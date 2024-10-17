@@ -37,12 +37,25 @@ data class UiProfile internal constructor(
         val statusesCountHumanized = statusesCount.humanize()
     }
 
-    val handleWithoutAt = handle.substringAfter("@")
+    val handleWithoutAt by lazy {
+        handle.removePrefix("@")
+    }
 
-    val handleWithoutAtAndHost =
-        handle
-            .substringBeforeLast("@")
-            .substringAfter("@")
+    val handleWithoutAtAndHost by lazy {
+        run {
+            handle
+                .removePrefix("@")
+                .split("@")
+                .firstOrNull()
+                ?: handleWithoutAt
+        }.let {
+            if (platformType == PlatformType.Bluesky) {
+                it.removeSuffix(".bsky.social")
+            } else {
+                it
+            }
+        }
+    }
 
     sealed interface BottomContent {
         data class Fields(

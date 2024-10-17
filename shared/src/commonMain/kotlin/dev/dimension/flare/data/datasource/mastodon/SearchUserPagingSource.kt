@@ -28,11 +28,11 @@ internal class SearchUserPagingSource(
                     following = following,
                     resolve = resolve,
                 ).accounts
-                ?.let {
+                ?.let { accounts ->
                     return LoadResult.Page(
-                        data = it.map { it.render(accountKey = accountKey, host = host) },
+                        data = accounts.map { it.render(accountKey = accountKey, host = host) },
                         prevKey = null,
-                        nextKey = it.lastOrNull()?.id?.takeIf { it != params.key },
+                        nextKey = accounts.lastOrNull()?.id?.takeIf { it != params.key && accounts.size == params.loadSize },
                     )
                 } ?: run {
                 return LoadResult.Error(Exception("No data"))

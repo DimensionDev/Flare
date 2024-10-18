@@ -512,4 +512,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">双头：爆炸：</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">泡沫游戏中的两个最大对象</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">您可以填写一个午餐箱，像此 🤯 🤯 一点点。</string>
+  <string name="vote">投票</string>
+  <string name="poll_expired">投票已过期</string>
+  <string name="poll_voted">已投票</string>
+  <string name="poll_expired_at">过期于 %1$s</string>
+  <string name="profile_search_user_using_account">使用 %3$s 在 %2$s 寻找 %1$s</string>
+  <string name="notification_login_expired">登录过期，请重新登录</string>
 </resources>

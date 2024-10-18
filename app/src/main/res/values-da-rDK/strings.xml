@@ -509,4 +509,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Dobbelt:eksplodering_head:</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">To af de største objekter i boblespillet på samme tid</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Du kan udfylde en frokostboks som denne: exploding_head: 🤯 lidt.</string>
+  <string name="vote">AFSTEMNING</string>
+  <string name="poll_expired">Afstemning udløbet</string>
+  <string name="poll_voted">Stemt</string>
+  <string name="poll_expired_at">Udløbet på %1$s</string>
+  <string name="profile_search_user_using_account">Find %1$s i %2$s ved hjælp af %3$s</string>
+  <string name="notification_login_expired">Login er udløbet. Log venligst ind igen</string>
 </resources>

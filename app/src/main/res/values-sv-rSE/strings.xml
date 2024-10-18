@@ -509,4 +509,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Dubbel🤯</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">Två av de största objekten i bubblan spelet på samma gång</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Du kan fylla en lunchlåda som denna: exploding_head: 🤯 lite.</string>
+  <string name="vote">Rösta</string>
+  <string name="poll_expired">Enkät löpte ut</string>
+  <string name="poll_voted">Röstade</string>
+  <string name="poll_expired_at">Förfallen vid %1$s</string>
+  <string name="profile_search_user_using_account">Hitta %1$s i %2$s med %3$s</string>
+  <string name="notification_login_expired">Inloggning löpte ut, vänligen logga in igen</string>
 </resources>

@@ -509,4 +509,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Kaksois🤯</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">Kaksi suurinta esineitä kupla peli samaan aikaan</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Voit täyttää lounaslaatikon kuten tämän 🤯 🤯 a bitti.</string>
+  <string name="vote">Äänestä</string>
+  <string name="poll_expired">Kysely vanhentunut</string>
+  <string name="poll_voted">Äänestetty</string>
+  <string name="poll_expired_at">Vanhentunut %1$s</string>
+  <string name="profile_search_user_using_account">Etsi %1$s %2$s käyttäen %3$s</string>
+  <string name="notification_login_expired">Kirjautuminen vanhentunut, kirjaudu uudelleen</string>
 </resources>

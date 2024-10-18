@@ -509,4 +509,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Dvojdle🤯</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">Dvě největší objekty ve hře pro bublinu současně</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Můžete vyplnit políčko pro oběd jako je toto 🤯 🤯 kousek</string>
+  <string name="vote">Hlasovat</string>
+  <string name="poll_expired">Anketa vypršela</string>
+  <string name="poll_voted">Hlasování</string>
+  <string name="poll_expired_at">Platnost vypršela v %1$s</string>
+  <string name="profile_search_user_using_account">Najít %1$s v %2$s pomocí %3$s</string>
+  <string name="notification_login_expired">Přihlášení vypršelo, přihlaste se prosím znovu</string>
 </resources>

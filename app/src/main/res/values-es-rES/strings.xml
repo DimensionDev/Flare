@@ -508,4 +508,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Doble:explotando_cabeza:</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">Dos de los objetos más grandes del juego de burbujas al mismo tiempo</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Puedes llenar una caja de almuerzo como esta :explosioning_head: 🤯 un poco.</string>
+  <string name="vote">Votaciones</string>
+  <string name="poll_expired">Encuesta caducada</string>
+  <string name="poll_voted">Votado</string>
+  <string name="poll_expired_at">Caducó el %1$s</string>
+  <string name="profile_search_user_using_account">Encuentra %1$s en %2$s usando %3$s</string>
+  <string name="notification_login_expired">Inicio de sesión expirado, por favor inicie sesión de nuevo</string>
 </resources>

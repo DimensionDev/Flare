@@ -508,4 +508,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Dobbel🤯</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">To av de største objektene i boblespillet samtidig</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Du kan fylle en lunsj boks som dette 🤯 🤯 en bit.</string>
+  <string name="vote">Stem</string>
+  <string name="poll_expired">Avstemningen utløpt</string>
+  <string name="poll_voted">Stemt</string>
+  <string name="poll_expired_at">Utløpt i %1$s</string>
+  <string name="profile_search_user_using_account">Finn %1$s i %2$s ved å bruke %3$s</string>
+  <string name="notification_login_expired">Innlogging utløpt, vennligst logg inn igjen</string>
 </resources>

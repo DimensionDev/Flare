@@ -509,4 +509,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Dublu:explorare_head:</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">Două dintre cele mai mari obiecte din jocul balon în același timp</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Poți umple o cutie de prânz ca aceasta 🤯 🤯 un pic.</string>
+  <string name="vote">Votează</string>
+  <string name="poll_expired">Sondajul a expirat</string>
+  <string name="poll_voted">Votat</string>
+  <string name="poll_expired_at">A expirat la %1$s</string>
+  <string name="profile_search_user_using_account">Găsește %1$s în %2$s folosind %3$s</string>
+  <string name="notification_login_expired">Logarea a expirat, te rugăm să te autentifici din nou</string>
 </resources>

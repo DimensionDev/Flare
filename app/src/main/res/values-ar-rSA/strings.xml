@@ -507,4 +507,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">مضاعفة🤯</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">اثنين من أكبر الكائنات في لعبة الفقاعات في نفس الوقت</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">يمكنك ملء صندوق الغداء مثل هذا 🤯 🤯 قليلاً.</string>
+  <string name="vote">التصويت</string>
+  <string name="poll_expired">انتهت صلاحية الاستطلاع</string>
+  <string name="poll_voted">صوت</string>
+  <string name="poll_expired_at">انتهت صلاحيتها في %1$s</string>
+  <string name="profile_search_user_using_account">البحث عن %1$s في %2$s باستخدام %3$s</string>
+  <string name="notification_login_expired">انتهت صلاحية تسجيل الدخول، الرجاء تسجيل الدخول مرة أخرى</string>
 </resources>

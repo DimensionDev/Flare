@@ -506,4 +506,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Подвійний🤯</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">Два найбільших об\'єкти в міхур гра одночасно</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Ви можете заповнити ланч на зразок цього 🤯 🤯 небагато.</string>
+  <string name="vote">Голосувати</string>
+  <string name="poll_expired">Опитування завершено</string>
+  <string name="poll_voted">Проголосували</string>
+  <string name="poll_expired_at">Термін дії збіг о %1$s</string>
+  <string name="profile_search_user_using_account">Знайти %1$s в %2$s за допомогою %3$s</string>
+  <string name="notification_login_expired">Вхід закінчився, будь ласка, увійдіть знову</string>
 </resources>

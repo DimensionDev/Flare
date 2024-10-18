@@ -509,4 +509,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Double:exploing_head:</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">同時にバブルゲームで最大の2つのオブジェクトを使用</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">:exploing_head: :exploing_head: 少し弁当を入れることができます。</string>
+  <string name="vote">投票</string>
+  <string name="poll_expired">投票の有効期限が切れました</string>
+  <string name="poll_voted">投票</string>
+  <string name="poll_expired_at">%1$sで期限切れ</string>
+  <string name="profile_search_user_using_account">%1$s を使用して %2$s で %3$sを見つける</string>
+  <string name="notification_login_expired">ログイン期限が切れました。もう一度ログインしてください。</string>
 </resources>

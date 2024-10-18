@@ -508,4 +508,9 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Podwójny:eksplodujący_head:</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">Dwa największe obiekty w tym samym czasie</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Możesz wypełnić pudełko obiadowe takie jak 🤯 🤯 trochę .</string>
+  <string name="vote">Głosuj</string>
+  <string name="poll_expired">Ankieta wygasła</string>
+  <string name="poll_voted">Zagłosowano</string>
+  <string name="poll_expired_at">Wygasło o %1$s</string>
+  <string name="notification_login_expired">Logowanie wygasło, zaloguj się ponownie</string>
 </resources>

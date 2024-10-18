@@ -19,6 +19,7 @@
   <string name="profile_header_button_following">フォロー中</string>
   <string name="profile_header_button_requested">申請済み</string>
   <string name="profile_header_button_blocked">ブロック中</string>
+  <string name="profile_header_button_is_fans">フォローされています</string>
   <string name="compose_title">作成</string>
   <string name="compose_hint">何か起きているのでしょうか？</string>
   <string name="compose_poll_option_hint">オプション %1$s</string>
@@ -106,6 +107,7 @@
   <string name="status_empty">ここに表示するものはありません</string>
   <string name="status_sensitive_media">敏感なメディア</string>
   <string name="show_media">メディアを表示</string>
+  <string name="login_expired">ログインセッションの有効期限が切れました</string>
   <string name="login_expired_message">クリックして再度ログインする</string>
   <string name="login_expired_relogin">再度ログインする</string>
   <string name="service_select_welcome_title">フレアへようこそ</string>
@@ -338,6 +340,7 @@
   <string name="feeds_subscribe">購読する</string>
   <string name="profile_tab_timeline">タイムライン</string>
   <string name="profile_tab_media">メディア</string>
+  <string name="tab_settings_title">タブ設定</string>
   <string name="misskey_achievement_notes1_title">mskyを設立しました</string>
   <string name="misskey_achievement_notes1_description">最初のメモを投稿する</string>
   <string name="misskey_achievement_notes1_flavor">Misskeyで楽しい時間をお過ごしください!</string>
@@ -513,6 +516,6 @@
   <string name="poll_expired">投票の有効期限が切れました</string>
   <string name="poll_voted">投票</string>
   <string name="poll_expired_at">%1$sで期限切れ</string>
-  <string name="profile_search_user_using_account">%1$s を使用して %2$s で %3$sを見つける</string>
+  <string name="profile_search_user_using_account">%3$s を使用して %2$s で %1$s を見つける</string>
   <string name="notification_login_expired">ログイン期限が切れました。もう一度ログインしてください。</string>
 </resources>

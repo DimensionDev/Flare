@@ -507,4 +507,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Удваивающий:взрыва_головы:</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">Два самых больших объекта в игре \"пузырьки\" одновременно</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Вы можете заполнить коробку обеда, такую как это 🤯 🤯 немного.</string>
+  <string name="vote">Голос</string>
+  <string name="poll_expired">Опрос просрочен</string>
+  <string name="poll_voted">Проголосовал</string>
+  <string name="poll_expired_at">Истек на %1$s</string>
+  <string name="profile_search_user_using_account">Искать %1$s в %2$s с помощью %3$s</string>
+  <string name="notification_login_expired">Срок действия входа истек, пожалуйста, войдите снова</string>
 </resources>

@@ -509,4 +509,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Dupla🤯</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">Dois dos maiores objetos no jogo de bolha ao mesmo tempo</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Você pode preencher uma caixa de almoço como esta 🤯 🤯 um pouco.</string>
+  <string name="vote">Votações</string>
+  <string name="poll_expired">Enquete expirada</string>
+  <string name="poll_voted">Votado</string>
+  <string name="poll_expired_at">Expirou em %1$s</string>
+  <string name="profile_search_user_using_account">Encontre %1$s em %2$s usando %3$s</string>
+  <string name="notification_login_expired">Login expirado, faça o login novamente</string>
 </resources>

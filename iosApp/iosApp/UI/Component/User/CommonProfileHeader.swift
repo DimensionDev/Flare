@@ -2,6 +2,7 @@ import SwiftUI
 import MarkdownUI
 import NetworkImage
 import shared
+import Awesome
 
 enum CommonProfileHeaderConstants {
     static let headerHeight: CGFloat = 200
@@ -53,15 +54,12 @@ struct CommonProfileHeader: View {
                                 .foregroundColor(.gray)
                             ForEach(0..<user.mark.count, id: \.self) { index in
                                 let mark = user.mark[index]
-                                let icon = switch mark {
-                                case .cat: "cat.circle"
-                                case .verified: "checkmark.circle.fill"
-                                case .locked: "lock.circle"
-                                case .bot: "figure.wave.circle"
+                                switch mark {
+                                case .cat: Awesome.Classic.Solid.cat.image.opacity(0.6)
+                                case .verified: Awesome.Classic.Solid.circleCheck.image.opacity(0.6)
+                                case .locked: Awesome.Classic.Solid.lock.image.opacity(0.6)
+                                case .bot: Awesome.Classic.Solid.robot.image.opacity(0.6)
                                 }
-                                Image(systemName: icon)
-                                    .font(.caption)
-                                    .opacity(0.6)
                             }
                         }
                     }
@@ -111,11 +109,6 @@ struct CommonProfileHeader: View {
                         ForEach(0..<list.count, id: \.self) { index in
                             let key = list[index]
                             let value = data.items[key]
-                            let icon = switch key {
-                            case .location: "location.circle"
-                            case .url: "network"
-                            case .verify: "checkmark.circle.fill"
-                            }
                             Label(
                                 title: {
                                     Markdown(value?.markdown ?? "")
@@ -123,7 +116,11 @@ struct CommonProfileHeader: View {
                                     .markdownInlineImageProvider(.emoji)
                                 },
                                 icon: {
-                                    Image(systemName: icon)
+                                    switch key {
+                                    case .location: Awesome.Classic.Solid.locationDot.image
+                                    case .url: Awesome.Classic.Solid.globe.image
+                                    case .verify: Awesome.Classic.Solid.circleCheck.image
+                                    }
                                 }
                             )
                         }

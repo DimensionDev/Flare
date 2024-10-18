@@ -13,6 +13,7 @@ internal class LikePagingSource(
     private val service: VVOService,
     private val event: StatusEvent.VVO,
     private val accountKey: MicroBlogKey,
+    private val onClearMarker: () -> Unit,
 ) : PagingSource<Int, UiTimeline>() {
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiTimeline> {
         return try {
@@ -21,6 +22,9 @@ internal class LikePagingSource(
                 return LoadResult.Error(
                     LoginExpiredException,
                 )
+            }
+            if (params.key == null) {
+                onClearMarker.invoke()
             }
             val response =
                 service.getAttitudes(

@@ -17,6 +17,7 @@ internal class MentionRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
+    private val onClearMarker: () -> Unit,
 ) : RemoteMediator<Int, DbPagingTimelineView>() {
     var page = 1
 
@@ -40,6 +41,7 @@ internal class MentionRemoteMediator(
                                 page = page,
                             ).also {
                                 database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+                                onClearMarker.invoke()
                             }
                     }
 

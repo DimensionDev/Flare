@@ -59,3 +59,9 @@ val vvoHostShort: String =
         append(vvo)
         append("LmNu".decodeBase64String())
     }
+
+val vvoHostLong: String =
+    buildString {
+        append("d2Vp".decodeBase64String())
+        append("Ym8uY29t".decodeBase64String())
+    }

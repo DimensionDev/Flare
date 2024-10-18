@@ -671,4 +671,6 @@
 
     <string name="profile_search_user_using_account">Find %1$s in %2$s using %3$s</string>
 
+    <string name="notification_login_expired">Login expired, please login again</string>
+
 </resources>

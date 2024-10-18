@@ -4,6 +4,8 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
+import dev.dimension.flare.common.InAppNotification
+import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.VVO
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
@@ -17,6 +19,7 @@ internal class HomeTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
+    private val inAppNotification: InAppNotification,
 ) : RemoteMediator<Int, DbPagingTimelineView>() {
     override suspend fun initialize(): InitializeAction = InitializeAction.SKIP_INITIAL_REFRESH
 
@@ -27,6 +30,10 @@ internal class HomeTimelineRemoteMediator(
         return try {
             val config = service.config()
             if (config.data?.login != true) {
+                inAppNotification.onError(
+                    Message.LoginExpired,
+                    LoginExpiredException,
+                )
                 return MediatorResult.Error(
                     LoginExpiredException,
                 )

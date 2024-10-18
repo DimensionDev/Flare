@@ -34,21 +34,20 @@ internal class ComposeInAppNotification : InAppNotification {
     }
 
     override fun onSuccess(message: Message) {
-        val messageId =
-            when (message) {
-                Message.Compose -> R.string.compose_notification_success_title
-            }
-        _source.value = Event(Notification.StringNotification(messageId, success = true))
+        _source.value = Event(Notification.StringNotification(message.title, success = true))
     }
 
     override fun onError(
         message: Message,
         throwable: Throwable,
     ) {
-        val messageId =
-            when (message) {
-                Message.Compose -> R.string.compose_notification_error_title
-            }
-        _source.value = Event(Notification.StringNotification(messageId, success = false))
+        _source.value = Event(Notification.StringNotification(message.title, success = false))
     }
 }
+
+private val Message.title
+    get() =
+        when (this) {
+            Message.Compose -> R.string.compose_notification_title
+            Message.LoginExpired -> R.string.notification_login_expired
+        }

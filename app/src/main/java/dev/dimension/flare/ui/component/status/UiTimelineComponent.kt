@@ -98,6 +98,7 @@ private fun UserListContent(
     data: UiTimeline.ItemContent.UserList,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -112,7 +113,15 @@ private fun UserListContent(
                 ) {
                     CommonStatusHeaderComponent(
                         data = user,
-                        onUserClick = {},
+                        onUserClick = {
+                            user.onClicked.invoke(
+                                ClickContext(
+                                    launcher = {
+                                        uriHandler.openUri(it)
+                                    },
+                                ),
+                            )
+                        },
                         modifier = Modifier.padding(8.dp),
                     )
                 }

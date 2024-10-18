@@ -8,6 +8,7 @@ import androidx.paging.cachedIn
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -41,8 +42,10 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -56,6 +59,7 @@ class VVODataSource(
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
+    private val inAppNotification: InAppNotification by inject()
     private val service by lazy {
         VVOService(credential.chocolate)
     }
@@ -78,6 +82,7 @@ class VVODataSource(
                     database,
                     accountKey,
                     pagingKey,
+                    inAppNotification,
                 ),
         )
 
@@ -103,6 +108,9 @@ class VVODataSource(
                             database,
                             accountKey,
                             pagingKey,
+                            onClearMarker = {
+                                MemCacheable.update(notificationMarkerMentionKey, 0)
+                            },
                         ),
                 )
 
@@ -114,6 +122,9 @@ class VVODataSource(
                         service = service,
                         accountKey = accountKey,
                         event = this,
+                        onClearMarker = {
+                            MemCacheable.update(notificationMarkerCommentKey, 0)
+                        },
                     )
                 }.flow.cachedIn(scope)
 
@@ -125,6 +136,9 @@ class VVODataSource(
                         service = service,
                         accountKey = accountKey,
                         event = this,
+                        onClearMarker = {
+                            MemCacheable.update(notificationMarkerLikeKey, 0)
+                        },
                     )
                 }.flow.cachedIn(scope)
         }
@@ -715,4 +729,42 @@ class VVODataSource(
             }
         }
     }
+
+    private val notificationMarkerMentionKey: String
+        get() = "notificationBadgeCount_mention_$accountKey"
+
+    private val notificationMarkerCommentKey: String
+        get() = "notificationBadgeCount_comment_$accountKey"
+
+    private val notificationMarkerLikeKey: String
+        get() = "notificationBadgeCount_like_$accountKey"
+
+    override fun notificationBadgeCount(): CacheData<Int> =
+        Cacheable(
+            fetchSource = {
+                val config = service.config()
+                val st = config.data?.st
+                requireNotNull(st) { "st is null" }
+                val response =
+                    service.remindUnread(
+                        time = Clock.System.now().toEpochMilliseconds() / 1000,
+                        st = st,
+                    )
+                val mention = response.data?.mentionStatus ?: 0
+                val comment = response.data?.cmt ?: 0
+                val like = response.data?.attitude ?: 0
+
+                MemCacheable.update(notificationMarkerMentionKey, mention)
+                MemCacheable.update(notificationMarkerCommentKey, comment)
+                MemCacheable.update(notificationMarkerLikeKey, like)
+            },
+            cacheSource = {
+                val mentionFlow = MemCacheable.subscribe<Long>(notificationMarkerMentionKey)
+                val commentFlow = MemCacheable.subscribe<Long>(notificationMarkerCommentKey)
+                val likeFlow = MemCacheable.subscribe<Long>(notificationMarkerLikeKey)
+                combine(mentionFlow, commentFlow, likeFlow) { mention, comment, like ->
+                    (mention + comment + like).toInt()
+                }
+            },
+        )
 }

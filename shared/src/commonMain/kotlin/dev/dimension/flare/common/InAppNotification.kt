@@ -17,4 +17,5 @@ interface InAppNotification {
 
 enum class Message {
     Compose,
+    LoginExpired,
 }

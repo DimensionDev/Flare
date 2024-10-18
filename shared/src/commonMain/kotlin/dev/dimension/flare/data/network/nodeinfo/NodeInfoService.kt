@@ -10,6 +10,7 @@ import dev.dimension.flare.data.network.nodeinfo.model.Schema21
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvo
 import dev.dimension.flare.model.vvoHost
+import dev.dimension.flare.model.vvoHostLong
 import dev.dimension.flare.model.vvoHostShort
 import dev.dimension.flare.model.xqtHost
 import io.ktor.client.call.body
@@ -79,7 +80,7 @@ internal data object NodeInfoService {
             if (host.equals(xqtHost, ignoreCase = true) || host.equals("x.social", ignoreCase = true)) {
                 return@coroutineScope PlatformType.xQt
             }
-            val vvo = listOf(vvoHost, vvo, vvoHostShort, "vvo.social")
+            val vvo = listOf(vvoHost, vvo, vvoHostShort, "vvo.social", vvoHostLong)
             if (vvo.any { it.equals(host, ignoreCase = true) }) {
                 return@coroutineScope PlatformType.VVo
             }

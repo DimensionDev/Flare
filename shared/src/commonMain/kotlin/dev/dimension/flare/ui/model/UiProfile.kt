@@ -37,6 +37,26 @@ data class UiProfile internal constructor(
         val statusesCountHumanized = statusesCount.humanize()
     }
 
+    val handleWithoutAt by lazy {
+        handle.removePrefix("@")
+    }
+
+    val handleWithoutAtAndHost by lazy {
+        run {
+            handle
+                .removePrefix("@")
+                .split("@")
+                .firstOrNull()
+                ?: handleWithoutAt
+        }.let {
+            if (platformType == PlatformType.Bluesky) {
+                it.removeSuffix(".bsky.social")
+            } else {
+                it
+            }
+        }
+    }
+
     sealed interface BottomContent {
         data class Fields(
             val fields: ImmutableMap<String, UiRichText>,

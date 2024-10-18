@@ -504,4 +504,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Διπλό🤯</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">Δύο από τα μεγαλύτερα αντικείμενα στο παιχνίδι φούσκα ταυτόχρονα</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Μπορείτε να γεμίσετε ένα κουτί μεσημεριανό όπως αυτό το 🤯 🤯 λίγο.</string>
+  <string name="vote">Ψηφοφορίες</string>
+  <string name="poll_expired">Η δημοσκόπηση έληξε</string>
+  <string name="poll_voted">Ψηφίστηκε</string>
+  <string name="poll_expired_at">Έληξε σε %1$s</string>
+  <string name="profile_search_user_using_account">Βρείτε %1$s σε %2$s χρησιμοποιώντας %3$s</string>
+  <string name="notification_login_expired">Η σύνδεση έληξε, παρακαλώ συνδεθείτε ξανά</string>
 </resources>

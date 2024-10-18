@@ -509,4 +509,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Doppel:explodiert_Kopf:</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">Zwei der größten Objekte im Blasenspiel zur gleichen Zeit</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Du kannst ein Lunchbox wie diesen 🤯 🤯 ein bisschen füllen.</string>
+  <string name="vote">Abstimmungen</string>
+  <string name="poll_expired">Umfrage abgelaufen</string>
+  <string name="poll_voted">Abgestimmt</string>
+  <string name="poll_expired_at">Abgelaufen am %1$s</string>
+  <string name="profile_search_user_using_account">%1$s in %2$s mit %3$s finden</string>
+  <string name="notification_login_expired">Login abgelaufen, bitte erneut anmelden</string>
 </resources>

@@ -38,9 +38,13 @@ class MastodonCallbackPresenter(
                 error = Exception("No pending OAuth")
             }
             if (pendingOAuth is UiApplication.Mastodon) {
-                tryPendingOAuth(pendingOAuth, code, accountRepository)
-                applicationRepository.setPendingOAuth(pendingOAuth.host, false)
-                toHome.invoke()
+                try {
+                    tryPendingOAuth(pendingOAuth, code, accountRepository)
+                    applicationRepository.setPendingOAuth(pendingOAuth.host, false)
+                    toHome.invoke()
+                } catch (e: Exception) {
+                    error = e
+                }
             } else {
                 error = Exception("Invalid pending OAuth: $pendingOAuth")
             }

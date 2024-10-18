@@ -509,4 +509,10 @@
   <string name="misskey_achievement_bubble_game_double_exploding_head_title">Doppio🤯</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_description">Due degli oggetti più grandi nel gioco della bolla allo stesso tempo</string>
   <string name="misskey_achievement_bubble_game_double_exploding_head_flavor">Puoi riempire una scatola del pranzo come questa 🤯 🤯 un po\'.</string>
+  <string name="vote">VOTAZIONI</string>
+  <string name="poll_expired">Sondaggio scaduto</string>
+  <string name="poll_voted">Votato</string>
+  <string name="poll_expired_at">Scaduto alla %1$s</string>
+  <string name="profile_search_user_using_account">Trova %1$s in %2$s usando %3$s</string>
+  <string name="notification_login_expired">Login scaduto, effettua nuovamente il login</string>
 </resources>

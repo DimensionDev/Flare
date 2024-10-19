@@ -251,7 +251,9 @@ internal fun Note.render(
             UiTimeline.TopMessage(
                 user = user,
                 icon = UiTimeline.TopMessage.Icon.Retweet,
-                type = UiTimeline.TopMessage.MessageType.Mastodon.Reblogged,
+                type =
+                    UiTimeline.TopMessage.MessageType.Misskey
+                        .Renote(id = id),
                 onClicked = {
                     launcher.launch(
                         AppDeepLink.Profile(

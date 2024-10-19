@@ -14,4 +14,7 @@ interface StatusReferenceDao {
 
     @Query("DELETE FROM status_reference WHERE statusKey = :key")
     suspend fun delete(key: MicroBlogKey)
+
+    @Query("DELETE FROM status_reference WHERE statusKey in (:keys)")
+    suspend fun delete(keys: List<MicroBlogKey>)
 }

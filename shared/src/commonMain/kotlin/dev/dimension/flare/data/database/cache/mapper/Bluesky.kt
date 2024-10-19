@@ -117,6 +117,7 @@ internal object Bluesky {
             database.statusDao().insertAll(it)
         }
         timeline.flatMap { it.status.references }.map { it.reference }.let {
+            database.statusReferenceDao().delete(it.map { it.statusKey })
             database.statusReferenceDao().insertAll(it)
         }
         database.pagingTimelineDao().insertAll(timeline.map { it.timeline })

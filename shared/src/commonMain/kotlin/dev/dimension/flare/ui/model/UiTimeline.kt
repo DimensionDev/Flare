@@ -180,21 +180,37 @@ data class UiTimeline internal constructor(
 
         sealed interface MessageType {
             sealed interface Mastodon : MessageType {
-                data object Reblogged : Mastodon
+                data class Reblogged(
+                    val id: String,
+                ) : Mastodon
 
-                data object Follow : Mastodon
+                data class Follow(
+                    val id: String,
+                ) : Mastodon
 
-                data object Favourite : Mastodon
+                data class Favourite(
+                    val id: String,
+                ) : Mastodon
 
-                data object Mention : Mastodon
+                data class Mention(
+                    val id: String,
+                ) : Mastodon
 
-                data object Poll : Mastodon
+                data class Poll(
+                    val id: String,
+                ) : Mastodon
 
-                data object FollowRequest : Mastodon
+                data class FollowRequest(
+                    val id: String,
+                ) : Mastodon
 
-                data object Status : Mastodon
+                data class Status(
+                    val id: String,
+                ) : Mastodon
 
-                data object Update : Mastodon
+                data class Update(
+                    val id: String,
+                ) : Mastodon
             }
 
             sealed interface Misskey : MessageType {

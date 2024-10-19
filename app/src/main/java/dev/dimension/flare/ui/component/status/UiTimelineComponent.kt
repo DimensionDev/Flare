@@ -212,40 +212,40 @@ private fun TopMessageComponent(
 
             is UiTimeline.TopMessage.MessageType.Mastodon ->
                 when (type) {
-                    UiTimeline.TopMessage.MessageType.Mastodon.Favourite ->
+                    is UiTimeline.TopMessage.MessageType.Mastodon.Favourite ->
                         stringResource(
                             id = R.string.mastodon_notification_item_favourited_your_status,
                         )
 
-                    UiTimeline.TopMessage.MessageType.Mastodon.Follow ->
+                    is UiTimeline.TopMessage.MessageType.Mastodon.Follow ->
                         stringResource(
                             id = R.string.mastodon_notification_item_followed_you,
                         )
 
-                    UiTimeline.TopMessage.MessageType.Mastodon.FollowRequest ->
+                    is UiTimeline.TopMessage.MessageType.Mastodon.FollowRequest ->
                         stringResource(
                             id = R.string.mastodon_notification_item_requested_follow,
                         )
 
-                    UiTimeline.TopMessage.MessageType.Mastodon.Mention ->
+                    is UiTimeline.TopMessage.MessageType.Mastodon.Mention ->
                         stringResource(
                             id = R.string.mastodon_notification_item_mentioned_you,
                         )
 
-                    UiTimeline.TopMessage.MessageType.Mastodon.Poll ->
+                    is UiTimeline.TopMessage.MessageType.Mastodon.Poll ->
                         stringResource(id = R.string.mastodon_notification_item_poll_ended)
 
-                    UiTimeline.TopMessage.MessageType.Mastodon.Reblogged ->
+                    is UiTimeline.TopMessage.MessageType.Mastodon.Reblogged ->
                         stringResource(
                             id = R.string.mastodon_notification_item_reblogged_your_status,
                         )
 
-                    UiTimeline.TopMessage.MessageType.Mastodon.Status ->
+                    is UiTimeline.TopMessage.MessageType.Mastodon.Status ->
                         stringResource(
                             id = R.string.mastodon_notification_item_posted_status,
                         )
 
-                    UiTimeline.TopMessage.MessageType.Mastodon.Update ->
+                    is UiTimeline.TopMessage.MessageType.Mastodon.Update ->
                         stringResource(
                             id = R.string.mastodon_notification_item_updated_status,
                         )

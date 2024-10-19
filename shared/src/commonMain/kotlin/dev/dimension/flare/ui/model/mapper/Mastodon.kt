@@ -53,14 +53,30 @@ internal fun Notification.render(
             )
     val topMessageType =
         when (type) {
-            NotificationTypes.Follow -> UiTimeline.TopMessage.MessageType.Mastodon.Follow
-            NotificationTypes.Favourite -> UiTimeline.TopMessage.MessageType.Mastodon.Favourite
-            NotificationTypes.Reblog -> UiTimeline.TopMessage.MessageType.Mastodon.Reblogged
-            NotificationTypes.Mention -> UiTimeline.TopMessage.MessageType.Mastodon.Mention
-            NotificationTypes.Poll -> UiTimeline.TopMessage.MessageType.Mastodon.Poll
-            NotificationTypes.FollowRequest -> UiTimeline.TopMessage.MessageType.Mastodon.FollowRequest
-            NotificationTypes.Status -> UiTimeline.TopMessage.MessageType.Mastodon.Status
-            NotificationTypes.Update -> UiTimeline.TopMessage.MessageType.Mastodon.Update
+            NotificationTypes.Follow ->
+                UiTimeline.TopMessage.MessageType.Mastodon
+                    .Follow(id = id.orEmpty())
+            NotificationTypes.Favourite ->
+                UiTimeline.TopMessage.MessageType.Mastodon
+                    .Favourite(id = id.orEmpty())
+            NotificationTypes.Reblog ->
+                UiTimeline.TopMessage.MessageType.Mastodon
+                    .Reblogged(id = id.orEmpty())
+            NotificationTypes.Mention ->
+                UiTimeline.TopMessage.MessageType.Mastodon
+                    .Mention(id = id.orEmpty())
+            NotificationTypes.Poll ->
+                UiTimeline.TopMessage.MessageType.Mastodon
+                    .Poll(id = id.orEmpty())
+            NotificationTypes.FollowRequest ->
+                UiTimeline.TopMessage.MessageType.Mastodon
+                    .FollowRequest(id = id.orEmpty())
+            NotificationTypes.Status ->
+                UiTimeline.TopMessage.MessageType.Mastodon
+                    .Status(id = id.orEmpty())
+            NotificationTypes.Update ->
+                UiTimeline.TopMessage.MessageType.Mastodon
+                    .Update(id = id.orEmpty())
             null -> null
         }
     val topMessage =
@@ -121,7 +137,9 @@ internal fun Status.render(
             UiTimeline.TopMessage(
                 user = user,
                 icon = UiTimeline.TopMessage.Icon.Retweet,
-                type = UiTimeline.TopMessage.MessageType.Mastodon.Reblogged,
+                type =
+                    UiTimeline.TopMessage.MessageType.Mastodon
+                        .Reblogged(id = id.orEmpty()),
                 onClicked = {
                     launcher.launch(
                         AppDeepLink.Profile(

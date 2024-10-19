@@ -95,6 +95,7 @@ internal object Misskey {
             database.statusDao().insertAll(it)
         }
         timeline.flatMap { it.status.references }.map { it.reference }.let {
+            database.statusReferenceDao().delete(it.map { it.statusKey })
             database.statusReferenceDao().insertAll(it)
         }
         database.pagingTimelineDao().insertAll(timeline.map { it.timeline })
@@ -160,7 +161,11 @@ private fun List<Note>.toDbPagingTimeline(
             references =
                 listOfNotNull(
                     if (it.renote != null) {
-                        ReferenceType.Retweet to it.renote.toDbStatusWithUser(accountKey)
+                        if (it.text.isNullOrEmpty()) {
+                            ReferenceType.Retweet to it.renote.toDbStatusWithUser(accountKey)
+                        } else {
+                            ReferenceType.Quote to it.renote.toDbStatusWithUser(accountKey)
+                        }
                     } else {
                         null
                     },

@@ -30,6 +30,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.PaperPlane
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.BackButton
@@ -49,15 +50,15 @@ import dev.dimension.flare.ui.presenter.invoke
 @Composable
 internal fun DMConversationScreen(
     accountType: AccountType,
-    id: String,
+    roomKey: MicroBlogKey,
     onBack: () -> Unit,
 ) {
     val state by producePresenter(
-        key = "dm_conversation_${accountType}_$id",
+        key = "dm_conversation_${accountType}_$roomKey",
     ) {
         presenter(
             accountType = accountType,
-            id = id,
+            roomKey = roomKey,
         )
     }
 
@@ -213,17 +214,17 @@ private fun DMItem(
 @Composable
 private fun presenter(
     accountType: AccountType,
-    id: String,
+    roomKey: MicroBlogKey,
 ) = run {
     val text = rememberTextFieldState()
     val state =
         remember(
             accountType,
-            id,
+            roomKey,
         ) {
             DMConversationPresenter(
                 accountType = accountType,
-                id = id,
+                roomKey = roomKey,
             )
         }.invoke()
 

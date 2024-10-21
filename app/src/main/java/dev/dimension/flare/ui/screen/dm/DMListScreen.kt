@@ -41,6 +41,7 @@ import compose.icons.fontawesomeicons.solid.CircleExclamation
 import compose.icons.fontawesomeicons.solid.List
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -89,7 +90,7 @@ internal fun DMScreenRoute(
                     onItemClicked = { item ->
                         scaffoldNavigator.navigateTo(
                             ListDetailPaneScaffoldRole.Detail,
-                            DMPaneNavArgs(item.id),
+                            DMPaneNavArgs(item.key.toString()),
                         )
                     },
                 )
@@ -100,7 +101,7 @@ internal fun DMScreenRoute(
                 scaffoldNavigator.currentDestination?.content?.let { args ->
                     DMConversationScreen(
                         accountType = accountType,
-                        id = args.id,
+                        roomKey = MicroBlogKey.valueOf(args.key),
                         onBack = scaffoldNavigator::navigateBack,
                     )
                 }
@@ -111,7 +112,7 @@ internal fun DMScreenRoute(
 
 @Parcelize
 private data class DMPaneNavArgs(
-    val id: String,
+    val key: String,
 ) : Parcelable
 
 @OptIn(ExperimentalMaterial3Api::class)

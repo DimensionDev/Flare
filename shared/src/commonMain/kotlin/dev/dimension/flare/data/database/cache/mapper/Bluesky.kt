@@ -58,15 +58,15 @@ internal object Bluesky {
         database: CacheDatabase,
         data: List<MessageView>,
     ) {
-        val room =
-            DbMessageRoom(
-                roomKey = roomKey,
-                platformType = PlatformType.Bluesky,
-                messageKey = null,
-            )
+//        val room =
+//            DbMessageRoom(
+//                roomKey = roomKey,
+//                platformType = PlatformType.Bluesky,
+//                messageKey = null,
+//            )
         val messages = data.map { it.toDbMessageItem(roomKey) }
         database.messageDao().insertMessages(messages)
-        database.messageDao().insert(room)
+//        database.messageDao().insert(room)
     }
 
     suspend fun saveFeed(
@@ -521,16 +521,16 @@ private fun ConvoViewLastMessageUnion.toDbMessageItem(roomKey: MicroBlogKey) =
         is ConvoViewLastMessageUnion.DeletedMessageView -> toDbMessageItem(roomKey)
     }
 
-private fun ConvoViewLastMessageUnion.MessageView.toDbMessageItem(roomKey: MicroBlogKey) =
-    with(value) {
-        DbMessageItem(
-            messageKey = MicroBlogKey(id = id, host = roomKey.host),
-            roomKey = roomKey,
-            userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host),
-            timestamp = sentAt.toEpochMilliseconds(),
-            content = MessageContent.Bluesky.Message(this),
-        )
-    }
+private fun MessageView.toDbMessageItem(roomKey: MicroBlogKey) =
+    DbMessageItem(
+        messageKey = MicroBlogKey(id = id, host = roomKey.host),
+        roomKey = roomKey,
+        userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host),
+        timestamp = sentAt.toEpochMilliseconds(),
+        content = MessageContent.Bluesky.Message(this),
+    )
+
+private fun ConvoViewLastMessageUnion.MessageView.toDbMessageItem(roomKey: MicroBlogKey) = value.toDbMessageItem(roomKey)
 
 private fun ConvoViewLastMessageUnion.DeletedMessageView.toDbMessageItem(roomKey: MicroBlogKey) =
     with(value) {

@@ -10,6 +10,7 @@ import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
@@ -24,7 +25,7 @@ import kotlin.time.Duration.Companion.seconds
 
 class DMConversationPresenter(
     private val accountType: AccountType,
-    private val id: String,
+    private val roomKey: MicroBlogKey,
 ) : PresenterBase<DMConversationState>() {
     @Composable
     override fun body(): DMConversationState {
@@ -33,16 +34,16 @@ class DMConversationPresenter(
             serviceState
                 .map { service ->
                     require(service is DirectMessageDataSource)
-                    remember(service, id) {
-                        service.directMessageConversation(id)
+                    remember(service, roomKey) {
+                        service.directMessageConversation(roomKey)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
         val users =
             serviceState
                 .flatMap { service ->
                     require(service is DirectMessageDataSource)
-                    remember(service, id) {
-                        service.getDirectMessageConversationInfo(id)
+                    remember(service, roomKey) {
+                        service.getDirectMessageConversationInfo(roomKey)
                     }.collectAsState().toUi()
                 }.map {
                     it.users
@@ -51,7 +52,7 @@ class DMConversationPresenter(
             serviceState.onSuccess {
                 require(it is DirectMessageDataSource)
                 delay(5.seconds)
-                it.fetchNewDirectMessageForConversation(id)
+                it.fetchNewDirectMessageForConversation(roomKey)
             }
         }
         return object : DMConversationState {
@@ -62,7 +63,7 @@ class DMConversationPresenter(
             override fun send(message: String) {
                 serviceState.onSuccess {
                     require(it is DirectMessageDataSource)
-                    it.sendDirectMessage(id, message)
+                    it.sendDirectMessage(roomKey, message)
                 }
             }
         }

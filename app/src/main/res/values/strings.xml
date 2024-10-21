@@ -674,6 +674,7 @@
     <string name="dm_list_error">Failed to load direct messages</string>
     <string name="send">Send</string>
     <string name="dm_send_placeholder">Send a message</string>
+    <string name="dm_deleted">Deleted</string>
 
 
     <string name="profile_search_user_using_account">Find %1$s in %2$s using %3$s</string>

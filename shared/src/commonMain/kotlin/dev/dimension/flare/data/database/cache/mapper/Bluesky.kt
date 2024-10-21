@@ -9,11 +9,19 @@ import app.bsky.feed.PostView
 import app.bsky.feed.ReplyRefParentUnion
 import app.bsky.notification.ListNotificationsNotification
 import app.bsky.notification.ListNotificationsReason
+import chat.bsky.convo.ConvoView
+import chat.bsky.convo.ConvoViewLastMessageUnion
+import chat.bsky.convo.MessageView
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
+import dev.dimension.flare.data.database.cache.model.DbMessageItem
+import dev.dimension.flare.data.database.cache.model.DbMessageRoom
+import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.database.cache.model.DbUser
+import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.datasource.bluesky.bskyJson
@@ -26,6 +34,41 @@ import sh.christian.ozone.api.AtUri
 import sh.christian.ozone.api.model.JsonContent
 
 internal object Bluesky {
+    suspend fun saveDM(
+        accountKey: MicroBlogKey,
+        database: CacheDatabase,
+        data: List<ConvoView>,
+    ) {
+        val rooms = data.map { it.toDbMessageRoom(accountKey.host) }
+        val references = data.flatMap { it.toDbMessageRoomReference(accountKey.host) }
+        val messages =
+            data.mapNotNull {
+                it.lastMessage?.toDbMessageItem(it.toDbMessageRoom(accountKey.host).roomKey)
+            }
+        val timeline = data.map { it.toDbDirectMessageTimeline(accountKey) }
+        database.messageDao().insertMessages(messages)
+        database.messageDao().insertReferences(references)
+        database.messageDao().insert(rooms)
+        database.messageDao().insertTimeline(timeline)
+    }
+
+    suspend fun saveMessage(
+        accountKey: MicroBlogKey,
+        roomKey: MicroBlogKey,
+        database: CacheDatabase,
+        data: List<MessageView>,
+    ) {
+        val room =
+            DbMessageRoom(
+                roomKey = roomKey,
+                platformType = PlatformType.Bluesky,
+                messageKey = null,
+            )
+        val messages = data.map { it.toDbMessageItem(roomKey) }
+        database.messageDao().insertMessages(messages)
+        database.messageDao().insert(room)
+    }
+
     suspend fun saveFeed(
         accountKey: MicroBlogKey,
         pagingKey: String,
@@ -438,3 +481,64 @@ internal fun ProfileViewDetailed.toDbUser(host: String) =
         host = host,
         content = UserContent.Bluesky(this),
     )
+
+private fun ConvoView.toDbDirectMessageTimeline(accountKey: MicroBlogKey): DbDirectMessageTimeline {
+    val roomKey = toDbMessageRoom(accountKey.host).roomKey
+    return DbDirectMessageTimeline(
+        accountKey = accountKey,
+        roomKey = roomKey,
+        sortId =
+            lastMessage?.toDbMessageItem(roomKey)?.timestamp
+                ?: 0L,
+    )
+}
+
+private fun ConvoView.toDbMessageRoom(host: String) =
+    DbMessageRoom(
+        roomKey = MicroBlogKey(id = id, host = host),
+        platformType = PlatformType.Bluesky,
+        messageKey =
+            when (val message = lastMessage) {
+                is ConvoViewLastMessageUnion.MessageView -> MicroBlogKey(id = message.value.id, host = host)
+                is ConvoViewLastMessageUnion.DeletedMessageView -> MicroBlogKey(id = message.value.id, host = host)
+                null -> null
+            },
+    )
+
+private fun ConvoView.toDbMessageRoomReference(host: String): List<DbMessageRoomReference> {
+    val roomKey = toDbMessageRoom(host).roomKey
+    return members.map {
+        DbMessageRoomReference(
+            roomKey = roomKey,
+            userKey = MicroBlogKey(id = it.did.did, host = host),
+        )
+    }
+}
+
+private fun ConvoViewLastMessageUnion.toDbMessageItem(roomKey: MicroBlogKey) =
+    when (this) {
+        is ConvoViewLastMessageUnion.MessageView -> toDbMessageItem(roomKey)
+        is ConvoViewLastMessageUnion.DeletedMessageView -> toDbMessageItem(roomKey)
+    }
+
+private fun ConvoViewLastMessageUnion.MessageView.toDbMessageItem(roomKey: MicroBlogKey) =
+    with(value) {
+        DbMessageItem(
+            messageKey = MicroBlogKey(id = id, host = roomKey.host),
+            roomKey = roomKey,
+            userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host),
+            timestamp = sentAt.toEpochMilliseconds(),
+            content = MessageContent.Bluesky.Message(this),
+        )
+    }
+
+private fun ConvoViewLastMessageUnion.DeletedMessageView.toDbMessageItem(roomKey: MicroBlogKey) =
+    with(value) {
+        DbMessageItem(
+            messageKey = MicroBlogKey(id = id, host = roomKey.host),
+            roomKey = roomKey,
+            userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host),
+            timestamp = sentAt.toEpochMilliseconds(),
+            content = MessageContent.Bluesky.Deleted(this),
+        )
+    }

@@ -9,7 +9,7 @@ import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.model.UiDMList
+import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 
@@ -42,7 +42,7 @@ class DMListPresenter(
 }
 
 interface DMListState {
-    val items: PagingState<UiDMList>
+    val items: PagingState<UiDMRoom>
     val isRefreshing: Boolean
 
     suspend fun refreshSuspend()

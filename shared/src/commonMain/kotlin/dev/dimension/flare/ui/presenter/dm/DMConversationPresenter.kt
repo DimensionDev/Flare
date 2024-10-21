@@ -18,6 +18,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -36,7 +37,7 @@ class DMConversationPresenter(
                         service.directMessageConversation(id)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
-        val user =
+        val users =
             serviceState
                 .flatMap { service ->
                     require(service is DirectMessageDataSource)
@@ -44,7 +45,7 @@ class DMConversationPresenter(
                         service.getDirectMessageConversationInfo(id)
                     }.collectAsState().toUi()
                 }.map {
-                    it.user
+                    it.users
                 }
         LaunchedEffect(Unit) {
             serviceState.onSuccess {
@@ -56,7 +57,7 @@ class DMConversationPresenter(
         return object : DMConversationState {
             override val items = items
 
-            override val user = user
+            override val users = users
 
             override fun send(message: String) {
                 serviceState.onSuccess {
@@ -70,7 +71,7 @@ class DMConversationPresenter(
 
 interface DMConversationState {
     val items: PagingState<UiDMItem>
-    val user: UiState<UiUserV2>
+    val users: UiState<ImmutableList<UiUserV2>>
 
     fun send(message: String)
 }

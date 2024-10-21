@@ -2,8 +2,9 @@ package dev.dimension.flare.data.database.cache.model
 
 import androidx.room.DatabaseView
 import androidx.room.Embedded
+import dev.dimension.flare.data.database.cache.CACHE_DATABASE_VERSION
 
-const val PAGING_TIMELINE_VIEW = "PagingTimelineView11"
+const val PAGING_TIMELINE_VIEW = "PagingTimelineView$CACHE_DATABASE_VERSION"
 
 @DatabaseView(
     viewName = PAGING_TIMELINE_VIEW,

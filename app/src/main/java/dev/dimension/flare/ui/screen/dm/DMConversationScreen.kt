@@ -65,11 +65,11 @@ internal fun DMConversationScreen(
         topBar = {
             FlareTopAppBar(
                 title = {
-                    state.user.onSuccess {
-                        HtmlText(
-                            element = it.name.data,
-                            maxLines = 1,
-                        )
+                    state.users.onSuccess {
+//                        HtmlText(
+//                            element = it.name.data,
+//                            maxLines = 1,
+//                        )
                     }
                 },
                 navigationIcon = {
@@ -157,7 +157,7 @@ private fun DMItem(
                     Alignment.CenterStart
                 },
         ) {
-            when (val message = item.message) {
+            when (val message = item.content) {
                 is UiDMItem.Message.Text ->
                     HtmlText(
                         element = message.text.data,
@@ -192,6 +192,13 @@ private fun DMItem(
                             } else {
                                 MaterialTheme.colorScheme.onSurface
                             },
+                    )
+
+                UiDMItem.Message.Deleted ->
+                    Text(
+                        text = stringResource(id = R.string.dm_deleted),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
             }
         }

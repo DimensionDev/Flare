@@ -6,6 +6,8 @@ import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
 
+const val CACHE_DATABASE_VERSION = 12
+
 @Database(
     entities = [
         dev.dimension.flare.data.database.cache.model.DbEmoji::class,
@@ -13,11 +15,15 @@ import androidx.room.TypeConverters
         dev.dimension.flare.data.database.cache.model.DbStatus::class,
         dev.dimension.flare.data.database.cache.model.DbUser::class,
         dev.dimension.flare.data.database.cache.model.DbPagingTimeline::class,
+        dev.dimension.flare.data.database.cache.model.DbMessageRoom::class,
+        dev.dimension.flare.data.database.cache.model.DbMessageItem::class,
+        dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline::class,
+        dev.dimension.flare.data.database.cache.model.DbMessageRoomReference::class,
     ],
     views = [
         dev.dimension.flare.data.database.cache.model.DbPagingTimelineView::class,
     ],
-    version = 11,
+    version = CACHE_DATABASE_VERSION,
     exportSchema = false,
 )
 @TypeConverters(
@@ -26,6 +32,7 @@ import androidx.room.TypeConverters
     dev.dimension.flare.data.database.cache.model.EmojiContentConverter::class,
     dev.dimension.flare.data.database.cache.model.StatusConverter::class,
     dev.dimension.flare.data.database.cache.model.UserContentConverters::class,
+    dev.dimension.flare.data.database.cache.model.MessageContentConverters::class,
 )
 @ConstructedBy(CacheDatabaseConstructor::class)
 abstract class CacheDatabase : RoomDatabase() {
@@ -38,6 +45,8 @@ abstract class CacheDatabase : RoomDatabase() {
     abstract fun userDao(): dev.dimension.flare.data.database.cache.dao.UserDao
 
     abstract fun pagingTimelineDao(): dev.dimension.flare.data.database.cache.dao.PagingTimelineDao
+
+    abstract fun messageDao(): dev.dimension.flare.data.database.cache.dao.MessageDao
 }
 
 // The Room compiler generates the `actual` implementations.

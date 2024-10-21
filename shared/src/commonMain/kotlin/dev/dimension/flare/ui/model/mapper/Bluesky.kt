@@ -12,10 +12,13 @@ import app.bsky.feed.PostView
 import app.bsky.feed.PostViewEmbedUnion
 import app.bsky.graph.ListView
 import app.bsky.notification.ListNotificationsReason
+import app.bsky.richtext.Facet
 import app.bsky.richtext.FacetFeatureUnion
+import chat.bsky.convo.MessageView
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.bluesky.bskyJson
 import dev.dimension.flare.data.datasource.microblog.StatusAction
@@ -24,6 +27,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiCard
+import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
@@ -37,6 +41,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.json.Json
 import sh.christian.ozone.api.model.JsonContent
+import sh.christian.ozone.api.model.ReadOnlyList
 
 internal val bskyJson by lazy {
     Json {
@@ -60,11 +65,21 @@ private fun Element.appendTextWithBr(text: String) {
 private fun parseBluesky(
     post: Post,
     accountKey: MicroBlogKey,
+): UiRichText =
+    parseBluesky(
+        text = post.text,
+        facets = post.facets,
+        accountKey = accountKey,
+    )
+
+private fun parseBluesky(
+    text: String,
+    facets: ReadOnlyList<Facet>,
+    accountKey: MicroBlogKey,
 ): UiRichText {
     val element = Element("p")
 
-    val codePoints = post.text.toByteArray(charset = Charsets.UTF_8)
-    val facets = post.facets
+    val codePoints = text.toByteArray(charset = Charsets.UTF_8)
     var codePointIndex = 0
     for (facet in facets) {
         val start = facet.index.byteStart.toInt()
@@ -789,4 +804,15 @@ internal fun ListView.render(accountKey: MicroBlogKey) =
         avatar = avatar?.uri,
         creator = creator.render(accountKey),
         platformType = PlatformType.Bluesky,
+    )
+
+internal fun MessageContent.Bluesky.render(accountKey: MicroBlogKey) =
+    when (this) {
+        is MessageContent.Bluesky.Deleted -> UiDMItem.Message.Deleted
+        is MessageContent.Bluesky.Message -> data.render(accountKey)
+    }
+
+internal fun MessageView.render(accountKey: MicroBlogKey) =
+    UiDMItem.Message.Text(
+        text = parseBluesky(text, facets, accountKey),
     )

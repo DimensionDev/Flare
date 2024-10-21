@@ -51,7 +51,7 @@ import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.ListComponent
-import dev.dimension.flare.ui.model.UiDMList
+import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.presenter.dm.DMListPresenter
 import dev.dimension.flare.ui.presenter.dm.DMListState
@@ -118,7 +118,7 @@ private data class DMPaneNavArgs(
 @Composable
 private fun DMListScreen(
     accountType: AccountType,
-    onItemClicked: (UiDMList) -> Unit,
+    onItemClicked: (UiDMRoom) -> Unit,
 ) {
     val state by producePresenter("dm_list_$accountType") { presenter(accountType) }
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()

@@ -102,6 +102,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -1727,13 +1728,51 @@ class BlueskyDataSource(
             },
         )
 
-    override fun directMessageList(): Flow<PagingData<UiDMRoom>> {
-        TODO("Not yet implemented")
-    }
+    override fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
+        Pager(
+            config = PagingConfig(pageSize = 20),
+            remoteMediator =
+                DMListRemoteMediator(
+                    service = service,
+                    accountKey = accountKey,
+                    database = database,
+                ),
+            pagingSourceFactory = {
+                database.messageDao().getRoomPagingSource(
+                    accountKey = accountKey,
+                )
+            },
+        ).flow
+            .map {
+                it.map {
+                    it.room.render(accountKey = accountKey)
+                }
+            }.cachedIn(scope)
 
-    override fun directMessageConversation(roomKey: MicroBlogKey): Flow<PagingData<UiDMItem>> {
-        TODO("Not yet implemented")
-    }
+    override fun directMessageConversation(
+        roomKey: MicroBlogKey,
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiDMItem>> =
+        Pager(
+            config = PagingConfig(pageSize = 20),
+            remoteMediator =
+                DMConversationRemoteMediator(
+                    service = service,
+                    accountKey = accountKey,
+                    database = database,
+                    roomKey = roomKey,
+                ),
+            pagingSourceFactory = {
+                database.messageDao().getRoomMessagesPagingSource(
+                    roomKey = roomKey,
+                )
+            },
+        ).flow
+            .map {
+                it.map {
+                    it.render(accountKey = accountKey)
+                }
+            }.cachedIn(scope)
 
     override fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> =
         Cacheable(

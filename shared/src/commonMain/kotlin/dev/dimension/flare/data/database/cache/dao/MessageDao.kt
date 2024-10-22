@@ -43,11 +43,8 @@ interface MessageDao {
     @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
     suspend fun insertTimeline(items: List<DbDirectMessageTimeline>)
 
-    @Query("DELETE FROM DbDirectMessageTimeline WHERE roomKey = :roomKey AND accountKey = :accountKey")
-    suspend fun deleteTimeline(
-        roomKey: MicroBlogKey,
-        accountKey: MicroBlogKey,
-    )
+    @Query("DELETE FROM DbMessageItem WHERE roomKey = :roomKey")
+    suspend fun clearRoomMessage(roomKey: MicroBlogKey)
 
     @Query("DELETE FROM DbMessageItem WHERE messageKey = :messageKey")
     suspend fun deleteMessage(messageKey: MicroBlogKey)
@@ -57,4 +54,7 @@ interface MessageDao {
 
     @Query("SELECT * FROM DbMessageItem WHERE roomKey = :roomKey AND isLocal = 0 ORDER BY timestamp DESC")
     suspend fun getLatestMessage(roomKey: MicroBlogKey): DbMessageItem?
+
+    @Query("DELETE FROM DbDirectMessageTimeline WHERE accountKey = :accountKey")
+    suspend fun clearMessageTimeline(accountKey: MicroBlogKey)
 }

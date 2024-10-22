@@ -205,18 +205,33 @@ private fun DMListScreen(
                                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                                             verticalAlignment = Alignment.CenterVertically,
                                         ) {
-                                            Row(
-                                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                modifier = Modifier.weight(1f),
-                                            ) {
-                                                HtmlText(
-                                                    element = item.user.name.data,
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis,
-                                                )
+                                            val user = item.user
+                                            if (user != null) {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                    verticalAlignment = Alignment.CenterVertically,
+                                                    modifier = Modifier.weight(1f),
+                                                ) {
+                                                    HtmlText(
+                                                        element = user.name.data,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                    )
+                                                    Text(
+                                                        text = user.handle,
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        modifier =
+                                                            Modifier
+                                                                .alpha(MediumAlpha),
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                    )
+                                                }
+                                            }
+                                            val lastMessage = item.lastMessage
+                                            if (lastMessage != null) {
                                                 Text(
-                                                    text = item.user.handle,
+                                                    text = lastMessage.timestamp.shortTime.localizedShortTime,
                                                     style = MaterialTheme.typography.bodySmall,
                                                     modifier =
                                                         Modifier
@@ -225,19 +240,10 @@ private fun DMListScreen(
                                                     overflow = TextOverflow.Ellipsis,
                                                 )
                                             }
-                                            Text(
-                                                text = item.lastMessage.timestamp.shortTime.localizedShortTime,
-                                                style = MaterialTheme.typography.bodySmall,
-                                                modifier =
-                                                    Modifier
-                                                        .alpha(MediumAlpha),
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis,
-                                            )
                                         }
                                     },
                                     leadingContent = {
-                                        AvatarComponent(item.user.avatar)
+                                        AvatarComponent(item.user?.avatar)
                                     },
                                     supportingContent = {
                                         Text(

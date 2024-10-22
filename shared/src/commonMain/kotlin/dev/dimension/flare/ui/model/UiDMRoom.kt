@@ -22,6 +22,9 @@ data class UiDMRoom(
     val id by lazy {
         key.toString()
     }
+    val user by lazy {
+        users.firstOrNull()
+    }
 }
 
 @Immutable

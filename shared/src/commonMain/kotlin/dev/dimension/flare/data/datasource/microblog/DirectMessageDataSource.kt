@@ -7,14 +7,18 @@ import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Clock
 import kotlin.uuid.Uuid
 
 internal interface DirectMessageDataSource : AuthenticatedMicroblogDataSource {
-    fun directMessageList(): Flow<PagingData<UiDMRoom>>
+    fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>>
 
-    fun directMessageConversation(roomKey: MicroBlogKey): Flow<PagingData<UiDMItem>>
+    fun directMessageConversation(
+        roomKey: MicroBlogKey,
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiDMItem>>
 
     fun sendDirectMessage(
         roomKey: MicroBlogKey,

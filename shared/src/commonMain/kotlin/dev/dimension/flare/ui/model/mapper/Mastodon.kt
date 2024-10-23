@@ -77,10 +77,12 @@ internal fun Notification.render(
             NotificationTypes.Update ->
                 UiTimeline.TopMessage.MessageType.Mastodon
                     .Update(id = id.orEmpty())
-            null -> null
+            null ->
+                UiTimeline.TopMessage.MessageType.Mastodon
+                    .UnKnown(id = id.orEmpty())
         }
     val topMessage =
-        topMessageType?.let {
+        topMessageType.let {
             UiTimeline.TopMessage(
                 user = user,
                 icon =

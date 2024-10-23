@@ -168,7 +168,7 @@ private fun TopMessageComponent(
             UiTimeline.TopMessage.Icon.Reply -> FontAwesomeIcons.Solid.Reply
             UiTimeline.TopMessage.Icon.Quote -> FontAwesomeIcons.Solid.QuoteLeft
         }
-    val text: String =
+    val text: String? =
         when (val type = data.type) {
             is UiTimeline.TopMessage.MessageType.Bluesky ->
                 when (type) {
@@ -249,6 +249,8 @@ private fun TopMessageComponent(
                         stringResource(
                             id = R.string.mastodon_notification_item_updated_status,
                         )
+
+                    is UiTimeline.TopMessage.MessageType.Mastodon.UnKnown -> null
                 }
 
             is UiTimeline.TopMessage.MessageType.Misskey ->
@@ -325,22 +327,24 @@ private fun TopMessageComponent(
                 }
         }
 
-    StatusRetweetHeaderComponent(
-        icon = icon,
-        user = data.user,
-        text = text,
-        modifier =
-            modifier
-                .clickable {
-                    data.onClicked.invoke(
-                        ClickContext(
-                            launcher = {
-                                uriHandler.openUri(it)
-                            },
-                        ),
-                    )
-                },
-    )
+    if (text != null) {
+        StatusRetweetHeaderComponent(
+            icon = icon,
+            user = data.user,
+            text = text,
+            modifier =
+                modifier
+                    .clickable {
+                        data.onClicked.invoke(
+                            ClickContext(
+                                launcher = {
+                                    uriHandler.openUri(it)
+                                },
+                            ),
+                        )
+                    },
+        )
+    }
 }
 
 val MisskeyAchievement.titleResId: Int

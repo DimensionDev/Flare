@@ -211,6 +211,10 @@ data class UiTimeline internal constructor(
                 data class Update(
                     val id: String,
                 ) : Mastodon
+
+                data class UnKnown(
+                    val id: String,
+                ) : Mastodon
             }
 
             sealed interface Misskey : MessageType {

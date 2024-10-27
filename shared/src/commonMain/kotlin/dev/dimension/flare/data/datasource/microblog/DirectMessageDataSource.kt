@@ -7,6 +7,7 @@ import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
+import dev.dimension.flare.ui.model.UiState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.Clock
@@ -40,7 +41,7 @@ internal interface DirectMessageDataSource : AuthenticatedMicroblogDataSource {
 
     fun leaveDirectMessage(roomKey: MicroBlogKey)
 
-    suspend fun createDirectMessageRoom(userKey: MicroBlogKey): MicroBlogKey
+    fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>>
 
     suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean
 }

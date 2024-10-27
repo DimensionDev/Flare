@@ -74,6 +74,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
+import com.ramcosta.composedestinations.generated.destinations.DMScreenRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.EditAccountListRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ProfileMediaRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.SearchRouteDestination
@@ -172,46 +173,10 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     }
     state
         .onSuccess {
-            ProfileScreen(
+            ProfileRoute(
                 userKey = it.key,
-                onBack = {
-                    navigator.navigateUp()
-                },
-                onProfileMediaClick = {
-                    navigator.navigate(
-                        ProfileMediaRouteDestination(
-                            it.key,
-                            accountType = accountType,
-                        ),
-                    )
-                },
-                onMediaClick = { statusKey, index, preview ->
-                    navigator.navigate(
-                        StatusMediaRouteDestination(
-                            statusKey = statusKey,
-                            mediaIndex = index,
-                            preview = preview,
-                            accountType = accountType,
-                        ),
-                    )
-                },
+                navigator = navigator,
                 accountType = accountType,
-                toEditAccountList = {
-                    navigator.navigate(
-                        EditAccountListRouteDestination(
-                            accountType,
-                            it.key,
-                        ),
-                    )
-                },
-                toSearchUserUsingAccount = { handle, accountKey ->
-                    navigator.navigate(
-                        SearchRouteDestination(
-                            handle,
-                            AccountType.Specific(accountKey),
-                        ),
-                    )
-                },
             )
         }.onLoading {
             ProfileLoadingScreen(
@@ -252,41 +217,10 @@ internal fun ProfileWithUserNameAndHostRoute(
     }
     state
         .onSuccess {
-            ProfileScreen(
+            ProfileRoute(
                 userKey = it.key,
-                onBack = {
-                    navigator.navigateUp()
-                },
-                onProfileMediaClick = {
-                    navigator.navigate(
-                        ProfileMediaRouteDestination(
-                            it.key,
-                            accountType = accountType,
-                        ),
-                    )
-                },
-                onMediaClick = { statusKey, index, preview ->
-                    navigator.navigate(
-                        StatusMediaRouteDestination(
-                            statusKey = statusKey,
-                            mediaIndex = index,
-                            preview = preview,
-                            accountType = accountType,
-                        ),
-                    )
-                },
+                navigator = navigator,
                 accountType = accountType,
-                toEditAccountList = {
-                    navigator.navigate(EditAccountListRouteDestination(accountType, it.key))
-                },
-                toSearchUserUsingAccount = { handle, accountKey ->
-                    navigator.navigate(
-                        SearchRouteDestination(
-                            handle,
-                            AccountType.Specific(accountKey),
-                        ),
-                    )
-                },
             )
         }.onLoading {
             ProfileLoadingScreen(
@@ -312,9 +246,9 @@ internal fun MeRoute(
     accountType: AccountType,
 ) {
     ProfileRoute(
-        null,
-        navigator,
-        accountType,
+        userKey = null,
+        navigator = navigator,
+        accountType = accountType,
         showBackButton = false,
     )
 }
@@ -401,46 +335,10 @@ internal fun ProfileDeeplinkRoute(
     accountKey: MicroBlogKey?,
 ) {
     val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-    ProfileScreen(
+    ProfileRoute(
         userKey = userKey,
-        onBack = {
-            navigator.navigateUp()
-        },
-        onProfileMediaClick = {
-            navigator.navigate(
-                ProfileMediaRouteDestination(
-                    userKey,
-                    accountType = accountType,
-                ),
-            )
-        },
-        onMediaClick = { statusKey, index, preview ->
-            navigator.navigate(
-                StatusMediaRouteDestination(
-                    statusKey = statusKey,
-                    mediaIndex = index,
-                    preview = preview,
-                    accountType = accountType,
-                ),
-            )
-        },
+        navigator = navigator,
         accountType = accountType,
-        toEditAccountList = {
-            navigator.navigate(
-                EditAccountListRouteDestination(
-                    accountType,
-                    userKey,
-                ),
-            )
-        },
-        toSearchUserUsingAccount = { handle, accountKey ->
-            navigator.navigate(
-                SearchRouteDestination(
-                    handle,
-                    AccountType.Specific(accountKey),
-                ),
-            )
-        },
     )
 }
 
@@ -497,6 +395,11 @@ internal fun ProfileRoute(
                 ),
             )
         },
+        toStartMessage = {
+            navigator.navigate(
+                DMScreenRouteDestination(accountType = accountType, initialUserKey = it),
+            )
+        },
     )
 }
 
@@ -508,7 +411,7 @@ private fun ProfileScreen(
     accountType: AccountType,
     toEditAccountList: () -> Unit,
     toSearchUserUsingAccount: (String, MicroBlogKey) -> Unit,
-    toStartMessage: (MicroBlogKey) -> Unit = {},
+    toStartMessage: (MicroBlogKey) -> Unit,
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
     showBackButton: Boolean = true,

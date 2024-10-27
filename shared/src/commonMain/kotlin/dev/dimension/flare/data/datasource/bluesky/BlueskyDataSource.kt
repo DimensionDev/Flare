@@ -112,6 +112,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -2000,6 +2001,12 @@ class BlueskyDataSource(
         roomKey: MicroBlogKey,
         message: DeletedMessageView,
     ) {
+        database.messageDao().deleteMessage(
+            MicroBlogKey(
+                id = message.id,
+                host = accountKey.host,
+            ),
+        )
     }
 
     override val directMessageBadgeCount: CacheData<Int> =
@@ -2047,26 +2054,31 @@ class BlueskyDataSource(
         }
     }
 
-    override suspend fun createDirectMessageRoom(userKey: MicroBlogKey): MicroBlogKey =
-        runCatching {
-            pdsService()
-                .getConvoForMembers(
-                    params =
-                        GetConvoForMembersQueryParams(
-                            members = persistentListOf(Did(did = userKey.id)),
-                        ),
-                ).requireResponse()
-        }.onSuccess {
-            Bluesky.saveDM(
-                accountKey = accountKey,
-                database = database,
-                data = listOf(it.convo),
+    override fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> =
+        flow {
+            runCatching {
+                pdsService()
+                    .getConvoForMembers(
+                        params =
+                            GetConvoForMembersQueryParams(
+                                members = persistentListOf(Did(did = userKey.id)),
+                            ),
+                    ).requireResponse()
+            }.onSuccess {
+                Bluesky.saveDM(
+                    accountKey = accountKey,
+                    database = database,
+                    data = listOf(it.convo),
+                )
+            }.fold(
+                onSuccess = {
+                    emit(UiState.Success(MicroBlogKey(id = it.convo.id, host = accountKey.host)))
+                },
+                onFailure = {
+                    emit(UiState.Error(it))
+                },
             )
-        }.getOrThrow()
-            .convo
-            .let {
-                MicroBlogKey(id = it.id, host = accountKey.host)
-            }
+        }
 
     override suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean =
         runCatching {

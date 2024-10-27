@@ -23,6 +23,7 @@ import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,6 +41,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleExclamation
+import compose.icons.fontawesomeicons.solid.CircleUser
 import compose.icons.fontawesomeicons.solid.List
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
@@ -47,6 +49,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
@@ -54,7 +57,6 @@ import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.ListComponent
-import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.presenter.dm.DMListPresenter
 import dev.dimension.flare.ui.presenter.dm.DMListState
@@ -75,13 +77,23 @@ internal fun DMScreenRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
     navigationState: NavigationState,
+    initialUserKey: MicroBlogKey? = null,
 ) {
     val scaffoldNavigator =
         rememberListDetailPaneScaffoldNavigator<DMPaneNavArgs>()
-    BackHandler(
-        scaffoldNavigator.canNavigateBack(),
-    ) {
-        scaffoldNavigator.navigateBack()
+    if (initialUserKey != null) {
+        LaunchedEffect(initialUserKey) {
+            scaffoldNavigator.navigateTo(
+                ListDetailPaneScaffoldRole.Detail,
+                DMPaneNavArgs(initialUserKey.toString(), isUserKey = true),
+            )
+        }
+    } else {
+        BackHandler(
+            scaffoldNavigator.canNavigateBack(),
+        ) {
+            scaffoldNavigator.navigateBack()
+        }
     }
 
     ListDetailPaneScaffold(
@@ -91,10 +103,10 @@ internal fun DMScreenRoute(
             AnimatedPane {
                 DMListScreen(
                     accountType = accountType,
-                    onItemClicked = { item ->
+                    onItemClicked = { key ->
                         scaffoldNavigator.navigateTo(
                             ListDetailPaneScaffoldRole.Detail,
-                            DMPaneNavArgs(item.key.toString()),
+                            DMPaneNavArgs(key.toString(), isUserKey = false),
                         )
                     },
                 )
@@ -103,15 +115,18 @@ internal fun DMScreenRoute(
         detailPane = {
             AnimatedPane {
                 scaffoldNavigator.currentDestination?.content?.let { args ->
-                    DMConversationScreen(
-                        accountType = accountType,
-                        roomKey = MicroBlogKey.valueOf(args.key),
-                        onBack = scaffoldNavigator::navigateBack,
-                        navigationState = navigationState,
-                        toProfile = {
-                            navigator.navigate(ProfileRouteDestination(userKey = it, accountType = accountType))
-                        },
-                    )
+                    if (args.isUserKey) {
+                    } else {
+                        DMConversationScreen(
+                            accountType = accountType,
+                            roomKey = MicroBlogKey.valueOf(args.key),
+                            onBack = scaffoldNavigator::navigateBack,
+                            navigationState = navigationState,
+                            toProfile = {
+                                navigator.navigate(ProfileRouteDestination(userKey = it, accountType = accountType))
+                            },
+                        )
+                    }
                 }
             }
         },
@@ -121,15 +136,18 @@ internal fun DMScreenRoute(
 @Parcelize
 private data class DMPaneNavArgs(
     val key: String,
+    val isUserKey: Boolean,
 ) : Parcelable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DMListScreen(
     accountType: AccountType,
-    onItemClicked: (UiDMRoom) -> Unit,
+    onItemClicked: (MicroBlogKey) -> Unit,
 ) {
-    val state by producePresenter("dm_list_$accountType") { presenter(accountType) }
+    val state by producePresenter("dm_list_$accountType") {
+        presenter(accountType)
+    }
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     FlareScaffold(
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
@@ -220,7 +238,7 @@ private fun DMListScreen(
                                 modifier =
                                     Modifier
                                         .clickable {
-                                            onItemClicked.invoke(item)
+                                            onItemClicked.invoke(item.key)
                                         },
                             ) {
                                 ListComponent(
@@ -267,7 +285,19 @@ private fun DMListScreen(
                                         }
                                     },
                                     leadingContent = {
-                                        AvatarComponent(item.user?.avatar)
+                                        val avatar = item.user?.avatar
+                                        if (avatar.isNullOrEmpty()) {
+                                            FAIcon(
+                                                FontAwesomeIcons.Solid.CircleUser,
+                                                contentDescription = null,
+                                                modifier =
+                                                    Modifier
+                                                        .size(AvatarComponentDefaults.size),
+                                                tint = MaterialTheme.colorScheme.primary,
+                                            )
+                                        } else {
+                                            AvatarComponent(avatar)
+                                        }
                                     },
                                     supportingContent = {
                                         Text(

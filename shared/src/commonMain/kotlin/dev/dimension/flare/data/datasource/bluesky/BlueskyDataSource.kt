@@ -34,9 +34,11 @@ import app.bsky.notification.ListNotificationsQueryParams
 import app.bsky.unspecced.GetPopularFeedGeneratorsQueryParams
 import chat.bsky.convo.DeleteMessageForSelfRequest
 import chat.bsky.convo.DeletedMessageView
+import chat.bsky.convo.GetConvoForMembersQueryParams
 import chat.bsky.convo.GetConvoQueryParams
 import chat.bsky.convo.GetLogQueryParams
 import chat.bsky.convo.GetLogResponseLogUnion
+import chat.bsky.convo.LeaveConvoRequest
 import chat.bsky.convo.ListConvosQueryParams
 import chat.bsky.convo.LogCreateMessageMessageUnion
 import chat.bsky.convo.LogDeleteMessageMessageUnion
@@ -2026,6 +2028,56 @@ class BlueskyDataSource(
             database.messageDao().clearUnreadCount(roomKey, accountKey = accountKey)
         }
     }
+
+    override fun leaveDirectMessage(roomKey: MicroBlogKey) {
+        coroutineScope.launch {
+            runCatching {
+                pdsService().leaveConvo(
+                    request =
+                        LeaveConvoRequest(
+                            convoId = roomKey.id,
+                        ),
+                )
+            }.onSuccess {
+                database.messageDao().deleteRoomTimeline(roomKey, accountKey = accountKey)
+                database.messageDao().deleteRoom(roomKey)
+                database.messageDao().deleteRoomReference(roomKey)
+                database.messageDao().deleteRoomMessages(roomKey)
+            }
+        }
+    }
+
+    override suspend fun createDirectMessageRoom(userKey: MicroBlogKey): MicroBlogKey =
+        runCatching {
+            pdsService()
+                .getConvoForMembers(
+                    params =
+                        GetConvoForMembersQueryParams(
+                            members = persistentListOf(Did(did = userKey.id)),
+                        ),
+                ).requireResponse()
+        }.onSuccess {
+            Bluesky.saveDM(
+                accountKey = accountKey,
+                database = database,
+                data = listOf(it.convo),
+            )
+        }.getOrThrow()
+            .convo
+            .let {
+                MicroBlogKey(id = it.id, host = accountKey.host)
+            }
+
+    override suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean =
+        runCatching {
+            pdsService()
+                .getConvoForMembers(
+                    params =
+                        GetConvoForMembersQueryParams(
+                            members = persistentListOf(Did(did = userKey.id)),
+                        ),
+                ).requireResponse()
+        }.isSuccess
 }
 
 internal inline fun <reified T, reified R> T.bskyJson(): R = bskyJson.decodeFromJsonElement(bskyJson.encodeToJsonElement(this))

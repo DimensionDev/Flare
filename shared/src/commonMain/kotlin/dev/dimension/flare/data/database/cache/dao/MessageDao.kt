@@ -67,4 +67,19 @@ interface MessageDao {
         roomKey: MicroBlogKey,
         accountKey: MicroBlogKey,
     )
+
+    @Query("DELETE FROM DbDirectMessageTimeline WHERE roomKey = :roomKey AND accountKey = :accountKey")
+    suspend fun deleteRoomTimeline(
+        roomKey: MicroBlogKey,
+        accountKey: MicroBlogKey,
+    )
+
+    @Query("DELETE FROM DbMessageRoom WHERE roomKey = :roomKey")
+    suspend fun deleteRoom(roomKey: MicroBlogKey)
+
+    @Query("DELETE FROM DbMessageRoomReference WHERE roomKey = :roomKey")
+    suspend fun deleteRoomReference(roomKey: MicroBlogKey)
+
+    @Query("DELETE FROM DbMessageItem WHERE roomKey = :roomKey")
+    suspend fun deleteRoomMessages(roomKey: MicroBlogKey)
 }

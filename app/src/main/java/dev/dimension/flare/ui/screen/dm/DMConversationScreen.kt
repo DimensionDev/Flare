@@ -25,6 +25,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
@@ -35,7 +37,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -44,7 +48,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.ArrowRightFromBracket
 import compose.icons.fontawesomeicons.solid.CircleExclamation
+import compose.icons.fontawesomeicons.solid.CircleUser
+import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.PaperPlane
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
@@ -80,6 +87,7 @@ internal fun DMConversationScreen(
     roomKey: MicroBlogKey,
     onBack: () -> Unit,
     navigationState: NavigationState,
+    toProfile: (MicroBlogKey) -> Unit,
 ) {
     DisposableEffect(Unit) {
         navigationState.disableBottomBarAutoHide()
@@ -121,6 +129,69 @@ internal fun DMConversationScreen(
                 },
                 navigationIcon = {
                     BackButton(onBack = onBack)
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            state.setShowDropdown(!state.showDropdown)
+                        },
+                    ) {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
+                            contentDescription = stringResource(R.string.more),
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = state.showDropdown,
+                        onDismissRequest = {
+                            state.setShowDropdown(false)
+                        },
+                    ) {
+                        state.users.onSuccess {
+                            if (it.size == 1) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = stringResource(R.string.dm_to_profile),
+                                        )
+                                    },
+                                    leadingIcon = {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.CircleUser,
+                                            contentDescription = stringResource(R.string.dm_to_profile),
+                                        )
+                                    },
+                                    onClick = {
+                                        state.setShowDropdown(false)
+                                        toProfile.invoke(it.first().key)
+                                    },
+                                )
+                            }
+                        }
+
+                        HorizontalDivider()
+
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(R.string.dm_leave),
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            },
+                            leadingIcon = {
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.ArrowRightFromBracket,
+                                    contentDescription = stringResource(R.string.dm_leave),
+                                    tint = MaterialTheme.colorScheme.error,
+                                )
+                            },
+                            onClick = {
+                                state.setShowDropdown(false)
+                                state.leave()
+                                onBack()
+                            },
+                        )
+                    }
                 },
             )
         },
@@ -342,6 +413,7 @@ private fun presenter(
     roomKey: MicroBlogKey,
 ) = run {
     val text = rememberTextFieldState()
+    var showDropdown by remember { mutableStateOf(false) }
     val state =
         remember(
             accountType,
@@ -356,6 +428,11 @@ private fun presenter(
     object : DMConversationState by state {
         val text = text
         val canSend = text.text.isNotEmpty()
+        val showDropdown = showDropdown
+
+        fun setShowDropdown(show: Boolean) {
+            showDropdown = show
+        }
 
         fun send() {
             send(text.text.toString())

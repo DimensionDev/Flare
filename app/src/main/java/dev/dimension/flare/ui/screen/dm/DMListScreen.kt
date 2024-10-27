@@ -35,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.ProfileRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -107,6 +108,9 @@ internal fun DMScreenRoute(
                         roomKey = MicroBlogKey.valueOf(args.key),
                         onBack = scaffoldNavigator::navigateBack,
                         navigationState = navigationState,
+                        toProfile = {
+                            navigator.navigate(ProfileRouteDestination(userKey = it, accountType = accountType))
+                        },
                     )
                 }
             }

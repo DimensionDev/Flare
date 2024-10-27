@@ -9,6 +9,7 @@ import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.repository.NoActiveAccountException
@@ -31,6 +32,7 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class ProfilePresenter(
@@ -115,6 +117,24 @@ class ProfilePresenter(
                     null
                 }
             }
+        val canSendMessage =
+            remember(accountServiceState, userKey) {
+                accountServiceState.map {
+                    if (it is DirectMessageDataSource && userKey != null) {
+                        flow<Boolean> {
+                            runCatching {
+                                it.canSendDirectMessage(userKey)
+                            }.getOrElse {
+                                false
+                            }.let {
+                                emit(it)
+                            }
+                        }
+                    } else {
+                        flow<Boolean> { emit(false) }
+                    }
+                }
+            }.flatMap { it.collectAsUiState().value }
         return object : ProfileState(
             userState = userState.flatMap { it.toUi() },
             listState = listState,
@@ -128,6 +148,7 @@ class ProfilePresenter(
                     it is ListDataSource
                 },
             myAccountKey = myAccountKey,
+            canSendMessage = canSendMessage,
         ) {
             override suspend fun refresh() {
                 userState.onSuccess {
@@ -197,6 +218,7 @@ abstract class ProfileState(
     val isGuestMode: Boolean,
     val isListDataSource: UiState<Boolean>,
     val myAccountKey: UiState<MicroBlogKey>,
+    val canSendMessage: UiState<Boolean>,
 ) {
     abstract suspend fun refresh()
 

@@ -79,6 +79,13 @@ class DMConversationPresenter(
                     it.retrySendDirectMessage(key)
                 }
             }
+
+            override fun leave() {
+                serviceState.onSuccess {
+                    require(it is DirectMessageDataSource)
+                    it.leaveDirectMessage(roomKey)
+                }
+            }
         }
     }
 }
@@ -90,4 +97,6 @@ interface DMConversationState {
     fun send(message: String)
 
     fun retry(key: MicroBlogKey)
+
+    fun leave()
 }

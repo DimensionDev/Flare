@@ -13,7 +13,7 @@ import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
 internal class DMListRemoteMediator(
-    private val service: BlueskyService,
+    private val getService: suspend () -> BlueskyService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
 ) : RemoteMediator<Int, DbDirectMessageTimelineWithRoom>() {
@@ -24,6 +24,7 @@ internal class DMListRemoteMediator(
         state: PagingState<Int, DbDirectMessageTimelineWithRoom>,
     ): MediatorResult {
         try {
+            val service = getService()
             val response =
                 when (loadType) {
                     LoadType.REFRESH -> {

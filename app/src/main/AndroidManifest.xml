@@ -15,9 +15,9 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault.NoActionBar"
         android:enableOnBackInvokedCallback="true"
-        android:windowSoftInputMode="adjustResize"
         android:name=".App">
         <activity
+            android:windowSoftInputMode="adjustResize"
             android:launchMode="singleTop"
             android:name=".MainActivity"
             android:exported="true"

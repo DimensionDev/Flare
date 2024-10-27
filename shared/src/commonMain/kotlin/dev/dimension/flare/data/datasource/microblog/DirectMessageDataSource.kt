@@ -35,6 +35,8 @@ internal interface DirectMessageDataSource : AuthenticatedMicroblogDataSource {
     fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom>
 
     suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey)
+
+    val directMessageBadgeCount: CacheData<Int>
 }
 
 internal fun DirectMessageDataSource.createSendingDirectMessage(

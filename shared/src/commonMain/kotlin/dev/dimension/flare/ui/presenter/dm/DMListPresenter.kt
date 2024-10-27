@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.dm
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onSuccess
@@ -18,13 +19,14 @@ class DMListPresenter(
 ) : PresenterBase<DMListState>() {
     @Composable
     override fun body(): DMListState {
+        val scope = rememberCoroutineScope()
         val serviceState = accountServiceProvider(accountType = accountType)
         val items =
             serviceState
                 .map { service ->
                     require(service is DirectMessageDataSource)
                     remember(service) {
-                        service.directMessageList()
+                        service.directMessageList(scope = scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
         return object : DMListState {

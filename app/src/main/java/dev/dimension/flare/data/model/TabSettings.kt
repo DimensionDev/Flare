@@ -20,6 +20,7 @@ import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.House
 import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
+import compose.icons.fontawesomeicons.solid.Message
 import compose.icons.fontawesomeicons.solid.RectangleList
 import compose.icons.fontawesomeicons.solid.Rss
 import compose.icons.fontawesomeicons.solid.Star
@@ -94,7 +95,8 @@ sealed interface TitleType {
             Bookmark,
             Favourite,
             List,
-            Feeds, ;
+            Feeds,
+            DirectMessage, ;
 
             fun toId(): Int =
                 when (this) {
@@ -110,6 +112,7 @@ sealed interface TitleType {
                     Favourite -> R.string.home_tab_favorite_title
                     List -> R.string.home_tab_list_title
                     Feeds -> R.string.home_tab_feeds_title
+                    DirectMessage -> R.string.dm_list_title
                 }
         }
     }
@@ -144,6 +147,7 @@ sealed interface IconType {
             Bluesky,
             List,
             Feeds,
+            Messages,
             ;
 
             fun toIcon(): ImageVector =
@@ -164,6 +168,7 @@ sealed interface IconType {
                     Bluesky -> FontAwesomeIcons.Brands.Bluesky
                     List -> FontAwesomeIcons.Solid.List
                     Feeds -> FontAwesomeIcons.Solid.Rss
+                    Messages -> FontAwesomeIcons.Solid.Message
                 }
         }
     }
@@ -431,10 +436,6 @@ sealed interface TimelineTabItem : TabItem {
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Search, accountKey),
                         ),
                 ),
-                ProfileTabItem(
-                    accountKey = accountKey,
-                    userKey = accountKey,
-                ),
             )
 
         private fun defaultBlueskySecondaryItems(accountKey: MicroBlogKey) =
@@ -453,6 +454,14 @@ sealed interface TimelineTabItem : TabItem {
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Feeds),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Feeds, accountKey),
+                        ),
+                ),
+                DirectMessageTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.DirectMessage),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Messages, accountKey),
                         ),
                 ),
             )
@@ -790,6 +799,16 @@ data object SettingsTabItem : TabItem {
             )
 
     override fun update(metaData: TabMetaData): TabItem = this
+}
+
+@Serializable
+data class DirectMessageTabItem(
+    override val account: AccountType,
+    override val metaData: TabMetaData,
+) : TabItem {
+    override val key: String = "dm_$account"
+
+    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
 @OptIn(ExperimentalSerializationApi::class)

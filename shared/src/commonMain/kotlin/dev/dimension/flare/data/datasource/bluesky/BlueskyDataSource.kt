@@ -33,10 +33,17 @@ import app.bsky.graph.UnmuteActorRequest
 import app.bsky.notification.ListNotificationsQueryParams
 import app.bsky.unspecced.GetPopularFeedGeneratorsQueryParams
 import chat.bsky.convo.DeleteMessageForSelfRequest
+import chat.bsky.convo.DeletedMessageView
 import chat.bsky.convo.GetConvoQueryParams
 import chat.bsky.convo.GetLogQueryParams
+import chat.bsky.convo.GetLogResponseLogUnion
+import chat.bsky.convo.ListConvosQueryParams
+import chat.bsky.convo.LogCreateMessageMessageUnion
+import chat.bsky.convo.LogDeleteMessageMessageUnion
 import chat.bsky.convo.MessageInput
+import chat.bsky.convo.MessageView
 import chat.bsky.convo.SendMessageRequest
+import chat.bsky.convo.UpdateReadRequest
 import com.atproto.moderation.CreateReportRequest
 import com.atproto.moderation.CreateReportRequestSubjectUnion
 import com.atproto.moderation.Token
@@ -78,6 +85,7 @@ import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.data.network.bluesky.model.DidDoc
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -136,6 +144,24 @@ class BlueskyDataSource(
             accountKey = accountKey,
             accountQueries = appDatabase.accountDao(),
         )
+    }
+
+    private var cachedEndpoint: String? = null
+
+    private suspend fun pdsService(): BlueskyService {
+        if (cachedEndpoint == null) {
+            val didDoc: DidDoc =
+                service
+                    .getSession()
+                    .requireResponse()
+                    .didDoc
+                    .bskyJson()
+            val entryPoint = didDoc.service?.firstOrNull()?.serviceEndpoint
+            cachedEndpoint = entryPoint
+        }
+        return cachedEndpoint?.let {
+            service.copy(baseUrl = it)
+        } ?: service
     }
 
     override fun homeTimeline(
@@ -1733,7 +1759,7 @@ class BlueskyDataSource(
             config = PagingConfig(pageSize = 20),
             remoteMediator =
                 DMListRemoteMediator(
-                    service = service,
+                    getService = this::pdsService,
                     accountKey = accountKey,
                     database = database,
                 ),
@@ -1745,7 +1771,7 @@ class BlueskyDataSource(
         ).flow
             .map {
                 it.map {
-                    it.room.render(accountKey = accountKey)
+                    it.render(accountKey = accountKey)
                 }
             }.cachedIn(scope)
 
@@ -1757,10 +1783,11 @@ class BlueskyDataSource(
             config = PagingConfig(pageSize = 20),
             remoteMediator =
                 DMConversationRemoteMediator(
-                    service = service,
+                    getService = this::pdsService,
                     accountKey = accountKey,
                     database = database,
                     roomKey = roomKey,
+                    clearBadge = this::clearDirectMessageBadgeCount,
                 ),
             pagingSourceFactory = {
                 database.messageDao().getRoomMessagesPagingSource(
@@ -1778,7 +1805,7 @@ class BlueskyDataSource(
         Cacheable(
             fetchSource = {
                 val response =
-                    service
+                    pdsService()
                         .getConvo(params = GetConvoQueryParams(convoId = roomKey.id))
                         .requireResponse()
                 Bluesky.saveDM(
@@ -1794,7 +1821,7 @@ class BlueskyDataSource(
                         roomKey = roomKey,
                         accountKey = accountKey,
                     ).mapNotNull {
-                        it?.room?.render(accountKey = accountKey)
+                        it?.render(accountKey = accountKey)
                     }
             },
         )
@@ -1807,7 +1834,7 @@ class BlueskyDataSource(
             val tempMessage = createSendingDirectMessage(roomKey, message)
             database.messageDao().insertMessages(listOf(tempMessage))
             runCatching {
-                service.sendMessage(
+                pdsService().sendMessage(
                     request =
                         SendMessageRequest(
                             convoId = roomKey.id,
@@ -1847,7 +1874,7 @@ class BlueskyDataSource(
                 database.messageDao().deleteMessage(messageKey)
             } else {
                 runCatching {
-                    service.deleteMessageForSelf(
+                    pdsService().deleteMessageForSelf(
                         request =
                             DeleteMessageForSelfRequest(
                                 convoId = roomKey.id,
@@ -1877,7 +1904,7 @@ class BlueskyDataSource(
                 )
 
                 runCatching {
-                    service.sendMessage(
+                    pdsService().sendMessage(
                         request =
                             SendMessageRequest(
                                 convoId = current.roomKey.id,
@@ -1917,17 +1944,87 @@ class BlueskyDataSource(
                 null
             }
         val response =
-            service.getLog(
+            pdsService().getLog(
                 params =
                     GetLogQueryParams(
                         cursor = cursor,
                     ),
             )
-//        response.requireResponse().logs.forEach {
-//            when (it) {
-//
-//            }
-//        }
+        pdsService().updateRead(
+            request =
+                UpdateReadRequest(
+                    convoId = roomKey.id,
+                ),
+        )
+        response.requireResponse().logs.forEach {
+            when (it) {
+                is GetLogResponseLogUnion.CreateMessage -> {
+                    when (val message = it.value.message) {
+                        is LogCreateMessageMessageUnion.MessageView ->
+                            handleMessage(roomKey = roomKey, message = message.value)
+                        is LogCreateMessageMessageUnion.DeletedMessageView ->
+                            handleMessage(roomKey = roomKey, message = message.value)
+                    }
+                }
+                is GetLogResponseLogUnion.DeleteMessage -> {
+                    when (val message = it.value.message) {
+                        is LogDeleteMessageMessageUnion.MessageView ->
+                            handleMessage(roomKey = roomKey, message = message.value)
+                        is LogDeleteMessageMessageUnion.DeletedMessageView ->
+                            handleMessage(roomKey = roomKey, message = message.value)
+                    }
+                }
+                is GetLogResponseLogUnion.BeginConvo -> {
+                }
+                is GetLogResponseLogUnion.LeaveConvo -> {
+                }
+            }
+        }
+    }
+
+    private suspend fun handleMessage(
+        roomKey: MicroBlogKey,
+        message: MessageView,
+    ) {
+        Bluesky.saveMessage(
+            accountKey = accountKey,
+            roomKey = roomKey,
+            database = database,
+            data = listOf(message),
+        )
+    }
+
+    private suspend fun handleMessage(
+        roomKey: MicroBlogKey,
+        message: DeletedMessageView,
+    ) {
+    }
+
+    override val directMessageBadgeCount: CacheData<Int> =
+        Cacheable(
+            fetchSource = {
+                val response =
+                    pdsService()
+                        .listConvos(
+                            params = ListConvosQueryParams(),
+                        ).requireResponse()
+                Bluesky.saveDM(
+                    accountKey = accountKey,
+                    database = database,
+                    data = response.convos,
+                )
+            },
+            cacheSource = {
+                database.messageDao().getRoomTimeline(accountKey = accountKey).map {
+                    it.sumOf { it.timeline.unreadCount.toInt() }
+                }
+            },
+        )
+
+    private fun clearDirectMessageBadgeCount(roomKey: MicroBlogKey) {
+        coroutineScope.launch {
+            database.messageDao().clearUnreadCount(roomKey, accountKey = accountKey)
+        }
     }
 }
 

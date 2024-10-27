@@ -11,6 +11,7 @@ data class UiDMRoom(
     val key: MicroBlogKey,
     val users: ImmutableList<UiUserV2>,
     val lastMessage: UiDMItem?,
+    val unreadCount: Long,
 ) {
     val lastMessageText: String by lazy {
         when (val message = lastMessage?.content) {
@@ -34,6 +35,7 @@ data class UiDMItem(
     val content: Message,
     val timestamp: UiDateTime,
     val isFromMe: Boolean,
+    val sendState: SendState?,
 ) {
     sealed interface Message {
         data class Text(
@@ -41,6 +43,11 @@ data class UiDMItem(
         ) : Message
 
         data object Deleted : Message
+    }
+
+    enum class SendState {
+        Sending,
+        Failed,
     }
 
     val id by lazy {

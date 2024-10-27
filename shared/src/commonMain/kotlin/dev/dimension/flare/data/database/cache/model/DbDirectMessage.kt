@@ -24,6 +24,7 @@ data class DbDirectMessageTimeline(
     val accountKey: MicroBlogKey,
     val roomKey: MicroBlogKey,
     val sortId: Long,
+    val unreadCount: Long,
     @PrimaryKey
     val _id: String = "$accountKey-$roomKey",
 )

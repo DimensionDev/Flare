@@ -21,6 +21,10 @@ interface MessageDao {
     fun getRoomPagingSource(accountKey: MicroBlogKey): PagingSource<Int, DbDirectMessageTimelineWithRoom>
 
     @Transaction
+    @Query("SELECT * FROM DbDirectMessageTimeline WHERE accountKey = :accountKey ORDER BY sortId DESC")
+    fun getRoomTimeline(accountKey: MicroBlogKey): Flow<List<DbDirectMessageTimelineWithRoom>>
+
+    @Transaction
     @Query("SELECT * FROM DbMessageItem WHERE roomKey = :roomKey ORDER BY timestamp DESC")
     fun getRoomMessagesPagingSource(roomKey: MicroBlogKey): PagingSource<Int, DbMessageItemWithUser>
 
@@ -57,4 +61,10 @@ interface MessageDao {
 
     @Query("DELETE FROM DbDirectMessageTimeline WHERE accountKey = :accountKey")
     suspend fun clearMessageTimeline(accountKey: MicroBlogKey)
+
+    @Query("UPDATE DbDirectMessageTimeline SET unreadCount = 0 WHERE roomKey = :roomKey AND accountKey = :accountKey")
+    suspend fun clearUnreadCount(
+        roomKey: MicroBlogKey,
+        accountKey: MicroBlogKey,
+    )
 }

@@ -46,6 +46,8 @@ internal object Bluesky {
                 it.lastMessage?.toDbMessageItem(it.toDbMessageRoom(accountKey.host).roomKey)
             }
         val timeline = data.map { it.toDbDirectMessageTimeline(accountKey) }
+        val users = data.flatMap { it.members }.map { it.toDbUser(accountKey.host) }
+        database.userDao().insertAll(users)
         database.messageDao().insertMessages(messages)
         database.messageDao().insertReferences(references)
         database.messageDao().insert(rooms)
@@ -468,6 +470,31 @@ private fun ProfileViewBasic.toDbUser(host: String) =
         content = UserContent.BlueskyLite(this),
     )
 
+private fun chat.bsky.actor.ProfileViewBasic.toDbUser(host: String) =
+    DbUser(
+        userKey =
+            MicroBlogKey(
+                id = did.did,
+                host = host,
+            ),
+        platformType = PlatformType.Bluesky,
+        name = displayName.orEmpty(),
+        handle = handle.handle,
+        host = host,
+        content =
+            UserContent.BlueskyLite(
+                ProfileViewBasic(
+                    did = did,
+                    handle = handle,
+                    displayName = displayName,
+                    avatar = avatar,
+                    associated = associated,
+                    viewer = viewer,
+                    labels = labels,
+                ),
+            ),
+    )
+
 internal fun ProfileViewDetailed.toDbUser(host: String) =
     DbUser(
         userKey =
@@ -490,6 +517,7 @@ private fun ConvoView.toDbDirectMessageTimeline(accountKey: MicroBlogKey): DbDir
         sortId =
             lastMessage?.toDbMessageItem(roomKey)?.timestamp
                 ?: 0L,
+        unreadCount = unreadCount,
     )
 }
 

@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.dm
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
@@ -30,12 +31,13 @@ class DMConversationPresenter(
     @Composable
     override fun body(): DMConversationState {
         val serviceState = accountServiceProvider(accountType = accountType)
+        val scope = rememberCoroutineScope()
         val items =
             serviceState
                 .map { service ->
                     require(service is DirectMessageDataSource)
                     remember(service, roomKey) {
-                        service.directMessageConversation(roomKey)
+                        service.directMessageConversation(roomKey, scope = scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
         val users =
@@ -48,11 +50,15 @@ class DMConversationPresenter(
                 }.map {
                     it.users
                 }
-        LaunchedEffect(Unit) {
-            serviceState.onSuccess {
-                require(it is DirectMessageDataSource)
-                delay(5.seconds)
-                it.fetchNewDirectMessageForConversation(roomKey)
+        serviceState.onSuccess {
+            require(it is DirectMessageDataSource)
+            LaunchedEffect(Unit) {
+                while (true) {
+                    delay(5.seconds)
+                    runCatching {
+                        it.fetchNewDirectMessageForConversation(roomKey)
+                    }
+                }
             }
         }
         return object : DMConversationState {
@@ -66,6 +72,13 @@ class DMConversationPresenter(
                     it.sendDirectMessage(roomKey, message)
                 }
             }
+
+            override fun retry(key: MicroBlogKey) {
+                serviceState.onSuccess {
+                    require(it is DirectMessageDataSource)
+                    it.retrySendDirectMessage(key)
+                }
+            }
         }
     }
 }
@@ -75,4 +88,6 @@ interface DMConversationState {
     val users: UiState<ImmutableList<UiUserV2>>
 
     fun send(message: String)
+
+    fun retry(key: MicroBlogKey)
 }

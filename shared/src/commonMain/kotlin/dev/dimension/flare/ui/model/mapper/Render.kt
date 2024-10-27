@@ -1,8 +1,8 @@
 package dev.dimension.flare.ui.model.mapper
 
 import com.fleeksoft.ksoup.nodes.Element
+import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimelineWithRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageItemWithUser
-import dev.dimension.flare.data.database.cache.model.DbMessageRoomWithLastMessageAndUser
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.MessageContent
@@ -116,15 +116,16 @@ internal fun DbUser.render(accountKey: MicroBlogKey) =
         is UserContent.XQT -> content.data.render(accountKey = accountKey)
     }
 
-internal fun DbMessageRoomWithLastMessageAndUser.render(accountKey: MicroBlogKey) =
+internal fun DbDirectMessageTimelineWithRoom.render(accountKey: MicroBlogKey) =
     UiDMRoom(
-        key = room.roomKey,
-        lastMessage = lastMessage?.render(accountKey),
+        key = room.room.roomKey,
+        lastMessage = room.lastMessage?.render(accountKey),
         users =
-            users
+            room.users
                 .filter { it.reference.userKey != accountKey }
                 .map { it.user.render(accountKey) }
                 .toImmutableList(),
+        unreadCount = timeline.unreadCount,
     )
 
 internal fun DbMessageItemWithUser.render(accountKey: MicroBlogKey) =
@@ -139,9 +140,18 @@ internal fun DbMessageItemWithUser.render(accountKey: MicroBlogKey) =
                     UiDMItem.Message.Text(
                         Element("span")
                             .apply {
-                                appendText("content.text")
+                                appendText(content.text)
                             }.toUi(),
                     )
             },
         isFromMe = accountKey == message.userKey,
+        sendState =
+            when (val content = message.content) {
+                is MessageContent.Local ->
+                    when (content.state) {
+                        MessageContent.Local.State.SENDING -> UiDMItem.SendState.Sending
+                        MessageContent.Local.State.FAILED -> UiDMItem.SendState.Failed
+                    }
+                is MessageContent.Bluesky -> null
+            },
     )

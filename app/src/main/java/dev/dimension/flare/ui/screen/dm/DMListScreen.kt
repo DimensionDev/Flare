@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -57,6 +58,7 @@ import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.presenter.dm.DMListPresenter
 import dev.dimension.flare.ui.presenter.dm.DMListState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.screen.list.ItemPlaceHolder
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -71,6 +73,7 @@ import kotlinx.parcelize.Parcelize
 internal fun DMScreenRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
+    navigationState: NavigationState,
 ) {
     val scaffoldNavigator =
         rememberListDetailPaneScaffoldNavigator<DMPaneNavArgs>()
@@ -103,6 +106,7 @@ internal fun DMScreenRoute(
                         accountType = accountType,
                         roomKey = MicroBlogKey.valueOf(args.key),
                         onBack = scaffoldNavigator::navigateBack,
+                        navigationState = navigationState,
                     )
                 }
             }
@@ -152,15 +156,21 @@ private fun DMListScreen(
                                 modifier = Modifier.fillParentMaxSize(),
                                 contentAlignment = Alignment.Center,
                             ) {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.List,
-                                    contentDescription = stringResource(id = R.string.dm_list_empty),
-                                    modifier = Modifier.size(48.dp),
-                                )
-                                Text(
-                                    text = stringResource(id = R.string.dm_list_empty),
-                                    style = MaterialTheme.typography.headlineMedium,
-                                )
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.List,
+                                        contentDescription = stringResource(id = R.string.dm_list_empty),
+                                        modifier = Modifier.size(48.dp),
+                                    )
+                                    Text(
+                                        text = stringResource(id = R.string.dm_list_empty),
+                                        style = MaterialTheme.typography.headlineMedium,
+                                    )
+                                }
                             }
                         },
                         loadingContent = {
@@ -180,15 +190,25 @@ private fun DMListScreen(
                                 modifier = Modifier.fillParentMaxSize(),
                                 contentAlignment = Alignment.Center,
                             ) {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.CircleExclamation,
-                                    contentDescription = stringResource(id = R.string.dm_list_error),
-                                    modifier = Modifier.size(48.dp),
-                                )
-                                Text(
-                                    text = stringResource(id = R.string.dm_list_error),
-                                    style = MaterialTheme.typography.headlineMedium,
-                                )
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.CircleExclamation,
+                                        contentDescription = stringResource(id = R.string.dm_list_error),
+                                        modifier = Modifier.size(48.dp),
+                                    )
+                                    Text(
+                                        text = stringResource(id = R.string.dm_list_error),
+                                        style = MaterialTheme.typography.headlineMedium,
+                                    )
+                                    Text(
+                                        text = it.message.orEmpty(),
+                                        style = MaterialTheme.typography.headlineMedium,
+                                    )
+                                }
                             }
                         },
                         itemContent = { item ->
@@ -252,6 +272,15 @@ private fun DMListScreen(
                                             maxLines = 1,
                                             overflow = TextOverflow.Ellipsis,
                                         )
+                                    },
+                                    trailingContent = {
+                                        if (item.unreadCount > 0) {
+                                            Badge {
+                                                Text(
+                                                    text = item.unreadCount.toString(),
+                                                )
+                                            }
+                                        }
                                     },
                                     modifier =
                                         Modifier

@@ -84,13 +84,8 @@ class ProfilePresenter(
             }.body().mediaState
         val relationState =
             accountServiceState.flatMap { service ->
-                val actualUserKey =
-                    userKey
-                        ?: if (service is AuthenticatedMicroblogDataSource) {
-                            service.accountKey
-                        } else {
-                            null
-                        } ?: throw NoActiveAccountException
+                require(service is AuthenticatedMicroblogDataSource)
+                val actualUserKey = userKey ?: service.accountKey
                 remember(service, userKey) {
                     service.relation(actualUserKey)
                 }.collectAsUiState().value.flatMap { it }
@@ -107,6 +102,7 @@ class ProfilePresenter(
             }
         val actions =
             accountServiceState.map { service ->
+                require(service is AuthenticatedMicroblogDataSource)
                 service.profileActions().toImmutableList().toImmutableListWrapper()
             }
         val myAccountKey =
@@ -175,7 +171,9 @@ class ProfilePresenter(
             ) {
                 scope.launch {
                     accountServiceState.onSuccess { service ->
-                        service.follow(userKey, data)
+                        if (service is AuthenticatedMicroblogDataSource) {
+                            service.follow(userKey, data)
+                        }
                     }
                 }
             }

@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
@@ -21,7 +22,11 @@ class NotificationBadgePresenter(
 ) : PresenterBase<NotificationBadgeState>() {
     @Composable
     override fun body(): NotificationBadgeState {
-        val serviceState = accountServiceProvider(accountType = accountType)
+        val serviceState =
+            accountServiceProvider(accountType = accountType).map {
+                require(it is AuthenticatedMicroblogDataSource)
+                it
+            }
         val countState =
             serviceState.map { service ->
                 remember(service) {

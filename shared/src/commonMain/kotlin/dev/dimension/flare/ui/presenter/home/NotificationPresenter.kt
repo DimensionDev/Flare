@@ -32,7 +32,11 @@ class NotificationPresenter(
     override fun body(): NotificationState {
         val scope = rememberCoroutineScope()
         var type by remember { mutableStateOf<NotificationFilter?>(null) }
-        val serviceState = accountServiceProvider(accountType = accountType)
+        val serviceState =
+            accountServiceProvider(accountType = accountType).map {
+                require(it is AuthenticatedMicroblogDataSource)
+                it
+            }
         val allTypes =
             serviceState.map { service ->
                 service.supportedNotificationFilter.toImmutableList()
@@ -54,12 +58,7 @@ class NotificationPresenter(
                     } else {
                         UiState.Success(
                             remember(service, currentType) {
-                                val pagingKey =
-                                    if (service is AuthenticatedMicroblogDataSource) {
-                                        "notification_${currentType}_${service.accountKey}"
-                                    } else {
-                                        "notification"
-                                    }
+                                val pagingKey = "notification_${currentType}_${service.accountKey}"
                                 service.notification(
                                     type = currentType,
                                     scope = scope,

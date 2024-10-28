@@ -2090,6 +2090,38 @@ class BlueskyDataSource(
                         ),
                 ).requireResponse()
         }.isSuccess
+
+    override fun following(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiUserV2>> =
+        Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            FollowingPagingSource(
+                service = service,
+                userKey = userKey,
+                accountKey = accountKey,
+            )
+        }.flow.cachedIn(scope)
+
+    override fun fans(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiUserV2>> =
+        Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            FansPagingSource(
+                service = service,
+                userKey = userKey,
+                accountKey = accountKey,
+            )
+        }.flow.cachedIn(scope)
 }
 
 internal inline fun <reified T, reified R> T.bskyJson(): R = bskyJson.decodeFromJsonElement(bskyJson.encodeToJsonElement(this))

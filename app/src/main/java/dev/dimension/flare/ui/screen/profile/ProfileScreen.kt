@@ -74,6 +74,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
+import com.ramcosta.composedestinations.generated.destinations.DMScreenRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.EditAccountListRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ProfileMediaRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.SearchRouteDestination
@@ -83,11 +84,16 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Cat
 import compose.icons.fontawesomeicons.solid.CircleCheck
+import compose.icons.fontawesomeicons.solid.CircleExclamation
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Globe
+import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.LocationDot
 import compose.icons.fontawesomeicons.solid.Lock
+import compose.icons.fontawesomeicons.solid.Message
 import compose.icons.fontawesomeicons.solid.Robot
+import compose.icons.fontawesomeicons.solid.UserSlash
+import compose.icons.fontawesomeicons.solid.VolumeXmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.PagingState
@@ -167,46 +173,10 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     }
     state
         .onSuccess {
-            ProfileScreen(
+            ProfileRoute(
                 userKey = it.key,
-                onBack = {
-                    navigator.navigateUp()
-                },
-                onProfileMediaClick = {
-                    navigator.navigate(
-                        ProfileMediaRouteDestination(
-                            it.key,
-                            accountType = accountType,
-                        ),
-                    )
-                },
-                onMediaClick = { statusKey, index, preview ->
-                    navigator.navigate(
-                        StatusMediaRouteDestination(
-                            statusKey = statusKey,
-                            mediaIndex = index,
-                            preview = preview,
-                            accountType = accountType,
-                        ),
-                    )
-                },
+                navigator = navigator,
                 accountType = accountType,
-                toEditAccountList = {
-                    navigator.navigate(
-                        EditAccountListRouteDestination(
-                            accountType,
-                            it.key,
-                        ),
-                    )
-                },
-                toSearchUserUsingAccount = { handle, accountKey ->
-                    navigator.navigate(
-                        SearchRouteDestination(
-                            handle,
-                            AccountType.Specific(accountKey),
-                        ),
-                    )
-                },
             )
         }.onLoading {
             ProfileLoadingScreen(
@@ -247,41 +217,10 @@ internal fun ProfileWithUserNameAndHostRoute(
     }
     state
         .onSuccess {
-            ProfileScreen(
+            ProfileRoute(
                 userKey = it.key,
-                onBack = {
-                    navigator.navigateUp()
-                },
-                onProfileMediaClick = {
-                    navigator.navigate(
-                        ProfileMediaRouteDestination(
-                            it.key,
-                            accountType = accountType,
-                        ),
-                    )
-                },
-                onMediaClick = { statusKey, index, preview ->
-                    navigator.navigate(
-                        StatusMediaRouteDestination(
-                            statusKey = statusKey,
-                            mediaIndex = index,
-                            preview = preview,
-                            accountType = accountType,
-                        ),
-                    )
-                },
+                navigator = navigator,
                 accountType = accountType,
-                toEditAccountList = {
-                    navigator.navigate(EditAccountListRouteDestination(accountType, it.key))
-                },
-                toSearchUserUsingAccount = { handle, accountKey ->
-                    navigator.navigate(
-                        SearchRouteDestination(
-                            handle,
-                            AccountType.Specific(accountKey),
-                        ),
-                    )
-                },
             )
         }.onLoading {
             ProfileLoadingScreen(
@@ -307,9 +246,9 @@ internal fun MeRoute(
     accountType: AccountType,
 ) {
     ProfileRoute(
-        null,
-        navigator,
-        accountType,
+        userKey = null,
+        navigator = navigator,
+        accountType = accountType,
         showBackButton = false,
     )
 }
@@ -396,46 +335,10 @@ internal fun ProfileDeeplinkRoute(
     accountKey: MicroBlogKey?,
 ) {
     val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-    ProfileScreen(
+    ProfileRoute(
         userKey = userKey,
-        onBack = {
-            navigator.navigateUp()
-        },
-        onProfileMediaClick = {
-            navigator.navigate(
-                ProfileMediaRouteDestination(
-                    userKey,
-                    accountType = accountType,
-                ),
-            )
-        },
-        onMediaClick = { statusKey, index, preview ->
-            navigator.navigate(
-                StatusMediaRouteDestination(
-                    statusKey = statusKey,
-                    mediaIndex = index,
-                    preview = preview,
-                    accountType = accountType,
-                ),
-            )
-        },
+        navigator = navigator,
         accountType = accountType,
-        toEditAccountList = {
-            navigator.navigate(
-                EditAccountListRouteDestination(
-                    accountType,
-                    userKey,
-                ),
-            )
-        },
-        toSearchUserUsingAccount = { handle, accountKey ->
-            navigator.navigate(
-                SearchRouteDestination(
-                    handle,
-                    AccountType.Specific(accountKey),
-                ),
-            )
-        },
     )
 }
 
@@ -492,6 +395,11 @@ internal fun ProfileRoute(
                 ),
             )
         },
+        toStartMessage = {
+            navigator.navigate(
+                DMScreenRouteDestination(accountType = accountType, initialUserKey = it),
+            )
+        },
     )
 }
 
@@ -503,6 +411,7 @@ private fun ProfileScreen(
     accountType: AccountType,
     toEditAccountList: () -> Unit,
     toSearchUserUsingAccount: (String, MicroBlogKey) -> Unit,
+    toStartMessage: (MicroBlogKey) -> Unit,
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
     showBackButton: Boolean = true,
@@ -613,6 +522,7 @@ private fun ProfileScreen(
                                 toEditAccountList = toEditAccountList,
                                 accountsState = state.allAccountsState,
                                 toSearchUserUsingAccount = toSearchUserUsingAccount,
+                                toStartMessage = toStartMessage,
                             )
                         }
                     },
@@ -649,6 +559,7 @@ private fun ProfileScreen(
                                     toEditAccountList = toEditAccountList,
                                     accountsState = state.allAccountsState,
                                     toSearchUserUsingAccount = toSearchUserUsingAccount,
+                                    toStartMessage = toStartMessage,
                                 )
                             },
                             expandMatrices = true,
@@ -854,6 +765,7 @@ private fun ProfileMenu(
     showMoreMenus: Boolean,
     toEditAccountList: () -> Unit,
     toSearchUserUsingAccount: (String, MicroBlogKey) -> Unit,
+    toStartMessage: (MicroBlogKey) -> Unit,
 ) {
     profileState.isMe.onSuccess { isMe ->
         if (!isMe) {
@@ -863,7 +775,7 @@ private fun ProfileMenu(
                 }) {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.more),
                     )
                 }
                 DropdownMenu(
@@ -872,27 +784,59 @@ private fun ProfileMenu(
                 ) {
                     profileState.relationState.onSuccess { relation ->
                         if (!profileState.isGuestMode && relation.following) {
-                            profileState.userState.onSuccess { user ->
-                                profileState.isListDataSource.onSuccess { isListDataSource ->
-                                    if (isListDataSource) {
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(
-                                                    text =
-                                                        stringResource(
-                                                            id = R.string.user_follow_edit_list,
-                                                        ),
-                                                )
-                                            },
-                                            onClick = {
-                                                setShowMoreMenus(false)
-                                                toEditAccountList.invoke()
-                                            },
-                                        )
-                                    }
+                            profileState.isListDataSource.onSuccess { isListDataSource ->
+                                if (isListDataSource) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text =
+                                                    stringResource(
+                                                        id = R.string.user_follow_edit_list,
+                                                    ),
+                                            )
+                                        },
+                                        onClick = {
+                                            setShowMoreMenus(false)
+                                            toEditAccountList.invoke()
+                                        },
+                                        leadingIcon = {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.List,
+                                                contentDescription =
+                                                    stringResource(
+                                                        id = R.string.user_follow_edit_list,
+                                                    ),
+                                            )
+                                        },
+                                    )
                                 }
                             }
                         }
+                        profileState.canSendMessage.onSuccess {
+                            if (it) {
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = stringResource(id = R.string.user_send_message),
+                                        )
+                                    },
+                                    onClick = {
+                                        setShowMoreMenus(false)
+                                        toStartMessage.invoke(user.key)
+                                    },
+                                    leadingIcon = {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Message,
+                                            contentDescription =
+                                                stringResource(
+                                                    id = R.string.user_send_message,
+                                                ),
+                                        )
+                                    },
+                                )
+                            }
+                        }
+                        HorizontalDivider()
                         accountsState.accounts.onSuccess { accounts ->
                             profileState.myAccountKey.onSuccess { myKey ->
                                 if (accounts.size > 1) {
@@ -933,6 +877,7 @@ private fun ProfileMenu(
                                             }
                                         }
                                     }
+                                    HorizontalDivider()
                                 }
                             }
                         }
@@ -940,6 +885,19 @@ private fun ProfileMenu(
                             for (i in 0..<actions.size) {
                                 val action = actions[i]
                                 DropdownMenuItem(
+                                    leadingIcon = {
+                                        FAIcon(
+                                            imageVector =
+                                                when (action) {
+                                                    is ProfileAction.Block ->
+                                                        FontAwesomeIcons.Solid.UserSlash
+
+                                                    is ProfileAction.Mute ->
+                                                        FontAwesomeIcons.Solid.VolumeXmark
+                                                },
+                                            contentDescription = null,
+                                        )
+                                    },
                                     text = {
                                         val text =
                                             when (action) {
@@ -991,6 +949,18 @@ private fun ProfileMenu(
                                         id = R.string.user_report,
                                         user.handle,
                                     ),
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        },
+                        leadingIcon = {
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.CircleExclamation,
+                                contentDescription =
+                                    stringResource(
+                                        id = R.string.user_report,
+                                        user.handle,
+                                    ),
+                                tint = MaterialTheme.colorScheme.error,
                             )
                         },
                         onClick = {

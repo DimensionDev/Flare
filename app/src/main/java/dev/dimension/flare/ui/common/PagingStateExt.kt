@@ -15,11 +15,24 @@ fun <T : Any> LazyListScope.items(
     errorContent: @Composable LazyItemScope.(Throwable) -> Unit = {},
     loadingContent: @Composable LazyItemScope.() -> Unit = {},
     loadingCount: Int = 10,
+    key: (PagingState.Success<T>.(index: Int) -> Any)? = null,
+    contentType: PagingState.Success<T>.(index: Int) -> Any? = { null },
     itemContent: @Composable LazyItemScope.(T) -> Unit,
 ) {
     state
         .onSuccess {
-            items(itemCount) { index ->
+            items(
+                count = itemCount,
+                key =
+                    key?.let {
+                        {
+                            it(this, it)
+                        }
+                    },
+                contentType = {
+                    contentType(this, it)
+                },
+            ) { index ->
                 val item = get(index)
                 if (item != null) {
                     itemContent(item)

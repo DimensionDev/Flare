@@ -86,6 +86,11 @@ private val bottomBarHeight = 56.dp
 
 val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { bottomBarHeight }
 
+internal data class BottomBarSettings(
+    val autoHide: Boolean = true,
+    val withDivider: Boolean = true,
+)
+
 @OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterial3AdaptiveNavigationSuiteApi
 @Composable
@@ -95,6 +100,8 @@ fun NavigationSuiteScaffold2(
     modifier: Modifier = Modifier,
     drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed),
     drawerGesturesEnabled: Boolean = true,
+    bottomBarAutoHideEnabled: Boolean = true,
+    bottomBarDividerEnabled: Boolean = true,
     layoutType: NavigationSuiteType =
         NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo()),
     navigationSuiteColors: NavigationSuiteColors = NavigationSuiteDefaults.colors(),
@@ -131,7 +138,13 @@ fun NavigationSuiteScaffold2(
     Surface(
         modifier =
             modifier
-                .nestedScroll(nestedScrollConnection),
+                .let {
+                    if (bottomBarAutoHideEnabled) {
+                        it.nestedScroll(nestedScrollConnection)
+                    } else {
+                        it
+                    }
+                },
         color = containerColor,
         contentColor = contentColor,
     ) {
@@ -245,14 +258,16 @@ fun NavigationSuiteScaffold2(
                             contentColor = navigationSuiteColors.navigationBarContentColor,
                         ) {
                             Box {
-                                HorizontalDivider(
-                                    modifier =
-                                        Modifier
-                                            .align(Alignment.TopCenter)
-                                            .fillMaxWidth(),
-                                    color = FlareDividerDefaults.color,
-                                    thickness = FlareDividerDefaults.thickness,
-                                )
+                                if (bottomBarDividerEnabled) {
+                                    HorizontalDivider(
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.TopCenter)
+                                                .fillMaxWidth(),
+                                        color = FlareDividerDefaults.color,
+                                        thickness = FlareDividerDefaults.thickness,
+                                    )
+                                }
                                 Row(
                                     modifier =
                                         Modifier

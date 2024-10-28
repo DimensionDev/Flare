@@ -6,25 +6,19 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
-import dev.dimension.flare.data.database.cache.model.PAGING_TIMELINE_VIEW
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.model.MicroBlogKey
 
 @Dao
 interface PagingTimelineDao {
-//    @Transaction
-//    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountKey = :accountKey ORDER BY sortId DESC")
-//    fun getPagingSource(
-//        pagingKey: String,
-//        accountKey: MicroBlogKey,
-//    ): PagingSource<Int, DbPagingTimelineWithStatus>
-
-    @Query("SELECT * FROM $PAGING_TIMELINE_VIEW WHERE pagingKey = :pagingKey AND accountKey = :accountKey ORDER BY sortId DESC")
-    fun getDbPagingTimelineView(
+    @Transaction
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountKey = :accountKey ORDER BY sortId DESC")
+    fun getPagingSource(
         pagingKey: String,
         accountKey: MicroBlogKey,
-    ): PagingSource<Int, DbPagingTimelineView>
+    ): PagingSource<Int, DbPagingTimelineWithStatus>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(timeline: List<DbPagingTimeline>)

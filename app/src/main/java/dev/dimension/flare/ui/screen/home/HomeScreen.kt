@@ -67,6 +67,7 @@ import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationSty
 import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.generated.destinations.BlueskyFeedsRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.DMScreenRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.DiscoverRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.HomeTimelineRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ListScreenRouteDestination
@@ -76,6 +77,7 @@ import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRout
 import com.ramcosta.composedestinations.generated.destinations.SettingsRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.TimelineRouteDestination
 import com.ramcosta.composedestinations.navigation.DependenciesContainerBuilder
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.spec.Direction
 import com.ramcosta.composedestinations.spec.NavHostGraphSpec
@@ -90,6 +92,7 @@ import compose.icons.fontawesomeicons.solid.Pen
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.Bluesky
+import dev.dimension.flare.data.model.DirectMessageTabItem
 import dev.dimension.flare.data.model.DiscoverTabItem
 import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.NotificationTabItem
@@ -114,6 +117,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
+import dev.dimension.flare.ui.presenter.home.DirectMessageBadgePresenter
 import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
@@ -140,6 +144,7 @@ import soup.compose.material.motion.animation.rememberSlideDistance
 
 data class RootNavController(
     val navController: NavController,
+    val navigator: DestinationsNavigator = navController.toDestinationsNavigator(),
 )
 
 @OptIn(
@@ -188,6 +193,8 @@ internal fun HomeScreen(
                 ) {
                     NavigationSuiteScaffold2(
                         modifier = Modifier.fillMaxSize(),
+                        bottomBarDividerEnabled = state.navigationState.bottomBarDividerEnabled,
+                        bottomBarAutoHideEnabled = state.navigationState.bottomBarAutoHideEnabled,
                         layoutType = actualLayoutType,
                         drawerHeader = {
                             DrawerHeader(
@@ -644,6 +651,7 @@ private fun getDirection(
 
         is AllListTabItem -> ListScreenRouteDestination(accountType)
         is Bluesky.FeedsTabItem -> BlueskyFeedsRouteDestination(accountType)
+        is DirectMessageTabItem -> DMScreenRouteDestination(accountType)
     }
 
 @Composable
@@ -743,7 +751,8 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
                             UiState.Success(
                                 HomeTabState(
                                     primary =
-                                        TimelineTabItem.default
+                                        TimelineTabItem
+                                            .defaultPrimary(user)
                                             .map {
                                                 HomeTabItem(it)
                                             }.toImmutableList(),
@@ -799,12 +808,16 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
                         primary =
                             it.primary
                                 .map {
-                                    if (it.tabItem is NotificationTabItem) {
-                                        it.copy(
-                                            badgeCountState = notificationBadgePresenter(it.tabItem.account),
-                                        )
-                                    } else {
-                                        it
+                                    when (it.tabItem) {
+                                        is NotificationTabItem ->
+                                            it.copy(
+                                                badgeCountState = notificationBadgePresenter(it.tabItem.account),
+                                            )
+                                        is DirectMessageTabItem ->
+                                            it.copy(
+                                                badgeCountState = directMessageBadgePresenter(it.tabItem.account),
+                                            )
+                                        else -> it
                                     }
                                 }.toImmutableList(),
                     )
@@ -833,6 +846,15 @@ private fun notificationBadgePresenter(accountType: AccountType): UiState<Int> {
     val presenter =
         remember(accountType) {
             NotificationBadgePresenter(accountType)
+        }.invoke()
+    return presenter.count
+}
+
+@Composable
+private fun directMessageBadgePresenter(accountType: AccountType): UiState<Int> {
+    val presenter =
+        remember(accountType) {
+            DirectMessageBadgePresenter(accountType)
         }.invoke()
     return presenter.count
 }
@@ -884,11 +906,17 @@ private class TabState {
 internal class NavigationState {
     private val state = mutableStateOf<NavigationSuiteType?>(null)
     private val drawerState = mutableStateOf(true)
+    private val bottomBarAutoHideState = mutableStateOf(true)
+    private val bottomBarDividerState = mutableStateOf(true)
     val type: NavigationSuiteType?
         get() = state.value
 
     val drawerEnabled: Boolean
         get() = drawerState.value
+    val bottomBarAutoHideEnabled: Boolean
+        get() = bottomBarAutoHideState.value
+    val bottomBarDividerEnabled: Boolean
+        get() = bottomBarDividerState.value
 
     fun hide() {
         state.value = NavigationSuiteType.None
@@ -904,6 +932,22 @@ internal class NavigationState {
 
     fun disableDrawer() {
         drawerState.value = false
+    }
+
+    fun enableBottomBarAutoHide() {
+        bottomBarAutoHideState.value = true
+    }
+
+    fun disableBottomBarAutoHide() {
+        bottomBarAutoHideState.value = false
+    }
+
+    fun showBottomBarDivider() {
+        bottomBarDividerState.value = true
+    }
+
+    fun hideBottomBarDivider() {
+        bottomBarDividerState.value = false
     }
 }
 

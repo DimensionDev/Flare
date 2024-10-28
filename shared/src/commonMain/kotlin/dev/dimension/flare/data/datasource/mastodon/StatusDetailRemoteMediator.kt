@@ -7,7 +7,7 @@ import androidx.paging.RemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Mastodon
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.firstOrNull
@@ -21,10 +21,10 @@ internal class StatusDetailRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val statusOnly: Boolean,
-) : RemoteMediator<Int, DbPagingTimelineView>() {
+) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineView>,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
         return try {
             if (loadType != LoadType.REFRESH) {

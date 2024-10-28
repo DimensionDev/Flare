@@ -9,7 +9,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.Required
@@ -23,12 +23,12 @@ internal class UserTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
-) : RemoteMediator<Int, DbPagingTimelineView>() {
+) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     private var cursor: String? = null
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineView>,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
         return try {
             val response =

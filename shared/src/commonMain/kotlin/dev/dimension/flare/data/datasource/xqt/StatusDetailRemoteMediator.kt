@@ -10,7 +10,7 @@ import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.xqt.XQTService
@@ -33,13 +33,13 @@ internal class StatusDetailRemoteMediator(
     private val event: StatusEvent.XQT,
     private val pagingKey: String,
     private val statusOnly: Boolean,
-) : RemoteMediator<Int, DbPagingTimelineView>() {
+) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     private var cursor: String? = null
     private var actualId: String? = null
 
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineView>,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult =
         try {
             if (loadType == LoadType.REFRESH) {

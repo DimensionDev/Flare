@@ -12,7 +12,7 @@ import app.bsky.feed.ThreadViewPostReplieUnion
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.persistentListOf
@@ -28,10 +28,10 @@ internal class StatusDetailRemoteMediator(
     private val database: CacheDatabase,
     private val pagingKey: String,
     private val statusOnly: Boolean,
-) : RemoteMediator<Int, DbPagingTimelineView>() {
+) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     override suspend fun load(
         loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineView>,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
         return try {
             if (loadType != LoadType.REFRESH) {

@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.model.mapper
 import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimelineWithRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageItemWithUser
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineView
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
@@ -18,17 +18,14 @@ import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.Instant
 
-internal fun DbPagingTimelineView.render(event: StatusEvent): UiTimeline =
-    status_content.render(
+internal fun DbPagingTimelineWithStatus.render(event: StatusEvent): UiTimeline =
+    status.status.data.content.render(
         timeline.accountKey,
         event,
         references =
-            listOfNotNull(
-                retweet_status_content?.let { ReferenceType.Retweet to it },
-                quote_status_content?.let { ReferenceType.Quote to it },
-                reply_status_content?.let { ReferenceType.Reply to it },
-                notification_status_content?.let { ReferenceType.Notification to it },
-            ).toMap(),
+            status.references
+                .map { it.reference.referenceType to it.status.data.content }
+                .toMap(),
     )
 
 internal fun StatusContent.render(

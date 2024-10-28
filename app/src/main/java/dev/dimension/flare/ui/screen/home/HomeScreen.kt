@@ -77,6 +77,7 @@ import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRout
 import com.ramcosta.composedestinations.generated.destinations.SettingsRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.TimelineRouteDestination
 import com.ramcosta.composedestinations.navigation.DependenciesContainerBuilder
+import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.navigation.dependency
 import com.ramcosta.composedestinations.spec.Direction
 import com.ramcosta.composedestinations.spec.NavHostGraphSpec
@@ -143,6 +144,7 @@ import soup.compose.material.motion.animation.rememberSlideDistance
 
 data class RootNavController(
     val navController: NavController,
+    val navigator: DestinationsNavigator = navController.toDestinationsNavigator(),
 )
 
 @OptIn(

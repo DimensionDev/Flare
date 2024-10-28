@@ -116,6 +116,15 @@ internal fun DMScreenRoute(
             AnimatedPane {
                 scaffoldNavigator.currentDestination?.content?.let { args ->
                     if (args.isUserKey) {
+                        UserDMConversationScreen(
+                            accountType = accountType,
+                            userKey = MicroBlogKey.valueOf(args.key),
+                            onBack = scaffoldNavigator::navigateBack,
+                            navigationState = navigationState,
+                            toProfile = {
+                                navigator.navigate(ProfileRouteDestination(userKey = it, accountType = accountType))
+                            },
+                        )
                     } else {
                         DMConversationScreen(
                             accountType = accountType,

@@ -49,7 +49,7 @@ Here're some features we're planning to implement in the future, you can check t
 ### Bluesky
  - [x] Support for lists
  - [x] Support for feeds
- - [ ] Support DM
+ - [x] Support DM
 
 ## Building
 ### Android

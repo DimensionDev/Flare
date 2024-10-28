@@ -76,6 +76,8 @@ import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
 import com.ramcosta.composedestinations.generated.destinations.DMScreenRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.EditAccountListRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.FansScreenDestination
+import com.ramcosta.composedestinations.generated.destinations.FollowingScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.ProfileMediaRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.SearchRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
@@ -400,6 +402,22 @@ internal fun ProfileRoute(
                 DMScreenRouteDestination(accountType = accountType, initialUserKey = it),
             )
         },
+        onFollowListClick = {
+            navigator.navigate(
+                FollowingScreenDestination(
+                    userKey = it,
+                    accountType = accountType,
+                ),
+            )
+        },
+        onFansListClick = {
+            navigator.navigate(
+                FansScreenDestination(
+                    userKey = it,
+                    accountType = accountType,
+                ),
+            )
+        },
     )
 }
 
@@ -412,6 +430,8 @@ private fun ProfileScreen(
     toEditAccountList: () -> Unit,
     toSearchUserUsingAccount: (String, MicroBlogKey) -> Unit,
     toStartMessage: (MicroBlogKey) -> Unit,
+    onFollowListClick: (userKey: MicroBlogKey) -> Unit,
+    onFansListClick: (userKey: MicroBlogKey) -> Unit,
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
     showBackButton: Boolean = true,
@@ -574,6 +594,8 @@ private fun ProfileScreen(
                                 }
                             },
                             isBigScreen = bigScreen,
+                            onFollowListClick = onFollowListClick,
+                            onFansListClick = onFansListClick,
                         )
                     }
                 }
@@ -689,6 +711,8 @@ private fun ProfileScreen(
                                             }
                                         },
                                         isBigScreen = bigScreen,
+                                        onFollowListClick = onFollowListClick,
+                                        onFansListClick = onFansListClick,
                                     )
                                 }
                             },
@@ -985,6 +1009,8 @@ private fun ProfileHeader(
     menu: @Composable RowScope.() -> Unit,
     expandMatrices: Boolean,
     isBigScreen: Boolean,
+    onFollowListClick: (userKey: MicroBlogKey) -> Unit,
+    onFansListClick: (userKey: MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     when (userState) {
@@ -1008,6 +1034,8 @@ private fun ProfileHeader(
                 onAvatarClick = onAvatarClick,
                 onBannerClick = onBannerClick,
                 isBigScreen = isBigScreen,
+                onFollowListClick = onFollowListClick,
+                onFansListClick = onFansListClick,
             )
         }
     }
@@ -1023,6 +1051,8 @@ private fun ProfileHeaderSuccess(
     isMe: UiState<Boolean>,
     menu: @Composable RowScope.() -> Unit,
     isBigScreen: Boolean,
+    onFollowListClick: (userKey: MicroBlogKey) -> Unit,
+    onFansListClick: (userKey: MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
     expandMatrices: Boolean = false,
 ) {
@@ -1193,6 +1223,12 @@ private fun ProfileHeaderSuccess(
                             )
                         },
                     expanded = expandMatrices,
+                    onClicked = {
+                        when (it) {
+                            1 -> onFollowListClick.invoke(user.key)
+                            2 -> onFansListClick.invoke(user.key)
+                        }
+                    },
                 )
             }
         },

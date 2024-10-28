@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.repository.accountProvider
@@ -158,8 +159,13 @@ class ComposePresenter(
             remember(services) {
                 services.merge().map {
                     it
-                        .map { it.composeConfig(statusKey = status?.statusKey) }
-                        .reduceOrNull { acc, config -> acc.merge(config) } ?: ComposeConfig()
+                        .mapNotNull {
+                            if (it is AuthenticatedMicroblogDataSource) {
+                                it.composeConfig(statusKey = status?.statusKey)
+                            } else {
+                                null
+                            }
+                        }.reduceOrNull { acc, config -> acc.merge(config) } ?: ComposeConfig()
                 }
             }
 

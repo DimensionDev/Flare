@@ -10,28 +10,23 @@ import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.UserContent
+import dev.dimension.flare.data.datasource.mastodon.MastodonFansPagingSource
+import dev.dimension.flare.data.datasource.mastodon.MastodonFollowingPagingSource
 import dev.dimension.flare.data.datasource.mastodon.SearchUserPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendHashtagPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendsUserPagingSource
-import dev.dimension.flare.data.datasource.microblog.ComposeConfig
-import dev.dimension.flare.data.datasource.microblog.ComposeData
-import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
-import dev.dimension.flare.data.datasource.microblog.NotificationFilter
-import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
+import dev.dimension.flare.ui.model.mapper.renderGuest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -47,18 +42,6 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         Pager(PagingConfig(pageSize = pageSize)) {
             GuestTimelinePagingSource(host = GuestMastodonService.HOST)
         }.flow.cachedIn(scope)
-
-    override fun notification(
-        type: NotificationFilter,
-        pageSize: Int,
-        pagingKey: String,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> {
-        TODO("Not yet implemented")
-    }
-
-    override val supportedNotificationFilter: List<NotificationFilter>
-        get() = emptyList()
 
     override fun userByAcct(acct: String): CacheData<UiUserV2> {
         val (name, host) = MicroBlogKey.valueOf(acct)
@@ -109,8 +92,6 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         )
     }
 
-    override fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>> = flowOf(UiState.Error(Exception("Not implemented")))
-
     override fun userTimeline(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
@@ -148,18 +129,9 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                 GuestMastodonService
                     .lookupStatus(
                         statusKey.id,
-                    ).render(GuestMastodonService.HOST, null, null)
+                    ).renderGuest(GuestMastodonService.HOST)
             },
         )
-    }
-
-    override suspend fun compose(
-        data: ComposeData,
-        progress: (ComposeProgress) -> Unit,
-    ) {
-    }
-
-    override suspend fun deleteStatus(statusKey: MicroBlogKey) {
     }
 
     override fun searchStatus(
@@ -217,14 +189,37 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
             )
         }.flow
 
-    override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig = ComposeConfig()
-
-    override suspend fun follow(
+    override fun following(
         userKey: MicroBlogKey,
-        relation: UiRelation,
-    ) {
-        TODO("Not yet implemented")
-    }
+        scope: CoroutineScope,
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiUserV2>> =
+        Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            MastodonFollowingPagingSource(
+                service = GuestMastodonService,
+                host = GuestMastodonService.HOST,
+                userKey = userKey,
+                accountKey = null,
+            )
+        }.flow.cachedIn(scope)
 
-    override fun profileActions(): List<ProfileAction> = emptyList()
+    override fun fans(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiUserV2>> =
+        Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            MastodonFansPagingSource(
+                service = GuestMastodonService,
+                host = GuestMastodonService.HOST,
+                userKey = userKey,
+                accountKey = null,
+            )
+        }.flow.cachedIn(scope)
 }

@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.component
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -20,6 +21,7 @@ import kotlinx.collections.immutable.ImmutableMap
 @Composable
 internal fun MatricesDisplay(
     matrices: ImmutableMap<Int, String>,
+    onClicked: (index: Int) -> Unit,
     modifier: Modifier = Modifier,
     expanded: Boolean = false,
 ) {
@@ -30,7 +32,12 @@ internal fun MatricesDisplay(
         ) {
             matrices.onEachIndexed { index, (resId, text) ->
                 Column(
-                    modifier = Modifier.weight(1f),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .clickable {
+                                onClicked.invoke(index)
+                            },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
@@ -53,10 +60,14 @@ internal fun MatricesDisplay(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            matrices.forEach { (resId, text) ->
+            matrices.onEachIndexed { index, (resId, text) ->
                 Text(
                     text = stringResource(resId, text),
                     style = MaterialTheme.typography.bodySmall,
+                    modifier =
+                        Modifier.clickable {
+                            onClicked.invoke(index)
+                        },
                 )
             }
         }

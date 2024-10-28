@@ -2,41 +2,24 @@ package dev.dimension.flare.data.datasource.microblog
 
 import androidx.paging.PagingData
 import dev.dimension.flare.common.CacheData
-import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 
 interface MicroblogDataSource {
-//    val account: UiAccount
-
     fun homeTimeline(
         pageSize: Int = 20,
         pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>>
 
-    fun notification(
-        type: NotificationFilter = NotificationFilter.All,
-        pageSize: Int = 20,
-        pagingKey: String,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>>
-
-    val supportedNotificationFilter: List<NotificationFilter>
-
     fun userByAcct(acct: String): CacheData<UiUserV2>
 
     fun userById(id: String): CacheData<UiProfile>
-
-    fun relation(userKey: MicroBlogKey): Flow<UiState<UiRelation>>
 
     fun userTimeline(
         userKey: MicroBlogKey,
@@ -54,13 +37,6 @@ interface MicroblogDataSource {
     ): Flow<PagingData<UiTimeline>>
 
     fun status(statusKey: MicroBlogKey): CacheData<UiTimeline>
-
-    suspend fun compose(
-        data: ComposeData,
-        progress: (ComposeProgress) -> Unit,
-    )
-
-    suspend fun deleteStatus(statusKey: MicroBlogKey)
 
     fun searchStatus(
         query: String,
@@ -85,35 +61,17 @@ interface MicroblogDataSource {
 
     fun discoverHashtags(pageSize: Int = 20): Flow<PagingData<UiHashtag>>
 
-    fun composeConfig(statusKey: MicroBlogKey? = null): ComposeConfig
-
-    fun profileActions(): List<ProfileAction>
-
-    suspend fun follow(
+    fun following(
         userKey: MicroBlogKey,
-        relation: UiRelation,
-    )
+        scope: CoroutineScope,
+        pageSize: Int = 20,
+        pagingKey: String = "following_$userKey",
+    ): Flow<PagingData<UiUserV2>>
 
-    fun notificationBadgeCount(): CacheData<Int> = Cacheable({ }, { flowOf(0) })
+    fun fans(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pageSize: Int = 20,
+        pagingKey: String = "fans_$userKey",
+    ): Flow<PagingData<UiUserV2>>
 }
-
-interface AuthenticatedMicroblogDataSource : MicroblogDataSource {
-    val accountKey: MicroBlogKey
-}
-
-data class ComposeProgress(
-    val progress: Int,
-    val total: Int,
-) {
-    val percent: Double
-        get() = progress.toDouble() / total.toDouble()
-}
-
-enum class NotificationFilter {
-    All,
-    Mention,
-    Comment,
-    Like,
-}
-
-fun AuthenticatedMicroblogDataSource.relationKeyWithUserKey(userKey: MicroBlogKey) = "relation:$accountKey:$userKey"

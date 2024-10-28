@@ -4,7 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.mapper.render
+import dev.dimension.flare.ui.model.mapper.renderGuest
 
 internal class GuestDiscoverStatusPagingSource(
     private val host: String,
@@ -20,7 +20,7 @@ internal class GuestDiscoverStatusPagingSource(
                 )
 
             LoadResult.Page(
-                data = result.map { it.render(host = host, accountKey = null, event = null) },
+                data = result.map { it.renderGuest(host = host) },
                 prevKey = null,
                 nextKey = result.size + (params.key ?: 0),
             )

@@ -686,4 +686,7 @@
 
     <string name="notification_login_expired">Login expired, please login again</string>
 
+    <string name="following_title">Following</string>
+    <string name="fans_title">Follower</string>
+
 </resources>

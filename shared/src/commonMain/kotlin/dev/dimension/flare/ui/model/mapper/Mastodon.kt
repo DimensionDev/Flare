@@ -35,6 +35,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Instant
+import kotlin.collections.orEmpty
 
 internal fun Notification.render(
     accountKey: MicroBlogKey,
@@ -121,6 +122,20 @@ internal fun Notification.render(
         platformType = PlatformType.Mastodon,
     )
 }
+
+internal fun Status.renderGuest(host: String) =
+    render(
+        host = host,
+        accountKey = null,
+        event = null,
+        references =
+            reblog
+                ?.let { reblog ->
+                    mapOf(
+                        ReferenceType.Retweet to StatusContent.Mastodon(reblog),
+                    )
+                }.orEmpty(),
+    )
 
 internal fun Status.render(
     host: String,

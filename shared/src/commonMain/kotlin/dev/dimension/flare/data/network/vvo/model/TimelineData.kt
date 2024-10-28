@@ -20,8 +20,10 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.floatOrNull
+import kotlinx.serialization.json.longOrNull
 
 @Serializable
 internal data class VVOResponse<T>(
@@ -381,7 +383,8 @@ internal data class User(
     val mbrank: Long? = null,
     @SerialName("follow_me")
     val followMe: Boolean? = null,
-    val following: Boolean? = null,
+    @SerialName("following")
+    val following_: JsonPrimitive? = null,
     @SerialName("follow_count")
     val followCount: Long? = null,
     @SerialName("followers_count")
@@ -398,7 +401,10 @@ internal data class User(
     val badge: Map<String, Long>? = null,
     @SerialName("special_follow")
     val specialFollow: Boolean? = null,
-)
+) {
+    val following: Boolean
+        get() = following_?.booleanOrNull ?: following_?.longOrNull?.let { it != 0L } ?: false
+}
 
 @Serializable
 internal data class Visible(

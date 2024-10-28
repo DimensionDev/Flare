@@ -2,10 +2,12 @@ package dev.dimension.flare.data.network.mastodon
 
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.network.ktorfit
+import dev.dimension.flare.data.network.mastodon.api.AccountResources
 import dev.dimension.flare.data.network.mastodon.api.LookupResources
 import dev.dimension.flare.data.network.mastodon.api.SearchResources
 import dev.dimension.flare.data.network.mastodon.api.TimelineResources
 import dev.dimension.flare.data.network.mastodon.api.TrendsResources
+import dev.dimension.flare.data.network.mastodon.api.createAccountResources
 import dev.dimension.flare.data.network.mastodon.api.createLookupResources
 import dev.dimension.flare.data.network.mastodon.api.createSearchResources
 import dev.dimension.flare.data.network.mastodon.api.createTimelineResources
@@ -39,6 +41,7 @@ internal object GuestMastodonService :
     TrendsResources by config(BASEURL).createTrendsResources(),
     LookupResources by config(BASEURL).createLookupResources(),
     TimelineResources by config(BASEURL).createTimelineResources(),
+    AccountResources by config(BASEURL).createAccountResources(),
     SearchResources by config(BASEURL).createSearchResources() {
     const val HOST = "mastodon.social"
 

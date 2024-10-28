@@ -1254,4 +1254,38 @@ class MastodonDataSource(
             }
         }
     }
+
+    override fun following(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiUserV2>> =
+        Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            MastodonFollowingPagingSource(
+                service = service,
+                host = accountKey.host,
+                userKey = userKey,
+                accountKey = accountKey,
+            )
+        }.flow.cachedIn(scope)
+
+    override fun fans(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiUserV2>> =
+        Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            MastodonFansPagingSource(
+                service = service,
+                host = accountKey.host,
+                userKey = userKey,
+                accountKey = accountKey,
+            )
+        }.flow.cachedIn(scope)
 }

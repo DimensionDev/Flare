@@ -10,6 +10,8 @@ import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.model.UserContent
+import dev.dimension.flare.data.datasource.mastodon.MastodonFansPagingSource
+import dev.dimension.flare.data.datasource.mastodon.MastodonFollowingPagingSource
 import dev.dimension.flare.data.datasource.mastodon.SearchUserPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendHashtagPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendsUserPagingSource
@@ -186,4 +188,38 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                 GuestMastodonService,
             )
         }.flow
+
+    override fun following(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiUserV2>> =
+        Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            MastodonFollowingPagingSource(
+                service = GuestMastodonService,
+                host = GuestMastodonService.HOST,
+                userKey = userKey,
+                accountKey = null,
+            )
+        }.flow.cachedIn(scope)
+
+    override fun fans(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pageSize: Int,
+        pagingKey: String,
+    ): Flow<PagingData<UiUserV2>> =
+        Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            MastodonFansPagingSource(
+                service = GuestMastodonService,
+                host = GuestMastodonService.HOST,
+                userKey = userKey,
+                accountKey = null,
+            )
+        }.flow.cachedIn(scope)
 }

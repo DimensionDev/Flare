@@ -60,4 +60,18 @@ interface MicroblogDataSource {
     ): Flow<PagingData<UiTimeline>>
 
     fun discoverHashtags(pageSize: Int = 20): Flow<PagingData<UiHashtag>>
+
+    fun following(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pageSize: Int = 20,
+        pagingKey: String = "following_$userKey",
+    ): Flow<PagingData<UiUserV2>>
+
+    fun fans(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pageSize: Int = 20,
+        pagingKey: String = "fans_$userKey",
+    ): Flow<PagingData<UiUserV2>>
 }

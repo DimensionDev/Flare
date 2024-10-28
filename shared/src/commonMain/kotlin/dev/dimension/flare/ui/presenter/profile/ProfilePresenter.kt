@@ -91,7 +91,6 @@ class ProfilePresenter(
                 }.collectAsUiState().value.flatMap { it }
             }
 
-//        val scope = koinInject<CoroutineScope>()
         val isMe =
             accountServiceState.map {
                 if (it is AuthenticatedMicroblogDataSource) {
@@ -177,28 +176,6 @@ class ProfilePresenter(
                     }
                 }
             }
-//
-//            override fun block(
-//                user: UiUser,
-//                data: UiRelation,
-//            ) {
-//                scope.launch {
-//                    accountServiceState.onSuccess { service ->
-//                        service.block(user.userKey, data)
-//                    }
-//                }
-//            }
-//
-//            override fun mute(
-//                user: UiUser,
-//                data: UiRelation,
-//            ) {
-//                scope.launch {
-//                    accountServiceState.onSuccess { service ->
-//                        service.mute(user.userKey, data)
-//                    }
-//                }
-//            }
 
             override fun report(userKey: MicroBlogKey) {
             }
@@ -224,16 +201,6 @@ abstract class ProfileState(
         userKey: MicroBlogKey,
         data: UiRelation,
     )
-//
-//    abstract fun block(
-//        user: UiUser,
-//        data: UiRelation,
-//    )
-//
-//    abstract fun mute(
-//        user: UiUser,
-//        data: UiRelation,
-//    )
 
     abstract fun onProfileActionClick(
         userKey: MicroBlogKey,

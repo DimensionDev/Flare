@@ -128,6 +128,7 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -137,11 +138,12 @@ import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
-import dev.dimension.flare.ui.presenter.settings.AccountsState
 import dev.dimension.flare.ui.screen.home.RegisterTabCallback
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentMapOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import moe.tlaster.nestedscrollview.VerticalNestedScrollView
 import moe.tlaster.nestedscrollview.rememberNestedScrollViewState
@@ -784,7 +786,7 @@ private fun ProfileMediaTab(
 @Composable
 private fun ProfileMenu(
     profileState: ProfileState,
-    accountsState: AccountsState,
+    accountsState: UiState<Map<PlatformType, ImmutableList<UiState<UiProfile>>>>,
     setShowMoreMenus: (Boolean) -> Unit,
     showMoreMenus: Boolean,
     toEditAccountList: () -> Unit,
@@ -860,44 +862,51 @@ private fun ProfileMenu(
                                 )
                             }
                         }
-                        HorizontalDivider()
-                        accountsState.accounts.onSuccess { accounts ->
+                        accountsState.onSuccess { accounts ->
                             profileState.myAccountKey.onSuccess { myKey ->
                                 if (accounts.size > 1) {
-                                    for (i in 0 until accounts.size) {
-                                        val account = accounts[i]
-                                        account.second.onSuccess { accountData ->
-                                            if (accountData.key != user.key &&
-                                                accountData.key != myKey &&
-                                                accountData.platformType != user.platformType
-                                            ) {
-                                                DropdownMenuItem(
-                                                    text = {
-                                                        Text(
-                                                            text =
-                                                                stringResource(
-                                                                    id = R.string.profile_search_user_using_account,
-                                                                    user.handleWithoutAtAndHost,
-                                                                    accountData.platformType.name,
-                                                                    accountData.handleWithoutAt,
-                                                                ),
-                                                        )
-                                                    },
-                                                    onClick = {
-                                                        setShowMoreMenus(false)
-                                                        val actualHandle =
-                                                            if (accountData.platformType == PlatformType.Bluesky) {
-                                                                user.handleWithoutAtAndHost
-                                                                    .replace("_", "")
-                                                            } else {
-                                                                user.handleWithoutAtAndHost
-                                                            }
-                                                        toSearchUserUsingAccount(
-                                                            actualHandle,
-                                                            accountData.key,
-                                                        )
-                                                    },
-                                                )
+                                    accounts.forEach { (_, value) ->
+                                        value.forEach { account ->
+                                            account.onSuccess { accountData ->
+                                                if (accountData.key != user.key &&
+                                                    accountData.key != myKey &&
+                                                    accountData.platformType != user.platformType
+                                                ) {
+                                                    DropdownMenuItem(
+                                                        text = {
+                                                            Text(
+                                                                text =
+                                                                    if (value.size == 1) {
+                                                                        stringResource(
+                                                                            id = R.string.profile_search_user_using_account_compat,
+                                                                            accountData.platformType.name,
+                                                                        )
+                                                                    } else {
+                                                                        stringResource(
+                                                                            id = R.string.profile_search_user_using_account,
+                                                                            user.handleWithoutAtAndHost,
+                                                                            accountData.platformType.name,
+                                                                            accountData.handleWithoutAt,
+                                                                        )
+                                                                    },
+                                                            )
+                                                        },
+                                                        onClick = {
+                                                            setShowMoreMenus(false)
+                                                            val actualHandle =
+                                                                if (accountData.platformType == PlatformType.Bluesky) {
+                                                                    user.handleWithoutAtAndHost
+                                                                        .replace("_", "")
+                                                                } else {
+                                                                    user.handleWithoutAtAndHost
+                                                                }
+                                                            toSearchUserUsingAccount(
+                                                                actualHandle,
+                                                                accountData.key,
+                                                            )
+                                                        },
+                                                    )
+                                                }
                                             }
                                         }
                                     }
@@ -1571,7 +1580,14 @@ private fun profilePresenter(
         }.invoke()
     object {
         val state = state
-        val allAccountsState = allAccounts
+        val allAccountsState =
+            allAccounts.accounts.map {
+                it
+                    .toImmutableList()
+                    .groupBy { it.first.platformType }
+                    .map { it.key to (it.value.map { it.second }.toImmutableList()) }
+                    .toMap()
+            }
         val showMoreMenus = showMoreMenus
         val isRefreshing = isRefreshing
         val profileTabs = profileTabs

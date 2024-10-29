@@ -115,13 +115,13 @@ internal fun AccountsScreen(
 
                 is UiState.Success -> {
                     items(accountState.data.size) { index ->
-                        val (accountKey, data) = accountState.data[index]
+                        val (account, data) = accountState.data[index]
                         SwipeToDismissBox(
                             state =
                                 rememberSwipeToDismissBoxState(
                                     confirmValueChange = {
                                         if (it == SwipeToDismissBoxValue.EndToStart) {
-                                            state.removeAccount(accountKey)
+                                            state.removeAccount(account.accountKey)
                                             true
                                         } else {
                                             false

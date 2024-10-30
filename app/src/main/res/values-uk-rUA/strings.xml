@@ -510,6 +510,20 @@
   <string name="poll_expired">Опитування завершено</string>
   <string name="poll_voted">Проголосували</string>
   <string name="poll_expired_at">Термін дії збіг о %1$s</string>
+  <string name="dm_list_title">Миттєві повідомлення</string>
+  <string name="dm_list_empty">Нема особистих повідомлень</string>
+  <string name="dm_list_error">Не вдалося завантажити особисті повідомлення</string>
+  <string name="send">Відправити</string>
+  <string name="dm_send_placeholder">Надіслати повідомлення</string>
+  <string name="dm_deleted">Видалено</string>
+  <string name="dm_conversation">Пряме повідомлення</string>
+  <string name="dm_sending">Надсилання</string>
+  <string name="dm_leave">Вийти з розмови</string>
+  <string name="dm_to_profile">Показати профіль</string>
+  <string name="user_send_message">Відправити повідомлення</string>
   <string name="profile_search_user_using_account">Знайти %1$s в %2$s за допомогою %3$s</string>
+  <string name="profile_search_user_using_account_compat">Знайти в %1$s</string>
   <string name="notification_login_expired">Вхід закінчився, будь ласка, увійдіть знову</string>
+  <string name="following_title">Слідкую</string>
+  <string name="fans_title">Підписник</string>
 </resources>

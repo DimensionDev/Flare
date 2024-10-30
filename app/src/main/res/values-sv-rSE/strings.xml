@@ -513,6 +513,20 @@
   <string name="poll_expired">Enkät löpte ut</string>
   <string name="poll_voted">Röstade</string>
   <string name="poll_expired_at">Förfallen vid %1$s</string>
+  <string name="dm_list_title">Direkta meddelanden</string>
+  <string name="dm_list_empty">Inga direktmeddelanden</string>
+  <string name="dm_list_error">Det gick inte att ladda direktmeddelanden</string>
+  <string name="send">Skicka</string>
+  <string name="dm_send_placeholder">Skicka ett meddelande</string>
+  <string name="dm_deleted">Borttagen</string>
+  <string name="dm_conversation">Rum för direkt meddelande</string>
+  <string name="dm_sending">Skickar</string>
+  <string name="dm_leave">Lämna konversationen</string>
+  <string name="dm_to_profile">Visa profil</string>
+  <string name="user_send_message">Skicka meddelande</string>
   <string name="profile_search_user_using_account">Hitta %1$s i %2$s med %3$s</string>
+  <string name="profile_search_user_using_account_compat">Sök i %1$s</string>
   <string name="notification_login_expired">Inloggning löpte ut, vänligen logga in igen</string>
+  <string name="following_title">Följer</string>
+  <string name="fans_title">Följare</string>
 </resources>

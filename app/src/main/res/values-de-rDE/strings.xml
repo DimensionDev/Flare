@@ -513,6 +513,20 @@
   <string name="poll_expired">Umfrage abgelaufen</string>
   <string name="poll_voted">Abgestimmt</string>
   <string name="poll_expired_at">Abgelaufen am %1$s</string>
+  <string name="dm_list_title">Direkte Nachrichten</string>
+  <string name="dm_list_empty">Keine direkten Nachrichten</string>
+  <string name="dm_list_error">Fehler beim Laden der Direktnachrichten</string>
+  <string name="send">Senden</string>
+  <string name="dm_send_placeholder">Nachricht senden</string>
+  <string name="dm_deleted">Gelöscht</string>
+  <string name="dm_conversation">Direkte Nachricht</string>
+  <string name="dm_sending">Senden</string>
+  <string name="dm_leave">Gespräch verlassen</string>
+  <string name="dm_to_profile">Profil anzeigen</string>
+  <string name="user_send_message">Nachricht senden</string>
   <string name="profile_search_user_using_account">%1$s in %2$s mit %3$s finden</string>
+  <string name="profile_search_user_using_account_compat">Suchen in %1$s</string>
   <string name="notification_login_expired">Login abgelaufen, bitte erneut anmelden</string>
+  <string name="following_title">Folgt</string>
+  <string name="fans_title">Follower</string>
 </resources>

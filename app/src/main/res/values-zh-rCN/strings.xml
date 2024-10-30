@@ -516,6 +516,20 @@
   <string name="poll_expired">投票已过期</string>
   <string name="poll_voted">已投票</string>
   <string name="poll_expired_at">过期于 %1$s</string>
+  <string name="dm_list_title">私信</string>
+  <string name="dm_list_empty">没有私信</string>
+  <string name="dm_list_error">加载私信失败</string>
+  <string name="send">发送</string>
+  <string name="dm_send_placeholder">发送消息</string>
+  <string name="dm_deleted">已删除</string>
+  <string name="dm_conversation">私信</string>
+  <string name="dm_sending">正在发送</string>
+  <string name="dm_leave">离开对话</string>
+  <string name="dm_to_profile">显示用户资料</string>
+  <string name="user_send_message">发送消息</string>
   <string name="profile_search_user_using_account">使用 %3$s 在 %2$s 寻找 %1$s</string>
+  <string name="profile_search_user_using_account_compat">在 %1$s 中查找</string>
   <string name="notification_login_expired">登录过期，请重新登录</string>
+  <string name="following_title">正在关注</string>
+  <string name="fans_title">粉丝</string>
 </resources>

@@ -513,6 +513,20 @@
   <string name="poll_expired">Sondaggio scaduto</string>
   <string name="poll_voted">Votato</string>
   <string name="poll_expired_at">Scaduto alla %1$s</string>
+  <string name="dm_list_title">Messaggi Diretti</string>
+  <string name="dm_list_empty">Nessun messaggio diretto</string>
+  <string name="dm_list_error">Caricamento dei messaggi diretti non riuscito</string>
+  <string name="send">Invia</string>
+  <string name="dm_send_placeholder">Invia un messaggio</string>
+  <string name="dm_deleted">Eliminato</string>
+  <string name="dm_conversation">Sala Messaggi Diretti</string>
+  <string name="dm_sending">Invio</string>
+  <string name="dm_leave">Lascia la conversazione</string>
+  <string name="dm_to_profile">Mostra profilo</string>
+  <string name="user_send_message">Invia messaggio</string>
   <string name="profile_search_user_using_account">Trova %1$s in %2$s usando %3$s</string>
+  <string name="profile_search_user_using_account_compat">Trova in %1$s</string>
   <string name="notification_login_expired">Login scaduto, effettua nuovamente il login</string>
+  <string name="following_title">Seguendo</string>
+  <string name="fans_title">Follower</string>
 </resources>

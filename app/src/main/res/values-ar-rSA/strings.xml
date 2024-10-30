@@ -511,6 +511,20 @@
   <string name="poll_expired">انتهت صلاحية الاستطلاع</string>
   <string name="poll_voted">صوت</string>
   <string name="poll_expired_at">انتهت صلاحيتها في %1$s</string>
+  <string name="dm_list_title">الرسائل المباشرة</string>
+  <string name="dm_list_empty">لا توجد رسائل مباشرة</string>
+  <string name="dm_list_error">فشل في تحميل الرسائل المباشرة</string>
+  <string name="send">إرسال</string>
+  <string name="dm_send_placeholder">إرسال رسالة</string>
+  <string name="dm_deleted">محذوف</string>
+  <string name="dm_conversation">غرفة الرسائل المباشرة</string>
+  <string name="dm_sending">إرسال</string>
+  <string name="dm_leave">مغادرة المحادثة</string>
+  <string name="dm_to_profile">إظهار الملف الشخصي</string>
+  <string name="user_send_message">إرسال رسالة</string>
   <string name="profile_search_user_using_account">البحث عن %1$s في %2$s باستخدام %3$s</string>
+  <string name="profile_search_user_using_account_compat">البحث في %1$s</string>
   <string name="notification_login_expired">انتهت صلاحية تسجيل الدخول، الرجاء تسجيل الدخول مرة أخرى</string>
+  <string name="following_title">تابع</string>
+  <string name="fans_title">متابع</string>
 </resources>

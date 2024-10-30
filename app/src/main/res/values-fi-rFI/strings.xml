@@ -513,6 +513,20 @@
   <string name="poll_expired">Kysely vanhentunut</string>
   <string name="poll_voted">Äänestetty</string>
   <string name="poll_expired_at">Vanhentunut %1$s</string>
+  <string name="dm_list_title">Suorat Viestit</string>
+  <string name="dm_list_empty">Ei suoria viestejä</string>
+  <string name="dm_list_error">Suorien viestien lataaminen epäonnistui</string>
+  <string name="send">Lähetä</string>
+  <string name="dm_send_placeholder">Lähetä viesti</string>
+  <string name="dm_deleted">Poistettu</string>
+  <string name="dm_conversation">Suora Viestihuone</string>
+  <string name="dm_sending">Lähetetään</string>
+  <string name="dm_leave">Poistu keskustelusta</string>
+  <string name="dm_to_profile">Näytä profiili</string>
+  <string name="user_send_message">Lähetä viesti</string>
   <string name="profile_search_user_using_account">Etsi %1$s %2$s käyttäen %3$s</string>
+  <string name="profile_search_user_using_account_compat">Etsi kohteesta %1$s</string>
   <string name="notification_login_expired">Kirjautuminen vanhentunut, kirjaudu uudelleen</string>
+  <string name="following_title">Seurataan</string>
+  <string name="fans_title">Seuraaja</string>
 </resources>

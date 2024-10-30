@@ -508,6 +508,20 @@
   <string name="poll_expired">Η δημοσκόπηση έληξε</string>
   <string name="poll_voted">Ψηφίστηκε</string>
   <string name="poll_expired_at">Έληξε σε %1$s</string>
+  <string name="dm_list_title">Άμεσα Μηνύματα</string>
+  <string name="dm_list_empty">Δεν υπάρχουν άμεσα μηνύματα</string>
+  <string name="dm_list_error">Αποτυχία φόρτωσης άμεσων μηνυμάτων</string>
+  <string name="send">Αποστολή</string>
+  <string name="dm_send_placeholder">Αποστολή μηνύματος</string>
+  <string name="dm_deleted">Διαγράφηκε</string>
+  <string name="dm_conversation">Δωμάτιο Άμεσου Μηνύματος</string>
+  <string name="dm_sending">Αποστολή</string>
+  <string name="dm_leave">Έξοδος από συνομιλία</string>
+  <string name="dm_to_profile">Εμφάνιση προφίλ</string>
+  <string name="user_send_message">Αποστολή μηνύματος</string>
   <string name="profile_search_user_using_account">Βρείτε %1$s σε %2$s χρησιμοποιώντας %3$s</string>
+  <string name="profile_search_user_using_account_compat">Εύρεση σε %1$s</string>
   <string name="notification_login_expired">Η σύνδεση έληξε, παρακαλώ συνδεθείτε ξανά</string>
+  <string name="following_title">Ακολουθεί</string>
+  <string name="fans_title">Ακόλουθος</string>
 </resources>

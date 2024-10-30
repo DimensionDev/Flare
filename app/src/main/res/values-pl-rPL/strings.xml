@@ -512,5 +512,18 @@
   <string name="poll_expired">Ankieta wygasła</string>
   <string name="poll_voted">Zagłosowano</string>
   <string name="poll_expired_at">Wygasło o %1$s</string>
+  <string name="dm_list_title">Wiadomości bezpośrednie</string>
+  <string name="dm_list_empty">Brak bezpośrednich wiadomości</string>
+  <string name="dm_list_error">Nie udało się załadować bezpośrednich wiadomości</string>
+  <string name="send">Wyślij</string>
+  <string name="dm_send_placeholder">Wyślij wiadomość</string>
+  <string name="dm_deleted">Usunięto</string>
+  <string name="dm_conversation">Bezpośredni pokój wiadomości</string>
+  <string name="dm_sending">Wysyłanie</string>
+  <string name="dm_leave">Opuść rozmowę</string>
+  <string name="dm_to_profile">Pokaż profil</string>
+  <string name="user_send_message">Wyślij wiadomość</string>
   <string name="notification_login_expired">Logowanie wygasło, zaloguj się ponownie</string>
+  <string name="following_title">Obserwowane</string>
+  <string name="fans_title">Obserwujący</string>
 </resources>

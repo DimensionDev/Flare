@@ -512,6 +512,20 @@
   <string name="poll_expired">Encuesta caducada</string>
   <string name="poll_voted">Votado</string>
   <string name="poll_expired_at">Caducó el %1$s</string>
+  <string name="dm_list_title">Mensajes directos</string>
+  <string name="dm_list_empty">No hay mensajes directos</string>
+  <string name="dm_list_error">Error al cargar mensajes directos</string>
+  <string name="send">Enviar</string>
+  <string name="dm_send_placeholder">Enviar un mensaje</string>
+  <string name="dm_deleted">Eliminado</string>
+  <string name="dm_conversation">Sala de mensajes directos</string>
+  <string name="dm_sending">Enviando</string>
+  <string name="dm_leave">Dejar conversación</string>
+  <string name="dm_to_profile">Mostrar perfil</string>
+  <string name="user_send_message">Enviar mensaje</string>
   <string name="profile_search_user_using_account">Encuentra %1$s en %2$s usando %3$s</string>
+  <string name="profile_search_user_using_account_compat">Buscar en %1$s</string>
   <string name="notification_login_expired">Inicio de sesión expirado, por favor inicie sesión de nuevo</string>
+  <string name="following_title">Siguiendo</string>
+  <string name="fans_title">Seguidor</string>
 </resources>

@@ -513,6 +513,20 @@
   <string name="poll_expired">Anketa vypršela</string>
   <string name="poll_voted">Hlasování</string>
   <string name="poll_expired_at">Platnost vypršela v %1$s</string>
+  <string name="dm_list_title">Přímé zprávy</string>
+  <string name="dm_list_empty">Žádné přímé zprávy</string>
+  <string name="dm_list_error">Nepodařilo se načíst přímé zprávy</string>
+  <string name="send">Poslat</string>
+  <string name="dm_send_placeholder">Odeslat zprávu</string>
+  <string name="dm_deleted">Odstraněno</string>
+  <string name="dm_conversation">Místnost přímých zpráv</string>
+  <string name="dm_sending">Odesílání</string>
+  <string name="dm_leave">Opustit konverzaci</string>
+  <string name="dm_to_profile">Zobrazit profil</string>
+  <string name="user_send_message">Odeslat zprávu</string>
   <string name="profile_search_user_using_account">Najít %1$s v %2$s pomocí %3$s</string>
+  <string name="profile_search_user_using_account_compat">Najít v %1$s</string>
   <string name="notification_login_expired">Přihlášení vypršelo, přihlaste se prosím znovu</string>
+  <string name="following_title">Sledovat</string>
+  <string name="fans_title">Sledující</string>
 </resources>

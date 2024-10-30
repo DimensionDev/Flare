@@ -513,6 +513,20 @@
   <string name="poll_expired">Sondage expiré</string>
   <string name="poll_voted">Voté</string>
   <string name="poll_expired_at">Expiré à %1$s</string>
+  <string name="dm_list_title">Messages directs</string>
+  <string name="dm_list_empty">Aucun message direct</string>
+  <string name="dm_list_error">Impossible de charger les messages directs</string>
+  <string name="send">Envoyer</string>
+  <string name="dm_send_placeholder">Envoyer un message</string>
+  <string name="dm_deleted">Supprimé</string>
+  <string name="dm_conversation">Salon de message direct</string>
+  <string name="dm_sending">Envoi en cours</string>
+  <string name="dm_leave">Quitter la conversation</string>
+  <string name="dm_to_profile">Afficher le profil</string>
+  <string name="user_send_message">Envoyer un message</string>
   <string name="profile_search_user_using_account">Trouvez %1$s dans %2$s en utilisant %3$s</string>
+  <string name="profile_search_user_using_account_compat">Trouver dans %1$s</string>
   <string name="notification_login_expired">La connexion a expiré, veuillez vous reconnecter</string>
+  <string name="following_title">Abonnements</string>
+  <string name="fans_title">Abonné</string>
 </resources>

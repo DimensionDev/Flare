@@ -513,6 +513,20 @@
   <string name="poll_expired">Sondajul a expirat</string>
   <string name="poll_voted">Votat</string>
   <string name="poll_expired_at">A expirat la %1$s</string>
+  <string name="dm_list_title">Mesaje directe</string>
+  <string name="dm_list_empty">Niciun mesaj direct</string>
+  <string name="dm_list_error">Încărcarea mesajelor directe a eșuat</string>
+  <string name="send">Trimite</string>
+  <string name="dm_send_placeholder">Trimite un mesaj</string>
+  <string name="dm_deleted">Șters</string>
+  <string name="dm_conversation">Camera Mesajului direct</string>
+  <string name="dm_sending">Trimitere</string>
+  <string name="dm_leave">Părăsește conversația</string>
+  <string name="dm_to_profile">Afișare profil</string>
+  <string name="user_send_message">Trimite mesaj</string>
   <string name="profile_search_user_using_account">Găsește %1$s în %2$s folosind %3$s</string>
+  <string name="profile_search_user_using_account_compat">Găsește în %1$s</string>
   <string name="notification_login_expired">Logarea a expirat, te rugăm să te autentifici din nou</string>
+  <string name="following_title">Urmăriți</string>
+  <string name="fans_title">Urmăritor</string>
 </resources>

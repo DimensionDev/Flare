@@ -511,6 +511,20 @@
   <string name="poll_expired">Опрос просрочен</string>
   <string name="poll_voted">Проголосовал</string>
   <string name="poll_expired_at">Истек на %1$s</string>
+  <string name="dm_list_title">Прямые сообщения</string>
+  <string name="dm_list_empty">Нет личных сообщений</string>
+  <string name="dm_list_error">Не удалось загрузить личные сообщения</string>
+  <string name="send">Отправить</string>
+  <string name="dm_send_placeholder">Отправить сообщение</string>
+  <string name="dm_deleted">Удалено</string>
+  <string name="dm_conversation">Комната прямого сообщения</string>
+  <string name="dm_sending">Отправка</string>
+  <string name="dm_leave">Покинуть разговор</string>
+  <string name="dm_to_profile">Показать профиль</string>
+  <string name="user_send_message">Отправить сообщение</string>
   <string name="profile_search_user_using_account">Искать %1$s в %2$s с помощью %3$s</string>
+  <string name="profile_search_user_using_account_compat">Найти в %1$s</string>
   <string name="notification_login_expired">Срок действия входа истек, пожалуйста, войдите снова</string>
+  <string name="following_title">Подписка</string>
+  <string name="fans_title">Фольклор</string>
 </resources>

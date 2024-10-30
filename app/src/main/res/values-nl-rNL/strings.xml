@@ -513,6 +513,20 @@
   <string name="poll_expired">Poll verlopen</string>
   <string name="poll_voted">Gestemd</string>
   <string name="poll_expired_at">Verlopen op %1$s</string>
+  <string name="dm_list_title">Directe Berichten</string>
+  <string name="dm_list_empty">Geen directe berichten</string>
+  <string name="dm_list_error">Laden van privéberichten mislukt</string>
+  <string name="send">Verzenden</string>
+  <string name="dm_send_placeholder">Stuur een bericht</string>
+  <string name="dm_deleted">Verwijderd</string>
+  <string name="dm_conversation">Rechtstreeks Berichten Kamer</string>
+  <string name="dm_sending">Verzenden</string>
+  <string name="dm_leave">Gesprek verlaten</string>
+  <string name="dm_to_profile">Toon profiel</string>
+  <string name="user_send_message">Verstuur bericht</string>
   <string name="profile_search_user_using_account">Zoek %1$s in %2$s met %3$s</string>
+  <string name="profile_search_user_using_account_compat">Zoeken in %1$s</string>
   <string name="notification_login_expired">Inloggen verlopen, gelieve opnieuw in te loggen</string>
+  <string name="following_title">Volgt</string>
+  <string name="fans_title">Volger</string>
 </resources>

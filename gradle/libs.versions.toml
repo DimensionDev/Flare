@@ -45,7 +45,7 @@ google-services = "4.4.2"
 firebase-crashlytics = "3.0.2"
 napier = "2.7.1"
 materialKolor = "2.0.0"
-room = "2.7.0-SNAPSHOT"
+room = "2.7.0-alpha11"
 
 [libraries]
 bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }

@@ -512,6 +512,20 @@
   <string name="poll_expired">Avstemningen utløpt</string>
   <string name="poll_voted">Stemt</string>
   <string name="poll_expired_at">Utløpt i %1$s</string>
+  <string name="dm_list_title">Direkte meldinger</string>
+  <string name="dm_list_empty">Ingen direkte meldinger</string>
+  <string name="dm_list_error">Kunne ikke laste direkte meldinger</string>
+  <string name="send">Sende</string>
+  <string name="dm_send_placeholder">Send en melding</string>
+  <string name="dm_deleted">Slettet</string>
+  <string name="dm_conversation">Direkte meldingsrom</string>
+  <string name="dm_sending">Sender</string>
+  <string name="dm_leave">Forlat samtale</string>
+  <string name="dm_to_profile">Vis profil</string>
+  <string name="user_send_message">Send melding</string>
   <string name="profile_search_user_using_account">Finn %1$s i %2$s ved å bruke %3$s</string>
+  <string name="profile_search_user_using_account_compat">Finn i %1$s</string>
   <string name="notification_login_expired">Innlogging utløpt, vennligst logg inn igjen</string>
+  <string name="following_title">Følger</string>
+  <string name="fans_title">Følger</string>
 </resources>

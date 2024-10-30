@@ -516,6 +516,20 @@
   <string name="poll_expired">投票の有効期限が切れました</string>
   <string name="poll_voted">投票</string>
   <string name="poll_expired_at">%1$sで期限切れ</string>
+  <string name="dm_list_title">ダイレクトメッセージ</string>
+  <string name="dm_list_empty">ダイレクトメッセージはありません</string>
+  <string name="dm_list_error">ダイレクトメッセージの読み込みに失敗しました</string>
+  <string name="send">送信</string>
+  <string name="dm_send_placeholder">メッセージを送信</string>
+  <string name="dm_deleted">削除しました</string>
+  <string name="dm_conversation">ダイレクトメッセージ ルーム</string>
+  <string name="dm_sending">送信中</string>
+  <string name="dm_leave">会話から出る</string>
+  <string name="dm_to_profile">プロファイルを表示</string>
+  <string name="user_send_message">メッセージを送信</string>
   <string name="profile_search_user_using_account">%3$s を使用して %2$s で %1$s を見つける</string>
+  <string name="profile_search_user_using_account_compat">%1$s で検索</string>
   <string name="notification_login_expired">ログイン期限が切れました。もう一度ログインしてください。</string>
+  <string name="following_title">フォロー中</string>
+  <string name="fans_title">フォロワー</string>
 </resources>

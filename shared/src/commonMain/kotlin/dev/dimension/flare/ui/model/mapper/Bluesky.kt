@@ -86,11 +86,14 @@ private fun parseBluesky(
         val end = facet.index.byteEnd.toInt()
         // some facets may have same start
         // for example: https://bsky.app/profile/technews4869.bsky.social/post/3l4vfqetv7t25
-        if (codePointIndex > start) {
+        if (start - codePointIndex < 0) {
             continue
         }
         val beforeFacetText = codePoints.drop(codePointIndex).take(start - codePointIndex).stringify()
         element.appendTextWithBr(beforeFacetText)
+        if (end - start < 0) {
+            continue
+        }
         val facetText = codePoints.drop(start).take(end - start).stringify()
         // TODO: multiple features
         val feature = facet.features.firstOrNull()

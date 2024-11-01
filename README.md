@@ -18,38 +18,23 @@ The ultimate next generation* open-sourced AI powered** decentralized social net
 <a href='https://play.google.com/store/apps/details?id=dev.dimension.flare&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' src='docs\src\assets\en_badge_web_generic.png' height=50/></a>
 
 ## Features
- - Consolidate all your social networks into one client, featuring Mastodon, Misskey, Bluesky, X, VVO, and more to come.
+ - Consolidate all your social networks into one client, featuring Mastodon, Misskey, Bluesky and more to come.
  - Crosspost your content simultaneously across all your platforms.
  - It is FOSS and privacy-centric, ensuring that no data is collected from you.
 
 ## Roadmap
-Here're some features we're planning to implement in the future, you can check the project board [here](https://github.com/orgs/DimensionDev/projects/3) for progress.
+Here're some features we're planning to implement in the future.
  - [ ] Mixed timeline
  - [ ] AI powered features
- - [x] Support for vvo platform
+   - [ ] Translation
+   - [ ] Summary
+   - [ ] Quick reply
  - [ ] Support for Meta Threads
- - [x] Anonymous mode, no need to login
- - [x] Customizable tabs
- - [x] Local filtering
- - [x] Crossposting
- - [x] Translation
+ - [ ] Anonymous mode enhancement
+   - Option to change data source
  - [ ] Auto thread
  - [ ] Local history
- - [ ] Quick reply
-
-### Mastodon
- - [x] Support for polls
- - [x] Support global/local timelines
- - [x] Support for lists
- - [x] Support for bookmarks/faovrites timelines
-
-### Misskey
- - [x] Support for polls
-
-### Bluesky
- - [x] Support for lists
- - [x] Support for feeds
- - [x] Support DM
+ - [ ] RSS feed support
 
 ## Building
 ### Android

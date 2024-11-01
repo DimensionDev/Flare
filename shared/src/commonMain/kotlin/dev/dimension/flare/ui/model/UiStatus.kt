@@ -59,7 +59,7 @@ private fun Token.toHtml(accountKey: MicroBlogKey): Node =
 
         is UserNameToken ->
             Element("a").apply {
-                attributes().put("href", AppDeepLink.ProfileWithNameAndHost(accountKey, value, accountKey.host))
+                attributes().put("href", AppDeepLink.ProfileWithNameAndHost(accountKey, value.trimStart('@'), accountKey.host))
                 addChildren(TextNode(value))
             }
     }

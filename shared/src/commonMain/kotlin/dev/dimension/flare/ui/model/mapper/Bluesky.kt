@@ -32,6 +32,7 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
 import io.ktor.utils.io.charsets.Charsets
@@ -40,6 +41,10 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
+import moe.tlaster.twitter.parser.TwitterParser
 import sh.christian.ozone.api.model.JsonContent
 import sh.christian.ozone.api.model.ReadOnlyList
 
@@ -59,6 +64,24 @@ private fun Element.appendTextWithBr(text: String) {
         if (i < parts.size - 1) {
             addChildren(Element("br"))
         }
+    }
+}
+
+private fun parseBlueskyJson(
+    json: JsonContent,
+    accountKey: MicroBlogKey,
+): UiRichText {
+    try {
+        return parseBluesky(post = json.bskyJson(), accountKey = accountKey)
+    } catch (e: Exception) {
+        val jobj = json.bskyJson<JsonContent, JsonObject>()
+        val text = jobj["text"]?.jsonPrimitive?.contentOrNull
+        return Element("p")
+            .apply {
+                if (text != null) {
+                    appendText(text)
+                }
+            }.toUi()
     }
 }
 
@@ -216,22 +239,26 @@ internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
         is StatusContent.BlueskyNotification.Post ->
             references[ReferenceType.Notification]?.render(accountKey, event) ?: post.render(accountKey, event = event)
         is StatusContent.BlueskyNotification.UserList -> {
-            val reason = this.data.firstOrNull()?.reason ?: ListNotificationsReason.UNKNOWN
+            val reason = this.data.firstOrNull()?.reason
             val uri =
                 this.data
                     .firstOrNull()
                     ?.uri
                     ?.atUri ?: ""
             val topMessage =
-                UiTimeline.TopMessage(
-                    user = null,
-                    icon = reason.icon,
-                    type = reason.type,
-                    onClicked = {
+                if (reason != null) {
+                    UiTimeline.TopMessage(
+                        user = null,
+                        icon = reason.icon,
+                        type = reason.type,
+                        onClicked = {
 //                        launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
-                    },
-                    statusKey = MicroBlogKey(id = uri, host = accountKey.host),
-                )
+                        },
+                        statusKey = MicroBlogKey(id = uri, host = accountKey.host),
+                    )
+                } else {
+                    null
+                }
             val content =
                 UiTimeline.ItemContent.UserList(
                     users = this.data.map { it.author.render(accountKey = accountKey) }.toImmutableList(),
@@ -302,7 +329,7 @@ internal fun PostView.renderStatus(
         images = findMedias(this),
         card = findCard(this),
         statusKey = statusKey,
-        content = parseBluesky(record.bskyJson<JsonContent, Post>(), accountKey),
+        content = parseBlueskyJson(record, accountKey),
         poll = null,
         quote = listOfNotNull(findQuote(accountKey, this, event)).toImmutableList(),
         contentWarning = null,
@@ -457,6 +484,13 @@ internal fun ProfileViewBasic.render(accountKey: MicroBlogKey): UiProfile {
     )
 }
 
+private val parser =
+    TwitterParser(
+        validMarkInUserName = listOf('.', '-'),
+        enableEscapeInUrl = true,
+        validMarkInHashTag = listOf('.', ':'),
+    )
+
 internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
     val userKey =
         MicroBlogKey(
@@ -473,7 +507,7 @@ internal fun ProfileView.render(accountKey: MicroBlogKey): UiProfile {
         handle = "@${handle.handle}",
         key = userKey,
         banner = null,
-        description = Element("span").apply { addChildren(TextNode(description.orEmpty())) }.toUi(),
+        description = description?.let { parser.parse(it) }?.toHtml(accountKey)?.toUi(),
         matrices =
             UiProfile.Matrices(
                 fansCount = 0,
@@ -505,7 +539,7 @@ internal fun ProfileViewDetailed.render(accountKey: MicroBlogKey): UiProfile {
         handle = "@${handle.handle}",
         key = userKey,
         banner = banner?.uri,
-        description = Element("span").apply { addChildren(TextNode(description.orEmpty())) }.toUi(),
+        description = description?.let { parser.parse(it) }?.toHtml(accountKey)?.toUi(),
         matrices =
             UiProfile.Matrices(
                 fansCount = followersCount ?: 0,
@@ -635,32 +669,31 @@ private fun render(
                         }.flatten()
                         .toImmutableList(),
                 card =
-                    record.value.embeds
-                        .mapNotNull {
-                            when (it) {
-                                is RecordViewRecordEmbedUnion.ExternalView ->
-                                    UiCard(
-                                        url = it.value.external.uri.uri,
-                                        title = it.value.external.title,
-                                        description = it.value.external.description,
-                                        media =
-                                            it.value.external.thumb?.let {
-                                                UiMedia.Image(
-                                                    url = it.uri,
-                                                    previewUrl = it.uri,
-                                                    description = null,
-                                                    width = 0f,
-                                                    height = 0f,
-                                                    sensitive = false,
-                                                )
-                                            },
-                                    )
+                    record.value.embeds.firstNotNullOfOrNull {
+                        when (it) {
+                            is RecordViewRecordEmbedUnion.ExternalView ->
+                                UiCard(
+                                    url = it.value.external.uri.uri,
+                                    title = it.value.external.title,
+                                    description = it.value.external.description,
+                                    media =
+                                        it.value.external.thumb?.let {
+                                            UiMedia.Image(
+                                                url = it.uri,
+                                                previewUrl = it.uri,
+                                                description = null,
+                                                width = 0f,
+                                                height = 0f,
+                                                sensitive = false,
+                                            )
+                                        },
+                                )
 
-                                else -> null
-                            }
-                        }.firstOrNull(),
+                            else -> null
+                        }
+                    },
                 statusKey = statusKey,
-                content = parseBluesky(record.value.value.bskyJson<JsonContent, Post>(), accountKey),
+                content = parseBlueskyJson(record.value.value, accountKey),
                 actions =
                     listOfNotNull(
                         StatusAction.Item.Reply(

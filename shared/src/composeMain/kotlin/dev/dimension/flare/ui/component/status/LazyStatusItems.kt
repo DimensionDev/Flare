@@ -162,7 +162,7 @@ internal fun LazyStaggeredGridScope.status(
                     modifier = Modifier.size(48.dp),
                 )
                 Text(
-                    text = stringResource(id = R.string.status_empty),
+                    text = stringResource(resource = Res.string.status_empty),
                     modifier = Modifier.padding(16.dp),
                 )
             }
@@ -236,10 +236,10 @@ private fun LoginExpiredError(modifier: Modifier = Modifier) {
             modifier = Modifier.size(48.dp),
         )
         Text(
-            text = stringResource(id = R.string.login_expired),
+            text = stringResource(resource = Res.string.login_expired),
         )
         Text(
-            text = stringResource(id = R.string.login_expired_message),
+            text = stringResource(resource = Res.string.login_expired_message),
         )
     }
 }

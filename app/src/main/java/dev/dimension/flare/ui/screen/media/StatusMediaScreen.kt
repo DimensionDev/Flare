@@ -58,7 +58,6 @@ import coil.annotation.ExperimentalCoilApi
 import coil.imageLoader
 import coil.request.ImageRequest
 import coil.size.Size
-import com.eygraber.compose.placeholder.material3.placeholder
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -92,6 +91,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.theme.FlareTheme
+import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

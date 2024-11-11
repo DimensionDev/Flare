@@ -28,7 +28,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -59,6 +58,7 @@ import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
 
 @Destination<RootGraph>(

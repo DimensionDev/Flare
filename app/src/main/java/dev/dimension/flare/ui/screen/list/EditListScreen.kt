@@ -39,7 +39,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.EditListMemberRouteDestination
@@ -76,6 +75,7 @@ import dev.dimension.flare.ui.presenter.list.EditListState
 import dev.dimension.flare.ui.presenter.list.ListEditPresenter
 import dev.dimension.flare.ui.screen.settings.AccountItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
 
 @Destination<RootGraph>(

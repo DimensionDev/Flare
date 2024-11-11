@@ -11,14 +11,14 @@ espresso-core = "3.6.1"
 lifecycle-runtime-ktx = "2.8.7"
 activity-compose = "1.9.3"
 compose-bom = "2024.10.01"
-ksp = "2.0.21-1.0.25"
+ksp = "2.0.21-1.0.27"
 paging = "3.3.2"
 navigation = "2.8.3"
 kotlinx-datetime = "0.6.1"
 kotlinx-collections-immutable = "0.3.8"
 kotlinx-serialization = "1.7.3"
-coil = "2.7.0"
-ktorfit = "2.1.0"
+coil3 = "3.0.2"
+ktorfit = "2.2.0"
 ktor = "3.0.1"
 reorderable = "2.4.0"
 stately = "2.1.0"
@@ -37,7 +37,7 @@ versionUpdate = "0.51.0"
 bluesky = "0.1.1-SNAPSHOT"
 kotlinx-coroutines = "1.9.0"
 koin = "4.0.0"
-composeIcons = "1.2.5"
+composeIcons = "1.3.0"
 media3 = "1.4.1"
 desugar_jdk_libs = "2.1.3"
 firebase-bom = "33.5.1"
@@ -46,6 +46,7 @@ firebase-crashlytics = "3.0.2"
 napier = "2.7.1"
 materialKolor = "2.0.0"
 room = "2.7.0-alpha11"
+compose-multiplatform = "1.7.0"
 
 [libraries]
 bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }
@@ -78,7 +79,7 @@ material3-adaptive-navigation = { group = "androidx.compose.material3.adaptive",
 paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
-composeIcons-fontAwesome = { module = "com.github.Tlaster.compose-icons:font-awesome", version.ref = "composeIcons" }
+composeIcons-fontAwesome = { module = "moe.tlaster.compose.icons:font-awesome", version.ref = "composeIcons" }
 datastore = { group = "androidx.datastore", name = "datastore", version = "1.1.1" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 androidx-window = { group = "androidx.window", name = "window-core", version = "1.3.0" }
@@ -107,19 +108,20 @@ koin-android = { group = "io.insert-koin", name = "koin-android" }
 koin-compose = { group = "io.insert-koin", name = "koin-compose" }
 koin-androidx-compose = { group = "io.insert-koin", name = "koin-androidx-compose" }
 
-coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
-coil-gif = { group = "io.coil-kt", name = "coil-gif", version.ref = "coil" }
-coil-svg = { group = "io.coil-kt", name = "coil-svg", version.ref = "coil" }
+coil3-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil3" }
+coil3-gif = { group = "io.coil-kt.coil3", name = "coil-gif", version.ref = "coil3" }
+coil3-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil3" }
+coil3-ktor3 = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coil3" }
 apng = { group = "com.github.penfeizhou.android.animation", name = "apng", version.ref = "apng-android" }
 awebp = { group = "com.github.penfeizhou.android.animation", name = "awebp", version.ref = "apng-android" }
 vectordrawable-animated = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version = "1.2.0" }
 zoomable-image = { group = "me.saket.telephoto", name = "zoomable-image-coil", version = "0.13.0" }
 
-ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib-ktor-3.0.0", version.ref = "ktorfit" }
+ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
 ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", version.ref = "ktorfit" }
-ktorfit-converters-response = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-response-ktor-3.0.0", version.ref = "ktorfit" }
-ktorfit-converters-call = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-call-ktor-3.0.0", version.ref = "ktorfit" }
-ktorfit-converters-flow = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-flow-ktor-3.0.0", version.ref = "ktorfit" }
+ktorfit-converters-response = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-response", version.ref = "ktorfit" }
+ktorfit-converters-call = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-call", version.ref = "ktorfit" }
+ktorfit-converters-flow = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-converters-flow", version.ref = "ktorfit" }
 
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
@@ -144,7 +146,7 @@ mfm-multiplatform = "moe.tlaster:mfm-multiplatform:0.1.2-SNAPSHOT"
 
 compose-webview = { group = "io.github.kevinnzou", name = "compose-webview", version = "0.33.6" }
 
-compose-placeholder-material3 = { group = "com.eygraber", name = "compose-placeholder-material3", version = "1.0.8" }
+compose-placeholder-material3 = { group = "io.github.fornewid", name = "placeholder-material3", version = "2.0.0" }
 
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
@@ -169,7 +171,8 @@ navigation = ["navigation-compose"]
 kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json", "kotlinx-coroutines-core"]
 koin = ["koin-core", "koin-android", "koin-compose", "koin-androidx-compose"]
 ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
-coil = ["coil-compose", "coil-gif", "apng", "coil-svg", "awebp", "vectordrawable-animated", "zoomable-image"]
+coil3 = ["coil3-compose", "coil3-gif", "coil3-svg", "coil3-ktor3"]
+coil3-extensions = ["apng", "awebp", "vectordrawable-animated", "zoomable-image"]
 accompanist = ["accompanist-permissions", "accompanist-drawablepainter"]
 compose-destinations = ["compose-destinations"]
 media3 = ["media3-exoplayer", "media3-ui", "media3-hls"]
@@ -191,3 +194,4 @@ google-services = { id = "com.google.gms.google-services", version.ref = "google
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 room = { id = "androidx.room", version.ref = "room" }
+composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }

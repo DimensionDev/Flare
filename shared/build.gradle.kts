@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.room)
+    alias(libs.plugins.composeMultiplatform)
 }
 
 kotlin {
@@ -74,13 +75,27 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
+        val composeMain by creating {
+            dependsOn(commonMain)
+            dependencies {
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+                implementation(compose.components.resources)
+                implementation(libs.composeIcons.fontAwesome)
+                implementation(libs.bundles.coil3)
+                implementation(libs.compose.placeholder.material3)
+            }
+        }
         val androidMain by getting {
+            dependsOn(composeMain)
             dependencies {
                 implementation(project.dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.foundation)
             }
         }
         val appleMain by getting {
+            dependsOn(composeMain)
             dependencies {
                 implementation(libs.ktor.client.darwin)
             }
@@ -131,6 +146,15 @@ skie {
     features {
         enableSwiftUIObservingPreview = true
     }
+}
+
+compose.resources {
+    customDirectory(
+        sourceSetName = "commonMain",
+        directoryProvider = provider { layout.projectDirectory.dir("composeMain").dir("composeResources") }
+    )
+    packageOfResClass = "dev.dimension.flare"
+    generateResClass = always
 }
 
 afterEvaluate {

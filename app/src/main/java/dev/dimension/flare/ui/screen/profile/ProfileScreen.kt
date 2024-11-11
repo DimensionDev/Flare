@@ -68,7 +68,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.window.core.layout.WindowWidthSizeClass
-import com.eygraber.compose.placeholder.material3.placeholder
 import com.fleeksoft.ksoup.nodes.Element
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -141,6 +140,7 @@ import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.screen.home.RegisterTabCallback
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
@@ -168,33 +168,12 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     accountKey: MicroBlogKey?,
 ) {
     val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-    val state by producePresenter(key = "acct_${accountKey}_$userName@$host") {
-        profileWithUserNameAndHostPresenter(
-            userName = userName,
-            host = host,
-            accountType = accountType,
-        )
-    }
-    state
-        .onSuccess {
-            ProfileRoute(
-                userKey = it.key,
-                navigator = navigator,
-                accountType = accountType,
-            )
-        }.onLoading {
-            ProfileLoadingScreen(
-                onBack = {
-                    navigator.navigateUp()
-                },
-            )
-        }.onError {
-            ProfileErrorScreen(
-                onBack = {
-                    navigator.navigateUp()
-                },
-            )
-        }
+    ProfileWithUserNameAndHostRoute(
+        userName = userName,
+        host = host,
+        navigator = navigator,
+        accountType = accountType,
+    )
 }
 
 @Composable

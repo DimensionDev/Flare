@@ -33,7 +33,6 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -51,8 +50,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -91,7 +88,6 @@ import dev.dimension.flare.mastodon_visibility_private
 import dev.dimension.flare.mastodon_visibility_public
 import dev.dimension.flare.mastodon_visibility_unlisted
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.more
 import dev.dimension.flare.poll_expired
 import dev.dimension.flare.poll_expired_at
@@ -104,7 +100,6 @@ import dev.dimension.flare.report
 import dev.dimension.flare.retweet
 import dev.dimension.flare.retweet_remove
 import dev.dimension.flare.show_media
-import dev.dimension.flare.status_detail_translate
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.FAIcon
@@ -113,16 +108,10 @@ import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.localizedFullTime
-import dev.dimension.flare.ui.model.localizedShortTime
-import dev.dimension.flare.ui.model.onError
-import dev.dimension.flare.ui.model.onLoading
-import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.render.direction
-import dev.dimension.flare.ui.screen.status.statusTranslatePresenter
-import dev.dimension.flare.ui.theme.MediumAlpha
+import dev.dimension.flare.ui.theme.mediumAlpha
 import dev.dimension.flare.unlike
-import io.github.fornewid.placeholder.material3.placeholder
+import dev.dimension.flare.vote
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import org.jetbrains.compose.resources.stringResource
@@ -178,7 +167,7 @@ fun CommonStatusComponent(
                                 modifier =
                                     Modifier
                                         .size(14.dp)
-                                        .alpha(MediumAlpha),
+                                        .alpha(MaterialTheme.colorScheme.mediumAlpha),
                             )
                         }
 
@@ -186,7 +175,8 @@ fun CommonStatusComponent(
                     }
                     if (!isDetail) {
                         Text(
-                            text = item.createdAt.shortTime.localizedShortTime,
+//                            text = item.createdAt.shortTime.localizedShortTime,
+                            text = item.createdAt.toString(),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -271,7 +261,8 @@ fun CommonStatusComponent(
         if (isDetail) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = item.createdAt.value.localizedFullTime,
+//                text = item.createdAt.value.localizedFullTime,
+                text = item.createdAt.toString(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -287,7 +278,8 @@ fun CommonStatusComponent(
                 Spacer(modifier = Modifier.height(4.dp))
             } else {
                 CompositionLocalProvider(
-                    LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = MediumAlpha),
+                    LocalContentColor provides
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = MaterialTheme.colorScheme.mediumAlpha),
                     LocalTextStyle provides MaterialTheme.typography.bodySmall,
                 ) {
                     StatusActions(item.actions)
@@ -339,7 +331,7 @@ private fun StatusMediasComponent(
                 modifier =
                     Modifier
                         .size(12.dp)
-                        .alpha(MediumAlpha),
+                        .alpha(MaterialTheme.colorScheme.mediumAlpha),
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
@@ -347,7 +339,7 @@ private fun StatusMediasComponent(
                 style = MaterialTheme.typography.bodySmall,
                 modifier =
                     Modifier
-                        .alpha(MediumAlpha),
+                        .alpha(MaterialTheme.colorScheme.mediumAlpha),
             )
         }
     }
@@ -437,54 +429,54 @@ private fun TranslationComponent(
     rawContent: String,
     content: Element,
 ) {
-    var enabledTranslate by rememberSaveable("translate-$statusKey") {
-        mutableStateOf(false)
-    }
-    TextButton(
-        onClick = {
-            if (!enabledTranslate) {
-                enabledTranslate = true
-            }
-        },
-    ) {
-        Text(
-            text =
-                stringResource(
-                    resource = Res.string.status_detail_translate,
-                    Locale.current.platformLocale.displayLanguage,
-                ),
-        )
-    }
-    if (enabledTranslate) {
-        Spacer(modifier = Modifier.height(4.dp))
-        val state by producePresenter(
-            "translate_${contentWarning}_$rawContent",
-        ) {
-            statusTranslatePresenter(contentWarning = contentWarning, content = content)
-        }
-        state.contentWarning
-            ?.onSuccess {
-                Text(text = it)
-            }?.onLoading {
-                Text(
-                    text = "Lores ipsum dolor sit amet",
-                    modifier = Modifier.placeholder(true),
-                )
-            }?.onError {
-                Text(text = it.message ?: "Error")
-            }
-        state.text
-            .onSuccess {
-                Text(text = it)
-            }.onLoading {
-                Text(
-                    text = "Lores ipsum dolor sit amet",
-                    modifier = Modifier.placeholder(true),
-                )
-            }.onError {
-                Text(text = it.message ?: "Error")
-            }
-    }
+//    var enabledTranslate by rememberSaveable("translate-$statusKey") {
+//        mutableStateOf(false)
+//    }
+//    TextButton(
+//        onClick = {
+//            if (!enabledTranslate) {
+//                enabledTranslate = true
+//            }
+//        },
+//    ) {
+//        Text(
+//            text =
+//                stringResource(
+//                    resource = Res.string.status_detail_translate,
+//                    Locale.current.platformLocale.displayLanguage,
+//                ),
+//        )
+//    }
+//    if (enabledTranslate) {
+//        Spacer(modifier = Modifier.height(4.dp))
+//        val state by producePresenter(
+//            "translate_${contentWarning}_$rawContent",
+//        ) {
+//            statusTranslatePresenter(contentWarning = contentWarning, content = content)
+//        }
+//        state.contentWarning
+//            ?.onSuccess {
+//                Text(text = it)
+//            }?.onLoading {
+//                Text(
+//                    text = "Lores ipsum dolor sit amet",
+//                    modifier = Modifier.placeholder(true),
+//                )
+//            }?.onError {
+//                Text(text = it.message ?: "Error")
+//            }
+//        state.text
+//            .onSuccess {
+//                Text(text = it)
+//            }.onLoading {
+//                Text(
+//                    text = "Lores ipsum dolor sit amet",
+//                    modifier = Modifier.placeholder(true),
+//                )
+//            }.onError {
+//                Text(text = it.message ?: "Error")
+//            }
+//    }
 }
 
 @Composable
@@ -721,7 +713,7 @@ private fun StatusReplyComponent(
     Row(
         modifier =
             modifier
-                .alpha(MediumAlpha),
+                .alpha(MaterialTheme.colorScheme.mediumAlpha),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
@@ -763,7 +755,7 @@ private fun StatusContentComponent(
                         Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
-                            .alpha(MediumAlpha)
+                            .alpha(MaterialTheme.colorScheme.mediumAlpha)
                             .clickable {
                                 expanded = !expanded
                             },
@@ -840,7 +832,7 @@ private fun StatusPollComponent(
                 modifier =
                     Modifier
                         .align(Alignment.End)
-                        .alpha(MediumAlpha),
+                        .alpha(MaterialTheme.colorScheme.mediumAlpha),
                 style = MaterialTheme.typography.bodySmall,
             )
         } else {
@@ -848,12 +840,13 @@ private fun StatusPollComponent(
                 text =
                     stringResource(
                         resource = Res.string.poll_expired_at,
-                        poll.expiresAt.localizedFullTime,
+                        poll.expiresAt.toString(),
+//                        poll.expiresAt.localizedFullTime,
                     ),
                 modifier =
                     Modifier
                         .align(Alignment.End)
-                        .alpha(MediumAlpha),
+                        .alpha(MaterialTheme.colorScheme.mediumAlpha),
                 style = MaterialTheme.typography.bodySmall,
             )
         }
@@ -1027,7 +1020,7 @@ private fun ExpandedCard(
                     style = MaterialTheme.typography.bodySmall,
                     modifier =
                         Modifier
-                            .alpha(MediumAlpha),
+                            .alpha(MaterialTheme.colorScheme.mediumAlpha),
                 )
             }
         }
@@ -1075,7 +1068,7 @@ fun CompatCard(
                     style = MaterialTheme.typography.bodySmall,
                     modifier =
                         Modifier
-                            .alpha(MediumAlpha),
+                            .alpha(MaterialTheme.colorScheme.mediumAlpha),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )

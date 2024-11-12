@@ -23,32 +23,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleExclamation
 import compose.icons.fontawesomeicons.solid.File
 import compose.icons.fontawesomeicons.solid.FileCircleExclamation
-import dev.dimension.flare.R
+import dev.dimension.flare.Res
 import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onEndOfList
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.login_expired
+import dev.dimension.flare.login_expired_message
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.status_empty
+import dev.dimension.flare.status_loadmore_end
+import dev.dimension.flare.status_loadmore_error
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.theme.DisabledAlpha
-import dev.dimension.flare.ui.theme.MediumAlpha
+import dev.dimension.flare.ui.theme.disableAlpha
+import dev.dimension.flare.ui.theme.mediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
+import org.jetbrains.compose.resources.stringResource
 
 internal fun LazyStaggeredGridScope.status(
     pagingState: PagingState<UiTimeline>,
@@ -124,7 +126,7 @@ internal fun LazyStaggeredGridScope.status(
                         HorizontalDivider()
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = stringResource(R.string.status_loadmore_end),
+                            text = stringResource(Res.string.status_loadmore_end),
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
@@ -176,11 +178,11 @@ private fun OnLoading(modifier: Modifier = Modifier) {
         modifier = modifier,
     ) {
         StatusPlaceholder(
-            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+            modifier = Modifier.padding(horizontal = MaterialTheme.screenHorizontalPadding),
         )
         Spacer(modifier = Modifier.height(8.dp))
         HorizontalDivider(
-            modifier = Modifier.alpha(DisabledAlpha),
+            modifier = Modifier.alpha(MaterialTheme.colorScheme.disableAlpha),
         )
     }
 }
@@ -212,7 +214,7 @@ private fun OnError(
                     contentDescription = null,
                     modifier = Modifier.size(48.dp),
                 )
-                Text(text = stringResource(R.string.status_loadmore_error))
+                Text(text = stringResource(Res.string.status_loadmore_error))
             }
         }
     }
@@ -220,12 +222,13 @@ private fun OnError(
 
 @Composable
 private fun LoginExpiredError(modifier: Modifier = Modifier) {
-    val uriHandler = LocalUriHandler.current
+//    val uriHandler = LocalUriHandler.current
     Column(
         modifier =
             modifier
                 .clickable {
-                    uriHandler.openUri(ServiceSelectRouteDestination.deeplink())
+                    // TODO:
+//                    uriHandler.openUri(ServiceSelectRouteDestination.deeplink())
                 },
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -250,7 +253,7 @@ internal fun StatusItem(
 //    event: StatusEvent,
     modifier: Modifier = Modifier,
     detailStatusKey: MicroBlogKey? = null,
-    horizontalPadding: Dp = screenHorizontalPadding,
+    horizontalPadding: Dp = MaterialTheme.screenHorizontalPadding,
 ) {
     if (item == null) {
         Column(
@@ -318,7 +321,7 @@ internal fun UserPlaceholder(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodySmall,
                 modifier =
                     Modifier
-                        .alpha(MediumAlpha)
+                        .alpha(MaterialTheme.colorScheme.mediumAlpha)
                         .placeholder(true),
             )
         }

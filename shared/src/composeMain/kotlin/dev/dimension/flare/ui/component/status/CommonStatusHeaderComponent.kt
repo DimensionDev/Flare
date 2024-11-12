@@ -20,7 +20,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.UiUserV2
-import dev.dimension.flare.ui.theme.MediumAlpha
+import dev.dimension.flare.ui.theme.mediumAlpha
 
 @Composable
 internal fun CommonStatusHeaderComponent(
@@ -60,7 +60,7 @@ internal fun CommonStatusHeaderComponent(
                 style = MaterialTheme.typography.bodySmall,
                 modifier =
                     Modifier
-                        .alpha(MediumAlpha)
+                        .alpha(MaterialTheme.colorScheme.mediumAlpha)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,

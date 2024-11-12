@@ -39,6 +39,7 @@ kotlin {
         }?.let {
             dependencies.add(it, libs.ktorfit.ksp)
             dependencies.add(it, libs.room.compiler)
+            dependencies.add(it, libs.compose.swift.bridge.ksp)
         }
     }
 
@@ -85,6 +86,7 @@ kotlin {
                 implementation(libs.composeIcons.fontAwesome)
                 implementation(libs.bundles.coil3)
                 implementation(libs.compose.placeholder.material3)
+                implementation(libs.compose.swift.bridge)
             }
         }
         val androidMain by getting {
@@ -107,6 +109,24 @@ kotlin {
             }
         }
     }
+}
+
+dependencies {
+    skieSubPlugin(libs.compose.swift.bridge.skie)
+}
+
+tasks.withType<com.google.devtools.ksp.gradle.KspTaskNative>().configureEach {
+    options.add(org.jetbrains.kotlin.gradle.plugin.SubpluginOption("apoption", "compose-swift-bridge.targetName=$target"))
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    if (name != "kspCommonMainKotlinMetadata") {
+        dependsOn("kspCommonMainKotlinMetadata")
+    }
+}
+
+kotlin.sourceSets.commonMain {
+    kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
 }
 
 room {

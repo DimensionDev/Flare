@@ -6,7 +6,8 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.DrawerState
@@ -22,7 +23,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -38,8 +38,8 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.R
-import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.HomeTimelineTabItem
+import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -55,6 +55,7 @@ import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
@@ -138,7 +139,7 @@ private fun HomeTimelineScreen(
                                                 },
                                             ) {
                                                 TabTitle(
-                                                    tab.timelineTabItem.metaData.title,
+                                                    tab.metaData.title,
                                                     modifier =
                                                         Modifier
                                                             .padding(8.dp),
@@ -148,7 +149,7 @@ private fun HomeTimelineScreen(
                                     }
                                 }
                             } else {
-                                TabTitle(title = tabs[0].timelineTabItem.metaData.title)
+                                TabTitle(title = tabs[0].metaData.title)
                             }
                         }
                     }
@@ -210,7 +211,7 @@ private fun HomeTimelineScreen(
                     // workaround for a bug in HorizontalPager with Drawer
                     // https://issuetracker.google.com/issues/167408603
                     TimelineComponent(
-                        presenter = tabs[0],
+                        presenter = tabs[0].presenter,
                         accountType = accountType,
                         contentPadding = contentPadding,
                         modifier = Modifier.fillMaxSize(),
@@ -221,7 +222,7 @@ private fun HomeTimelineScreen(
                     ) { index ->
                         val tab = tabs[index]
                         TimelineComponent(
-                            presenter = tab,
+                            presenter = tab.presenter,
                             accountType = accountType,
                             contentPadding = contentPadding,
                             modifier = Modifier.fillMaxSize(),
@@ -271,7 +272,11 @@ private fun timelinePresenter(
         tabs.map {
             it
                 .map {
-                    it.createPresenter()
+                    TimelineTabState(
+                        presenter = it.createPresenter(),
+                        lazyListState = rememberLazyStaggeredGridState(),
+                        metaData = it.metaData,
+                    )
                 }.toImmutableList()
         }
 
@@ -280,3 +285,9 @@ private fun timelinePresenter(
         val tabState = tabState
     }
 }
+
+private data class TimelineTabState(
+    val presenter: TimelinePresenter,
+    val lazyListState: LazyStaggeredGridState,
+    val metaData: TabMetaData,
+)

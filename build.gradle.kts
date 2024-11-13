@@ -19,7 +19,7 @@ plugins {
 allprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.JVM_21)
             allWarningsAsErrors.set(true)
             freeCompilerArgs.set(listOf(
                 "-Xexpect-actual-classes",

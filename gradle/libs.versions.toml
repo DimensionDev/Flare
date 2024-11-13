@@ -1,6 +1,6 @@
 [versions]
 compileSdk = "35"
-minSdk = "23"
+minSdk = "24"
 java = "21"
 agp = "8.7.2"
 kotlin = "2.0.21"
@@ -164,9 +164,6 @@ mlkit-translate = { group = "com.google.mlkit", name = "translate", version = "1
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.1.2" }
 material-motion-compose = { module = "io.github.fornewid:material-motion-compose-core", version = "1.2.1" }
-compose-swift-bridge = { module = "co.touchlab.compose:compose-swift-bridge", version = "0.1.0" }
-compose-swift-bridge-ksp = { module = "co.touchlab.compose:compose-swift-bridge-ksp", version = "0.1.0" }
-compose-swift-bridge-skie = { module = "co.touchlab.compose:compose-swift-bridge-skie", version = "0.1.0" }
 
 [bundles]
 compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3", "material3WindowSizeClass", "material3-adaptive-navigation-suite", "material3-adaptive", "material3-adaptive-navigation", "material3-adaptive-layout"]

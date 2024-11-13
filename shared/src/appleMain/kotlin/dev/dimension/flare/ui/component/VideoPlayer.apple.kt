@@ -5,19 +5,22 @@ import androidx.compose.ui.Modifier
 import dev.dimension.flare.ui.model.UiMedia
 
 @Composable
-expect fun VideoPlayer(
+actual fun VideoPlayer(
     data: UiMedia.Video,
-    modifier: Modifier = Modifier,
-)
+    modifier: Modifier,
+) {
+}
 
 @Composable
-expect fun GifPlayer(
+actual fun GifPlayer(
     data: UiMedia.Gif,
-    modifier: Modifier = Modifier,
-)
+    modifier: Modifier,
+) {
+}
 
 @Composable
-expect fun AudioPlayer(
+actual fun AudioPlayer(
     data: UiMedia.Audio,
-    modifier: Modifier = Modifier,
-)
+    modifier: Modifier,
+) {
+}

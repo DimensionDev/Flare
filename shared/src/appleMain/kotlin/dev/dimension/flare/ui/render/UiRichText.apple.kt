@@ -7,12 +7,16 @@ import com.fleeksoft.ksoup.nodes.TextNode
 actual data class UiRichText(
     val markdown: String,
     actual val raw: String,
+    actual val data: Element,
+    actual val isRTL: Boolean = false,
+    actual val innerText: String = raw,
 )
 
 actual fun Element.toUi(): UiRichText =
     UiRichText(
         markdown = toMarkdown(),
         raw = text(),
+        data = this,
     )
 
 internal fun Node.toMarkdown(): String =

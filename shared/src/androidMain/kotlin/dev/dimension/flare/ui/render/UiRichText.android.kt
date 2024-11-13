@@ -5,10 +5,11 @@ import com.fleeksoft.ksoup.nodes.Element
 import java.text.Bidi
 
 actual data class UiRichText(
-    val data: Element,
+    actual val data: Element,
     val direction: LayoutDirection,
+    actual val isRTL: Boolean = direction == LayoutDirection.Rtl,
 ) {
-    val innerText = data.text()
+    actual val innerText = data.text()
     actual val raw: String = data.text()
 }
 

@@ -21,7 +21,6 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -36,6 +35,7 @@ import dev.dimension.flare.ui.presenter.profile.FollowingPresenter
 import dev.dimension.flare.ui.presenter.profile.UserListPresenter
 import dev.dimension.flare.ui.screen.settings.AccountItem
 import kotlinx.coroutines.launch
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
 @Destination<RootGraph>(

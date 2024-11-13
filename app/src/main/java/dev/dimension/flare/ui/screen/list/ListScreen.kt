@@ -63,7 +63,6 @@ import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
@@ -80,6 +79,7 @@ import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.parcelize.Parcelize
+import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Destination<RootGraph>(

@@ -86,6 +86,7 @@ kotlin {
                 implementation(libs.composeIcons.fontAwesome)
                 implementation(libs.bundles.coil3)
                 implementation(libs.compose.placeholder.material3)
+                implementation(libs.precompose.molecule)
             }
         }
         val androidMain by getting {

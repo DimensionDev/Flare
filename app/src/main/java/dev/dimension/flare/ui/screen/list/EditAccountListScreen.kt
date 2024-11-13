@@ -21,7 +21,6 @@ import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -30,6 +29,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.EditAccountListPresenter
 import io.github.fornewid.placeholder.material3.placeholder
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Destination<RootGraph>
 @Composable

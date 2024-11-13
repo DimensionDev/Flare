@@ -39,7 +39,6 @@ import compose.icons.fontawesomeicons.solid.Heart
 import compose.icons.fontawesomeicons.solid.Rss
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
@@ -60,6 +59,7 @@ import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],

@@ -54,8 +54,7 @@ fun QuotedStatus(
             data.user?.let {
                 UserCompat(it) {
                     Text(
-//                        text = data.createdAt.shortTime.localizedShortTime,
-                        text = data.createdAt.toString(),
+                        text = data.createdAt.shortTime,
                         style = MaterialTheme.typography.bodySmall,
                         modifier =
                             Modifier

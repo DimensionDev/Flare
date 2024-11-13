@@ -147,6 +147,7 @@ dependencies {
     implementation(libs.colorpicker.compose)
     implementation(libs.material.motion.compose)
     implementation(libs.nestedScrollView)
+    implementation(libs.precompose.molecule)
 
     if (project.file("google-services.json").exists()) {
         implementation(platform(libs.firebase.bom))

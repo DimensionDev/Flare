@@ -64,7 +64,6 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FloppyDisk
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.CoroutineScope
@@ -75,6 +74,7 @@ import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.ZoomableContentLocation
 import me.saket.telephoto.zoomable.rememberZoomableState
 import me.saket.telephoto.zoomable.zoomable
+import moe.tlaster.precompose.molecule.producePresenter
 import moe.tlaster.swiper.Swiper
 import moe.tlaster.swiper.rememberSwiperState
 import org.koin.compose.koinInject

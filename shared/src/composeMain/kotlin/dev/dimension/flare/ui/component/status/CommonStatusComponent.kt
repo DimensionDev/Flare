@@ -175,8 +175,7 @@ fun CommonStatusComponent(
                     }
                     if (!isDetail) {
                         Text(
-//                            text = item.createdAt.shortTime.localizedShortTime,
-                            text = item.createdAt.toString(),
+                            text = item.createdAt.shortTime,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -261,8 +260,7 @@ fun CommonStatusComponent(
         if (isDetail) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-//                text = item.createdAt.value.localizedFullTime,
-                text = item.createdAt.toString(),
+                text = item.createdAt.fullTime,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -840,8 +838,7 @@ private fun StatusPollComponent(
                 text =
                     stringResource(
                         resource = Res.string.poll_expired_at,
-                        poll.expiresAt.toString(),
-//                        poll.expiresAt.localizedFullTime,
+                        poll.expiredAt.fullTime,
                     ),
                 modifier =
                     Modifier

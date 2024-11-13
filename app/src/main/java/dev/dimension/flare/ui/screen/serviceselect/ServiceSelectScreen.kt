@@ -57,7 +57,6 @@ import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.logoUrl
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.OnNewIntent
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.BackButton
@@ -79,6 +78,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.distinctUntilChanged
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
 @Destination<RootGraph>(

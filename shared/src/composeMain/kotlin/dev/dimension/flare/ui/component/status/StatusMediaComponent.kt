@@ -88,14 +88,13 @@ internal fun StatusMediaComponent(
             modifier =
                 Modifier
                     .clip(MaterialTheme.shapes.medium)
-                    .blur(32.dp)
                     .let {
-                        it.blur(32.dp)
 //                        if (hideSensitive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-//                            it.blur(32.dp)
-//                        } else {
-//                            it
-//                        }
+                        if (hideSensitive) {
+                            it.blur(32.dp)
+                        } else {
+                            it
+                        }
                     },
             expandedSize = appearanceSettings.expandMediaSize,
         )
@@ -175,7 +174,6 @@ fun MediaItem(
     showCountdown: Boolean = true,
     contentScale: ContentScale = ContentScale.Crop,
 ) {
-    val appearanceSettings = LocalAppearanceSettings.current
     when (media) {
         is UiMedia.Image -> {
             NetworkImage(
@@ -215,118 +213,6 @@ fun MediaItem(
                             }
                         },
             )
-//            val wifiState by wifiState()
-//            val shouldPlay =
-//                remember(appearanceSettings.videoAutoplay, wifiState) {
-//                    appearanceSettings.videoAutoplay == VideoAutoplay.ALWAYS ||
-//                        (appearanceSettings.videoAutoplay == VideoAutoplay.WIFI && wifiState)
-//                }
-//            if (shouldPlay) {
-//                VideoPlayer(
-// //                    contentScale = contentScale,
-//                    uri = media.url,
-// //                    muted = true,
-//                    previewUri = media.thumbnailUrl,
-//                    contentDescription = media.description,
-//                    modifier =
-//                        modifier
-//                            .fillMaxSize()
-//                            .let {
-//                                if (keepAspectRatio) {
-//                                    it.aspectRatio(
-//                                        media.aspectRatio,
-//                                        matchHeightConstraintsFirst = media.aspectRatio > 1f,
-//                                    )
-//                                } else {
-//                                    it
-//                                }
-//                            },
-//                    loadingPlaceholder = {
-//                        Box(
-//                            modifier =
-//                                Modifier
-//                                    .fillMaxSize(),
-//                            contentAlignment = Alignment.Center,
-//                        ) {
-//                            NetworkImage(
-//                                contentScale = contentScale,
-//                                model = media.thumbnailUrl,
-//                                contentDescription = media.description,
-//                                modifier =
-//                                    Modifier
-//                                        .fillMaxSize(),
-//                            )
-//                        }
-//                        CircularProgressIndicator(
-//                            modifier =
-//                                Modifier
-//                                    .align(Alignment.BottomStart)
-//                                    .padding(24.dp)
-//                                    .size(24.dp),
-//                            color = Color.White,
-//                        )
-//                    },
-//                    remainingTimeContent =
-//                        if (showCountdown) {
-//                            {
-//                                Box(
-//                                    modifier =
-//                                        Modifier
-//                                            .padding(16.dp)
-//                                            .background(
-//                                                Color.Black.copy(alpha = 0.5f),
-//                                                shape = MaterialTheme.shapes.small,
-//                                            ).padding(horizontal = 8.dp, vertical = 4.dp)
-//                                            .align(Alignment.BottomStart),
-//                                    contentAlignment = Alignment.Center,
-//                                ) {
-//                                    Text(
-//                                        text =
-//                                            remember(it) {
-//                                                it.milliseconds.humanize()
-//                                            },
-//                                        color = Color.White,
-//                                        style = MaterialTheme.typography.bodySmall,
-//                                    )
-//                                }
-//                            }
-//                        } else {
-//                            null
-//                        },
-//                )
-//            } else {
-//                Box(
-//                    modifier = modifier,
-//                ) {
-//                    NetworkImage(
-//                        contentScale = contentScale,
-//                        model = media.thumbnailUrl,
-//                        contentDescription = media.description,
-//                        modifier =
-//                            Modifier
-//                                .fillMaxSize()
-//                                .let {
-//                                    if (keepAspectRatio) {
-//                                        it.aspectRatio(
-//                                            media.aspectRatio,
-//                                            matchHeightConstraintsFirst = media.aspectRatio > 1f,
-//                                        )
-//                                    } else {
-//                                        it
-//                                    }
-//                                },
-//                    )
-//                    FAIcon(
-//                        FontAwesomeIcons.Solid.CirclePlay,
-//                        contentDescription = null,
-//                        modifier =
-//                            Modifier
-//                                .align(Alignment.BottomStart)
-//                                .padding(16.dp)
-//                                .size(48.dp),
-//                    )
-//                }
-//            }
         }
 
         is UiMedia.Audio ->
@@ -352,49 +238,5 @@ fun MediaItem(
                             }
                         },
             )
-//            VideoPlayer(
-// //                contentScale = contentScale,
-//                uri = media.url,
-// //                muted = true,
-//                previewUri = media.previewUrl,
-//                contentDescription = media.description,
-//                modifier =
-//                    modifier
-//                        .fillMaxSize()
-//                        .let {
-//                            if (keepAspectRatio) {
-//                                it.aspectRatio(
-//                                    media.aspectRatio,
-//                                    matchHeightConstraintsFirst = media.aspectRatio > 1f,
-//                                )
-//                            } else {
-//                                it
-//                            }
-//                        },
-//            ) {
-//                Box(
-//                    modifier =
-//                        Modifier
-//                            .fillMaxSize(),
-//                    contentAlignment = Alignment.Center,
-//                ) {
-//                    NetworkImage(
-//                        contentScale = contentScale,
-//                        model = media.previewUrl,
-//                        contentDescription = media.description,
-//                        modifier =
-//                            Modifier
-//                                .fillMaxSize(),
-//                    )
-//                }
-//                CircularProgressIndicator(
-//                    modifier =
-//                        Modifier
-//                            .align(Alignment.BottomStart)
-//                            .padding(24.dp)
-//                            .size(24.dp),
-//                    color = Color.White,
-//                )
-//            }
     }
 }

@@ -30,11 +30,11 @@ import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
+import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
 @Composable

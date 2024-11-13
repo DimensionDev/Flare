@@ -33,7 +33,6 @@ import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -45,6 +44,7 @@ import dev.dimension.flare.ui.presenter.list.EditListMemberPresenter
 import dev.dimension.flare.ui.presenter.list.EditListMemberState
 import dev.dimension.flare.ui.presenter.list.EmptyQueryException
 import dev.dimension.flare.ui.screen.settings.AccountItem
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],

@@ -23,13 +23,13 @@ import coil.imageLoader
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import dev.dimension.flare.R
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Destination<RootGraph>(
     wrappers = [ThemeWrapper::class],

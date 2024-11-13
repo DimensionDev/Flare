@@ -46,7 +46,6 @@ import compose.icons.fontawesomeicons.solid.List
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
@@ -57,7 +56,6 @@ import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.ListComponent
-import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.presenter.dm.DMListPresenter
 import dev.dimension.flare.ui.presenter.dm.DMListState
 import dev.dimension.flare.ui.presenter.invoke
@@ -67,6 +65,7 @@ import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Destination<RootGraph>(
@@ -282,7 +281,7 @@ private fun DMListScreen(
                                             val lastMessage = item.lastMessage
                                             if (lastMessage != null) {
                                                 Text(
-                                                    text = lastMessage.timestamp.shortTime.localizedShortTime,
+                                                    text = lastMessage.timestamp.shortTime,
                                                     style = MaterialTheme.typography.bodySmall,
                                                     modifier =
                                                         Modifier

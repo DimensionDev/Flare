@@ -76,7 +76,6 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.VideoPlayerPool
@@ -100,6 +99,7 @@ import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
+import moe.tlaster.precompose.molecule.producePresenter
 import okhttp3.internal.toImmutableList
 import org.koin.compose.koinInject
 import soup.compose.material.motion.animation.materialFadeThroughIn

@@ -48,7 +48,6 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
@@ -66,6 +65,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailPresenter
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
 @Destination<RootGraph>(

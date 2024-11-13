@@ -57,7 +57,6 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
@@ -68,13 +67,13 @@ import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.status.FlareDividerDefaults
 import dev.dimension.flare.ui.model.UiDMItem
-import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.dm.DMConversationPresenter
 import dev.dimension.flare.ui.presenter.dm.DMConversationState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(
     ExperimentalMaterial3Api::class,
@@ -399,7 +398,7 @@ private fun DMItem(
             )
         } else if (item.sendState == null || item.sendState != UiDMItem.SendState.Failed) {
             Text(
-                item.timestamp.shortTime.localizedShortTime,
+                item.timestamp.shortTime,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

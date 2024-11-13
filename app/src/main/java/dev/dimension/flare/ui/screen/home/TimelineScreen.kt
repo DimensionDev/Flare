@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -30,12 +31,12 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Pen
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.component.status.TimelineComponent
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
@@ -43,6 +44,7 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.TabTitle
 import kotlinx.coroutines.launch
+import moe.tlaster.precompose.molecule.producePresenter
 
 // @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
 @Destination<RootGraph>(
@@ -82,7 +84,8 @@ private fun TimelineScreen(
     val state by producePresenter(key = "timeline_${tabItem.key}") {
         timelinePresenter(tabItem)
     }
-    RegisterTabCallback(lazyListState = state.lazyListState)
+    val lazyListState = rememberLazyStaggeredGridState()
+    RegisterTabCallback(lazyListState = lazyListState)
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     FlareScaffold(
         topBar = {
@@ -132,10 +135,12 @@ private fun TimelineScreen(
         },
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->
-        TimelineItemContent(
-            state = state,
-            contentPadding = contentPadding,
+        TimelineComponent(
+            presenter = state.presenter,
+            accountType = tabItem.account,
             modifier = Modifier.fillMaxSize(),
+            contentPadding = contentPadding,
+            lazyListState = lazyListState,
         )
     }
 }
@@ -143,7 +148,10 @@ private fun TimelineScreen(
 @Composable
 private fun timelinePresenter(tabItem: TimelineTabItem) =
     run {
-        val state = timelineItemPresenter(tabItem)
+        val presenter =
+            remember(tabItem) {
+                tabItem.createPresenter()
+            }
         val accountState =
             remember(tabItem.account) {
                 UserPresenter(
@@ -151,6 +159,7 @@ private fun timelinePresenter(tabItem: TimelineTabItem) =
                     userKey = null,
                 )
             }.invoke()
-        object : UserState by accountState, TimelineItemState by state {
+        object : UserState by accountState {
+            val presenter = presenter
         }
     }

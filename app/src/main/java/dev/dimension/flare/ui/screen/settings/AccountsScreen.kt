@@ -39,7 +39,6 @@ import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.BackButton
@@ -57,6 +56,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import io.github.fornewid.placeholder.material3.placeholder
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
 @Destination<RootGraph>(

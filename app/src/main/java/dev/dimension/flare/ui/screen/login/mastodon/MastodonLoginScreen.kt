@@ -34,7 +34,6 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.ApplicationRepository
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -43,6 +42,7 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.login.mastodonLoginUseCase
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
+import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
 @Destination<RootGraph>(

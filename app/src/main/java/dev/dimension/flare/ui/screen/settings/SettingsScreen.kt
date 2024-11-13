@@ -44,7 +44,6 @@ import compose.icons.fontawesomeicons.solid.Filter
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.Table
 import dev.dimension.flare.R
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -56,6 +55,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.screen.home.Router
 import kotlinx.parcelize.Parcelize
+import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Destination<RootGraph>(

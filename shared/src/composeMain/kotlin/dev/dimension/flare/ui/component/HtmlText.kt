@@ -40,7 +40,7 @@ private val lightLinkColor = Color(0xff0066cc)
 private val darkLinkColor = Color(0xff99c3ff)
 
 @Composable
-internal fun HtmlText(
+fun HtmlText(
     element: Element,
     modifier: Modifier = Modifier,
     layoutDirection: LayoutDirection = LocalLayoutDirection.current,

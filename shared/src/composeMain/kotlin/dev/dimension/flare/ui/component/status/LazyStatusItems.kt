@@ -52,7 +52,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
 import org.jetbrains.compose.resources.stringResource
 
-internal fun LazyStaggeredGridScope.status(
+fun LazyStaggeredGridScope.status(
     pagingState: PagingState<UiTimeline>,
     detailStatusKey: MicroBlogKey? = null,
 ) = with(pagingState) {
@@ -248,7 +248,7 @@ private fun LoginExpiredError(modifier: Modifier = Modifier) {
 }
 
 @Composable
-internal fun StatusItem(
+fun StatusItem(
     item: UiTimeline?,
 //    event: StatusEvent,
     modifier: Modifier = Modifier,
@@ -274,7 +274,7 @@ internal fun StatusItem(
 }
 
 @Composable
-internal fun StatusPlaceholder(modifier: Modifier = Modifier) {
+fun StatusPlaceholder(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
     ) {
@@ -293,7 +293,7 @@ internal fun StatusPlaceholder(modifier: Modifier = Modifier) {
 }
 
 @Composable
-internal fun UserPlaceholder(modifier: Modifier = Modifier) {
+fun UserPlaceholder(modifier: Modifier = Modifier) {
     Row(
         modifier =
             modifier

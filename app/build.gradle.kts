@@ -118,6 +118,8 @@ dependencies {
     implementation(libs.ktorfit.lib)
     ksp(libs.ktorfit.ksp)
 //    implementation(libs.bundles.coil)
+    implementation(libs.bundles.coil3)
+    implementation(libs.bundles.coil3.extensions)
     implementation(libs.bundles.ktor)
     implementation(libs.molecule.runtime)
     implementation(libs.ksoup)

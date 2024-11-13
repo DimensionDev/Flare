@@ -71,7 +71,7 @@ fun NetworkImage(
 }
 
 @Composable
-fun EmojiImage(
+internal fun EmojiImage(
     uri: String,
     modifier: Modifier = Modifier,
 ) {

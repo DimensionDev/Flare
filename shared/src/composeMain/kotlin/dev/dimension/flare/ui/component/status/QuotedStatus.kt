@@ -27,7 +27,7 @@ import dev.dimension.flare.ui.render.direction
 import dev.dimension.flare.ui.theme.mediumAlpha
 
 @Composable
-internal fun QuotedStatus(
+fun QuotedStatus(
     data: UiTimeline.ItemContent.Status,
     modifier: Modifier = Modifier,
     maxLines: Int = 6,

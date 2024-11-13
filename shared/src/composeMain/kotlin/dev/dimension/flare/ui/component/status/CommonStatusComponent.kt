@@ -480,7 +480,7 @@ private fun TranslationComponent(
 }
 
 @Composable
-internal fun StatusVisibilityComponent(
+fun StatusVisibilityComponent(
     visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type,
     modifier: Modifier = Modifier,
 ) {
@@ -1077,7 +1077,7 @@ fun CompatCard(
     }
 }
 
-internal object FlareDividerDefaults {
+object FlareDividerDefaults {
     val color: Color
         @Composable
         get() = DividerDefaults.color.copy(alpha = 0.87f)

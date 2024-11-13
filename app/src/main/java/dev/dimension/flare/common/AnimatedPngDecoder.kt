@@ -1,12 +1,13 @@
 package dev.dimension.flare.common
 
-import coil.ImageLoader
-import coil.annotation.ExperimentalCoilApi
-import coil.decode.DecodeResult
-import coil.decode.Decoder
-import coil.decode.ImageSource
-import coil.fetch.SourceResult
-import coil.request.Options
+import coil3.ImageLoader
+import coil3.annotation.ExperimentalCoilApi
+import coil3.asImage
+import coil3.decode.DecodeResult
+import coil3.decode.Decoder
+import coil3.decode.ImageSource
+import coil3.fetch.SourceFetchResult
+import coil3.request.Options
 import com.github.penfeizhou.animation.apng.APNGDrawable
 import com.github.penfeizhou.animation.apng.decode.APNGParser
 
@@ -16,13 +17,13 @@ internal class AnimatedPngDecoder(
     @OptIn(ExperimentalCoilApi::class)
     override suspend fun decode(): DecodeResult =
         DecodeResult(
-            drawable = APNGDrawable.fromFile(source.file().toString()),
+            image = APNGDrawable.fromFile(source.file().toString()).asImage(),
             isSampled = false,
         )
 
     class Factory : Decoder.Factory {
         override fun create(
-            result: SourceResult,
+            result: SourceFetchResult,
             options: Options,
             imageLoader: ImageLoader,
         ): Decoder? =

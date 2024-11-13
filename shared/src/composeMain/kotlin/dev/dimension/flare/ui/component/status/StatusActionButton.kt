@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 
 @Composable
-internal fun StatusActionButton(
+fun StatusActionButton(
     icon: ImageVector,
     text: String?,
     onClicked: () -> Unit,

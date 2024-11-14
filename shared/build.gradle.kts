@@ -22,8 +22,8 @@ kotlin {
         iosX64(),
         iosArm64(),
         iosSimulatorArm64(),
-        macosArm64(),
-        macosX64(),
+//        macosArm64(),
+//        macosX64(),
     ).forEach { appleTarget ->
         appleTarget.binaries.framework {
             baseName = "shared"
@@ -86,7 +86,7 @@ kotlin {
                 implementation(libs.composeIcons.fontAwesome)
                 implementation(libs.bundles.coil3)
                 implementation(libs.compose.placeholder.material3)
-                implementation(libs.precompose.molecule)
+//                implementation(libs.precompose.molecule)
             }
         }
         val androidMain by getting {

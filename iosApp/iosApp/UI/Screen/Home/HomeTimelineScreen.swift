@@ -1,25 +1,22 @@
 import SwiftUI
 import shared
 
+struct ComposeTimelineViewController: UIViewControllerRepresentable {
+    let presenter: TimelinePresenter
+    let accountType: AccountType
+    func makeUIViewController(context: Context) -> UIViewController {
+        return TimelineViewController(presenter: presenter, accountType: accountType)
+    }
+
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+    }
+}
+
 struct TimelineScreen: View {
     let presenter: TimelinePresenter
-    @State private var state: TimelineState
-    init(presenter: TimelinePresenter) {
-        self.presenter = presenter
-        self.state = self.presenter.models.value
-    }
+    let accountType: AccountType
     var body: some View {
-        List {
-            StatusTimelineComponent(
-                data: state.listState,
-                detailKey: nil
-            )
-        }
-        .listStyle(.plain)
-        .refreshable {
-            try? await presenter.models.value.refresh()
-        }
-        .collect(flow: presenter.models, into: $state)
+        ComposeTimelineViewController(presenter: presenter, accountType: accountType)
     }
 }
 
@@ -34,7 +31,7 @@ struct HomeTimelineScreen: View {
     }
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
-            TimelineScreen(presenter: presenter)
+            TimelineScreen(presenter: presenter, accountType: accountType)
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #else

@@ -44,7 +44,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-import moe.tlaster.precompose.molecule.producePresenter
+//import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -55,11 +55,12 @@ fun TimelineComponent(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     lazyListState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ) {
-    val state by producePresenter(
-        key = "$presenter:$accountType",
-    ) {
-        presenter(presenter, accountType, lazyListState)
-    }
+//    val state by producePresenter(
+//        key = "$presenter:$accountType",
+//    ) {
+//        presenter(presenter, accountType, lazyListState)
+//    }
+    val state = presenter(presenter, accountType, lazyListState)
     val scope = rememberCoroutineScope()
     RefreshContainer(
         modifier = modifier,

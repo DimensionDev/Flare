@@ -60,7 +60,6 @@ import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.TabTitle
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
@@ -215,6 +214,7 @@ private fun HomeTimelineScreen(
                         accountType = accountType,
                         contentPadding = contentPadding,
                         modifier = Modifier.fillMaxSize(),
+                        lazyListState = tabs[0].lazyListState,
                     )
                 } else {
                     HorizontalPager(
@@ -226,6 +226,7 @@ private fun HomeTimelineScreen(
                             accountType = accountType,
                             contentPadding = contentPadding,
                             modifier = Modifier.fillMaxSize(),
+                            lazyListState = tab.lazyListState,
                         )
                     }
                 }
@@ -269,15 +270,20 @@ private fun timelinePresenter(
             rememberPagerState { it.size }
         }
     val tabState =
-        tabs.map {
-            it
-                .map {
-                    TimelineTabState(
-                        presenter = it.createPresenter(),
-                        lazyListState = rememberLazyStaggeredGridState(),
-                        metaData = it.metaData,
-                    )
-                }.toImmutableList()
+        remember(tabs) {
+            tabs.map {
+                it.map {
+                    it.createPresenter() to it.metaData
+                }
+            }
+        }.map {
+            it.map {
+                TimelineTabState(
+                    presenter = it.first,
+                    lazyListState = rememberLazyStaggeredGridState(),
+                    metaData = it.second,
+                )
+            }
         }
 
     object : UserState by accountState {

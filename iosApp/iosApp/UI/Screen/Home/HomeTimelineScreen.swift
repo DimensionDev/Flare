@@ -4,8 +4,10 @@ import shared
 struct ComposeTimelineViewController: UIViewControllerRepresentable {
     let presenter: TimelinePresenter
     let accountType: AccountType
+    let darkMode: Bool
+    let onOpenLink: (String) -> Void
     func makeUIViewController(context: Context) -> UIViewController {
-        return TimelineViewController(presenter: presenter, accountType: accountType)
+        return TimelineViewController(presenter: presenter, accountType: accountType, darkMode: darkMode, onOpenLink: onOpenLink)
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
@@ -13,10 +15,13 @@ struct ComposeTimelineViewController: UIViewControllerRepresentable {
 }
 
 struct TimelineScreen: View {
+    @Environment(\.openURL) private var openURL
     let presenter: TimelinePresenter
     let accountType: AccountType
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
+
     var body: some View {
-        ComposeTimelineViewController(presenter: presenter, accountType: accountType)
+        ComposeTimelineViewController(presenter: presenter, accountType: accountType, darkMode: colorScheme == .dark, onOpenLink: { openURL(.init(string: $0)!) })
     }
 }
 

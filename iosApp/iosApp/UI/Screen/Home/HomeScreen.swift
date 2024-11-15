@@ -4,7 +4,7 @@ import Awesome
 
 struct HomeScreen: View {
     @State private var presenter = ActiveAccountPresenter()
-    
+
     var body: some View {
         ObservePresenter(presenter: presenter) { userState in
             let accountType: AccountType? = switch onEnum(of: userState.user) {
@@ -21,7 +21,7 @@ struct HomeScreen: View {
                 HomeContent(accountType: actualAccountType)
             }
         }
-        
+
     }
 }
 

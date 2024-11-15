@@ -7,14 +7,16 @@ import dev.dimension.flare.ui.component.status.TimelineComponent
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import platform.UIKit.UIViewController
 
+@Suppress("FunctionName")
 fun TimelineViewController(
     presenter: TimelinePresenter,
     accountType: AccountType,
-): UIViewController = ComposeUIViewController {
-    MaterialTheme {
-        TimelineComponent(
-            presenter = presenter,
-            accountType = accountType,
-        )
+): UIViewController =
+    ComposeUIViewController {
+        MaterialTheme {
+            TimelineComponent(
+                presenter = presenter,
+                accountType = accountType,
+            )
+        }
     }
-}

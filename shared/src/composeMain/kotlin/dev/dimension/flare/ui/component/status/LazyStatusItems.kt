@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.component.status
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -74,7 +73,7 @@ fun LazyStaggeredGridScope.status(
                     item,
                     detailStatusKey = detailStatusKey,
                     modifier =
-                        Modifier
+                    Modifier,
 //                            .let {
 //                                if (item != null) {
 //                                    it.sharedBounds(
@@ -92,7 +91,7 @@ fun LazyStaggeredGridScope.status(
 //                                    it
 //                                }
 //                            }
-                            .background(MaterialTheme.colorScheme.background),
+//                            .background(MaterialTheme.colorScheme.background),
                 )
                 if (it != itemCount - 1) {
                     HorizontalDivider(
@@ -257,18 +256,20 @@ fun StatusItem(
 ) {
     if (item == null) {
         Column(
-            modifier = modifier.padding(horizontal = horizontalPadding),
+            modifier =
+                modifier.padding(
+                    horizontal = horizontalPadding,
+                    vertical = 8.dp,
+                ),
         ) {
             StatusPlaceholder()
-            Spacer(modifier = Modifier.height(8.dp))
         }
     } else {
         UiTimelineComponent(
             item = item,
             detailStatusKey = detailStatusKey,
-            modifier =
-                modifier
-                    .padding(horizontal = horizontalPadding),
+            modifier = modifier,
+//                    .padding(horizontal = horizontalPadding),
         )
     }
 }

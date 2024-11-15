@@ -126,7 +126,7 @@ fun CommonStatusComponent(
     val appearanceSettings = LocalAppearanceSettings.current
     Column(
         modifier =
-            modifier
+            Modifier
                 .let {
                     if (isDetail) {
                         it
@@ -141,7 +141,7 @@ fun CommonStatusComponent(
                             )
                         }
                     }
-                },
+                }.then(modifier),
     ) {
         item.user?.let { user ->
             CommonStatusHeaderComponent(

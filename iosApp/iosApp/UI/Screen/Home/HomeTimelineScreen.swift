@@ -14,6 +14,25 @@ struct ComposeTimelineViewController: UIViewControllerRepresentable {
     }
 }
 
+struct ComposeTimelineListController: UIViewControllerRepresentable {
+    let pagingState: PagingState<UiTimeline>
+    let onRefresh: () -> Void
+    let detailStatusKey: MicroBlogKey?
+    let darkMode: Bool
+    let onOpenLink: (String) -> Void
+    func makeUIViewController(context: Context) -> some UIViewController {
+        let controller = TimelineListViewController(onRefresh: onRefresh, pagingState: pagingState, darkMode: darkMode, onOpenLink: onOpenLink, detailStatusKey: detailStatusKey)
+        
+        if let pop = controller.navigationController?.interactivePopGestureRecognizer {
+            controller.view.gestureRecognizers?.filter { $0.name == "CMPGestureRecognizer" }.first?.shouldRequireFailure(of: pop)
+        }
+        
+        return controller
+    }
+    func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
+    }
+}
+
 struct TimelineScreen: View {
     @Environment(\.openURL) private var openURL
     let presenter: TimelinePresenter

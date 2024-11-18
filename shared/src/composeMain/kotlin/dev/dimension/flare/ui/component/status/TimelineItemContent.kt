@@ -35,6 +35,7 @@ import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.home_timeline_new_toots
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.model.UiTimeline
@@ -44,7 +45,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-// import moe.tlaster.precompose.molecule.producePresenter
+import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -55,12 +56,12 @@ fun TimelineComponent(
     contentPadding: PaddingValues = PaddingValues(0.dp),
     lazyListState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
 ) {
-//    val state by producePresenter(
-//        key = "$presenter:$accountType",
-//    ) {
-//        presenter(presenter, accountType, lazyListState)
-//    }
-    val state = presenter(presenter, accountType, lazyListState)
+    val state by producePresenter(
+        key = "$presenter:$accountType",
+    ) {
+        presenter(presenter, accountType, lazyListState)
+    }
+//    val state = presenter(presenter, accountType, lazyListState)
     val scope = rememberCoroutineScope()
     RefreshContainer(
         modifier = modifier,
@@ -102,6 +103,32 @@ fun TimelineComponent(
                         Text(text = stringResource(Res.string.home_timeline_new_toots))
                     }
                 }
+            }
+        },
+    )
+}
+
+@Composable
+fun TimelineList(
+    onRefresh: () -> Unit,
+    pagingState: PagingState<UiTimeline>,
+    detailStatusKey: MicroBlogKey? = null,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    modifier: Modifier = Modifier,
+    lazyListState: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
+) {
+    RefreshContainer(
+        modifier = modifier,
+        onRefresh = onRefresh,
+        isRefreshing = pagingState.isRefreshing,
+        indicatorPadding = contentPadding,
+        content = {
+            LazyStatusVerticalStaggeredGrid(
+                state = lazyListState,
+                contentPadding = contentPadding,
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                status(pagingState, detailStatusKey)
             }
         },
     )

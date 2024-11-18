@@ -4,6 +4,8 @@ import shared
 struct StatusDetailScreen: View {
     @State private var presenter: StatusContextPresenter
     private let statusKey: MicroBlogKey
+    @Environment(\.colorScheme) var colorScheme: ColorScheme
+    @Environment(\.openURL) private var openURL
 
     init(accountType: AccountType, statusKey: MicroBlogKey) {
         presenter = .init(accountType: accountType, statusKey: statusKey)
@@ -12,16 +14,13 @@ struct StatusDetailScreen: View {
 
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
-            List {
-                StatusTimelineComponent(
-                    data: state.listState,
-                    detailKey: statusKey
-                )
-            }
-            .listStyle(.plain)
-            .refreshable {
-                try? await state.refresh()
-            }
+            ComposeTimelineListController(
+                pagingState: state.listState,
+                onRefresh: {  },
+                detailStatusKey: statusKey,
+                darkMode: colorScheme == .dark,
+                onOpenLink: { openURL(.init(string: $0)!) }
+            )
         }
     }
 }

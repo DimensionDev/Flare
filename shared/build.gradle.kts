@@ -86,7 +86,7 @@ kotlin {
                 implementation(libs.composeIcons.fontAwesome)
                 implementation(libs.bundles.coil3)
                 implementation(libs.compose.placeholder.material3)
-//                implementation(libs.precompose.molecule)
+                implementation(libs.precompose.molecule)
             }
         }
         val androidMain by getting {
@@ -102,6 +102,11 @@ kotlin {
             dependsOn(composeMain)
             dependencies {
                 implementation(libs.ktor.client.darwin)
+                implementation("org.jetbrains.androidx.core:core-bundle:1.0.1")
+                implementation("org.jetbrains.androidx.savedstate:savedstate:1.2.2")
+                implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.8.4")
+                implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.4")
+                implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
             }
         }
         val nativeMain by getting {

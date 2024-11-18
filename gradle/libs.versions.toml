@@ -46,7 +46,7 @@ firebase-crashlytics = "3.0.2"
 napier = "2.7.1"
 materialKolor = "2.0.0"
 room = "2.7.0-alpha11"
-compose-multiplatform = "1.7.0"
+compose-multiplatform = "1.7.1"
 
 [libraries]
 bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }

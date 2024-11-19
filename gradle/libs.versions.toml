@@ -169,6 +169,8 @@ material-motion-compose = { module = "io.github.fornewid:material-motion-compose
 
 precompose-molecule = { module = "moe.tlaster:precompose-molecule", version = "1.7.0-alpha03" }
 
+compose-cupertino = { module = "io.github.alexzhirkevich:cupertino-core", version = "0.1.0-alpha04" }
+
 [bundles]
 compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3", "material3WindowSizeClass", "material3-adaptive-navigation-suite", "material3-adaptive", "material3-adaptive-navigation", "material3-adaptive-layout"]
 navigation = ["navigation-compose"]

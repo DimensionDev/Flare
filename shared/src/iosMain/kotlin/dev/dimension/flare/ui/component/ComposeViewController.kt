@@ -8,8 +8,6 @@ import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -22,17 +20,20 @@ import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.window.ComposeUIViewController
+import dev.dimension.flare.ui.iOSDarkColorScheme
+import dev.dimension.flare.ui.iOSLightColorScheme
 import kotlinx.coroutines.launch
 import platform.UIKit.UIViewController
 
 @Suppress("FunctionName")
-fun ComposeViewController(
-    content: @Composable () -> Unit,
+internal fun ComposeViewController(
     onOpenLink: (String) -> Unit,
     darkMode: Boolean,
+    secondary: Boolean = false,
+    content: @Composable () -> Unit,
 ): UIViewController =
     ComposeUIViewController {
-        val colorScheme = if (darkMode) darkColorScheme() else lightColorScheme()
+        val colorScheme = if (darkMode) iOSDarkColorScheme(secondary) else iOSLightColorScheme(secondary)
         MaterialTheme(
             colorScheme = colorScheme,
         ) {

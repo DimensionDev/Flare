@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
+		06005F5A2CEC976F0060A785 /* ComposeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06005F592CEC97660060A785 /* ComposeView.swift */; };
 		060501BC2ACA985B00DBCCEB /* StatusTimelineBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060501BB2ACA985B00DBCCEB /* StatusTimelineBuilder.swift */; };
 		060501BE2ACAC4ED00DBCCEB /* NotificationScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060501BD2ACAC4ED00DBCCEB /* NotificationScreen.swift */; };
 		060501C02ACAC8AF00DBCCEB /* SplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060501BF2ACAC8AF00DBCCEB /* SplashScreen.swift */; };
@@ -78,6 +79,7 @@
 /* Begin PBXFileReference section */
 		058557BA273AAA24004C7B11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		06005F592CEC97660060A785 /* ComposeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposeView.swift; sourceTree = "<group>"; };
 		060501BB2ACA985B00DBCCEB /* StatusTimelineBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusTimelineBuilder.swift; sourceTree = "<group>"; };
 		060501BD2ACAC4ED00DBCCEB /* NotificationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScreen.swift; sourceTree = "<group>"; };
 		060501BF2ACAC8AF00DBCCEB /* SplashScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreen.swift; sourceTree = "<group>"; };
@@ -239,6 +241,7 @@
 		066151222AC54A8200CCB945 /* Component */ = {
 			isa = PBXGroup;
 			children = (
+				06005F592CEC97660060A785 /* ComposeView.swift */,
 				069050772CAE6100007FC957 /* SwitUIInAppNotification.swift */,
 				06C862742B4D2A46008C902C /* Compact */,
 				060501C42ACBF40700DBCCEB /* User */,
@@ -577,6 +580,7 @@
 				062A3C892C6C9ECD00A45E44 /* VVOLoginScreen.swift in Sources */,
 				060881C12AE10D35001AAD2F /* ComposeViewModel.swift in Sources */,
 				0620DD9E2AC44237009BD1BE /* HomeTimelineScreen.swift in Sources */,
+				06005F5A2CEC976F0060A785 /* ComposeView.swift in Sources */,
 				061C2CFC2B4E77D700249514 /* FullScreenImageViewer.swift in Sources */,
 				061C2CFE2B4E82C900249514 /* ImageViewWindow.swift in Sources */,
 				06F4B4C92C6369390005317F /* VGrid.swift in Sources */,

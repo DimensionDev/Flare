@@ -964,14 +964,14 @@ private fun ExpandedCard(
     val appearanceSettings = LocalAppearanceSettings.current
     Column(
         modifier =
-            modifier
+            Modifier
                 .border(
                     FlareDividerDefaults.thickness,
                     color = FlareDividerDefaults.color,
                     shape = MaterialTheme.shapes.medium,
                 ).clip(
                     shape = MaterialTheme.shapes.medium,
-                ),
+                ).then(modifier),
     ) {
         card.media?.let {
             AdaptiveGrid(
@@ -1016,14 +1016,14 @@ fun CompatCard(
 ) {
     Row(
         modifier =
-            modifier
+            Modifier
                 .border(
                     FlareDividerDefaults.thickness,
                     color = FlareDividerDefaults.color,
                     shape = MaterialTheme.shapes.medium,
                 ).clip(
                     shape = MaterialTheme.shapes.medium,
-                ),
+                ).then(modifier),
     ) {
         card.media?.let {
             MediaItem(

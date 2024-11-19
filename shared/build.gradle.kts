@@ -103,6 +103,7 @@ kotlin {
             dependencies {
                 implementation(libs.ktor.client.darwin)
                 implementation(libs.lifecycle.viewmodel.compose)
+                implementation(libs.compose.cupertino)
             }
         }
         val nativeMain by getting {

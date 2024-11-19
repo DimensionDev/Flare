@@ -1,5 +1,6 @@
 [versions]
 compileSdk = "35"
+lifecycleViewmodelCompose = "2.8.4"
 minSdk = "24"
 java = "21"
 agp = "8.7.2"
@@ -59,6 +60,7 @@ lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtim
 lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }

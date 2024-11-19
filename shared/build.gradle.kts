@@ -102,11 +102,7 @@ kotlin {
             dependsOn(composeMain)
             dependencies {
                 implementation(libs.ktor.client.darwin)
-                implementation("org.jetbrains.androidx.core:core-bundle:1.0.1")
-                implementation("org.jetbrains.androidx.savedstate:savedstate:1.2.2")
-                implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel:2.8.4")
-                implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-savedstate:2.8.4")
-                implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")
+                implementation(libs.lifecycle.viewmodel.compose)
             }
         }
         val nativeMain by getting {

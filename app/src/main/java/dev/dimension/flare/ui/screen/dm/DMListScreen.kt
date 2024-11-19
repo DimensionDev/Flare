@@ -56,6 +56,7 @@ import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.ListComponent
+import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.presenter.dm.DMListPresenter
 import dev.dimension.flare.ui.presenter.dm.DMListState
 import dev.dimension.flare.ui.presenter.invoke
@@ -281,7 +282,7 @@ private fun DMListScreen(
                                             val lastMessage = item.lastMessage
                                             if (lastMessage != null) {
                                                 Text(
-                                                    text = lastMessage.timestamp.shortTime,
+                                                    text = lastMessage.timestamp.shortTime.localizedShortTime,
                                                     style = MaterialTheme.typography.bodySmall,
                                                     modifier =
                                                         Modifier

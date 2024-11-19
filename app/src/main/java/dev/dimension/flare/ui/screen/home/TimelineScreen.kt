@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -36,7 +35,6 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.component.status.TimelineComponent
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
@@ -84,8 +82,7 @@ private fun TimelineScreen(
     val state by producePresenter(key = "timeline_${tabItem.key}") {
         timelinePresenter(tabItem)
     }
-    val lazyListState = rememberLazyStaggeredGridState()
-    RegisterTabCallback(lazyListState = lazyListState)
+    RegisterTabCallback(lazyListState = state.lazyListState)
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     FlareScaffold(
         topBar = {
@@ -135,12 +132,10 @@ private fun TimelineScreen(
         },
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->
-        TimelineComponent(
-            presenter = state.presenter,
-            accountType = tabItem.account,
-            modifier = Modifier.fillMaxSize(),
+        TimelineItemContent(
+            state = state,
             contentPadding = contentPadding,
-            lazyListState = lazyListState,
+            modifier = Modifier.fillMaxSize(),
         )
     }
 }
@@ -148,10 +143,7 @@ private fun TimelineScreen(
 @Composable
 private fun timelinePresenter(tabItem: TimelineTabItem) =
     run {
-        val presenter =
-            remember(tabItem) {
-                tabItem.createPresenter()
-            }
+        val state = timelineItemPresenter(tabItem)
         val accountState =
             remember(tabItem.account) {
                 UserPresenter(
@@ -159,7 +151,6 @@ private fun timelinePresenter(tabItem: TimelineTabItem) =
                     userKey = null,
                 )
             }.invoke()
-        object : UserState by accountState {
-            val presenter = presenter
+        object : UserState by accountState, TimelineItemState by state {
         }
     }

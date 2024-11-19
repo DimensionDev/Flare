@@ -23,11 +23,11 @@ import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
-import dev.dimension.flare.ui.render.direction
-import dev.dimension.flare.ui.theme.mediumAlpha
+import dev.dimension.flare.ui.model.localizedShortTime
+import dev.dimension.flare.ui.theme.MediumAlpha
 
 @Composable
-fun QuotedStatus(
+internal fun QuotedStatus(
     data: UiTimeline.ItemContent.Status,
     modifier: Modifier = Modifier,
     maxLines: Int = 6,
@@ -54,11 +54,11 @@ fun QuotedStatus(
             data.user?.let {
                 UserCompat(it) {
                     Text(
-                        text = data.createdAt.shortTime,
+                        text = data.createdAt.shortTime.localizedShortTime,
                         style = MaterialTheme.typography.bodySmall,
                         modifier =
                             Modifier
-                                .alpha(MaterialTheme.colorScheme.mediumAlpha),
+                                .alpha(MediumAlpha),
                         maxLines = 1,
                     )
                 }
@@ -114,7 +114,7 @@ internal fun UserCompat(
                     style = MaterialTheme.typography.bodySmall,
                     modifier =
                         Modifier
-                            .alpha(MaterialTheme.colorScheme.mediumAlpha),
+                            .alpha(MediumAlpha),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )

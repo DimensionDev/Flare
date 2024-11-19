@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.UiUserV2
-import dev.dimension.flare.ui.theme.mediumAlpha
+import dev.dimension.flare.ui.theme.MediumAlpha
 
 @Composable
 internal fun StatusRetweetHeaderComponent(
@@ -28,7 +28,7 @@ internal fun StatusRetweetHeaderComponent(
     Row(
         modifier =
             modifier
-                .alpha(MaterialTheme.colorScheme.mediumAlpha),
+                .alpha(MediumAlpha),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FAIcon(

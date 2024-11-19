@@ -1,46 +1,25 @@
 import SwiftUI
 import shared
 
-struct ComposeTimelineViewController: UIViewControllerRepresentable {
-    let presenter: TimelinePresenter
-    let accountType: AccountType
-    let darkMode: Bool
-    let onOpenLink: (String) -> Void
-    func makeUIViewController(context: Context) -> UIViewController {
-        return TimelineViewController(presenter: presenter, accountType: accountType, darkMode: darkMode, onOpenLink: onOpenLink)
-    }
-
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-    }
-}
-
-struct ComposeTimelineListController: UIViewControllerRepresentable {
-    let pagingState: PagingState<UiTimeline>
-    let onRefresh: () -> Void
-    let detailStatusKey: MicroBlogKey?
-    let darkMode: Bool
-    let onOpenLink: (String) -> Void
-    func makeUIViewController(context: Context) -> some UIViewController {
-        let controller = TimelineListViewController(onRefresh: onRefresh, pagingState: pagingState, darkMode: darkMode, onOpenLink: onOpenLink, detailStatusKey: detailStatusKey)
-        
-        if let pop = controller.navigationController?.interactivePopGestureRecognizer {
-            controller.view.gestureRecognizers?.filter { $0.name == "CMPGestureRecognizer" }.first?.shouldRequireFailure(of: pop)
-        }
-        
-        return controller
-    }
-    func updateUIViewController(_ uiViewController: UIViewControllerType, context: Context) {
-    }
-}
-
 struct TimelineScreen: View {
-    @Environment(\.openURL) private var openURL
     let presenter: TimelinePresenter
-    let accountType: AccountType
-    @Environment(\.colorScheme) var colorScheme: ColorScheme
-
+    @State private var state: TimelineState
+    init(presenter: TimelinePresenter) {
+        self.presenter = presenter
+        self.state = self.presenter.models.value
+    }
     var body: some View {
-        ComposeTimelineViewController(presenter: presenter, accountType: accountType, darkMode: colorScheme == .dark, onOpenLink: { openURL(.init(string: $0)!) })
+        List {
+            StatusTimelineComponent(
+                data: state.listState,
+                detailKey: nil
+            )
+        }
+        .listStyle(.plain)
+        .refreshable {
+            try? await presenter.models.value.refresh()
+        }
+        .collect(flow: presenter.models, into: $state)
     }
 }
 
@@ -55,7 +34,7 @@ struct HomeTimelineScreen: View {
     }
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
-            TimelineScreen(presenter: presenter, accountType: accountType)
+            TimelineScreen(presenter: presenter)
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #else

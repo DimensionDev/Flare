@@ -20,10 +20,10 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.model.UiUserV2
-import dev.dimension.flare.ui.theme.mediumAlpha
+import dev.dimension.flare.ui.theme.MediumAlpha
 
 @Composable
-fun CommonStatusHeaderComponent(
+internal fun CommonStatusHeaderComponent(
     data: UiUserV2,
     onUserClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
@@ -60,7 +60,7 @@ fun CommonStatusHeaderComponent(
                 style = MaterialTheme.typography.bodySmall,
                 modifier =
                     Modifier
-                        .alpha(MaterialTheme.colorScheme.mediumAlpha)
+                        .alpha(MediumAlpha)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
@@ -75,7 +75,7 @@ fun CommonStatusHeaderComponent(
 }
 
 @Composable
-fun ListComponent(
+internal fun ListComponent(
     headlineContent: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier,
     leadingContent: @Composable RowScope.() -> Unit = {},

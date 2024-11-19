@@ -144,7 +144,8 @@ struct CommonStatusComponent: View {
                 Spacer()
                     .frame(height: 4)
                 HStack {
-                    Text(data.createdAt.fullTime)
+                    Text(data.createdAt, style: .date)
+                    Text(data.createdAt, style: .time)
                 }
                 .opacity(0.6)
             }
@@ -237,8 +238,16 @@ struct CommonStatusComponent: View {
     }
 }
 
-func dateFormatter(_ date: UiDateTime) -> some View {
-    return Text(date.shortTime)
+func dateFormatter(_ date: Date) -> some View {
+    let now = Date()
+    let oneDayAgo = Calendar.current.date(byAdding: .day, value: -1, to: now)!
+    if date > oneDayAgo {
+        // If the date is within the last day, use the .timer style
+        return Text(date, style: .relative)
+    } else {
+        // Otherwise, use the .dateTime style
+        return Text(date, style: .date)
+    }
 }
 
 struct StatusActionItemIcon: View {

@@ -168,12 +168,33 @@ internal fun ProfileWithUserNameAndHostDeeplinkRoute(
     accountKey: MicroBlogKey?,
 ) {
     val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-    ProfileWithUserNameAndHostRoute(
-        userName = userName,
-        host = host,
-        navigator = navigator,
-        accountType = accountType,
-    )
+    val state by producePresenter(key = "acct_${accountKey}_$userName@$host") {
+        profileWithUserNameAndHostPresenter(
+            userName = userName,
+            host = host,
+            accountType = accountType,
+        )
+    }
+    state
+        .onSuccess {
+            ProfileRoute(
+                userKey = it.key,
+                navigator = navigator,
+                accountType = accountType,
+            )
+        }.onLoading {
+            ProfileLoadingScreen(
+                onBack = {
+                    navigator.navigateUp()
+                },
+            )
+        }.onError {
+            ProfileErrorScreen(
+                onBack = {
+                    navigator.navigateUp()
+                },
+            )
+        }
 }
 
 @Composable

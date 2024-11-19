@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
+import dev.dimension.flare.ui.theme.isLight
 
 private const val ID_IMAGE = "image"
 private val lightLinkColor = Color(0xff0066cc)
@@ -59,8 +61,7 @@ fun HtmlText(
     textStyle: TextStyle = LocalTextStyle.current,
     linkStyle: TextStyle =
         textStyle.copy(
-            color = lightLinkColor,
-//            color = if (MaterialTheme.colorScheme.isLight()) lightLinkColor else darkLinkColor,
+            color = if (MaterialTheme.colorScheme.isLight()) lightLinkColor else darkLinkColor,
         ),
 ) {
     CompositionLocalProvider(
@@ -160,7 +161,7 @@ private fun RenderContent(
 }
 
 @ExperimentalUnitApi
-private fun buildContentAnnotatedString(
+fun buildContentAnnotatedString(
     element: Element,
     textStyle: TextStyle,
     linkStyle: TextStyle,
@@ -175,7 +176,7 @@ private fun buildContentAnnotatedString(
     }
 }
 
-private data class StyleData(
+data class StyleData(
     val textStyle: TextStyle,
     val linkStyle: TextStyle,
 )

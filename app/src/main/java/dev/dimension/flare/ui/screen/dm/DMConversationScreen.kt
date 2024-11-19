@@ -67,6 +67,7 @@ import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.status.FlareDividerDefaults
 import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.dm.DMConversationPresenter
 import dev.dimension.flare.ui.presenter.dm.DMConversationState
@@ -398,7 +399,7 @@ private fun DMItem(
             )
         } else if (item.sendState == null || item.sendState != UiDMItem.SendState.Failed) {
             Text(
-                item.timestamp.shortTime,
+                item.timestamp.shortTime.localizedShortTime,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

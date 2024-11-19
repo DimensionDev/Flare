@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.component.status
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,36 +23,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleExclamation
 import compose.icons.fontawesomeicons.solid.File
 import compose.icons.fontawesomeicons.solid.FileCircleExclamation
-import dev.dimension.flare.Res
+import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onEndOfList
 import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.repository.LoginExpiredException
-import dev.dimension.flare.login_expired
-import dev.dimension.flare.login_expired_message
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.status_empty
-import dev.dimension.flare.status_loadmore_end
-import dev.dimension.flare.status_loadmore_error
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.theme.disableAlpha
-import dev.dimension.flare.ui.theme.mediumAlpha
+import dev.dimension.flare.ui.theme.DisabledAlpha
+import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
-import org.jetbrains.compose.resources.stringResource
 
-fun LazyStaggeredGridScope.status(
+internal fun LazyStaggeredGridScope.status(
     pagingState: PagingState<UiTimeline>,
     detailStatusKey: MicroBlogKey? = null,
 ) = with(pagingState) {
@@ -73,7 +72,7 @@ fun LazyStaggeredGridScope.status(
                     item,
                     detailStatusKey = detailStatusKey,
                     modifier =
-                    Modifier,
+                        Modifier
 //                            .let {
 //                                if (item != null) {
 //                                    it.sharedBounds(
@@ -91,7 +90,7 @@ fun LazyStaggeredGridScope.status(
 //                                    it
 //                                }
 //                            }
-//                            .background(MaterialTheme.colorScheme.background),
+                            .background(MaterialTheme.colorScheme.background),
                 )
                 if (it != itemCount - 1) {
                     HorizontalDivider(
@@ -125,7 +124,7 @@ fun LazyStaggeredGridScope.status(
                         HorizontalDivider()
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = stringResource(Res.string.status_loadmore_end),
+                            text = stringResource(R.string.status_loadmore_end),
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
@@ -163,7 +162,7 @@ fun LazyStaggeredGridScope.status(
                     modifier = Modifier.size(48.dp),
                 )
                 Text(
-                    text = stringResource(resource = Res.string.status_empty),
+                    text = stringResource(id = R.string.status_empty),
                     modifier = Modifier.padding(16.dp),
                 )
             }
@@ -177,11 +176,11 @@ private fun OnLoading(modifier: Modifier = Modifier) {
         modifier = modifier,
     ) {
         StatusPlaceholder(
-            modifier = Modifier.padding(horizontal = MaterialTheme.screenHorizontalPadding),
+            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
         )
         Spacer(modifier = Modifier.height(8.dp))
         HorizontalDivider(
-            modifier = Modifier.alpha(MaterialTheme.colorScheme.disableAlpha),
+            modifier = Modifier.alpha(DisabledAlpha),
         )
     }
 }
@@ -213,7 +212,7 @@ private fun OnError(
                     contentDescription = null,
                     modifier = Modifier.size(48.dp),
                 )
-                Text(text = stringResource(Res.string.status_loadmore_error))
+                Text(text = stringResource(R.string.status_loadmore_error))
             }
         }
     }
@@ -221,13 +220,12 @@ private fun OnError(
 
 @Composable
 private fun LoginExpiredError(modifier: Modifier = Modifier) {
-//    val uriHandler = LocalUriHandler.current
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier =
             modifier
                 .clickable {
-                    // TODO:
-//                    uriHandler.openUri(ServiceSelectRouteDestination.deeplink())
+                    uriHandler.openUri(ServiceSelectRouteDestination.deeplink())
                 },
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -238,21 +236,21 @@ private fun LoginExpiredError(modifier: Modifier = Modifier) {
             modifier = Modifier.size(48.dp),
         )
         Text(
-            text = stringResource(resource = Res.string.login_expired),
+            text = stringResource(id = R.string.login_expired),
         )
         Text(
-            text = stringResource(resource = Res.string.login_expired_message),
+            text = stringResource(id = R.string.login_expired_message),
         )
     }
 }
 
 @Composable
-fun StatusItem(
+internal fun StatusItem(
     item: UiTimeline?,
 //    event: StatusEvent,
     modifier: Modifier = Modifier,
     detailStatusKey: MicroBlogKey? = null,
-    horizontalPadding: Dp = MaterialTheme.screenHorizontalPadding,
+    horizontalPadding: Dp = screenHorizontalPadding,
 ) {
     if (item == null) {
         Column(
@@ -269,13 +267,13 @@ fun StatusItem(
             item = item,
             detailStatusKey = detailStatusKey,
             modifier = modifier,
-//                    .padding(horizontal = horizontalPadding),
+            horizontalPadding = screenHorizontalPadding,
         )
     }
 }
 
 @Composable
-fun StatusPlaceholder(modifier: Modifier = Modifier) {
+internal fun StatusPlaceholder(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
     ) {
@@ -294,7 +292,7 @@ fun StatusPlaceholder(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun UserPlaceholder(modifier: Modifier = Modifier) {
+internal fun UserPlaceholder(modifier: Modifier = Modifier) {
     Row(
         modifier =
             modifier
@@ -322,7 +320,7 @@ fun UserPlaceholder(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodySmall,
                 modifier =
                     Modifier
-                        .alpha(MaterialTheme.colorScheme.mediumAlpha)
+                        .alpha(MediumAlpha)
                         .placeholder(true),
             )
         }

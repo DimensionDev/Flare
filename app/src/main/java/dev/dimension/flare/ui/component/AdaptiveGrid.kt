@@ -9,7 +9,7 @@ import kotlin.math.ceil
 import kotlin.math.sqrt
 
 @Composable
-internal fun AdaptiveGrid(
+fun AdaptiveGrid(
     content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
     spacing: Dp = 4.dp,

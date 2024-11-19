@@ -6,14 +6,14 @@ struct StatusMediaScreen: View {
     @State private var selectedImage: Int
     private let initialIndex: Int32
     private let dismiss: () -> Void
-    
+
     init(accountType: AccountType, statusKey: MicroBlogKey, index: Int32, dismiss: @escaping () -> Void) {
         presenter = .init(accountType: accountType, statusKey: statusKey)
         self.initialIndex = index
         self.dismiss = dismiss
         selectedImage = .init(index + 1)
     }
-    
+
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
             ZStack {

@@ -33,6 +33,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -50,6 +51,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
@@ -74,32 +77,11 @@ import compose.icons.fontawesomeicons.solid.QuoteLeft
 import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
 import compose.icons.fontawesomeicons.solid.Trash
-import dev.dimension.flare.Res
-import dev.dimension.flare.bookmark_add
-import dev.dimension.flare.bookmark_remove
+import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
-import dev.dimension.flare.delete
-import dev.dimension.flare.like
-import dev.dimension.flare.mastodon_item_content_warning
-import dev.dimension.flare.mastodon_visibility_direct
-import dev.dimension.flare.mastodon_visibility_private
-import dev.dimension.flare.mastodon_visibility_public
-import dev.dimension.flare.mastodon_visibility_unlisted
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.more
-import dev.dimension.flare.poll_expired
-import dev.dimension.flare.poll_expired_at
-import dev.dimension.flare.quote
-import dev.dimension.flare.reaction_add
-import dev.dimension.flare.reaction_remove
-import dev.dimension.flare.reply
-import dev.dimension.flare.reply_to
-import dev.dimension.flare.report
-import dev.dimension.flare.retweet
-import dev.dimension.flare.retweet_remove
-import dev.dimension.flare.show_media
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.FAIcon
@@ -108,13 +90,17 @@ import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.render.direction
-import dev.dimension.flare.ui.theme.mediumAlpha
-import dev.dimension.flare.unlike
-import dev.dimension.flare.vote
+import dev.dimension.flare.ui.model.localizedFullTime
+import dev.dimension.flare.ui.model.localizedShortTime
+import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
+import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.screen.status.statusTranslatePresenter
+import dev.dimension.flare.ui.theme.MediumAlpha
+import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import org.jetbrains.compose.resources.stringResource
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
 fun CommonStatusComponent(
@@ -167,7 +153,7 @@ fun CommonStatusComponent(
                                 modifier =
                                     Modifier
                                         .size(14.dp)
-                                        .alpha(MaterialTheme.colorScheme.mediumAlpha),
+                                        .alpha(MediumAlpha),
                             )
                         }
 
@@ -175,7 +161,7 @@ fun CommonStatusComponent(
                     }
                     if (!isDetail) {
                         Text(
-                            text = item.createdAt.shortTime,
+                            text = item.createdAt.shortTime.localizedShortTime,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -260,7 +246,7 @@ fun CommonStatusComponent(
         if (isDetail) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = item.createdAt.fullTime,
+                text = item.createdAt.value.localizedFullTime,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -276,8 +262,7 @@ fun CommonStatusComponent(
                 Spacer(modifier = Modifier.height(4.dp))
             } else {
                 CompositionLocalProvider(
-                    LocalContentColor provides
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = MaterialTheme.colorScheme.mediumAlpha),
+                    LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = MediumAlpha),
                     LocalTextStyle provides MaterialTheme.typography.bodySmall,
                 ) {
                     StatusActions(item.actions)
@@ -325,19 +310,19 @@ private fun StatusMediasComponent(
         ) {
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Image,
-                contentDescription = stringResource(resource = Res.string.show_media),
+                contentDescription = stringResource(id = R.string.show_media),
                 modifier =
                     Modifier
                         .size(12.dp)
-                        .alpha(MaterialTheme.colorScheme.mediumAlpha),
+                        .alpha(MediumAlpha),
             )
             Spacer(modifier = Modifier.width(4.dp))
             Text(
-                text = stringResource(resource = Res.string.show_media),
+                text = stringResource(id = R.string.show_media),
                 style = MaterialTheme.typography.bodySmall,
                 modifier =
                     Modifier
-                        .alpha(MaterialTheme.colorScheme.mediumAlpha),
+                        .alpha(MediumAlpha),
             )
         }
     }
@@ -427,58 +412,58 @@ private fun TranslationComponent(
     rawContent: String,
     content: Element,
 ) {
-//    var enabledTranslate by rememberSaveable("translate-$statusKey") {
-//        mutableStateOf(false)
-//    }
-//    TextButton(
-//        onClick = {
-//            if (!enabledTranslate) {
-//                enabledTranslate = true
-//            }
-//        },
-//    ) {
-//        Text(
-//            text =
-//                stringResource(
-//                    resource = Res.string.status_detail_translate,
-//                    Locale.current.platformLocale.displayLanguage,
-//                ),
-//        )
-//    }
-//    if (enabledTranslate) {
-//        Spacer(modifier = Modifier.height(4.dp))
-//        val state by producePresenter(
-//            "translate_${contentWarning}_$rawContent",
-//        ) {
-//            statusTranslatePresenter(contentWarning = contentWarning, content = content)
-//        }
-//        state.contentWarning
-//            ?.onSuccess {
-//                Text(text = it)
-//            }?.onLoading {
-//                Text(
-//                    text = "Lores ipsum dolor sit amet",
-//                    modifier = Modifier.placeholder(true),
-//                )
-//            }?.onError {
-//                Text(text = it.message ?: "Error")
-//            }
-//        state.text
-//            .onSuccess {
-//                Text(text = it)
-//            }.onLoading {
-//                Text(
-//                    text = "Lores ipsum dolor sit amet",
-//                    modifier = Modifier.placeholder(true),
-//                )
-//            }.onError {
-//                Text(text = it.message ?: "Error")
-//            }
-//    }
+    var enabledTranslate by rememberSaveable("translate-$statusKey") {
+        mutableStateOf(false)
+    }
+    TextButton(
+        onClick = {
+            if (!enabledTranslate) {
+                enabledTranslate = true
+            }
+        },
+    ) {
+        Text(
+            text =
+                stringResource(
+                    id = R.string.status_detail_translate,
+                    Locale.current.platformLocale.displayLanguage,
+                ),
+        )
+    }
+    if (enabledTranslate) {
+        Spacer(modifier = Modifier.height(4.dp))
+        val state by producePresenter(
+            "translate_${contentWarning}_$rawContent",
+        ) {
+            statusTranslatePresenter(contentWarning = contentWarning, content = content)
+        }
+        state.contentWarning
+            ?.onSuccess {
+                Text(text = it)
+            }?.onLoading {
+                Text(
+                    text = "Lores ipsum dolor sit amet",
+                    modifier = Modifier.placeholder(true),
+                )
+            }?.onError {
+                Text(text = it.message ?: "Error")
+            }
+        state.text
+            .onSuccess {
+                Text(text = it)
+            }.onLoading {
+                Text(
+                    text = "Lores ipsum dolor sit amet",
+                    modifier = Modifier.placeholder(true),
+                )
+            }.onError {
+                Text(text = it.message ?: "Error")
+            }
+    }
 }
 
 @Composable
-fun StatusVisibilityComponent(
+internal fun StatusVisibilityComponent(
     visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type,
     modifier: Modifier = Modifier,
 ) {
@@ -486,28 +471,28 @@ fun StatusVisibilityComponent(
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Globe,
-                contentDescription = stringResource(resource = Res.string.mastodon_visibility_public),
+                contentDescription = stringResource(id = R.string.mastodon_visibility_public),
                 modifier = modifier,
             )
 
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.LockOpen,
-                contentDescription = stringResource(resource = Res.string.mastodon_visibility_unlisted),
+                contentDescription = stringResource(id = R.string.mastodon_visibility_unlisted),
                 modifier = modifier,
             )
 
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Lock,
-                contentDescription = stringResource(resource = Res.string.mastodon_visibility_private),
+                contentDescription = stringResource(id = R.string.mastodon_visibility_private),
                 modifier = modifier,
             )
 
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.At,
-                contentDescription = stringResource(resource = Res.string.mastodon_visibility_direct),
+                contentDescription = stringResource(id = R.string.mastodon_visibility_direct),
                 modifier = modifier,
             )
     }
@@ -667,38 +652,38 @@ private fun statusActionItemText(item: StatusAction.Item) =
     when (item) {
         is StatusAction.Item.Bookmark -> {
             if (item.bookmarked) {
-                stringResource(resource = Res.string.bookmark_remove)
+                stringResource(id = R.string.bookmark_remove)
             } else {
-                stringResource(resource = Res.string.bookmark_add)
+                stringResource(id = R.string.bookmark_add)
             }
         }
 
-        is StatusAction.Item.Delete -> stringResource(resource = Res.string.delete)
+        is StatusAction.Item.Delete -> stringResource(id = R.string.delete)
         is StatusAction.Item.Like -> {
             if (item.liked) {
-                stringResource(resource = Res.string.unlike)
+                stringResource(id = R.string.unlike)
             } else {
-                stringResource(resource = Res.string.like)
+                stringResource(id = R.string.like)
             }
         }
 
-        StatusAction.Item.More -> stringResource(resource = Res.string.more)
-        is StatusAction.Item.Quote -> stringResource(resource = Res.string.quote)
+        StatusAction.Item.More -> stringResource(id = R.string.more)
+        is StatusAction.Item.Quote -> stringResource(id = R.string.quote)
         is StatusAction.Item.Reaction -> {
             if (item.reacted) {
-                stringResource(resource = Res.string.reaction_remove)
+                stringResource(id = R.string.reaction_remove)
             } else {
-                stringResource(resource = Res.string.reaction_add)
+                stringResource(id = R.string.reaction_add)
             }
         }
 
-        is StatusAction.Item.Reply -> stringResource(resource = Res.string.reply)
-        is StatusAction.Item.Report -> stringResource(resource = Res.string.report)
+        is StatusAction.Item.Reply -> stringResource(id = R.string.reply)
+        is StatusAction.Item.Report -> stringResource(id = R.string.report)
         is StatusAction.Item.Retweet -> {
             if (item.retweeted) {
-                stringResource(resource = Res.string.retweet_remove)
+                stringResource(id = R.string.retweet_remove)
             } else {
-                stringResource(resource = Res.string.retweet)
+                stringResource(id = R.string.retweet)
             }
         }
     }
@@ -711,19 +696,19 @@ private fun StatusReplyComponent(
     Row(
         modifier =
             modifier
-                .alpha(MaterialTheme.colorScheme.mediumAlpha),
+                .alpha(MediumAlpha),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         FAIcon(
             imageVector = FontAwesomeIcons.Solid.Reply,
-            contentDescription = stringResource(resource = Res.string.reply_to),
+            contentDescription = stringResource(id = R.string.reply_to),
             modifier =
                 Modifier
                     .size(12.dp),
         )
         Text(
-            text = stringResource(resource = Res.string.reply_to, replyHandle),
+            text = stringResource(id = R.string.reply_to, replyHandle),
             style = MaterialTheme.typography.bodySmall,
             maxLines = 1,
         )
@@ -753,7 +738,7 @@ private fun StatusContentComponent(
                         Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
-                            .alpha(MaterialTheme.colorScheme.mediumAlpha)
+                            .alpha(MediumAlpha)
                             .clickable {
                                 expanded = !expanded
                             },
@@ -761,7 +746,7 @@ private fun StatusContentComponent(
                 ) {
                     FAIcon(
                         imageVector = FontAwesomeIcons.Solid.Lock,
-                        contentDescription = stringResource(resource = Res.string.mastodon_item_content_warning),
+                        contentDescription = stringResource(id = R.string.mastodon_item_content_warning),
                     )
                     Text(
                         text = it,
@@ -826,24 +811,24 @@ private fun StatusPollComponent(
         }
         if (poll.expired) {
             Text(
-                text = stringResource(resource = Res.string.poll_expired),
+                text = stringResource(id = R.string.poll_expired),
                 modifier =
                     Modifier
                         .align(Alignment.End)
-                        .alpha(MaterialTheme.colorScheme.mediumAlpha),
+                        .alpha(MediumAlpha),
                 style = MaterialTheme.typography.bodySmall,
             )
         } else {
             Text(
                 text =
                     stringResource(
-                        resource = Res.string.poll_expired_at,
-                        poll.expiredAt.fullTime,
+                        id = R.string.poll_expired_at,
+                        poll.expiredAt.value.localizedFullTime,
                     ),
                 modifier =
                     Modifier
                         .align(Alignment.End)
-                        .alpha(MaterialTheme.colorScheme.mediumAlpha),
+                        .alpha(MediumAlpha),
                 style = MaterialTheme.typography.bodySmall,
             )
         }
@@ -855,7 +840,7 @@ private fun StatusPollComponent(
                 },
             ) {
                 Text(
-                    text = stringResource(resource = Res.string.vote),
+                    text = stringResource(id = R.string.vote),
                 )
             }
         }
@@ -1017,7 +1002,7 @@ private fun ExpandedCard(
                     style = MaterialTheme.typography.bodySmall,
                     modifier =
                         Modifier
-                            .alpha(MaterialTheme.colorScheme.mediumAlpha),
+                            .alpha(MediumAlpha),
                 )
             }
         }
@@ -1065,7 +1050,7 @@ fun CompatCard(
                     style = MaterialTheme.typography.bodySmall,
                     modifier =
                         Modifier
-                            .alpha(MaterialTheme.colorScheme.mediumAlpha),
+                            .alpha(MediumAlpha),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -1074,7 +1059,7 @@ fun CompatCard(
     }
 }
 
-object FlareDividerDefaults {
+internal object FlareDividerDefaults {
     val color: Color
         @Composable
         get() = DividerDefaults.color.copy(alpha = 0.87f)

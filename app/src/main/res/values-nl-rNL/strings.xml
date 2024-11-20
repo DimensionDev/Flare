@@ -192,30 +192,6 @@
   <string name="search_status">status</string>
   <string name="quick_menu_title">Snel menu</string>
   <string name="quick_menu_add_account">Account toevoegen</string>
-  <string-array name="settings_about_description">
-    <item>De ultieme volgende generatie open-sourced AI heeft gedecentraliseerde sociale netwerkclient aangedreven voor Android.</item>
-    <item>De ultieme volgende generatie open-sourced AI stuurde gedecentraliseerde sociale netwerkclient.</item>
-  </string-array>
-  <string-array name="settings_about_source_code">
-    <item>Bron code</item>
-    <item>Bron code</item>
-  </string-array>
-  <string-array name="settings_about_telegram">
-    <item>Telegram</item>
-    <item>Telegram</item>
-  </string-array>
-  <string-array name="settings_about_telegram_description">
-    <item>Deelnemen aan onze Telegram-groep</item>
-    <item>Deelnemen aan onze Telegram-groep</item>
-  </string-array>
-  <string-array name="settings_about_localization">
-    <item>Crowdin</item>
-    <item>Crowdin</item>
-  </string-array>
-  <string-array name="settings_about_localization_description">
-    <item>Help ons Flare te vertalen</item>
-    <item>Help ons Flare te vertalen</item>
-  </string-array>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Toon acties</string>
   <string name="settings_appearance_show_actions_description">Acties weergeven onderaan de status</string>

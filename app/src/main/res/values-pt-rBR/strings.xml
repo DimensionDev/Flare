@@ -192,30 +192,6 @@
   <string name="search_status">SItuação</string>
   <string name="quick_menu_title">Menu rápido</string>
   <string name="quick_menu_add_account">Adicionar conta</string>
-  <string-array name="settings_about_description">
-    <item>O derradeiro cliente descentralizado de rede social de código-fonte aberto de última geração para Android.</item>
-    <item>O melhor cliente descentralizado de rede social de código-fonte aberto da próxima geração.</item>
-  </string-array>
-  <string-array name="settings_about_source_code">
-    <item>Código fonte</item>
-    <item>Código fonte</item>
-  </string-array>
-  <string-array name="settings_about_telegram">
-    <item>Telegram</item>
-    <item>Telegram</item>
-  </string-array>
-  <string-array name="settings_about_telegram_description">
-    <item>Junte-se ao nosso grupo do Telegram</item>
-    <item>Junte-se ao nosso grupo do Telegram</item>
-  </string-array>
-  <string-array name="settings_about_localization">
-    <item>Crowdin</item>
-    <item>Crowdin</item>
-  </string-array>
-  <string-array name="settings_about_localization_description">
-    <item>Ajude-nos a traduzir o Sinalizador</item>
-    <item>Ajude-nos a traduzir o Sinalizador</item>
-  </string-array>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Mostrar ações</string>
   <string name="settings_appearance_show_actions_description">Mostrar ações na parte inferior do status</string>

@@ -192,12 +192,6 @@
   <string name="search_status">Status</string>
   <string name="quick_menu_title">Snabb meny</string>
   <string name="quick_menu_add_account">Lägg till konto</string>
-  <string name="settings_about_description">Den ultimata nästa generation öppen källkod AI drivs decentraliserad sociala nätverk klient för Android.</string>
-  <string name="settings_about_source_code">Källkod</string>
-  <string name="settings_about_telegram">Telegram</string>
-  <string name="settings_about_telegram_description">Gå med i vår Telegramgrupp</string>
-  <string name="settings_about_localization">Crowdin</string>
-  <string name="settings_about_localization_description">Hjälp oss att översätta Flare</string>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Visa åtgärder</string>
   <string name="settings_appearance_show_actions_description">Visa åtgärder längst ner på statusen</string>

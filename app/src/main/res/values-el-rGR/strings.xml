@@ -188,12 +188,6 @@
   <string name="search_status">Κατάσταση</string>
   <string name="quick_menu_title">Γρήγορο μενού</string>
   <string name="quick_menu_add_account">Προσθήκη λογαριασμού</string>
-  <string name="settings_about_description">Η απόλυτη νέα γενιά ανοιχτού κώδικα AI τροφοδοτείται από αποκεντρωμένη εφαρμογή κοινωνικών δικτύων για το Android.</string>
-  <string name="settings_about_source_code">Πηγαίος κώδικας</string>
-  <string name="settings_about_telegram">Telegram</string>
-  <string name="settings_about_telegram_description">Γίνετε μέλος της ομάδας Telegram</string>
-  <string name="settings_about_localization">Crowdin</string>
-  <string name="settings_about_localization_description">Βοηθήστε μας να μεταφράσουμε το Flare</string>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Εμφάνιση ενεργειών</string>
   <string name="settings_appearance_show_actions_description">Εμφάνιση ενεργειών στο κάτω μέρος της κατάστασης</string>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="settings_about_description">На основі децентралізованого клієнта соціальної мережі під час наступного покоління.</string>
+  <string name="settings_about_source_code">Початковий код</string>
+  <string name="settings_about_telegram">Телеграма</string>
+  <string name="settings_about_telegram_description">Приєднатися до нашої групи в Telegram</string>
+  <string name="settings_about_localization">Кравдін</string>
+  <string name="settings_about_localization_description">Допоможіть нам перекласти Flare</string>
+</resources>

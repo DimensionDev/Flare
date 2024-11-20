@@ -192,12 +192,6 @@
   <string name="search_status">Stato</string>
   <string name="quick_menu_title">Menu rapido</string>
   <string name="quick_menu_add_account">Aggiungi account</string>
-  <string name="settings_about_description">Il client di social network decentralizzato basato su AI di ultima generazione open source per Android.</string>
-  <string name="settings_about_source_code">Codice sorgente</string>
-  <string name="settings_about_telegram">Telegram</string>
-  <string name="settings_about_telegram_description">Unisciti al nostro gruppo Telegram</string>
-  <string name="settings_about_localization">Crowdin</string>
-  <string name="settings_about_localization_description">Aiutaci a tradurre il chiarore</string>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Mostra azioni</string>
   <string name="settings_appearance_show_actions_description">Mostra le azioni in fondo allo stato</string>

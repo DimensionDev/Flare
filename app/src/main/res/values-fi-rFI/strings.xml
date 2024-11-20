@@ -192,12 +192,6 @@
   <string name="search_status">Tila</string>
   <string name="quick_menu_title">Nopea valikko</string>
   <string name="quick_menu_add_account">Lisää tili</string>
-  <string name="settings_about_description">Lopullinen seuraavan sukupolven avoimen lähdekoodin tekoälykäyttöinen hajautettu sosiaalisen verkon asiakasohjelma Androidille.</string>
-  <string name="settings_about_source_code">Lähdekoodi</string>
-  <string name="settings_about_telegram">Telegram</string>
-  <string name="settings_about_telegram_description">Liity meidän Telegram ryhmään</string>
-  <string name="settings_about_localization">Crowdiini</string>
-  <string name="settings_about_localization_description">Auta meitä kääntämään Flare</string>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Näytä toiminnot</string>
   <string name="settings_appearance_show_actions_description">Näytä toiminnot tilan alareunassa</string>

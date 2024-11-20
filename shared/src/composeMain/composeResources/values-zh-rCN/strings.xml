@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="settings_about_description">下一代开放源码的 AI 为分散的社交网络客户端提供动力。</string>
+  <string name="settings_about_source_code">源代码</string>
+  <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">加入Telegram群组</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">帮助我们翻译Flare</string>
+</resources>

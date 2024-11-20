@@ -113,9 +113,9 @@ private class IOSIndication(
         override fun ContentDrawScope.draw() {
             drawContent()
             if (isPressed) {
-                drawRect(color = color.copy(alpha = 0.15f), size = size)
-            } else if (isHovered || isFocused) {
                 drawRect(color = color.copy(alpha = 0.05f), size = size)
+            } else if (isHovered || isFocused) {
+                drawRect(color = color.copy(alpha = 0.025f), size = size)
             }
         }
     }

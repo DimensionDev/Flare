@@ -61,13 +61,13 @@ fun AboutScreenContent(
             style = MaterialTheme.typography.bodySmall,
             modifier =
                 Modifier
-//                    .alpha(MediumAlpha)
                     .padding(horizontal = 16.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Text(
             text = version,
             style = MaterialTheme.typography.bodySmall,
-//            modifier = Modifier.alpha(MediumAlpha),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         ListItem(
             headlineContent = {
@@ -76,7 +76,6 @@ fun AboutScreenContent(
             supportingContent = {
                 Text(
                     text = "https://github.com/DimensionDev/Flare",
-//                    modifier = Modifier.alpha(MediumAlpha),
                 )
             },
             modifier =
@@ -98,7 +97,6 @@ fun AboutScreenContent(
             supportingContent = {
                 Text(
                     text = stringResource(resource = Res.string.settings_about_telegram_description),
-//                    modifier = Modifier.alpha(MediumAlpha),
                 )
             },
             modifier =
@@ -120,7 +118,6 @@ fun AboutScreenContent(
             supportingContent = {
                 Text(
                     text = stringResource(resource = Res.string.settings_about_localization_description),
-//                    modifier = Modifier.alpha(MediumAlpha),
                 )
             },
             modifier =

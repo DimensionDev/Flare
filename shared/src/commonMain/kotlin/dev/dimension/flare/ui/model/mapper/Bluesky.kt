@@ -5,6 +5,7 @@ import app.bsky.actor.ProfileViewBasic
 import app.bsky.actor.ProfileViewDetailed
 import app.bsky.embed.RecordViewRecordEmbedUnion
 import app.bsky.embed.RecordViewRecordUnion
+import app.bsky.embed.RecordWithMediaViewMediaUnion
 import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.GeneratorView
 import app.bsky.feed.Post
@@ -40,6 +41,7 @@ import io.ktor.utils.io.core.toByteArray
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -610,6 +612,40 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
                             ?.toFloat() ?: 0f,
                 ),
             )
+        }
+
+        is PostViewEmbedUnion.RecordWithMediaView -> {
+            when (val media = embed.value.media) {
+                is RecordWithMediaViewMediaUnion.ExternalView -> persistentListOf()
+                is RecordWithMediaViewMediaUnion.ImagesView ->
+                    media.value.images
+                        .map {
+                            UiMedia.Image(
+                                url = it.fullsize.uri,
+                                previewUrl = it.thumb.uri,
+                                description = it.alt,
+                                width = it.aspectRatio?.width?.toFloat() ?: 0f,
+                                height = it.aspectRatio?.height?.toFloat() ?: 0f,
+                                sensitive = false,
+                            )
+                        }.toPersistentList()
+                is RecordWithMediaViewMediaUnion.VideoView ->
+                    persistentListOf(
+                        UiMedia.Video(
+                            url = media.value.playlist.uri,
+                            thumbnailUrl = media.value.thumbnail?.uri ?: "",
+                            description = media.value.alt,
+                            width =
+                                media.value.aspectRatio
+                                    ?.width
+                                    ?.toFloat() ?: 0f,
+                            height =
+                                media.value.aspectRatio
+                                    ?.height
+                                    ?.toFloat() ?: 0f,
+                        ),
+                    )
+            }
         }
 
         else -> persistentListOf()

@@ -190,12 +190,30 @@
   <string name="search_status">Статус</string>
   <string name="quick_menu_title">Меню</string>
   <string name="quick_menu_add_account">Добавить аккаунт</string>
-  <string name="settings_about_description">Конечное поколение с открытым исходным кодом AI обеспечило децентрализованную социальную сеть для Android.</string>
-  <string name="settings_about_source_code">Исходный код</string>
-  <string name="settings_about_telegram">Телеграмма</string>
-  <string name="settings_about_telegram_description">Присоединяйтесь к нашей группе Telegram</string>
-  <string name="settings_about_localization">Crowdin</string>
-  <string name="settings_about_localization_description">Помогите нам перевести сигнал</string>
+  <string-array name="settings_about_description">
+    <item>Конечное поколение с открытым исходным кодом AI обеспечило децентрализованную социальную сеть для Android.</item>
+    <item>Конечное поколение с открытым исходным кодом обеспечило децентрализованный клиент социальных сетей.</item>
+  </string-array>
+  <string-array name="settings_about_source_code">
+    <item>Исходный код</item>
+    <item>Исходный код</item>
+  </string-array>
+  <string-array name="settings_about_telegram">
+    <item>Телеграмма</item>
+    <item>Телеграмма</item>
+  </string-array>
+  <string-array name="settings_about_telegram_description">
+    <item>Присоединяйтесь к нашей группе Telegram</item>
+    <item>Присоединяйтесь к нашей группе Telegram</item>
+  </string-array>
+  <string-array name="settings_about_localization">
+    <item>Crowdin</item>
+    <item>Crowdin</item>
+  </string-array>
+  <string-array name="settings_about_localization_description">
+    <item>Помогите нам перевести сигнал</item>
+    <item>Помогите нам перевести сигнал</item>
+  </string-array>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Показать действия</string>
   <string name="settings_appearance_show_actions_description">Показать действия внизу статуса</string>

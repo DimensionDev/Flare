@@ -189,12 +189,30 @@
   <string name="search_status">Статус</string>
   <string name="quick_menu_title">Швидке меню</string>
   <string name="quick_menu_add_account">Додати обліковий запис</string>
-  <string name="settings_about_description">На Андроїд наступного покоління використовує децентралізований клієнт соціальної мережі для Android.</string>
-  <string name="settings_about_source_code">Початковий код</string>
-  <string name="settings_about_telegram">Телеграма</string>
-  <string name="settings_about_telegram_description">Приєднатися до нашої групи в Telegram</string>
-  <string name="settings_about_localization">Кравдін</string>
-  <string name="settings_about_localization_description">Допоможіть нам перекласти Flare</string>
+  <string-array name="settings_about_description">
+    <item>На Андроїд наступного покоління використовує децентралізований клієнт соціальної мережі для Android.</item>
+    <item>На основі децентралізованого клієнта соціальної мережі під час наступного покоління.</item>
+  </string-array>
+  <string-array name="settings_about_source_code">
+    <item>Початковий код</item>
+    <item>Початковий код</item>
+  </string-array>
+  <string-array name="settings_about_telegram">
+    <item>Телеграма</item>
+    <item>Телеграма</item>
+  </string-array>
+  <string-array name="settings_about_telegram_description">
+    <item>Приєднатися до нашої групи в Telegram</item>
+    <item>Приєднатися до нашої групи в Telegram</item>
+  </string-array>
+  <string-array name="settings_about_localization">
+    <item>Кравдін</item>
+    <item>Кравдін</item>
+  </string-array>
+  <string-array name="settings_about_localization_description">
+    <item>Допоможіть нам перекласти Flare</item>
+    <item>Допоможіть нам перекласти Flare</item>
+  </string-array>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Показати дії</string>
   <string name="settings_appearance_show_actions_description">Показати дії внизу статусу</string>

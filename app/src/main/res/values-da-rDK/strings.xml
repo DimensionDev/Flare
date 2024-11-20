@@ -192,12 +192,30 @@
   <string name="search_status">Status</string>
   <string name="quick_menu_title">Hurtig menu</string>
   <string name="quick_menu_add_account">Tilføj konto</string>
-  <string name="settings_about_description">Den ultimative næste generation open-sourced AI drevet decentraliserede sociale netværk klient til Android.</string>
-  <string name="settings_about_source_code">Kilde kode</string>
-  <string name="settings_about_telegram">Telegram</string>
-  <string name="settings_about_telegram_description">Tilmeld dig vores Telegram gruppe</string>
-  <string name="settings_about_localization">Crowdin</string>
-  <string name="settings_about_localization_description">Hjælp os med at oversætte Flare</string>
+  <string-array name="settings_about_description">
+    <item>Den ultimative næste generation open-sourced AI drevet decentraliserede sociale netværk klient til Android.</item>
+    <item>Den ultimative næste generation open sourced AI drevet decentraliserede sociale netværk klient.</item>
+  </string-array>
+  <string-array name="settings_about_source_code">
+    <item>Kilde kode</item>
+    <item>Kilde kode</item>
+  </string-array>
+  <string-array name="settings_about_telegram">
+    <item>Telegram</item>
+    <item>Telegram</item>
+  </string-array>
+  <string-array name="settings_about_telegram_description">
+    <item>Tilmeld dig vores Telegram gruppe</item>
+    <item>Tilmeld dig vores Telegram gruppe</item>
+  </string-array>
+  <string-array name="settings_about_localization">
+    <item>Crowdin</item>
+    <item>Crowdin</item>
+  </string-array>
+  <string-array name="settings_about_localization_description">
+    <item>Hjælp os med at oversætte Flare</item>
+    <item>Hjælp os med at oversætte Flare</item>
+  </string-array>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Vis handlinger</string>
   <string name="settings_appearance_show_actions_description">Vis handlinger i bunden af status</string>

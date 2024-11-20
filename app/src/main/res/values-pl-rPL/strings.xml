@@ -191,30 +191,6 @@
   <string name="search_status">Status</string>
   <string name="quick_menu_title">Szybkie menu</string>
   <string name="quick_menu_add_account">Dodaj konto</string>
-  <string-array name="settings_about_description">
-    <item>Najnowszy klient zdecentralizowanej sieci społecznościowej z napędem AI nowej generacji dla Androida.</item>
-    <item>Najnowszy klient nowej generacji oparty na zdecentralizowanej sieci społecznościowej.</item>
-  </string-array>
-  <string-array name="settings_about_source_code">
-    <item>Kod źródłowy</item>
-    <item>Kod źródłowy</item>
-  </string-array>
-  <string-array name="settings_about_telegram">
-    <item>Telegram</item>
-    <item>Telegram</item>
-  </string-array>
-  <string-array name="settings_about_telegram_description">
-    <item>Dołącz do naszej grupy Telegram</item>
-    <item>Dołącz do naszej grupy Telegram</item>
-  </string-array>
-  <string-array name="settings_about_localization">
-    <item>Crowdin</item>
-    <item>Crowdin</item>
-  </string-array>
-  <string-array name="settings_about_localization_description">
-    <item>Pomóż nam przetłumaczyć Flare</item>
-    <item>Pomóż nam przetłumaczyć Flare</item>
-  </string-array>
   <string name="settings_appearance_generic">Generic</string>
   <string name="settings_appearance_show_actions">Pokaż akcje</string>
   <string name="settings_appearance_show_actions_description">Pokaż akcje na dole stanu</string>

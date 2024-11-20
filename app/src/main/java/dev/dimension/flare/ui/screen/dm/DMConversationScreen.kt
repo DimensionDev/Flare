@@ -57,7 +57,6 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
@@ -75,6 +74,7 @@ import dev.dimension.flare.ui.presenter.dm.DMConversationState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(
     ExperimentalMaterial3Api::class,

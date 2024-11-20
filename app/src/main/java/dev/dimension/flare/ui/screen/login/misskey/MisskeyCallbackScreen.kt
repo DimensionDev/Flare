@@ -19,12 +19,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.MisskeyCallbackPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import moe.tlaster.precompose.molecule.producePresenter
 
 // @Destination<RootGraph>(
 //    deepLinks = [

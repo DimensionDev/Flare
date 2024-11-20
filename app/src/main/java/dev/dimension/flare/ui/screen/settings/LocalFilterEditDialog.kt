@@ -29,7 +29,6 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -41,6 +40,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.LocalFilterPresenter
 import dev.dimension.flare.ui.screen.media.FullScreenDialogStyle
 import dev.dimension.flare.ui.screen.media.SetDialogDestinationToEdgeToEdge
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Destination<RootGraph>(
     style = FullScreenDialogStyle::class,

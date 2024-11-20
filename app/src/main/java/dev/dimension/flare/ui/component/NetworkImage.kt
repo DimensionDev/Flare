@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,14 +17,14 @@ import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImagePainter
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import coil.size.Size
-import com.eygraber.compose.placeholder.material3.placeholder
+import coil3.compose.AsyncImagePainter
+import coil3.compose.LocalPlatformContext
+import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.rememberAsyncImagePainter
+import coil3.request.ImageRequest
+import coil3.size.Size
+import io.github.fornewid.placeholder.material3.placeholder
 
 @Composable
 fun NetworkImage(
@@ -46,7 +48,7 @@ fun NetworkImage(
     SubcomposeAsyncImage(
         model =
             ImageRequest
-                .Builder(LocalContext.current)
+                .Builder(LocalPlatformContext.current)
                 .data(model)
                 .let {
                     if (model is String) {
@@ -69,11 +71,11 @@ fun NetworkImage(
 }
 
 @Composable
-fun EmojiImage(
+internal fun EmojiImage(
     uri: String,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
+    val context = LocalPlatformContext.current
     val painter =
         rememberAsyncImagePainter(
             model =
@@ -85,7 +87,8 @@ fun EmojiImage(
                         .build()
                 },
         )
-    if (painter.state is AsyncImagePainter.State.Success) {
+    val state by painter.state.collectAsState(AsyncImagePainter.State.Loading(painter))
+    if (state is AsyncImagePainter.State.Success) {
         val aspectRatio =
             remember(painter.intrinsicSize) {
                 val size = painter.intrinsicSize

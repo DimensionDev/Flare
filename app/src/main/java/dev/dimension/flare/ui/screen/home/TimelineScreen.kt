@@ -30,7 +30,6 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Pen
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -43,6 +42,7 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.TabTitle
 import kotlinx.coroutines.launch
+import moe.tlaster.precompose.molecule.producePresenter
 
 // @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
 @Destination<RootGraph>(

@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.room)
+    alias(libs.plugins.composeMultiplatform)
 }
 
 kotlin {
@@ -21,8 +22,8 @@ kotlin {
         iosX64(),
         iosArm64(),
         iosSimulatorArm64(),
-        macosArm64(),
-        macosX64(),
+//        macosArm64(),
+//        macosX64(),
     ).forEach { appleTarget ->
         appleTarget.binaries.framework {
             baseName = "shared"
@@ -74,15 +75,35 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
+        val composeMain by creating {
+            dependsOn(commonMain)
+            dependencies {
+                implementation(compose.ui)
+                implementation(compose.runtime)
+                implementation(compose.foundation)
+                implementation(compose.material3)
+                implementation(compose.components.resources)
+                implementation(libs.composeIcons.fontAwesome)
+                implementation(libs.bundles.coil3)
+                implementation(libs.compose.placeholder.material3)
+                implementation(libs.precompose.molecule)
+            }
+        }
         val androidMain by getting {
+            dependsOn(composeMain)
             dependencies {
                 implementation(project.dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.foundation)
+                implementation(libs.bundles.media3)
+                implementation(libs.core.ktx)
             }
         }
         val appleMain by getting {
+            dependsOn(composeMain)
             dependencies {
                 implementation(libs.ktor.client.darwin)
+                implementation(libs.lifecycle.viewmodel.compose)
+                implementation(libs.compose.cupertino)
             }
         }
         val nativeMain by getting {
@@ -131,6 +152,15 @@ skie {
     features {
         enableSwiftUIObservingPreview = true
     }
+}
+
+compose.resources {
+    customDirectory(
+        sourceSetName = "commonMain",
+        directoryProvider = provider { layout.projectDirectory.dir("composeMain").dir("composeResources") }
+    )
+    packageOfResClass = "dev.dimension.flare"
+    generateResClass = always
 }
 
 afterEvaluate {

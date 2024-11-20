@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.eygraber.compose.placeholder.material3.placeholder
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -49,6 +48,7 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.theme.DisabledAlpha
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import io.github.fornewid.placeholder.material3.placeholder
 
 internal fun LazyStaggeredGridScope.status(
     pagingState: PagingState<UiTimeline>,
@@ -254,18 +254,20 @@ internal fun StatusItem(
 ) {
     if (item == null) {
         Column(
-            modifier = modifier.padding(horizontal = horizontalPadding),
+            modifier =
+                modifier.padding(
+                    horizontal = horizontalPadding,
+                    vertical = 8.dp,
+                ),
         ) {
             StatusPlaceholder()
-            Spacer(modifier = Modifier.height(8.dp))
         }
     } else {
         UiTimelineComponent(
             item = item,
             detailStatusKey = detailStatusKey,
-            modifier =
-                modifier
-                    .padding(horizontal = horizontalPadding),
+            modifier = modifier,
+            horizontalPadding = screenHorizontalPadding,
         )
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -30,22 +31,39 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @Composable
 internal fun UiTimelineComponent(
     item: UiTimeline,
     modifier: Modifier = Modifier,
     detailStatusKey: MicroBlogKey? = null,
+    horizontalPadding: Dp = screenHorizontalPadding,
 ) {
     Column(
         modifier = modifier,
     ) {
-        item.topMessage?.let { TopMessageComponent(it) }
-        Spacer(modifier = Modifier.height(4.dp))
+        item.topMessage?.let {
+            Spacer(modifier = Modifier.height(8.dp))
+            TopMessageComponent(
+                data = it,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
+        }
         item.content?.let {
             ItemContentComponent(
                 item = it,
                 detailStatusKey = detailStatusKey,
+                modifier =
+                    Modifier
+                        .let {
+                            if (item.topMessage == null) {
+                                it.padding(top = 4.dp)
+                            } else {
+                                it
+                            }
+                        }.padding(top = 4.dp)
+                        .padding(horizontal = horizontalPadding),
             )
         }
     }

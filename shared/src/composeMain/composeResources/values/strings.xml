@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name" translatable="false">Flare</string>
+
+    <string name="settings_about_description">The ultimate next generation open-sourced AI powered decentralized social network client.</string>
+    <string name="settings_about_source_code">Source code</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Join our Telegram group</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Help us translate Flare</string>
+</resources>

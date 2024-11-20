@@ -35,17 +35,20 @@ data class AppearanceSettings(
     val compatLinkPreview: Boolean = false,
 )
 
+@Serializable
 enum class Theme {
     LIGHT,
     DARK,
     SYSTEM,
 }
 
+@Serializable
 enum class AvatarShape {
     CIRCLE,
     SQUARE,
 }
 
+@Serializable
 enum class VideoAutoplay {
     ALWAYS,
     WIFI,

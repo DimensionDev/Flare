@@ -56,7 +56,6 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import com.eygraber.compose.placeholder.material3.placeholder
 import com.fleeksoft.ksoup.nodes.Element
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Regular
@@ -83,7 +82,6 @@ import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.FAIcon
@@ -99,8 +97,10 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.screen.status.statusTranslatePresenter
 import dev.dimension.flare.ui.theme.MediumAlpha
+import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
 fun CommonStatusComponent(
@@ -112,7 +112,7 @@ fun CommonStatusComponent(
     val appearanceSettings = LocalAppearanceSettings.current
     Column(
         modifier =
-            modifier
+            Modifier
                 .let {
                     if (isDetail) {
                         it
@@ -127,7 +127,7 @@ fun CommonStatusComponent(
                             )
                         }
                     }
-                },
+                }.then(modifier),
     ) {
         item.user?.let { user ->
             CommonStatusHeaderComponent(
@@ -823,7 +823,7 @@ private fun StatusPollComponent(
                 text =
                     stringResource(
                         id = R.string.poll_expired_at,
-                        poll.expiresAt.localizedFullTime,
+                        poll.expiredAt.value.localizedFullTime,
                     ),
                 modifier =
                     Modifier
@@ -964,14 +964,14 @@ private fun ExpandedCard(
     val appearanceSettings = LocalAppearanceSettings.current
     Column(
         modifier =
-            modifier
+            Modifier
                 .border(
                     FlareDividerDefaults.thickness,
                     color = FlareDividerDefaults.color,
                     shape = MaterialTheme.shapes.medium,
                 ).clip(
                     shape = MaterialTheme.shapes.medium,
-                ),
+                ).then(modifier),
     ) {
         card.media?.let {
             AdaptiveGrid(
@@ -1016,14 +1016,14 @@ fun CompatCard(
 ) {
     Row(
         modifier =
-            modifier
+            Modifier
                 .border(
                     FlareDividerDefaults.thickness,
                     color = FlareDividerDefaults.color,
                     shape = MaterialTheme.shapes.medium,
                 ).clip(
                     shape = MaterialTheme.shapes.medium,
-                ),
+                ).then(modifier),
     ) {
         card.media?.let {
             MediaItem(

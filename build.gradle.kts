@@ -13,12 +13,13 @@ plugins {
     alias(libs.plugins.ben.manes.versions)
     alias(libs.plugins.compose.compiler) apply false
     alias(libs.plugins.room) apply false
+    alias(libs.plugins.composeMultiplatform) apply false
 }
 
 allprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_17)
+            jvmTarget.set(JvmTarget.JVM_21)
             allWarningsAsErrors.set(true)
             freeCompilerArgs.set(listOf(
                 "-Xexpect-actual-classes",

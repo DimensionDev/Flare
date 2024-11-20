@@ -117,7 +117,8 @@ dependencies {
     implementation(libs.bundles.koin)
     implementation(libs.ktorfit.lib)
     ksp(libs.ktorfit.ksp)
-    implementation(libs.bundles.coil)
+    implementation(libs.bundles.coil3)
+    implementation(libs.bundles.coil3.extensions)
     implementation(libs.bundles.ktor)
     implementation(libs.molecule.runtime)
     implementation(libs.ksoup)
@@ -145,6 +146,8 @@ dependencies {
     implementation(libs.colorpicker.compose)
     implementation(libs.material.motion.compose)
     implementation(libs.nestedScrollView)
+    implementation(libs.precompose.molecule)
+    implementation(libs.compose.placeholder.material3)
 
     if (project.file("google-services.json").exists()) {
         implementation(platform(libs.firebase.bom))

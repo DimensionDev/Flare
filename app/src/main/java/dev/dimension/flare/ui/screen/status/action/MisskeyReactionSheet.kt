@@ -22,12 +22,12 @@ import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.MisskeyReactionPresenter
+import moe.tlaster.precompose.molecule.producePresenter
 
 @Destination<RootGraph>(
     style = DestinationStyle.Dialog::class,

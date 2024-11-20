@@ -15,7 +15,6 @@ import com.kevinnzou.web.rememberWebViewState
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.result.ResultBackNavigator
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiApplication
@@ -23,6 +22,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.XQTLoginPresenter
 import dev.dimension.flare.ui.screen.home.NavigationState
 import kotlinx.coroutines.delay
+import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.time.Duration.Companion.seconds
 
 @Composable

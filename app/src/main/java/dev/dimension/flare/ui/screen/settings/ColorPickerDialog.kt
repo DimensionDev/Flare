@@ -30,10 +30,10 @@ import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.molecule.producePresenter
 import dev.dimension.flare.ui.component.ThemeWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
 @Destination<RootGraph>(

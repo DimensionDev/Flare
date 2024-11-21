@@ -19,31 +19,33 @@ For those able & willing to help fix issues and/or implement features ...
 ### Development environment
 
 Make sure you have
- - JDK 17  
- - Xcode 15 if you're building for iOS/macOS
+ - JDK 21
+ - Xcode 16 if you're building for iOS
 
 ### Code guidelines
 Flare uses [ktlint](https://github.com/pinterest/ktlint) to check the code style for Kotlin, so make sure run `./gradlew ktlintFormat` and fix the errors before you submit any PR.  
 
 ### Building
 ### Android
- - Make sure you have JDK 17 installed
+ - Make sure you have JDK 21 installed
  - Run `./gradlew installDebug` to build and install the debug version of the app
  - You can open the project in Android Studio or IntelliJ IDEA if you want
 
-### iOS/macOS
- - Make sure you have a Mac with Xcode 15 installed
+### iOS
+ - Make sure you have a Mac with Xcode 16 installed
  - open `iosApp/iosApp.xcodeproj` in Xcode
  - Build and run the app
 
 ### Project structure
 The project is split into 3 parts:
- - `shared`: The common code shared between Android and iOS/macOS
+ - `shared`: The common code shared between Android and iOS
+   - `shared/composeMain`: Compose Multiplatform UI that shared between Android and iOS
+   - `shared/commonMain`: Bussiness logic without any UI.
  - `app`: The Android app
- - `iosApp`: The iOS/macOS app  
+ - `iosApp`: The iOS app
 
 Most of the business logic is in `shared`, and the platform specific code and UI is in `app` and `iosApp`.  
-Flare uses [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) to share code between platforms, [Jetpack Compose](https://developer.android.com/jetpack/compose) for the UI on Android, [SwiftUI](https://developer.apple.com/xcode/swiftui/) for the UI on iOS/macOS.
+Flare uses [Kotlin Multiplatform](https://kotlinlang.org/docs/multiplatform.html) to share code between platforms, [Jetpack Compose](https://developer.android.com/jetpack/compose) for the UI on Android, [SwiftUI](https://developer.apple.com/xcode/swiftui/) for the UI on iOS.
 
 ### Business logic
 Flare leverages [Molecule](https://github.com/cashapp/molecule) to implement business logic, with most presenters extending from `PresenterBase`. Additionally, Flare employs the concept of a "single source of truth" to ensure consistency in its business logic implementation.

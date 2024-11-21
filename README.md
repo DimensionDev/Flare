@@ -5,11 +5,11 @@
 
 ![badge-Platform](https://img.shields.io/badge/Supported%20Platform-Mastodon%20|%20Misskey%20|%20Bluesky%20-black)
 
-![badge-Android](https://img.shields.io/badge/Android-6.0-3DDC84)
-![badge-iOS](https://img.shields.io/badge/iOS-17.0-black)
+![badge-Android](https://img.shields.io/badge/Android-7.0-3DDC84)
+![badge-iOS](https://img.shields.io/badge/iOS-18.0-black)
 
 
-The ultimate next generation* open-sourced AI powered** decentralized social network client for Android/iOS/macOS, still in development.  
+The ultimate next generation* open-sourced AI powered** decentralized social network client for Android/iOS, still in development.
 *: _Just a joke_  
 **: _Not yet implemented_
 
@@ -20,7 +20,7 @@ The ultimate next generation* open-sourced AI powered** decentralized social net
 ## Features
  - Consolidate all your social networks into one client, featuring Mastodon, Misskey, Bluesky and more to come.
  - Crosspost your content simultaneously across all your platforms.
- - It is FOSS and privacy-centric, ensuring that no data is collected from you.
+ - It is FOSS and privacy-centric.
 
 ## Roadmap
 Here're some features we're planning to implement in the future.
@@ -38,12 +38,12 @@ Here're some features we're planning to implement in the future.
 
 ## Building
 ### Android
- - Make sure you have JDK 17 installed
+ - Make sure you have JDK 21 installed
  - Run `./gradlew installDebug` to build and install the debug version of the app
  - You can open the project in Android Studio or IntelliJ IDEA if you want
 
-### iOS/macOS
- - Make sure you have a Mac with Xcode 15 installed
+### iOS
+ - Make sure you have a Mac with Xcode 16 installed
  - open `iosApp/iosApp.xcodeproj` in Xcode
  - Build and run the app
 

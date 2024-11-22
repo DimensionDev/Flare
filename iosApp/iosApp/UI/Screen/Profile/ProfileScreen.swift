@@ -1,7 +1,7 @@
-import SwiftUI
+import MarkdownUI
 import OrderedCollections
 import shared
-import MarkdownUI
+import SwiftUI
 
 struct ProfileScreen: View {
     let toProfileMedia: (MicroBlogKey) -> Void
@@ -40,6 +40,7 @@ struct ProfileScreen: View {
         .frame(width: 384)
         #endif
     }
+
     var profileListContent: some View {
         ObservePresenter(presenter: presenter) { state in
             List {
@@ -75,6 +76,7 @@ struct ProfileScreen: View {
             .listStyle(.plain)
         }
     }
+
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
             let title: LocalizedStringKey = if case .success(let user) = onEnum(of: state.userState) {
@@ -107,18 +109,19 @@ struct ProfileScreen: View {
             #endif
             .if(horizontalSizeClass != .compact, transform: { view in
                 view
-                    #if os(iOS)
-                    .navigationBarTitleDisplayMode(.inline)
-                    #endif
-                    .navigationTitle(title)
+                #if os(iOS)
+                .navigationBarTitleDisplayMode(.inline)
+                #endif
+                .navigationTitle(title)
             })
             .toolbar {
-                Menu {
-                    if case .success(let user) = onEnum(of: state.userState) {
-                        if case .success(let isMe) = onEnum(of: state.isMe), !isMe.data.boolValue {
+                if case .success(let isMe) = onEnum(of: state.isMe), !isMe.data.boolValue {
+                    Menu {
+                        if case .success(let user) = onEnum(of: state.userState) {
                             if case .success(let relation) = onEnum(of: state.relationState),
                                case .success(let actions) = onEnum(of: state.actions),
-                               actions.data.size > 0 {
+                               actions.data.size > 0
+                            {
                                 ForEach(0..<actions.data.size, id: \.self) { index in
                                     let item = actions.data.get(index: index)
                                     Button(action: {
@@ -128,27 +131,27 @@ struct ProfileScreen: View {
                                     }, label: {
                                         let text = switch onEnum(of: item) {
                                         case .block(let block): if block.relationState(relation: relation.data) {
-                                            String(localized: "unblock")
-                                        } else {
-                                            String(localized: "block")
-                                        }
+                                                String(localized: "unblock")
+                                            } else {
+                                                String(localized: "block")
+                                            }
                                         case .mute(let mute): if mute.relationState(relation: relation.data) {
-                                            String(localized: "unmute")
-                                        } else {
-                                            String(localized: "mute")
-                                        }
+                                                String(localized: "unmute")
+                                            } else {
+                                                String(localized: "mute")
+                                            }
                                         }
                                         let icon = switch onEnum(of: item) {
                                         case .block(let block): if block.relationState(relation: relation.data) {
-                                            "xmark.circle"
-                                        } else {
-                                            "checkmark.circle"
-                                        }
+                                                "xmark.circle"
+                                            } else {
+                                                "checkmark.circle"
+                                            }
                                         case .mute(let mute): if mute.relationState(relation: relation.data) {
-                                            "speaker"
-                                        } else {
-                                            "speaker.slash"
-                                        }
+                                                "speaker"
+                                            } else {
+                                                "speaker.slash"
+                                            }
                                         }
                                         Label(text, systemImage: icon)
                                     })
@@ -158,9 +161,10 @@ struct ProfileScreen: View {
                                 Label("report", systemImage: "exclamationmark.bubble")
                             })
                         }
+
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
                     }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
                 }
             }
         }
@@ -184,14 +188,14 @@ struct LargeProfileImagePreviews: View {
                         let image = media as? UiMediaImage
                         let shouldBlur = image?.sensitive ?? false
                         MediaItemComponent(media: media)
-                        .if(shouldBlur, transform: { view in
-                            view.blur(radius: 32)
-                        })
-                        .onAppear(perform: {
-                            success.get(index: index)
-                        })
-                        .aspectRatio(1, contentMode: .fill)
-                        .clipped()
+                            .if(shouldBlur, transform: { view in
+                                view.blur(radius: 32)
+                            })
+                            .onAppear(perform: {
+                                success.get(index: index)
+                            })
+                            .aspectRatio(1, contentMode: .fill)
+                            .clipped()
                     }
                 }
             }
@@ -218,15 +222,15 @@ struct SmallProfileMediaPreviews: View {
                             let image = media as? UiMediaImage
                             let shouldBlur = image?.sensitive ?? false
                             MediaItemComponent(media: media)
-                            .if(shouldBlur, transform: { view in
-                                view.blur(radius: 32)
-                            })
-                            .onAppear(perform: {
-                                success.get(index: index)
-                            })
-                            .aspectRatio(1, contentMode: .fill)
-                            .clipped()
-                            .frame(width: 48, height: 48)
+                                .if(shouldBlur, transform: { view in
+                                    view.blur(radius: 32)
+                                })
+                                .onAppear(perform: {
+                                    success.get(index: index)
+                                })
+                                .aspectRatio(1, contentMode: .fill)
+                                .clipped()
+                                .frame(width: 48, height: 48)
                         }
                     }
                 })
@@ -252,7 +256,7 @@ struct ProfileHeader: View {
                 isMe: isMe,
                 onFollowClick: { _ in }
             )
-                .redacted(reason: .placeholder)
+            .redacted(reason: .placeholder)
         case .success(let data):
             ProfileHeaderSuccess(
                 user: data.data,
@@ -312,11 +316,11 @@ struct FieldsView: View {
             }
             .padding(.vertical)
             #if os(iOS)
-            .background(Color(UIColor.secondarySystemBackground))
+                .background(Color(UIColor.secondarySystemBackground))
             #else
-            .background(Color(NSColor.windowBackgroundColor))
+                .background(Color(NSColor.windowBackgroundColor))
             #endif
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
         } else {
             EmptyView()
         }

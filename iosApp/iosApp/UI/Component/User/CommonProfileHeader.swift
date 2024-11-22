@@ -9,6 +9,15 @@ enum CommonProfileHeaderConstants {
     static let avatarSize: CGFloat = 96
 }
 
+struct CompactLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: 4) {
+            configuration.icon
+            configuration.title
+        }
+    }
+}
+
 struct CommonProfileHeader: View {
     let user: UiProfile
     let relation: UiState<UiRelation>
@@ -105,24 +114,60 @@ struct CommonProfileHeader: View {
                     case .fields(let data):
                         FieldsView(fields: data.fields)
                     case .iconify(let data):
-                        let list = data.items.map { $0.key }
-                        ForEach(0..<list.count, id: \.self) { index in
-                            let key = list[index]
-                            let value = data.items[key]
-                            Label(
-                                title: {
-                                    Markdown(value?.markdown ?? "")
-                                    .font(.body)
-                                    .markdownInlineImageProvider(.emoji)
-                                },
-                                icon: {
-                                    switch key {
-                                    case .location: Awesome.Classic.Solid.locationDot.image
-                                    case .url: Awesome.Classic.Solid.globe.image
-                                    case .verify: Awesome.Classic.Solid.circleCheck.image
+                        HStack(spacing: 8) {
+                            if let locationValue = data.items[.location] {
+                                Label(
+                                    title: {
+                                        Markdown(locationValue.markdown)
+                                            .font(.footnote)
+                                            .markdownInlineImageProvider(.emoji)
+                                    },
+                                    icon: {
+                                        Image("attributes/location").renderingMode(.template)
                                     }
-                                }
-                            )
+                                )
+                                .labelStyle(CompactLabelStyle())
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(6)
+                            }
+                            
+                            if let urlValue = data.items[.url] {
+                                Label(
+                                    title: {
+                                        Markdown(urlValue.markdown)
+                                            .font(.footnote)
+                                            .markdownInlineImageProvider(.emoji)
+                                    },
+                                    icon: {
+                                        Image("attributes/globe").renderingMode(.template)
+                                    }
+                                )
+                                .labelStyle(CompactLabelStyle())
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(6)
+                            }
+                            
+//                            if let verifyValue = data.items[.verify] {
+//                                Label(
+//                                    title: {
+//                                        Markdown(verifyValue.markdown)
+//                                            .font(.footnote)
+//                                            .markdownInlineImageProvider(.emoji)
+//                                    },
+//                                    icon: {
+//                                        Image("attributes/calendar").renderingMode(.template)
+//                                    }
+//                                )
+//                                .labelStyle(CompactLabelStyle())
+//                                .padding(.horizontal, 8)
+//                                .padding(.vertical, 4)
+//                                .background(Color(.systemGray6))
+//                                .cornerRadius(6)
+//                            }
                         }
                     }
                 }

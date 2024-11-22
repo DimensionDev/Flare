@@ -109,6 +109,9 @@ struct CommonProfileHeader: View {
                         .markdownInlineImageProvider(.emoji)
                 }
 
+                MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
+
+                
                 if let bottomContent = user.bottomContent {
                     switch onEnum(of: bottomContent) {
                     case .fields(let data):
@@ -119,11 +122,13 @@ struct CommonProfileHeader: View {
                                 Label(
                                     title: {
                                         Markdown(locationValue.markdown)
-                                            .font(.footnote)
+                                            .font(.caption2)
                                             .markdownInlineImageProvider(.emoji)
                                     },
                                     icon: {
-                                        Image("attributes/location").renderingMode(.template)
+                                        Image("attributes/location")
+                                            .renderingMode(.template)
+                                            .imageScale(.small)
                                     }
                                 )
                                 .labelStyle(CompactLabelStyle())
@@ -137,11 +142,13 @@ struct CommonProfileHeader: View {
                                 Label(
                                     title: {
                                         Markdown(urlValue.markdown)
-                                            .font(.footnote)
+                                            .font(.caption2)
                                             .markdownInlineImageProvider(.emoji)
                                     },
                                     icon: {
-                                        Image("attributes/globe").renderingMode(.template)
+                                        Image("attributes/globe")
+                                            .renderingMode(.template)
+                                            .imageScale(.small)
                                     }
                                 )
                                 .labelStyle(CompactLabelStyle())
@@ -172,7 +179,6 @@ struct CommonProfileHeader: View {
                     }
                 }
 
-                MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
             }
             .padding([.horizontal])
         }

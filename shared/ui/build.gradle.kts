@@ -3,13 +3,9 @@ import java.util.Locale
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
-    alias(libs.plugins.ktorfit)
     alias(libs.plugins.skie)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.room)
     alias(libs.plugins.composeMultiplatform)
 }
 
@@ -57,15 +53,10 @@ kotlin {
         }
         val appleMain by getting {
             dependencies {
-                implementation(libs.lifecycle.viewmodel.compose)
                 implementation(libs.compose.cupertino)
             }
         }
     }
-}
-
-room {
-    schemaDirectory("$projectDir/schemas")
 }
 
 android {

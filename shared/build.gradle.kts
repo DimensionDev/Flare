@@ -76,17 +76,12 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
-                implementation(project.dependencies.platform(libs.compose.bom))
-                implementation(libs.compose.foundation)
-                implementation(libs.bundles.media3)
                 implementation(libs.core.ktx)
             }
         }
         val appleMain by getting {
             dependencies {
                 implementation(libs.ktor.client.darwin)
-                implementation(libs.lifecycle.viewmodel.compose)
-                implementation(libs.compose.cupertino)
             }
         }
         val nativeMain by getting {

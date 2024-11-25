@@ -193,7 +193,7 @@ internal fun List<ListNotificationsNotification>.toDb(
     val grouped = this.groupBy { it.reason }.filter { it.value.any() }
     return grouped.flatMap { (reason, items) ->
         when (reason) {
-            ListNotificationsReason.UNKNOWN, ListNotificationsReason.STARTERPACK_JOINED ->
+            is ListNotificationsReason.Unknown, ListNotificationsReason.StarterpackJoined ->
                 items.map {
                     createDbPagingTimelineWithStatus(
                         accountKey = accountKey,
@@ -204,15 +204,15 @@ internal fun List<ListNotificationsNotification>.toDb(
                     )
                 }
 
-            ListNotificationsReason.REPOST, ListNotificationsReason.LIKE -> {
+            ListNotificationsReason.Repost, ListNotificationsReason.Like -> {
                 val post =
                     items
                         .first()
                         .record
                         .let {
                             when (reason) {
-                                ListNotificationsReason.REPOST -> it.bskyJson<JsonContent, app.bsky.feed.Repost>().subject
-                                ListNotificationsReason.LIKE -> it.bskyJson<JsonContent, app.bsky.feed.Like>().subject
+                                ListNotificationsReason.Repost -> it.bskyJson<JsonContent, app.bsky.feed.Repost>().subject
+                                ListNotificationsReason.Like -> it.bskyJson<JsonContent, app.bsky.feed.Like>().subject
                                 else -> null
                             }
                         }?.uri
@@ -226,8 +226,8 @@ internal fun List<ListNotificationsNotification>.toDb(
                     )
                 val idSuffix =
                     when (reason) {
-                        ListNotificationsReason.REPOST -> "_repost"
-                        ListNotificationsReason.LIKE -> "_like"
+                        ListNotificationsReason.Repost -> "_repost"
+                        ListNotificationsReason.Like -> "_like"
                         else -> ""
                     }
                 val data =
@@ -262,7 +262,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                 )
             }
 
-            ListNotificationsReason.FOLLOW -> {
+            ListNotificationsReason.Follow -> {
                 val content = StatusContent.BlueskyNotification.UserList(data = items, post = null)
                 val data =
                     DbStatusWithUser(
@@ -291,7 +291,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                 )
             }
 
-            ListNotificationsReason.MENTION, ListNotificationsReason.REPLY, ListNotificationsReason.QUOTE -> {
+            ListNotificationsReason.Mention, ListNotificationsReason.Reply, ListNotificationsReason.Quote -> {
                 items.mapNotNull {
                     val post = references[it.uri] ?: return@mapNotNull null
                     val content = StatusContent.BlueskyNotification.Post(post = post)
@@ -530,6 +530,7 @@ private fun ConvoView.toDbMessageRoom(host: String) =
                 is ConvoViewLastMessageUnion.MessageView -> MicroBlogKey(id = message.value.id, host = host)
                 is ConvoViewLastMessageUnion.DeletedMessageView -> MicroBlogKey(id = message.value.id, host = host)
                 null -> null
+                is ConvoViewLastMessageUnion.Unknown -> null
             },
     )
 
@@ -547,6 +548,7 @@ private fun ConvoViewLastMessageUnion.toDbMessageItem(roomKey: MicroBlogKey) =
     when (this) {
         is ConvoViewLastMessageUnion.MessageView -> toDbMessageItem(roomKey)
         is ConvoViewLastMessageUnion.DeletedMessageView -> toDbMessageItem(roomKey)
+        is ConvoViewLastMessageUnion.Unknown -> null
     }
 
 private fun MessageView.toDbMessageItem(roomKey: MicroBlogKey) =

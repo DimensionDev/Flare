@@ -8,13 +8,17 @@ import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class StoragePresenter : PresenterBase<StorageState>() {
+class StoragePresenter :
+    PresenterBase<StorageState>(),
+    KoinComponent {
+    private val cacheDatabase by inject<CacheDatabase>()
+
     @Composable
     override fun body(): StorageState {
         val scope = rememberCoroutineScope()
-        val cacheDatabase = koinInject<CacheDatabase>()
         val statusCount by remember {
             cacheDatabase
                 .statusDao()

@@ -11,6 +11,7 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -24,15 +25,20 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.map
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class VVOStatusDetailPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
-) : PresenterBase<VVOStatusDetailState>() {
+) : PresenterBase<VVOStatusDetailState>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): VVOStatusDetailState {
         val scope = rememberCoroutineScope()
-        val service = accountServiceProvider(accountType)
+        val service = accountServiceProvider(accountType, repository = accountRepository)
         val status =
             service
                 .flatMap {

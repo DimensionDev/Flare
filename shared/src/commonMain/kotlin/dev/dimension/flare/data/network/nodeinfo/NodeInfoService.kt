@@ -77,7 +77,8 @@ internal data object NodeInfoService {
 
     suspend fun detectPlatformType(host: String): PlatformType =
         coroutineScope {
-            if (host.equals(xqtHost, ignoreCase = true) || host.equals("x.social", ignoreCase = true)) {
+            val xqt = listOf(xqtHost, "xqt.social", "x.com")
+            if (xqt.any { it.equals(host, ignoreCase = true) }) {
                 return@coroutineScope PlatformType.xQt
             }
             val vvo = listOf(vvoHost, vvo, vvoHostShort, "vvo.social", vvoHostLong)

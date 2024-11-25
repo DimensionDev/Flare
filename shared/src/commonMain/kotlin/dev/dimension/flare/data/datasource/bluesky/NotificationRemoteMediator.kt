@@ -71,20 +71,20 @@ internal class NotificationRemoteMediator(
                 response.notifications
                     .mapNotNull {
                         when (it.reason) {
-                            ListNotificationsReason.UNKNOWN -> null
-                            ListNotificationsReason.LIKE ->
+                            is ListNotificationsReason.Unknown -> null
+                            ListNotificationsReason.Like ->
                                 it.record
                                     .bskyJson<JsonContent, app.bsky.feed.Like>()
                                     .subject.uri
-                            ListNotificationsReason.REPOST ->
+                            ListNotificationsReason.Repost ->
                                 it.record
                                     .bskyJson<JsonContent, app.bsky.feed.Repost>()
                                     .subject.uri
-                            ListNotificationsReason.FOLLOW -> null
-                            ListNotificationsReason.MENTION -> it.uri
-                            ListNotificationsReason.REPLY -> it.uri
-                            ListNotificationsReason.QUOTE -> it.uri
-                            ListNotificationsReason.STARTERPACK_JOINED -> null
+                            ListNotificationsReason.Follow -> null
+                            ListNotificationsReason.Mention -> it.uri
+                            ListNotificationsReason.Reply -> it.uri
+                            ListNotificationsReason.Quote -> it.uri
+                            ListNotificationsReason.StarterpackJoined -> null
                         }
                     }.distinct()
                     .toImmutableList()

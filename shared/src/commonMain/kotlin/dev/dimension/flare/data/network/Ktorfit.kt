@@ -1,13 +1,14 @@
 package dev.dimension.flare.data.network
 
+import co.touchlab.kermit.Logger
+import co.touchlab.kermit.loggerConfigInit
+import co.touchlab.kermit.platformLogWriter
 import de.jensklingenberg.ktorfit.converter.CallConverterFactory
 import de.jensklingenberg.ktorfit.converter.FlowConverterFactory
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.network.authorization.Authorization
 import dev.dimension.flare.data.network.authorization.AuthorizationPlugin
-import io.github.aakira.napier.DebugAntilog
-import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -57,11 +58,13 @@ internal fun ktorClient(
 }
 
 private data object NapierLogger : io.ktor.client.plugins.logging.Logger {
-    init {
-        Napier.base(DebugAntilog())
-    }
+    private val log =
+        Logger(
+            loggerConfigInit(platformLogWriter(co.touchlab.kermit.DefaultFormatter)),
+            "HTTP Client",
+        )
 
     override fun log(message: String) {
-        Napier.v(message, null, "HTTP Client")
+        log.d(message)
     }
 }

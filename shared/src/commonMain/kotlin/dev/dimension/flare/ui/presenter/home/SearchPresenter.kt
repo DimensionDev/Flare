@@ -9,6 +9,7 @@ import androidx.compose.runtime.setValue
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
@@ -16,15 +17,20 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.presenter.PresenterBase
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class SearchPresenter(
     private val accountType: AccountType,
     private val initialQuery: String = "",
-) : PresenterBase<SearchState>() {
+) : PresenterBase<SearchState>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): SearchState {
         val scope = rememberCoroutineScope()
-        val accountState = accountServiceProvider(accountType = accountType)
+        val accountState = accountServiceProvider(accountType = accountType, repository = accountRepository)
         var query by remember { mutableStateOf(initialQuery) }
 
         val user =

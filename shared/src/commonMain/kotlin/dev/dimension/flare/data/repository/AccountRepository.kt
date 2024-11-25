@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import org.koin.compose.koinInject
 
 class AccountRepository(
     private val appDatabase: AppDatabase,
@@ -79,7 +78,7 @@ data object NoActiveAccountException : Exception("No active account.")
 data object LoginExpiredException : Exception("Login expired.")
 
 @Composable
-internal fun activeAccountPresenter(repository: AccountRepository = koinInject()): State<UiState<UiAccount>> =
+internal fun activeAccountPresenter(repository: AccountRepository): State<UiState<UiAccount>> =
     remember(repository) {
         repository.activeAccount
             .map<UiAccount?, UiState<UiAccount>> {
@@ -94,7 +93,7 @@ internal fun activeAccountPresenter(repository: AccountRepository = koinInject()
 @Composable
 internal fun accountProvider(
     accountType: AccountType,
-    repository: AccountRepository = koinInject(),
+    repository: AccountRepository,
 ): State<UiState<UiAccount>> =
     produceState<UiState<UiAccount>>(
         initialValue = UiState.Loading(),
@@ -117,11 +116,14 @@ internal fun accountProvider(
     }
 
 @Composable
-internal fun accountServiceProvider(accountType: AccountType): UiState<MicroblogDataSource> {
+internal fun accountServiceProvider(
+    accountType: AccountType,
+    repository: AccountRepository,
+): UiState<MicroblogDataSource> {
     if (accountType is AccountType.Guest) {
         return UiState.Success(GuestDataSource)
     }
-    val account by accountProvider(accountType = accountType)
+    val account by accountProvider(accountType = accountType, repository = repository)
     return account.map {
         remember(it) {
             it.dataSource
@@ -130,7 +132,7 @@ internal fun accountServiceProvider(accountType: AccountType): UiState<Microblog
 }
 
 @Composable
-internal fun allAccountsPresenter(repository: AccountRepository = koinInject()): State<UiState<ImmutableList<UiAccount>>> =
+internal fun allAccountsPresenter(repository: AccountRepository): State<UiState<ImmutableList<UiAccount>>> =
     remember(repository) {
         repository.allAccounts
             .map {

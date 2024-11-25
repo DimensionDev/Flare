@@ -39,7 +39,7 @@ internal class UserTimelineRemoteMediator(
                                     actor = Did(did = userKey.id),
                                     filter =
                                         if (onlyMedia) {
-                                            GetAuthorFeedFilter.POSTS_WITH_MEDIA
+                                            GetAuthorFeedFilter.PostsWithMedia
                                         } else {
                                             null
                                         },
@@ -61,7 +61,7 @@ internal class UserTimelineRemoteMediator(
                                     actor = Did(did = userKey.id),
                                     filter =
                                         if (onlyMedia) {
-                                            GetAuthorFeedFilter.POSTS_WITH_MEDIA
+                                            GetAuthorFeedFilter.PostsWithMedia
                                         } else {
                                             null
                                         },

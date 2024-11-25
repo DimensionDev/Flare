@@ -100,11 +100,3 @@ compose.resources {
     packageOfResClass = "dev.dimension.flare"
     generateResClass = always
 }
-
-afterEvaluate {
-//    val kspCommonMainKotlinMetadata by tasks
-    val runKtlintFormatOverCommonMainSourceSet by tasks
-    val runKtlintCheckOverCommonMainSourceSet by tasks
-    runKtlintFormatOverCommonMainSourceSet.dependsOn("kspCommonMainKotlinMetadata")
-    runKtlintCheckOverCommonMainSourceSet.dependsOn("kspCommonMainKotlinMetadata")
-}

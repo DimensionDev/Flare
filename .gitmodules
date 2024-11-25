@@ -1,0 +1,3 @@
+[submodule "linuxApp/gtk-kn"]
+	path = linuxApp/gtk-kn
+	url = https://gitlab.com/gtk-kn/gtk-kn.git

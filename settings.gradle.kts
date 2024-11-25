@@ -2,7 +2,6 @@ pluginManagement {
     repositories {
         google()
         mavenCentral()
-        mavenLocal()
         gradlePluginPortal()
         maven("https://oss.sonatype.org/content/repositories/snapshots/")
     }
@@ -12,7 +11,6 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        mavenLocal()
         maven("https://jitpack.io")
         maven("https://androidx.dev/storage/compose-compiler/repository/")
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
@@ -26,3 +24,4 @@ include(":linuxApp")
 include(":shared")
 include(":shared:ui")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+includeBuild("linuxApp/gtk-kn")

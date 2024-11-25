@@ -14,17 +14,20 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import io.ktor.http.Url
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class BlueskyLoginPresenter(
     private val toHome: () -> Unit,
-) : PresenterBase<BlueskyLoginState>() {
+) : PresenterBase<BlueskyLoginState>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): BlueskyLoginState {
         var error by remember { mutableStateOf<Throwable?>(null) }
         val scope = rememberCoroutineScope()
         var loading by remember { mutableStateOf(false) }
-        val accountRepository: AccountRepository = koinInject()
 
         return object : BlueskyLoginState {
             override val loading = loading

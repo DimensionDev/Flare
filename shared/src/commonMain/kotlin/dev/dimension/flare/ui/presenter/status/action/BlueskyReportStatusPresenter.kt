@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -19,16 +20,22 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class BlueskyReportStatusPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
-) : PresenterBase<BlueskyReportStatusState>() {
+) : PresenterBase<BlueskyReportStatusState>(),
+    KoinComponent {
+    // using io scope because it's a long-running operation
+    private val scope by inject<CoroutineScope>()
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): BlueskyReportStatusState {
         val service =
-            accountServiceProvider(accountType = accountType).map { service ->
+            accountServiceProvider(accountType = accountType, repository = accountRepository).map { service ->
                 service as BlueskyDataSource
             }
         val status =
@@ -36,8 +43,6 @@ class BlueskyReportStatusPresenter(
                 StatusPresenter(accountType = accountType, statusKey = statusKey)
             }.body().status
         var reason by remember { mutableStateOf<BlueskyReportStatusState.ReportReason?>(null) }
-        // using io scope because it's a long-running operation
-        val scope = koinInject<CoroutineScope>()
         return object : BlueskyReportStatusState {
             override val allReasons = BlueskyReportStatusState.ReportReason.entries.toImmutableList()
             override val reason: BlueskyReportStatusState.ReportReason?

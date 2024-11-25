@@ -10,12 +10,16 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
-import org.koin.compose.koinInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class SearchHistoryPresenter : PresenterBase<SearchHistoryState>() {
+class SearchHistoryPresenter :
+    PresenterBase<SearchHistoryState>(),
+    KoinComponent {
+    private val repository: SearchHistoryRepository by inject()
+
     @Composable
     override fun body(): SearchHistoryState {
-        val repository: SearchHistoryRepository = koinInject()
         val searchHistories by remember {
             repository.allSearchHistory
         }.collectAsUiState()

@@ -10,7 +10,6 @@ plugins {
     alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.room)
-    alias(libs.plugins.composeMultiplatform)
 }
 
 kotlin {
@@ -22,8 +21,8 @@ kotlin {
         iosX64(),
         iosArm64(),
         iosSimulatorArm64(),
-//        macosArm64(),
-//        macosX64(),
+        macosArm64(),
+        macosX64(),
     ).forEach { appleTarget ->
         appleTarget.binaries.framework {
             baseName = "shared"
@@ -31,6 +30,7 @@ kotlin {
             embedBitcode(org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode.DISABLE)
         }
     }
+    linuxX64()
     targets.forEach { target ->
         target.name.takeIf {
             it != "metadata"
@@ -53,12 +53,11 @@ kotlin {
                 implementation(libs.bundles.kotlinx)
                 implementation(dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
-                implementation(libs.koin.compose)
                 api(libs.paging.common)
                 implementation(libs.bundles.ktorfit)
                 implementation(libs.bundles.ktor)
                 implementation(libs.okio)
-                implementation(libs.napier)
+                implementation(libs.kermit)
                 implementation(libs.kotlin.codepoints.deluxe)
                 implementation(libs.ksoup)
                 implementation(libs.mfm.multiplatform)
@@ -75,22 +74,7 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
-        val composeMain by creating {
-            dependsOn(commonMain)
-            dependencies {
-                implementation(compose.ui)
-                implementation(compose.runtime)
-                implementation(compose.foundation)
-                implementation(compose.material3)
-                implementation(compose.components.resources)
-                implementation(libs.composeIcons.fontAwesome)
-                implementation(libs.bundles.coil3)
-                implementation(libs.compose.placeholder.material3)
-                implementation(libs.precompose.molecule)
-            }
-        }
         val androidMain by getting {
-            dependsOn(composeMain)
             dependencies {
                 implementation(project.dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.foundation)
@@ -99,7 +83,6 @@ kotlin {
             }
         }
         val appleMain by getting {
-            dependsOn(composeMain)
             dependencies {
                 implementation(libs.ktor.client.darwin)
                 implementation(libs.lifecycle.viewmodel.compose)
@@ -110,6 +93,11 @@ kotlin {
             dependencies {
                 implementation(libs.stately.isolate)
                 implementation(libs.stately.iso.collections)
+            }
+        }
+        val linuxMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.cio)
             }
         }
     }
@@ -152,15 +140,6 @@ skie {
     features {
         enableSwiftUIObservingPreview = true
     }
-}
-
-compose.resources {
-    customDirectory(
-        sourceSetName = "commonMain",
-        directoryProvider = provider { layout.projectDirectory.dir("composeMain").dir("composeResources") }
-    )
-    packageOfResClass = "dev.dimension.flare"
-    generateResClass = always
 }
 
 afterEvaluate {

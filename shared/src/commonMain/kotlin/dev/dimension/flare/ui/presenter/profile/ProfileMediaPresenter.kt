@@ -8,6 +8,7 @@ import androidx.paging.flatMap
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.NoActiveAccountException
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -17,15 +18,20 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.flow.map
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class ProfileMediaPresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey?,
-) : PresenterBase<ProfileMediaState>() {
+) : PresenterBase<ProfileMediaState>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): ProfileMediaState {
         val scope = rememberCoroutineScope()
-        val accountServiceState = accountServiceProvider(accountType = accountType)
+        val accountServiceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
         val mediaState =
             accountServiceState
                 .map { service ->

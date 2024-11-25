@@ -12,6 +12,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.NoActiveAccountException
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -34,15 +35,20 @@ import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class ProfilePresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey?,
-) : PresenterBase<ProfileState>() {
+) : PresenterBase<ProfileState>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): ProfileState {
         val scope = rememberCoroutineScope()
-        val accountServiceState = accountServiceProvider(accountType = accountType)
+        val accountServiceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
         val userState =
             accountServiceState.map { service ->
                 val userId =
@@ -215,11 +221,14 @@ class ProfileWithUserNameAndHostPresenter(
     private val userName: String,
     private val host: String,
     private val accountType: AccountType,
-) : PresenterBase<UserState>() {
+) : PresenterBase<UserState>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): UserState {
         val userState =
-            accountServiceProvider(accountType = accountType).flatMap { service ->
+            accountServiceProvider(accountType = accountType, repository = accountRepository).flatMap { service ->
                 remember(service) {
                     service.userByAcct("$userName@$host")
                 }.collectAsState().toUi()

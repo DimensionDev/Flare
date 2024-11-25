@@ -48,7 +48,6 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import moe.tlaster.twitter.parser.TwitterParser
 import sh.christian.ozone.api.model.JsonContent
-import sh.christian.ozone.api.model.ReadOnlyList
 
 internal val bskyJson by lazy {
     Json {
@@ -99,7 +98,7 @@ private fun parseBluesky(
 
 private fun parseBluesky(
     text: String,
-    facets: ReadOnlyList<Facet>,
+    facets: List<Facet>,
     accountKey: MicroBlogKey,
 ): UiRichText {
     val element = Element("p")
@@ -166,6 +165,15 @@ private fun parseBluesky(
                                         keyword = facetText,
                                     ),
                                 )
+                            },
+                    )
+                }
+
+                is FacetFeatureUnion.Unknown -> {
+                    element.addChildren(
+                        Element("span")
+                            .apply {
+                                appendTextWithBr(facetText)
                             },
                     )
                 }
@@ -282,27 +290,27 @@ internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
 private val ListNotificationsReason.icon: UiTimeline.TopMessage.Icon
     get() =
         when (this) {
-            ListNotificationsReason.LIKE -> UiTimeline.TopMessage.Icon.Favourite
-            ListNotificationsReason.REPOST -> UiTimeline.TopMessage.Icon.Retweet
-            ListNotificationsReason.FOLLOW -> UiTimeline.TopMessage.Icon.Follow
-            ListNotificationsReason.MENTION -> UiTimeline.TopMessage.Icon.Mention
-            ListNotificationsReason.REPLY -> UiTimeline.TopMessage.Icon.Reply
-            ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.Icon.Reply
-            ListNotificationsReason.UNKNOWN -> UiTimeline.TopMessage.Icon.Info
-            ListNotificationsReason.STARTERPACK_JOINED -> UiTimeline.TopMessage.Icon.Info
+            ListNotificationsReason.Like -> UiTimeline.TopMessage.Icon.Favourite
+            ListNotificationsReason.Repost -> UiTimeline.TopMessage.Icon.Retweet
+            ListNotificationsReason.Follow -> UiTimeline.TopMessage.Icon.Follow
+            ListNotificationsReason.Mention -> UiTimeline.TopMessage.Icon.Mention
+            ListNotificationsReason.Reply -> UiTimeline.TopMessage.Icon.Reply
+            ListNotificationsReason.Quote -> UiTimeline.TopMessage.Icon.Reply
+            is ListNotificationsReason.Unknown -> UiTimeline.TopMessage.Icon.Info
+            ListNotificationsReason.StarterpackJoined -> UiTimeline.TopMessage.Icon.Info
         }
 
 private val ListNotificationsReason.type: UiTimeline.TopMessage.MessageType
     get() =
         when (this) {
-            ListNotificationsReason.LIKE -> UiTimeline.TopMessage.MessageType.Bluesky.Like
-            ListNotificationsReason.REPOST -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
-            ListNotificationsReason.FOLLOW -> UiTimeline.TopMessage.MessageType.Bluesky.Follow
-            ListNotificationsReason.MENTION -> UiTimeline.TopMessage.MessageType.Bluesky.Mention
-            ListNotificationsReason.REPLY -> UiTimeline.TopMessage.MessageType.Bluesky.Reply
-            ListNotificationsReason.QUOTE -> UiTimeline.TopMessage.MessageType.Bluesky.Quote
-            ListNotificationsReason.UNKNOWN -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
-            ListNotificationsReason.STARTERPACK_JOINED -> UiTimeline.TopMessage.MessageType.Bluesky.StarterpackJoined
+            ListNotificationsReason.Like -> UiTimeline.TopMessage.MessageType.Bluesky.Like
+            ListNotificationsReason.Repost -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
+            ListNotificationsReason.Follow -> UiTimeline.TopMessage.MessageType.Bluesky.Follow
+            ListNotificationsReason.Mention -> UiTimeline.TopMessage.MessageType.Bluesky.Mention
+            ListNotificationsReason.Reply -> UiTimeline.TopMessage.MessageType.Bluesky.Reply
+            ListNotificationsReason.Quote -> UiTimeline.TopMessage.MessageType.Bluesky.Quote
+            is ListNotificationsReason.Unknown -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
+            ListNotificationsReason.StarterpackJoined -> UiTimeline.TopMessage.MessageType.Bluesky.StarterpackJoined
         }
 
 internal fun PostView.render(
@@ -645,6 +653,8 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
                                     ?.toFloat() ?: 0f,
                         ),
                     )
+
+                is RecordWithMediaViewMediaUnion.Unknown -> persistentListOf()
             }
         }
 

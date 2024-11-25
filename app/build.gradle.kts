@@ -141,6 +141,7 @@ dependencies {
     debugImplementation(libs.mlkit.language.id.debug)
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(projects.shared)
+    implementation(projects.shared.ui)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)
     implementation(libs.colorpicker.compose)

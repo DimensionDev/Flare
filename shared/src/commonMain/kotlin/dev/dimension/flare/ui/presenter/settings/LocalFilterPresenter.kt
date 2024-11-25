@@ -8,12 +8,16 @@ import dev.dimension.flare.ui.model.UiKeywordFilter
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
-import org.koin.compose.koinInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class LocalFilterPresenter : PresenterBase<LocalFilterState>() {
+class LocalFilterPresenter :
+    PresenterBase<LocalFilterState>(),
+    KoinComponent {
+    private val repository by inject<LocalFilterRepository>()
+
     @Composable
     override fun body(): LocalFilterState {
-        val repository = koinInject<LocalFilterRepository>()
         val all by remember { repository.getAllFlow() }.collectAsUiState()
         return object : LocalFilterState {
             override val items = all

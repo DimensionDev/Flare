@@ -11,11 +11,15 @@ import dev.dimension.flare.data.repository.ApplicationRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class ServiceSelectPresenter(
     private val toHome: () -> Unit,
-) : PresenterBase<ServiceSelectState>() {
+) : PresenterBase<ServiceSelectState>(),
+    KoinComponent {
+    private val applicationRepository: ApplicationRepository by inject()
+
     @Composable
     override fun body(): ServiceSelectState {
         val nodeInfoState = remember { NodeInfoPresenter() }.body()
@@ -39,7 +43,6 @@ class ServiceSelectPresenter(
 
     @Composable
     private fun misskeyLoginPresenter(onBack: (() -> Unit)?): MisskeyLoginState {
-        val applicationRepository: ApplicationRepository = koinInject()
         var loading by remember { mutableStateOf(false) }
         var error by remember { mutableStateOf<String?>(null) }
         val scope = rememberCoroutineScope()
@@ -89,7 +92,6 @@ class ServiceSelectPresenter(
 
     @Composable
     private fun mastodonLoginPresenter(onBack: (() -> Unit)?): MastodonLoginState {
-        val applicationRepository: ApplicationRepository = koinInject()
         var loading by remember { mutableStateOf(false) }
         var error by remember { mutableStateOf<String?>(null) }
         val scope = rememberCoroutineScope()

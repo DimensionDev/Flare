@@ -13,14 +13,17 @@ import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class VVOLoginPresenter(
     private val toHome: () -> Unit,
-) : PresenterBase<VVOLoginState>() {
+) : PresenterBase<VVOLoginState>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): VVOLoginState {
-        val accountRepository: AccountRepository = koinInject()
         var loading by remember { mutableStateOf(false) }
         var error by remember { mutableStateOf<Throwable?>(null) }
         val scope = rememberCoroutineScope()

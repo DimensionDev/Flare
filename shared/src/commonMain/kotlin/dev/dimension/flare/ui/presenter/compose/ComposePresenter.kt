@@ -12,6 +12,7 @@ import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountProvider
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.data.repository.allAccountsPresenter
@@ -35,16 +36,21 @@ import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import org.koin.compose.koinInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class ComposePresenter(
     private val accountType: AccountType,
     private val status: ComposeStatus? = null,
-) : PresenterBase<ComposeState>() {
+) : PresenterBase<ComposeState>(),
+    KoinComponent {
+    private val composeUseCase: ComposeUseCase by inject()
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): ComposeState {
-        val accountState by accountProvider(accountType = accountType)
-        val accounts by allAccountsPresenter()
+        val accountState by accountProvider(accountType = accountType, repository = accountRepository)
+        val accounts by allAccountsPresenter(repository = accountRepository)
         val selectedAccounts =
             remember {
                 mutableStateListOf<UiAccount>()
@@ -112,16 +118,18 @@ class ComposePresenter(
                             }.filter {
                                 it.platformType in platforms
                             }.map { account ->
-                                accountServiceProvider(accountType = AccountType.Specific(accountKey = account.accountKey))
-                                    .flatMap { service ->
-                                        remember(account.accountKey) {
-                                            service.userById(account.accountKey.id)
-                                        }.collectAsState()
-                                            .toUi()
-                                            .map {
-                                                it as UiUserV2
-                                            }
-                                    } to account
+                                accountServiceProvider(
+                                    accountType = AccountType.Specific(accountKey = account.accountKey),
+                                    repository = accountRepository,
+                                ).flatMap { service ->
+                                    remember(account.accountKey) {
+                                        service.userById(account.accountKey.id)
+                                    }.collectAsState()
+                                        .toUi()
+                                        .map {
+                                            it as UiUserV2
+                                        }
+                                } to account
                             }.toImmutableList()
                             .toImmutableListWrapper()
                     }
@@ -152,9 +160,8 @@ class ComposePresenter(
 
         val services =
             selectedAccounts.map {
-                accountServiceProvider(accountType = AccountType.Specific(accountKey = it.accountKey))
+                accountServiceProvider(accountType = AccountType.Specific(accountKey = it.accountKey), repository = accountRepository)
             }
-        val composeUseCase: ComposeUseCase = koinInject()
         val composeConfig: UiState<ComposeConfig> =
             remember(services) {
                 services.merge().map {

@@ -14,6 +14,7 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
@@ -24,16 +25,21 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class NotificationPresenter(
     private val accountType: AccountType,
-) : PresenterBase<NotificationState>() {
+) : PresenterBase<NotificationState>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): NotificationState {
         val scope = rememberCoroutineScope()
         var type by remember { mutableStateOf<NotificationFilter?>(null) }
         val serviceState =
-            accountServiceProvider(accountType = accountType).map {
+            accountServiceProvider(accountType = accountType, repository = accountRepository).map {
                 require(it is AuthenticatedMicroblogDataSource)
                 it
             }

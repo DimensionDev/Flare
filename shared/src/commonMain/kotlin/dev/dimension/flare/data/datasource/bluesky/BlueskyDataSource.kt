@@ -87,6 +87,7 @@ import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.data.network.bluesky.UnspeccedBlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
@@ -473,12 +474,12 @@ class BlueskyDataSource(
                     CreateReportRequest(
                         reasonType =
                             when (reason) {
-                                BlueskyReportStatusState.ReportReason.Spam -> Token.REASON_SPAM
-                                BlueskyReportStatusState.ReportReason.Violation -> Token.REASON_VIOLATION
-                                BlueskyReportStatusState.ReportReason.Misleading -> Token.REASON_MISLEADING
-                                BlueskyReportStatusState.ReportReason.Sexual -> Token.REASON_SEXUAL
-                                BlueskyReportStatusState.ReportReason.Rude -> Token.REASON_RUDE
-                                BlueskyReportStatusState.ReportReason.Other -> Token.REASON_OTHER
+                                BlueskyReportStatusState.ReportReason.Spam -> Token.ReasonSpam
+                                BlueskyReportStatusState.ReportReason.Violation -> Token.ReasonViolation
+                                BlueskyReportStatusState.ReportReason.Misleading -> Token.ReasonMisleading
+                                BlueskyReportStatusState.ReportReason.Sexual -> Token.ReasonSexual
+                                BlueskyReportStatusState.ReportReason.Rude -> Token.ReasonRude
+                                BlueskyReportStatusState.ReportReason.Other -> Token.ReasonOther
                             },
                         subject =
                             CreateReportRequestSubjectUnion.RepoStrongRef(
@@ -1072,7 +1073,7 @@ class BlueskyDataSource(
                     ?.value
                     ?.items
                     ?.filter {
-                        it.type == Type.FEED
+                        it.type == Type.Feed
                     }.orEmpty()
             service
                 .getFeedGenerators(
@@ -1103,7 +1104,7 @@ class BlueskyDataSource(
 
                 override suspend fun load(params: LoadParams<String>): LoadResult<String, UiList> {
                     val result =
-                        service
+                        UnspeccedBlueskyService
                             .getPopularFeedGenerators(
                                 GetPopularFeedGeneratorsQueryParams(
                                     limit = params.loadSize.toLong(),
@@ -1209,7 +1210,7 @@ class BlueskyDataSource(
                             (
                                 pref.value.items +
                                     SavedFeed(
-                                        type = Type.FEED,
+                                        type = Type.Feed,
                                         value = feedInfo.view.uri.atUri,
                                         pinned = true,
                                         id = Uuid.random().toString(),
@@ -1399,7 +1400,7 @@ class BlueskyDataSource(
                 }
             val record =
                 app.bsky.graph.List(
-                    purpose = app.bsky.graph.Token.CURATELIST,
+                    purpose = app.bsky.graph.Token.Curatelist,
                     name = title,
                     description = description,
                     avatar = iconInfo?.blob,
@@ -1967,6 +1968,8 @@ class BlueskyDataSource(
                             handleMessage(roomKey = roomKey, message = message.value)
                         is LogCreateMessageMessageUnion.DeletedMessageView ->
                             handleMessage(roomKey = roomKey, message = message.value)
+
+                        is LogCreateMessageMessageUnion.Unknown -> Unit
                     }
                 }
                 is GetLogResponseLogUnion.DeleteMessage -> {
@@ -1975,12 +1978,16 @@ class BlueskyDataSource(
                             handleMessage(roomKey = roomKey, message = message.value)
                         is LogDeleteMessageMessageUnion.DeletedMessageView ->
                             handleMessage(roomKey = roomKey, message = message.value)
+
+                        is LogDeleteMessageMessageUnion.Unknown -> Unit
                     }
                 }
                 is GetLogResponseLogUnion.BeginConvo -> {
                 }
                 is GetLogResponseLogUnion.LeaveConvo -> {
                 }
+
+                is GetLogResponseLogUnion.Unknown -> Unit
             }
         }
     }

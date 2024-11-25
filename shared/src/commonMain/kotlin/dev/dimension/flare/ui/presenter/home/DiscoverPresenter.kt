@@ -7,6 +7,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiHashtag
@@ -15,14 +16,19 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.presenter.PresenterBase
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class DiscoverPresenter(
     private val accountType: AccountType,
-) : PresenterBase<DiscoverState>() {
+) : PresenterBase<DiscoverState>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): DiscoverState {
         val scope = rememberCoroutineScope()
-        val accountState = accountServiceProvider(accountType = accountType)
+        val accountState = accountServiceProvider(accountType = accountType, repository = accountRepository)
         val users =
             accountState
                 .flatMap { dataSource ->

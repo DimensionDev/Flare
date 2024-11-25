@@ -2,18 +2,24 @@ package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class DeleteListPresenter(
     private val accountType: AccountType,
     private val listId: String,
-) : PresenterBase<DeleteListState>() {
+) : PresenterBase<DeleteListState>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): DeleteListState {
-        val serviceState = accountServiceProvider(accountType = accountType)
+        val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
 
         return object : DeleteListState {
             override suspend fun deleteList() {

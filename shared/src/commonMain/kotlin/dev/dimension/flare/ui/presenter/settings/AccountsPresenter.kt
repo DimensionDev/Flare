@@ -20,20 +20,27 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
-import org.koin.compose.koinInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class AccountsPresenter : PresenterBase<AccountsState>() {
+class AccountsPresenter :
+    PresenterBase<AccountsState>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): AccountsState {
-        val accountRepository = koinInject<AccountRepository>()
-        val accounts by allAccountsPresenter()
-        val activeAccount by activeAccountPresenter()
+        val accounts by allAccountsPresenter(repository = accountRepository)
+        val activeAccount by activeAccountPresenter(repository = accountRepository)
         val user =
             accounts.map {
                 it
                     .map { account ->
                         account to
-                            accountServiceProvider(accountType = AccountType.Specific(account.accountKey)).flatMap { service ->
+                            accountServiceProvider(
+                                accountType = AccountType.Specific(account.accountKey),
+                                repository = accountRepository,
+                            ).flatMap { service ->
                                 remember(account.accountKey) {
                                     service.userById(account.accountKey.id)
                                 }.collectAsState().toUi()

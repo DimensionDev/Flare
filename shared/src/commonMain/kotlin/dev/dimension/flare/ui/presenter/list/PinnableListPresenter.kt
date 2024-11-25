@@ -5,6 +5,7 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList
@@ -16,13 +17,18 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class PinnableListPresenter(
     private val accountType: AccountType,
-) : PresenterBase<PinnableListState>() {
+) : PresenterBase<PinnableListState>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): PinnableListState {
-        val serviceState = accountServiceProvider(accountType = accountType)
+        val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
         val items =
             serviceState
                 .mapNotNull { service ->

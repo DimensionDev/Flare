@@ -9,6 +9,7 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -17,10 +18,15 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 abstract class UserListPresenter(
     private val accountType: AccountType,
-) : PresenterBase<UserListPresenter.State>() {
+) : PresenterBase<UserListPresenter.State>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     interface State {
         val listState: PagingState<UiUserV2>
 
@@ -29,7 +35,7 @@ abstract class UserListPresenter(
 
     @Composable
     override fun body(): State {
-        val service = accountServiceProvider(accountType)
+        val service = accountServiceProvider(accountType, repository = accountRepository)
         val scope = rememberCoroutineScope()
         val listState =
             service

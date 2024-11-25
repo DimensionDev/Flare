@@ -29,6 +29,8 @@ import kotlinx.serialization.json.Json
 import sh.christian.ozone.BlueskyApi
 import sh.christian.ozone.XrpcBlueskyApi
 import sh.christian.ozone.api.response.AtpErrorDescription
+import sh.christian.ozone.unspecced.UnspeccedBlueskyApi
+import sh.christian.ozone.unspecced.XrpcUnspeccedBlueskyApi
 
 internal data class BlueskyService(
     private val baseUrl: String,
@@ -52,6 +54,8 @@ internal data class BlueskyService(
             expectSuccess = false
         },
     )
+
+internal data object UnspeccedBlueskyService : UnspeccedBlueskyApi by XrpcUnspeccedBlueskyApi()
 
 private class AtprotoProxyPlugin {
     companion object : HttpClientPlugin<Unit, AtprotoProxyPlugin> {

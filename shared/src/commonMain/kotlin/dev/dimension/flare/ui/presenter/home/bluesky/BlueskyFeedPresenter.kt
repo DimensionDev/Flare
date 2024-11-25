@@ -9,6 +9,7 @@ import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList
@@ -20,15 +21,20 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.launch
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class BlueskyFeedPresenter(
     private val accountType: AccountType,
     private val uri: String,
-) : PresenterBase<BlueskyFeedState>() {
+) : PresenterBase<BlueskyFeedState>(),
+    KoinComponent {
+    private val accountRepository: AccountRepository by inject()
+
     @Composable
     override fun body(): BlueskyFeedState {
         val scope = rememberCoroutineScope()
-        val serviceState = accountServiceProvider(accountType = accountType)
+        val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
         val timeline =
             serviceState
                 .map {

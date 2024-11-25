@@ -19,17 +19,21 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import org.koin.compose.koinInject
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class ActiveAccountPresenter : PresenterBase<UserState>() {
+class ActiveAccountPresenter :
+    PresenterBase<UserState>(),
+    KoinComponent {
+    private val accountRepository by inject<AccountRepository>()
+
     @Composable
     override fun body(): UserState {
-        val accountRepository = koinInject<AccountRepository>()
-        val account by activeAccountPresenter()
+        val account by activeAccountPresenter(repository = accountRepository)
         val user =
             account
                 .flatMap {
-                    accountServiceProvider(accountType = AccountType.Specific(it.accountKey))
+                    accountServiceProvider(accountType = AccountType.Specific(it.accountKey), repository = accountRepository)
                 }.flatMap {
                     if (it !is AuthenticatedMicroblogDataSource) {
                         UiState.Error(NoActiveAccountException)

@@ -1,0 +1,10 @@
+xcassets:
+  inputs:
+    - iosApp/Assets.xcassets
+  outputs:
+    - templateName: swift5
+      params:
+        forceProvidesNamespaces: true
+        enumName: Asset
+        bundle: 'Bundle(identifier: "dev.dimension.flare")'
+      output: Generated/Sources/Assets.swift

@@ -3,6 +3,10 @@ import MarkdownUI
 import NetworkImage
 import shared
 import Awesome
+import Foundation
+
+// Generated
+@_exported import Generated
 
 enum CommonProfileHeaderConstants {
     static let headerHeight: CGFloat = 200
@@ -119,39 +123,39 @@ struct CommonProfileHeader: View {
                     case .iconify(let data):
                         HStack(spacing: 8) {
                             if let locationValue = data.items[.location] {
-                                Label(
+                                    Label(
                                     title: {
                                         Markdown(locationValue.markdown)
                                             .font(.caption2)
                                             .markdownInlineImageProvider(.emoji)
                                     },
-                                    icon: {
-                                        Image("attributes/location")
-                                            .renderingMode(.template)
+                                        icon: {
+                                            Image(uiImage: Asset.Image.Attributes.location.image
+                                                .withRenderingMode(.alwaysTemplate))
                                             .imageScale(.small)
-                                    }
-                                )
-                                .labelStyle(CompactLabelStyle())
+                                        }
+                                    )
+                                    .labelStyle(CompactLabelStyle())
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                                 .background(Color(.systemGray6))
                                 .cornerRadius(6)
-                            }
+                                        }
                             
                             if let urlValue = data.items[.url] {
-                                Label(
+                                    Label(
                                     title: {
                                         Markdown(urlValue.markdown)
                                             .font(.caption2)
                                             .markdownInlineImageProvider(.emoji)
                                     },
-                                    icon: {
-                                        Image("attributes/globe")
-                                            .renderingMode(.template)
+                                        icon: {
+                                            Image(uiImage: Asset.Image.Attributes.globe.image
+                                                .withRenderingMode(.alwaysTemplate))
                                             .imageScale(.small)
-                                    }
-                                )
-                                .labelStyle(CompactLabelStyle())
+                                        }
+                                    )
+                                    .labelStyle(CompactLabelStyle())
                                 .padding(.horizontal, 8)
                                 .padding(.vertical, 4)
                                 .background(Color(.systemGray6))

@@ -76,6 +76,8 @@ kotlin {
         }
         val androidMain by getting {
             dependencies {
+                implementation(project.dependencies.platform(libs.compose.bom))
+                implementation(libs.compose.foundation)
                 implementation(libs.core.ktx)
             }
         }

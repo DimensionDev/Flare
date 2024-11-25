@@ -36,7 +36,17 @@ jobs:
           java-version: 21
 
       - name: Set up Gnome Dev
-        run: sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends apt-utils openjdk-17-jdk-headless python3-pip gcc-multilib libgirepository1.0-dev libadwaita-1-dev libgtksourceview-5-dev libwebkitgtk-6.0-dev
+        run: |
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            apt-utils \
+            openjdk-17-jdk-headless \
+            python3-pip \
+            gcc-multilib \
+            libgirepository1.0-dev \
+            libadwaita-1-dev \
+            libgtksourceview-5-dev \
+            libwebkitgtk-6.0-dev
 
       # Build with Gradle
       - name: Build with Gradle

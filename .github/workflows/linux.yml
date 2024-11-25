@@ -28,11 +28,15 @@ jobs:
       - uses: actions/checkout@v3
         with:
           submodules: true
+
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: 21
+
+      - name: Set up Gnome Dev
+        run: DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends apt-utils openjdk-17-jdk-headless python3-pip gcc-multilib libgirepository1.0-dev libadwaita-1-dev libgtksourceview-5-dev libwebkitgtk-6.0-dev
 
       # Build with Gradle
       - name: Build with Gradle

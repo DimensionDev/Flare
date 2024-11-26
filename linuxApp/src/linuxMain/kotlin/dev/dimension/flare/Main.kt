@@ -3,6 +3,8 @@ package dev.dimension.flare
 import dev.dimension.flare.ui.screen.home.homeScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import org.gtkkn.bindings.gio.ApplicationFlags
 import org.gtkkn.bindings.gio.annotations.GioVersion2_28
 import org.gtkkn.bindings.gtk.Application
@@ -55,3 +57,13 @@ internal sealed interface AppContext {
 private data class AppContextImpl(
     override val coroutineScope: CoroutineScope,
 ) : AppContext
+
+
+internal fun <T> AppContext.observe(
+    flow: Flow<T>,
+    onEach: (T) -> Unit,
+) = coroutineScope.launch {
+    flow.collect {
+        onEach(it)
+    }
+}

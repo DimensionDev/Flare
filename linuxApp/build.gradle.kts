@@ -17,7 +17,7 @@ kotlin {
         val linuxMain by getting {
             dependencies {
                 implementation(projects.shared)
-                implementation("org.gtkkn:gtk4")
+                implementation("moe.tlaster.gtkkn:gtk4:0.0.1-SNAPSHOT")
             }
         }
     }

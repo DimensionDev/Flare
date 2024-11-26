@@ -17,6 +17,7 @@ kotlin {
         val linuxMain by getting {
             dependencies {
                 implementation(projects.shared)
+                implementation(libs.kotlinx.coroutines.test)
                 implementation("moe.tlaster.gtkkn:gtk4:0.0.1-SNAPSHOT")
             }
         }

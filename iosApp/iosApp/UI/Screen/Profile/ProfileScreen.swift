@@ -4,8 +4,14 @@ import shared
 import SwiftUI
 
 struct ProfileScreen: View {
+ 
+    //MicroBlogKey host+id
     let toProfileMedia: (MicroBlogKey) -> Void
+    
+    //包含 user relationState， isme，listState - userTimeline，mediaState，canSendMessage
     @State private var presenter: ProfilePresenter
+    
+    //横屏 竖屏
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     init(accountType: AccountType, userKey: MicroBlogKey?, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
@@ -17,6 +23,7 @@ struct ProfileScreen: View {
         ObservePresenter(presenter: presenter) { state in
             ScrollView {
                 VStack {
+                    //header
                     ProfileHeader(
                         user: state.userState,
                         relation: state.relationState,
@@ -25,6 +32,7 @@ struct ProfileScreen: View {
                             state.follow(userKey: user.key, data: relation)
                         }
                     )
+                    //medias
                     if case .success(let userState) = onEnum(of: state.userState) {
                         Button(action: {
                             toProfileMedia(userState.data.key)

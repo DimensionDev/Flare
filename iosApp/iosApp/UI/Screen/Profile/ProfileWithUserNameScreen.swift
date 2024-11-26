@@ -1,6 +1,9 @@
 import SwiftUI
 import shared
-
+import MarkdownUI
+import OrderedCollections
+ 
+//user profile 入口
 struct ProfileWithUserNameScreen: View {
     @State private var presenter: ProfileWithUserNameAndHostPresenter
     private let accountType: AccountType
@@ -13,8 +16,11 @@ struct ProfileWithUserNameScreen: View {
     }
 
     var body: some View {
+        
+        // 自动更新UI，根据presenter models
         ObservePresenter(presenter: presenter) { state in
             ZStack {
+                //UiState Kotlin 的密封类
                 switch onEnum(of: state.user) {
                 case .error:
                     Text("error")

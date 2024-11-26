@@ -22,6 +22,9 @@ struct CompactLabelStyle: LabelStyle {
     }
 }
 
+/*
+ * CommonProfileHeader User Profile header(banner -- avatar -- desc -- follow count -- user location/url)
+ */
 struct CommonProfileHeader: View {
     let user: UiProfile
     let relation: UiState<UiRelation>
@@ -29,6 +32,7 @@ struct CommonProfileHeader: View {
     let onFollowClick: (UiRelation) -> Void
 
     var body: some View {
+        // banner
         ZStack(alignment: .top) {
             if let banner = user.banner, !banner.isEmpty {
                 Color.clear.overlay {
@@ -45,6 +49,8 @@ struct CommonProfileHeader: View {
                     .foregroundColor(.gray)
                     .frame(height: CommonProfileHeaderConstants.headerHeight)
             }
+            
+            //user avatar
             VStack(alignment: .leading) {
                 HStack {
                     VStack {
@@ -77,6 +83,7 @@ struct CommonProfileHeader: View {
                         }
                     }
                     Spacer()
+                    // user relation
                     VStack {
                         Spacer()
                             .frame(height: CommonProfileHeaderConstants.headerHeight)
@@ -108,14 +115,20 @@ struct CommonProfileHeader: View {
                             }
                     }
                 }
+                Spacer()
+                //user desc
                 if let desc = user.description_?.markdown {
                     Markdown(desc)
                         .markdownInlineImageProvider(.emoji)
                 }
-
+                Spacer()
+                
+                //user follows -  user fans
                 MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
 
-                
+                Spacer()
+
+                //user Location  user url
                 if let bottomContent = user.bottomContent {
                     switch onEnum(of: bottomContent) {
                     case .fields(let data):

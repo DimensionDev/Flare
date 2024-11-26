@@ -1,13 +1,13 @@
 package dev.dimension.flare.ui.screen.home
 
 import dev.dimension.flare.AppContext
+import dev.dimension.flare.observe
 import dev.dimension.flare.ui.presenter.CounterPresenter
 import org.gtkkn.bindings.gtk.Box
 import org.gtkkn.bindings.gtk.Button
 import org.gtkkn.bindings.gtk.Label
 import org.gtkkn.bindings.gtk.Orientation
 import org.gtkkn.bindings.gtk.Widget
-import dev.dimension.flare.observe
 
 internal fun AppContext.homeScreen(): Widget {
     val presenter = CounterPresenter()

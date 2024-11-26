@@ -58,7 +58,6 @@ private data class AppContextImpl(
     override val coroutineScope: CoroutineScope,
 ) : AppContext
 
-
 internal fun <T> AppContext.observe(
     flow: Flow<T>,
     onEach: (T) -> Unit,

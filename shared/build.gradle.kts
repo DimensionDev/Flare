@@ -79,6 +79,7 @@ kotlin {
                 implementation(project.dependencies.platform(libs.compose.bom))
                 implementation(libs.compose.foundation)
                 implementation(libs.core.ktx)
+                implementation(libs.ktor.client.okhttp)
             }
         }
         val appleMain by getting {
@@ -94,7 +95,7 @@ kotlin {
         }
         val linuxMain by getting {
             dependencies {
-                implementation(libs.ktor.client.cio)
+                implementation(libs.ktor.client.curl)
             }
         }
     }

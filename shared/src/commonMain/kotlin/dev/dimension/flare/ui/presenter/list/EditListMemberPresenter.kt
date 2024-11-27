@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -86,6 +87,7 @@ class EditListMemberPresenter(
     }
 }
 
+@Immutable
 interface EditListMemberState {
     val users: PagingState<Pair<UiUserV2, Boolean>>
 

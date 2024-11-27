@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.dm
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.repository.AccountRepository
@@ -21,6 +22,7 @@ class UserDMConversationPresenter(
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
 
+    @Immutable
     interface State {
         val roomKey: UiState<MicroBlogKey>
     }

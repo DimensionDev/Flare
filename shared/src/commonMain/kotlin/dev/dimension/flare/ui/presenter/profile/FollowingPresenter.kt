@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.profile
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.PagingData
@@ -27,6 +28,7 @@ abstract class UserListPresenter(
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
 
+    @Immutable
     interface State {
         val listState: PagingState<UiUserV2>
 

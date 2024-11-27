@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.status
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.repository.AccountRepository
@@ -38,6 +39,7 @@ class StatusPresenter(
     }
 }
 
+@Immutable
 interface StatusState {
     val status: UiState<UiTimeline>
 }

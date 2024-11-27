@@ -258,6 +258,7 @@ class ComposePresenter(
     }
 }
 
+@Immutable
 interface VisibilityState {
     val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type
     val allVisibilities: ImmutableList<UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type>
@@ -270,6 +271,7 @@ interface VisibilityState {
     fun setVisibility(value: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type)
 }
 
+@Immutable
 sealed interface ComposeStatus {
     val statusKey: MicroBlogKey
 

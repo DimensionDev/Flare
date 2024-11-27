@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.settings
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.repository.LocalFilterRepository
@@ -49,6 +50,7 @@ class LocalFilterPresenter :
     }
 }
 
+@Immutable
 interface LocalFilterState {
     val items: UiState<ImmutableListWrapper<UiKeywordFilter>>
 

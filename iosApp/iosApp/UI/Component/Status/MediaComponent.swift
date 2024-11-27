@@ -1,6 +1,6 @@
 import SwiftUI
 import shared
-import NetworkImage
+import Kingfisher
 import AVKit
 
 struct MediaComponent: View {
@@ -95,28 +95,29 @@ struct MediaComponent: View {
 }
 
 struct MediaItemComponent: View {
-    // #if os(iOS)
-    //    @State var showCover = false
-    // #else
-    //    @Environment(\.openWindow) var openWindow
-    // #endif
     let media: UiMedia
     var body: some View {
         ZStack {
             Color.clear.overlay {
                 switch onEnum(of: media) {
                 case .image(let data):
-                    NetworkImage(url: URL(string: data.previewUrl)) { image in
-                        image.resizable().scaledToFill()
+                    if let url = URL(string: data.previewUrl) {
+                        KFImage(url)
+                            .resizable()
+                            .scaledToFill()
                     }
                 case .video(let video):
-                    MutedVideoPlayer(url: video.url)
+                    if let url = URL(string: video.thumbnailUrl) {
+                        KFImage(url)
+                            .resizable()
+                            .scaledToFill()
+                    }
                 case .audio(let audio):
                     VideoPlayer(player: AVPlayer(url: URL(string: audio.url)!)) {
-                        if let cover = audio.previewUrl {
-                            NetworkImage(url: URL(string: cover)) { image in
-                                image.resizable().scaledToFill()
-                            }
+                        if let cover = audio.previewUrl, let url = URL(string: cover) {
+                            KFImage(url)
+                                .resizable()
+                                .scaledToFill()
                         }
                     }
                 case .gif(let gif):

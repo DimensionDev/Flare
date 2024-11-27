@@ -63,6 +63,18 @@ struct ProfileScreen: View {
                     )
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets())
+                    .allowsHitTesting(true)
+                    .zIndex(1)
+                    .overlay(alignment: .top) {
+                        GeometryReader { proxy in
+                            Color.clear.preference(
+                                key: ScrollOffsetPreferenceKey.self,
+                                value: proxy.frame(in: .named("scroll")).minY
+                            )
+                        }
+                        .frame(height: 0)
+                    }
+
                     if case .success(let userState) = onEnum(of: state.userState) {
                         Button(action: {
                             toProfileMedia(userState.data.key)
@@ -78,10 +90,17 @@ struct ProfileScreen: View {
                     detailKey: nil
                 )
             }
+            .coordinateSpace(name: "scroll")
+            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                // 如果需要，可以在这里处理滚动偏移量
+            }
             .refreshable {
                 try? await state.refresh()
             }
             .listStyle(.plain)
+            .scrollDisabled(false)
+            .scrollDismissesKeyboard(.immediately)
+            .scrollIndicators(.hidden)
         }
     }
 
@@ -332,5 +351,12 @@ struct FieldsView: View {
         } else {
             EmptyView()
         }
+    }
+}
+
+struct ScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }

@@ -63,12 +63,11 @@ struct ProfileMediaListScreen: View {
     private func showPhotoBrowser(media: UiMedia, images: [UiMedia], initialIndex: Int) {
         let browser = JXPhotoBrowser()
         browser.scrollDirection = .horizontal
-        
-        // 设置图片数量回调
         browser.numberOfItems = { images.count }
-        
-        // 设置初始索引
         browser.pageIndex = initialIndex
+        
+        // 设置淡入淡出动画
+        browser.transitionAnimator = JXPhotoBrowserFadeAnimator()
         
         // 根据媒体类型返回对应的 Cell
         browser.cellClassAtIndex = { index in
@@ -81,166 +80,68 @@ struct ProfileMediaListScreen: View {
             }
         }
         
+        // 加载媒体内容
         browser.reloadCellAtIndex = { context in
             guard context.index >= 0, context.index < images.count else { return }
             let media = images[context.index]
             
             switch onEnum(of: media) {
             case .video(let data):
-                if let url = URL(string: data.url ?? ""),
+                if let url = URL(string: data.url),
                    let cell = context.cell as? MediaBrowserVideoCell {
-                    cell.loadVideo(url: url, thumbnailUrl: data.thumbnailUrl)
+                    cell.load(url: url, previewUrl: URL(string: data.thumbnailUrl), isGIF: false)
+                }
+            case .gif(let data):
+                if let url = URL(string: data.url),
+                   let cell = context.cell as? MediaBrowserVideoCell {
+                    cell.load(url: url, previewUrl: URL(string: data.previewUrl), isGIF: true)
                 }
             case .image(let data):
-                if let url = URL(string: data.url ?? ""),
+                if let url = URL(string: data.url),
                    let cell = context.cell as? JXPhotoBrowserImageCell {
                     cell.imageView.kf.setImage(with: url, options: [
                         .transition(.fade(0.25)),
                         .processor(DownsamplingImageProcessor(size: UIScreen.main.bounds.size))
                     ])
                 }
-            case .gif(let data):
-                if let url = URL(string: data.url ?? ""),
-                   let cell = context.cell as? MediaBrowserVideoCell {
-                    cell.loadVideo(url: url, thumbnailUrl: data.previewUrl)
-                }
-            case .audio:
+            default:
                 break
             }
         }
         
-        // 视频播放控制
+        // Cell 将要显示
         browser.cellWillAppear = { cell, index in
             let media = images[index]
             switch onEnum(of: media) {
             case .video, .gif:
                 if let videoCell = cell as? MediaBrowserVideoCell {
-                    videoCell.player.play()
+                    videoCell.willDisplay()
                 }
             default:
                 break
             }
         }
         
+        // Cell 将要消失
         browser.cellWillDisappear = { cell, index in
             let media = images[index]
             switch onEnum(of: media) {
             case .video, .gif:
                 if let videoCell = cell as? MediaBrowserVideoCell {
-                    videoCell.player.pause()
+                    videoCell.didEndDisplaying()
                 }
             default:
                 break
             }
         }
         
+        // 即将关闭时的处理
+        browser.willDismiss = { _ in
+            // 返回 true 表示执行动画
+            return true
+        }
+        
         browser.show()
-    }
-}
-
-// MARK: - VideoCell
-class MediaBrowserVideoCell: UIView, JXPhotoBrowserCell {
-    weak var photoBrowser: JXPhotoBrowser?
-    
-    lazy var player = AVPlayer()
-    lazy var playerLayer = AVPlayerLayer(player: player)
-    private let progressView = UIProgressView(progressViewStyle: .default)
-    private let thumbnailImageView = UIImageView()
-    
-    static func generate(with browser: JXPhotoBrowser) -> Self {
-        let instance = Self.init(frame: .zero)
-        instance.photoBrowser = browser
-        return instance
-    }
-    
-    required override init(frame: CGRect) {
-        super.init(frame: .zero)
-        backgroundColor = .black
-        
-        thumbnailImageView.contentMode = .scaleAspectFit
-        addSubview(thumbnailImageView)
-        thumbnailImageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        progressView.progressTintColor = .white
-        progressView.trackTintColor = .gray
-        addSubview(progressView)
-        progressView.translatesAutoresizingMaskIntoConstraints = false
-        
-        layer.addSublayer(playerLayer)
-        
-        NSLayoutConstraint.activate([
-            thumbnailImageView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            thumbnailImageView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            thumbnailImageView.topAnchor.constraint(equalTo: topAnchor),
-            thumbnailImageView.bottomAnchor.constraint(equalTo: bottomAnchor),
-            
-            progressView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            progressView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            progressView.centerYAnchor.constraint(equalTo: centerYAnchor)
-        ])
-        
-        let tap = UITapGestureRecognizer(target: self, action: #selector(click))
-        addGestureRecognizer(tap)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        playerLayer.frame = bounds
-    }
-    
-    func loadVideo(url: URL, thumbnailUrl: String?) {
-        // 显示缩略图
-        if let thumbnailUrl = thumbnailUrl, let url = URL(string: thumbnailUrl) {
-            thumbnailImageView.kf.setImage(with: url)
-        }
-        
-        // 设置视频
-        let asset = AVURLAsset(url: url)
-        let playerItem = AVPlayerItem(asset: asset)
-        
-        // 监听加载进度
-        playerItem.addObserver(self, forKeyPath: "loadedTimeRanges", options: .new, context: nil)
-        
-        // 监听播放状态
-        NotificationCenter.default.addObserver(self,
-                                             selector: #selector(playerItemDidReadyToPlay),
-                                             name: .AVPlayerItemNewErrorLogEntry,
-                                             object: playerItem)
-        
-        player.replaceCurrentItem(with: playerItem)
-    }
-    
-    @objc private func playerItemDidReadyToPlay() {
-        thumbnailImageView.isHidden = true
-        progressView.isHidden = true
-        player.play()
-    }
-    
-    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
-        if keyPath == "loadedTimeRanges",
-           let playerItem = object as? AVPlayerItem {
-            let loadedTimeRanges = playerItem.loadedTimeRanges
-            if let timeRange = loadedTimeRanges.first?.timeRangeValue {
-                let bufferedDuration = CMTimeGetSeconds(timeRange.duration)
-                let totalDuration = CMTimeGetSeconds(playerItem.duration)
-                let progress = Float(bufferedDuration / totalDuration)
-                DispatchQueue.main.async {
-                    self.progressView.progress = progress
-                }
-            }
-        }
-    }
-    
-    deinit {
-        player.currentItem?.removeObserver(self, forKeyPath: "loadedTimeRanges")
-    }
-    
-    @objc private func click() {
-        photoBrowser?.dismiss()
     }
 }
 
@@ -432,7 +333,7 @@ struct MediaGridItem: View {
                     
                     VStack {
                         HStack {
-                            Text("Video")
+                            Text("GIF")
                                 .font(.caption)
                                 .padding(4)
                                 .background(.ultraThinMaterial)
@@ -440,6 +341,9 @@ struct MediaGridItem: View {
                         }
                         Spacer()
                     }
+                }
+                .onTapGesture {
+                    onTap()
                 }
             case .image(let image):
                 ZStack {
@@ -504,5 +408,177 @@ struct MediaGridItem: View {
         .onTapGesture {
             onTap()
         }
+    }
+}
+
+// MARK: - VideoCell
+class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
+    weak var photoBrowser: JXPhotoBrowser?
+    private var videoViewController: MediaPreviewVideoViewController?
+    private let mediaSaver: MediaSaver
+    private var currentURL: URL?
+    private var existedPan: UIPanGestureRecognizer?
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    required init(frame: CGRect, mediaSaver: MediaSaver = DefaultMediaSaver.shared) {
+        self.mediaSaver = mediaSaver
+        super.init(frame: frame)
+        setupUI()
+    }
+    
+    private func setupUI() {
+        backgroundColor = .black
+        
+        // 添加拖动手势
+        let pan = UIPanGestureRecognizer(target: self, action: #selector(onPan(_:)))
+        pan.delegate = self
+        addGestureRecognizer(pan)
+        existedPan = pan
+        
+        // 添加点击手势
+        let tap = UITapGestureRecognizer(target: self, action: #selector(click))
+        addGestureRecognizer(tap)
+    }
+    
+    @objc private func onPan(_ pan: UIPanGestureRecognizer) {
+        guard let parentView = superview else { return }
+        
+        let translation = pan.translation(in: parentView)
+        let scale = 1 - abs(translation.y) / parentView.bounds.height
+        
+        switch pan.state {
+        case .changed:
+            // 跟随手指移动
+            transform = CGAffineTransform(translationX: translation.x, y: translation.y)
+                .scaledBy(x: scale, y: scale)
+            
+            // 调整背景透明度
+            parentView.backgroundColor = UIColor.black.withAlphaComponent(scale)
+            
+        case .ended, .cancelled:
+            let velocity = pan.velocity(in: parentView)
+            let shouldDismiss = abs(translation.y) > 100 || abs(velocity.y) > 500
+            
+            if shouldDismiss {
+                // 关闭浏览器
+                photoBrowser?.dismiss()
+            } else {
+                // 恢复原位
+                UIView.animate(withDuration: 0.3) {
+                    self.transform = .identity
+                    parentView.backgroundColor = .black
+                }
+            }
+            
+        default:
+            break
+        }
+    }
+    
+    // UIGestureRecognizerDelegate
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        // 允许同时识别多个手势
+        return true
+    }
+    
+    func load(url: URL, previewUrl: URL?, isGIF: Bool) {
+        // 如果已经加载了相同的 URL，不需要重新加载
+        if currentURL == url {
+            return
+        }
+        
+        // 先清理旧的资源
+        cleanupCurrentVideo()
+        currentURL = url
+        
+        // Create view model
+        let viewModel = MediaPreviewVideoViewModel(
+            mediaSaver: mediaSaver,
+            item: isGIF ? .gif(.init(assetURL: url, previewURL: previewUrl)) 
+                       : .video(.init(assetURL: url, previewURL: previewUrl))
+        )
+        
+        // Create and setup new view controller
+        let newVC = MediaPreviewVideoViewController()
+        newVC.viewModel = viewModel
+        videoViewController = newVC
+        
+        // Add to view hierarchy
+        addSubview(newVC.view)
+        newVC.view.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Add as child view controller
+        if let parentViewController = self.findViewController() {
+            parentViewController.addChild(newVC)
+            newVC.didMove(toParent: parentViewController)
+        }
+        
+        NSLayoutConstraint.activate([
+            newVC.view.leadingAnchor.constraint(equalTo: leadingAnchor),
+            newVC.view.trailingAnchor.constraint(equalTo: trailingAnchor),
+            newVC.view.topAnchor.constraint(equalTo: topAnchor),
+            newVC.view.bottomAnchor.constraint(equalTo: bottomAnchor)
+        ])
+        
+        // 默认不自动播放，等待 willDisplay 时再播放
+        viewModel.player?.pause()
+    }
+    
+    private func cleanupCurrentVideo() {
+        // 暂停当前播放的视频
+        if let viewModel = videoViewController?.viewModel,
+           let player = viewModel.player {
+            player.pause()
+            player.replaceCurrentItem(with: nil)  // 清除播放器项
+        }
+        
+        // 移除视频控制器
+        if let vc = videoViewController {
+            vc.willMove(toParent: nil)
+            vc.view.removeFromSuperview()
+            vc.removeFromParent()
+            videoViewController = nil
+        }
+        currentURL = nil
+    }
+    
+    func willDisplay() {
+        // 显示时开始播放视频
+        if let viewModel = videoViewController?.viewModel,
+           let player = viewModel.player {
+            player.play()
+        }
+    }
+    
+    func didEndDisplaying() {
+        cleanupCurrentVideo()
+    }
+    
+    @objc private func click() {
+        photoBrowser?.dismiss()
+    }
+    
+    // Helper method to find parent view controller
+    private func findViewController() -> UIViewController? {
+        var responder: UIResponder? = self
+        while let nextResponder = responder?.next {
+            if let viewController = nextResponder as? UIViewController {
+                return viewController
+            }
+            responder = nextResponder
+        }
+        return nil
+    }
+}
+
+// MARK: - JXPhotoBrowserCell
+extension MediaBrowserVideoCell: JXPhotoBrowserCell {
+    static func generate(with browser: JXPhotoBrowser) -> Self {
+        let instance = Self.init(frame: .zero)
+        instance.photoBrowser = browser
+        return instance
     }
 }

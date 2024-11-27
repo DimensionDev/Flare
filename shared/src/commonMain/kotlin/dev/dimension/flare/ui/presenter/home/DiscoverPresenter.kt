@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -89,6 +90,7 @@ class DiscoverPresenter(
     }
 }
 
+@Immutable
 interface DiscoverState {
     val users: PagingState<UiUserV2>
     val status: PagingState<UiTimeline>

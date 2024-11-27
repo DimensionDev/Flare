@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.presenter.compose
 
+import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.datasource.microblog.ComposeData
@@ -46,14 +47,18 @@ internal class ComposeUseCase(
     }
 }
 
+@Immutable
 sealed interface ComposeProgressState {
+    @Immutable
     data object Success : ComposeProgressState
 
+    @Immutable
     data class Progress(
         val current: Int,
         val max: Int,
     ) : ComposeProgressState
 
+    @Immutable
     data class Error(
         val throwable: Throwable,
     ) : ComposeProgressState

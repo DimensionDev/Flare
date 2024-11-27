@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -42,6 +43,7 @@ class ListMembersPresenter(
     }
 }
 
+@Immutable
 interface ListMembersState {
     val memberInfo: PagingState<UiUserV2>
 }

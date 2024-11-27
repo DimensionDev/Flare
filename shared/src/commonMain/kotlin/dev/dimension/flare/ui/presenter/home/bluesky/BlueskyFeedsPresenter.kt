@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.home.bluesky
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -84,6 +85,7 @@ class BlueskyFeedsPresenter(
     }
 }
 
+@Immutable
 interface BlueskyFeedsState {
     val myFeeds: PagingState<UiList>
     val popularFeeds: PagingState<Pair<UiList, Boolean>>

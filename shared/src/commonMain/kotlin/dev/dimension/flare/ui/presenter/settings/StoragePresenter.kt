@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.settings
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -45,6 +46,7 @@ class StoragePresenter :
     }
 }
 
+@Immutable
 interface StorageState {
     val userCount: Long
     val statusCount: Long

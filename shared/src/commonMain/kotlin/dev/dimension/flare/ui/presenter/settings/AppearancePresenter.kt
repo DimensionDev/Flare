@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.settings
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
@@ -25,6 +26,7 @@ class AppearancePresenter : PresenterBase<AppearanceState>() {
     }
 }
 
+@Immutable
 interface AppearanceState {
     val sampleStatus: UiState<UiTimeline>
 }

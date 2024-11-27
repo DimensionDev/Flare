@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
@@ -73,6 +74,7 @@ class PinnableListPresenter(
     }
 }
 
+@Immutable
 interface PinnableListState {
     val items: UiState<ImmutableList<UiList>>
 }

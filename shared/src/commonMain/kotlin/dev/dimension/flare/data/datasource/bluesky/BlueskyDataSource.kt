@@ -113,6 +113,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -237,6 +238,7 @@ class BlueskyDataSource(
                 database
                     .userDao()
                     .findByHandleAndHost(name, host, PlatformType.Bluesky)
+                    .distinctUntilChanged()
                     .mapNotNull { it?.render(accountKey) }
             },
         )
@@ -256,6 +258,7 @@ class BlueskyDataSource(
                 database
                     .userDao()
                     .findByKey(MicroBlogKey(id, accountKey.host))
+                    .distinctUntilChanged()
                     .mapNotNull { it?.render(accountKey) }
             },
         )
@@ -1824,7 +1827,8 @@ class BlueskyDataSource(
                     .getRoomInfo(
                         roomKey = roomKey,
                         accountKey = accountKey,
-                    ).mapNotNull {
+                    ).distinctUntilChanged()
+                    .mapNotNull {
                         it?.render(accountKey = accountKey)
                     }
             },
@@ -2031,9 +2035,13 @@ class BlueskyDataSource(
                 )
             },
             cacheSource = {
-                database.messageDao().getRoomTimeline(accountKey = accountKey).map {
-                    it.sumOf { it.timeline.unreadCount.toInt() }
-                }
+                database
+                    .messageDao()
+                    .getRoomTimeline(accountKey = accountKey)
+                    .distinctUntilChanged()
+                    .map {
+                        it.sumOf { it.timeline.unreadCount.toInt() }
+                    }
             },
         )
 

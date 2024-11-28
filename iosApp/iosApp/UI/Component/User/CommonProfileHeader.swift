@@ -1,6 +1,6 @@
 import SwiftUI
 import MarkdownUI
-import NetworkImage
+import Kingfisher
 import shared
 import Awesome
 import Foundation
@@ -36,12 +36,11 @@ struct CommonProfileHeader: View {
         ZStack(alignment: .top) {
             if let banner = user.banner, !banner.isEmpty {
                 Color.clear.overlay {
-                    NetworkImage(url: URL(string: banner)) { image in
-                        image.resizable().scaledToFill()
-                            .frame(height: CommonProfileHeaderConstants.headerHeight)
-                            .clipped()
-                    }
-                    .frame(height: CommonProfileHeaderConstants.headerHeight)
+                    KFImage(URL(string: banner))
+                        .resizable()
+                        .scaledToFill()
+                        .frame(height: CommonProfileHeaderConstants.headerHeight)
+                        .clipped()
                 }
                 .frame(height: CommonProfileHeaderConstants.headerHeight)
             } else {

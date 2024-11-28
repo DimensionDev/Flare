@@ -1,6 +1,6 @@
 import SwiftUI
 import shared
-import NetworkImage
+import Kingfisher
 
 struct MisskeyReactionSheet: View {
     @State private var presenter: MisskeyReactionPresenter
@@ -23,9 +23,9 @@ struct MisskeyReactionSheet: View {
                                 state.select(emoji: item)
                                 onBack()
                             }, label: {
-                                NetworkImage(url: URL(string: item.url)) { image in
-                                    image.resizable().scaledToFit()
-                                }
+                                KFImage(URL(string: item.url))
+                                    .resizable()
+                                    .scaledToFit()
                             })
                             .buttonStyle(.plain)
                         }

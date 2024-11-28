@@ -1,7 +1,7 @@
 import SwiftUI
 import AuthenticationServices
 import shared
-import NetworkImage
+import Kingfisher
 import Combine
 
 struct ServiceSelectScreen: View {
@@ -45,13 +45,9 @@ struct ServiceSelectScreen: View {
                             .disabled(state.loading)
                         switch onEnum(of: state.detectedPlatformType) {
                         case .success(let success):
-                            NetworkImage(
-                                url: .init(string: success.data.logoUrl),
-                                content: { image in
-                                    image.resizable().frame(width: 24, height: 24)
-                                }
-                            )
-                            .frame(width: 24, height: 24)
+                            KFImage(URL(string: success.data.logoUrl))
+                                .resizable()
+                                .frame(width: 24, height: 24)
                         case .error:
                             Image(systemName: "questionmark")
                                 .frame(width: 24, height: 24)
@@ -169,11 +165,12 @@ struct ServiceSelectScreen: View {
                                     }, label: {
                                         VStack {
                                             HStack {
-                                                if instance.iconUrl != nil {
-                                                    NetworkImage(url: URL(string: instance.iconUrl!)) { image in
-                                                        image.resizable().frame(width: 24, height: 24)
-                                                    }
-                                                    .frame(width: 24, height: 24)
+                                                if let iconUrl = instance.iconUrl {
+                                                    KFImage(URL(string: iconUrl))
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                        .frame(width: 48, height: 48)
+                                                        .clipShape(Circle())
                                                 }
                                                 Text(instance.name)
                                                     .font(.title)
@@ -185,11 +182,12 @@ struct ServiceSelectScreen: View {
                                                 .frame(maxWidth: .infinity)
                                         }
                                         .background {
-                                            if instance.bannerUrl != nil {
-                                                NetworkImage(url: URL(string: instance.bannerUrl!)) { image in
-                                                    image.resizable().scaledToFill()
-                                                }
-                                                .opacity(0.15)
+                                            if let bannerUrl = instance.bannerUrl {
+                                                KFImage(URL(string: bannerUrl))
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(height: 120)
+                                                    .clipped()
                                             } else {
                                                 EmptyView()
                                             }

@@ -1,20 +1,21 @@
 import SwiftUI
-import NetworkImage
+import Kingfisher
 
 struct UserAvatar: View {
     @Environment(\.appSettings) private var appSettings
     let data: String
     var size: CGFloat = 48
+    
     var body: some View {
         let shape = switch appSettings.appearanceSettings.avatarShape {
         case .circle: RoundedRectangle(cornerRadius: size)
         case .square: RoundedRectangle(cornerRadius: 8)
         }
-        NetworkImage(url: URL(string: data)) { image in
-            image.resizable().scaledToFit()
-        }
-        .frame(width: size, height: size)
-        .clipShape(shape)
+        KFImage(URL(string: data))
+            .resizable()
+            .scaledToFit()
+            .frame(width: size, height: size)
+            .clipShape(shape)
     }
 }
 

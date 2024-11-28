@@ -1,6 +1,6 @@
 import SwiftUI
 import shared
-import NetworkImage
+import Kingfisher
 import AVKit
 
 struct FullScreenImageViewer: View {
@@ -9,11 +9,9 @@ struct FullScreenImageViewer: View {
         ZStack {
             switch onEnum(of: media) {
             case .image(let data):
-                NetworkImage(url: .init(string: data.url)) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                }
+                KFImage(URL(string: data.url))
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
             case .video(let video):
                 VideoPlayer(player: AVPlayer(url: URL(string: video.url)!))
             case .audio(let audio):

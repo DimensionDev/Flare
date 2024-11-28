@@ -2,14 +2,18 @@
 import SwiftUI
 import NetworkImage
 import AVKit
+import Kingfisher
 
 struct ImageViewWindow: View {
     let url: String?
     var body: some View {
         if let url = url {
-            NetworkImage(url: URL(string: url)) { image in
-                image.resizable().scaledToFit()
-            }
+             KFImage(URL(string: url))
+                .resizable()
+                .scaledToFit()
+            // NetworkImage(url: URL(string: url)) { image in
+            //     image.resizable().scaledToFit()
+            // }
         }
     }
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 import shared
 import PhotosUI
-import NetworkImage
+import Kingfisher
 import Awesome
 
 struct ComposeScreen: View {
@@ -234,9 +234,11 @@ struct ComposeScreen: View {
                                                     Button(action: {
                                                         viewModel.addEmoji(emoji: item)
                                                     }, label: {
-                                                        NetworkImage(url: URL(string: item.url)) { image in
-                                                            image.resizable().scaledToFit()
-                                                        }
+                                                         
+                                                            KFImage(URL(string: item.url))
+                                                                .resizable()
+                                                                .scaledToFit()
+                                                         
                                                     })
                                                     .buttonStyle(.plain)
 

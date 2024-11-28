@@ -1,8 +1,8 @@
 import SwiftUI
 import MarkdownUI
 import shared
-import NetworkImage
 import Awesome
+import Kingfisher
 
 struct CommonStatusComponent: View {
     @State private var showMedia: Bool = false
@@ -130,7 +130,13 @@ struct CommonStatusComponent: View {
                                     reaction.onClicked()
                                 }, label: {
                                     HStack {
-                                        NetworkImage(url: URL(string: reaction.url))
+                                        if !reaction.url.isEmpty {
+                                            KFImage(URL(string: reaction.url))
+                                                .resizable()
+                                                .scaledToFit()
+                                         } else {
+                                            Text(reaction.name)
+                                        }
                                         Text(reaction.humanizedCount)
                                     }
                                 })

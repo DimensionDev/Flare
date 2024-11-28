@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.profile
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -72,10 +73,12 @@ class ProfileMediaPresenter(
     }
 }
 
+@Immutable
 interface ProfileMediaState {
     val mediaState: PagingState<ProfileMedia>
 }
 
+@Immutable
 data class ProfileMedia(
     val media: UiMedia,
     val status: UiTimeline,

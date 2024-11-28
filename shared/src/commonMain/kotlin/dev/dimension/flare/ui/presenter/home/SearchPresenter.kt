@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -75,6 +76,7 @@ class SearchPresenter(
     }
 }
 
+@Immutable
 interface SearchState {
     val users: PagingState<UiUserV2>
     val status: PagingState<UiTimeline>

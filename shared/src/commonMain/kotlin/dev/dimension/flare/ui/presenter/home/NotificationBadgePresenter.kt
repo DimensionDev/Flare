@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
@@ -59,6 +60,7 @@ class NotificationBadgePresenter(
     }
 }
 
+@Immutable
 interface NotificationBadgeState {
     val count: UiState<Int>
 

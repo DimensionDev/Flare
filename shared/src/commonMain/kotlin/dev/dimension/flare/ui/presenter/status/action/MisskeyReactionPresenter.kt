@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.status.action
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
@@ -79,6 +80,7 @@ class MisskeyReactionPresenter(
     }
 }
 
+@Immutable
 interface MisskeyReactionState {
     val emojis: UiState<ImmutableListWrapper<UiEmoji>>
 

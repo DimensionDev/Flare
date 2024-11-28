@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.refreshSuspend
@@ -78,6 +79,7 @@ class ListEditPresenter(
     }
 }
 
+@Immutable
 interface EditListState :
     EditListMemberState,
     ListMembersState,

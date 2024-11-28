@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -64,6 +65,7 @@ class ActiveAccountPresenter :
     }
 }
 
+@Immutable
 interface UserState {
     val user: UiState<UiUserV2>
 }

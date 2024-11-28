@@ -66,6 +66,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -219,6 +220,7 @@ class XQTDataSource(
                 database
                     .userDao()
                     .findByHandleAndHost(name, host, PlatformType.xQt)
+                    .distinctUntilChanged()
                     .mapNotNull { it?.render(accountKey) }
             },
         )
@@ -247,6 +249,7 @@ class XQTDataSource(
                 database
                     .userDao()
                     .findByKey(userKey)
+                    .distinctUntilChanged()
                     .mapNotNull { it?.render(accountKey) }
             },
         )
@@ -370,6 +373,7 @@ class XQTDataSource(
                 database
                     .statusDao()
                     .get(statusKey, accountKey)
+                    .distinctUntilChanged()
                     .mapNotNull { it?.content?.render(accountKey, this) }
             },
         )

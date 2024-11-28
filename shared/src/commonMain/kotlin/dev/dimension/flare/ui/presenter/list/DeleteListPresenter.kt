@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -32,6 +33,7 @@ class DeleteListPresenter(
     }
 }
 
+@Immutable
 interface DeleteListState {
     suspend fun deleteList()
 }

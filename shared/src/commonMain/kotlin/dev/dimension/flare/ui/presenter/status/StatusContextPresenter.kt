@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.status
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -47,6 +48,7 @@ class StatusContextPresenter(
     }
 }
 
+@Immutable
 abstract class StatusContextState(
     val listState: PagingState<UiTimeline>,
 ) {

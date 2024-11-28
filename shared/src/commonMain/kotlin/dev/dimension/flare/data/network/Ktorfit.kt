@@ -11,6 +11,7 @@ import dev.dimension.flare.data.network.authorization.Authorization
 import dev.dimension.flare.data.network.authorization.AuthorizationPlugin
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
+import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
@@ -44,7 +45,7 @@ internal fun ktorClient(
             json(JSON)
         }
     },
-) = HttpClient {
+) = HttpClient(httpClientEngine) {
     if (authorization != null) {
         install(AuthorizationPlugin) {
             this.authorization = authorization
@@ -56,6 +57,8 @@ internal fun ktorClient(
         level = LogLevel.ALL
     }
 }
+
+internal expect val httpClientEngine: HttpClientEngine
 
 private data object NapierLogger : io.ktor.client.plugins.logging.Logger {
     private val log =

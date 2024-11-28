@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.status.action
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -42,6 +43,7 @@ class MastodonReportPresenter(
     }
 }
 
+@Immutable
 interface MastodonReportState {
     fun report()
 }

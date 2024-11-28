@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.dm
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -49,6 +50,7 @@ class DMListPresenter(
     }
 }
 
+@Immutable
 interface DMListState {
     val items: PagingState<UiDMRoom>
     val isRefreshing: Boolean

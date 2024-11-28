@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.presenter.list
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
@@ -39,6 +40,7 @@ class ListInfoPresenter(
     }
 }
 
+@Immutable
 interface ListInfoState {
     val listInfo: UiState<UiList>
 }

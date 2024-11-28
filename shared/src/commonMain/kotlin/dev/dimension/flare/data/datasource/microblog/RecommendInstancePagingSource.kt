@@ -7,6 +7,9 @@ import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.ui.model.UiInstance
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 internal class RecommendInstancePagingSource : PagingSource<Int, UiInstance>() {
     override fun getRefreshKey(state: PagingState<Int, UiInstance>): Int? = null
@@ -14,32 +17,40 @@ internal class RecommendInstancePagingSource : PagingSource<Int, UiInstance>() {
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiInstance> =
         try {
             val instances =
-                runCatching {
-                    JoinMastodonService.servers().map {
-                        UiInstance(
-                            name = it.domain,
-                            description = it.description,
-                            iconUrl = null,
-                            domain = it.domain,
-                            type = PlatformType.Mastodon,
-                            bannerUrl = it.proxiedThumbnail,
-                            usersCount = it.totalUsers,
-                        )
-                    }
-                }.getOrDefault(emptyList()) +
-                    runCatching {
-                        JoinMisskeyService.instances().instancesInfos.map {
-                            UiInstance(
-                                name = it.name,
-                                description = it.description,
-                                iconUrl = it.meta.iconURL,
-                                domain = it.url,
-                                type = PlatformType.Misskey,
-                                bannerUrl = it.meta.bannerURL,
-                                usersCount = it.stats.usersCount,
-                            )
-                        }
-                    }.getOrDefault(emptyList())
+                coroutineScope {
+                    listOf(
+                        async {
+                            runCatching {
+                                JoinMastodonService.servers().map {
+                                    UiInstance(
+                                        name = it.domain,
+                                        description = it.description,
+                                        iconUrl = null,
+                                        domain = it.domain,
+                                        type = PlatformType.Mastodon,
+                                        bannerUrl = it.proxiedThumbnail,
+                                        usersCount = it.totalUsers,
+                                    )
+                                }
+                            }.getOrDefault(emptyList())
+                        },
+                        async {
+                            runCatching {
+                                JoinMisskeyService.instances().instancesInfos.map {
+                                    UiInstance(
+                                        name = it.name,
+                                        description = it.description,
+                                        iconUrl = it.meta.iconURL,
+                                        domain = it.url,
+                                        type = PlatformType.Misskey,
+                                        bannerUrl = it.meta.bannerURL,
+                                        usersCount = it.stats.usersCount,
+                                    )
+                                }
+                            }.getOrDefault(emptyList())
+                        },
+                    ).awaitAll().flatMap { it }
+                }
             val bsky =
                 listOf(
                     UiInstance(

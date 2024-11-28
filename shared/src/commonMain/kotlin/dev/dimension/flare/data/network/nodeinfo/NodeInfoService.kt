@@ -102,8 +102,6 @@ internal data object NodeInfoService {
                     runCatching {
                         BlueskyService("https://$host").describeServer().requireResponse()
                         PlatformType.Bluesky
-                    }.onFailure {
-                        it.printStackTrace()
                     }.getOrNull()
                 }
 

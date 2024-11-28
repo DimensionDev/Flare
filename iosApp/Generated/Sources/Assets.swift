@@ -25,6 +25,22 @@ public typealias AssetImageTypeAlias = ImageAsset.Image
 // swiftlint:disable identifier_name line_length nesting type_body_length type_name
 public enum Asset {
   public static let accentColor = ColorAsset(name: "AccentColor")
+  public enum Tab {
+    public static let background = ColorAsset(name: "Tab/background")
+    public static let compose = ImageAsset(name: "Tab/compose")
+    public static let discoverActive = ImageAsset(name: "Tab/discover.active")
+    public static let discoverInactive = ImageAsset(name: "Tab/discover.inactive")
+    public static let feedActivie = ImageAsset(name: "Tab/feed.activie")
+    public static let feedInactive = ImageAsset(name: "Tab/feed.inactive")
+    public static let homeActive = ImageAsset(name: "Tab/home.active")
+    public static let homeInactive = ImageAsset(name: "Tab/home.inactive")
+    public static let profileActive = ImageAsset(name: "Tab/profile.active")
+    public static let profileInactive = ImageAsset(name: "Tab/profile.inactive")
+    public static let searchActive = ImageAsset(name: "Tab/search.active")
+    public static let searchInactive = ImageAsset(name: "Tab/search.inactive")
+    public static let trendingActive = ImageAsset(name: "Tab/trending.active")
+    public static let trendingInactive = ImageAsset(name: "Tab/trending.inactive")
+  }
   public enum Image {
     public static let arrowSquareDown = ImageAsset(name: "arrow.square.down")
     public static let arrowSquareUp = ImageAsset(name: "arrow.square.up")

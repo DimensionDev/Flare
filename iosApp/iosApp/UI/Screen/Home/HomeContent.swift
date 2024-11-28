@@ -20,39 +20,19 @@ struct HomeContent: View {
                                 accountType: accountType
                             )
                             .toolbar {
-                                if !(accountType is AccountTypeGuest) {
-                                    ToolbarItem(placement: .primaryAction) {
-                                        Button {
-                                            router.navigate(to: AppleRoute.ComposeNew(accountType: accountType))
-                                        } label: {
-                                            Awesome.Classic.Regular.penToSquare.image
-                                                .foregroundColor(.init(.accentColor))
-                                        }
-                                    }
-                                    ToolbarItem(placement: .navigation) {
-                                        Button {
-                                            showSettings = true
-                                        } label: {
-                                            Awesome.Classic.Solid.gear.image
-                                                .foregroundColor(.init(.accentColor))
-                                        }
-                                    }
-                                } else {
-                                    ToolbarItem(placement: .primaryAction) {
-                                        Button {
-                                            showLogin = true
-                                        } label: {
-                                            Text("Login")
-                                        }
-                                    }
-                                }
+                                HomeAppBar(
+                                    router: router,
+                                    accountType: accountType,
+                                    showSettings: $showSettings,
+                                    showLogin: $showLogin
+                                )
                             }
                         }
                     } label: {
                         Label {
-                            Text("home_timeline_title")
+                            Text("")
                         } icon: {
-                            Awesome.Classic.Solid.house.image
+                            (selectedTab == .timeline ? Asset.Tab.feedActivie.swiftUIImage : Asset.Tab.feedInactive.swiftUIImage)
                                 .foregroundColor(.init(.accentColor))
                         }
                     }
@@ -64,13 +44,32 @@ struct HomeContent: View {
                             }
                         } label: {
                             Label {
-                                Text("home_notification_title")
+                                Text("")
                             } icon: {
-                                Awesome.Classic.Solid.bell.image
+                                (selectedTab == .notification ? Asset.Tab.trendingActive.swiftUIImage : Asset.Tab.trendingInactive.swiftUIImage)
                                     .foregroundColor(.init(.accentColor))
                             }
                         }
                         .customizationID(HomeTabs.notification.customizationID)
+                    }
+                    if !(accountType is AccountTypeGuest) {
+                        Tab(value: .compose) {
+                            TabItem { router in
+                                ComposeTabView(
+                                    router: router,
+                                    accountType: accountType,
+                                    selectedTab: $selectedTab
+                                )
+                            }
+                        } label: {
+                            Label {
+                                Text("")
+                            } icon: {
+                                Asset.Tab.compose.swiftUIImage
+                                    .foregroundColor(.init(.accentColor))
+                            }
+                        }
+                        .customizationID(HomeTabs.compose.customizationID)
                     }
                     Tab(value: .discover, role: .search) {
                         TabItem { router in
@@ -83,9 +82,9 @@ struct HomeContent: View {
                         }
                     } label: {
                         Label {
-                            Text("home_discover_title")
+                            Text("")
                         } icon: {
-                            Awesome.Classic.Solid.magnifyingGlass.image
+                            (selectedTab == .discover ? Asset.Tab.searchActive.swiftUIImage : Asset.Tab.searchInactive.swiftUIImage)
                                 .foregroundColor(.init(.accentColor))
                         }
                     }
@@ -103,29 +102,14 @@ struct HomeContent: View {
                             }
                         } label: {
                             Label {
-                                Text("home_profile_title")
+                                Text("")
                             } icon: {
-                                Awesome.Classic.Solid.circleUser.image
+                                (selectedTab == .profile ? Asset.Tab.profileActive.swiftUIImage : Asset.Tab.profileInactive.swiftUIImage)
                                     .foregroundColor(.init(.accentColor))
                             }
                         }
                         .customizationID(HomeTabs.profile.customizationID)
                     }
-                    
-                    // if horizontalSizeClass > .compact
-                    //                    if horizontalSizeClass == .regular {
-                    
-                    //                        if case .success(let data) = onEnum(of: listState.items) {
-                    //                            ForEach(0..<data.itemCount, id: \.self) { index in
-                    //                                Tab {
-                    //                                    Text("")
-                    //                                } label: {
-                    //                                    Text("")
-                    //                                }
-                    //                            }
-                    //                        }
-                    //                    }
-                    
                 }
                 .tabViewStyle(.sidebarAdaptable)
                 .tabViewCustomization($tabViewCustomization)
@@ -147,10 +131,25 @@ struct HomeContent: View {
     }
 }
 
+struct ComposeTabView: View {
+    let router: Router
+    let accountType: AccountType
+    @Binding var selectedTab: HomeTabs
+    
+    var body: some View {
+        Color.clear
+            .onAppear {
+                router.navigate(to: AppleRoute.ComposeNew(accountType: accountType))
+                selectedTab = .timeline
+            }
+    }
+}
+
 enum HomeTabs: Equatable, Hashable, Identifiable {
     var id: Self { self }
     case timeline
     case notification
+    case compose
     case discover
     case profile
     case list(String)
@@ -161,6 +160,7 @@ extension HomeTabs {
         switch self {
         case .timeline: return "home_timeline"
         case .notification: return "home_notification"
+        case .compose: return "home_compose"
         case .discover: return "home_discover"
         case .profile: return "home_profile"
         case .list(let id): return "home_list_\(id)"

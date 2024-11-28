@@ -66,6 +66,7 @@
 		06DF79D72B46B24800CF21FE /* SettingsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DF79D62B46B24800CF21FE /* SettingsRepository.swift */; };
 		06DF79DA2B46B26600CF21FE /* AppearanceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DF79D92B46B26600CF21FE /* AppearanceSettings.swift */; };
 		06F4B4C92C6369390005317F /* VGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F4B4C82C6369390005317F /* VGrid.swift */; };
+		64444A612CF870F1005DDD23 /* HomeAppBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64444A602CF870F1005DDD23 /* HomeAppBar.swift */; };
 		64E2085E2CF84559001C64EF /* ZJFlexibleDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E2085B2CF84559001C64EF /* ZJFlexibleDataSource.swift */; };
 		64E2085F2CF84559001C64EF /* MediaPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E208532CF84559001C64EF /* MediaPreviewViewController.swift */; };
 		64E208602CF84559001C64EF /* MediaPreviewImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E208482CF84559001C64EF /* MediaPreviewImageView.swift */; };
@@ -151,6 +152,7 @@
 		06DF79D62B46B24800CF21FE /* SettingsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRepository.swift; sourceTree = "<group>"; };
 		06DF79D92B46B26600CF21FE /* AppearanceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettings.swift; sourceTree = "<group>"; };
 		06F4B4C82C6369390005317F /* VGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VGrid.swift; sourceTree = "<group>"; };
+		64444A602CF870F1005DDD23 /* HomeAppBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeAppBar.swift; sourceTree = "<group>"; };
 		64E208482CF84559001C64EF /* MediaPreviewImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewImageView.swift; sourceTree = "<group>"; };
 		64E208492CF84559001C64EF /* MediaPreviewImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewImageViewController.swift; sourceTree = "<group>"; };
 		64E2084A2CF84559001C64EF /* MediaPreviewImageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewImageViewModel.swift; sourceTree = "<group>"; };
@@ -258,6 +260,7 @@
 		0620DD9C2AC44224009BD1BE /* Home */ = {
 			isa = PBXGroup;
 			children = (
+				64444A602CF870F1005DDD23 /* HomeAppBar.swift */,
 				0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */,
 				066151202AC540B700CCB945 /* HomeScreen.swift */,
 				064D99C62CAFBEE400915E03 /* HomeContent.swift */,
@@ -708,6 +711,7 @@
 				06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */,
 				06DF79D72B46B24800CF21FE /* SettingsRepository.swift in Sources */,
 				066151242AC54A9C00CCB945 /* CommonStatusComponent.swift in Sources */,
+				64444A612CF870F1005DDD23 /* HomeAppBar.swift in Sources */,
 				069050782CAE6108007FC957 /* SwitUIInAppNotification.swift in Sources */,
 				06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */,
 				066151212AC540B700CCB945 /* HomeScreen.swift in Sources */,

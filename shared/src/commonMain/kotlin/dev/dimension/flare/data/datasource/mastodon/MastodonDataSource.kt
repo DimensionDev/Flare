@@ -59,6 +59,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -272,6 +273,7 @@ class MastodonDataSource(
                 database
                     .userDao()
                     .findByHandleAndHost(name, host, PlatformType.Mastodon)
+                    .distinctUntilChanged()
                     .mapNotNull { it?.render(accountKey) }
             },
         )
@@ -288,6 +290,7 @@ class MastodonDataSource(
                 database
                     .userDao()
                     .findByKey(userKey)
+                    .distinctUntilChanged()
                     .mapNotNull { it?.render(accountKey) }
             },
         )
@@ -368,6 +371,7 @@ class MastodonDataSource(
                 database
                     .statusDao()
                     .get(statusKey, accountKey)
+                    .distinctUntilChanged()
                     .mapNotNull { it?.content?.render(accountKey, this) }
             },
         )
@@ -383,6 +387,7 @@ class MastodonDataSource(
                 database
                     .emojiDao()
                     .get(accountKey.host)
+                    .distinctUntilChanged()
                     .mapNotNull { it?.toUi()?.toImmutableList() }
             },
         )

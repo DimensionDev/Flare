@@ -27,6 +27,7 @@ import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.renderGuest
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -57,6 +58,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                 database
                     .userDao()
                     .findByHandleAndHost(name, host, PlatformType.Mastodon)
+                    .distinctUntilChanged()
                     .mapNotNull {
                         val content = it?.content
                         if (content is UserContent.Mastodon) {
@@ -80,6 +82,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                 database
                     .userDao()
                     .findByKey(userKey)
+                    .distinctUntilChanged()
                     .mapNotNull {
                         val content = it?.content
                         if (content is UserContent.Mastodon) {

@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.microblog
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import dev.dimension.flare.data.network.mastodon.JoinMastodonService
+import dev.dimension.flare.data.network.mastodon.MastodonInstanceService
 import dev.dimension.flare.data.network.misskey.JoinMisskeyService
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.logoUrl
@@ -49,10 +50,64 @@ internal class RecommendInstancePagingSource : PagingSource<Int, UiInstance>() {
                                 }
                             }.getOrDefault(emptyList())
                         },
+                        async {
+                            runCatching {
+                                MastodonInstanceService("https://pawoo.net/").instance().let {
+                                    listOf(
+                                        UiInstance(
+                                            name = it.domain ?: "pawoo.net",
+                                            description = it.title,
+                                            iconUrl = it.thumbnail?.url ?: PlatformType.Mastodon.logoUrl,
+                                            domain = it.domain ?: "pawoo.net",
+                                            type = PlatformType.Mastodon,
+                                            bannerUrl = it.thumbnail?.url ?: PlatformType.Mastodon.logoUrl,
+                                            usersCount = it.usage?.users?.activeMonth ?: 0,
+                                        ),
+                                    )
+                                }
+                            }.getOrDefault(emptyList())
+                        },
                     ).awaitAll().flatMap { it }
                 }
-            val bsky =
+            val mstdnJP =
+                instances.firstOrNull { it.domain == "mstdn.jp" } ?: run {
+                    UiInstance(
+                        name = "mstdn.jp",
+                        description = "mstdn.jp",
+                        iconUrl = PlatformType.Mastodon.logoUrl,
+                        domain = "mstdn.jp",
+                        type = PlatformType.Mastodon,
+                        bannerUrl = null,
+                        usersCount = 0,
+                    )
+                }
+            val pawoo =
+                instances.firstOrNull { it.domain == "pawoo.net" } ?: run {
+                    UiInstance(
+                        name = "pawoo.net",
+                        description = "pawoo.net",
+                        iconUrl = PlatformType.Mastodon.logoUrl,
+                        domain = "pawoo.net",
+                        type = PlatformType.Mastodon,
+                        bannerUrl = null,
+                        usersCount = 0,
+                    )
+                }
+            val extra =
                 listOf(
+                    mstdnJP,
+                    pawoo,
+                    UiInstance(
+                        name = "X",
+                        description =
+                            "From breaking news and entertainment to sports and politics," +
+                                " get the full story with all the live commentary.",
+                        iconUrl = PlatformType.xQt.logoUrl,
+                        domain = "x.com",
+                        type = PlatformType.xQt,
+                        bannerUrl = null,
+                        usersCount = 0,
+                    ),
                     UiInstance(
                         name = "Bluesky",
                         description =
@@ -65,20 +120,9 @@ internal class RecommendInstancePagingSource : PagingSource<Int, UiInstance>() {
                         bannerUrl = null,
                         usersCount = 0,
                     ),
-                    UiInstance(
-                        name = "X",
-                        description =
-                            "From breaking news and entertainment to sports and politics," +
-                                " get the full story with all the live commentary.",
-                        iconUrl = PlatformType.xQt.logoUrl,
-                        domain = "x.com",
-                        type = PlatformType.xQt,
-                        bannerUrl = null,
-                        usersCount = 0,
-                    ),
                 )
             LoadResult.Page(
-                data = bsky + instances.sortedByDescending { it.usersCount },
+                data = extra + (instances.sortedByDescending { it.usersCount }.filter { it !in extra }),
                 prevKey = null,
                 nextKey = null,
             )

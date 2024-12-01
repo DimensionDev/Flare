@@ -12,6 +12,7 @@ plugins {
     alias(libs.plugins.room)
 }
 
+val enableLinux = providers.gradleProperty("dev.dimension.flare.linux").orNull == "true"
 kotlin {
     applyDefaultHierarchyTemplate()
 
@@ -30,7 +31,9 @@ kotlin {
             embedBitcode(org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode.DISABLE)
         }
     }
-    linuxX64()
+    if (enableLinux) {
+        linuxX64()
+    }
     targets.forEach { target ->
         target.name.takeIf {
             it != "metadata"
@@ -93,9 +96,11 @@ kotlin {
                 implementation(libs.stately.iso.collections)
             }
         }
-        val linuxMain by getting {
-            dependencies {
-                implementation(libs.ktor.client.curl)
+        if (enableLinux) {
+            val linuxMain by getting {
+                dependencies {
+                    implementation(libs.ktor.client.curl)
+                }
             }
         }
     }

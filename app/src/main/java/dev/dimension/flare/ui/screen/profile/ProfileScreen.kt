@@ -442,9 +442,7 @@ private fun ProfileScreen(
     val state by producePresenter(key = "${accountType}_$userKey") {
         profilePresenter(userKey = userKey, accountType = accountType)
     }
-    val listState = rememberLazyStaggeredGridState()
     val nestedScrollState = rememberNestedScrollViewState()
-    RegisterTabCallback(lazyListState = listState)
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val windowInfo = currentWindowAdaptiveInfo()
     val windowSize =
@@ -660,6 +658,10 @@ private fun ProfileScreen(
                                             )
                                         }
                                         is ProfileState.Tab.Timeline -> {
+                                            val listState = rememberLazyStaggeredGridState()
+                                            if (index == pagerState.currentPage) {
+                                                RegisterTabCallback(lazyListState = listState)
+                                            }
                                             LazyStatusVerticalStaggeredGrid(
                                                 state = listState,
                                                 contentPadding =

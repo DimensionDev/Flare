@@ -1,2 +1,12 @@
 cyclomatic_complexity:
   ignores_case_statements: true
+
+disabled_rules:
+  - force_cast
+  - identifier_name
+  - line_length
+
+# 如果你后续想启用line_length规则但是想调整长度限制，可以使用下面的配置
+# line_length:
+#   warning: 250
+#   error: 300

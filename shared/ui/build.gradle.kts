@@ -23,8 +23,7 @@ kotlin {
     ).forEach { appleTarget ->
         appleTarget.binaries.framework {
             baseName = "sharedUI"
-            isStatic = true
-            embedBitcode(org.jetbrains.kotlin.gradle.plugin.mpp.BitcodeEmbeddingMode.DISABLE)
+//            isStatic = true
         }
     }
 

@@ -1,0 +1,7 @@
+#include "Config.xcconfig"
+
+// Debug configuration
+OTHER_LDFLAGS = $(inherited) -lsqlite3 -framework shared -Xlinker -interposable
+
+// Disable script sandboxing for development
+ENABLE_USER_SCRIPT_SANDBOXING = NO

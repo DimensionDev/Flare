@@ -67,6 +67,15 @@
 		06DF79DA2B46B26600CF21FE /* AppearanceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DF79D92B46B26600CF21FE /* AppearanceSettings.swift */; };
 		06F4B4C92C6369390005317F /* VGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F4B4C82C6369390005317F /* VGrid.swift */; };
 		64444A612CF870F1005DDD23 /* HomeAppBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64444A602CF870F1005DDD23 /* HomeAppBar.swift */; };
+		64444A682CF88557005DDD23 /* TabSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64444A662CF88557005DDD23 /* TabSettingsView.swift */; };
+		64444A692CF88557005DDD23 /* TabSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64444A642CF88557005DDD23 /* TabSettingsStore.swift */; };
+		64444A6C2CF88636005DDD23 /* AppBarTabItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64444A6B2CF88636005DDD23 /* AppBarTabItem.swift */; };
+		64444A6F2CF88B52005DDD23 /* BookmarkScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64444A6D2CF88B52005DDD23 /* BookmarkScreen.swift */; };
+		64444A702CF88B52005DDD23 /* FeaturedScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64444A6E2CF88B52005DDD23 /* FeaturedScreen.swift */; };
+		645D5B1D2CFDADF4001BD950 /* PhotoBrowserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645D5B1B2CFDADF4001BD950 /* PhotoBrowserManager.swift */; };
+		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
+		64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64782BD02CFD65F4008DE526 /* View+Injection.swift */; };
+		64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */; };
 		64E2085E2CF84559001C64EF /* ZJFlexibleDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E2085B2CF84559001C64EF /* ZJFlexibleDataSource.swift */; };
 		64E2085F2CF84559001C64EF /* MediaPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E208532CF84559001C64EF /* MediaPreviewViewController.swift */; };
 		64E208602CF84559001C64EF /* MediaPreviewImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E208482CF84559001C64EF /* MediaPreviewImageView.swift */; };
@@ -153,6 +162,15 @@
 		06DF79D92B46B26600CF21FE /* AppearanceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettings.swift; sourceTree = "<group>"; };
 		06F4B4C82C6369390005317F /* VGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VGrid.swift; sourceTree = "<group>"; };
 		64444A602CF870F1005DDD23 /* HomeAppBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeAppBar.swift; sourceTree = "<group>"; };
+		64444A642CF88557005DDD23 /* TabSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSettingsStore.swift; sourceTree = "<group>"; };
+		64444A662CF88557005DDD23 /* TabSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSettingsView.swift; sourceTree = "<group>"; };
+		64444A6B2CF88636005DDD23 /* AppBarTabItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBarTabItem.swift; sourceTree = "<group>"; };
+		64444A6D2CF88B52005DDD23 /* BookmarkScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkScreen.swift; sourceTree = "<group>"; };
+		64444A6E2CF88B52005DDD23 /* FeaturedScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeaturedScreen.swift; sourceTree = "<group>"; };
+		645D5B1B2CFDADF4001BD950 /* PhotoBrowserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoBrowserManager.swift; sourceTree = "<group>"; };
+		64655C2C2CFD6CA000255488 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		64782BD02CFD65F4008DE526 /* View+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Injection.swift"; sourceTree = "<group>"; };
+		64C855FF2CFD7F260071DCD8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		64E208482CF84559001C64EF /* MediaPreviewImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewImageView.swift; sourceTree = "<group>"; };
 		64E208492CF84559001C64EF /* MediaPreviewImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewImageViewController.swift; sourceTree = "<group>"; };
 		64E2084A2CF84559001C64EF /* MediaPreviewImageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewImageViewModel.swift; sourceTree = "<group>"; };
@@ -260,8 +278,13 @@
 		0620DD9C2AC44224009BD1BE /* Home */ = {
 			isa = PBXGroup;
 			children = (
+				64444A632CF88557005DDD23 /* Model */,
+				64444A652CF88557005DDD23 /* Store */,
+				64444A672CF88557005DDD23 /* TabSettings */,
 				64444A602CF870F1005DDD23 /* HomeAppBar.swift */,
 				0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */,
+				64444A6D2CF88B52005DDD23 /* BookmarkScreen.swift */,
+				64444A6E2CF88B52005DDD23 /* FeaturedScreen.swift */,
 				066151202AC540B700CCB945 /* HomeScreen.swift */,
 				064D99C62CAFBEE400915E03 /* HomeContent.swift */,
 				060501BD2ACAC4ED00DBCCEB /* NotificationScreen.swift */,
@@ -286,6 +309,7 @@
 		066151222AC54A8200CCB945 /* Component */ = {
 			isa = PBXGroup;
 			children = (
+				645D5B1C2CFDADF4001BD950 /* Media */,
 				64E208582CF84559001C64EF /* MediaPreview */,
 				64E2085D2CF84559001C64EF /* WaterfallList */,
 				06005F592CEC97660060A785 /* ComposeView.swift */,
@@ -393,6 +417,46 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		64444A632CF88557005DDD23 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				64444A6B2CF88636005DDD23 /* AppBarTabItem.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		64444A652CF88557005DDD23 /* Store */ = {
+			isa = PBXGroup;
+			children = (
+				64444A642CF88557005DDD23 /* TabSettingsStore.swift */,
+			);
+			path = Store;
+			sourceTree = "<group>";
+		};
+		64444A672CF88557005DDD23 /* TabSettings */ = {
+			isa = PBXGroup;
+			children = (
+				64444A662CF88557005DDD23 /* TabSettingsView.swift */,
+			);
+			path = TabSettings;
+			sourceTree = "<group>";
+		};
+		645D5B1C2CFDADF4001BD950 /* Media */ = {
+			isa = PBXGroup;
+			children = (
+				645D5B1B2CFDADF4001BD950 /* PhotoBrowserManager.swift */,
+			);
+			path = Media;
+			sourceTree = "<group>";
+		};
+		64782BD12CFD65F4008DE526 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				64782BD02CFD65F4008DE526 /* View+Injection.swift */,
+			);
+			path = Extension;
+			sourceTree = "<group>";
+		};
 		64E2084B2CF84559001C64EF /* Image */ = {
 			isa = PBXGroup;
 			children = (
@@ -480,6 +544,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				64782BD12CFD65F4008DE526 /* Extension */,
 				64E2087D2CF846DE001C64EF /* Common */,
 				06DF79D42B46B1C700CF21FE /* Data */,
 				06D5C9152AC3BB2B007439D5 /* UI */,
@@ -500,6 +565,8 @@
 		AB1DB47929225F7C00F7AF9C /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
+				64C855FF2CFD7F260071DCD8 /* Release.xcconfig */,
+				64655C2C2CFD6CA000255488 /* Debug.xcconfig */,
 				AB3632DC29227652001CCB65 /* Config.xcconfig */,
 			);
 			path = Configuration;
@@ -618,7 +685,9 @@
 			files = (
 				058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */,
 				058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */,
+				64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */,
 				06B851552B6B926D00DFA075 /* Localizable.xcstrings in Resources */,
+				64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */,
 				06B8514F2B6B22A500DFA075 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -701,6 +770,8 @@
 				06C862762B4D2A55008C902C /* UIImage.swift in Sources */,
 				0634767B2B4FCFAE006B21F1 /* SearchScreen.swift in Sources */,
 				060881BE2AE109FA001AAD2F /* ComposeScreen.swift in Sources */,
+				64444A682CF88557005DDD23 /* TabSettingsView.swift in Sources */,
+				64444A692CF88557005DDD23 /* TabSettingsStore.swift in Sources */,
 				0690CF8D2B5F51A200824A21 /* XQTLoginScreen.swift in Sources */,
 				06B851592B73881E00DFA075 /* StatusMediaScreen.swift in Sources */,
 				061C2D002B4E8B0600249514 /* StatusDetailScreen.swift in Sources */,
@@ -727,6 +798,7 @@
 				64E208622CF84559001C64EF /* CGImage+Extension.swift in Sources */,
 				64E208632CF84559001C64EF /* MediaPreviewImageViewModel.swift in Sources */,
 				64E208642CF84559001C64EF /* ProgressBarView.swift in Sources */,
+				64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */,
 				64E208652CF84559001C64EF /* PlaybackState.swift in Sources */,
 				64E208662CF84559001C64EF /* ZJFlexibleLayout.swift in Sources */,
 				64E208672CF84559001C64EF /* MediaPreviewImageViewController.swift in Sources */,
@@ -746,12 +818,15 @@
 				06AD156B2AC3F454000DC865 /* Route.swift in Sources */,
 				060881B52AD9260B001AAD2F /* UserComponent.swift in Sources */,
 				062A3C832C6C8EBD00A45E44 /* MisskeyReactionSheet.swift in Sources */,
+				64444A6F2CF88B52005DDD23 /* BookmarkScreen.swift in Sources */,
+				64444A702CF88B52005DDD23 /* FeaturedScreen.swift in Sources */,
 				060881BC2ADE5C68001AAD2F /* AccountsScreen.swift in Sources */,
 				067D89792AD25DB000F8F932 /* MarkdownTheme.swift in Sources */,
 				060881B32AD91EB9001AAD2F /* StatusRetweetHeaderComponent.swift in Sources */,
 				063476792B4FBB9E006B21F1 /* DiscoverScreen.swift in Sources */,
 				062A3C852C6C982E00A45E44 /* VVOStatusDetailScreen.swift in Sources */,
 				060501C82ACD09B800DBCCEB /* UserAvatar.swift in Sources */,
+				64444A6C2CF88636005DDD23 /* AppBarTabItem.swift in Sources */,
 				060881BA2ADE555D001AAD2F /* SettingsScreen.swift in Sources */,
 				06C862732B4D2A14008C902C /* UserInterfaceSizeClass.swift in Sources */,
 				B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */,
@@ -763,6 +838,7 @@
 				64E2087E2CF846DE001C64EF /* KotlinByteArray.swift in Sources */,
 				64E2087F2CF846DE001C64EF /* ViewExt.swift in Sources */,
 				061C2CFA2B4E6E0100249514 /* ProfileWithUserNameScreen.swift in Sources */,
+				645D5B1D2CFDADF4001BD950 /* PhotoBrowserManager.swift in Sources */,
 				B62B21AA368B7AC14846EE0A /* WebView.swift in Sources */,
 				B62B24E9F9BC4D31DFCE7FD8 /* AppleUriLauncher.swift in Sources */,
 			);
@@ -773,7 +849,7 @@
 /* Begin XCBuildConfiguration section */
 		7555FFA3242A565B00829871 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AB3632DC29227652001CCB65 /* Config.xcconfig */;
+			baseConfigurationReference = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -840,7 +916,7 @@
 		};
 		7555FFA4242A565B00829871 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = AB3632DC29227652001CCB65 /* Config.xcconfig */;
+			baseConfigurationReference = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -959,7 +1035,7 @@
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = 7LFDZ96332;
 				ENABLE_PREVIEWS = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",

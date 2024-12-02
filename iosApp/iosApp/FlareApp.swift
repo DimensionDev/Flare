@@ -11,16 +11,19 @@ struct FlareApp: SwiftUI.App {
     init() {
         KoinHelper.shared.start(inAppNotification: SwitUIInAppNotification())
     }
+ 
 
     var body: some Scene {
         WindowGroup {
             #if os(macOS)
             ProvideWindowSizeClass {
                 RouterView()
+                    .enableInjection()
             }
             .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
             #else
             RouterView()
+                .enableInjection()
             #endif
         }
         #if os(macOS)

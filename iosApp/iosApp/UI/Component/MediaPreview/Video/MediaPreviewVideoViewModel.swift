@@ -55,8 +55,10 @@ final class MediaPreviewVideoViewModel {
             let playerItem = AVPlayerItem(url: assertURL)
             let _player = AVPlayer(playerItem: playerItem)
             self.player = _player
+            
         }
         
+ 
         guard let player = player else {
             assertionFailure()
             return

@@ -4,13 +4,13 @@ import shared
 import SwiftUI
 
 struct ProfileScreen: View {
- 
+
     //MicroBlogKey host+id
     let toProfileMedia: (MicroBlogKey) -> Void
-    
+
     //包含 user relationState， isme，listState - userTimeline，mediaState，canSendMessage
     @State private var presenter: ProfilePresenter
-    
+
     //横屏 竖屏
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 

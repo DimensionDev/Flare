@@ -35,7 +35,7 @@ struct MediaComponent: View {
                     if let index = medias.firstIndex(where: { it in
                         it === item
                     }) {
-                        onMediaClick(index - 1, item)
+                        onMediaClick(index, item)
                     }
                 }, label: {
                     MediaItemComponent(media: item)
@@ -89,7 +89,6 @@ struct MediaComponent: View {
             view.aspectRatio(16/9, contentMode: .fit)
         }
         .frame(maxWidth: 600)
-        //        .aspectRatio(16/9, contentMode: .fit)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }

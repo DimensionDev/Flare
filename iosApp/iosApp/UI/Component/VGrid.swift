@@ -7,9 +7,9 @@ struct CustomGrid<Item, ItemView>: View where ItemView: View {
     let itemBuilder: (Item) -> ItemView
 
     var body: some View {
-        VStack {
+        VStack(spacing: 0.3) {  
             ForEach(0..<rowsCount, id: \.self) { rowIndex in
-                HStack {
+                HStack(spacing: 0.3) {  
                     ForEach(0..<columns, id: \.self) { columnIndex in
                         if let item = itemFor(row: rowIndex, column: columnIndex) {
                             itemBuilder(item)

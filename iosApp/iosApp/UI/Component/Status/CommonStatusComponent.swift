@@ -3,6 +3,7 @@ import MarkdownUI
 import shared
 import Awesome
 import Kingfisher
+import JXPhotoBrowser
 
 struct CommonStatusComponent: View {
     @State private var showMedia: Bool = false
@@ -80,7 +81,7 @@ struct CommonStatusComponent: View {
                     MediaComponent(
                         hideSensitive: data.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
                         medias: data.images,
-                        onMediaClick: onMediaClick,
+                        onMediaClick: handleMediaClick,
                         sensitive: data.sensitive
                     )
                 } else {
@@ -241,6 +242,18 @@ struct CommonStatusComponent: View {
                 }
             }
         }.frame(alignment: .leading)
+    }
+    
+    private func handleMediaClick(_ index: Int, _ media: UiMedia) {
+        // Call original Kotlin callback
+        onMediaClick(index, media)
+        
+        // Show preview
+        PhotoBrowserManager.shared.showPhotoBrowser(
+            media: media,
+            images: data.images,
+            initialIndex: index
+        )
     }
 }
 

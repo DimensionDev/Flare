@@ -2,7 +2,7 @@ import SwiftUI
 import shared
 import MarkdownUI
 import OrderedCollections
- 
+
 //user profile 入口
 struct ProfileWithUserNameScreen: View {
     @State private var presenter: ProfileWithUserNameAndHostPresenter
@@ -16,7 +16,7 @@ struct ProfileWithUserNameScreen: View {
     }
 
     var body: some View {
-        
+
         // 自动更新UI，根据presenter models
         ObservePresenter(presenter: presenter) { state in
             ZStack {

@@ -79,5 +79,6 @@ interface MicroblogDataSource {
     fun profileTabs(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
+        pagingSize: Int = 20,
     ): ImmutableList<ProfileTab>
 }

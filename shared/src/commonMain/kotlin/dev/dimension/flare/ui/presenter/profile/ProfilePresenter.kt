@@ -13,6 +13,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.NoActiveAccountException
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -137,6 +138,37 @@ class ProfilePresenter(
                     }
                 }
             }.flatMap { it.collectAsUiState().value }
+
+        val tabs =
+            accountServiceState.map { service ->
+                val actualUserKey =
+                    userKey
+                        ?: if (service is AuthenticatedMicroblogDataSource) {
+                            service.accountKey
+                        } else {
+                            null
+                        } ?: throw NoActiveAccountException
+                remember(service, userKey) {
+                    service.profileTabs(actualUserKey, scope)
+                }.map {
+                    when (it) {
+                        is ProfileTab.Media ->
+                            ProfileState.Tab.Media(
+                                data = mediaState,
+                            )
+                        is ProfileTab.Timeline -> {
+                            ProfileState.Tab.Timeline(
+                                type = it.type,
+                                data = it.flow.collectAsLazyPagingItems().toPagingState(),
+                            )
+                        }
+                    }
+                }.let {
+                    remember(it) {
+                        it.toImmutableList().toImmutableListWrapper()
+                    }
+                }
+            }
         return object : ProfileState(
             userState = userState.flatMap { it.toUi() },
             listState = listState,
@@ -151,6 +183,7 @@ class ProfilePresenter(
                 },
             myAccountKey = myAccountKey,
             canSendMessage = canSendMessage,
+            tabs = tabs,
         ) {
             override suspend fun refresh() {
                 userState.onSuccess {
@@ -202,6 +235,7 @@ abstract class ProfileState(
     val isListDataSource: UiState<Boolean>,
     val myAccountKey: UiState<MicroBlogKey>,
     val canSendMessage: UiState<Boolean>,
+    val tabs: UiState<ImmutableListWrapper<Tab>>,
 ) {
     abstract suspend fun refresh()
 
@@ -217,6 +251,20 @@ abstract class ProfileState(
     )
 
     abstract fun report(userKey: MicroBlogKey)
+
+    @Immutable
+    sealed interface Tab {
+        @Immutable
+        data class Timeline(
+            val type: ProfileTab.Timeline.Type,
+            val data: PagingState<UiTimeline>,
+        ) : Tab
+
+        @Immutable
+        data class Media(
+            val data: PagingState<ProfileMedia>,
+        ) : Tab
+    }
 }
 
 class ProfileWithUserNameAndHostPresenter(

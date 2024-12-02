@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.login
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -20,16 +21,17 @@ import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 
 class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
-    @OptIn(FlowPreview::class)
+    @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     @Composable
     override fun body(): NodeInfoState {
         val scope = rememberCoroutineScope()
@@ -56,20 +58,20 @@ class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
                 }
             }.collectAsLazyPagingItems()
 
-        val detectedPlatformType =
-            remember(filterFlow) {
-                filterFlow.mapNotNull {
+        val detectedPlatformType by remember<Flow<UiState<PlatformType>>>(filterFlow) {
+            filterFlow.flatMapLatest {
+                flow {
                     runCatching {
+                        emit(UiState.Loading())
                         NodeInfoService.detectPlatformType(it)
+                    }.onSuccess {
+                        emit(UiState.Success(it))
+                    }.onFailure {
+                        emit(UiState.Error(it))
                     }
                 }
-            }.collectAsUiState().value.flatMap {
-                it.getOrNull()?.let {
-                    UiState.Success(it)
-                } ?: run {
-                    it.exceptionOrNull()?.let { it1 -> UiState.Error(it1) }
-                } ?: UiState.Loading()
             }
+        }.collectAsState(UiState.Loading())
 
         return object : NodeInfoState {
             override val instances = instances.toPagingState()

@@ -1,11 +1,14 @@
 package dev.dimension.flare.ui.screen.serviceselect
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,6 +35,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -47,7 +51,6 @@ import com.ramcosta.composedestinations.result.NavResult
 import com.ramcosta.composedestinations.result.ResultRecipient
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Question
 import compose.icons.fontawesomeicons.solid.Xmark
@@ -67,9 +70,11 @@ import dev.dimension.flare.ui.component.OutlinedSecureTextField2
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiInstance
+import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.ServiceSelectPresenter
 import dev.dimension.flare.ui.presenter.login.ServiceSelectState
@@ -144,8 +149,13 @@ fun ServiceSelectScreen(
             Column(
                 modifier =
                     Modifier
-                        .padding(it + PaddingValues(horizontal = screenHorizontalPadding))
-                        .fillMaxSize(),
+                        .padding(
+                            PaddingValues(
+                                top = it.calculateTopPadding(),
+                                start = it.calculateStartPadding(LocalLayoutDirection.current),
+                                end = it.calculateEndPadding(LocalLayoutDirection.current),
+                            ) + PaddingValues(horizontal = screenHorizontalPadding),
+                        ).fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
@@ -200,18 +210,20 @@ fun ServiceSelectScreen(
                                     contentDescription = null,
                                 )
                             }.onLoading {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Globe,
-                                    contentDescription = null,
-                                    modifier = Modifier.placeholder(true),
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
                                 )
                             }
                     },
                     enabled = !state.loading,
                 )
-                if (state.canNext) {
-                    state.detectedPlatformType.onSuccess {
-                        when (it) {
+                AnimatedVisibility(state.canNext && state.detectedPlatformType.isSuccess) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                    ) {
+                        when (state.detectedPlatformType.takeSuccess()) {
+                            null -> Unit
                             PlatformType.Bluesky -> {
                                 OutlinedTextField2(
                                     state = state.blueskyInputState.username,
@@ -367,6 +379,10 @@ fun ServiceSelectScreen(
                             Alignment.CenterHorizontally,
                         ),
                     verticalItemSpacing = 8.dp,
+                    contentPadding =
+                        PaddingValues(
+                            bottom = it.calculateBottomPadding(),
+                        ),
                 ) {
                     state.instances
                         .onSuccess {

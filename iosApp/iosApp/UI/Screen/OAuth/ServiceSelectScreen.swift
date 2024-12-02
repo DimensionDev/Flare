@@ -1,8 +1,8 @@
-import SwiftUI
 import AuthenticationServices
-import shared
-import Kingfisher
 import Combine
+import Kingfisher
+import shared
+import SwiftUI
 
 struct ServiceSelectScreen: View {
     @State private var presenter: ServiceSelectPresenter
@@ -29,32 +29,30 @@ struct ServiceSelectScreen: View {
                         .multilineTextAlignment(.center)
                         .frame(alignment: .center)
                         .padding(.top)
-                    Text("service_select_description")
+                    Text(verbatim: NSLocalizedString("service_select_description", comment: "").replacingOccurrences(of: "\\n", with: "\n"))
                         .font(.subheadline)
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity, alignment: .center)
+                    // .fixedSize(horizontal: false, vertical: true)
                     HStack {
                         TextField("service_select_instance_url_placeholder", text: $instanceURL)
                             .disableAutocorrection(true)
-                            #if os(iOS)
+                        #if os(iOS)
                             .textInputAutocapitalization(.never)
                             .keyboardType(.URL)
-                            #endif
+                        #endif
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .disabled(state.loading)
                         switch onEnum(of: state.detectedPlatformType) {
-                        case .success(let success):
+                        case let .success(success):
                             KFImage(URL(string: success.data.logoUrl))
                                 .resizable()
                                 .frame(width: 24, height: 24)
                         case .error:
-                            Image(systemName: "questionmark")
-                                .frame(width: 24, height: 24)
+                            EmptyView()
                         case .loading:
-                            Image(systemName: "questionmark")
-                                .frame(width: 24, height: 24)
-                                .redacted(reason: .placeholder)
+                            EmptyView().padding(.trailing, 24)
                         }
                     }
                     .onChange(of: instanceURL) {
@@ -64,150 +62,51 @@ struct ServiceSelectScreen: View {
                 .padding()
                 List {
                     if state.canNext,
-                       case .success(let success) = onEnum(of: state.detectedPlatformType) {
+                       case let .success(success) = onEnum(of: state.detectedPlatformType)
+                    {
                         switch success.data.toSwiftEnum() {
                         case .bluesky:
-                            VStack {
-                                TextField(
-                                    "service_select_bluesky_base_url_placeholder",
-                                    text: $blueskyInputViewModel.baseUrl
-                                )
-                                    .disableAutocorrection(true)
-                                    #if os(iOS)
-                                    .textInputAutocapitalization(.never)
-                                    .keyboardType(.URL)
-                                    #endif
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .disabled(state.loading)
-                                TextField("username", text: $blueskyInputViewModel.username)
-                                    .disableAutocorrection(true)
-                                    #if os(iOS)
-                                    .textInputAutocapitalization(.never)
-                                    #endif
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .disabled(state.loading)
-                                SecureField("password", text: $blueskyInputViewModel.password)
-                                    .disableAutocorrection(true)
-                                    #if os(iOS)
-                                    .textInputAutocapitalization(.never)
-                                    .keyboardType(.URL)
-                                    #endif
-                                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    .disabled(state.loading)
-                                Button(action: {
-                                    state.blueskyLoginState.login(
-                                        baseUrl: blueskyInputViewModel.baseUrl,
-                                        username: blueskyInputViewModel.username,
-                                        password: blueskyInputViewModel.password
-                                    )
-                                }, label: {
-                                    Text("confirm")
-                                })
-                                .buttonStyle(.borderedProminent)
-                            }
-                            .listRowSeparator(.hidden)
-                            .frame(maxWidth: .infinity, alignment: Alignment.center)
-                            .disabled(state.loading)
+                            blueskyLoginView(state: state)
                         case .mastodon:
-                            Button {
-                                state.mastodonLoginState.login(host: instanceURL, launchUrl: { url in handleUrl(url: url) })
-                            } label: {
-                                Text("next")
-                                    .frame(width: 200)
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .listRowSeparator(.hidden)
-                            .frame(maxWidth: .infinity, alignment: Alignment.center)
-                            .disabled(state.loading)
+                            mastodonLoginView(state: state)
                         case .misskey:
-                            Button {
-                                state.misskeyLoginState.login(host: instanceURL, launchUrl: { url in handleUrl(url: url) })
-                            } label: {
-                                Text("next")
-                                    .frame(width: 200)
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .listRowSeparator(.hidden)
-                            .frame(maxWidth: .infinity, alignment: Alignment.center)
-                            .disabled(state.loading)
+                            misskeyLoginView(state: state)
                         case .xQt:
-                            Button {
-                                showXQT = true
-                            } label: {
-                                Text("next")
-                                    .frame(width: 200)
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .listRowSeparator(.hidden)
-                            .frame(maxWidth: .infinity, alignment: Alignment.center)
-                            .disabled(state.loading)
+                            xqtLoginView(state: state)
                         case .vvo:
-                            Button {
-                                showVVo = true
-                            } label: {
-                                Text("next")
-                                    .frame(width: 200)
-                            }
-                            .buttonStyle(.borderedProminent)
-                            .listRowSeparator(.hidden)
-                            .frame(maxWidth: .infinity, alignment: Alignment.center)
-                            .disabled(state.loading)
+                            vvoLoginView(state: state)
                         }
-                    } else if case .success(let success) = onEnum(of: state.instances) {
-                        ForEach(0..<success.itemCount, id: \.self) { index in
-                            let item = success.peek(index: index)
-                            ZStack {
-                                switch item {
-                                case .some(let instance):
-                                    Button(action: {
-                                        instanceURL = instance.domain
-                                        state.setFilter(value: instance.domain)
-                                    }, label: {
-                                        VStack {
-                                            HStack {
-                                                if let iconUrl = instance.iconUrl {
-                                                    KFImage(URL(string: iconUrl))
-                                                        .resizable()
-                                                        .scaledToFit()
-                                                        .frame(width: 48, height: 48)
-                                                        .clipShape(Circle())
-                                                }
-                                                Text(instance.name)
-                                                    .font(.title)
-                                            }
-                                            Text(instance.domain)
-                                                .font(.caption)
-                                            Text(instance.description_ ?? "")
-                                                .lineLimit(3)
-                                                .frame(maxWidth: .infinity)
-                                        }
-                                        .background {
-                                            if let bannerUrl = instance.bannerUrl {
-                                                KFImage(URL(string: bannerUrl))
-                                                    .resizable()
-                                                    .scaledToFill()
-                                                    .frame(height: 120)
-                                                    .clipped()
-                                            } else {
-                                                EmptyView()
-                                            }
-                                        }
-                                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                                        .clipped()
-                                    })
-                                    .buttonStyle(.plain)
-                                case .none:
-                                    InstancePlaceHolder()
+                    } else if case let .success(success) = onEnum(of: state.instances) {
+                        LazyVStack(spacing: 10) {
+                            ForEach(0 ..< success.itemCount, id: \.self) { index in
+                                let item = success.peek(index: index)
+                                ZStack {
+                                    switch item {
+                                    case let .some(instance):
+                                        Button(action: {
+                                            instanceURL = instance.domain
+                                            state.setFilter(value: instance.domain)
+                                        }, label: {
+                                            instanceCardView(instance: instance)
+                                        })
+                                        .buttonStyle(.plain)
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .shadow(radius: 2)
+                                        // .padding(.horizontal)
+                                        .padding(.vertical, 4)
+                                    case .none:
+                                        InstancePlaceHolder()
+                                    }
                                 }
+                                .onAppear {
+                                    success.get(index: index)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .listRowSeparator(.hidden)
                             }
-                            .onAppear {
-                                success.get(index: index)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .listRowSeparator(.hidden)
                         }
                     } else if state.instances.isLoading {
-                        ForEach(0...10, id: \.self) { _ in
+                        ForEach(0 ... 10, id: \.self) { _ in
                             InstancePlaceHolder()
                                 .listRowSeparator(.hidden)
                         }
@@ -237,6 +136,247 @@ struct ServiceSelectScreen: View {
         }
     }
 
+    // MARK: - Platform Login Views
+
+    @ViewBuilder
+    private func blueskyLoginView(state: ServiceSelectState) -> some View {
+        VStack {
+            TextField(
+                "service_select_bluesky_base_url_placeholder",
+                text: $blueskyInputViewModel.baseUrl
+            )
+            .disableAutocorrection(true)
+            #if os(iOS)
+                .textInputAutocapitalization(.never)
+                .keyboardType(.URL)
+            #endif
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .disabled(state.loading)
+
+            TextField("username", text: $blueskyInputViewModel.username)
+                .disableAutocorrection(true)
+            #if os(iOS)
+                .textInputAutocapitalization(.never)
+            #endif
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .disabled(state.loading)
+
+            SecureField("password", text: $blueskyInputViewModel.password)
+                .disableAutocorrection(true)
+            #if os(iOS)
+                .textInputAutocapitalization(.never)
+                .keyboardType(.URL)
+            #endif
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .disabled(state.loading)
+
+            Button(action: {
+                state.blueskyLoginState.login(
+                    baseUrl: blueskyInputViewModel.baseUrl,
+                    username: blueskyInputViewModel.username,
+                    password: blueskyInputViewModel.password
+                )
+            }, label: {
+                Text("confirm")
+            })
+            .buttonStyle(.borderedProminent)
+        }
+        .listRowSeparator(.hidden)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .disabled(state.loading)
+    }
+
+    @ViewBuilder
+    private func mastodonLoginView(state: ServiceSelectState) -> some View {
+        Button {
+            state.mastodonLoginState.login(host: instanceURL, launchUrl: { url in handleUrl(url: url) })
+        } label: {
+            Text("next")
+                .frame(width: 200)
+        }
+        .buttonStyle(.borderedProminent)
+        .listRowSeparator(.hidden)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .disabled(state.loading)
+    }
+
+    @ViewBuilder
+    private func misskeyLoginView(state: ServiceSelectState) -> some View {
+        Button {
+            state.misskeyLoginState.login(host: instanceURL, launchUrl: { url in handleUrl(url: url) })
+        } label: {
+            Text("next")
+                .frame(width: 200)
+        }
+        .buttonStyle(.borderedProminent)
+        .listRowSeparator(.hidden)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .disabled(state.loading)
+    }
+
+    @ViewBuilder
+    private func xqtLoginView(state: ServiceSelectState) -> some View {
+        Button {
+            showXQT = true
+        } label: {
+            Text("next")
+                .frame(width: 200)
+        }
+        .buttonStyle(.borderedProminent)
+        .listRowSeparator(.hidden)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .disabled(state.loading)
+    }
+
+    @ViewBuilder
+    private func vvoLoginView(state: ServiceSelectState) -> some View {
+        Button {
+            showVVo = true
+        } label: {
+            Text("next")
+                .frame(width: 200)
+        }
+        .buttonStyle(.borderedProminent)
+        .listRowSeparator(.hidden)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .disabled(state.loading)
+    }
+
+    @ViewBuilder
+    private func instanceCardView(instance: UiInstance) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            // 第一部分：头像和基本信息
+            ZStack {
+                // 背景层
+                if let bannerUrl = instance.bannerUrl {
+                    KFImage(URL(string: bannerUrl))
+                        .resizable()
+                        .scaledToFill()
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 80)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+
+                HStack(spacing: 12) {
+                    // 头像或占位符
+                    Group {
+                        if let iconUrl = instance.iconUrl, !iconUrl.isEmpty, URL(string: iconUrl) != nil {
+                            KFImage(URL(string: iconUrl))
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 48, height: 48)
+                                .clipShape(Circle())
+                        } else {
+                            Circle()
+                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                                .frame(width: 48, height: 48)
+                                .background(Circle().fill(Color.gray.opacity(0.1)))
+                        }
+                    }
+
+                    // 名字和网址
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(instance.name)
+                            .font(.headline)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color(.systemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                        Text(instance.domain)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color(.systemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    // .background(
+                    //     Group {
+                    //         if instance.bannerUrl != nil {
+                    //             // 有背景图时使用渐变
+                    //             LinearGradient(
+                    //                 colors: [
+                    //                     Color(.systemBackground),
+                    //                     Color(.systemBackground).opacity(0.9),
+                    //                     Color(.systemBackground).opacity(0.7)
+                    //                 ],
+                    //                 startPoint: .leading,
+                    //                 endPoint: .trailing
+                    //             )
+                    //         } else {
+                    //             // 没有背景图时使用纯色
+                    //             // Color(.systemBackground)
+                    //         }
+                    //     }
+                    // )
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+            }
+            .frame(height: 80)
+
+            // 第二部分：简介
+            if let description = instance.description_ {
+                Text(parseHTML(description))
+                    .font(.body)
+                    .lineLimit(3)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 8)
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+    }
+
+    private func parseHTML(_ html: String) -> String {
+        // 移除常见的HTML标签
+        var result = html
+        let patterns = [
+            "<[^>]+>",  // 移除所有HTML标签
+            "&nbsp;",   // 替换特殊字符
+            "&amp;",
+            "&lt;",
+            "&gt;",
+            "&quot;"
+        ]
+        
+        let replacements = [
+            "",         // 对应标签的替换
+            " ",
+            "&",
+            "<",
+            ">",
+            "\""
+        ]
+        
+        for (pattern, replacement) in zip(patterns, replacements) {
+            if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
+                result = regex.stringByReplacingMatches(
+                    in: result,
+                    options: [],
+                    range: NSRange(result.startIndex..., in: result),
+                    withTemplate: replacement
+                )
+            }
+        }
+        
+        // 处理连续的空白字符
+        if let regex = try? NSRegularExpression(pattern: "\\s+", options: .caseInsensitive) {
+            result = regex.stringByReplacingMatches(
+                in: result,
+                options: [],
+                range: NSRange(result.startIndex..., in: result),
+                withTemplate: " "
+            )
+        }
+        
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     private func handleUrl(url: String) {
         Task {
             guard let url = URL(string: url) else {
@@ -252,8 +392,7 @@ struct ServiceSelectScreen: View {
                 } else if urlWithToken.absoluteString.starts(with: AppDeepLink.Callback.shared.MISSKEY) {
                     presenter.models.value.misskeyLoginState.resume(url: urlWithToken.absoluteString)
                 }
-            } catch {
-            }
+            } catch {}
         }
     }
 }

@@ -27,4 +27,11 @@ allprojects {
             ))
         }
     }
+    afterEvaluate {
+        // TODO: workaround for https://youtrack.jetbrains.com/issue/KT-72068
+        if (tasks.findByName("embedAndSignAppleFrameworkForXcode") != null) {
+            val embedAndSignAppleFrameworkForXcode by tasks
+            embedAndSignAppleFrameworkForXcode.dependsOn(":commonizeNativeDistribution")
+        }
+    }
 }

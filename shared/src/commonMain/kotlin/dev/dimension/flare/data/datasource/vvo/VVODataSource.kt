@@ -22,6 +22,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
@@ -40,6 +41,8 @@ import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -804,4 +807,16 @@ class VVODataSource(
                 accountKey = accountKey,
             )
         }.flow.cachedIn(scope)
+
+    override fun profileTabs(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pagingSize: Int,
+    ): ImmutableList<ProfileTab> =
+        persistentListOf(
+            ProfileTab.Timeline(
+                type = ProfileTab.Timeline.Type.Status,
+                flow = userTimeline(userKey, scope, pagingSize),
+            ),
+        )
 }

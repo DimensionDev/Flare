@@ -4,6 +4,7 @@ import shared
 import Awesome
 import Kingfisher
 import JXPhotoBrowser
+import SwiftDate
 
 struct CommonStatusComponent: View {
     @State private var showMedia: Bool = false
@@ -258,15 +259,9 @@ struct CommonStatusComponent: View {
 }
 
 func dateFormatter(_ date: Date) -> some View {
-    let now = Date()
-    let oneDayAgo = Calendar.current.date(byAdding: .day, value: -1, to: now)!
-    if date > oneDayAgo {
-        // If the date is within the last day, use the .timer style
-        return Text(date, style: .relative)
-    } else {
-        // Otherwise, use the .dateTime style
-        return Text(date, style: .date)
-    }
+    let dateInRegion = DateInRegion(date, region: .current)
+    return Text(dateInRegion.toRelative(since: DateInRegion(Date(), region: .current)))
+        .foregroundColor(.gray)
 }
 
 struct StatusActionItemIcon: View {

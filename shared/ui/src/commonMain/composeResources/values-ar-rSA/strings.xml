@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="settings_about_description">الجيل القادم النهائي مفتوح المصدر من AI زبون الشبكة الاجتماعية اللامركزية.</string>
+  <string name="settings_about_source_code">الكود المصدري</string>
+  <string name="settings_about_telegram">تيليجرام</string>
+  <string name="settings_about_telegram_description">انضم إلى مجموعة تيليجرام</string>
+  <string name="settings_about_localization">كرودن</string>
+  <string name="settings_about_localization_description">ساعدنا في ترجمة الشفق</string>
+</resources>

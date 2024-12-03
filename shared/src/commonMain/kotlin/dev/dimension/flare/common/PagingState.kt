@@ -1,6 +1,5 @@
 package dev.dimension.flare.common
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
@@ -186,7 +185,6 @@ inline fun LoadState.onEndOfList(block: () -> Unit): LoadState {
     return this
 }
 
-@Composable
 internal fun <T : Any> UiState<LazyPagingItems<T>>.toPagingState(): PagingState<T> =
     when (this) {
         is UiState.Loading -> PagingState.Loading()
@@ -194,7 +192,6 @@ internal fun <T : Any> UiState<LazyPagingItems<T>>.toPagingState(): PagingState<
         is UiState.Success -> data.toPagingState()
     }
 
-@Composable
 internal fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
     if (itemCount > 0) {
         return PagingState.Success.PagingSuccess(
@@ -217,3 +214,10 @@ internal fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
         return PagingState.Empty(this::refresh)
     }
 }
+
+internal fun <T : Any> UiState<PagingState<T>>.flatten(): PagingState<T> =
+    when (this) {
+        is UiState.Loading -> PagingState.Loading()
+        is UiState.Error -> PagingState.Error(throwable)
+        is UiState.Success -> data
+    }

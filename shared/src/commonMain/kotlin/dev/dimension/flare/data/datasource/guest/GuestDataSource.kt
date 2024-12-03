@@ -16,6 +16,7 @@ import dev.dimension.flare.data.datasource.mastodon.SearchUserPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendHashtagPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendsUserPagingSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -25,6 +26,8 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.model.mapper.renderGuest
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -108,7 +111,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                 userId = userKey.id,
                 onlyMedia = mediaOnly,
             )
-        }.flow
+        }.flow.cachedIn(scope)
 
     override fun context(
         statusKey: MicroBlogKey,
@@ -225,4 +228,34 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                 accountKey = null,
             )
         }.flow.cachedIn(scope)
+
+    override fun profileTabs(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pagingSize: Int,
+    ): ImmutableList<ProfileTab> =
+        persistentListOf(
+            ProfileTab.Timeline(
+                type = ProfileTab.Timeline.Type.Status,
+                flow =
+                    Pager(PagingConfig(pageSize = pagingSize)) {
+                        GuestUserTimelinePagingSource(
+                            host = GuestMastodonService.HOST,
+                            userId = userKey.id,
+                        )
+                    }.flow.cachedIn(scope),
+            ),
+            ProfileTab.Timeline(
+                type = ProfileTab.Timeline.Type.StatusWithReplies,
+                flow =
+                    Pager(PagingConfig(pageSize = pagingSize)) {
+                        GuestUserTimelinePagingSource(
+                            host = GuestMastodonService.HOST,
+                            userId = userKey.id,
+                            withReply = true,
+                        )
+                    }.flow.cachedIn(scope),
+            ),
+            ProfileTab.Media,
+        )
 }

@@ -18,7 +18,8 @@ internal class UserTimelineRemoteMediator(
     private val userKey: MicroBlogKey,
     private val database: CacheDatabase,
     private val pagingKey: String,
-    private val onlyMedia: Boolean,
+    private val onlyMedia: Boolean = false,
+    private val withReplies: Boolean = false,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     override suspend fun load(
         loadType: LoadType,
@@ -36,6 +37,7 @@ internal class UserTimelineRemoteMediator(
                             UsersNotesRequest(
                                 userId = userKey.id,
                                 limit = state.config.pageSize,
+                                withReplies = withReplies,
                             ).let {
                                 if (onlyMedia) {
                                     it.copy(
@@ -62,6 +64,7 @@ internal class UserTimelineRemoteMediator(
                                 userId = userKey.id,
                                 limit = state.config.pageSize,
                                 untilId = lastItem.timeline.statusKey.id,
+                                withReplies = withReplies,
                             ).let {
                                 if (onlyMedia) {
                                     it.copy(

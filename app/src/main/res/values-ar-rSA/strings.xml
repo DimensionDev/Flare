@@ -328,7 +328,9 @@
   <string name="feeds_discover_feeds_created_by">تم إنشاؤها بواسطة %1$s</string>
   <string name="feeds_unsubscribe">إلغاء الاشتراك</string>
   <string name="feeds_subscribe">اشترك</string>
-  <string name="profile_tab_timeline">الخط</string>
+  <string name="profile_tab_timeline">المشاركات</string>
+  <string name="profile_tab_timeline_with_reply">الوظائف والردود</string>
+  <string name="profile_tab_likes">إعجاب</string>
   <string name="profile_tab_media">الوسائط</string>
   <string name="misskey_achievement_notes1_title">فقط إعداد سماوي</string>
   <string name="misskey_achievement_notes1_description">انشر ملاحظتك الأولى</string>

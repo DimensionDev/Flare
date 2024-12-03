@@ -332,7 +332,9 @@
   <string name="feeds_discover_feeds_created_by">作成者： %1$s</string>
   <string name="feeds_unsubscribe">購読解除</string>
   <string name="feeds_subscribe">購読する</string>
-  <string name="profile_tab_timeline">タイムライン</string>
+  <string name="profile_tab_timeline">投稿</string>
+  <string name="profile_tab_timeline_with_reply">投稿と返信</string>
+  <string name="profile_tab_likes">いいね</string>
   <string name="profile_tab_media">メディア</string>
   <string name="tab_settings_title">タブ設定</string>
   <string name="misskey_achievement_notes1_title">mskyを設立しました</string>

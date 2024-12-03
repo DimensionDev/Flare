@@ -332,7 +332,7 @@
   <string name="feeds_discover_feeds_created_by">由%1$s创建</string>
   <string name="feeds_unsubscribe">取消订阅</string>
   <string name="feeds_subscribe">订阅</string>
-  <string name="profile_tab_timeline">员额</string>
+  <string name="profile_tab_timeline">帖子</string>
   <string name="profile_tab_timeline_with_reply">帖子和回复</string>
   <string name="profile_tab_likes">点赞</string>
   <string name="profile_tab_media">媒体</string>

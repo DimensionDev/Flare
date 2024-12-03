@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="settings_about_description">Den ultimata nästa generation öppen källkod AI drivs decentraliserade sociala nätverk klient.</string>
+  <string name="settings_about_source_code">Källkod</string>
+  <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">Gå med i vår Telegramgrupp</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">Hjälp oss att översätta Flare</string>
+</resources>

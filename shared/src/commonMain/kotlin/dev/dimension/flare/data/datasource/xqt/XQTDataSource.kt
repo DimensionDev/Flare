@@ -1136,6 +1136,7 @@ class XQTDataSource(
                             ),
                     ),
             ),
+            ProfileTab.Media,
             if (userKey == accountKey) {
                 ProfileTab.Timeline(
                     type = ProfileTab.Timeline.Type.Likes,
@@ -1160,6 +1161,5 @@ class XQTDataSource(
             } else {
                 null
             },
-            ProfileTab.Media,
         ).toPersistentList()
 }

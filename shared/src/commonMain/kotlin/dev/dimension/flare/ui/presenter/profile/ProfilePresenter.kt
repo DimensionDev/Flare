@@ -7,6 +7,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.common.flatten
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
@@ -69,23 +70,6 @@ class ProfilePresenter(
                 }
             }
 
-        val listState =
-            accountServiceState
-                .map { service ->
-                    val actualUserKey =
-                        userKey
-                            ?: if (service is AuthenticatedMicroblogDataSource) {
-                                service.accountKey
-                            } else {
-                                null
-                            } ?: throw NoActiveAccountException
-                    remember(service, userKey) {
-                        service.userTimeline(
-                            actualUserKey,
-                            scope = scope,
-                        )
-                    }.collectAsLazyPagingItems()
-                }.toPagingState()
         val mediaState =
             remember {
                 ProfileMediaPresenter(accountType = accountType, userKey = userKey)
@@ -168,6 +152,18 @@ class ProfilePresenter(
                         it.toImmutableList().toImmutableListWrapper()
                     }
                 }
+            }
+
+        val listState =
+            remember(tabs) {
+                tabs
+                    .map {
+                        it
+                            .toImmutableList()
+                            .filterIsInstance<ProfileState.Tab.Timeline>()
+                            .first()
+                            .data
+                    }.flatten()
             }
         return object : ProfileState(
             userState = userState.flatMap { it.toUi() },

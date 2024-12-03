@@ -327,7 +327,9 @@
   <string name="feeds_discover_feeds_created_by">Створено %1$s</string>
   <string name="feeds_unsubscribe">Відмовитися від підписки</string>
   <string name="feeds_subscribe">Підписатися</string>
-  <string name="profile_tab_timeline">Хронологія</string>
+  <string name="profile_tab_timeline">Повідомлення</string>
+  <string name="profile_tab_timeline_with_reply">Повідомлення і відповіді</string>
+  <string name="profile_tab_likes">Сподобалося</string>
   <string name="profile_tab_media">Медіа</string>
   <string name="misskey_achievement_notes1_title">просто налаштуйте мою msky</string>
   <string name="misskey_achievement_notes1_description">Опублікуйте свою першу нотатку</string>

@@ -30,6 +30,7 @@ struct DiscoverScreen: View {
                                             if let item = data.peek(index: index) {
                                                 UserComponent(
                                                     user: item,
+                                                    topEndContent:nil,
                                                     onUserClicked: {
                                                         onUserClicked(item)
                                                     }
@@ -66,6 +67,8 @@ struct DiscoverScreen: View {
                                             if let item = data.peek(index: index) {
                                                 UserComponent(
                                                     user: item,
+                                                    topEndContent:nil,
+
                                                     onUserClicked: {
                                                         onUserClicked(item)
                                                     }

@@ -1,11 +1,13 @@
-import SwiftUI
-import shared
-import NetworkImage
 import MarkdownUI
+import NetworkImage
+import shared
+import SwiftUI
 
 struct UserComponent: View {
     let user: UiUserV2
+    let topEndContent: UiTimelineItemContentStatusTopEndContent?
     let onUserClicked: () -> Void
+
     var body: some View {
         HStack {
             Button(
@@ -23,10 +25,20 @@ struct UserComponent: View {
                     .lineLimit(1)
                     .font(.headline)
                     .markdownInlineImageProvider(.emoji)
-                Text(user.handle)
-                    .lineLimit(1)
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
+                HStack{
+                    Text(user.handle)
+                        .lineLimit(1)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                    // 设置 pawoo 用户的可见状态
+                    if topEndContent != nil {
+                        if let topEndContent =  topEndContent {
+                            switch onEnum(of: topEndContent) {
+                            case let .visibility(data): StatusVisibilityComponent(visibility: data.visibility).foregroundColor(.gray)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -42,6 +54,7 @@ struct AccountItem: View {
                 .opacity(0.5)
         )
     }
+
     var body: some View {
         switch onEnum(of: userState) {
         case .error:
@@ -61,7 +74,7 @@ struct AccountItem: View {
                 }
             }
             .redacted(reason: .placeholder)
-        case .success(let success):
+        case let .success(success):
             let user = success.data
             HStack {
                 UserAvatar(data: user.avatar, size: 48)

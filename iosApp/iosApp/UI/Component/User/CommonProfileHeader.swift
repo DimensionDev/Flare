@@ -10,7 +10,7 @@ import Foundation
 
 enum CommonProfileHeaderConstants {
     static let headerHeight: CGFloat = 200
-    static let avatarSize: CGFloat = 96
+    static let avatarSize: CGFloat = 60
 }
 
 struct CompactLabelStyle: LabelStyle {
@@ -30,13 +30,19 @@ struct CommonProfileHeader: View {
     let relation: UiState<UiRelation>
     let isMe: UiState<KotlinBoolean>
     let onFollowClick: (UiRelation) -> Void
+    @State private var isBannerValid: Bool = true
 
     var body: some View {
         // banner
         ZStack(alignment: .top) {
-            if let banner = user.banner, !banner.isEmpty {
+            if let banner = user.banner, !banner.isEmpty && banner.range(of: "^https?://.*example\\.com.*$", options: .regularExpression) == nil && isBannerValid {
                 Color.clear.overlay {
                     KFImage(URL(string: banner))
+                        .onSuccess { result in
+                            if result.image.size.width <= 10 || result.image.size.height <= 10 {
+                                isBannerValid = false
+                            }
+                        }
                         .resizable()
                         .scaledToFill()
                         .frame(height: CommonProfileHeaderConstants.headerHeight)
@@ -44,14 +50,15 @@ struct CommonProfileHeader: View {
                 }
                 .frame(height: CommonProfileHeaderConstants.headerHeight)
             } else {
-                Rectangle()
-                    .foregroundColor(.gray)
-                    .frame(height: CommonProfileHeaderConstants.headerHeight)
+                DynamicBannerBackground(avatarUrl: user.avatar)
             }
-            
             //user avatar
             VStack(alignment: .leading) {
+                
+         Spacer().frame(height: 16)
+
                 HStack {
+                    //avatar
                     VStack {
                         Spacer()
                             .frame(
@@ -60,6 +67,8 @@ struct CommonProfileHeader: View {
                             )
                         UserAvatar(data: user.avatar, size: CommonProfileHeaderConstants.avatarSize)
                     }
+ 
+                    //user name
                     VStack(alignment: .leading) {
                         Spacer()
                             .frame(height: CommonProfileHeaderConstants.headerHeight)
@@ -80,13 +89,12 @@ struct CommonProfileHeader: View {
                                 }
                             }
                         }
-                    }
-                    Spacer()
-                    // user relation
-                    VStack {
-                        Spacer()
-                            .frame(height: CommonProfileHeaderConstants.headerHeight)
+//                        Spacer()
+//                            .frame(height: CommonProfileHeaderConstants.headerHeight)
+                        HStack {
+                            MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
 
+                            Spacer()
                             if case .success(let data) = onEnum(of: isMe), !data.data.boolValue {
                                 switch onEnum(of: relation) {
                                 case .success(let relationState): Button(action: {
@@ -102,6 +110,11 @@ struct CommonProfileHeader: View {
                                         String(localized: "relation_follow")
                                     }
                                     Text(text)
+                                        .font(.caption)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.gray.opacity(0.2))
+                                        .clipShape(RoundedRectangle(cornerRadius: 15))
                                 })
                                 .buttonStyle(.borderless)
                                 case .loading: Button(action: {}, label: {
@@ -112,9 +125,17 @@ struct CommonProfileHeader: View {
                                 case .error: EmptyView()
                                 }
                             }
+                            }
+                    }
+                    Spacer()
+                    // user relation
+                    VStack {
+                     
                     }
                 }
                 Spacer()
+                Spacer()
+
                 //user desc
                 if let desc = user.description_?.markdown {
                     Markdown(desc)
@@ -123,14 +144,16 @@ struct CommonProfileHeader: View {
                 Spacer()
                 
                 //user follows -  user fans
-                MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
+//                MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
 
+                Spacer()
                 Spacer()
 
                 //user Location  user url
                 if let bottomContent = user.bottomContent {
                     switch onEnum(of: bottomContent) {
                     case .fields(let data):
+                        // pawoo  的 一些个人 table Info List
                         FieldsView(fields: data.fields)
                     case .iconify(let data):
                         HStack(spacing: 8) {
@@ -198,5 +221,63 @@ struct CommonProfileHeader: View {
             }
             .padding([.horizontal])
         }
+    }
+}
+
+struct DynamicBannerBackground: View {
+    let avatarUrl: String
+    
+    var body: some View {
+        ZStack {
+            // 放大的头像背景
+            KFImage(URL(string: avatarUrl))
+                .resizable()
+                .scaledToFill()
+                .frame(height: CommonProfileHeaderConstants.headerHeight)
+                .blur(radius: 10)
+                .overlay {
+                    // 添加渐变遮罩
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            Color.black.opacity(0.3),
+                            Color.black.opacity(0.1),
+                            Color.black.opacity(0.3)
+                        ]),
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                }
+                .clipped()
+        }
+        .frame(height: CommonProfileHeaderConstants.headerHeight)
+    }
+}
+
+extension UIImage {
+    var averageColor: UIColor? {
+        guard let inputImage = CIImage(image: self) else { return nil }
+        let extentVector = CIVector(x: inputImage.extent.origin.x,
+                                  y: inputImage.extent.origin.y,
+                                  z: inputImage.extent.size.width,
+                                  w: inputImage.extent.size.height)
+
+        guard let filter = CIFilter(name: "CIAreaAverage",
+                                  parameters: [kCIInputImageKey: inputImage,
+                                             kCIInputExtentKey: extentVector]) else { return nil }
+        guard let outputImage = filter.outputImage else { return nil }
+
+        var bitmap = [UInt8](repeating: 0, count: 4)
+        let context = CIContext(options: [.workingColorSpace: kCFNull as Any])
+        context.render(outputImage,
+                      toBitmap: &bitmap,
+                      rowBytes: 4,
+                      bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
+                      format: .RGBA8,
+                      colorSpace: nil)
+
+        return UIColor(red: CGFloat(bitmap[0]) / 255,
+                      green: CGFloat(bitmap[1]) / 255,
+                      blue: CGFloat(bitmap[2]) / 255,
+                      alpha: CGFloat(bitmap[3]) / 255)
     }
 }

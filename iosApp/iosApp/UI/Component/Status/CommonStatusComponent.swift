@@ -5,7 +5,7 @@ import Awesome
 import Kingfisher
 import JXPhotoBrowser
 import SwiftDate
-
+ 
 struct CommonStatusComponent: View {
     @State private var showMedia: Bool = false
     @State private var expanded: Bool = false
@@ -16,29 +16,34 @@ struct CommonStatusComponent: View {
     let isDetail: Bool
     var body: some View {
         VStack(alignment: .leading) {
-            HStack {
+            HStack(alignment: .top) {
                 if let user = data.user {
                     UserComponent(
                         user: user,
+                        topEndContent: data.topEndContent as? UiTimelineItemContentStatusTopEndContent,
                         onUserClicked: {
                             user.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
                         }
                     )
                 }
                 Spacer()
-                HStack {
-                    if let topEndContent = data.topEndContent {
-                        switch onEnum(of: topEndContent) {
-                        case .visibility(let data): StatusVisibilityComponent(visibility: data.visibility)
+                //icon + time
+                VStack(alignment: .trailing, spacing: 2) {
+                    HStack(spacing: 4) {
+                        // if let topEndContent = data.topEndContent {
+                        //     switch onEnum(of: topEndContent) {
+                        //     case .visibility(let data): StatusVisibilityComponent(visibility: data.visibility)
+                        //     }
+                        // }
+                        if !isDetail {
+                            dateFormatter(data.createdAt)
                         }
-                    }
-                    if !isDetail {
-                        dateFormatter(data.createdAt)
                     }
                 }
                 .foregroundColor(.gray)
                 .font(.caption)
             }
+            // reply
             if let aboveTextContent = data.aboveTextContent {
                 switch onEnum(of: aboveTextContent) {
                 case .replyTo(let data): Text(String(localized: "Reply to \(data.handle)"))
@@ -48,6 +53,7 @@ struct CommonStatusComponent: View {
                 Spacer()
                     .frame(height: 4)
             }
+            
             if let cwText = data.contentWarning, !cwText.isEmpty {
                 Button(action: {
                     withAnimation {
@@ -62,6 +68,7 @@ struct CommonStatusComponent: View {
                     } else {
                         Image(systemName: "arrowtriangle.left.circle.fill")
                     }
+                    
                 })
                 .opacity(0.6)
                 .buttonStyle(.plain)
@@ -70,11 +77,13 @@ struct CommonStatusComponent: View {
                         .frame(height: 8)
                 }
             }
+            // tweet content
             if expanded || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
                 Markdown(data.content.markdown)
                     .font(.body)
                     .markdownInlineImageProvider(.emoji)
             }
+            //media
             if !data.images.isEmpty {
                 Spacer()
                     .frame(height: 8)
@@ -99,9 +108,11 @@ struct CommonStatusComponent: View {
                     .buttonStyle(.borderless)
                 }
             }
+            //link preview
             if let card = data.card, appSettings.appearanceSettings.showLinkPreview {
                 LinkPreview(card: card)
             }
+            // quote tweet
             if !data.quote.isEmpty {
                 Spacer()
                     .frame(height: 4)
@@ -121,6 +132,7 @@ struct CommonStatusComponent: View {
 #endif
                 .cornerRadius(8)
             }
+            //
             if let bottomContent = data.bottomContent {
                 switch onEnum(of: bottomContent) {
                 case .reaction(let data):
@@ -148,6 +160,7 @@ struct CommonStatusComponent: View {
                     }
                 }
             }
+            // if detail page
             if isDetail {
                 Spacer()
                     .frame(height: 4)
@@ -159,6 +172,8 @@ struct CommonStatusComponent: View {
             }
             Spacer()
                 .frame(height: 8)
+            
+            //bottom action
             if appSettings.appearanceSettings.showActions || isDetail, !data.actions.isEmpty {
                 HStack {
                     ForEach(0..<data.actions.count, id: \.self) { actionIndex in
@@ -200,6 +215,7 @@ struct CommonStatusComponent: View {
                                         Label {
                                             Text(text)
                                         } icon: {
+                                            // bottom action icon
                                             StatusActionItemIcon(item: item)
                                         }
                                     })
@@ -264,58 +280,30 @@ func dateFormatter(_ date: Date) -> some View {
         .foregroundColor(.gray)
 }
 
+// bottom action icon image
 struct StatusActionItemIcon: View {
     let item: StatusActionItem
     var body: some View {
         switch onEnum(of: item) {
         case .bookmark(let data):
             if (data.bookmarked) {
-                Awesome.Classic.Solid.bookmark.image
-#if os(macOS)
-                    .foregroundColor(.labelColor)
-#elseif os(iOS)
-                    .foregroundColor(.label)
-#endif
+                Image(asset: Asset.Image.Status.Toolbar.bookmarkFilled)
             } else {
-                Awesome.Classic.Regular.bookmark.image
-#if os(macOS)
-                    .foregroundColor(.labelColor)
-#elseif os(iOS)
-                    .foregroundColor(.label)
-#endif
+                Image(asset: Asset.Image.Status.Toolbar.bookmark)
             }
         case .delete(_):
-            Awesome.Classic.Solid.trash.image
+            Image(asset: Asset.Image.Status.Toolbar.delete)
         case .like(let data):
             if (data.liked) {
-                Awesome.Classic.Solid.heart.image
-#if os(macOS)
-                    .foregroundColor(.labelColor)
-#elseif os(iOS)
-                    .foregroundColor(.label)
-#endif
+                Image(asset: Asset.Image.Status.Toolbar.favorite)
             } else {
-                Awesome.Classic.Regular.heart.image
-#if os(macOS)
-                    .foregroundColor(.labelColor)
-#elseif os(iOS)
-                    .foregroundColor(.label)
-#endif
+                Image(asset: Asset.Image.Status.Toolbar.favoriteBorder)
             }
         case .more(_):
-            Awesome.Classic.Solid.ellipsis.image
-#if os(macOS)
-                    .foregroundColor(.labelColor)
-#elseif os(iOS)
-                    .foregroundColor(.label)
-#endif
+            Image(asset: Asset.Image.Status.more).rotationEffect(.degrees(90))
         case .quote(_):
-            Awesome.Classic.Solid.quoteLeft.image
-#if os(macOS)
-                    .foregroundColor(.labelColor)
-#elseif os(iOS)
-                    .foregroundColor(.label)
-#endif
+            Image(asset: Asset.Image.Status.Toolbar.quote)
+
         case .reaction(let data):
             if (data.reacted) {
                 Awesome.Classic.Solid.minus.image
@@ -333,35 +321,28 @@ struct StatusActionItemIcon: View {
 #endif
             }
         case .reply(_):
-            Awesome.Classic.Solid.reply.image
-#if os(macOS)
-                .foregroundColor(.labelColor)
-#elseif os(iOS)
-                .foregroundColor(.label)
-#endif
+            Image(asset: Asset.Image.Status.Toolbar.chatBubbleOutline)
         case .report(_):
-            Awesome.Classic.Solid.circleInfo.image
-#if os(macOS)
-                .foregroundColor(.labelColor)
-#elseif os(iOS)
-                .foregroundColor(.label)
-#endif
+            Image(asset: Asset.Image.Status.Toolbar.flag)
         case .retweet(let data):
             if (data.retweeted) {
-                Awesome.Classic.Solid.retweet.image
-                    .foregroundColor(.init(.accentColor))
+                Image(asset: Asset.Image.Status.Toolbar.repeat).foregroundColor(.init(.accentColor))
+//                Awesome.Classic.Solid.retweet.image
+                    
             } else {
-                Awesome.Classic.Solid.retweet.image
-#if os(macOS)
-                    .foregroundColor(.labelColor)
-#elseif os(iOS)
-                    .foregroundColor(.label)
-#endif
+                Image(asset: Asset.Image.Status.Toolbar.repeat)
+//                Awesome.Classic.Solid.retweet.image
+//#if os(macOS)
+//                    .foregroundColor(.labelColor)
+//#elseif os(iOS)
+//                    .foregroundColor(.label)
+//#endif
             }
         }
     }
 }
 
+//bottom action
 struct StatusActionLabel: View {
     let item: StatusActionItem
     var body: some View {
@@ -395,6 +376,7 @@ struct StatusActionLabel: View {
         Label {
             Text(text)
         } icon: {
+            // bottom action icon
             StatusActionItemIcon(item: item)
         }
         .foregroundStyle(color, color)
@@ -406,7 +388,7 @@ struct StatusVisibilityComponent: View {
     var body: some View {
         switch visibility {
         case .public:
-            Awesome.Classic.Solid.globe.image
+            Awesome.Classic.Solid.globe.image.opacity(0.6)
         case .home:
             Awesome.Classic.Solid.lockOpen.image
         case .followers:

@@ -36,6 +36,7 @@ struct ProfileMediaListScreen: View {
     @State private var refreshing = false
     @State private var selectedMedia: (media: UiMedia, index: Int)?
     @State private var showingMediaPreview = false
+    @Environment(\.appSettings) private var appSettings
 
     init(accountType: AccountType, userKey: MicroBlogKey) {
         presenter = .init(accountType: accountType, userKey: userKey)
@@ -45,7 +46,7 @@ struct ProfileMediaListScreen: View {
         ObservePresenter<ProfileMediaState, ProfileMediaPresenter, AnyView>(presenter: presenter) { state in
             AnyView(
                 WaterfallCollectionView(state: state) { item in
-                    MediaGridItem(media: item.media) {
+                    MediaGridItem(media: item.media, appSetting: appSettings) {
                         let allImages = state.allMediaItems
                         if !allImages.isEmpty,
                            let mediaIndex = allImages.firstIndex(where: { $0 === item.media }) {
@@ -294,6 +295,7 @@ class HostingCell: UICollectionViewCell {
 
 struct MediaGridItem: View {
     let media: UiMedia
+    let appSetting: AppSettings
     let onTap: () -> Void
 
     var body: some View {
@@ -361,9 +363,11 @@ struct MediaGridItem: View {
                         .resizable()
                         .scaledToFit()
 //                        .fade(duration: 0.25)
-                        .blur(radius: image.sensitive ? 20 : 0)
+                        .blur(radius: !appSetting.appearanceSettings.showSensitiveContent && image.sensitive ? 20 : 0)
 
-                    if image.sensitive {
+               
+
+                    if !appSetting.appearanceSettings.showSensitiveContent && image.sensitive {
                         Text("Sensitive Content")
                             .foregroundColor(.white)
                             .padding(8)

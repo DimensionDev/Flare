@@ -42,6 +42,77 @@ public enum Asset {
     public static let trendingInactive = ImageAsset(name: "Tab/trending.inactive")
   }
   public enum Image {
+    public enum Notification {
+      public static let bellIcon = ImageAsset(name: "Notification/bell.icon")
+      public static let birdIcon = ImageAsset(name: "Notification/bird.icon")
+      public static let followWhite = ImageAsset(name: "Notification/follow.white")
+      public static let heartIcon = ImageAsset(name: "Notification/heart.icon")
+      public static let heartWhite = ImageAsset(name: "Notification/heart.white")
+      public static let listIcon = ImageAsset(name: "Notification/list.icon")
+      public static let messagesWhite = ImageAsset(name: "Notification/messages.white")
+      public static let milestonIcon = ImageAsset(name: "Notification/mileston.icon")
+      public static let more = ImageAsset(name: "Notification/more")
+      public static let personIcon = ImageAsset(name: "Notification/person.icon")
+      public static let playIcon = ImageAsset(name: "Notification/play.icon")
+      public static let recommendationIcon = ImageAsset(name: "Notification/recommendation.icon")
+      public static let reportIcon = ImageAsset(name: "Notification/report.icon")
+      public static let retweetIcon = ImageAsset(name: "Notification/retweet.icon")
+      public static let retweetWhite = ImageAsset(name: "Notification/retweet.white")
+      public static let securityAlertIcon = ImageAsset(name: "Notification/security.alert.icon")
+      public static let spacesIcon = ImageAsset(name: "Notification/spaces.icon")
+    }
+    public enum Status {
+      public enum AudioSpace {
+        public static let bell = ImageAsset(name: "Status/AudioSpace/bell")
+        public static let calendar = ImageAsset(name: "Status/AudioSpace/calendar")
+        public static let microphone = ImageAsset(name: "Status/AudioSpace/microphone")
+        public static let playerPlay = ImageAsset(name: "Status/AudioSpace/player.play")
+      }
+      public enum Dashboard {
+        public static let chatBubbleOutlineSmall = ImageAsset(name: "Status/Dashboard/chat.bubble.outline.small")
+        public static let favoriteBorderSmall = ImageAsset(name: "Status/Dashboard/favorite.border.small")
+        public static let quoteClosingSmall = ImageAsset(name: "Status/Dashboard/quote.closing.small")
+        public static let repeatSmall = ImageAsset(name: "Status/Dashboard/repeat.small")
+      }
+      public enum RankingMode {
+        public static let arrowDown = ImageAsset(name: "Status/RankingMode/arrow.down")
+      }
+      public enum Toolbar {
+        public static let block = ImageAsset(name: "Status/Toolbar/block")
+        public static let bookmarkFilled = ImageAsset(name: "Status/Toolbar/bookmark.filled")
+        public static let bookmarkFilledLarge = ImageAsset(name: "Status/Toolbar/bookmark.filled.large")
+        public static let bookmark = ImageAsset(name: "Status/Toolbar/bookmark")
+        public static let bookmarkLarge = ImageAsset(name: "Status/Toolbar/bookmark.large")
+        public static let chatBubbleOutline = ImageAsset(name: "Status/Toolbar/chat.bubble.outline")
+        public static let chatBubbleOutlineLarge = ImageAsset(name: "Status/Toolbar/chat.bubble.outline.large")
+        public static let collectBorder = ImageAsset(name: "Status/Toolbar/collect.border")
+        public static let collect = ImageAsset(name: "Status/Toolbar/collect")
+        public static let delete = ImageAsset(name: "Status/Toolbar/delete")
+        public static let favoriteBorder = ImageAsset(name: "Status/Toolbar/favorite.border")
+        public static let favoriteBorderLarge = ImageAsset(name: "Status/Toolbar/favorite.border.large")
+        public static let favorite = ImageAsset(name: "Status/Toolbar/favorite")
+        public static let favoriteLarge = ImageAsset(name: "Status/Toolbar/favorite.large")
+        public static let flag = ImageAsset(name: "Status/Toolbar/flag")
+        public static let follow = ImageAsset(name: "Status/Toolbar/follow")
+        public static let link = ImageAsset(name: "Status/Toolbar/link")
+        public static let mute = ImageAsset(name: "Status/Toolbar/mute")
+        public static let playerPlayFilled = ImageAsset(name: "Status/Toolbar/player.play.filled")
+        public static let quote = ImageAsset(name: "Status/Toolbar/quote")
+        public static let `repeat` = ImageAsset(name: "Status/Toolbar/repeat")
+        public static let repeatLarge = ImageAsset(name: "Status/Toolbar/repeat.large")
+        public static let squareAndArrowUp = ImageAsset(name: "Status/Toolbar/square.and.arrow.up")
+        public static let squareAndArrowUpLarge = ImageAsset(name: "Status/Toolbar/square.and.arrow.up.large")
+        public static let unblock = ImageAsset(name: "Status/Toolbar/unblock")
+        public static let unfollow = ImageAsset(name: "Status/Toolbar/unfollow")
+        public static let unmute = ImageAsset(name: "Status/Toolbar/unmute")
+        public static let userAdd = ImageAsset(name: "Status/Toolbar/user.add")
+      }
+      public static let media = ImageAsset(name: "Status/media")
+      public static let more = ImageAsset(name: "Status/more")
+      public static let pin = ImageAsset(name: "Status/pin")
+      public static let place = ImageAsset(name: "Status/place")
+      public static let verifedBadge = ImageAsset(name: "Status/verifed.badge")
+    }
     public static let arrowSquareDown = ImageAsset(name: "arrow.square.down")
     public static let arrowSquareUp = ImageAsset(name: "arrow.square.up")
     public enum Attributes {

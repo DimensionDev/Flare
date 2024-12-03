@@ -2,7 +2,7 @@ import MarkdownUI
 import OrderedCollections
 import shared
 import SwiftUI
-
+ 
 struct ProfileScreen: View {
 
     //MicroBlogKey host+id
@@ -13,11 +13,14 @@ struct ProfileScreen: View {
 
     //横屏 竖屏
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    
+    @Environment(\.appSettings) private var appSettings
 
-    init(accountType: AccountType, userKey: MicroBlogKey?, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
+
+     init(accountType: AccountType, userKey: MicroBlogKey?, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
         self.toProfileMedia = toProfileMedia
         presenter = .init(accountType: accountType, userKey: userKey)
-    }
+     }
 
     var sideProfileHeader: some View {
         ObservePresenter(presenter: presenter) { state in
@@ -37,7 +40,7 @@ struct ProfileScreen: View {
                         Button(action: {
                             toProfileMedia(userState.data.key)
                         }, label: {
-                            LargeProfileImagePreviews(state: state.mediaState)
+                            LargeProfileImagePreviews(state: state.mediaState,appSetting: appSettings)
                         })
                         .buttonStyle(.borderless)
                     }
@@ -79,7 +82,7 @@ struct ProfileScreen: View {
                         Button(action: {
                             toProfileMedia(userState.data.key)
                         }, label: {
-                            SmallProfileMediaPreviews(state: state.mediaState)
+                            SmallProfileMediaPreviews(state: state.mediaState,appSetting: appSettings)
                         })
                         .buttonStyle(.borderless)
                         .listRowInsets(.none)
@@ -200,6 +203,7 @@ struct ProfileScreen: View {
 
 struct LargeProfileImagePreviews: View {
     let state: PagingState<ProfileMedia>
+    let appSetting: AppSettings
     var body: some View {
         switch onEnum(of: state) {
         case .error:
@@ -213,7 +217,10 @@ struct LargeProfileImagePreviews: View {
                     let item = success.peek(index: index)
                     if let media = item?.media {
                         let image = media as? UiMediaImage
-                        let shouldBlur = image?.sensitive ?? false
+                         
+                        let shouldBlur = appSetting.appearanceSettings.showSensitiveContent && (image?.sensitive ?? false)
+
+                        
                         MediaItemComponent(media: media)
                             .if(shouldBlur, transform: { view in
                                 view.blur(radius: 32)
@@ -234,6 +241,7 @@ struct LargeProfileImagePreviews: View {
 
 struct SmallProfileMediaPreviews: View {
     let state: PagingState<ProfileMedia>
+    let appSetting: AppSettings
     var body: some View {
         switch onEnum(of: state) {
         case .error:
@@ -247,7 +255,11 @@ struct SmallProfileMediaPreviews: View {
                         let item = success.peek(index: index)
                         if let media = item?.media {
                             let image = media as? UiMediaImage
-                            let shouldBlur = image?.sensitive ?? false
+                            
+                            let shouldBlur = !appSetting.appearanceSettings.showSensitiveContent && (image?.sensitive ?? false)
+
+                          
+                            
                             MediaItemComponent(media: media)
                                 .if(shouldBlur, transform: { view in
                                     view.blur(radius: 32)
@@ -311,15 +323,22 @@ struct MatrixView: View {
     var body: some View {
         HStack {
             Text(followCount)
-            Text("matrix_following")
+                .fontWeight(.bold)
+            Text("正在关注")
+                .foregroundColor(.secondary)
+                .font(.footnote)
             Divider()
             Text(fansCount)
-            Text("matrix_followers")
+                .fontWeight(.bold)
+            Text("关注者")
+                .foregroundColor(.secondary)
+                .font(.footnote)
         }
         .font(.caption)
     }
 }
 
+// pawoo  的 一些个人 table Info List
 struct FieldsView: View {
     let fields: [String: UiRichText]
     var body: some View {
@@ -327,14 +346,20 @@ struct FieldsView: View {
             VStack(alignment: .leading) {
                 let keys = fields.map {
                     $0.key
-                }
+                }.sorted()  
                 ForEach(0..<keys.count, id: \.self) { index in
                     let key = keys[index]
                     Text(key)
-                        .font(.caption)
-                    Markdown(fields[key]?.markdown ?? "")
-                        .font(.body)
-                        .markdownInlineImageProvider(.emoji)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Markdown(fields[key]?.markdown ?? "").markdownTextStyle(textStyle: {
+                        FontFamilyVariant(.normal)
+                        FontSize(.em(0.9))
+                        
+//                        LineSpacing(1.3)
+                        ForegroundColor(.primary)
+                    }).markdownInlineImageProvider(.emoji)
+                        .padding(.vertical, 4)
                     if index != keys.count - 1 {
                         Divider()
                     }

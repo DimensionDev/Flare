@@ -24,6 +24,7 @@ struct SearchScreen: View {
                                     if let item = data.peek(index: index) {
                                         UserComponent(
                                             user: item,
+                                            topEndContent:nil,
                                             onUserClicked: {
                                                 onUserClicked(item)
                                             }

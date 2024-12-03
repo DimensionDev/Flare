@@ -75,6 +75,7 @@ struct StatusItemView: View {
                 HStack {
                     UserComponent(
                         user: data.value,
+                        topEndContent: nil,
                         onUserClicked: {
                             data.value.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
                         }

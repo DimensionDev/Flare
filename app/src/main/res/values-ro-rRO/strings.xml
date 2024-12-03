@@ -330,7 +330,9 @@
   <string name="feeds_discover_feeds_created_by">Creat de %1$s</string>
   <string name="feeds_unsubscribe">Dezabonare</string>
   <string name="feeds_subscribe">Abonează-te</string>
-  <string name="profile_tab_timeline">Cronologie</string>
+  <string name="profile_tab_timeline">Mesaje</string>
+  <string name="profile_tab_timeline_with_reply">Postări și răspunsuri</string>
+  <string name="profile_tab_likes">Aprecieri</string>
   <string name="profile_tab_media">Media</string>
   <string name="misskey_achievement_notes1_title">doar pentru a-mi configura msky</string>
   <string name="misskey_achievement_notes1_description">Postează prima ta notă</string>

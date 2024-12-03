@@ -325,7 +325,9 @@
   <string name="feeds_discover_feeds_created_by">Δημιουργήθηκε από %1$s</string>
   <string name="feeds_unsubscribe">Διαγραφή</string>
   <string name="feeds_subscribe">Εγγραφή</string>
-  <string name="profile_tab_timeline">Χρονοδιάγραμμα</string>
+  <string name="profile_tab_timeline">Αναρτήσεις</string>
+  <string name="profile_tab_timeline_with_reply">Δημοσιεύσεις και απαντήσεις</string>
+  <string name="profile_tab_likes">Αρέσει</string>
   <string name="profile_tab_media">Πολυμέσα</string>
   <string name="misskey_achievement_notes1_title">ακριβώς ρύθμιση μου msky</string>
   <string name="misskey_achievement_notes1_description">Δημοσιεύστε την πρώτη σας σημείωση</string>

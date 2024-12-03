@@ -330,7 +330,9 @@
   <string name="feeds_discover_feeds_created_by">Erstellt von %1$s</string>
   <string name="feeds_unsubscribe">Abmelden</string>
   <string name="feeds_subscribe">Abonnieren</string>
-  <string name="profile_tab_timeline">Zeitleiste</string>
+  <string name="profile_tab_timeline">Beiträge</string>
+  <string name="profile_tab_timeline_with_reply">Beiträge und Antworten</string>
+  <string name="profile_tab_likes">Gefällt</string>
   <string name="profile_tab_media">Medien</string>
   <string name="misskey_achievement_notes1_title">nur meinen msky einrichten</string>
   <string name="misskey_achievement_notes1_description">Schreibe deine erste Notiz</string>

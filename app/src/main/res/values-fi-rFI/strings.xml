@@ -330,7 +330,9 @@
   <string name="feeds_discover_feeds_created_by">Luotu %1$s</string>
   <string name="feeds_unsubscribe">Peruuta Tilaus</string>
   <string name="feeds_subscribe">Tilaa</string>
-  <string name="profile_tab_timeline">Aikajana</string>
+  <string name="profile_tab_timeline">Julkaisut</string>
+  <string name="profile_tab_timeline_with_reply">Julkaisut ja vastaukset</string>
+  <string name="profile_tab_likes">Tykkäykset</string>
   <string name="profile_tab_media">Media</string>
   <string name="misskey_achievement_notes1_title">vain pystyttää minun msky</string>
   <string name="misskey_achievement_notes1_description">Lähetä ensimmäinen muistiinpanosi</string>

@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.network.xqt
 
 import dev.dimension.flare.data.network.authorization.BearerAuthorization
+import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.xqt.api.DefaultApi
 import dev.dimension.flare.data.network.xqt.api.GuestApi
@@ -28,9 +29,15 @@ import dev.dimension.flare.data.network.xqt.api.createV11PostApi
 import dev.dimension.flare.data.network.xqt.api.createV20GetApi
 import dev.dimension.flare.model.xqtHost
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.plugins.BrowserUserAgent
 import io.ktor.client.plugins.HttpClientPlugin
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.request.HttpRequestPipeline
+import io.ktor.client.request.accept
+import io.ktor.client.request.get
 import io.ktor.client.request.headers
+import io.ktor.http.ContentType
 import io.ktor.util.AttributeKey
 import io.ktor.utils.io.KtorDsl
 
@@ -93,6 +100,29 @@ internal class XQTService(
         fun checkChocolate(value: String) =
 //            value.contains("gt=") &&
             value.contains("ct0=") && value.contains("auth_token=")
+    }
+
+    suspend fun getInitialUserId(chocolate: String): String? {
+        val response =
+            ktorClient {
+                BrowserUserAgent()
+                defaultRequest {
+                    headers {
+                        append("Cookie", chocolate)
+                        append("sec-fetch-dest", "document")
+                        append("sec-fetch-mode", "navigate")
+                        append("sec-fetch-site", "cross-site")
+                        append("sec-gpc", "1")
+                        append("upgrade-insecure-requests", "1")
+                        append("accept-language", "en-US,en;q=0.9")
+                        append("dnt", "1")
+                        append("host", "x" + ".com")
+                    }
+                    accept(ContentType.Text.Html)
+                }
+            }.get("https://" + "x" + ".com" + "/home").body<String>()
+        val userIdRegex = "\"user_id\":\"([0-9]+)\"".toRegex()
+        return userIdRegex.find(response)?.groupValues?.get(1)
     }
 }
 

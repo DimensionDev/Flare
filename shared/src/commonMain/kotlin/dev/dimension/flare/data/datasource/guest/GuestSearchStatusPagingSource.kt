@@ -7,6 +7,7 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.renderGuest
 
 internal class GuestSearchStatusPagingSource(
+    private val service: GuestMastodonService,
     private val host: String,
     private val query: String,
 ) : PagingSource<String, UiTimeline>() {
@@ -16,13 +17,13 @@ internal class GuestSearchStatusPagingSource(
         try {
             val result =
                 if (query.startsWith("#")) {
-                    GuestMastodonService.hashtagTimeline(
+                    service.hashtagTimeline(
                         hashtag = query.removePrefix("#"),
                         limit = params.loadSize,
                         max_id = params.key,
                     )
                 } else {
-                    GuestMastodonService
+                    service
                         .searchV2(
                             query = query,
                             limit = params.loadSize,

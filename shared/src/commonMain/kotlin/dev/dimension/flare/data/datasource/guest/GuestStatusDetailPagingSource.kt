@@ -8,6 +8,7 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.renderGuest
 
 internal class GuestStatusDetailPagingSource(
+    private val service: GuestMastodonService,
     private val host: String,
     private val statusKey: MicroBlogKey,
     private val statusOnly: Boolean,
@@ -19,17 +20,17 @@ internal class GuestStatusDetailPagingSource(
             val result =
                 if (statusOnly) {
                     val current =
-                        GuestMastodonService.lookupStatus(
+                        service.lookupStatus(
                             statusKey.id,
                         )
                     listOf(current)
                 } else {
                     val context =
-                        GuestMastodonService.context(
+                        service.context(
                             statusKey.id,
                         )
                     val current =
-                        GuestMastodonService.lookupStatus(
+                        service.lookupStatus(
                             statusKey.id,
                         )
                     context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()

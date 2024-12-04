@@ -29,6 +29,7 @@ import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.generated.destinations.AboutRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.AccountsRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.AppearanceRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.GuestSettingRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.LocalFilterRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StorageRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.TabCustomizeRouteDestination
@@ -41,6 +42,7 @@ import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.CircleUser
 import compose.icons.fontawesomeicons.solid.Database
 import compose.icons.fontawesomeicons.solid.Filter
+import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.Table
 import dev.dimension.flare.R
@@ -62,7 +64,10 @@ import moe.tlaster.precompose.molecule.producePresenter
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun SettingsRoute(navigationState: NavigationState) {
+internal fun SettingsRoute(
+    navigationState: NavigationState,
+    navigator: DestinationsNavigator,
+) {
     val scaffoldNavigator =
         rememberListDetailPaneScaffoldNavigator<SettingsDetailDestination>()
     BackHandler(
@@ -93,6 +98,9 @@ internal fun SettingsRoute(navigationState: NavigationState) {
                     },
                     toLocalFilter = {
                         scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.LocalFilter)
+                    },
+                    toGuestSettings = {
+                        navigator.navigate(GuestSettingRouteDestination)
                     },
                 )
             }
@@ -175,6 +183,7 @@ internal fun SettingsScreen(
     toAbout: () -> Unit,
     toTabCustomization: () -> Unit,
     toLocalFilter: () -> Unit,
+    toGuestSettings: () -> Unit,
 ) {
     val state by producePresenter { settingsPresenter() }
     FlareScaffold(
@@ -228,6 +237,27 @@ internal fun SettingsScreen(
                     )
                 }
             HorizontalDivider()
+            state.user.onError {
+                ListItem(
+                    headlineContent = {
+                        Text(text = stringResource(id = R.string.settings_guest_setting_title))
+                    },
+                    modifier =
+                        Modifier
+                            .clickable {
+                                toGuestSettings.invoke()
+                            },
+                    leadingContent = {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Globe,
+                            contentDescription = null,
+                        )
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_guest_setting_description))
+                    },
+                )
+            }
             ListItem(
                 headlineContent = {
                     Text(text = stringResource(id = R.string.settings_appearance_title))

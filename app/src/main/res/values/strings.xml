@@ -115,6 +115,8 @@
     <string name="settings_tab_customization_description">Customize the tabs on the home screen</string>
     <string name="settings_local_filter_title">Local filter</string>
     <string name="settings_local_filter_description">Local filter settings for timeline</string>
+    <string name="settings_guest_setting_title">Guest Mode Host</string>
+    <string name="settings_guest_setting_description">Set the host for guest mode</string>
 
     <string name="status_loadmore_end">No more toots</string>
     <string name="status_loadmore_error">Error loading more toots</string>

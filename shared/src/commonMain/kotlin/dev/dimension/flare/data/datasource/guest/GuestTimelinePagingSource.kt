@@ -2,11 +2,12 @@ package dev.dimension.flare.data.datasource.guest
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import dev.dimension.flare.data.network.mastodon.GuestMastodonService
+import dev.dimension.flare.data.network.mastodon.api.TrendsResources
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.renderGuest
 
 internal class GuestTimelinePagingSource(
+    private val service: TrendsResources,
     private val host: String,
 ) : PagingSource<Int, UiTimeline>() {
     override fun getRefreshKey(state: PagingState<Int, UiTimeline>): Int? = null
@@ -15,7 +16,7 @@ internal class GuestTimelinePagingSource(
         try {
             val offset = params.key ?: 0
             val limit = params.loadSize
-            val statuses = GuestMastodonService.trendsStatuses(limit = limit, offset = offset)
+            val statuses = service.trendsStatuses(limit = limit, offset = offset)
             LoadResult.Page(
                 data =
                     statuses.map { it.renderGuest(host = host) },

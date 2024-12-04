@@ -330,7 +330,9 @@
   <string name="feeds_discover_feeds_created_by">Skapad av %1$s</string>
   <string name="feeds_unsubscribe">Avprenumerera</string>
   <string name="feeds_subscribe">Prenumerera</string>
-  <string name="profile_tab_timeline">Tidslinje</string>
+  <string name="profile_tab_timeline">Inlägg</string>
+  <string name="profile_tab_timeline_with_reply">Inlägg och svar</string>
+  <string name="profile_tab_likes">Gillar</string>
   <string name="profile_tab_media">Media</string>
   <string name="misskey_achievement_notes1_title">bara konfigurera min msky</string>
   <string name="misskey_achievement_notes1_description">Posta din första anteckning</string>

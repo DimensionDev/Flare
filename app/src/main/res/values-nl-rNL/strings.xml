@@ -330,7 +330,9 @@
   <string name="feeds_discover_feeds_created_by">Aangemaakt door %1$s</string>
   <string name="feeds_unsubscribe">Afmelden</string>
   <string name="feeds_subscribe">Abonneren</string>
-  <string name="profile_tab_timeline">Tijdlijn</string>
+  <string name="profile_tab_timeline">Berichten</string>
+  <string name="profile_tab_timeline_with_reply">Berichten en antwoorden</string>
+  <string name="profile_tab_likes">Vind-ik-leuk</string>
   <string name="profile_tab_media">Medium</string>
   <string name="misskey_achievement_notes1_title">stel gewoon mijn msky op</string>
   <string name="misskey_achievement_notes1_description">Plaats je eerste notitie</string>

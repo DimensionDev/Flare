@@ -330,7 +330,9 @@
   <string name="feeds_discover_feeds_created_by">Oprettet af %1$s</string>
   <string name="feeds_unsubscribe">Afmeld</string>
   <string name="feeds_subscribe">Abonnér</string>
-  <string name="profile_tab_timeline">Tidslinje</string>
+  <string name="profile_tab_timeline">Indlæg</string>
+  <string name="profile_tab_timeline_with_reply">Indlæg og svar</string>
+  <string name="profile_tab_likes">Likes</string>
   <string name="profile_tab_media">Medier</string>
   <string name="misskey_achievement_notes1_title">opsætning af min msky</string>
   <string name="misskey_achievement_notes1_description">Send din første note</string>

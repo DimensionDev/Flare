@@ -81,6 +81,7 @@ import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
 import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
 import dev.dimension.flare.data.datasource.microblog.memoryPager
@@ -110,6 +111,7 @@ import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -2137,6 +2139,63 @@ class BlueskyDataSource(
                 accountKey = accountKey,
             )
         }.flow.cachedIn(scope)
+
+    override fun profileTabs(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pagingSize: Int,
+    ): ImmutableList<ProfileTab> =
+        listOfNotNull(
+            ProfileTab.Timeline(
+                type = ProfileTab.Timeline.Type.Status,
+                flow = userTimeline(userKey, scope, pagingSize),
+            ),
+            ProfileTab.Timeline(
+                type = ProfileTab.Timeline.Type.StatusWithReplies,
+                flow =
+                    timelinePager(
+                        pageSize = pagingSize,
+                        pagingKey = "user_timeline_replies_$userKey",
+                        accountKey = accountKey,
+                        database = database,
+                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                        scope = scope,
+                        mediator =
+                            UserTimelineRemoteMediator(
+                                service,
+                                accountKey,
+                                database,
+                                userKey,
+                                pagingKey = "user_timeline_replies_$userKey",
+                                withReplies = true,
+                            ),
+                    ),
+            ),
+            ProfileTab.Media,
+            if (userKey == accountKey) {
+                ProfileTab.Timeline(
+                    type = ProfileTab.Timeline.Type.Likes,
+                    flow =
+                        timelinePager(
+                            pageSize = pagingSize,
+                            pagingKey = "user_timeline_likes_$userKey",
+                            accountKey = accountKey,
+                            database = database,
+                            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                            scope = scope,
+                            mediator =
+                                UserLikesTimelineRemoteMediator(
+                                    service,
+                                    accountKey,
+                                    database,
+                                    pagingKey = "user_timeline_likes_$userKey",
+                                ),
+                        ),
+                )
+            } else {
+                null
+            },
+        ).toPersistentList()
 }
 
 internal inline fun <reified T, reified R> T.bskyJson(): R = bskyJson.decodeFromJsonElement(bskyJson.encodeToJsonElement(this))

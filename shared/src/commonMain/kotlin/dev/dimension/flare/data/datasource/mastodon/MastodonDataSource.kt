@@ -27,6 +27,7 @@ import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
 import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
+import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
@@ -57,6 +58,7 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -1293,4 +1295,38 @@ class MastodonDataSource(
                 accountKey = accountKey,
             )
         }.flow.cachedIn(scope)
+
+    override fun profileTabs(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pagingSize: Int,
+    ): ImmutableList<ProfileTab> =
+        listOfNotNull(
+            ProfileTab.Timeline(
+                type = ProfileTab.Timeline.Type.Status,
+                flow = userTimeline(userKey, scope, pagingSize),
+            ),
+            ProfileTab.Timeline(
+                type = ProfileTab.Timeline.Type.StatusWithReplies,
+                flow =
+                    timelinePager(
+                        pageSize = pagingSize,
+                        pagingKey = "user_timeline_replies_$userKey",
+                        accountKey = accountKey,
+                        database = database,
+                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                        scope = scope,
+                        mediator =
+                            UserTimelineRemoteMediator(
+                                service = service,
+                                accountKey = accountKey,
+                                database = database,
+                                userKey = userKey,
+                                pagingKey = "user_timeline_replies_$userKey",
+                                withReplies = true,
+                            ),
+                    ),
+            ),
+            ProfileTab.Media,
+        ).toPersistentList()
 }

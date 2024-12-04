@@ -7,6 +7,7 @@ import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
+import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
@@ -74,4 +75,10 @@ interface MicroblogDataSource {
         pageSize: Int = 20,
         pagingKey: String = "fans_$userKey",
     ): Flow<PagingData<UiUserV2>>
+
+    fun profileTabs(
+        userKey: MicroBlogKey,
+        scope: CoroutineScope,
+        pagingSize: Int = 20,
+    ): ImmutableList<ProfileTab>
 }

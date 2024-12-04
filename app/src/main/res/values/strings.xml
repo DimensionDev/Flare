@@ -402,7 +402,9 @@
     <string name="feeds_unsubscribe">Unsubscribe</string>
     <string name="feeds_subscribe">Subscribe</string>
 
-    <string name="profile_tab_timeline">Timeline</string>
+    <string name="profile_tab_timeline">Posts</string>
+    <string name="profile_tab_timeline_with_reply">Posts and replies</string>
+    <string name="profile_tab_likes">Likes</string>
     <string name="profile_tab_media">Media</string>
 
     <string name="tab_settings_title">Tab settings</string>

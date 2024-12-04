@@ -329,7 +329,9 @@
   <string name="feeds_discover_feeds_created_by">Creado por %1$s</string>
   <string name="feeds_unsubscribe">Darse de baja</string>
   <string name="feeds_subscribe">Suscribirse</string>
-  <string name="profile_tab_timeline">Línea de tiempo</string>
+  <string name="profile_tab_timeline">Mensajes</string>
+  <string name="profile_tab_timeline_with_reply">Mensajes y respuestas</string>
+  <string name="profile_tab_likes">Me gusta</string>
   <string name="profile_tab_media">Medios</string>
   <string name="misskey_achievement_notes1_title">simplemente configurando mi msky</string>
   <string name="misskey_achievement_notes1_description">Publica tu primera nota</string>

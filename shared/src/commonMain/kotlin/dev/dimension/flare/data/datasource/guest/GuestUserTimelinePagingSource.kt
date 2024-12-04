@@ -9,6 +9,7 @@ import dev.dimension.flare.ui.model.mapper.renderGuest
 internal class GuestUserTimelinePagingSource(
     private val host: String,
     private val userId: String,
+    private val withReply: Boolean = false,
     private val onlyMedia: Boolean = false,
 ) : PagingSource<String, UiTimeline>() {
     override fun getRefreshKey(state: PagingState<String, UiTimeline>): String? = null
@@ -23,6 +24,7 @@ internal class GuestUserTimelinePagingSource(
                     limit = limit,
                     max_id = maxId,
                     only_media = onlyMedia,
+                    exclude_replies = !withReply,
                 )
             LoadResult.Page(
                 data =

@@ -14,10 +14,14 @@ struct MediaComponent: View {
         } && sensitive
         let columns = if medias.count == 1 {
             1
-        } else if medias.count < 5 {
+        } else if medias.count == 2 {
             2
+        } else if medias.count == 3 {
+            2  // Special case handled in CustomGrid
+        } else if medias.count == 4 {
+            2  // 2x2 grid
         } else {
-            3
+            3  // 3 columns for 5+ images
         }
         ZStack(alignment: .topLeading) {
             CustomGrid(items: medias, columns: columns) { item in
@@ -106,11 +110,13 @@ struct MediaItemComponent: View {
                             .scaledToFill()
                     }
                 case .video(let video):
-                    if let url = URL(string: video.thumbnailUrl) {
-                        KFImage(url)
-                            .resizable()
-                            .scaledToFill()
-                    }
+                   MutedVideoPlayer(url: video.url)
+
+                    // if let url = URL(string: video.thumbnailUrl) {
+                    //     KFImage(url)
+                    //         .resizable()
+                    //         .scaledToFill()
+                    // }
                 case .audio(let audio):
                     VideoPlayer(player: AVPlayer(url: URL(string: audio.url)!)) {
                         if let cover = audio.previewUrl, let url = URL(string: cover) {

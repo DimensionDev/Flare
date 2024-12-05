@@ -37,7 +37,8 @@ struct ProfileMediaListScreen: View {
     @State private var selectedMedia: (media: UiMedia, index: Int)?
     @State private var showingMediaPreview = false
     @Environment(\.appSettings) private var appSettings
-
+    @Environment(\.dismiss) private var dismiss
+    
     init(accountType: AccountType, userKey: MicroBlogKey) {
         presenter = .init(accountType: accountType, userKey: userKey)
     }
@@ -46,7 +47,7 @@ struct ProfileMediaListScreen: View {
         ObservePresenter<ProfileMediaState, ProfileMediaPresenter, AnyView>(presenter: presenter) { state in
             AnyView(
                 WaterfallCollectionView(state: state) { item in
-                    MediaGridItem(media: item.media, appSetting: appSettings) {
+                    ProfileMediaItemView(media: item.media, appSetting: appSettings) {
                         let allImages = state.allMediaItems
                         if !allImages.isEmpty,
                            let mediaIndex = allImages.firstIndex(where: { $0 === item.media }) {
@@ -293,11 +294,26 @@ class HostingCell: UICollectionViewCell {
     }
 }
 
-struct MediaGridItem: View {
+struct ProfileMediaItemView: View {
     let media: UiMedia
     let appSetting: AppSettings
     let onTap: () -> Void
-
+    @State private var hideSensitive: Bool
+    
+    init(media: UiMedia, appSetting: AppSettings, onTap: @escaping () -> Void) {
+        self.media = media
+        self.appSetting = appSetting
+        self.onTap = onTap
+        
+        // 初始化 hideSensitive
+        switch onEnum(of: media) {
+        case .image(let image):
+            self._hideSensitive = State(initialValue: !appSetting.appearanceSettings.showSensitiveContent && image.sensitive)
+        default:
+            self._hideSensitive = State(initialValue: false)
+        }
+    }
+    
     var body: some View {
         ZStack {
             switch onEnum(of: media) {
@@ -363,16 +379,15 @@ struct MediaGridItem: View {
                         .resizable()
                         .scaledToFit()
 //                        .fade(duration: 0.25)
-                        .blur(radius: !appSetting.appearanceSettings.showSensitiveContent && image.sensitive ? 20 : 0)
-
-               
+                        .if(!appSetting.appearanceSettings.showSensitiveContent && image.sensitive && hideSensitive) { view in
+                            view.blur(radius: 32)
+                        }
 
                     if !appSetting.appearanceSettings.showSensitiveContent && image.sensitive {
-                        Text("Sensitive Content")
-                            .foregroundColor(.white)
-                            .padding(8)
-                            .background(.ultraThinMaterial)
-                            .cornerRadius(8)
+                        SensitiveContentButton(
+                            hideSensitive: hideSensitive,
+                            action: { hideSensitive.toggle() }
+                        )
                     }
                 }
             case .video(let video):
@@ -586,3 +601,41 @@ extension MediaBrowserVideoCell: JXPhotoBrowserCell {
         return instance
     }
 }
+
+//struct SensitiveContentButton: View {
+//    let hideSensitive: Bool
+//    let action: () -> Void
+//    
+//    var body: some View {
+//        if hideSensitive {
+//            Button(action: {
+//                action()
+//            }, label: {
+//                Text("status_sensitive_media_show", comment: "Status media sensitive button")
+//                    .foregroundColor(.white)
+//                    .padding(.horizontal, 16)
+//                    .padding(.vertical, 8)
+//                    .background(.ultraThinMaterial)
+//                    .cornerRadius(8)
+//            })
+//            .buttonStyle(.plain)
+//            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+//        } else {
+//            VStack {
+//                HStack {
+//                    Button(action: {
+//                        action()
+//                    }, label: {
+//                        Image(systemName: "eye.slash")
+//                            .foregroundColor(Color(uiColor: UIColor.systemBackground))
+//                    })
+//                    .padding()
+//                    .buttonStyle(.borderedProminent)
+//                    .tint(Color.primary)
+//                    Spacer()
+//                }
+//                Spacer()
+//            }
+//        }
+//    }
+//}

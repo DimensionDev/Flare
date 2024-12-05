@@ -3,179 +3,98 @@ import shared
 import Kingfisher
 import AVKit
 
+//medias
 struct MediaComponent: View {
     @State var hideSensitive: Bool
     let medias: [UiMedia]
     let onMediaClick: (Int, UiMedia) -> Void
     let sensitive: Bool
+    
     var body: some View {
         let showSensitiveButton = medias.allSatisfy { media in
             media is UiMediaImage
         } && sensitive
-        let columns = if medias.count == 1 {
-            1
-        } else if medias.count == 2 {
-            2
-        } else if medias.count == 3 {
-            2  // Special case handled in CustomGrid
-        } else if medias.count == 4 {
-            2  // 2x2 grid
-        } else {
-            3  // 3 columns for 5+ images
-        }
+        
         ZStack(alignment: .topLeading) {
-            CustomGrid(items: medias, columns: columns) { item in
-                Button(action: {
-                    let preview: String? = switch onEnum(of: item) {
-                    case .audio:
-                        nil
-                    case .gif(let gif):
-                        gif.previewUrl
-                    case .image(let image):
-                        image.previewUrl
-                    case .video(let video):
-                        video.thumbnailUrl
-                    }
-                    if let index = medias.firstIndex(where: { it in
-                        it === item
-                    }) {
-                        onMediaClick(index, item)
-                    }
-                }, label: {
-                    MediaItemComponent(media: item)
-                })
-                .buttonStyle(.borderless)
-            }
-            .if(hideSensitive, transform: { view in
-                view.blur(radius: 32)
-            })
-            if showSensitiveButton {
-                if hideSensitive {
-                    Button(action: {
-                        withAnimation {
-                            hideSensitive = false
-                        }
-                    }, label: {
-                        Color.clear
-                    })
-                    .buttonStyle(.borderless)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    Button(action: {
-                        withAnimation {
-                            hideSensitive = false
-                        }
-                    }, label: {
-                        Text("status_sensitive_media_show", comment: "Status media sensitive button")
-                    })
-                    .buttonStyle(.borderedProminent)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                } else {
-                    Button(action: {
-                        withAnimation {
-                            hideSensitive = true
-                        }
-                    }, label: {
-                        Image(systemName: "eye.slash")
-                        #if os(iOS)
-                            .foregroundColor(Color(uiColor: UIColor.systemBackground))
-                        #elseif os(macOS)
-                            .foregroundColor(Color(nsColor: NSColor.textBackgroundColor))
-                        #endif
-                    })
-                    .padding()
-                    .buttonStyle(.borderedProminent)
-                    .tint(Color.primary)
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
+            let mediaViewModels = medias.map { media -> FeedMediaViewModel in
+                switch media {
+                case let image as UiMediaImage:
+                    return FeedMediaViewModel(media: image)
+                case let video as UiMediaVideo:
+                    return FeedMediaViewModel(media: video)
+                case let audio as UiMediaAudio:
+                    return FeedMediaViewModel(media: audio)
+                case let gif as UiMediaGif:
+                    return FeedMediaViewModel(media: gif)
+                default:
+                    fatalError("Unsupported media type")
                 }
             }
-        }
-        .if(medias.count < 7) { view in
-            view.aspectRatio(16/9, contentMode: .fit)
+            
+            // build tweet medias layout
+            FeedMediaGridView(
+                action: { ctx in
+                    let media = medias[ctx.index]
+                    onMediaClick(ctx.index, media)
+                },
+                viewModels: mediaViewModels,
+                idealWidth: 600,
+                idealHeight: 280,
+                horizontalPadding: 0,
+                preferredPaddingGridLayoutOnly: false,
+                preferredApplyCornerRadius: true
+            )
+            //视频sensitive 模糊遮照层
+            .if(hideSensitive, transform: { view in
+                 view.blur(radius: 32)
+             })
+ 
+            
+            if showSensitiveButton {
+                SensitiveContentButton(
+                    hideSensitive: hideSensitive,
+                    action: { hideSensitive.toggle() }
+                )
+            }
         }
         .frame(maxWidth: 600)
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
 
+//这个地方要合并，重构掉 todo:
 struct MediaItemComponent: View {
     let media: UiMedia
+    
     var body: some View {
-        ZStack {
-            Color.clear.overlay {
-                switch onEnum(of: media) {
-                case .image(let data):
-                    if let url = URL(string: data.previewUrl) {
-                        KFImage(url)
-                            .resizable()
-                            .scaledToFill()
-                    }
-                case .video(let video):
-                   MutedVideoPlayer(url: video.url)
-
-                    // if let url = URL(string: video.thumbnailUrl) {
-                    //     KFImage(url)
-                    //         .resizable()
-                    //         .scaledToFill()
-                    // }
-                case .audio(let audio):
-                    VideoPlayer(player: AVPlayer(url: URL(string: audio.url)!)) {
-                        if let cover = audio.previewUrl, let url = URL(string: cover) {
-                            KFImage(url)
-                                .resizable()
-                                .scaledToFill()
-                        }
-                    }
-                case .gif(let gif):
-                    MutedVideoPlayer(url: gif.url)
-                }
-            }
-        }
-        .clipped()
-        // #if os(macOS)
-        //        .onTapGesture {
-        //            switch onEnum(of: media) {
-        //            case .image(let data):
-        //                openWindow(id: "image-view", value: data.url)
-        //            case .video(let video):
-        //                openWindow(id: "video-view", value: video.url)
-        //            case .audio(let audio):
-        //                openWindow(id: "video-view", value: audio.url)
-        //            case .gif(let gif):
-        //                openWindow(id: "video-view", value: gif.url)
-        //            }
-        //        }
-        // #else
-        //        .onTapGesture {
-        //            showCover = true
-        //        }
-        //        .sheet(
-        //            isPresented: $showCover,
-        //            onDismiss: { showCover = false }
-        //        ) {
-        //            FullScreenImageViewer(media: media)
-        //        }
-        // #endif
+        let viewModel = FeedMediaViewModel(media: media)
+        LensMediaView(
+            viewModel: viewModel,
+            isSingleVideo: true,
+            fixedAspectRatio: nil,
+            action: {}
+        )
     }
 }
 
-struct MutedVideoPlayer: View {
-    let player: AVPlayer
-    let autoPlay: Bool
-    init(url: String, autoPlay: Bool = true) {
-        self.player = AVPlayer(url: URL(string: url)!)
-        self.player.isMuted = true
-        self.autoPlay = autoPlay
-    }
-    var body: some View {
-        VideoPlayer(player: player)
-            .if(autoPlay) { view in
-                view
-                    .onAppear {
-                        player.play()
-                    }
-                    .onDisappear {
-                        player.pause()
-                    }
-            }
-    }
-}
+//struct MutedVideoPlayer: View {
+//    let player: AVPlayer
+//    let autoPlay: Bool
+//    init(url: String, autoPlay: Bool = true) {
+//        self.player = AVPlayer(url: URL(string: url)!)
+//        self.player.isMuted = true
+//        self.autoPlay = autoPlay
+//    }
+//    var body: some View {
+//        VideoPlayer(player: player)
+//            .if(autoPlay) { view in
+//                view
+//                    .onAppear {
+//                        player.play()
+//                    }
+//                    .onDisappear {
+//                        player.pause()
+//                    }
+//            }
+//    }
+//}

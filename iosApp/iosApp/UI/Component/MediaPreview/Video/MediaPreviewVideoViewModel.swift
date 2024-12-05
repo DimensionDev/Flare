@@ -75,7 +75,7 @@ final class MediaPreviewVideoViewModel {
                 case .gif:    return
                 default:      break
                 }
-                self.logger.log(level: .debug, "\((#file as NSString).lastPathComponent, privacy: .public)[\(#line, privacy: .public)], \(#function, privacy: .public): player state: \(status.description)")
+//                self.logger.log(level: .debug, "\((#file as NSString).lastPathComponent, privacy: .public)[\(#line, privacy: .public)], \(#function, privacy: .public): player state: \(status.description)")
                 
                 switch status {
                 case .unknown, .buffering, .readyToPlay:

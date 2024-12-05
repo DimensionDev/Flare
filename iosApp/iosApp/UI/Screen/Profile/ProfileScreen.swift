@@ -230,6 +230,7 @@ struct LargeProfileImagePreviews: View {
                             })
                             .aspectRatio(1, contentMode: .fill)
                             .clipped()
+                            .allowsHitTesting(false)// 防止点击不了，修饰符，不接受点击事件，而是将事件穿透到外层的button。
                     }
                 }
             }
@@ -270,6 +271,7 @@ struct SmallProfileMediaPreviews: View {
                                 .aspectRatio(1, contentMode: .fill)
                                 .clipped()
                                 .frame(width: 48, height: 48)
+                                .allowsHitTesting(false)
                         }
                     }
                 })

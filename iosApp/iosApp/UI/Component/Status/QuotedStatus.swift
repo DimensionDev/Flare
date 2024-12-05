@@ -2,12 +2,15 @@ import SwiftUI
 import shared
 import MarkdownUI
 
+//引用
 struct QuotedStatus: View {
     @State private var showMedia: Bool = false
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
+
     let data: UiTimelineItemContentStatus
     let onMediaClick: (Int, UiMedia) -> Void
+    
     var body: some View {
         Button(action: {
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openURL: openURL)))

@@ -66,6 +66,10 @@
 		06DF79D72B46B24800CF21FE /* SettingsRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DF79D62B46B24800CF21FE /* SettingsRepository.swift */; };
 		06DF79DA2B46B26600CF21FE /* AppearanceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06DF79D92B46B26600CF21FE /* AppearanceSettings.swift */; };
 		06F4B4C92C6369390005317F /* VGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06F4B4C82C6369390005317F /* VGrid.swift */; };
+		6428884C2D0058C3007409FF /* FeedMediaGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642888482D0058C3007409FF /* FeedMediaGridView.swift */; };
+		6428884D2D0058C3007409FF /* MediaViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6428884B2D0058C3007409FF /* MediaViewModel.swift */; };
+		6428884E2D0058C3007409FF /* LensMediaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6428884A2D0058C3007409FF /* LensMediaView.swift */; };
+		6428884F2D0058C3007409FF /* FeedMediaPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642888492D0058C3007409FF /* FeedMediaPlayButton.swift */; };
 		64444A612CF870F1005DDD23 /* HomeAppBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64444A602CF870F1005DDD23 /* HomeAppBar.swift */; };
 		64444A682CF88557005DDD23 /* TabSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64444A662CF88557005DDD23 /* TabSettingsView.swift */; };
 		64444A692CF88557005DDD23 /* TabSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64444A642CF88557005DDD23 /* TabSettingsStore.swift */; };
@@ -74,6 +78,7 @@
 		64444A702CF88B52005DDD23 /* FeaturedScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64444A6E2CF88B52005DDD23 /* FeaturedScreen.swift */; };
 		645D5B1D2CFDADF4001BD950 /* PhotoBrowserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645D5B1B2CFDADF4001BD950 /* PhotoBrowserManager.swift */; };
 		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
+		647167432D01902B00C7D8A5 /* SensitiveContentButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 647167412D01902B00C7D8A5 /* SensitiveContentButton.swift */; };
 		64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64782BD02CFD65F4008DE526 /* View+Injection.swift */; };
 		64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */ = {isa = PBXBuildFile; productRef = 64BBDA712CFDD8420052E599 /* SwiftDate */; };
 		64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */; };
@@ -162,6 +167,10 @@
 		06DF79D62B46B24800CF21FE /* SettingsRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRepository.swift; sourceTree = "<group>"; };
 		06DF79D92B46B26600CF21FE /* AppearanceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettings.swift; sourceTree = "<group>"; };
 		06F4B4C82C6369390005317F /* VGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VGrid.swift; sourceTree = "<group>"; };
+		642888482D0058C3007409FF /* FeedMediaGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedMediaGridView.swift; sourceTree = "<group>"; };
+		642888492D0058C3007409FF /* FeedMediaPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedMediaPlayButton.swift; sourceTree = "<group>"; };
+		6428884A2D0058C3007409FF /* LensMediaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LensMediaView.swift; sourceTree = "<group>"; };
+		6428884B2D0058C3007409FF /* MediaViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaViewModel.swift; sourceTree = "<group>"; };
 		64444A602CF870F1005DDD23 /* HomeAppBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeAppBar.swift; sourceTree = "<group>"; };
 		64444A642CF88557005DDD23 /* TabSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSettingsStore.swift; sourceTree = "<group>"; };
 		64444A662CF88557005DDD23 /* TabSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSettingsView.swift; sourceTree = "<group>"; };
@@ -170,6 +179,7 @@
 		64444A6E2CF88B52005DDD23 /* FeaturedScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeaturedScreen.swift; sourceTree = "<group>"; };
 		645D5B1B2CFDADF4001BD950 /* PhotoBrowserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoBrowserManager.swift; sourceTree = "<group>"; };
 		64655C2C2CFD6CA000255488 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		647167412D01902B00C7D8A5 /* SensitiveContentButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensitiveContentButton.swift; sourceTree = "<group>"; };
 		64782BD02CFD65F4008DE526 /* View+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Injection.swift"; sourceTree = "<group>"; };
 		64C855FF2CFD7F260071DCD8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		64E208482CF84559001C64EF /* MediaPreviewImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewImageView.swift; sourceTree = "<group>"; };
@@ -237,6 +247,10 @@
 		060501C32ACBF40200DBCCEB /* Status */ = {
 			isa = PBXGroup;
 			children = (
+				642888482D0058C3007409FF /* FeedMediaGridView.swift */,
+				642888492D0058C3007409FF /* FeedMediaPlayButton.swift */,
+				6428884A2D0058C3007409FF /* LensMediaView.swift */,
+				6428884B2D0058C3007409FF /* MediaViewModel.swift */,
 				066151232AC54A9C00CCB945 /* CommonStatusComponent.swift */,
 				060501BB2ACA985B00DBCCEB /* StatusTimelineBuilder.swift */,
 				067D897D2AD3A2F900F8F932 /* MediaComponent.swift */,
@@ -311,6 +325,7 @@
 		066151222AC54A8200CCB945 /* Component */ = {
 			isa = PBXGroup;
 			children = (
+				647167422D01902B00C7D8A5 /* Common */,
 				645D5B1C2CFDADF4001BD950 /* Media */,
 				64E208582CF84559001C64EF /* MediaPreview */,
 				64E2085D2CF84559001C64EF /* WaterfallList */,
@@ -449,6 +464,14 @@
 				645D5B1B2CFDADF4001BD950 /* PhotoBrowserManager.swift */,
 			);
 			path = Media;
+			sourceTree = "<group>";
+		};
+		647167422D01902B00C7D8A5 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				647167412D01902B00C7D8A5 /* SensitiveContentButton.swift */,
+			);
+			path = Common;
 			sourceTree = "<group>";
 		};
 		64782BD12CFD65F4008DE526 /* Extension */ = {
@@ -782,11 +805,16 @@
 				06DF79D12B4699E200CF21FE /* AppearanceScreen.swift in Sources */,
 				067D897E2AD3A2F900F8F932 /* MediaComponent.swift in Sources */,
 				064D99C72CAFBEE400915E03 /* HomeContent.swift in Sources */,
+				647167432D01902B00C7D8A5 /* SensitiveContentButton.swift in Sources */,
 				062A3C872C6C9CF800A45E44 /* VVOCommentScreen.swift in Sources */,
 				06D5C9182AC3BB69007439D5 /* ServiceSelectScreen.swift in Sources */,
 				06DF79D72B46B24800CF21FE /* SettingsRepository.swift in Sources */,
 				066151242AC54A9C00CCB945 /* CommonStatusComponent.swift in Sources */,
 				64444A612CF870F1005DDD23 /* HomeAppBar.swift in Sources */,
+				6428884C2D0058C3007409FF /* FeedMediaGridView.swift in Sources */,
+				6428884D2D0058C3007409FF /* MediaViewModel.swift in Sources */,
+				6428884E2D0058C3007409FF /* LensMediaView.swift in Sources */,
+				6428884F2D0058C3007409FF /* FeedMediaPlayButton.swift in Sources */,
 				069050782CAE6108007FC957 /* SwitUIInAppNotification.swift in Sources */,
 				06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */,
 				066151212AC540B700CCB945 /* HomeScreen.swift in Sources */,

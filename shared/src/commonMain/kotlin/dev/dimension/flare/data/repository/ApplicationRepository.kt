@@ -7,7 +7,7 @@ import dev.dimension.flare.ui.model.UiApplication
 import dev.dimension.flare.ui.model.UiApplication.Companion.toUi
 import kotlinx.coroutines.flow.firstOrNull
 
-class ApplicationRepository(
+internal class ApplicationRepository(
     private val database: AppDatabase,
 ) {
     suspend fun findByHost(host: String): UiApplication? =

@@ -24,7 +24,6 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
@@ -58,7 +57,7 @@ class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
                 }
             }.collectAsLazyPagingItems()
 
-        val detectedPlatformType by remember<Flow<UiState<PlatformType>>>(filterFlow) {
+        val detectedPlatformType by remember(filterFlow) {
             filterFlow.flatMapLatest {
                 flow {
                     runCatching {

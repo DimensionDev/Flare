@@ -6,16 +6,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
-import dev.dimension.flare.data.datasource.guest.GuestDataSource
+import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -27,9 +31,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
-class AccountRepository(
+internal class AccountRepository(
     private val appDatabase: AppDatabase,
     private val coroutineScope: CoroutineScope,
+    internal val appDataStore: AppDataStore,
 ) {
     val activeAccount: Flow<UiAccount?> by lazy {
         appDatabase.accountDao().activeAccount().map {
@@ -121,7 +126,20 @@ internal fun accountServiceProvider(
     repository: AccountRepository,
 ): UiState<MicroblogDataSource> {
     if (accountType is AccountType.Guest) {
-        return UiState.Success(GuestDataSource)
+        val guestData by repository.appDataStore.guestDataStore.data
+            .collectAsUiState()
+        return guestData.map {
+            remember(it) {
+                when (it.platformType) {
+                    PlatformType.Mastodon ->
+                        GuestMastodonDataSource(
+                            host = it.host,
+                            locale = Locale.language,
+                        )
+                    else -> throw UnsupportedOperationException()
+                }
+            }
+        }
     }
     val account by accountProvider(accountType = accountType, repository = repository)
     return account.map {

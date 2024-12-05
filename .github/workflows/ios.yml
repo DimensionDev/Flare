@@ -30,6 +30,6 @@ jobs:
           distribution: 'zulu'
           java-version: 21
       - name: Build
-        uses: yukiarrr/ios-build-action@v1.12.0
+        uses: sparkfabrik/ios-build-action@v2.3.2
         with:
-          project-path: ./iosApp
+          project-path: ./iosApp/iosApp.xcodeproj

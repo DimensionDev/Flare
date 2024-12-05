@@ -51,8 +51,8 @@ import com.ramcosta.composedestinations.result.NavResult
 import com.ramcosta.composedestinations.result.ResultRecipient
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CircleQuestion
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
-import compose.icons.fontawesomeicons.solid.Question
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onEmpty
@@ -206,7 +206,7 @@ fun ServiceSelectScreen(
                                 )
                             }.onError {
                                 FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Question,
+                                    imageVector = FontAwesomeIcons.Solid.CircleQuestion,
                                     contentDescription = null,
                                 )
                             }.onLoading {

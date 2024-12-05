@@ -10,9 +10,9 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
-import dev.dimension.flare.data.database.app.model.DbGuestData
-import dev.dimension.flare.data.datasource.guest.GuestMastodonDataSource
+import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
+import dev.dimension.flare.data.datastore.AppDataStore
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -31,12 +31,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
-private const val DEFAULT_GUEST_HOST = "mastodon.social"
-private val DEFAULT_GUEST_PLATFORM_TYPE = PlatformType.Mastodon
-
-class AccountRepository(
+internal class AccountRepository(
     private val appDatabase: AppDatabase,
     private val coroutineScope: CoroutineScope,
+    internal val appDataStore: AppDataStore,
 ) {
     val activeAccount: Flow<UiAccount?> by lazy {
         appDatabase.accountDao().activeAccount().map {
@@ -47,24 +45,6 @@ class AccountRepository(
         appDatabase.accountDao().allAccounts().map {
             it.map { it.toUi() }.toImmutableList()
         }
-    }
-
-    val guestData by lazy {
-        appDatabase.guestDataDao().get().map {
-            it ?: DbGuestData(host = DEFAULT_GUEST_HOST, platformType = DEFAULT_GUEST_PLATFORM_TYPE)
-        }
-    }
-
-    fun setGuestData(
-        host: String,
-        platformType: PlatformType,
-    ) = coroutineScope.launch {
-        appDatabase.guestDataDao().insert(
-            DbGuestData(
-                host = host,
-                platformType = platformType,
-            ),
-        )
     }
 
     fun addAccount(account: UiAccount) =
@@ -146,7 +126,8 @@ internal fun accountServiceProvider(
     repository: AccountRepository,
 ): UiState<MicroblogDataSource> {
     if (accountType is AccountType.Guest) {
-        val guestData by repository.guestData.collectAsUiState()
+        val guestData by repository.appDataStore.guestDataStore.data
+            .collectAsUiState()
         return guestData.map {
             remember(it) {
                 when (it.platformType) {

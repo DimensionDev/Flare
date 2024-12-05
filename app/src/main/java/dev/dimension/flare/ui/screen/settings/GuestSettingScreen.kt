@@ -23,7 +23,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Question
+import compose.icons.fontawesomeicons.solid.CircleQuestion
 import dev.dimension.flare.R
 import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.ui.component.FAIcon
@@ -95,14 +95,21 @@ private fun GuestSettingScreen(onBack: () -> Unit) {
                 leadingIcon = {
                     state.platformType
                         .onSuccess {
-                            NetworkImage(
-                                it.logoUrl,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
+                            if (it in state.supportedPlatforms) {
+                                NetworkImage(
+                                    it.logoUrl,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            } else {
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.CircleQuestion,
+                                    contentDescription = null,
+                                )
+                            }
                         }.onError {
                             FAIcon(
-                                imageVector = FontAwesomeIcons.Solid.Question,
+                                imageVector = FontAwesomeIcons.Solid.CircleQuestion,
                                 contentDescription = null,
                             )
                         }.onLoading {

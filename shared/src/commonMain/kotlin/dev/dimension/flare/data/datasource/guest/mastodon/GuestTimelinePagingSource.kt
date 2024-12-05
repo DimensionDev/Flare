@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.datasource.guest
+package dev.dimension.flare.data.datasource.guest.mastodon
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
@@ -6,7 +6,7 @@ import dev.dimension.flare.data.network.mastodon.api.TrendsResources
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.renderGuest
 
-internal class GuestDiscoverStatusPagingSource(
+internal class GuestTimelinePagingSource(
     private val service: TrendsResources,
     private val host: String,
 ) : PagingSource<Int, UiTimeline>() {
@@ -14,16 +14,14 @@ internal class GuestDiscoverStatusPagingSource(
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, UiTimeline> =
         try {
-            val result =
-                service.trendsStatuses(
-                    limit = params.loadSize,
-                    offset = params.key,
-                )
-
+            val offset = params.key ?: 0
+            val limit = params.loadSize
+            val statuses = service.trendsStatuses(limit = limit, offset = offset)
             LoadResult.Page(
-                data = result.map { it.renderGuest(host = host) },
+                data =
+                    statuses.map { it.renderGuest(host = host) },
                 prevKey = null,
-                nextKey = result.size + (params.key ?: 0),
+                nextKey = offset + limit,
             )
         } catch (e: Exception) {
             LoadResult.Error(e)

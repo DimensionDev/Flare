@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.datasource.guest
+package dev.dimension.flare.data.datasource.guest.mastodon
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState

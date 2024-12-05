@@ -93,7 +93,7 @@ class MastodonCallbackPresenter(
     }
 }
 
-suspend fun mastodonLoginUseCase(
+internal suspend fun mastodonLoginUseCase(
     domain: String,
     applicationRepository: ApplicationRepository,
     launchOAuth: (String) -> Unit,

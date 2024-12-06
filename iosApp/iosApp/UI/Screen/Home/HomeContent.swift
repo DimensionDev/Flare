@@ -35,26 +35,37 @@ struct HomeTimelineView: View {
             HomeTimelineScreen(accountType: accountType)
                 .tag(0)
             
-            // 公开页面
-            PublicScreen(accountType: accountType)
-                .tag(1)
-            
-            // 书签页面
-            BookmarkScreen(accountType: accountType)
-                .tag(2)
-            
-            // 本地页面
-            LocalScreen(accountType: accountType)
-                .tag(3)
-            
-            // 收藏页面
-            FavoriteScreen(accountType: accountType)
-                .tag(4)
-            
-            // 精选页面
-            FeaturedScreen(accountType: accountType)
-                .tag(5)
-            
+            Group {
+                if selectedHomeTab == 1 {
+                    // 公开页面
+                    PublicScreen(accountType: accountType)
+                        .tag(1)
+                }
+                
+                if selectedHomeTab == 2 {
+                    // 书签页面
+                    BookmarkScreen(accountType: accountType)
+                        .tag(2)
+                }
+                
+                if selectedHomeTab == 3 {
+                    // 本地页面
+                    LocalScreen(accountType: accountType)
+                        .tag(3)
+                }
+                
+                if selectedHomeTab == 4 {
+                    // 收藏页面
+                    FavoriteScreen(accountType: accountType)
+                        .tag(4)
+                }
+                
+                if selectedHomeTab == 5 {
+                    // 精选页面
+                    FeaturedScreen(accountType: accountType)
+                        .tag(5)
+                }
+            }
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
         .navigationBarTitleDisplayMode(.inline)

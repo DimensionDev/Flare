@@ -52,27 +52,31 @@ struct HomeAppBar: ToolbarContent {
             
             // 中间的标签栏
             ToolbarItem(placement: .principal) {
-                HStack(spacing: 24) {
-                    ForEach(0..<3) { index in
-                        Button(action: {
-                            withAnimation {
-                                selectedHomeTab = index
-                            }
-                        }) {
-                            VStack(spacing: 4) {
-                                Text(index == 0 ? "首页" : index == 1 ? "书签" : "精选")
-                                    .font(.system(size: 16))
-                                    .foregroundColor(selectedHomeTab == index ? .primary : .gray)
-                                    .fontWeight(selectedHomeTab == index ? .semibold : .regular)
-                                
-                                Rectangle()
-                                    .fill(selectedHomeTab == index ? Color.accentColor : Color.clear)
-                                    .frame(height: 2)
-                                    .frame(width: 24)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 24) {
+                        ForEach(tabStore.tabs.filter { $0.isEnabled }) { tab in
+                            Button(action: {
+                                withAnimation {
+                                    selectedHomeTab = tab.tag
+                                }
+                            }) {
+                                VStack(spacing: 4) {
+                                    Text(tab.title)
+                                        .font(.system(size: 16))
+                                        .foregroundColor(selectedHomeTab == tab.tag ? .primary : .gray)
+                                        .fontWeight(selectedHomeTab == tab.tag ? .semibold : .regular)
+                                    
+                                    Rectangle()
+                                        .fill(selectedHomeTab == tab.tag ? Color.accentColor : Color.clear)
+                                        .frame(height: 2)
+                                        .frame(width: 24)
+                                }
                             }
                         }
                     }
+                    .padding(.horizontal)
                 }
+                .frame(maxWidth: UIScreen.main.bounds.width - 120) // 预留两侧按钮的空间
                 .frame(height: 44)
             }
             
@@ -103,37 +107,37 @@ struct HomeAppBar: ToolbarContent {
         }
     }
 }
-
-struct SettingsView: View {
-    @Environment(\.dismiss) var dismiss
-    @State private var items = [
-        "首页",
-        "书签",
-        "精选"
-    ]
-    
-    var body: some View {
-        NavigationView {
-            List {
-                ForEach(items, id: \.self) { item in
-                    HStack {
-                        Text(item)
-                        Spacer()
-                        Image(systemName: "line.3.horizontal")
-                            .foregroundColor(.gray)
-                    }
-                }
-                .onMove { source, destination in
-                    items.move(fromOffsets: source, toOffset: destination)
-                }
-            }
-            .navigationTitle("标签设置")
-            .navigationBarItems(
-                trailing: Button("完成") {
-                    dismiss()
-                }
-            )
-        }
-        .environment(\.editMode, .constant(.active))
-    }
-}
+//
+//struct SettingsView: View {
+//    @Environment(\.dismiss) var dismiss
+//    @State private var items = [
+//        "首页",
+//        "书签",
+//        "精选"
+//    ]
+//    
+//    var body: some View {
+//        NavigationView {
+//            List {
+//                ForEach(items, id: \.self) { item in
+//                    HStack {
+//                        Text(item)
+//                        Spacer()
+//                        Image(systemName: "line.3.horizontal")
+//                            .foregroundColor(.gray)
+//                    }
+//                }
+//                .onMove { source, destination in
+//                    items.move(fromOffsets: source, toOffset: destination)
+//                }
+//            }
+//            .navigationTitle("标签设置")
+//            .navigationBarItems(
+//                trailing: Button("完成") {
+//                    dismiss()
+//                }
+//            )
+//        }
+//        .environment(\.editMode, .constant(.active))
+//    }
+//}

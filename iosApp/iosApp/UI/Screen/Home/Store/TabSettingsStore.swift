@@ -6,8 +6,10 @@ class TabSettingsStore: ObservableObject {
     
     static let defaultTabs = [
         AppBarTabItem(title: "首页", tag: 0),
-        AppBarTabItem(title: "书签", tag: 1),
-        AppBarTabItem(title: "精选", tag: 2)
+        AppBarTabItem(title: "公开", tag: 1),
+        AppBarTabItem(title: "书签", tag: 2),
+        AppBarTabItem(title: "本地", tag: 3),
+        AppBarTabItem(title: "收藏", tag: 4)
     ]
     
     init() {
@@ -35,5 +37,17 @@ class TabSettingsStore: ObservableObject {
             tabs[index].isEnabled.toggle()
             saveTabs()
         }
+    }
+    
+    func addNewTab(title: String) {
+        let newTag = (tabs.map { $0.tag }.max() ?? -1) + 1
+        let newTab = AppBarTabItem(title: title, tag: newTag)
+        tabs.append(newTab)
+        saveTabs()
+    }
+    
+    func removeTab(_ id: String) {
+        tabs.removeAll { $0.id == id }
+        saveTabs()
     }
 }

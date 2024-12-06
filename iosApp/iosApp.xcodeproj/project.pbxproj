@@ -80,6 +80,9 @@
 		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
 		647167432D01902B00C7D8A5 /* SensitiveContentButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 647167412D01902B00C7D8A5 /* SensitiveContentButton.swift */; };
 		64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64782BD02CFD65F4008DE526 /* View+Injection.swift */; };
+		649100E92D02E8A10027BA18 /* LocalScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649100E72D02E8A10027BA18 /* LocalScreen.swift */; };
+		649100EA2D02E8A10027BA18 /* FavoriteScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649100E62D02E8A10027BA18 /* FavoriteScreen.swift */; };
+		649100EB2D02E8A10027BA18 /* PublicScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649100E82D02E8A10027BA18 /* PublicScreen.swift */; };
 		64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */ = {isa = PBXBuildFile; productRef = 64BBDA712CFDD8420052E599 /* SwiftDate */; };
 		64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */; };
 		64E2085E2CF84559001C64EF /* ZJFlexibleDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E2085B2CF84559001C64EF /* ZJFlexibleDataSource.swift */; };
@@ -181,6 +184,9 @@
 		64655C2C2CFD6CA000255488 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		647167412D01902B00C7D8A5 /* SensitiveContentButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensitiveContentButton.swift; sourceTree = "<group>"; };
 		64782BD02CFD65F4008DE526 /* View+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Injection.swift"; sourceTree = "<group>"; };
+		649100E62D02E8A10027BA18 /* FavoriteScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteScreen.swift; sourceTree = "<group>"; };
+		649100E72D02E8A10027BA18 /* LocalScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalScreen.swift; sourceTree = "<group>"; };
+		649100E82D02E8A10027BA18 /* PublicScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicScreen.swift; sourceTree = "<group>"; };
 		64C855FF2CFD7F260071DCD8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		64E208482CF84559001C64EF /* MediaPreviewImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewImageView.swift; sourceTree = "<group>"; };
 		64E208492CF84559001C64EF /* MediaPreviewImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaPreviewImageViewController.swift; sourceTree = "<group>"; };
@@ -299,6 +305,9 @@
 				64444A672CF88557005DDD23 /* TabSettings */,
 				64444A602CF870F1005DDD23 /* HomeAppBar.swift */,
 				0620DD9D2AC44237009BD1BE /* HomeTimelineScreen.swift */,
+				649100E62D02E8A10027BA18 /* FavoriteScreen.swift */,
+				649100E72D02E8A10027BA18 /* LocalScreen.swift */,
+				649100E82D02E8A10027BA18 /* PublicScreen.swift */,
 				64444A6D2CF88B52005DDD23 /* BookmarkScreen.swift */,
 				64444A6E2CF88B52005DDD23 /* FeaturedScreen.swift */,
 				066151202AC540B700CCB945 /* HomeScreen.swift */,
@@ -482,6 +491,13 @@
 			path = Extension;
 			sourceTree = "<group>";
 		};
+		649100DC2D02D2060027BA18 /* Helper */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Helper;
+			sourceTree = "<group>";
+		};
 		64E2084B2CF84559001C64EF /* Image */ = {
 			isa = PBXGroup;
 			children = (
@@ -569,6 +585,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				649100DC2D02D2060027BA18 /* Helper */,
 				64782BD12CFD65F4008DE526 /* Extension */,
 				64E2087D2CF846DE001C64EF /* Common */,
 				06DF79D42B46B1C700CF21FE /* Data */,
@@ -790,6 +807,9 @@
 			files = (
 				060501C02ACAC8AF00DBCCEB /* SplashScreen.swift in Sources */,
 				06DF79CF2B465D1D00CF21FE /* AboutScreen.swift in Sources */,
+				649100E92D02E8A10027BA18 /* LocalScreen.swift in Sources */,
+				649100EA2D02E8A10027BA18 /* FavoriteScreen.swift in Sources */,
+				649100EB2D02E8A10027BA18 /* PublicScreen.swift in Sources */,
 				060881AF2AD908FA001AAD2F /* LinkPreview.swift in Sources */,
 				066F23052B43BD59004A4A8D /* ProfileMediaListScreen.swift in Sources */,
 				060D00C22AC407DF0087427A /* FlareApp.swift in Sources */,

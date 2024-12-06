@@ -81,7 +81,7 @@ struct TabItem<Content: View>: View {
             } else {
                 return .systemAction
             }
-        })
+        }) 
     }
     @ViewBuilder
     func getView(route: AppleRoute, onBack: @escaping () -> Void, onNavigate: @escaping (_ route: AppleRoute) -> Void) -> some View {

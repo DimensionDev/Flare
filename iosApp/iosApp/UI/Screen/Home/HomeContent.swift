@@ -35,13 +35,26 @@ struct HomeTimelineView: View {
             HomeTimelineScreen(accountType: accountType)
                 .tag(0)
             
+            // 公开页面
+            PublicScreen(accountType: accountType)
+                .tag(1)
+            
             // 书签页面
             BookmarkScreen(accountType: accountType)
-                .tag(1)
+                .tag(2)
+            
+            // 本地页面
+            LocalScreen(accountType: accountType)
+                .tag(3)
+            
+            // 收藏页面
+            FavoriteScreen(accountType: accountType)
+                .tag(4)
             
             // 精选页面
             FeaturedScreen(accountType: accountType)
-                .tag(2)
+                .tag(5)
+            
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
         .navigationBarTitleDisplayMode(.inline)

@@ -18,6 +18,7 @@ data class DbStatus(
     val userKey: MicroBlogKey?,
     val platformType: PlatformType,
     val content: StatusContent,
+    val text: String, // For Searching
     @PrimaryKey
     val id: String = "${accountKey}_$statusKey",
 )

@@ -144,6 +144,7 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
         userKey = user?.userKey,
         content = StatusContent.MisskeyNotification(this),
         accountKey = accountKey,
+        text = null,
     )
 }
 
@@ -191,6 +192,7 @@ private fun Note.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser 
             content = StatusContent.Misskey(this),
             userKey = user.userKey,
             accountKey = accountKey,
+            text = text,
         )
     return DbStatusWithUser(
         data = status,

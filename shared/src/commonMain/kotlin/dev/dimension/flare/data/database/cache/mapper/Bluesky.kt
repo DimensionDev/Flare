@@ -28,6 +28,7 @@ import dev.dimension.flare.data.datasource.bluesky.bskyJson
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.ui.model.mapper.parseBlueskyJson
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.coroutines.flow.firstOrNull
 import sh.christian.ozone.api.AtUri
@@ -244,6 +245,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                 userKey = null,
                                 platformType = PlatformType.Bluesky,
                                 content = content,
+                                text = null,
                             ),
                     )
                 listOf(
@@ -278,6 +280,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                 userKey = null,
                                 platformType = PlatformType.Bluesky,
                                 content = content,
+                                text = null,
                             ),
                     )
                 listOfNotNull(
@@ -310,6 +313,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                     userKey = user.userKey,
                                     platformType = PlatformType.Bluesky,
                                     content = content,
+                                    text = null,
                                 ),
                         )
                     createDbPagingTimelineWithStatus(
@@ -349,6 +353,7 @@ private fun ListNotificationsNotification.toDbStatus(accountKey: MicroBlogKey): 
         userKey = user.userKey,
         content = StatusContent.BlueskyNotification.Normal(this),
         accountKey = accountKey,
+        text = null,
     )
 }
 
@@ -383,6 +388,7 @@ internal fun List<FeedViewPost>.toDbPagingTimeline(
                                         .userKey,
                                 content = StatusContent.BlueskyReason(data),
                                 accountKey = accountKey,
+                                text = null,
                             ),
                     )
                 }
@@ -427,6 +433,7 @@ private fun PostView.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithU
             content = StatusContent.Bluesky(this),
             userKey = user.userKey,
             accountKey = accountKey,
+            text = parseBlueskyJson(record, accountKey).raw,
         )
     return DbStatusWithUser(
         data = status,

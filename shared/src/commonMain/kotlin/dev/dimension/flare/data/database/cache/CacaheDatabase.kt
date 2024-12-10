@@ -6,7 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
 
-const val CACHE_DATABASE_VERSION = 13
+const val CACHE_DATABASE_VERSION = 14
 
 @Database(
     entities = [

@@ -14,6 +14,8 @@ import dev.dimension.flare.data.network.mastodon.api.model.Status
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.ui.model.mapper.parseMastodonContent
+import dev.dimension.flare.ui.render.toUi
 
 internal object Mastodon {
     suspend fun save(
@@ -80,6 +82,7 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
         userKey = user.userKey,
         content = StatusContent.MastodonNotification(this),
         accountKey = accountKey,
+        text = null,
     )
 }
 
@@ -122,6 +125,14 @@ private fun Status.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUse
                     .Mastodon(this),
             userKey = user.userKey,
             accountKey = accountKey,
+            text =
+                buildString {
+                    if (spoilerText != null) {
+                        append(spoilerText)
+                        append("\n\n")
+                    }
+                    append(parseMastodonContent(this@toDbStatusWithUser, accountKey, accountKey.host).toUi().raw)
+                },
         )
     return DbStatusWithUser(
         data = status,

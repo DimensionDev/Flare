@@ -9,7 +9,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -24,6 +23,7 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
@@ -49,7 +49,7 @@ private fun StorageScreen(onBack: () -> Unit) {
     }
     FlareScaffold(
         topBar = {
-            TopAppBar(
+            FlareTopAppBar(
                 title = {
                     Text(text = stringResource(id = R.string.settings_storage_title))
                 },

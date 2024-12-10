@@ -81,6 +81,7 @@ private fun Status.toDbStatus(accountKey: MicroBlogKey): DbStatus =
         content =
             dev.dimension.flare.data.database.cache.model.StatusContent
                 .VVO(data = this),
+        text = rawText,
     )
 
 private fun Comment.toDbPagingTimeline(
@@ -117,6 +118,7 @@ private fun Comment.toDbStatus(accountKey: MicroBlogKey): DbStatus =
         content =
             dev.dimension.flare.data.database.cache.model.StatusContent
                 .VVOComment(data = this),
+        text = null,
     )
 
 internal fun User.toDbUser(): DbUser =

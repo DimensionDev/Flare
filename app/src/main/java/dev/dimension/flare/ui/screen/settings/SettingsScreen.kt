@@ -11,7 +11,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
@@ -48,6 +47,7 @@ import compose.icons.fontawesomeicons.solid.Table
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
@@ -188,7 +188,7 @@ internal fun SettingsScreen(
     val state by producePresenter { settingsPresenter() }
     FlareScaffold(
         topBar = {
-            TopAppBar(
+            FlareTopAppBar(
                 title = {
                     Text(text = stringResource(id = R.string.settings_title))
                 },

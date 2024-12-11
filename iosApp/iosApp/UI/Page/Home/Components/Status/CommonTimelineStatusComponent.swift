@@ -1,13 +1,13 @@
 import Awesome
 import JXPhotoBrowser
 import Kingfisher
-import MarkdownUI
+// import MarkdownUI
 import shared
 import SwiftDate
 import SwiftUI
 
 // timeline tweet
-struct CommonStatusComponent: View {
+struct CommonTimelineStatusComponent: View {
     @State private var showMedia: Bool = false
     @State private var expanded: Bool = false
     @Environment(\.openURL) private var openURL
@@ -19,7 +19,10 @@ struct CommonStatusComponent: View {
 
     var body: some View {
         VStack(alignment: .leading) {
+            Spacer()
+                .frame(height: 2)
             HStack(alignment: .top) {
+                 
                 if let user = data.user {
                     UserComponent(
                         user: user,
@@ -82,9 +85,15 @@ struct CommonStatusComponent: View {
             }
             // tweet content
             if expanded || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
-                Markdown(data.content.markdown)
-                    .font(.body)
-                    .markdownInlineImageProvider(.emoji)
+                Spacer()
+                    .frame(height: 10)
+                
+                FlareText(data.content.raw)
+                    .onLinkTap { url in
+                        openURL(url)
+                    }
+                    .font(.system(size: 16))
+                    .foregroundColor(Colors.Text.swiftUIPrimary)
             }
             // media
             if !data.images.isEmpty {
@@ -118,22 +127,30 @@ struct CommonStatusComponent: View {
             // quote tweet
             if !data.quote.isEmpty {
                 Spacer()
-                    .frame(height: 4)
+                    .frame(height: 10)
                 VStack {
                     ForEach(0 ..< data.quote.count, id: \.self) { index in
                         let quote = data.quote[index]
                         QuotedStatus(data: quote, onMediaClick: onMediaClick)
+                            .foregroundColor(.gray)
+
                         if index != data.quote.count - 1 {
                             Divider()
                         }
                     }
                 }
-                #if os(iOS)
-                .background(Color(UIColor.secondarySystemBackground))
-                #else
-                .background(Color(NSColor.windowBackgroundColor))
-                #endif
+                .padding(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+                )
                 .cornerRadius(8)
+//                #if os(iOS)
+//                 .background(Color(UIColor.secondarySystemBackground))
+//                #else
+//                .background(Color(NSColor.windowBackgroundColor))
+//                #endif
+               
             }
             //
             if let bottomContent = data.bottomContent {
@@ -174,7 +191,7 @@ struct CommonStatusComponent: View {
                 .opacity(0.6)
             }
             Spacer()
-                .frame(height: 8)
+                .frame(height: 10)
 
             // bottom action
             if appSettings.appearanceSettings.showActions || isDetail, !data.actions.isEmpty {
@@ -261,6 +278,8 @@ struct CommonStatusComponent: View {
                         .font(.caption)
                 }
             }
+              Spacer()
+                .frame(height: 2)
         }.frame(alignment: .leading)
     }
 
@@ -299,59 +318,68 @@ func dateFormatter(_ date: Date) -> some View {
 // bottom action icon image
 struct StatusActionItemIcon: View {
     let item: StatusActionItem
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
         switch onEnum(of: item) {
         case let .bookmark(data):
             if data.bookmarked {
                 Image(asset: Asset.Image.Status.Toolbar.bookmarkFilled)
+                    .renderingMode(.template)
+                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
             } else {
                 Image(asset: Asset.Image.Status.Toolbar.bookmark)
+                    .renderingMode(.template)
+                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
             }
         case .delete:
             Image(asset: Asset.Image.Status.Toolbar.delete)
+                .renderingMode(.template)
+                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
         case let .like(data):
             if data.liked {
                 Image(asset: Asset.Image.Status.Toolbar.favorite)
+                    .renderingMode(.template)
+                    .foregroundColor(Colors.State.swiftUIActive)
             } else {
                 Image(asset: Asset.Image.Status.Toolbar.favoriteBorder)
+                    .renderingMode(.template)
+                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
             }
         case .more:
-            Image(asset: Asset.Image.Status.more).rotationEffect(.degrees(90))
+            Image(asset: Asset.Image.Status.more)
+                .renderingMode(.template)
+                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+                .rotationEffect(.degrees(90))
         case .quote:
             Image(asset: Asset.Image.Status.Toolbar.quote)
+                .renderingMode(.template)
+                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
         case let .reaction(data):
             if data.reacted {
                 Awesome.Classic.Solid.minus.image
-                #if os(macOS)
-                    .foregroundColor(.labelColor)
-                #elseif os(iOS)
-                    .foregroundColor(.label)
-                #endif
+                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
             } else {
                 Awesome.Classic.Solid.plus.image
-                #if os(macOS)
-                    .foregroundColor(.labelColor)
-                #elseif os(iOS)
-                    .foregroundColor(.label)
-                #endif
+                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
             }
         case .reply:
             Image(asset: Asset.Image.Status.Toolbar.chatBubbleOutline)
+                .renderingMode(.template)
+                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
         case .report:
             Image(asset: Asset.Image.Status.Toolbar.flag)
+                .renderingMode(.template)
+                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
         case let .retweet(data):
             if data.retweeted {
-                Image(asset: Asset.Image.Status.Toolbar.repeat).foregroundColor(.init(.accentColor))
-//                Awesome.Classic.Solid.retweet.image
-
+                Image(asset: Asset.Image.Status.Toolbar.repeat)
+                    .renderingMode(.template)
+                    .foregroundColor(Colors.State.swiftUIActive)
             } else {
                 Image(asset: Asset.Image.Status.Toolbar.repeat)
-//                Awesome.Classic.Solid.retweet.image
-                // #if os(macOS)
-//                    .foregroundColor(.labelColor)
-                // #elseif os(iOS)
-//                    .foregroundColor(.label)
-                // #endif
+                    .renderingMode(.template)
+                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
             }
         }
     }
@@ -362,7 +390,7 @@ struct StatusActionLabel: View {
     let item: StatusActionItem
     var body: some View {
         let text = switch onEnum(of: item) {
-        case let .like(data): data.humanizedCount
+        case let .like(data): data.humanizedCount 
         case let .retweet(data): data.humanizedCount
         case let .quote(data): data.humanizedCount
         case let .reply(data): data.humanizedCount

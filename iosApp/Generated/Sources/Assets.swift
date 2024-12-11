@@ -25,6 +25,211 @@ public typealias AssetImageTypeAlias = ImageAsset.Image
 // swiftlint:disable identifier_name line_length nesting type_body_length type_name
 public enum Asset {
   public static let accentColor = ColorAsset(name: "AccentColor")
+  public enum Color {
+    public enum Background {
+      public static let _01 = ColorAsset(name: "Color/Background/01")
+      public static let _02 = ColorAsset(name: "Color/Background/02")
+      public static let _02Blur85 = ColorAsset(name: "Color/Background/02_blur85")
+      public static let _03 = ColorAsset(name: "Color/Background/03")
+      public static let _04 = ColorAsset(name: "Color/Background/04")
+      public static let black1 = ColorAsset(name: "Color/Background/black1")
+      public static let black2 = ColorAsset(name: "Color/Background/black2")
+      public static let blur = ColorAsset(name: "Color/Background/blur")
+      public static let blur25 = ColorAsset(name: "Color/Background/blur25")
+      public static let blur50 = ColorAsset(name: "Color/Background/blur50")
+      public static let blur85 = ColorAsset(name: "Color/Background/blur85")
+      public static let darkElevated = ColorAsset(name: "Color/Background/dark.elevated")
+      public static let lens = ColorAsset(name: "Color/Background/lens")
+      public static let lensForground = ColorAsset(name: "Color/Background/lens_forground")
+      public static let lensSignup = ColorAsset(name: "Color/Background/lens_signup")
+      public static let loginMiddle = ColorAsset(name: "Color/Background/login_middle")
+      public static let navigationbarBackground = ColorAsset(name: "Color/Background/navigationbar_background")
+      public static let placeholder = ColorAsset(name: "Color/Background/placeholder")
+      public static let primary = ColorAsset(name: "Color/Background/primary")
+      public static let pure01 = ColorAsset(name: "Color/Background/pure01")
+      public static let redpacketLoading = ColorAsset(name: "Color/Background/redpacket.loading")
+      public static let vitalikBg = ColorAsset(name: "Color/Background/vitalik_bg")
+    }
+    public enum Colorful {
+      public static let _02 = ColorAsset(name: "Color/Colorful/02")
+      public static let _03 = ColorAsset(name: "Color/Colorful/03")
+      public static let _04 = ColorAsset(name: "Color/Colorful/04")
+      public static let _05 = ColorAsset(name: "Color/Colorful/05")
+      public static let _06 = ColorAsset(name: "Color/Colorful/06")
+      public static let _07 = ColorAsset(name: "Color/Colorful/07")
+      public static let _08 = ColorAsset(name: "Color/Colorful/08")
+      public static let _09 = ColorAsset(name: "Color/Colorful/09")
+      public static let blue = ColorAsset(name: "Color/Colorful/blue")
+      public static let farcaster = ColorAsset(name: "Color/Colorful/farcaster")
+      public static let green = ColorAsset(name: "Color/Colorful/green")
+      public static let primary = ColorAsset(name: "Color/Colorful/primary")
+      public static let purple = ColorAsset(name: "Color/Colorful/purple")
+    }
+    public enum Line {
+      public static let _01 = ColorAsset(name: "Color/Line/01")
+      public static let _02 = ColorAsset(name: "Color/Line/02")
+    }
+    public enum M3 {
+      public enum ReadOnly {
+        public enum InverseSurface {
+          public static let opacity016 = ColorAsset(name: "Color/M3/ReadOnly/InverseSurface/opacity-0.16")
+        }
+        public enum Outline {
+          public static let opacity016 = ColorAsset(name: "Color/M3/ReadOnly/Outline/opacity-0.16")
+        }
+        public static let onSurfaceVariant012 = ColorAsset(name: "Color/M3/ReadOnly/on.surface.variant-0.12")
+        public static let surface1 = ColorAsset(name: "Color/M3/ReadOnly/surface1")
+        public static let surface2 = ColorAsset(name: "Color/M3/ReadOnly/surface2")
+        public static let white = ColorAsset(name: "Color/M3/ReadOnly/white")
+      }
+      public enum Ref {
+        public enum Secondary {
+          public static let secondary20 = ColorAsset(name: "Color/M3/Ref/Secondary/secondary20")
+          public static let secondary80 = ColorAsset(name: "Color/M3/Ref/Secondary/secondary80")
+        }
+      }
+      public enum Sys {
+        public static let error = ColorAsset(name: "Color/M3/Sys/error")
+        public static let onPrimary = ColorAsset(name: "Color/M3/Sys/on.primary")
+        public static let onPrimaryContainer = ColorAsset(name: "Color/M3/Sys/on.primary.container")
+        public static let onSecondary = ColorAsset(name: "Color/M3/Sys/on.secondary")
+        public static let onSecondaryContainer = ColorAsset(name: "Color/M3/Sys/on.secondary.container")
+        public static let onSurface = ColorAsset(name: "Color/M3/Sys/on.surface")
+        public static let onSurfaceVariant = ColorAsset(name: "Color/M3/Sys/on.surface.variant")
+        public static let onSurfaceVariantReverse = ColorAsset(name: "Color/M3/Sys/on.surface.variant.reverse")
+        public static let onTertiary = ColorAsset(name: "Color/M3/Sys/on.tertiary")
+        public static let onTertiaryContainer = ColorAsset(name: "Color/M3/Sys/on.tertiary.container")
+        public static let outline = ColorAsset(name: "Color/M3/Sys/outline")
+        public static let primary = ColorAsset(name: "Color/M3/Sys/primary")
+        public static let primaryContainer = ColorAsset(name: "Color/M3/Sys/primary.container")
+        public static let secondary = ColorAsset(name: "Color/M3/Sys/secondary")
+        public static let secondaryContainer = ColorAsset(name: "Color/M3/Sys/secondary.container")
+        public static let surface = ColorAsset(name: "Color/M3/Sys/surface")
+        public static let surfaceVariant = ColorAsset(name: "Color/M3/Sys/surface.variant")
+        public static let tertiaryContainer = ColorAsset(name: "Color/M3/Sys/tertiary-container")
+        public static let tertiary = ColorAsset(name: "Color/M3/Sys/tertiary")
+      }
+    }
+    public enum State {
+      public static let active = ColorAsset(name: "Color/State/active")
+      public static let deactive = ColorAsset(name: "Color/State/deactive")
+      public static let deactiveDarkerA = ColorAsset(name: "Color/State/deactive.darker.a")
+      public static let deactiveDarker = ColorAsset(name: "Color/State/deactive.darker")
+      public static let labelA = ColorAsset(name: "Color/State/label.a")
+      public static let labelB = ColorAsset(name: "Color/State/label.b")
+      public static let label = ColorAsset(name: "Color/State/label")
+      public static let secondActive = ColorAsset(name: "Color/State/second.active")
+      public static let secondDeactive = ColorAsset(name: "Color/State/second.deactive")
+    }
+    public enum Sys {
+      public static let primary = ColorAsset(name: "Color/Sys/primary")
+      public static let secondary = ColorAsset(name: "Color/Sys/secondary")
+      public static let surface = ColorAsset(name: "Color/Sys/surface")
+    }
+    public static let twitter = ColorAsset(name: "Color/Twitter")
+    public static let binance = ColorAsset(name: "Color/binance")
+    public static let black = ColorAsset(name: "Color/black")
+    public static let blackPure = ColorAsset(name: "Color/black.pure")
+    public static let coinbase = ColorAsset(name: "Color/coinbase")
+    public static let deviceBackground = ColorAsset(name: "Color/device.background")
+    public static let discord = ColorAsset(name: "Color/discord")
+    public enum Gradient {
+      public enum A {
+        public static let a1 = ColorAsset(name: "Color/gradient/a/a1")
+        public static let a2 = ColorAsset(name: "Color/gradient/a/a2")
+        public static let a3 = ColorAsset(name: "Color/gradient/a/a3")
+        public static let a4 = ColorAsset(name: "Color/gradient/a/a4")
+      }
+      public enum B {
+        public static let a1 = ColorAsset(name: "Color/gradient/b/a1")
+        public static let a2 = ColorAsset(name: "Color/gradient/b/a2")
+      }
+      public enum C {
+        public static let a1 = ColorAsset(name: "Color/gradient/c/a1")
+        public static let a2 = ColorAsset(name: "Color/gradient/c/a2")
+      }
+      public enum D {
+        public static let a1 = ColorAsset(name: "Color/gradient/d/a1")
+        public static let a2 = ColorAsset(name: "Color/gradient/d/a2")
+      }
+      public enum E {
+        public static let a1 = ColorAsset(name: "Color/gradient/e/a1")
+        public static let a2 = ColorAsset(name: "Color/gradient/e/a2")
+      }
+      public enum F {
+        public static let a1 = ColorAsset(name: "Color/gradient/f/a1")
+        public static let a2 = ColorAsset(name: "Color/gradient/f/a2")
+      }
+      public enum G {
+        public static let a1 = ColorAsset(name: "Color/gradient/g/a1")
+        public static let a2 = ColorAsset(name: "Color/gradient/g/a2")
+        public static let a3 = ColorAsset(name: "Color/gradient/g/a3")
+      }
+      public enum H {
+        public static let a1 = ColorAsset(name: "Color/gradient/h/a1")
+        public static let a2 = ColorAsset(name: "Color/gradient/h/a2")
+        public static let a3 = ColorAsset(name: "Color/gradient/h/a3")
+        public static let a4 = ColorAsset(name: "Color/gradient/h/a4")
+      }
+      public enum I {
+        public static let a1 = ColorAsset(name: "Color/gradient/i/a1")
+        public static let a2 = ColorAsset(name: "Color/gradient/i/a2")
+        public static let a3 = ColorAsset(name: "Color/gradient/i/a3")
+        public static let a4 = ColorAsset(name: "Color/gradient/i/a4")
+      }
+      public enum J {
+        public static let a1 = ColorAsset(name: "Color/gradient/j/a1")
+        public static let a2 = ColorAsset(name: "Color/gradient/j/a2")
+        public static let a3 = ColorAsset(name: "Color/gradient/j/a3")
+        public static let a4 = ColorAsset(name: "Color/gradient/j/a4")
+      }
+      public enum K {
+        public static let a1 = ColorAsset(name: "Color/gradient/k/a1")
+        public static let a2 = ColorAsset(name: "Color/gradient/k/a2")
+      }
+      public static let surface1End = ColorAsset(name: "Color/gradient/surface1.end")
+      public static let surface1Start = ColorAsset(name: "Color/gradient/surface1.start")
+    }
+    public static let hyperlink = ColorAsset(name: "Color/hyperlink")
+    public static let luckyDropRequireBackground = ColorAsset(name: "Color/luckyDrop.requireBackground")
+    public static let luckyDropCover = ColorAsset(name: "Color/lucky_drop_cover")
+    public static let navbar = ColorAsset(name: "Color/navbar")
+    public static let naviitemBackground = ColorAsset(name: "Color/naviitem.background")
+    public static let orange = ColorAsset(name: "Color/orange")
+    public static let pageIndicatorBackground = ColorAsset(name: "Color/pageIndicator.background")
+    public static let phantom = ColorAsset(name: "Color/phantom")
+    public enum Primary {
+      public static let _2 = ColorAsset(name: "Color/primary/2")
+      public static let blue = ColorAsset(name: "Color/primary/blue")
+      public static let green = ColorAsset(name: "Color/primary/green")
+      public static let main = ColorAsset(name: "Color/primary/main")
+    }
+    public static let primary = ColorAsset(name: "Color/primary")
+    public enum Second {
+      public static let subTitle = ColorAsset(name: "Color/second/subTitle")
+    }
+    public static let secondary = ColorAsset(name: "Color/secondary")
+    public enum Surface {
+      public static let _10 = ColorAsset(name: "Color/surface/10")
+      public static let _11 = ColorAsset(name: "Color/surface/11")
+      public static let _2 = ColorAsset(name: "Color/surface/2")
+      public static let _3 = ColorAsset(name: "Color/surface/3")
+      public static let _4 = ColorAsset(name: "Color/surface/4")
+      public static let _7 = ColorAsset(name: "Color/surface/7")
+      public static let background = ColorAsset(name: "Color/surface/background")
+      public static let discoverFeedCard = ColorAsset(name: "Color/surface/discover_feed_card")
+      public static let hotTwitterBanner = ColorAsset(name: "Color/surface/hot_twitter_banner")
+      public static let iconBackground = ColorAsset(name: "Color/surface/icon_background")
+      public static let innerBackground = ColorAsset(name: "Color/surface/inner_background")
+      public static let onHotTwitterBanner = ColorAsset(name: "Color/surface/on_hot_twitter_banner")
+      public static let topBackground = ColorAsset(name: "Color/surface/top_background")
+    }
+    public static let surfaceIcon = ColorAsset(name: "Color/surface_icon")
+    public static let walletConnect = ColorAsset(name: "Color/wallet_connect")
+    public static let white = ColorAsset(name: "Color/white")
+    public static let whitePure = ColorAsset(name: "Color/white.pure")
+    public static let zerion = ColorAsset(name: "Color/zerion")
+  }
   public enum Tab {
     public static let background = ColorAsset(name: "Tab/background")
     public static let compose = ImageAsset(name: "Tab/compose")

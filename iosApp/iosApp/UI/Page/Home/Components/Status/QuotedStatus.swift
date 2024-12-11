@@ -36,10 +36,18 @@ struct QuotedStatus: View {
                     }
                     .padding(.horizontal, 8)
                 }
-                Markdown(data.content.markdown)
-                    .font(.body)
-                    .markdownInlineImageProvider(.emoji)
-                    .padding(.horizontal, 8)
+                // Markdown(data.content.markdown)
+                //     .markdownInlineImageProvider(.emoji)
+                //     .padding(.horizontal, 8)
+                //     .foregroundColor(.red)
+                //     .font(.body)
+
+                FlareText(data.content.raw, style: .quote)
+                    .onLinkTap { url in
+                        openURL(url)
+                    }
+                    .font(.system(size: 16))
+                
                 Spacer()
                     .frame(height: 8)
                 if !data.images.isEmpty {

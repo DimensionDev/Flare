@@ -59,7 +59,7 @@
 		64E877422D0430C7003559B9 /* FeedMediaPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D32D0430C7003559B9 /* FeedMediaPlayButton.swift */; };
 		64E877432D0430C7003559B9 /* PhotoBrowserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876BE2D0430C7003559B9 /* PhotoBrowserManager.swift */; };
 		64E877442D0430C7003559B9 /* ComposeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876BA2D0430C7003559B9 /* ComposeScreen.swift */; };
-		64E877452D0430C7003559B9 /* CommonStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D12D0430C7003559B9 /* CommonStatusComponent.swift */; };
+		64E877452D0430C7003559B9 /* CommonTimelineStatusComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D12D0430C7003559B9 /* CommonTimelineStatusComponent.swift */; };
 		64E877462D0430C7003559B9 /* SwitUIInAppNotification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876B32D0430C7003559B9 /* SwitUIInAppNotification.swift */; };
 		64E877472D0430C7003559B9 /* MarkdownTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876B12D0430C7003559B9 /* MarkdownTheme.swift */; };
 		64E877482D0430C7003559B9 /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876F02D0430C7003559B9 /* HomeScreen.swift */; };
@@ -112,6 +112,14 @@
 		64E877772D0430C7003559B9 /* MediaPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876CB2D0430C7003559B9 /* MediaPreviewViewController.swift */; };
 		64E877782D0430C7003559B9 /* QuotedStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D82D0430C7003559B9 /* QuotedStatus.swift */; };
 		64E877792D0430C7003559B9 /* LinkPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D52D0430C7003559B9 /* LinkPreview.swift */; };
+		64E8778C2D06CA4A003559B9 /* TwitterText in Frameworks */ = {isa = PBXBuildFile; productRef = 64E8778B2D06CA4A003559B9 /* TwitterText */; };
+		64E877912D06CD47003559B9 /* MetaTextKit in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877902D06CD47003559B9 /* MetaTextKit */; };
+		64E877BA2D080DFB003559B9 /* FlareText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877B62D080DFB003559B9 /* FlareText.swift */; };
+		64E877C02D08131D003559B9 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877BD2D08131D003559B9 /* Colors.swift */; };
+		64E877C52D083DF6003559B9 /* FlareMarkdownText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877C32D083DF6003559B9 /* FlareMarkdownText.swift */; };
+		64E877C62D083DF6003559B9 /* TwitterTextProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877C42D083DF6003559B9 /* TwitterTextProvider.swift */; };
+		64E877C92D0842AA003559B9 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877C82D0842AA003559B9 /* SwiftSoup */; };
+		64E877CC2D0842C5003559B9 /* Fuzi in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877CB2D0842C5003559B9 /* Fuzi */; };
 		B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */; };
 /* End PBXBuildFile section */
 
@@ -157,7 +165,7 @@
 		64E876CD2D0430C7003559B9 /* MediaSaver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaSaver.swift; sourceTree = "<group>"; };
 		64E876CE2D0430C7003559B9 /* ShareActivityProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareActivityProvider.swift; sourceTree = "<group>"; };
 		64E876CF2D0430C7003559B9 /* UIImage+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+Extension.swift"; sourceTree = "<group>"; };
-		64E876D12D0430C7003559B9 /* CommonStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonStatusComponent.swift; sourceTree = "<group>"; };
+		64E876D12D0430C7003559B9 /* CommonTimelineStatusComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonTimelineStatusComponent.swift; sourceTree = "<group>"; };
 		64E876D22D0430C7003559B9 /* FeedMediaGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedMediaGridView.swift; sourceTree = "<group>"; };
 		64E876D32D0430C7003559B9 /* FeedMediaPlayButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedMediaPlayButton.swift; sourceTree = "<group>"; };
 		64E876D42D0430C7003559B9 /* LensMediaView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LensMediaView.swift; sourceTree = "<group>"; };
@@ -210,6 +218,10 @@
 		64E8771D2D0430C7003559B9 /* VVOStatusDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VVOStatusDetailScreen.swift; sourceTree = "<group>"; };
 		64E877212D0430C7003559B9 /* Route.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Route.swift; sourceTree = "<group>"; };
 		64E877262D0430C7003559B9 /* MisskeyReactionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MisskeyReactionSheet.swift; sourceTree = "<group>"; };
+		64E877B62D080DFB003559B9 /* FlareText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareText.swift; sourceTree = "<group>"; };
+		64E877BD2D08131D003559B9 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		64E877C32D083DF6003559B9 /* FlareMarkdownText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareMarkdownText.swift; sourceTree = "<group>"; };
+		64E877C42D083DF6003559B9 /* TwitterTextProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterTextProvider.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* Flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
@@ -221,17 +233,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				64E877CC2D0842C5003559B9 /* Fuzi in Frameworks */,
 				64E208712CF8458A001C64EF /* FLAnimatedImage in Frameworks */,
 				0690507B2CAE634C007FC957 /* Awesome in Frameworks */,
+				64E877912D06CD47003559B9 /* MetaTextKit in Frameworks */,
 				066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */,
 				067D89772AD25C1700F8F932 /* MarkdownUI in Frameworks */,
 				64E208742CF845C2001C64EF /* Kingfisher in Frameworks */,
 				066AD0492B3ACDC1006F28F4 /* OrderedCollections in Frameworks */,
 				06B8514D2B6B228600DFA075 /* FirebaseCrashlytics in Frameworks */,
+				64E8778C2D06CA4A003559B9 /* TwitterText in Frameworks */,
 				06244DED2B75F21E00884683 /* AVKit.framework in Frameworks */,
 				64E2087A2CF84670001C64EF /* Generated in Frameworks */,
 				06B8514B2B6B228600DFA075 /* FirebaseAnalytics in Frameworks */,
 				64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */,
+				64E877C92D0842AA003559B9 /* SwiftSoup in Frameworks */,
 				64E208772CF84612001C64EF /* JXPhotoBrowser in Frameworks */,
 				066AD0472B3ACDC1006F28F4 /* DequeModule in Frameworks */,
 			);
@@ -271,13 +287,6 @@
 				64E2087C2CF846DE001C64EF /* ViewExt.swift */,
 			);
 			path = Common;
-			sourceTree = "<group>";
-		};
-		64E876A82D0430C7003559B9 /* Compose */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Compose;
 			sourceTree = "<group>";
 		};
 		64E876AA2D0430C7003559B9 /* Common */ = {
@@ -406,7 +415,8 @@
 		64E876DC2D0430C7003559B9 /* Status */ = {
 			isa = PBXGroup;
 			children = (
-				64E876D12D0430C7003559B9 /* CommonStatusComponent.swift */,
+				64E877AB2D073F97003559B9 /* Text */,
+				64E876D12D0430C7003559B9 /* CommonTimelineStatusComponent.swift */,
 				64E876D22D0430C7003559B9 /* FeedMediaGridView.swift */,
 				64E876D32D0430C7003559B9 /* FeedMediaPlayButton.swift */,
 				64E876D42D0430C7003559B9 /* LensMediaView.swift */,
@@ -673,7 +683,7 @@
 			path = Status;
 			sourceTree = "<group>";
 		};
-		64E877202D0430C7003559B9 /* Features */ = {
+		64E877202D0430C7003559B9 /* Page */ = {
 			isa = PBXGroup;
 			children = (
 				64E876BD2D0430C7003559B9 /* Compose */,
@@ -683,7 +693,7 @@
 				64E877172D0430C7003559B9 /* Settings */,
 				64E8771F2D0430C7003559B9 /* Status */,
 			);
-			path = Features;
+			path = Page;
 			sourceTree = "<group>";
 		};
 		64E877222D0430C7003559B9 /* Navigation */ = {
@@ -705,12 +715,29 @@
 		64E877282D0430C7003559B9 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				64E876A82D0430C7003559B9 /* Compose */,
-				64E877202D0430C7003559B9 /* Features */,
+				64E877202D0430C7003559B9 /* Page */,
 				64E877222D0430C7003559B9 /* Navigation */,
 				64E877272D0430C7003559B9 /* Status */,
 			);
 			path = UI;
+			sourceTree = "<group>";
+		};
+		64E877AB2D073F97003559B9 /* Text */ = {
+			isa = PBXGroup;
+			children = (
+				64E877C32D083DF6003559B9 /* FlareMarkdownText.swift */,
+				64E877C42D083DF6003559B9 /* TwitterTextProvider.swift */,
+				64E877B62D080DFB003559B9 /* FlareText.swift */,
+			);
+			path = Text;
+			sourceTree = "<group>";
+		};
+		64E877BE2D08131D003559B9 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				64E877BD2D08131D003559B9 /* Colors.swift */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		7555FF72242A565900829871 = {
@@ -736,6 +763,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				64E877BE2D08131D003559B9 /* Resources */,
 				64E877282D0430C7003559B9 /* UI */,
 				64782BD12CFD65F4008DE526 /* Extension */,
 				64E2087D2CF846DE001C64EF /* Common */,
@@ -819,6 +847,10 @@
 				64E208762CF84612001C64EF /* JXPhotoBrowser */,
 				64E208792CF84670001C64EF /* Generated */,
 				64BBDA712CFDD8420052E599 /* SwiftDate */,
+				64E8778B2D06CA4A003559B9 /* TwitterText */,
+				64E877902D06CD47003559B9 /* MetaTextKit */,
+				64E877C82D0842AA003559B9 /* SwiftSoup */,
+				64E877CB2D0842C5003559B9 /* Fuzi */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
@@ -861,6 +893,10 @@
 				64E208752CF84612001C64EF /* XCRemoteSwiftPackageReference "PhotoBrowser" */,
 				64E208782CF84670001C64EF /* XCLocalSwiftPackageReference "Generated" */,
 				64BBDA702CFDD8420052E599 /* XCRemoteSwiftPackageReference "SwiftDate" */,
+				64E8778A2D06CA4A003559B9 /* XCRemoteSwiftPackageReference "twitter-text" */,
+				64E8778F2D06CD47003559B9 /* XCRemoteSwiftPackageReference "MetaTextKit" */,
+				64E877C72D0842AA003559B9 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+				64E877CA2D0842C5003559B9 /* XCRemoteSwiftPackageReference "Fuzi" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -955,6 +991,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				060D00C22AC407DF0087427A /* FlareApp.swift in Sources */,
+				64E877C02D08131D003559B9 /* Colors.swift in Sources */,
 				06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */,
 				64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */,
 				B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */,
@@ -986,7 +1023,7 @@
 				64E877422D0430C7003559B9 /* FeedMediaPlayButton.swift in Sources */,
 				64E877432D0430C7003559B9 /* PhotoBrowserManager.swift in Sources */,
 				64E877442D0430C7003559B9 /* ComposeScreen.swift in Sources */,
-				64E877452D0430C7003559B9 /* CommonStatusComponent.swift in Sources */,
+				64E877452D0430C7003559B9 /* CommonTimelineStatusComponent.swift in Sources */,
 				64E877462D0430C7003559B9 /* SwitUIInAppNotification.swift in Sources */,
 				64E877472D0430C7003559B9 /* MarkdownTheme.swift in Sources */,
 				64E877482D0430C7003559B9 /* HomeScreen.swift in Sources */,
@@ -1008,6 +1045,8 @@
 				64E877582D0430C7003559B9 /* AppearanceScreen.swift in Sources */,
 				64E877592D0430C7003559B9 /* SettingsScreen.swift in Sources */,
 				64E8775A2D0430C7003559B9 /* MediaPreviewImageViewController.swift in Sources */,
+				64E877C52D083DF6003559B9 /* FlareMarkdownText.swift in Sources */,
+				64E877C62D083DF6003559B9 /* TwitterTextProvider.swift in Sources */,
 				64E8775B2D0430C7003559B9 /* ShareActivityProvider.swift in Sources */,
 				64E8775C2D0430C7003559B9 /* TabSettingsStore.swift in Sources */,
 				64E8775D2D0430C7003559B9 /* UIImage.swift in Sources */,
@@ -1022,6 +1061,7 @@
 				64E877662D0430C7003559B9 /* ComposeViewModel.swift in Sources */,
 				64E877672D0430C7003559B9 /* SettingsRepository.swift in Sources */,
 				64E877682D0430C7003559B9 /* AboutScreen.swift in Sources */,
+				64E877BA2D080DFB003559B9 /* FlareText.swift in Sources */,
 				64E877692D0430C7003559B9 /* SearchScreen.swift in Sources */,
 				64E8776A2D0430C7003559B9 /* FullScreenImageViewer.swift in Sources */,
 				64E8776B2D0430C7003559B9 /* FlareTheme.swift in Sources */,
@@ -1372,6 +1412,38 @@
 				minimumVersion = 3.1.5;
 			};
 		};
+		64E8778A2D06CA4A003559B9 /* XCRemoteSwiftPackageReference "twitter-text" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TwidereProject/twitter-text";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.0.4;
+			};
+		};
+		64E8778F2D06CD47003559B9 /* XCRemoteSwiftPackageReference "MetaTextKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/TwidereProject/MetaTextKit/";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.2.0;
+			};
+		};
+		64E877C72D0842AA003559B9 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.7.6;
+			};
+		};
+		64E877CA2D0842C5003559B9 /* XCRemoteSwiftPackageReference "Fuzi" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/cezheng/Fuzi.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.3;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1433,6 +1505,26 @@
 		64E208792CF84670001C64EF /* Generated */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Generated;
+		};
+		64E8778B2D06CA4A003559B9 /* TwitterText */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64E8778A2D06CA4A003559B9 /* XCRemoteSwiftPackageReference "twitter-text" */;
+			productName = TwitterText;
+		};
+		64E877902D06CD47003559B9 /* MetaTextKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64E8778F2D06CD47003559B9 /* XCRemoteSwiftPackageReference "MetaTextKit" */;
+			productName = MetaTextKit;
+		};
+		64E877C82D0842AA003559B9 /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64E877C72D0842AA003559B9 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+		64E877CB2D0842C5003559B9 /* Fuzi */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64E877CA2D0842C5003559B9 /* XCRemoteSwiftPackageReference "Fuzi" */;
+			productName = Fuzi;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

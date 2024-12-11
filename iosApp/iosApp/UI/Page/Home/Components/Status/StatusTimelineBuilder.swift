@@ -62,7 +62,7 @@ struct StatusItemView: View {
                     data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
                 }
             }, label: {
-                CommonStatusComponent(
+                CommonTimelineStatusComponent(
                     data: data,
                     onMediaClick: { index, media in
                         data.onMediaClicked(.init(launcher: AppleUriLauncher(openURL: openURL)), media, KotlinInt(integerLiteral: index))

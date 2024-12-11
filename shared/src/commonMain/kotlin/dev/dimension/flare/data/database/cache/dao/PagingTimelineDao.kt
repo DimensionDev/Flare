@@ -28,7 +28,11 @@ interface PagingTimelineDao {
         "SELECT * FROM DbStatus " +
             "WHERE DbStatus.text like :query",
     )
-    fun getHistoryPagingSource(query: String): PagingSource<Int, DbStatusWithReference>
+    fun searchHistoryPagingSource(query: String): PagingSource<Int, DbStatusWithReference>
+
+    @Transaction
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId DESC")
+    fun getStatusHistoryPagingSource(pagingKey: String): PagingSource<Int, DbPagingTimelineWithStatus>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(timeline: List<DbPagingTimeline>)

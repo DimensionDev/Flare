@@ -21,6 +21,7 @@ import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.PresenterBase
+import dev.dimension.flare.ui.presenter.status.LogStatusHistoryPresenter
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -33,6 +34,7 @@ class LocalCacheSearchPresenter :
 
     interface State {
         val data: PagingState<UiTimeline>
+        val history: PagingState<UiTimeline>
 
         fun setQuery(value: String)
     }
@@ -49,12 +51,30 @@ class LocalCacheSearchPresenter :
                     Pager(
                         config = PagingConfig(pageSize = 20),
                     ) {
-                        database.pagingTimelineDao().getHistoryPagingSource(query = "%$query%")
+                        database.pagingTimelineDao().searchHistoryPagingSource(query = "%$query%")
                     }.flow.let {
                         UiState.Success(it)
                     }
                 }
             }
+        val history =
+            remember(allAccounts) {
+                allAccounts.map { accounts ->
+                    Pager(
+                        config = PagingConfig(pageSize = 20),
+                    ) {
+                        database.pagingTimelineDao().getStatusHistoryPagingSource(pagingKey = LogStatusHistoryPresenter.PAGING_KEY)
+                    }.flow.map {
+                        it.map {
+                            val accountKey = it.status.status.data.accountKey
+                            val event = accounts.first { it.accountKey == accountKey }.dataSource as StatusEvent
+                            it.render(event)
+                        }
+                    }
+                }
+            }.map {
+                it.collectAsLazyPagingItems()
+            }.toPagingState()
         val data =
             remember(paging, allAccounts) {
                 allAccounts.flatMap { accounts ->
@@ -78,6 +98,7 @@ class LocalCacheSearchPresenter :
             }
 
             override val data: PagingState<UiTimeline> = data
+            override val history: PagingState<UiTimeline> = history
         }
     }
 }

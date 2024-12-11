@@ -4,6 +4,7 @@ import com.fleeksoft.ksoup.nodes.Element
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimelineWithRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageItemWithUser
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
@@ -24,6 +25,16 @@ internal fun DbPagingTimelineWithStatus.render(event: StatusEvent): UiTimeline =
         event,
         references =
             status.references
+                .map { it.reference.referenceType to it.status.data.content }
+                .toMap(),
+    )
+
+internal fun DbStatusWithReference.render(event: StatusEvent): UiTimeline =
+    status.data.content.render(
+        status.data.accountKey,
+        event,
+        references =
+            references
                 .map { it.reference.referenceType to it.status.data.content }
                 .toMap(),
     )

@@ -25,8 +25,8 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class LocalHistoryPresenter :
-    PresenterBase<LocalHistoryPresenter.State>(),
+class LocalCacheSearchPresenter :
+    PresenterBase<LocalCacheSearchPresenter.State>(),
     KoinComponent {
     private val database: CacheDatabase by inject()
     private val accountRepository: AccountRepository by inject()
@@ -49,7 +49,7 @@ class LocalHistoryPresenter :
                     Pager(
                         config = PagingConfig(pageSize = 20),
                     ) {
-                        database.pagingTimelineDao().getHistoryPagingSource(query = query)
+                        database.pagingTimelineDao().getHistoryPagingSource(query = "%$query%")
                     }.flow.let {
                         UiState.Success(it)
                     }
@@ -61,7 +61,7 @@ class LocalHistoryPresenter :
                     paging.map { pagingData ->
                         pagingData.map {
                             it.map {
-                                val accountKey = it.timeline.accountKey
+                                val accountKey = it.status.data.accountKey
                                 val event = accounts.first { it.accountKey == accountKey }.dataSource as StatusEvent
                                 it.render(event)
                             }

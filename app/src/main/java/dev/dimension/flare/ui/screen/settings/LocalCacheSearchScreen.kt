@@ -19,11 +19,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Xmark
+import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -78,7 +80,7 @@ private fun LocalCacheSearchScreen(onBack: () -> Unit) {
                             expanded = state.searchBarExpanded,
                             onExpandedChange = state::setSearchBarExpanded,
                             placeholder = {
-                                Text("Hinted search text")
+                                Text(stringResource(R.string.local_history_search_placeholder))
                             },
                             leadingIcon = {
                                 BackButton(

@@ -764,7 +764,9 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
             Element("a").apply {
 //                attributes["href"] = url
                 attributes().put("href", url)
-                appendChild(TextNode(content))
+                content.forEach {
+                    appendChild(it.toHtml(accountKey))
+                }
             }
         }
 

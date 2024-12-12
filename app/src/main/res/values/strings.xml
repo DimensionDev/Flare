@@ -117,6 +117,8 @@
     <string name="settings_local_filter_description">Local filter settings for timeline</string>
     <string name="settings_guest_setting_title">Guest Mode Host</string>
     <string name="settings_guest_setting_description">Set the host for guest mode</string>
+    <string name="settings_local_history_title">Local history</string>
+    <string name="settings_local_history_description">View or search your browsing history</string>
 
     <string name="status_loadmore_end">No more toots</string>
     <string name="status_loadmore_error">Error loading more toots</string>
@@ -686,5 +688,7 @@
 
     <string name="following_title">Following</string>
     <string name="fans_title">Follower</string>
+
+    <string name="local_history_search_placeholder">Search local cache</string>
 
 </resources>

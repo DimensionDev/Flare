@@ -47,6 +47,8 @@ class VVOStatusDetailPresenter(
                     }.collectAsState().toUi()
                 }
 
+        remember { LogStatusHistoryPresenter(accountType = accountType, statusKey = statusKey) }.body()
+
         val extendedText =
             service.flatMap {
                 require(it is VVODataSource)

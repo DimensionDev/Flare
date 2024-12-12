@@ -68,7 +68,7 @@ private fun Element.appendTextWithBr(text: String) {
     }
 }
 
-private fun parseBlueskyJson(
+internal fun parseBlueskyJson(
     json: JsonContent,
     accountKey: MicroBlogKey,
 ): UiRichText {

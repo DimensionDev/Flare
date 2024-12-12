@@ -100,6 +100,10 @@
   <string name="settings_tab_customization_description">De tabbladen op het startscherm aanpassen</string>
   <string name="settings_local_filter_title">Lokaal filter</string>
   <string name="settings_local_filter_description">Lokale filterinstellingen voor tijdlijn</string>
+  <string name="settings_guest_setting_title">Gast modus host</string>
+  <string name="settings_guest_setting_description">Stel de host in voor gastmodus</string>
+  <string name="settings_local_history_title">Lokale geschiedenis</string>
+  <string name="settings_local_history_description">Bekijk of zoek uw browsegeschiedenis</string>
   <string name="status_loadmore_end">Geen toots meer</string>
   <string name="status_loadmore_error">Fout bij laden van meer toots</string>
   <string name="status_loadmore_error_retry">Opnieuw</string>
@@ -525,4 +529,5 @@
   <string name="notification_login_expired">Inloggen verlopen, gelieve opnieuw in te loggen</string>
   <string name="following_title">Volgt</string>
   <string name="fans_title">Volger</string>
+  <string name="local_history_search_placeholder">Zoek lokale cache</string>
 </resources>

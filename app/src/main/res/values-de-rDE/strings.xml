@@ -100,6 +100,10 @@
   <string name="settings_tab_customization_description">Tabs auf dem Startbildschirm anpassen</string>
   <string name="settings_local_filter_title">Lokaler Filter</string>
   <string name="settings_local_filter_description">Lokale Filtereinstellungen für Zeitleiste</string>
+  <string name="settings_guest_setting_title">Gastmodus Host</string>
+  <string name="settings_guest_setting_description">Host für Gastmodus festlegen</string>
+  <string name="settings_local_history_title">Lokale Historie</string>
+  <string name="settings_local_history_description">Browserverlauf ansehen oder durchsuchen</string>
   <string name="status_loadmore_end">Keine weiteren toots</string>
   <string name="status_loadmore_error">Fehler beim Laden von weiteren toots</string>
   <string name="status_loadmore_error_retry">Wiederholen</string>
@@ -525,4 +529,5 @@
   <string name="notification_login_expired">Login abgelaufen, bitte erneut anmelden</string>
   <string name="following_title">Folgt</string>
   <string name="fans_title">Follower</string>
+  <string name="local_history_search_placeholder">Lokalen Cache suchen</string>
 </resources>

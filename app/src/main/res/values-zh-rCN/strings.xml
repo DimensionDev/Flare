@@ -101,6 +101,10 @@
   <string name="settings_tab_customization_description">自定义主屏幕上的选项卡</string>
   <string name="settings_local_filter_title">本地过滤器</string>
   <string name="settings_local_filter_description">时间轴的本地过滤器设置</string>
+  <string name="settings_guest_setting_title">访客模式主机</string>
+  <string name="settings_guest_setting_description">为访客模式设置主机</string>
+  <string name="settings_local_history_title">本地历史记录</string>
+  <string name="settings_local_history_description">查看或搜索您的浏览历史</string>
   <string name="status_loadmore_end">没有更多嘟文了</string>
   <string name="status_loadmore_error">加载失败</string>
   <string name="status_loadmore_error_retry">重试</string>
@@ -528,4 +532,5 @@
   <string name="notification_login_expired">登录过期，请重新登录</string>
   <string name="following_title">正在关注</string>
   <string name="fans_title">粉丝</string>
+  <string name="local_history_search_placeholder">搜索本地缓存</string>
 </resources>

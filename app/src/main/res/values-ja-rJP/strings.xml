@@ -101,6 +101,10 @@
   <string name="settings_tab_customization_description">ホーム画面のタブを編集する</string>
   <string name="settings_local_filter_title">ローカルフィルタ</string>
   <string name="settings_local_filter_description">タイムラインのローカルフィルター設定</string>
+  <string name="settings_guest_setting_title">ゲストモードホスト</string>
+  <string name="settings_guest_setting_description">ゲストモードのホストを設定</string>
+  <string name="settings_local_history_title">ローカル履歴</string>
+  <string name="settings_local_history_description">閲覧履歴を表示または検索</string>
   <string name="status_loadmore_end">トゥートはありません</string>
   <string name="status_loadmore_error">トゥートの読み込みエラー</string>
   <string name="status_loadmore_error_retry">再試行する</string>
@@ -528,4 +532,5 @@
   <string name="notification_login_expired">ログイン期限が切れました。もう一度ログインしてください。</string>
   <string name="following_title">フォロー中</string>
   <string name="fans_title">フォロワー</string>
+  <string name="local_history_search_placeholder">ローカルキャッシュを検索</string>
 </resources>

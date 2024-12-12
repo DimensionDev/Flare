@@ -98,6 +98,8 @@
   <string name="settings_tab_customization_description">Налаштування вкладок на головному екрані</string>
   <string name="settings_local_filter_title">Локальний фільтр</string>
   <string name="settings_local_filter_description">Налаштування локального фільтра для стрічки</string>
+  <string name="settings_guest_setting_description">Встановити режим гостя</string>
+  <string name="settings_local_history_description">Переглянути або шукати історію браузера</string>
   <string name="status_loadmore_end">Більше дмухів немає</string>
   <string name="status_loadmore_error">Помилка при завантаженні дмухів</string>
   <string name="status_loadmore_error_retry">Повторити спробу</string>

@@ -100,6 +100,10 @@
   <string name="settings_tab_customization_description">Настроить вкладки на главном экране</string>
   <string name="settings_local_filter_title">Локальный фильтр</string>
   <string name="settings_local_filter_description">Настройки локального фильтра для временной линии</string>
+  <string name="settings_guest_setting_title">Хост гостевого режима</string>
+  <string name="settings_guest_setting_description">Установить хост для гостевого режима</string>
+  <string name="settings_local_history_title">Локальная история</string>
+  <string name="settings_local_history_description">Просмотр или поиск в истории посещений</string>
   <string name="status_loadmore_end">Нет больше зубов</string>
   <string name="status_loadmore_error">Ошибка загрузки зубов</string>
   <string name="status_loadmore_error_retry">Повторить</string>
@@ -523,4 +527,5 @@
   <string name="notification_login_expired">Срок действия входа истек, пожалуйста, войдите снова</string>
   <string name="following_title">Подписка</string>
   <string name="fans_title">Фольклор</string>
+  <string name="local_history_search_placeholder">Поиск локального кэша</string>
 </resources>

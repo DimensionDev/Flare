@@ -100,6 +100,10 @@
   <string name="settings_tab_customization_description">Personalizza le schede nella schermata home</string>
   <string name="settings_local_filter_title">Filtro locale</string>
   <string name="settings_local_filter_description">Impostazioni del filtro locale per la timeline</string>
+  <string name="settings_guest_setting_title">Ospite Modalità Ospite</string>
+  <string name="settings_guest_setting_description">Imposta l\'host per la modalità ospite</string>
+  <string name="settings_local_history_title">Cronologia locale</string>
+  <string name="settings_local_history_description">Visualizza o cerca nella cronologia di navigazione</string>
   <string name="status_loadmore_end">Nessun altro toots</string>
   <string name="status_loadmore_error">Errore nel caricare altri toots</string>
   <string name="status_loadmore_error_retry">Riprova</string>
@@ -525,4 +529,5 @@
   <string name="notification_login_expired">Login scaduto, effettua nuovamente il login</string>
   <string name="following_title">Seguendo</string>
   <string name="fans_title">Follower</string>
+  <string name="local_history_search_placeholder">Cerca nella cache locale</string>
 </resources>

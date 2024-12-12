@@ -100,6 +100,10 @@
   <string name="settings_tab_customization_description">Tilpass fanene på hjemmeskjermen</string>
   <string name="settings_local_filter_title">Lokalt filter</string>
   <string name="settings_local_filter_description">Lokale filterinnstillinger for tidslinjen</string>
+  <string name="settings_guest_setting_title">Vert for gjestemodus</string>
+  <string name="settings_guest_setting_description">Angi verten for gjestemodus</string>
+  <string name="settings_local_history_title">Lokal historikk</string>
+  <string name="settings_local_history_description">Vis eller søk i historikk</string>
   <string name="status_loadmore_end">Ingen flere toots</string>
   <string name="status_loadmore_error">Feil ved lasting av flere toots</string>
   <string name="status_loadmore_error_retry">Prøv igjen</string>
@@ -524,4 +528,5 @@
   <string name="notification_login_expired">Innlogging utløpt, vennligst logg inn igjen</string>
   <string name="following_title">Følger</string>
   <string name="fans_title">Følger</string>
+  <string name="local_history_search_placeholder">Søk lokal cache</string>
 </resources>

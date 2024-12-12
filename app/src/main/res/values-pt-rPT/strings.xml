@@ -100,6 +100,10 @@
   <string name="settings_tab_customization_description">Personalizar as abas na tela inicial</string>
   <string name="settings_local_filter_title">Filtro local</string>
   <string name="settings_local_filter_description">Configurações de filtro local para timeline</string>
+  <string name="settings_guest_setting_title">format@@0 Guest Mode Host</string>
+  <string name="settings_guest_setting_description">Definir o host para o modo convidado</string>
+  <string name="settings_local_history_title">Histórico local</string>
+  <string name="settings_local_history_description">Ver ou pesquisar seu histórico de navegação</string>
   <string name="status_loadmore_end">Sem mais toots</string>
   <string name="status_loadmore_error">Erro ao carregar mais toots</string>
   <string name="status_loadmore_error_retry">Repetir</string>
@@ -525,4 +529,5 @@
   <string name="notification_login_expired">Login expirado, faça o login novamente</string>
   <string name="following_title">Seguinte</string>
   <string name="fans_title">Seguidor</string>
+  <string name="local_history_search_placeholder">Pesquisar cache local</string>
 </resources>

@@ -801,7 +801,12 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
 
         is moe.tlaster.mfm.parser.tree.TextNode -> {
             Element("span").apply {
-                appendChild(TextNode(content))
+                content.split("\n").forEachIndexed { index, line ->
+                    if (index != 0) {
+                        appendChild(Element("br"))
+                    }
+                    appendChild(TextNode(line))
+                }
             }
         }
 

@@ -45,7 +45,7 @@ firebase-bom = "33.7.0"
 google-services = "4.4.2"
 firebase-crashlytics = "3.0.2"
 materialKolor = "2.0.0"
-room = "2.7.0-alpha11"
+room = "2.7.0-alpha12"
 compose-multiplatform = "1.7.1"
 
 [libraries]

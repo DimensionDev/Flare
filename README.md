@@ -9,7 +9,7 @@
 ![badge-iOS](https://img.shields.io/badge/iOS-18.0-black)
 
 
-The ultimate next generation* open-sourced AI powered** decentralized social network client for Android/iOS, still in development.
+The ultimate next generation* open-sourced AI powered** decentralized social network client for Android/iOS, still in development.  
 *: _Just a joke_  
 **: _Not yet implemented_
 
@@ -30,10 +30,10 @@ Here're some features we're planning to implement in the future.
    - [ ] Summary
    - [ ] Quick reply
  - [ ] Support for Meta Threads
- - [ ] Anonymous mode enhancement
+ - [x] Anonymous mode enhancement
    - Option to change data source
  - [ ] Auto thread
- - [ ] Local history
+ - [x] Local history
  - [ ] RSS feed support
 
 ## Building

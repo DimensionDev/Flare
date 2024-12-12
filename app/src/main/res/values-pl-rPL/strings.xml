@@ -99,6 +99,10 @@
   <string name="settings_tab_customization_description">Dostosuj karty na ekranie głównym</string>
   <string name="settings_local_filter_title">Filtr lokalny</string>
   <string name="settings_local_filter_description">Lokalne ustawienia filtra dla osi czasu</string>
+  <string name="settings_guest_setting_title">Host trybu gościa</string>
+  <string name="settings_guest_setting_description">Ustaw host dla trybu gościa</string>
+  <string name="settings_local_history_title">Historia lokalna</string>
+  <string name="settings_local_history_description">Wyświetl lub przeszukaj historię przeglądania</string>
   <string name="status_loadmore_end">Nie ma więcej wpisów</string>
   <string name="status_loadmore_error">Błąd ładowania więcej wpisów</string>
   <string name="status_loadmore_error_retry">Ponów próbę</string>
@@ -522,4 +526,5 @@
   <string name="notification_login_expired">Logowanie wygasło, zaloguj się ponownie</string>
   <string name="following_title">Obserwowane</string>
   <string name="fans_title">Obserwujący</string>
+  <string name="local_history_search_placeholder">Szukaj lokalnej pamięci podręcznej</string>
 </resources>

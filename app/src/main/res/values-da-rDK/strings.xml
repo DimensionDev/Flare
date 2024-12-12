@@ -100,6 +100,10 @@
   <string name="settings_tab_customization_description">Tilpas fanerne på startskærmen</string>
   <string name="settings_local_filter_title">Lokalt filter</string>
   <string name="settings_local_filter_description">Lokale filterindstillinger for tidslinje</string>
+  <string name="settings_guest_setting_title">Gæst Tilstand Vært</string>
+  <string name="settings_guest_setting_description">Indstil værten for gæstetilstand</string>
+  <string name="settings_local_history_title">Lokal historik</string>
+  <string name="settings_local_history_description">Se eller søg i din browserhistorik</string>
   <string name="status_loadmore_end">Ikke flere toots</string>
   <string name="status_loadmore_error">Fejl ved indlæsning af flere toots</string>
   <string name="status_loadmore_error_retry">Forsøg igen</string>
@@ -525,4 +529,5 @@
   <string name="notification_login_expired">Login er udløbet. Log venligst ind igen</string>
   <string name="following_title">Følger</string>
   <string name="fans_title">Følger</string>
+  <string name="local_history_search_placeholder">Søg i lokal cache</string>
 </resources>

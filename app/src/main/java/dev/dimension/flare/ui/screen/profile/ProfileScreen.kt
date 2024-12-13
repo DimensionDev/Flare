@@ -42,7 +42,6 @@ import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowSize
@@ -110,6 +109,7 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.MatricesDisplay
 import dev.dimension.flare.ui.component.NetworkImage
@@ -261,7 +261,7 @@ internal fun MeRoute(
 private fun ProfileErrorScreen(onBack: () -> Unit) {
     FlareScaffold(
         topBar = {
-            TopAppBar(
+            FlareTopAppBar(
                 title = {
                     Text(text = "Error")
                 },
@@ -497,7 +497,7 @@ private fun ProfileScreen(
                         )
                     }
                 }
-                TopAppBar(
+                FlareTopAppBar(
                     title = {
                         state.state.userState.onSuccess {
                             HtmlText(

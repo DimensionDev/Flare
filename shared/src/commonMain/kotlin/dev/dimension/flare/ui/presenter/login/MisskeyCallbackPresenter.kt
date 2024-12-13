@@ -93,7 +93,7 @@ class MisskeyCallbackPresenter(
     }
 }
 
-suspend fun misskeyLoginUseCase(
+internal suspend fun misskeyLoginUseCase(
     host: String,
     applicationRepository: ApplicationRepository,
     launchOAuth: (String) -> Unit,

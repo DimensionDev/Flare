@@ -11,7 +11,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
@@ -22,6 +21,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
@@ -29,6 +30,8 @@ import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.generated.destinations.AboutRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.AccountsRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.AppearanceRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.GuestSettingRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.LocalCacheSearchRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.LocalFilterRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StorageRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.TabCustomizeRouteDestination
@@ -39,13 +42,16 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.CircleUser
+import compose.icons.fontawesomeicons.solid.ClockRotateLeft
 import compose.icons.fontawesomeicons.solid.Database
 import compose.icons.fontawesomeicons.solid.Filter
+import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.Table
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
@@ -62,7 +68,11 @@ import moe.tlaster.precompose.molecule.producePresenter
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun SettingsRoute(navigationState: NavigationState) {
+internal fun SettingsRoute(
+    navigationState: NavigationState,
+    navigator: DestinationsNavigator,
+) {
+    val uriHandler = LocalUriHandler.current
     val scaffoldNavigator =
         rememberListDetailPaneScaffoldNavigator<SettingsDetailDestination>()
     BackHandler(
@@ -94,6 +104,12 @@ internal fun SettingsRoute(navigationState: NavigationState) {
                     toLocalFilter = {
                         scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.LocalFilter)
                     },
+                    toGuestSettings = {
+                        navigator.navigate(GuestSettingRouteDestination)
+                    },
+                    toLocalHistory = {
+                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.LocalHistory)
+                    },
                 )
             }
         },
@@ -108,6 +124,7 @@ internal fun SettingsRoute(navigationState: NavigationState) {
                                 navigateBack = {
                                     scaffoldNavigator.navigateBack()
                                 },
+                                uriHandler = uriHandler,
                             ),
                         )
                         dependency(navigationState)
@@ -126,6 +143,7 @@ internal enum class SettingsDetailDestination : Parcelable {
     About,
     TabCustomization,
     LocalFilter,
+    LocalHistory,
     ;
 
     fun toDestination(): Direction =
@@ -136,6 +154,7 @@ internal enum class SettingsDetailDestination : Parcelable {
             About -> AboutRouteDestination
             TabCustomization -> TabCustomizeRouteDestination
             LocalFilter -> LocalFilterRouteDestination
+            LocalHistory -> LocalCacheSearchRouteDestination
         }
 }
 
@@ -144,6 +163,7 @@ internal class ProxyDestinationsNavigator(
     private val scaffoldNavigator: ThreePaneScaffoldNavigator<SettingsDetailDestination>,
     private val navigator: DestinationsNavigator,
     private val navigateBack: () -> Unit,
+    val uriHandler: UriHandler,
 ) : DestinationsNavigator by navigator {
     override fun navigateUp(): Boolean =
         if (navigator.navigateUp()) {
@@ -175,11 +195,13 @@ internal fun SettingsScreen(
     toAbout: () -> Unit,
     toTabCustomization: () -> Unit,
     toLocalFilter: () -> Unit,
+    toGuestSettings: () -> Unit,
+    toLocalHistory: () -> Unit,
 ) {
     val state by producePresenter { settingsPresenter() }
     FlareScaffold(
         topBar = {
-            TopAppBar(
+            FlareTopAppBar(
                 title = {
                     Text(text = stringResource(id = R.string.settings_title))
                 },
@@ -228,6 +250,28 @@ internal fun SettingsScreen(
                     )
                 }
             HorizontalDivider()
+            state.user
+                .onError {
+                    ListItem(
+                        headlineContent = {
+                            Text(text = stringResource(id = R.string.settings_guest_setting_title))
+                        },
+                        modifier =
+                            Modifier
+                                .clickable {
+                                    toGuestSettings.invoke()
+                                },
+                        leadingContent = {
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.Globe,
+                                contentDescription = null,
+                            )
+                        },
+                        supportingContent = {
+                            Text(text = stringResource(id = R.string.settings_guest_setting_description))
+                        },
+                    )
+                }
             ListItem(
                 headlineContent = {
                     Text(text = stringResource(id = R.string.settings_appearance_title))
@@ -282,6 +326,25 @@ internal fun SettingsScreen(
                         Modifier.clickable {
                             toLocalFilter.invoke()
                         },
+                )
+                ListItem(
+                    headlineContent = {
+                        Text(text = stringResource(id = R.string.settings_local_history_title))
+                    },
+                    modifier =
+                        Modifier
+                            .clickable {
+                                toLocalHistory.invoke()
+                            },
+                    leadingContent = {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.ClockRotateLeft,
+                            contentDescription = null,
+                        )
+                    },
+                    supportingContent = {
+                        Text(text = stringResource(id = R.string.settings_local_history_description))
+                    },
                 )
             }
 //            ListItem(

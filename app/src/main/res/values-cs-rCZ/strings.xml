@@ -100,6 +100,10 @@
   <string name="settings_tab_customization_description">Přizpůsobit panely na domovské obrazovce</string>
   <string name="settings_local_filter_title">Místní filtr</string>
   <string name="settings_local_filter_description">Místní nastavení filtru pro timeline</string>
+  <string name="settings_guest_setting_title">Hostitel režimu hostování</string>
+  <string name="settings_guest_setting_description">Nastavit hostitele pro režim hosta</string>
+  <string name="settings_local_history_title">Místní historie</string>
+  <string name="settings_local_history_description">Zobrazit nebo vyhledat historii prohlížení</string>
   <string name="status_loadmore_end">Žádné další tooty</string>
   <string name="status_loadmore_error">Chyba při načítání dalších tootů</string>
   <string name="status_loadmore_error_retry">Opakovat</string>
@@ -525,4 +529,5 @@
   <string name="notification_login_expired">Přihlášení vypršelo, přihlaste se prosím znovu</string>
   <string name="following_title">Sledovat</string>
   <string name="fans_title">Sledující</string>
+  <string name="local_history_search_placeholder">Hledat místní keš</string>
 </resources>

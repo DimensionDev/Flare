@@ -99,6 +99,10 @@
   <string name="settings_tab_customization_description">تخصيص علامات التبويب على الشاشة الرئيسية</string>
   <string name="settings_local_filter_title">الفلتر المحلي</string>
   <string name="settings_local_filter_description">إعدادات الفلتر المحلي للخيط الزمني</string>
+  <string name="settings_guest_setting_title">مضيف وضع الضيف</string>
+  <string name="settings_guest_setting_description">تعيين المضيف لوضع الضيف</string>
+  <string name="settings_local_history_title">التاريخ المحلي</string>
+  <string name="settings_local_history_description">عرض أو بحث سجل التصفح الخاص بك</string>
   <string name="status_loadmore_end">لا مزيد من التبويقات</string>
   <string name="status_loadmore_error">خطأ في تحميل المزيد من التبويقات</string>
   <string name="status_loadmore_error_retry">إعادة المحاولة</string>
@@ -523,4 +527,5 @@
   <string name="notification_login_expired">انتهت صلاحية تسجيل الدخول، الرجاء تسجيل الدخول مرة أخرى</string>
   <string name="following_title">تابع</string>
   <string name="fans_title">متابع</string>
+  <string name="local_history_search_placeholder">البحث عن ذاكرة التخزين المؤقت المحلية</string>
 </resources>

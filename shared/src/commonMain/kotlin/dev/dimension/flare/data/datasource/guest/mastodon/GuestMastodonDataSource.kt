@@ -1,4 +1,4 @@
-package dev.dimension.flare.data.datasource.guest
+package dev.dimension.flare.data.datasource.guest.mastodon
 
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -35,7 +35,14 @@ import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-object GuestDataSource : MicroblogDataSource, KoinComponent {
+class GuestMastodonDataSource(
+    private val host: String,
+    private val locale: String,
+) : MicroblogDataSource,
+    KoinComponent {
+    private val service by lazy {
+        GuestMastodonService("https://$host/", locale)
+    }
     private val database: CacheDatabase by inject()
 
     override fun homeTimeline(
@@ -44,7 +51,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
-            GuestTimelinePagingSource(host = GuestMastodonService.HOST)
+            GuestTimelinePagingSource(host = host, service = service)
         }.flow.cachedIn(scope)
 
     override fun userByAcct(acct: String): CacheData<UiUserV2> {
@@ -52,9 +59,9 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         return Cacheable(
             fetchSource = {
                 val user =
-                    GuestMastodonService
+                    service
                         .lookupUserByAcct("$name@$host")
-                        ?.toDbUser(GuestMastodonService.HOST) ?: throw Exception("User not found")
+                        ?.toDbUser(host) ?: throw Exception("User not found")
                 database.userDao().insert(user)
             },
             cacheSource = {
@@ -75,10 +82,10 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
     }
 
     override fun userById(id: String): CacheData<UiProfile> {
-        val userKey = MicroBlogKey(id, GuestMastodonService.HOST)
+        val userKey = MicroBlogKey(id, host)
         return Cacheable(
             fetchSource = {
-                val user = GuestMastodonService.lookupUser(id).toDbUser(GuestMastodonService.HOST)
+                val user = service.lookupUser(id).toDbUser(host)
                 database.userDao().insert(user)
             },
             cacheSource = {
@@ -89,7 +96,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                     .mapNotNull {
                         val content = it?.content
                         if (content is UserContent.Mastodon) {
-                            content.data.render(null, host = GuestMastodonService.HOST)
+                            content.data.render(null, host = host)
                         } else {
                             null
                         }
@@ -107,9 +114,10 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
             GuestUserTimelinePagingSource(
-                host = GuestMastodonService.HOST,
+                host = host,
                 userId = userKey.id,
                 onlyMedia = mediaOnly,
+                service = service,
             )
         }.flow.cachedIn(scope)
 
@@ -121,9 +129,10 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
             GuestStatusDetailPagingSource(
-                host = GuestMastodonService.HOST,
+                host = host,
                 statusKey = statusKey,
                 statusOnly = false,
+                service = service,
             )
         }.flow.cachedIn(scope)
 
@@ -132,10 +141,10 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         return MemCacheable(
             key = pagingKey,
             fetchSource = {
-                GuestMastodonService
+                service
                     .lookupStatus(
                         statusKey.id,
-                    ).renderGuest(GuestMastodonService.HOST)
+                    ).renderGuest(host)
             },
         )
     }
@@ -147,7 +156,7 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
-            GuestSearchStatusPagingSource(host = GuestMastodonService.HOST, query = query)
+            GuestSearchStatusPagingSource(host = host, query = query, service = service)
         }.flow.cachedIn(scope)
 
     override fun searchUser(
@@ -159,8 +168,8 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
             config = PagingConfig(pageSize = pageSize),
         ) {
             SearchUserPagingSource(
-                service = GuestMastodonService,
-                host = GuestMastodonService.HOST,
+                service = service,
+                host = host,
                 accountKey = null,
                 query,
             )
@@ -171,9 +180,9 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendsUserPagingSource(
-                service = GuestMastodonService,
+                service = service,
                 accountKey = null,
-                host = GuestMastodonService.HOST,
+                host = host,
             )
         }.flow
 
@@ -181,17 +190,17 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
         pageSize: Int,
         scope: CoroutineScope,
         pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        Pager(PagingConfig(pageSize = pageSize)) {
-            GuestDiscoverStatusPagingSource(host = GuestMastodonService.HOST)
-        }.flow.cachedIn(scope)
+    ): Flow<PagingData<UiTimeline>> = TODO()
+//        Pager(PagingConfig(pageSize = pageSize)) {
+//            GuestDiscoverStatusPagingSource(host = host, service = service)
+//        }.flow.cachedIn(scope)
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendHashtagPagingSource(
-                GuestMastodonService,
+                service,
             )
         }.flow
 
@@ -205,8 +214,8 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
             config = PagingConfig(pageSize = pageSize),
         ) {
             MastodonFollowingPagingSource(
-                service = GuestMastodonService,
-                host = GuestMastodonService.HOST,
+                service = service,
+                host = host,
                 userKey = userKey,
                 accountKey = null,
             )
@@ -222,8 +231,8 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
             config = PagingConfig(pageSize = pageSize),
         ) {
             MastodonFansPagingSource(
-                service = GuestMastodonService,
-                host = GuestMastodonService.HOST,
+                service = service,
+                host = host,
                 userKey = userKey,
                 accountKey = null,
             )
@@ -240,8 +249,9 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                 flow =
                     Pager(PagingConfig(pageSize = pagingSize)) {
                         GuestUserTimelinePagingSource(
-                            host = GuestMastodonService.HOST,
+                            host = host,
                             userId = userKey.id,
+                            service = service,
                         )
                     }.flow.cachedIn(scope),
             ),
@@ -250,9 +260,10 @@ object GuestDataSource : MicroblogDataSource, KoinComponent {
                 flow =
                     Pager(PagingConfig(pageSize = pagingSize)) {
                         GuestUserTimelinePagingSource(
-                            host = GuestMastodonService.HOST,
+                            host = host,
                             userId = userKey.id,
                             withReply = true,
+                            service = service,
                         )
                     }.flow.cachedIn(scope),
             ),

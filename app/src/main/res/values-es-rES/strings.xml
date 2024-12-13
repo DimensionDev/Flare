@@ -100,6 +100,10 @@
   <string name="settings_tab_customization_description">Personalizar las pestañas en la pantalla de inicio</string>
   <string name="settings_local_filter_title">Filtro local</string>
   <string name="settings_local_filter_description">Ajustes de filtro local para la línea de tiempo</string>
+  <string name="settings_guest_setting_title">Host del Modo Invitado</string>
+  <string name="settings_guest_setting_description">Establecer el host para el modo invitado</string>
+  <string name="settings_local_history_title">Historial local</string>
+  <string name="settings_local_history_description">Ver o buscar su historial de navegación</string>
   <string name="status_loadmore_end">No más toots</string>
   <string name="status_loadmore_error">Error al cargar más toots</string>
   <string name="status_loadmore_error_retry">Reintentar</string>
@@ -524,4 +528,5 @@
   <string name="notification_login_expired">Inicio de sesión expirado, por favor inicie sesión de nuevo</string>
   <string name="following_title">Siguiendo</string>
   <string name="fans_title">Seguidor</string>
+  <string name="local_history_search_placeholder">Buscar caché local</string>
 </resources>

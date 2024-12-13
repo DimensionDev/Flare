@@ -3,7 +3,7 @@ compileSdk = "35"
 lifecycleViewmodelCompose = "2.8.4"
 minSdk = "24"
 java = "21"
-agp = "8.7.2"
+agp = "8.7.3"
 kotlin = "2.1.0"
 core-ktx = "1.15.0"
 junit = "4.13.2"
@@ -11,16 +11,16 @@ androidx-test-ext-junit = "1.2.1"
 espresso-core = "3.6.1"
 lifecycle-runtime-ktx = "2.8.7"
 activity-compose = "1.9.3"
-compose-bom = "2024.11.00"
+compose-bom = "2024.12.01"
 ksp = "2.1.0-1.0.29"
-paging = "3.3.4"
-navigation = "2.8.4"
+paging = "3.3.5"
+navigation = "2.8.5"
 kotlinx-datetime = "0.6.1"
 kotlinx-collections-immutable = "0.3.8"
 kotlinx-serialization = "1.7.3"
 coil3 = "3.0.4"
 ktorfit = "2.2.0"
-ktor = "3.0.1"
+ktor = "3.0.2"
 reorderable = "2.4.0"
 stately = "2.1.0"
 twitter-parser = "0.5.3"
@@ -41,11 +41,11 @@ koin = "4.0.0"
 composeIcons = "1.3.0"
 media3 = "1.5.0"
 desugar_jdk_libs = "2.1.3"
-firebase-bom = "33.6.0"
+firebase-bom = "33.7.0"
 google-services = "4.4.2"
 firebase-crashlytics = "3.0.2"
 materialKolor = "2.0.0"
-room = "2.7.0-alpha11"
+room = "2.7.0-alpha12"
 compose-multiplatform = "1.7.1"
 
 [libraries]
@@ -88,7 +88,7 @@ androidx-splash = { group = "androidx.core", name = "core-splashscreen", version
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version = "2.5.0-alpha11" }
+sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version = "2.5.0-alpha12" }
 nestedScrollView = { group = "com.github.Tlaster", name = "NestedScrollView", version = "1.0.3" }
 
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }

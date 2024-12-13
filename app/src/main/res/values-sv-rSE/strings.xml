@@ -100,6 +100,10 @@
   <string name="settings_tab_customization_description">Anpassa flikarna på startskärmen</string>
   <string name="settings_local_filter_title">Lokalt filter</string>
   <string name="settings_local_filter_description">Lokala filterinställningar för tidslinje</string>
+  <string name="settings_guest_setting_title">Värd för gästläge</string>
+  <string name="settings_guest_setting_description">Ställ in värden för gästläge</string>
+  <string name="settings_local_history_title">Lokal historik</string>
+  <string name="settings_local_history_description">Visa eller sök i din webbhistorik</string>
   <string name="status_loadmore_end">Inga fler toots</string>
   <string name="status_loadmore_error">Fel vid laddning av fler toots</string>
   <string name="status_loadmore_error_retry">Försök igen</string>
@@ -525,4 +529,5 @@
   <string name="notification_login_expired">Inloggning löpte ut, vänligen logga in igen</string>
   <string name="following_title">Följer</string>
   <string name="fans_title">Följare</string>
+  <string name="local_history_search_placeholder">Sök lokal cache</string>
 </resources>

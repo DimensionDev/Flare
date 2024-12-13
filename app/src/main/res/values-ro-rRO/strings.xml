@@ -100,6 +100,10 @@
   <string name="settings_tab_customization_description">Personalizați filele de pe ecranul de pornire</string>
   <string name="settings_local_filter_title">Filtru local</string>
   <string name="settings_local_filter_description">Setări filtre locale pentru cronologie</string>
+  <string name="settings_guest_setting_title">Gazda Modului de Oaspete</string>
+  <string name="settings_guest_setting_description">Setați gazda pentru modul vizitator</string>
+  <string name="settings_local_history_title">Istoric local</string>
+  <string name="settings_local_history_description">Vezi sau caută istoricul navigărilor</string>
   <string name="status_loadmore_end">Nu mai sunt notițe</string>
   <string name="status_loadmore_error">Eroare la încărcarea mai multor notițe</string>
   <string name="status_loadmore_error_retry">Reîncercați</string>
@@ -525,4 +529,5 @@
   <string name="notification_login_expired">Logarea a expirat, te rugăm să te autentifici din nou</string>
   <string name="following_title">Urmăriți</string>
   <string name="fans_title">Urmăritor</string>
+  <string name="local_history_search_placeholder">Caută cache local</string>
 </resources>

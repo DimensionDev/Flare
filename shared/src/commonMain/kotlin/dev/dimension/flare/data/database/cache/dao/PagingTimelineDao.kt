@@ -6,9 +6,11 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.model.MicroBlogKey
 
 @Dao
@@ -19,6 +21,18 @@ interface PagingTimelineDao {
         pagingKey: String,
         accountKey: MicroBlogKey,
     ): PagingSource<Int, DbPagingTimelineWithStatus>
+
+    @Transaction
+    @RewriteQueriesToDropUnusedColumns
+    @Query(
+        "SELECT * FROM DbStatus " +
+            "WHERE DbStatus.text like :query",
+    )
+    fun searchHistoryPagingSource(query: String): PagingSource<Int, DbStatusWithReference>
+
+    @Transaction
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId DESC")
+    fun getStatusHistoryPagingSource(pagingKey: String): PagingSource<Int, DbPagingTimelineWithStatus>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(timeline: List<DbPagingTimeline>)

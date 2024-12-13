@@ -100,6 +100,10 @@
   <string name="settings_tab_customization_description">Personnaliser les onglets sur l\'écran d\'accueil</string>
   <string name="settings_local_filter_title">Filtre local</string>
   <string name="settings_local_filter_description">Paramètres de filtre local pour la timeline</string>
+  <string name="settings_guest_setting_title">Hôte en mode invité</string>
+  <string name="settings_guest_setting_description">Définir l\'hôte pour le mode invité</string>
+  <string name="settings_local_history_title">Historique local</string>
+  <string name="settings_local_history_description">Voir ou rechercher votre historique de navigation</string>
   <string name="status_loadmore_end">Plus de pouets</string>
   <string name="status_loadmore_error">Erreur lors du chargement de plusieurs pouets</string>
   <string name="status_loadmore_error_retry">Réessayer</string>
@@ -525,4 +529,5 @@
   <string name="notification_login_expired">La connexion a expiré, veuillez vous reconnecter</string>
   <string name="following_title">Abonnements</string>
   <string name="fans_title">Abonné</string>
+  <string name="local_history_search_placeholder">Rechercher dans la cache locale</string>
 </resources>

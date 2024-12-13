@@ -120,6 +120,7 @@ private fun toDbStatusWithUser(
                 content = StatusContent.XQT(tweet),
                 userKey = user.userKey,
                 accountKey = accountKey,
+                text = tweet.legacy?.fullText,
             ),
         user = user,
     )

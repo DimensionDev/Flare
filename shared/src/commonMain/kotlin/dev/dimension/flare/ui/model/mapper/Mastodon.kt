@@ -206,7 +206,7 @@ private fun Status.renderStatus(
         contentWarning = spoilerText,
         user = actualUser,
         quote = persistentListOf(),
-        content = parseContent(this, accountKey, host).toUi(),
+        content = parseMastodonContent(this, accountKey, host).toUi(),
         card =
             card?.url?.let { url ->
                 UiCard(
@@ -529,7 +529,7 @@ private fun parseName(status: Account): Element {
     return parseHtml(content) as? Element ?: Element("body")
 }
 
-private fun parseContent(
+internal fun parseMastodonContent(
     status: Status,
 //    text: String,
     accountKey: MicroBlogKey?,

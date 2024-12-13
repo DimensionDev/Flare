@@ -100,6 +100,10 @@
   <string name="settings_tab_customization_description">Muokkaa aloitusnäytöllä olevia välilehtiä</string>
   <string name="settings_local_filter_title">Paikallinen suodatin</string>
   <string name="settings_local_filter_description">Paikallisen suodattimen asetukset aikajanalle</string>
+  <string name="settings_guest_setting_title">Vierailevan Tilan Isäntä</string>
+  <string name="settings_guest_setting_description">Aseta isäntä vierastilaan</string>
+  <string name="settings_local_history_title">Paikallinen historia</string>
+  <string name="settings_local_history_description">Näytä tai etsi selaushistoriasi</string>
   <string name="status_loadmore_end">Ei enää toosia</string>
   <string name="status_loadmore_error">Virhe ladattaessa lisää toosia</string>
   <string name="status_loadmore_error_retry">Yritä Uudelleen</string>
@@ -525,4 +529,5 @@
   <string name="notification_login_expired">Kirjautuminen vanhentunut, kirjaudu uudelleen</string>
   <string name="following_title">Seurataan</string>
   <string name="fans_title">Seuraaja</string>
+  <string name="local_history_search_placeholder">Etsi paikallista välimuistia</string>
 </resources>

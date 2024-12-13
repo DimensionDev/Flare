@@ -952,30 +952,32 @@ internal class NavigationState {
 }
 
 private val LocalTabState =
-    androidx.compose.runtime.staticCompositionLocalOf<TabState> {
-        error("No TabState provided")
+    androidx.compose.runtime.staticCompositionLocalOf<TabState?> {
+        null
     }
 
 @Composable
 internal fun RegisterTabCallback(lazyListState: LazyStaggeredGridState) {
     val tabState = LocalTabState.current
-    val scope = rememberCoroutineScope()
-    val callback: () -> Unit =
-        remember(lazyListState, scope) {
-            {
-                scope.launch {
-                    if (lazyListState.firstVisibleItemIndex > 20) {
-                        lazyListState.scrollToItem(0)
-                    } else {
-                        lazyListState.animateScrollToItem(0)
+    if (tabState != null) {
+        val scope = rememberCoroutineScope()
+        val callback: () -> Unit =
+            remember(lazyListState, scope) {
+                {
+                    scope.launch {
+                        if (lazyListState.firstVisibleItemIndex > 20) {
+                            lazyListState.scrollToItem(0)
+                        } else {
+                            lazyListState.animateScrollToItem(0)
+                        }
                     }
                 }
             }
-        }
-    DisposableEffect(tabState, callback, lazyListState) {
-        tabState.registerCallback(callback)
-        onDispose {
-            tabState.unregisterCallback(callback)
+        DisposableEffect(tabState, callback, lazyListState) {
+            tabState.registerCallback(callback)
+            onDispose {
+                tabState.unregisterCallback(callback)
+            }
         }
     }
 }

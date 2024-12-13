@@ -69,6 +69,8 @@ kotlin {
                 implementation(libs.room.runtime)
                 implementation(libs.room.paging)
                 implementation(libs.sqlite.bundled)
+                implementation(libs.datastore)
+                implementation(libs.kotlinx.serialization.protobuf)
             }
         }
         val commonTest by getting {
@@ -82,6 +84,7 @@ kotlin {
                 implementation(libs.compose.foundation)
                 implementation(libs.core.ktx)
                 implementation(libs.ktor.client.okhttp)
+                implementation(libs.koin.android)
             }
         }
         val appleMain by getting {

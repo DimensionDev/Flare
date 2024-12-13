@@ -25,7 +25,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -51,8 +50,8 @@ import com.ramcosta.composedestinations.result.NavResult
 import com.ramcosta.composedestinations.result.ResultRecipient
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CircleQuestion
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
-import compose.icons.fontawesomeicons.solid.Question
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.onEmpty
@@ -65,6 +64,7 @@ import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedSecureTextField2
 import dev.dimension.flare.ui.component.OutlinedTextField2
@@ -136,7 +136,7 @@ fun ServiceSelectScreen(
             modifier = modifier,
             topBar = {
                 if (onBack != null) {
-                    TopAppBar(
+                    FlareTopAppBar(
                         title = {
                         },
                         navigationIcon = {
@@ -206,7 +206,7 @@ fun ServiceSelectScreen(
                                 )
                             }.onError {
                                 FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.Question,
+                                    imageVector = FontAwesomeIcons.Solid.CircleQuestion,
                                     contentDescription = null,
                                 )
                             }.onLoading {

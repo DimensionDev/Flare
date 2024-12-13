@@ -96,6 +96,10 @@
   <string name="settings_tab_customization_description">Προσαρμόστε τις καρτέλες στην αρχική οθόνη</string>
   <string name="settings_local_filter_title">Τοπικό φίλτρο</string>
   <string name="settings_local_filter_description">Ρυθμίσεις τοπικού φίλτρου για το χρονολόγιο</string>
+  <string name="settings_guest_setting_title">Εξυπηρετητής Λειτουργίας Επισκέπτη</string>
+  <string name="settings_guest_setting_description">Ορίστε τον κεντρικό υπολογιστή για τη λειτουργία επισκέπτη</string>
+  <string name="settings_local_history_title">Τοπικό ιστορικό</string>
+  <string name="settings_local_history_description">Δείτε ή αναζητήστε το ιστορικό περιήγησης</string>
   <string name="status_loadmore_end">Όχι άλλες φωνές</string>
   <string name="status_loadmore_error">Σφάλμα φόρτωσης περισσότερων φωνών</string>
   <string name="status_loadmore_error_retry">Επανάληψη</string>
@@ -520,4 +524,5 @@
   <string name="notification_login_expired">Η σύνδεση έληξε, παρακαλώ συνδεθείτε ξανά</string>
   <string name="following_title">Ακολουθεί</string>
   <string name="fans_title">Ακόλουθος</string>
+  <string name="local_history_search_placeholder">Αναζήτηση τοπικής προσωρινής μνήμης</string>
 </resources>

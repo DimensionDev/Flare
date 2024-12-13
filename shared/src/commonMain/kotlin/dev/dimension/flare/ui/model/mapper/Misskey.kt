@@ -764,7 +764,9 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
             Element("a").apply {
 //                attributes["href"] = url
                 attributes().put("href", url)
-                appendChild(TextNode(content))
+                content.forEach {
+                    appendChild(it.toHtml(accountKey))
+                }
             }
         }
 
@@ -801,7 +803,12 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
 
         is moe.tlaster.mfm.parser.tree.TextNode -> {
             Element("span").apply {
-                appendChild(TextNode(content))
+                content.split("\n").forEachIndexed { index, line ->
+                    if (index != 0) {
+                        appendChild(Element("br"))
+                    }
+                    appendChild(TextNode(line))
+                }
             }
         }
 

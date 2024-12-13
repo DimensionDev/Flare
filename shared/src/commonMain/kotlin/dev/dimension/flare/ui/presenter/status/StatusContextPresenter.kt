@@ -7,7 +7,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
@@ -36,6 +35,7 @@ class StatusContextPresenter(
                         service.context(statusKey, scope = scope)
                     }.collectAsLazyPagingItems()
                 }.toPagingState()
+        remember { LogStatusHistoryPresenter(accountType = accountType, statusKey = statusKey) }.body()
         return object : StatusContextState(
             listState,
         ) {

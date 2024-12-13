@@ -12,38 +12,42 @@ import dev.dimension.flare.data.network.mastodon.api.createLookupResources
 import dev.dimension.flare.data.network.mastodon.api.createSearchResources
 import dev.dimension.flare.data.network.mastodon.api.createTimelineResources
 import dev.dimension.flare.data.network.mastodon.api.createTrendsResources
-import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.request.headers
 import io.ktor.client.statement.bodyAsText
 
-private fun config(baseUrl: String) =
-    ktorfit(baseUrl) {
-        expectSuccess = true
-        HttpResponseValidator {
-            handleResponseExceptionWithRequest { exception, _ ->
-                if (exception is ResponseException) {
-                    exception.response
-                        .bodyAsText()
-                        .decodeJson<MastodonException>()
-                        .takeIf { it.error != null }
-                        ?.let {
-                            throw it
-                        }
-                }
+private fun config(
+    baseUrl: String,
+    locale: String,
+) = ktorfit(baseUrl) {
+    expectSuccess = true
+    HttpResponseValidator {
+        handleResponseExceptionWithRequest { exception, _ ->
+            if (exception is ResponseException) {
+                exception.response
+                    .bodyAsText()
+                    .decodeJson<MastodonException>()
+                    .takeIf { it.error != null }
+                    ?.let {
+                        throw it
+                    }
             }
         }
     }
-
-private const val BASEURL = "https://mastodon.social/"
-
-internal object GuestMastodonService :
-    TrendsResources by config(BASEURL).createTrendsResources(),
-    LookupResources by config(BASEURL).createLookupResources(),
-    TimelineResources by config(BASEURL).createTimelineResources(),
-    AccountResources by config(BASEURL).createAccountResources(),
-    SearchResources by config(BASEURL).createSearchResources() {
-    const val HOST = "mastodon.social"
-
-    val GuestKey = MicroBlogKey("guest", HOST)
+    defaultRequest {
+        headers {
+            append("accept-language", locale)
+        }
+    }
 }
+
+internal class GuestMastodonService(
+    private val baseUrl: String,
+    private val locale: String,
+) : TrendsResources by config(baseUrl, locale).createTrendsResources(),
+    LookupResources by config(baseUrl, locale).createLookupResources(),
+    TimelineResources by config(baseUrl, locale).createTimelineResources(),
+    AccountResources by config(baseUrl, locale).createAccountResources(),
+    SearchResources by config(baseUrl, locale).createSearchResources()

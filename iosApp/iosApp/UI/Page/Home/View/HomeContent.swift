@@ -28,56 +28,32 @@ struct HomeTimelineView: View {
     @Binding var showSettings: Bool
     @Binding var showLogin: Bool
     @Binding var selectedHomeTab: Int
+    @State private var currentPresenter: TimelinePresenter?
+    @State private var homeTimelinePresenter: HomeTimelinePresenter
+    
+    init(router: Router, accountType: AccountType, showSettings: Binding<Bool>, showLogin: Binding<Bool>, selectedHomeTab: Binding<Int>) {
+        self.router = router
+        self.accountType = accountType
+        self._showSettings = showSettings
+        self._showLogin = showLogin
+        self._selectedHomeTab = selectedHomeTab
+        self._homeTimelinePresenter = State(initialValue: HomeTimelinePresenter(accountType: accountType))
+    }
     
     var body: some View {
-        TabView(selection: $selectedHomeTab) {
-            // 首页内容
-            HomeTimelineScreen(accountType: accountType)
-                .tag(0)
-            
-            Group {
-                if selectedHomeTab == 1 {
-                    // 公开页面
-                    PublicScreen(accountType: accountType)
-                        .tag(1)
-                }
-                
-                if selectedHomeTab == 2 {
-                    // 书签页面
-                    BookmarkScreen(accountType: accountType)
-                        .tag(2)
-                }
-                
-                if selectedHomeTab == 3 {
-                    // 本地页面
-                    LocalScreen(accountType: accountType)
-                        .tag(3)
-                }
-                
-                if selectedHomeTab == 4 {
-                    // 收藏页面
-                    FavoriteScreen(accountType: accountType)
-                        .tag(4)
-                }
-                
-                if selectedHomeTab == 5 {
-                    // 精选页面
-                    FeaturedScreen(accountType: accountType)
-                        .tag(5)
-                }
+        let presenter = currentPresenter ?? homeTimelinePresenter
+        TimelineScreen(presenter: presenter)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                HomeAppBar(
+                    router: router,
+                    accountType: accountType,
+                    showSettings: $showSettings,
+                    showLogin: $showLogin,
+                    selectedHomeTab: $selectedHomeTab,
+                    currentPresenter: $currentPresenter
+                )
             }
-        }
-        .tabViewStyle(.page(indexDisplayMode: .never))
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            HomeAppBar(
-                router: router,
-                accountType: accountType,
-                showSettings: $showSettings,
-                showLogin: $showLogin,
-                selectedHomeTab: $selectedHomeTab
-            )
-        }
     }
 }
 

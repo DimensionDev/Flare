@@ -3,23 +3,20 @@ import shared
 
 struct TimelineScreen: View {
     let presenter: TimelinePresenter
-    @State private var state: TimelineState
-    init(presenter: TimelinePresenter) {
-        self.presenter = presenter
-        self.state = self.presenter.models.value
-    }
+    
     var body: some View {
-        List {
-            StatusTimelineComponent(
-                data: state.listState,
-                detailKey: nil
-            )
+        ObservePresenter(presenter: presenter) { state in
+            List {
+                StatusTimelineComponent(
+                    data: state.listState,
+                    detailKey: nil
+                )
+            }
+            .listStyle(.plain)
+            .refreshable {
+                try? await state.refresh()
+            }
         }
-        .listStyle(.plain)
-        .refreshable {
-            try? await presenter.models.value.refresh()
-        }
-        .collect(flow: presenter.models, into: $state)
     }
 }
 
@@ -28,10 +25,12 @@ struct HomeTimelineScreen: View {
     @State private var presenter: HomeTimelinePresenter
     private let accountType: AccountType
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    
     init(accountType: AccountType) {
         presenter = .init(accountType: accountType)
         self.accountType = accountType
     }
+    
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
             TimelineScreen(presenter: presenter)

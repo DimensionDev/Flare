@@ -113,13 +113,14 @@
 		64E877782D0430C7003559B9 /* QuotedStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D82D0430C7003559B9 /* QuotedStatus.swift */; };
 		64E877792D0430C7003559B9 /* LinkPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D52D0430C7003559B9 /* LinkPreview.swift */; };
 		64E8778C2D06CA4A003559B9 /* TwitterText in Frameworks */ = {isa = PBXBuildFile; productRef = 64E8778B2D06CA4A003559B9 /* TwitterText */; };
-		64E877912D06CD47003559B9 /* MetaTextKit in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877902D06CD47003559B9 /* MetaTextKit */; };
 		64E877BA2D080DFB003559B9 /* FlareText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877B62D080DFB003559B9 /* FlareText.swift */; };
 		64E877C02D08131D003559B9 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877BD2D08131D003559B9 /* Colors.swift */; };
 		64E877C52D083DF6003559B9 /* FlareMarkdownText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877C32D083DF6003559B9 /* FlareMarkdownText.swift */; };
 		64E877C62D083DF6003559B9 /* TwitterTextProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877C42D083DF6003559B9 /* TwitterTextProvider.swift */; };
 		64E877C92D0842AA003559B9 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877C82D0842AA003559B9 /* SwiftSoup */; };
 		64E877CC2D0842C5003559B9 /* Fuzi in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877CB2D0842C5003559B9 /* Fuzi */; };
+		64EB7DAB2D0C4C0400E41656 /* FLTabSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */; };
+		64EB7DAC2D0C4C0400E41656 /* FLTabSettings2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64EB7DA92D0C4C0400E41656 /* FLTabSettings2.swift */; };
 		B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */; };
 /* End PBXBuildFile section */
 
@@ -222,6 +223,8 @@
 		64E877BD2D08131D003559B9 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		64E877C32D083DF6003559B9 /* FlareMarkdownText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareMarkdownText.swift; sourceTree = "<group>"; };
 		64E877C42D083DF6003559B9 /* TwitterTextProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterTextProvider.swift; sourceTree = "<group>"; };
+		64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLTabSettings.swift; sourceTree = "<group>"; };
+		64EB7DA92D0C4C0400E41656 /* FLTabSettings2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLTabSettings2.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* Flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
@@ -236,7 +239,6 @@
 				64E877CC2D0842C5003559B9 /* Fuzi in Frameworks */,
 				64E208712CF8458A001C64EF /* FLAnimatedImage in Frameworks */,
 				0690507B2CAE634C007FC957 /* Awesome in Frameworks */,
-				64E877912D06CD47003559B9 /* MetaTextKit in Frameworks */,
 				066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */,
 				067D89772AD25C1700F8F932 /* MarkdownUI in Frameworks */,
 				64E208742CF845C2001C64EF /* Kingfisher in Frameworks */,
@@ -740,6 +742,15 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		64EB7DAA2D0C4C0400E41656 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */,
+				64EB7DA92D0C4C0400E41656 /* FLTabSettings2.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
 		7555FF72242A565900829871 = {
 			isa = PBXGroup;
 			children = (
@@ -763,6 +774,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				64EB7DAA2D0C4C0400E41656 /* Data */,
 				64E877BE2D08131D003559B9 /* Resources */,
 				64E877282D0430C7003559B9 /* UI */,
 				64782BD12CFD65F4008DE526 /* Extension */,
@@ -848,7 +860,6 @@
 				64E208792CF84670001C64EF /* Generated */,
 				64BBDA712CFDD8420052E599 /* SwiftDate */,
 				64E8778B2D06CA4A003559B9 /* TwitterText */,
-				64E877902D06CD47003559B9 /* MetaTextKit */,
 				64E877C82D0842AA003559B9 /* SwiftSoup */,
 				64E877CB2D0842C5003559B9 /* Fuzi */,
 			);
@@ -894,7 +905,6 @@
 				64E208782CF84670001C64EF /* XCLocalSwiftPackageReference "Generated" */,
 				64BBDA702CFDD8420052E599 /* XCRemoteSwiftPackageReference "SwiftDate" */,
 				64E8778A2D06CA4A003559B9 /* XCRemoteSwiftPackageReference "twitter-text" */,
-				64E8778F2D06CD47003559B9 /* XCRemoteSwiftPackageReference "MetaTextKit" */,
 				64E877C72D0842AA003559B9 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
 				64E877CA2D0842C5003559B9 /* XCRemoteSwiftPackageReference "Fuzi" */,
 			);
@@ -997,6 +1007,8 @@
 				B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */,
 				64E877292D0430C7003559B9 /* HomeAppBar.swift in Sources */,
 				64E8772A2D0430C7003559B9 /* UIImage+Extension.swift in Sources */,
+				64EB7DAB2D0C4C0400E41656 /* FLTabSettings.swift in Sources */,
+				64EB7DAC2D0C4C0400E41656 /* FLTabSettings2.swift in Sources */,
 				64E8772B2D0430C7003559B9 /* ProfileScreen.swift in Sources */,
 				64E8772C2D0430C7003559B9 /* ServiceSelectScreen.swift in Sources */,
 				64E8772D2D0430C7003559B9 /* HomeContent.swift in Sources */,
@@ -1420,14 +1432,6 @@
 				minimumVersion = 0.0.4;
 			};
 		};
-		64E8778F2D06CD47003559B9 /* XCRemoteSwiftPackageReference "MetaTextKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/TwidereProject/MetaTextKit/";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.2.0;
-			};
-		};
 		64E877C72D0842AA003559B9 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
@@ -1510,11 +1514,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 64E8778A2D06CA4A003559B9 /* XCRemoteSwiftPackageReference "twitter-text" */;
 			productName = TwitterText;
-		};
-		64E877902D06CD47003559B9 /* MetaTextKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 64E8778F2D06CD47003559B9 /* XCRemoteSwiftPackageReference "MetaTextKit" */;
-			productName = MetaTextKit;
 		};
 		64E877C82D0842AA003559B9 /* SwiftSoup */ = {
 			isa = XCSwiftPackageProductDependency;

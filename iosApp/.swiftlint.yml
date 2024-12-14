@@ -5,8 +5,14 @@ disabled_rules:
   - force_cast
   - identifier_name
   - line_length
+  - file_length
 
 # 如果你后续想启用line_length规则但是想调整长度限制，可以使用下面的配置
 # line_length:
 #   warning: 250
 #   error: 300
+
+# 如果你后续想启用file_length规则但是想调整长度限制，可以使用下面的配置
+# file_length:
+#   warning: 500
+#   error: 1200

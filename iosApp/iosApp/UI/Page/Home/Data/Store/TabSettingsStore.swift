@@ -1,30 +1,36 @@
 import Foundation
 import SwiftUI
+import shared
 
 class TabSettingsStore: ObservableObject {
-    @Published var tabs: [AppBarTabItem]
+    @Published var tabs: [FLTabItem]
+    @Published var availableTabs: [FLTabItem] = []
+    @Published var secondaryItems: [FLTabItem] = []
     
-    static let defaultTabs = [
-        AppBarTabItem(title: "首页", tag: 0),
-        AppBarTabItem(title: "公开", tag: 1),
-        AppBarTabItem(title: "书签", tag: 2),
-        AppBarTabItem(title: "本地", tag: 3),
-        AppBarTabItem(title: "收藏", tag: 4)
-    ]
+    private let user: UiUserV2
     
-    init() {
-        if let data = UserDefaults.standard.data(forKey: "tabSettings"),
-           let savedTabs = try? JSONDecoder().decode([AppBarTabItem].self, from: data) {
-            self.tabs = savedTabs
-        } else {
-            self.tabs = TabSettingsStore.defaultTabs
-        }
+    init(user: UiUserV2) {
+        self.user = user
+        // 根据用户平台加载对应的标签项
+        self.tabs = FLTabSettings.defaultPrimary(user: user)
+        self.secondaryItems = FLTabSettings.defaultSecondary(user: user)
+        updateAvailableTabs()
+    }
+    
+    private func updateAvailableTabs() {
+        let currentTabKeys = Set(tabs.map { $0.key })
+        // 可用标签应该是当前平台的 secondary items 中未被使用的项
+        availableTabs = secondaryItems.filter { !currentTabKeys.contains($0.key) }
     }
     
     func saveTabs() {
-        if let encoded = try? JSONEncoder().encode(tabs) {
-            UserDefaults.standard.set(encoded, forKey: "tabSettings")
-        }
+        let settings = FLTabSettings(
+            items: tabs,
+            secondaryItems: secondaryItems,
+            homeTabs: [:]
+        )
+        // TODO: 保存设置到持久化存储
+        updateAvailableTabs()
     }
     
     func moveTab(from source: IndexSet, to destination: Int) {
@@ -33,21 +39,24 @@ class TabSettingsStore: ObservableObject {
     }
     
     func toggleTab(_ id: String) {
-        if let index = tabs.firstIndex(where: { $0.id == id }) {
-            tabs[index].isEnabled.toggle()
+        if let index = tabs.firstIndex(where: { $0.key == id }) {
+            let tab = tabs[index]
+            let updatedMetaData = FLTabMetaData(
+                title: tab.metaData.title,
+                icon: tab.metaData.icon
+            )
+            tabs[index] = tab.update(metaData: updatedMetaData)
             saveTabs()
         }
     }
     
-    func addNewTab(title: String) {
-        let newTag = (tabs.map { $0.tag }.max() ?? -1) + 1
-        let newTab = AppBarTabItem(title: title, tag: newTag)
-        tabs.append(newTab)
+    func addTab(_ tab: FLTabItem) {
+        tabs.append(tab)
         saveTabs()
     }
     
     func removeTab(_ id: String) {
-        tabs.removeAll { $0.id == id }
+        tabs.removeAll { $0.key == id }
         saveTabs()
     }
 }

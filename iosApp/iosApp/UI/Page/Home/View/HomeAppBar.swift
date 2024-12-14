@@ -4,7 +4,9 @@ import SwiftUI
 import MarkdownUI
 
 struct HomeAppBar: ToolbarContent {
-    @StateObject private var tabStore = TabSettingsStore()
+    @State private var tabStore: TabSettingsStore?
+    @State private var selectedSecondaryItem: String?
+    @State private var presenterCache: [String: TimelinePresenter] = [:]
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     let router: Router
     let accountType: AccountType
@@ -14,6 +16,43 @@ struct HomeAppBar: ToolbarContent {
     @State private var showTabSettings = false
     @State private var showUserSettings = false
     @State private var presenter = ActiveAccountPresenter()
+    
+    @Binding var currentPresenter: TimelinePresenter?
+    
+    init(router: Router, accountType: AccountType, showSettings: Binding<Bool>, showLogin: Binding<Bool>, selectedHomeTab: Binding<Int>, currentPresenter: Binding<TimelinePresenter?>) {
+        self.router = router
+        self.accountType = accountType
+        self._showSettings = showSettings
+        self._showLogin = showLogin
+        self._selectedHomeTab = selectedHomeTab
+        self._currentPresenter = currentPresenter
+    }
+    
+    private func getOrCreatePresenter(for tab: FLTabItem) -> TimelinePresenter? {
+        if let timelineItem = tab as? FLTimelineTabItem {
+            let key = tab.key
+            if let cachedPresenter = presenterCache[key] {
+                return cachedPresenter
+            } else {
+                let presenter = timelineItem.createPresenter()
+                presenterCache[key] = presenter
+                return presenter
+            }
+        }
+        return nil
+    }
+    
+    private func initializeTabStore(with user: UiUserV2) {
+        if tabStore == nil {
+            tabStore = TabSettingsStore(user: user)
+            if selectedSecondaryItem == nil {
+                if let firstItem = tabStore?.secondaryItems.first {
+                    selectedSecondaryItem = firstItem.key
+                    currentPresenter = getOrCreatePresenter(for: firstItem)
+                }
+            }
+        }
+    }
     
     var body: some ToolbarContent {
         if !(accountType is AccountTypeGuest) {
@@ -46,6 +85,9 @@ struct HomeAppBar: ToolbarContent {
                                 .clipShape(Circle())
                                 .padding(.leading, 8)
                         }
+                        .task {
+                            initializeTabStore(with: data.data)
+                        }
                     }
                 }
             }
@@ -53,30 +95,41 @@ struct HomeAppBar: ToolbarContent {
             // 中间的标签栏
             ToolbarItem(placement: .principal) {
                 ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 24) {
-                        ForEach(tabStore.tabs.filter { $0.isEnabled }) { tab in
-                            Button(action: {
-                                withAnimation {
-                                    selectedHomeTab = tab.tag
-                                }
-                            }) {
-                                VStack(spacing: 4) {
-                                    Text(tab.title)
-                                        .font(.system(size: 16))
-                                        .foregroundColor(selectedHomeTab == tab.tag ? .primary : .gray)
-                                        .fontWeight(selectedHomeTab == tab.tag ? .semibold : .regular)
-                                    
-                                    Rectangle()
-                                        .fill(selectedHomeTab == tab.tag ? Color.accentColor : Color.clear)
-                                        .frame(height: 2)
-                                        .frame(width: 24)
+                    if let store = tabStore {
+                        HStack(spacing: 24) {
+                            ForEach(store.secondaryItems, id: \.key) { tab in
+                                Button(action: {
+                                    withAnimation {
+                                        selectedSecondaryItem = tab.key
+                                        currentPresenter = getOrCreatePresenter(for: tab)
+                                    }
+                                }) {
+                                    VStack(spacing: 4) {
+                                        switch tab.metaData.title {
+                                        case .text(let title):
+                                            Text(title)
+                                                .font(.system(size: 16))
+                                                .foregroundColor(selectedSecondaryItem == tab.key ? .primary : .gray)
+                                                .fontWeight(selectedSecondaryItem == tab.key ? .semibold : .regular)
+                                        case .localized(let key):
+                                            Text(NSLocalizedString(key, comment: ""))
+                                                .font(.system(size: 16))
+                                                .foregroundColor(selectedSecondaryItem == tab.key ? .primary : .gray)
+                                                .fontWeight(selectedSecondaryItem == tab.key ? .semibold : .regular)
+                                        }
+                                        
+                                        Rectangle()
+                                            .fill(selectedSecondaryItem == tab.key ? Color.accentColor : Color.clear)
+                                            .frame(height: 2)
+                                            .frame(width: 24)
+                                    }
                                 }
                             }
                         }
+                        .padding(.horizontal)
                     }
-                    .padding(.horizontal)
                 }
-                .frame(maxWidth: UIScreen.main.bounds.width - 120) // 预留两侧按钮的空间
+                .frame(maxWidth: UIScreen.main.bounds.width - 120)
                 .frame(height: 44)
             }
             
@@ -92,7 +145,9 @@ struct HomeAppBar: ToolbarContent {
                         .padding(.top, -7)
                 }
                 .sheet(isPresented: $showTabSettings) {
-                    TabSettingsView(store: tabStore)
+                    if let store = tabStore {
+                        TabSettingsView(store: store)
+                    }
                 }
             }
         } else {

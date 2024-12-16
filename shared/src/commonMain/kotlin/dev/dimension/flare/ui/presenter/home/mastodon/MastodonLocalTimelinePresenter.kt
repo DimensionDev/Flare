@@ -16,7 +16,7 @@ import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class PublicTimelinePresenter(
+class MastodonLocalTimelinePresenter(
     private val accountType: AccountType,
 ) : TimelinePresenter(),
     KoinComponent {
@@ -30,7 +30,7 @@ class PublicTimelinePresenter(
             .map { service ->
                 remember(service) {
                     require(service is MastodonDataSource)
-                    service.publicTimeline(scope = scope)
+                    service.localTimeline(scope = scope)
                 }.collectAsLazyPagingItems()
             }.toPagingState()
     }

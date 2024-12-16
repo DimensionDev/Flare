@@ -16,7 +16,7 @@ import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class BookmarkTimelinePresenter(
+class MastodonBookmarkTimelinePresenter(
     private val accountType: AccountType,
 ) : TimelinePresenter(),
     KoinComponent {

@@ -652,7 +652,7 @@ public struct FLMastodonLocalTimelineTabItem: FLTimelineTabItem {
     public var key: String { "local_\(account)" }
     
     public func createPresenter() -> TimelinePresenter {
-        LocalTimelinePresenter(accountType: account)
+        MastodonLocalTimelinePresenter(accountType: account)
     }
     
     public func update(metaData: FLTabMetaData) -> FLTabItem {
@@ -666,7 +666,7 @@ public struct FLMastodonPublicTimelineTabItem: FLTimelineTabItem {
     public var key: String { "public_\(account)" }
     
     public func createPresenter() -> TimelinePresenter {
-        PublicTimelinePresenter(accountType: account)
+        MastodonPublicTimelinePresenter(accountType: account)
     }
     
     public func update(metaData: FLTabMetaData) -> FLTabItem {
@@ -694,7 +694,7 @@ public struct FLMastodonFavouriteTimelineTabItem: FLTimelineTabItem {
     public var key: String { "favourite_\(account)" }
     
     public func createPresenter() -> TimelinePresenter {
-        FavouriteTimelinePresenter(accountType: account)
+        MastodonFavouriteTimelinePresenter(accountType: account)
     }
     
     public func update(metaData: FLTabMetaData) -> FLTabItem {
@@ -709,7 +709,7 @@ public struct FLMisskeyLocalTimelineTabItem: FLTimelineTabItem {
     public var key: String { "local_\(account)" }
     
     public func createPresenter() -> TimelinePresenter {
-        LocalTimelinePresenter(accountType: account)
+        MissKeyLocalTimelinePresenter(accountType: account)
     }
     
     public func update(metaData: FLTabMetaData) -> FLTabItem {
@@ -723,7 +723,7 @@ public struct FLMisskeyGlobalTimelineTabItem: FLTimelineTabItem {
     public var key: String { "global_\(account)" }
     
     public func createPresenter() -> TimelinePresenter {
-        PublicTimelinePresenter(accountType: account)
+        MissKeyPublicTimelinePresenter(accountType: account)
     }
     
     public func update(metaData: FLTabMetaData) -> FLTabItem {
@@ -738,7 +738,7 @@ public struct FLXQTFeaturedTimelineTabItem: FLTimelineTabItem {
     public var key: String { "featured_\(account)" }
     
     public func createPresenter() -> TimelinePresenter {
-        FeaturedTimelinePresenter(accountType: account)
+        XQTFeaturedTimelinePresenter(accountType: account)
     }
     
     public func update(metaData: FLTabMetaData) -> FLTabItem {

@@ -26,11 +26,11 @@ struct SettingsScreen: View {
                             .tag(SettingsDestination.account)
                         }
                         Section {
-                            Label("settings_appearance", systemImage: "paintpalette")
+                            Label("settings_appearance_generic", systemImage: "paintpalette")
                                 .tag(SettingsDestination.appearance)
-                            Label("settings_storage", systemImage: "externaldrive")
+                            Label("settings_storage_title", systemImage: "externaldrive")
                                 .tag(SettingsDestination.storage)
-                            Label("settings_about", systemImage: "exclamationmark.circle")
+                            Label("settings_about_subtitle", systemImage: "exclamationmark.circle")
                                 .tag(SettingsDestination.about)
                         }
                     }

@@ -2,46 +2,48 @@ import SwiftUI
 import shared
 
 struct TimelineScreen: View {
-    let presenter: TimelinePresenter
+    @ObservedObject var timelineStore: TimelineStore
     
     var body: some View {
-        ObservePresenter(presenter: presenter) { state in
+        if let presenter = timelineStore.currentPresenter {
             List {
-                StatusTimelineComponent(
-                    data: state.listState,
-                    detailKey: nil
-                )
+                ObservePresenter(presenter: presenter) { state in
+                    StatusTimelineComponent(
+                        data: state.listState,
+                        detailKey: nil
+                    )
+                }
             }
             .listStyle(.plain)
             .refreshable {
-                try? await state.refresh()
+                try? await timelineStore.refresh()
             }
+        } else {
+            ProgressView() // 显示加载状态
         }
     }
 }
 
 struct HomeTimelineScreen: View {
     @Environment(\.openURL) private var openURL
-    @State private var presenter: HomeTimelinePresenter
+    @StateObject private var timelineStore: TimelineStore
     private let accountType: AccountType
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     
     init(accountType: AccountType) {
-        presenter = .init(accountType: accountType)
         self.accountType = accountType
+        self._timelineStore = StateObject(wrappedValue: TimelineStore(accountType: accountType))
     }
     
     var body: some View {
-        ObservePresenter(presenter: presenter) { state in
-            TimelineScreen(presenter: presenter)
-            #if os(iOS)
+        TimelineScreen(timelineStore: timelineStore)
             .navigationBarTitleDisplayMode(.inline)
-            #else
+            #if !os(iOS)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: {
                         Task {
-                            try? await state.refresh()
+                            try? await timelineStore.refresh()
                         }
                     }, label: {
                         Image(systemName: "arrow.clockwise.circle")
@@ -49,7 +51,6 @@ struct HomeTimelineScreen: View {
                 }
             }
             #endif
-        }
-        .navigationTitle("home_timeline_title")
+            .navigationTitle("home_timeline_title")
     }
 }

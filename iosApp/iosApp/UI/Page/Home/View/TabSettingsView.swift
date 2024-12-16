@@ -12,7 +12,7 @@ struct TabSettingsView: View {
         NavigationView {
             List {
                 Section(header: Text("AppBar 标签")) {
-                    ForEach(store.secondaryItems, id: \.key) { tab in
+                    ForEach(store.allTabs, id: \.key) { tab in
                         TabItemRow(tab: tab, store: store) {
                             tabToDelete = tab
                             showingDeleteAlert = true

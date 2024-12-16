@@ -16,6 +16,7 @@ struct AccountsScreen: View {
                             switch onEnum(of: item.second) {
                             case .success(let user):
                                 Button {
+                                    NotificationCenter.default.post(name: .accountChanged, object: nil)
                                     state.setActiveAccount(accountKey: user.data.key)
                                 } label: {
                                     HStack {

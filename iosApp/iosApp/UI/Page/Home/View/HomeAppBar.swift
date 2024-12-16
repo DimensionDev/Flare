@@ -5,8 +5,6 @@ import MarkdownUI
 
 struct HomeAppBar: ToolbarContent {
     @State private var tabStore: TabSettingsStore?
-    @State private var selectedSecondaryItem: String?
-    @State private var presenterCache: [String: TimelinePresenter] = [:]
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     let router: Router
     let accountType: AccountType
@@ -16,41 +14,36 @@ struct HomeAppBar: ToolbarContent {
     @State private var showTabSettings = false
     @State private var showUserSettings = false
     @State private var presenter = ActiveAccountPresenter()
+    @ObservedObject var timelineStore: TimelineStore
     
-    @Binding var currentPresenter: TimelinePresenter?
-    
-    init(router: Router, accountType: AccountType, showSettings: Binding<Bool>, showLogin: Binding<Bool>, selectedHomeTab: Binding<Int>, currentPresenter: Binding<TimelinePresenter?>) {
+    init(router: Router, 
+         accountType: AccountType, 
+         showSettings: Binding<Bool>, 
+         showLogin: Binding<Bool>, 
+         selectedHomeTab: Binding<Int>,
+         timelineStore: TimelineStore) {
         self.router = router
         self.accountType = accountType
         self._showSettings = showSettings
         self._showLogin = showLogin
         self._selectedHomeTab = selectedHomeTab
-        self._currentPresenter = currentPresenter
-    }
-    
-    private func getOrCreatePresenter(for tab: FLTabItem) -> TimelinePresenter? {
-        if let timelineItem = tab as? FLTimelineTabItem {
-            let key = tab.key
-            if let cachedPresenter = presenterCache[key] {
-                return cachedPresenter
-            } else {
-                let presenter = timelineItem.createPresenter()
-                presenterCache[key] = presenter
-                return presenter
-            }
-        }
-        return nil
+        self.timelineStore = timelineStore
     }
     
     private func initializeTabStore(with user: UiUserV2) {
         if tabStore == nil {
             tabStore = TabSettingsStore(user: user)
-            if selectedSecondaryItem == nil {
-                if let firstItem = tabStore?.secondaryItems.first {
-                    selectedSecondaryItem = firstItem.key
-                    currentPresenter = getOrCreatePresenter(for: firstItem)
+            if timelineStore.selectedTabKey == nil {
+                if let firstItem = tabStore?.allTabs.first {
+                    timelineStore.updateCurrentPresenter(for: firstItem)
                 }
             }
+        }
+    }
+    
+    private func onTabSelected(_ tab: FLTabItem) {
+        withAnimation {
+            timelineStore.updateCurrentPresenter(for: tab)
         }
     }
     
@@ -97,29 +90,24 @@ struct HomeAppBar: ToolbarContent {
                 ScrollView(.horizontal, showsIndicators: false) {
                     if let store = tabStore {
                         HStack(spacing: 24) {
-                            ForEach(store.secondaryItems, id: \.key) { tab in
-                                Button(action: {
-                                    withAnimation {
-                                        selectedSecondaryItem = tab.key
-                                        currentPresenter = getOrCreatePresenter(for: tab)
-                                    }
-                                }) {
+                            ForEach(store.allTabs, id: \.key) { tab in
+                                Button(action: { onTabSelected(tab) }) {
                                     VStack(spacing: 4) {
                                         switch tab.metaData.title {
                                         case .text(let title):
                                             Text(title)
                                                 .font(.system(size: 16))
-                                                .foregroundColor(selectedSecondaryItem == tab.key ? .primary : .gray)
-                                                .fontWeight(selectedSecondaryItem == tab.key ? .semibold : .regular)
+                                                .foregroundColor(timelineStore.selectedTabKey == tab.key ? .primary : .gray)
+                                                .fontWeight(timelineStore.selectedTabKey == tab.key ? .semibold : .regular)
                                         case .localized(let key):
                                             Text(NSLocalizedString(key, comment: ""))
                                                 .font(.system(size: 16))
-                                                .foregroundColor(selectedSecondaryItem == tab.key ? .primary : .gray)
-                                                .fontWeight(selectedSecondaryItem == tab.key ? .semibold : .regular)
+                                                .foregroundColor(timelineStore.selectedTabKey == tab.key ? .primary : .gray)
+                                                .fontWeight(timelineStore.selectedTabKey == tab.key ? .semibold : .regular)
                                         }
                                         
                                         Rectangle()
-                                            .fill(selectedSecondaryItem == tab.key ? Color.accentColor : Color.clear)
+                                            .fill(timelineStore.selectedTabKey == tab.key ? Color.accentColor : Color.clear)
                                             .frame(height: 2)
                                             .frame(width: 24)
                                     }
@@ -162,37 +150,4 @@ struct HomeAppBar: ToolbarContent {
         }
     }
 }
-//
-//struct SettingsView: View {
-//    @Environment(\.dismiss) var dismiss
-//    @State private var items = [
-//        "首页",
-//        "书签",
-//        "精选"
-//    ]
-//    
-//    var body: some View {
-//        NavigationView {
-//            List {
-//                ForEach(items, id: \.self) { item in
-//                    HStack {
-//                        Text(item)
-//                        Spacer()
-//                        Image(systemName: "line.3.horizontal")
-//                            .foregroundColor(.gray)
-//                    }
-//                }
-//                .onMove { source, destination in
-//                    items.move(fromOffsets: source, toOffset: destination)
-//                }
-//            }
-//            .navigationTitle("标签设置")
-//            .navigationBarItems(
-//                trailing: Button("完成") {
-//                    dismiss()
-//                }
-//            )
-//        }
-//        .environment(\.editMode, .constant(.active))
-//    }
-//}
+ 

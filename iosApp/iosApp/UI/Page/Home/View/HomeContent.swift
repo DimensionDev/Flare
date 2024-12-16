@@ -28,21 +28,24 @@ struct HomeTimelineView: View {
     @Binding var showSettings: Bool
     @Binding var showLogin: Bool
     @Binding var selectedHomeTab: Int
-    @State private var currentPresenter: TimelinePresenter?
-    @State private var homeTimelinePresenter: HomeTimelinePresenter
+    @ObservedObject var timelineStore: TimelineStore
     
-    init(router: Router, accountType: AccountType, showSettings: Binding<Bool>, showLogin: Binding<Bool>, selectedHomeTab: Binding<Int>) {
+    init(router: Router, 
+         accountType: AccountType, 
+         showSettings: Binding<Bool>, 
+         showLogin: Binding<Bool>, 
+         selectedHomeTab: Binding<Int>,
+         timelineStore: TimelineStore) {
         self.router = router
         self.accountType = accountType
         self._showSettings = showSettings
         self._showLogin = showLogin
         self._selectedHomeTab = selectedHomeTab
-        self._homeTimelinePresenter = State(initialValue: HomeTimelinePresenter(accountType: accountType))
+        self.timelineStore = timelineStore
     }
     
     var body: some View {
-        let presenter = currentPresenter ?? homeTimelinePresenter
-        TimelineScreen(presenter: presenter)
+        TimelineScreen(timelineStore: timelineStore)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 HomeAppBar(
@@ -51,7 +54,7 @@ struct HomeTimelineView: View {
                     showSettings: $showSettings,
                     showLogin: $showLogin,
                     selectedHomeTab: $selectedHomeTab,
-                    currentPresenter: $currentPresenter
+                    timelineStore: timelineStore
                 )
             }
     }
@@ -66,6 +69,12 @@ struct HomeContent: View {
     @State var showLogin = false
     @State var showCompose = false
     @State private var selectedHomeTab = 0
+    @StateObject private var timelineStore: TimelineStore
+    
+    init(accountType: AccountType) {
+        self.accountType = accountType
+        self._timelineStore = StateObject(wrappedValue: TimelineStore(accountType: accountType))
+    }
     
     var body: some View {
         FlareTheme {
@@ -79,7 +88,8 @@ struct HomeContent: View {
                                 accountType: accountType,
                                 showSettings: $showSettings,
                                 showLogin: $showLogin,
-                                selectedHomeTab: $selectedHomeTab
+                                selectedHomeTab: $selectedHomeTab,
+                                timelineStore: timelineStore
                             )
                         }
                     }

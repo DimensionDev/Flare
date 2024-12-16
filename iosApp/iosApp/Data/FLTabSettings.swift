@@ -680,7 +680,7 @@ public struct FLMastodonBookmarkTimelineTabItem: FLTimelineTabItem {
     public var key: String { "bookmark_\(account)" }
     
     public func createPresenter() -> TimelinePresenter {
-        BookmarkTimelinePresenter(accountType: account)
+        MastodonBookmarkTimelinePresenter(accountType: account)
     }
     
     public func update(metaData: FLTabMetaData) -> FLTabItem {
@@ -752,7 +752,7 @@ public struct FLXQTBookmarkTimelineTabItem: FLTimelineTabItem {
     public var key: String { "bookmark_\(account)" }
     
     public func createPresenter() -> TimelinePresenter {
-        BookmarkTimelinePresenter(accountType: account)
+        XQTBookmarkTimelinePresenter(accountType: account)
     }
     
     public func update(metaData: FLTabMetaData) -> FLTabItem {
@@ -1126,3 +1126,4 @@ extension FLHomeTimelineTabItem {
 //        }
 //    }
 //}
+

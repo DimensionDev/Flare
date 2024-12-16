@@ -30,7 +30,19 @@ internal data object NodeInfoService {
             "http://nodeinfo.diaspora.software/ns/schema/2.1",
         )
 
-    suspend fun fetchNodeInfo(host: String): String {
+    private val mastodonNodeInfoName =
+        listOf(
+            "mastodon",
+            "kmyblue",
+            "fedibird",
+        )
+
+    private val misskeyNodeInfoName =
+        listOf(
+            "misskey",
+        )
+
+    suspend fun fetchNodeInfo(host: String): String? {
         val response =
             ktorClient()
                 .get(
@@ -48,27 +60,33 @@ internal data object NodeInfoService {
                         ktorClient()
                             .get(
                                 it.href,
-                            ).body<Schema10.Coordinate>()
-                            .software.name.value
+                            ).body<Schema10>()
+                            .software
+                            ?.name
+                            ?.value
 
                     "http://nodeinfo.diaspora.software/ns/schema/1.1" ->
                         ktorClient()
                             .get(
                                 it.href,
-                            ).body<Schema11.Coordinate>()
-                            .software.name.value
+                            ).body<Schema11>()
+                            .software
+                            ?.name
+                            ?.value
 
                     "http://nodeinfo.diaspora.software/ns/schema/2.0" ->
                         ktorClient()
                             .get(it.href)
-                            .body<Schema20.Coordinate>()
-                            .software.name
+                            .body<Schema20>()
+                            .software
+                            ?.name
 
                     "http://nodeinfo.diaspora.software/ns/schema/2.1" ->
                         ktorClient()
                             .get(it.href)
-                            .body<Schema21.Coordinate>()
-                            .software.name
+                            .body<Schema21>()
+                            .software
+                            ?.name
 
                     else -> throw IllegalArgumentException("Unsupported schema: ${it.rel}")
                 }
@@ -90,10 +108,12 @@ internal data object NodeInfoService {
                     runCatching {
                         val nodeInfo = fetchNodeInfo(host)
                         when {
-                            nodeInfo.contains("Mastodon", ignoreCase = true) -> PlatformType.Mastodon
-                            nodeInfo.contains("Misskey", ignoreCase = true) -> PlatformType.Misskey
+                            mastodonNodeInfoName.any { it.equals(nodeInfo, ignoreCase = true) } -> PlatformType.Mastodon
+                            misskeyNodeInfoName.any { it.equals(nodeInfo, ignoreCase = true) } -> PlatformType.Misskey
                             else -> throw IllegalArgumentException("Unsupported platform: $nodeInfo")
                         }
+                    }.onFailure {
+                        it.printStackTrace()
                     }.getOrNull()
                 }
 

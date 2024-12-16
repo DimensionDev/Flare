@@ -4,43 +4,41 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
-internal class Schema21 {
+/**
+ * NodeInfo schema version 2.1.
+ */
+@Serializable
+internal data class Schema21(
     /**
-     * NodeInfo schema version 2.1.
+     * Free form key value pairs for software specific values. Clients should not rely on any
+     * specific key present.
      */
-    @Serializable
-    data class Coordinate(
-        /**
-         * Free form key value pairs for software specific values. Clients should not rely on any
-         * specific key present.
-         */
-        val metadata: JsonObject,
-        /**
-         * Whether this server allows open self-registration.
-         */
-        val openRegistrations: Boolean,
-        /**
-         * The protocols supported on this server.
-         */
-        val protocols: List<Protocol>,
-        /**
-         * The third party sites this server can connect to via their application API.
-         */
-        val services: Services,
-        /**
-         * Metadata about server software in use.
-         */
-        val software: Software,
-        /**
-         * Usage statistics for this server.
-         */
-        val usage: Usage,
-        /**
-         * The schema version, must be 2.1.
-         */
-        val version: Version,
-    )
-
+    val metadata: JsonObject? = null,
+    /**
+     * Whether this server allows open self-registration.
+     */
+    val openRegistrations: Boolean? = null,
+    /**
+     * The protocols supported on this server.
+     */
+    val protocols: List<Protocol>? = null,
+    /**
+     * The third party sites this server can connect to via their application API.
+     */
+    val services: Services? = null,
+    /**
+     * Metadata about server software in use.
+     */
+    val software: Software? = null,
+    /**
+     * Usage statistics for this server.
+     */
+    val usage: Usage? = null,
+    /**
+     * The schema version, must be 2.1.
+     */
+    val version: Version? = null,
+) {
     @Serializable
     enum class Protocol(
         val value: String,
@@ -85,11 +83,11 @@ internal class Schema21 {
          * The third party sites this server can retrieve messages from for combined display with
          * regular traffic.
          */
-        val inbound: List<Inbound>,
+        val inbound: List<Inbound>? = null,
         /**
          * The third party sites this server can publish messages to on the behalf of a user.
          */
-        val outbound: List<Outbound>,
+        val outbound: List<Outbound>? = null,
     )
 
     @Serializable
@@ -222,7 +220,7 @@ internal class Schema21 {
         /**
          * The canonical name of this server software.
          */
-        val name: String,
+        val name: String? = null,
         /**
          * The url of the source code repository of this server software.
          */
@@ -230,7 +228,7 @@ internal class Schema21 {
         /**
          * The version of this server software.
          */
-        val version: String,
+        val version: String? = null,
     )
 
     /**
@@ -249,7 +247,7 @@ internal class Schema21 {
         /**
          * statistics about the users of this server.
          */
-        val users: Users,
+        val users: Users? = null,
     )
 
     /**

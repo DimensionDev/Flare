@@ -616,7 +616,7 @@ object Mastodon {
 
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.mastodon
-                .LocalTimelinePresenter(account)
+                .MastodonLocalTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -630,7 +630,7 @@ object Mastodon {
 
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.mastodon
-                .PublicTimelinePresenter(account)
+                .MastodonPublicTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -644,7 +644,7 @@ object Mastodon {
 
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.mastodon
-                .BookmarkTimelinePresenter(account)
+                .MastodonBookmarkTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -658,7 +658,7 @@ object Mastodon {
 
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.mastodon
-                .FavouriteTimelinePresenter(account)
+                .MastodonFavouriteTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -674,7 +674,7 @@ object Misskey {
 
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.misskey
-                .LocalTimelinePresenter(account)
+                .MissKeyLocalTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -688,7 +688,7 @@ object Misskey {
 
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.misskey
-                .PublicTimelinePresenter(account)
+                .MissKeyPublicTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -704,7 +704,7 @@ object XQT {
 
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.xqt
-                .FeaturedTimelinePresenter(account)
+                .XQTFeaturedTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
@@ -718,7 +718,7 @@ object XQT {
 
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.xqt
-                .BookmarkTimelinePresenter(account)
+                .XQTBookmarkTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }

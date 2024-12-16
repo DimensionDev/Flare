@@ -4,45 +4,43 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonObject
 
-internal class Schema20 {
+/**
+ * NodeInfo schema version 2.0.
+ */
+@Serializable
+internal data class Schema20(
     /**
-     * NodeInfo schema version 2.0.
+     * Free form key value pairs for software specific values. Clients should not rely on any
+     * specific key present.
      */
+    val metadata: JsonObject? = null,
+    /**
+     * Whether this server allows open self-registration.
+     */
+    val openRegistrations: Boolean? = null,
+    /**
+     * The protocols supported on this server.
+     */
+    val protocols: List<Protocol>? = null,
+    /**
+     * The third party sites this server can connect to via their application API.
+     */
+    val services: Services? = null,
+    /**
+     * Metadata about server software in use.
+     */
+    val software: Software? = null,
+    /**
+     * Usage statistics for this server.
+     */
+    val usage: Usage? = null,
+    /**
+     * The schema version, must be 2.0.
+     */
+    val version: Version? = null,
+) {
     @Serializable
-    data class Coordinate(
-        /**
-         * Free form key value pairs for software specific values. Clients should not rely on any
-         * specific key present.
-         */
-        val metadata: JsonObject,
-        /**
-         * Whether this server allows open self-registration.
-         */
-        val openRegistrations: Boolean,
-        /**
-         * The protocols supported on this server.
-         */
-        val protocols: List<Protocol>,
-        /**
-         * The third party sites this server can connect to via their application API.
-         */
-        val services: Services,
-        /**
-         * Metadata about server software in use.
-         */
-        val software: Software,
-        /**
-         * Usage statistics for this server.
-         */
-        val usage: Usage,
-        /**
-         * The schema version, must be 2.0.
-         */
-        val version: Version,
-    )
-
-    @Serializable
-    enum class Protocol(
+    internal enum class Protocol(
         val value: String,
     ) {
         @SerialName("activitypub")
@@ -80,20 +78,20 @@ internal class Schema20 {
      * The third party sites this server can connect to via their application API.
      */
     @Serializable
-    data class Services(
+    internal data class Services(
         /**
          * The third party sites this server can retrieve messages from for combined display with
          * regular traffic.
          */
-        val inbound: List<Inbound>,
+        val inbound: List<Inbound>? = null,
         /**
          * The third party sites this server can publish messages to on the behalf of a user.
          */
-        val outbound: List<Outbound>,
+        val outbound: List<Outbound>? = null,
     )
 
     @Serializable
-    enum class Inbound(
+    internal enum class Inbound(
         val value: String,
     ) {
         @SerialName("atom1.0")
@@ -122,7 +120,7 @@ internal class Schema20 {
     }
 
     @Serializable
-    enum class Outbound(
+    internal enum class Outbound(
         val value: String,
     ) {
         @SerialName("atom1.0")
@@ -214,22 +212,22 @@ internal class Schema20 {
      * Metadata about server software in use.
      */
     @Serializable
-    data class Software(
+    internal data class Software(
         /**
          * The canonical name of this server software.
          */
-        val name: String,
+        val name: String? = null,
         /**
          * The version of this server software.
          */
-        val version: String,
+        val version: String? = null,
     )
 
     /**
      * Usage statistics for this server.
      */
     @Serializable
-    data class Usage(
+    internal data class Usage(
         /**
          * The amount of comments that were made by users that are registered on this server.
          */
@@ -241,14 +239,14 @@ internal class Schema20 {
         /**
          * statistics about the users of this server.
          */
-        val users: Users,
+        val users: Users? = null,
     )
 
     /**
      * statistics about the users of this server.
      */
     @Serializable
-    data class Users(
+    internal data class Users(
         /**
          * The amount of users that signed in at least once in the last 180 days.
          */
@@ -267,7 +265,7 @@ internal class Schema20 {
      * The schema version, must be 2.0.
      */
     @Serializable
-    enum class Version(
+    internal enum class Version(
         val value: String,
     ) {
         @SerialName("2.0")

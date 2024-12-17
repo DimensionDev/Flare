@@ -73,6 +73,7 @@ kotlin {
                 implementation(libs.sqlite.bundled)
                 implementation(libs.datastore)
                 implementation(libs.kotlinx.serialization.protobuf)
+                implementation(libs.xmlUtil)
             }
         }
         val commonTest by getting {

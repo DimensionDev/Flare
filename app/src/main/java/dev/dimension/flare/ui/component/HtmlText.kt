@@ -1,6 +1,6 @@
 package dev.dimension.flare.ui.component
 
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.LocalTextStyle
@@ -9,7 +9,6 @@ import androidx.compose.material3.ProvideTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,7 +17,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
-import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -31,7 +29,7 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
@@ -118,7 +116,6 @@ private fun RenderContent(
                 linkStyle = linkStyle,
             )
         }
-    val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
     if (value.text.isNotEmpty() && value.text.isNotBlank()) {
         Text(
             modifier = modifier,
@@ -135,16 +132,13 @@ private fun RenderContent(
             overflow = overflow,
             softWrap = softWrap,
             text = value,
-            onTextLayout = {
-                layoutResult.value = it
-            },
             inlineContent =
                 mapOf(
                     ID_IMAGE to
                         InlineTextContent(
                             Placeholder(
-                                width = LocalTextStyle.current.fontSize,
-                                height = LocalTextStyle.current.fontSize,
+                                width = 1.em,
+                                height = 1.em,
                                 placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
                             ),
                         ) { target ->
@@ -152,7 +146,7 @@ private fun RenderContent(
                                 uri = target,
                                 modifier =
                                     Modifier
-                                        .size(LocalTextStyle.current.fontSize.value.dp),
+                                        .fillMaxSize(),
                             )
                         },
                 ),

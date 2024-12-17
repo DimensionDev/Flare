@@ -121,7 +121,7 @@ struct HomeAppBar: ToolbarContent {
                         .padding(.top, -7)
                 }
                 .sheet(isPresented: $showTabSettings) {
-                    TabSettingsView(store: tabSettingsStore)
+                    HomeAppBarSettingsView(store: tabSettingsStore)
                 }
             }
         } else {

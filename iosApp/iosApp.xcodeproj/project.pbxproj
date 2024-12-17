@@ -102,7 +102,7 @@
 		64E8776C2D0430C7003559B9 /* ColPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876DD2D0430C7003559B9 /* ColPosition.swift */; };
 		64E8776D2D0430C7003559B9 /* MediaViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D72D0430C7003559B9 /* MediaViewModel.swift */; };
 		64E8776E2D0430C7003559B9 /* LensMediaView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D42D0430C7003559B9 /* LensMediaView.swift */; };
-		64E8776F2D0430C7003559B9 /* TabSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876F72D0430C7003559B9 /* TabSettingsView.swift */; };
+		64E8776F2D0430C7003559B9 /* HomeAppBarSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876F72D0430C7003559B9 /* HomeAppBarSettingsView.swift */; };
 		64E877702D0430C7003559B9 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876B52D0430C7003559B9 /* WebView.swift */; };
 		64E877712D0430C7003559B9 /* VVOStatusDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E8771D2D0430C7003559B9 /* VVOStatusDetailScreen.swift */; };
 		64E877722D0430C7003559B9 /* MediaPreviewImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876C02D0430C7003559B9 /* MediaPreviewImageView.swift */; };
@@ -199,7 +199,7 @@
 		64E876F42D0430C7003559B9 /* PublicScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicScreen.swift; sourceTree = "<group>"; };
 		64E876F52D0430C7003559B9 /* SearchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchScreen.swift; sourceTree = "<group>"; };
 		64E876F62D0430C7003559B9 /* StatusMediaScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusMediaScreen.swift; sourceTree = "<group>"; };
-		64E876F72D0430C7003559B9 /* TabSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSettingsView.swift; sourceTree = "<group>"; };
+		64E876F72D0430C7003559B9 /* HomeAppBarSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeAppBarSettingsView.swift; sourceTree = "<group>"; };
 		64E876FD2D0430C7003559B9 /* ServiceSelectScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceSelectScreen.swift; sourceTree = "<group>"; };
 		64E876FE2D0430C7003559B9 /* VVOLoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VVOLoginScreen.swift; sourceTree = "<group>"; };
 		64E876FF2D0430C7003559B9 /* XQTLoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XQTLoginScreen.swift; sourceTree = "<group>"; };
@@ -488,6 +488,7 @@
 				64E876EC2D0430C7003559B9 /* FavoriteScreen.swift */,
 				64E876ED2D0430C7003559B9 /* FeaturedScreen.swift */,
 				64E876EE2D0430C7003559B9 /* HomeAppBar.swift */,
+				64E876F72D0430C7003559B9 /* HomeAppBarSettingsView.swift */,
 				64E876EF2D0430C7003559B9 /* HomeContent.swift */,
 				64E876F02D0430C7003559B9 /* HomeScreen.swift */,
 				64E876F12D0430C7003559B9 /* HomeTimelineScreen.swift */,
@@ -496,7 +497,6 @@
 				64E876F42D0430C7003559B9 /* PublicScreen.swift */,
 				64E876F52D0430C7003559B9 /* SearchScreen.swift */,
 				64E876F62D0430C7003559B9 /* StatusMediaScreen.swift */,
-				64E876F72D0430C7003559B9 /* TabSettingsView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -1080,7 +1080,7 @@
 				64E8776C2D0430C7003559B9 /* ColPosition.swift in Sources */,
 				64E8776D2D0430C7003559B9 /* MediaViewModel.swift in Sources */,
 				64E8776E2D0430C7003559B9 /* LensMediaView.swift in Sources */,
-				64E8776F2D0430C7003559B9 /* TabSettingsView.swift in Sources */,
+				64E8776F2D0430C7003559B9 /* HomeAppBarSettingsView.swift in Sources */,
 				64E877702D0430C7003559B9 /* WebView.swift in Sources */,
 				64E877712D0430C7003559B9 /* VVOStatusDetailScreen.swift in Sources */,
 				64E877722D0430C7003559B9 /* MediaPreviewImageView.swift in Sources */,

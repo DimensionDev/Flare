@@ -1,7 +1,7 @@
 import SwiftUI
 import shared
 
-struct TabSettingsView: View {
+struct HomeAppBarSettingsView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var store: TabSettingsStore
     @State private var showingAddSheet = false
@@ -11,7 +11,7 @@ struct TabSettingsView: View {
     var body: some View {
         NavigationView {
             List {
-                Section(header: Text("AppBar 标签")) {
+                Section(header: Text("")) {
                     ForEach(store.allTabs, id: \.key) { tab in
                         TabItemRow(tab: tab, store: store) {
                             tabToDelete = tab

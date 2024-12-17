@@ -34,8 +34,8 @@ struct QuotedStatus: View {
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
-                    .padding(.horizontal, 8)
-                }
+                    .padding(.horizontal, 9)
+                }  
                 // Markdown(data.content.markdown)
                 //     .markdownInlineImageProvider(.emoji)
                 //     .padding(.horizontal, 8)
@@ -55,7 +55,7 @@ struct QuotedStatus: View {
                         MediaComponent(
                             hideSensitive: data.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
                             medias: data.images,
-                            onMediaClick: onMediaClick,
+                            onMediaClick: handleMediaClick,
                             sensitive: data.sensitive
                         )
                     } else {
@@ -74,4 +74,30 @@ struct QuotedStatus: View {
         })
         .buttonStyle(.plain)
     }
+
+    private func handleMediaClick(_ index: Int, _ media: UiMedia) {
+        // Call original Kotlin callback
+//        onMediaClick(index, media)
+
+        // Log media URLs and index
+        print("    ")
+        print("    ")
+
+        print("Clicked media URL: \(media.url)")
+        print("All media URLs:")
+        for (i, img) in data.images.enumerated() {
+            print("[\(i)] \(img.url)")
+        }
+        print("Selected index: \(index)")
+        print("     ")
+        print("    ")
+
+        // Show preview
+        PhotoBrowserManager.shared.showPhotoBrowser(
+            media: media,
+            images: data.images,
+            initialIndex: index
+        )
+    }
+ 
 }

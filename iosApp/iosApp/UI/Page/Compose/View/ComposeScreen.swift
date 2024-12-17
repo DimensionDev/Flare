@@ -144,7 +144,7 @@ struct ComposeScreen: View {
                                         }
                                         .textFieldStyle(.roundedBorder)
                                         Button {
-                                            withAnimation {
+                                            withAnimation { 
                                                 viewModel.pollViewModel.remove(choice: choice)
                                             }
                                         } label: {

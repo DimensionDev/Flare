@@ -14,6 +14,6 @@ struct AboutScreen: View {
                 darkMode: colorScheme == .dark
             )
         )
-        .navigationTitle("about_title")
+        .navigationTitle("settings_about_title")
     }
 }

@@ -23,7 +23,7 @@ struct DiscoverScreen: View {
                     if searchState.searching {
                         switch onEnum(of: searchState.users) {
                         case .success(let data):
-                            Section("discover_users_title") {
+                            Section("discover_users") {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     LazyHStack {
                                         ForEach(0..<data.itemCount, id: \.self) { index in
@@ -51,7 +51,7 @@ struct DiscoverScreen: View {
                             EmptyView()
                                 .listRowSeparator(.hidden)
                         }
-                        Section("discover_status_title") {
+                        Section("discover_status") {
                             StatusTimelineComponent(
                                 data: searchState.status,
                                 detailKey: nil
@@ -60,7 +60,7 @@ struct DiscoverScreen: View {
                     } else {
                         switch onEnum(of: state.users) {
                         case .success(let data):
-                            Section("discover_users_title") {
+                            Section("discover_users") {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     LazyHGrid(rows: [.init(), .init()]) {
                                         ForEach(0..<data.itemCount, id: \.self) { index in
@@ -92,7 +92,7 @@ struct DiscoverScreen: View {
                         }
                         switch onEnum(of: state.hashtags) {
                         case .success(let data):
-                            Section("discover_hashtags_title") {
+                            Section("discover_hashtags") {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     LazyHStack {
                                         ForEach(0..<data.itemCount, id: \.self) { index in
@@ -126,7 +126,7 @@ struct DiscoverScreen: View {
                                 .listRowSeparator(.hidden)
                         }
                         if case .success(let data) = onEnum(of: state.status) {
-                            Section("discover_status_title") {
+                            Section("discover_status") {
                                 StatusTimelineComponent(
                                     data: state.status,
                                     detailKey: nil
@@ -145,7 +145,7 @@ struct DiscoverScreen: View {
                     }
                 }
                 .listStyle(.plain)
-                .navigationTitle("discover_title")
+                .navigationTitle("home_tab_discover_title")
             }
         }
     }

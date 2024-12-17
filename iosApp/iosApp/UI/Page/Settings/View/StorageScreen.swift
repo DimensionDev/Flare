@@ -32,7 +32,7 @@ struct StorageScreen: View {
         ObservePresenter(presenter: presenter) { state in
             List {
                 // Database Cache Section
-                Section("Database Cache") {
+                Section("settings_storage_clear_database") {
                     Button(role: .destructive) {
                         state.clearCache()
                     } label: {
@@ -42,11 +42,7 @@ struct StorageScreen: View {
                             Spacer()
                                 .frame(width: 16)
                             VStack(alignment: .leading) {
-                                Text("Clear Database Cache")
-                                Text(
-                                    "\(state.userCount) users, \(state.statusCount) statuses"
-                                )
-                                    .font(.caption)
+                                Text(String(format: NSLocalizedString("settings_storage_clear_database_description", comment: ""), String(state.userCount), String(state.statusCount)))
                             }
                         }
                     }
@@ -54,7 +50,7 @@ struct StorageScreen: View {
                 }
                 
                 // Image Cache Section
-                Section("Image Cache") {
+                Section("settings_storage_clear_image_cache") {
                     Button(role: .destructive) {
                         clearImageCache()
                     } label: {
@@ -64,9 +60,9 @@ struct StorageScreen: View {
                             Spacer()
                                 .frame(width: 16)
                             VStack(alignment: .leading) {
-                                Text("Clear Image Cache")
-                                Text("Current size: \(imageCacheSize)")
-                                    .font(.caption)
+                                Text(String(format: NSLocalizedString("settings_storage_clear_image_cache_description", comment: ""), String(imageCacheSize)))
+                                // Text("Current size: \(imageCacheSize)")
+                                //     .font(.caption)
                             }
                             if isCleaningCache {
                                 Spacer()
@@ -78,7 +74,7 @@ struct StorageScreen: View {
                     .disabled(isCleaningCache)
                 }
             }
-            .navigationTitle("Storage")
+            .navigationTitle("settings_storage_clear_database")
             .onAppear {
                 calculateImageCacheSize()
             }

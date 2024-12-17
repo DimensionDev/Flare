@@ -101,13 +101,13 @@ struct CommonProfileHeader: View {
                                     onFollowClick(relationState.data)
                                 }, label: {
                                     let text = if relationState.data.blocking {
-                                        String(localized: "relation_blocked")
+                                        String(localized: "profile_header_button_blockedblocked")
                                     } else if relationState.data.following {
-                                        String(localized: "relation_following")
+                                        String(localized: "profile_header_button_following")
                                     } else if relationState.data.hasPendingFollowRequestFromYou {
-                                        String(localized: "relation_requested")
+                                        String(localized: "profile_header_button_requested")
                                     } else {
-                                        String(localized: "relation_follow")
+                                        String(localized: "profile_header_button_follow")
                                     }
                                     Text(text)
                                         .font(.caption)

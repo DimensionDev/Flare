@@ -22,21 +22,23 @@ struct ServiceSelectScreen: View {
         ObservePresenter(presenter: presenter) { state in
             VStack {
                 VStack {
-                    Text("service_select_title")
+                    Text("service_select_welcome_title")
                         .frame(maxWidth: .infinity, alignment: .center)
                         .font(.title)
                         .fontWeight(.bold)
                         .multilineTextAlignment(.center)
                         .frame(alignment: .center)
                         .padding(.top)
-                    Text(verbatim: NSLocalizedString("service_select_description", comment: "").replacingOccurrences(of: "\\n", with: "\n"))
+                    Text(verbatim: NSLocalizedString("service_select_welcome_message", comment: "")
+                        .replacingOccurrences(of: "\\n", with: "\n")
+                        .replacingOccurrences(of: "Android", with: "iOS"))
                         .font(.subheadline)
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity, alignment: .center)
                     // .fixedSize(horizontal: false, vertical: true)
                     HStack {
-                        TextField("service_select_instance_url_placeholder", text: $instanceURL)
+                        TextField("service_select_instance_input_placeholder", text: $instanceURL)
                             .disableAutocorrection(true)
                         #if os(iOS)
                             .textInputAutocapitalization(.never)

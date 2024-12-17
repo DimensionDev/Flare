@@ -14,42 +14,42 @@ struct AppearanceScreen: View {
                         detailKey: nil
                     )
                 }
-                Section("appearance_settings_generic") {
+                Section("settings_appearance_generic") {
                     Picker(selection: Binding(get: {
                         appSettings.appearanceSettings.theme
                     }, set: { value in
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.theme, to: value))
                     }), content: {
-                        Text("app_theme_auto")
+                        Text("settings_appearance_theme_auto")
                             .tag(Theme.auto)
-                        Text("app_theme_dark")
+                        Text("settings_appearance_theme_dark")
                             .tag(Theme.dark)
-                        Text("app_theme_light")
+                        Text("settings_appearance_theme_light")
                             .tag(Theme.light)
                     }, label: {
-                        Text("appearance_theme_title")
-                        Text("appearance_theme_description")
+                        Text("settings_appearance_theme_color")
+                        Text("settings_appearance_theme_color_description")
                     })
                     Picker(selection: Binding(get: {
                         appSettings.appearanceSettings.avatarShape
                     }, set: { value in
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.avatarShape, to: value))
                     }), content: {
-                        Text("avatar_shape_circle")
+                        Text("settings_appearance_avatar_shape_round")
                             .tag(AvatarShape.circle)
-                        Text("avatar_shape_square")
+                        Text("settings_appearance_avatar_shape_square")
                             .tag(AvatarShape.square)
                     }, label: {
-                        Text("appearance_avatar_shape_title")
-                        Text("appearance_avatar_shape_description")
+                        Text("settings_appearance_avatar_shape")
+                        Text("settings_appearance_avatar_shape_description")
                     })
                     Toggle(isOn: Binding(get: {
                         appSettings.appearanceSettings.showActions
                     }, set: { value in
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showActions, to: value))
                     })) {
-                        Text("appearance_show_actions_title")
-                        Text("appearance_show_actions_description")
+                        Text("settings_appearance_show_actions")
+                        Text("settings_appearance_show_actions_description")
                     }
                     if appSettings.appearanceSettings.showActions {
                         Toggle(isOn: Binding(get: {
@@ -57,8 +57,8 @@ struct AppearanceScreen: View {
                         }, set: { value in
                             appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showNumbers, to: value))
                         })) {
-                            Text("appearance_show_numbers_title")
-                            Text("appearance_show_numbers_description")
+                            Text("settings_appearance_show_numbers")
+                            Text("settings_appearance_show_numbers_description")
                         }
                     }
                     Toggle(isOn: Binding(get: {
@@ -66,16 +66,16 @@ struct AppearanceScreen: View {
                     }, set: { value in
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showLinkPreview, to: value))
                     })) {
-                        Text("appearance_show_link_preview_title")
-                        Text("appearance_show_link_preview_description")
+                        Text("settings_appearance_show_link_previews")
+                        Text("settings_appearance_show_link_previews_description")
                     }
                     Toggle(isOn: Binding(get: {
                         appSettings.appearanceSettings.showMedia
                     }, set: { value in
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showMedia, to: value))
                     })) {
-                        Text("appearance_show_media_title")
-                        Text("appearance_show_media_description")
+                        Text("settings_appearance_show_media")
+                        Text("settings_appearance_show_media_description")
                     }
                     if appSettings.appearanceSettings.showMedia {
                         Toggle(isOn: Binding(get: {
@@ -83,13 +83,13 @@ struct AppearanceScreen: View {
                         }, set: { value in
                             appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showSensitiveContent, to: value))
                         })) {
-                            Text("appearance_show_sensitive_content_title")
-                            Text("appearance_show_sensitive_content_description")
+                            Text("settings_appearance_show_cw_img")
+                            Text("settings_appearance_show_cw_img_description")
                         }
                     }
                 }
                 .buttonStyle(.plain)
-                .navigationTitle("appearance_title")
+                .navigationTitle("settings_appearance_title")
             }
             #if os(macOS)
             .toggleStyle(.switch)

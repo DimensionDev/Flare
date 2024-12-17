@@ -59,7 +59,7 @@ struct ProfileMediaListScreen: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             )
         }
-        .navigationTitle("Media")
+        .navigationTitle("profile_tab_media")
     }
 
     private func showPhotoBrowser(media: UiMedia, images: [UiMedia], initialIndex: Int) {

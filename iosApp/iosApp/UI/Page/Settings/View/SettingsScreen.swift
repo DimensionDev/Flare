@@ -16,7 +16,7 @@ struct SettingsScreen: View {
                                 userState: state.user,
                                 supportingContent: { _ in
                                     AnyView(
-                                        Text("settings_account_manage")
+                                        Text("settings_accounts_title")
                                             .lineLimit(1)
                                             .font(.subheadline)
                                             .opacity(0.5)

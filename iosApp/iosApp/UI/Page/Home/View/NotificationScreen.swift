@@ -39,7 +39,7 @@ struct NotificationScreen: View {
             .refreshable {
                 try? await state.refresh()
             }
-            .navigationTitle("notification_title")
+            .navigationTitle("home_tab_notifications_title")
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #else

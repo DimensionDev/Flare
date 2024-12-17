@@ -12,7 +12,7 @@ struct SensitiveContentButton: View {
                         action()
                     }
                 }, label: {
-                    Text("status_sensitive_media_show", comment: "Status media sensitive button")
+                    Text("status_sensitive_media", comment: "Status media sensitive button")
                         .foregroundColor(.white) 
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)

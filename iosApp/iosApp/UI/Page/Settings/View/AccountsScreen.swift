@@ -70,7 +70,7 @@ struct AccountsScreen: View {
                     Text("loading")
                 }
             }
-            .navigationTitle("accounts_management_title")
+            .navigationTitle("settings_accounts_title")
             .toolbar {
                 Button(action: {
                     showServiceSelectSheet = true

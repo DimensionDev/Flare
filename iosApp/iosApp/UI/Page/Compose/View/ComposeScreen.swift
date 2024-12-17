@@ -4,6 +4,31 @@ import PhotosUI
 import Kingfisher
 import Awesome
 
+// 添加 PollExpiration 枚举
+enum PollExpiration: String, CaseIterable {
+    case minutes5
+    case minutes30
+    case hours1
+    case hours6
+    case hours12
+    case days1
+    case days3
+    case days7
+    
+    var localizedKey: String {
+        switch self {
+        case .minutes5: return "compose_poll_expiration_5_minutes"
+        case .minutes30: return "compose_poll_expiration_30_minutes"
+        case .hours1: return "compose_poll_expiration_1_hour"
+        case .hours6: return "compose_poll_expiration_6_hours"
+        case .hours12: return "compose_poll_expiration_12_hours"
+        case .days1: return "compose_poll_expiration_1_day"
+        case .days3: return "compose_poll_expiration_3_days"
+        case .days7: return "compose_poll_expiration_7_days"
+        }
+    }
+}
+
 struct ComposeScreen: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State var viewModel: ComposeViewModel
@@ -22,14 +47,14 @@ struct ComposeScreen: View {
                         VStack(alignment: .leading) {
                             if viewModel.enableCW {
                                 TextField(text: $viewModel.contentWarning) {
-                                    Text("compose_cw_placeholder")
+                                    Text("compose_content_warning_hint")
                                 }
                                 .textFieldStyle(.plain)
                                 .focused($cwKeyboardFocused)
                                 Divider()
                             }
                             TextField(text: $viewModel.text) {
-                                Text("compose_placeholder")
+                                Text("compose_hint")
                             }
                             .textFieldStyle(.plain)
                             .focused($keyboardFocused)
@@ -89,15 +114,15 @@ struct ComposeScreen: View {
                                     }
                                 }
                                 Toggle(isOn: $viewModel.mediaViewModel.sensitive, label: {
-                                    Text("compose_media_mark_sensitive")
+                                    Text("compose_media_sensitive")
                                 })
                             }
                             if viewModel.pollViewModel.enabled {
                                 HStack {
                                     Picker("compose_poll_type", selection: $viewModel.pollViewModel.pollType) {
-                                        Text("compose_poll_type_single")
+                                        Text("compose_poll_single_choice")
                                             .tag(ComposePollType.single)
-                                        Text("compose_poll_type_multiple")
+                                        Text("compose_poll_multiple_choice")
                                             .tag(ComposePollType.multiple)
                                     }
                                     .pickerStyle(.segmented)
@@ -112,10 +137,10 @@ struct ComposeScreen: View {
 #if os(iOS)
                                 .padding(.vertical)
 #endif
-                                ForEach($viewModel.pollViewModel.choices) { $choice in
+                                ForEach(Array(viewModel.pollViewModel.choices.enumerated()), id: \.element.id) { index, choice in
                                     HStack {
-                                        TextField(text: $choice.text) {
-                                            Text("compose_poll_choice_placeholder")
+                                        TextField(text: $viewModel.pollViewModel.choices[index].text) {
+                                            Text(String(format: NSLocalizedString("compose_poll_option_hint", comment: ""), String(index + 1)))
                                         }
                                         .textFieldStyle(.roundedBorder)
                                         Button {
@@ -138,12 +163,14 @@ struct ComposeScreen: View {
                                             Button(action: {
                                                 viewModel.pollViewModel.expired = expiration
                                             }, label: {
-                                                Text(expiration.rawValue)
+                                                Text(NSLocalizedString(PollExpiration(rawValue: expiration.rawValue)?.localizedKey ?? "", comment: ""))
                                             })
                                         }
                                     } label: {
-                                        Text("compose_poll_expiration")
-                                        Text(viewModel.pollViewModel.expired.rawValue)
+                                        Text(String(
+                                            format: NSLocalizedString("compose_poll_expiration_at", comment: ""),
+                                            NSLocalizedString(PollExpiration(rawValue: viewModel.pollViewModel.expired.rawValue)?.localizedKey ?? "", comment: "")
+                                        ))
                                     }
                                 }
                             }

@@ -4,7 +4,6 @@ import SwiftUI
 import MarkdownUI
 
 struct HomeAppBar: ToolbarContent {
-    @State private var tabStore: TabSettingsStore?
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     let router: Router
     let accountType: AccountType
@@ -13,32 +12,25 @@ struct HomeAppBar: ToolbarContent {
     @Binding var selectedHomeTab: Int
     @State private var showTabSettings = false
     @State private var showUserSettings = false
-    @State private var presenter = ActiveAccountPresenter()
     @ObservedObject var timelineStore: TimelineStore
+    @ObservedObject var tabSettingsStore: TabSettingsStore
+    @State private var scrollOffset: CGFloat = 0
+    @State private var scrollReader: ScrollViewProxy?
     
     init(router: Router, 
          accountType: AccountType, 
          showSettings: Binding<Bool>, 
          showLogin: Binding<Bool>, 
          selectedHomeTab: Binding<Int>,
-         timelineStore: TimelineStore) {
+         timelineStore: TimelineStore,
+         tabSettingsStore: TabSettingsStore) {
         self.router = router
         self.accountType = accountType
         self._showSettings = showSettings
         self._showLogin = showLogin
         self._selectedHomeTab = selectedHomeTab
         self.timelineStore = timelineStore
-    }
-    
-    private func initializeTabStore(with user: UiUserV2) {
-        if tabStore == nil {
-            tabStore = TabSettingsStore(user: user)
-            if timelineStore.selectedTabKey == nil {
-                if let firstItem = tabStore?.allTabs.first {
-                    timelineStore.updateCurrentPresenter(for: firstItem)
-                }
-            }
-        }
+        self.tabSettingsStore = tabSettingsStore
     }
     
     private func onTabSelected(_ tab: FLTabItem) {
@@ -51,47 +43,34 @@ struct HomeAppBar: ToolbarContent {
         if !(accountType is AccountTypeGuest) {
             // 左边的用户头像按钮
             ToolbarItem(placement: .navigation) {
-                ObservePresenter(presenter: presenter) { state in
-                    switch onEnum(of: state.user) {
-                    case .loading:
-                        Button {
-                            showSettings = true
-                        } label: {
-                            userAvatarPlaceholder(size: 32)
-                                .clipShape(Circle())
-                                .padding(.leading, 8)
-                        }
-                    case .error:
-                        Button {
-                            showSettings = true
-                        } label: {
-                            Awesome.Classic.Solid.user.image
-                                .foregroundColor(.init(.accentColor))
-                                .frame(width: 32, height: 32)
-                                .padding(.leading, 8)
-                        }
-                    case .success(let data):
-                        Button {
-                            showSettings = true
-                        } label: {
-                            UserAvatar(data: data.data.avatar, size: 32)
-                                .clipShape(Circle())
-                                .padding(.leading, 8)
-                        }
-                        .task {
-                            initializeTabStore(with: data.data)
-                        }
+                Button {
+                    showSettings = true
+                } label: {
+                    if let user = tabSettingsStore.currentUser {
+                        UserAvatar(data: user.avatar, size: 32)
+                            .clipShape(Circle())
+                            .padding(.leading, 8)
+                    } else {
+                        userAvatarPlaceholder(size: 32)
+                            .clipShape(Circle())
+                            .padding(.leading, 8)
                     }
                 }
             }
             
             // 中间的标签栏
             ToolbarItem(placement: .principal) {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    if let store = tabStore {
+                ScrollViewReader { proxy in
+                    ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 24) {
-                            ForEach(store.allTabs, id: \.key) { tab in
-                                Button(action: { onTabSelected(tab) }) {
+                            ForEach(tabSettingsStore.allTabs, id: \.key) { tab in
+                                Button(action: { 
+                                    onTabSelected(tab)
+                                    // 滚动到选中的标签
+                                    withAnimation {
+                                        proxy.scrollTo(tab.key, anchor: .center)
+                                    }
+                                }) {
                                     VStack(spacing: 4) {
                                         switch tab.metaData.title {
                                         case .text(let title):
@@ -111,14 +90,23 @@ struct HomeAppBar: ToolbarContent {
                                             .frame(height: 2)
                                             .frame(width: 24)
                                     }
+                                    .id(tab.key)
                                 }
                             }
                         }
                         .padding(.horizontal)
                     }
+                    .frame(maxWidth: UIScreen.main.bounds.width - 120)
+                    .frame(height: 44)
+                    .onAppear {
+                        // 如果有选中的标签，滚动到该标签
+                        if let selectedKey = timelineStore.selectedTabKey {
+                            withAnimation {
+                                proxy.scrollTo(selectedKey, anchor: .center)
+                            }
+                        }
+                    }
                 }
-                .frame(maxWidth: UIScreen.main.bounds.width - 120)
-                .frame(height: 44)
             }
             
             // 右边的设置按钮
@@ -133,9 +121,7 @@ struct HomeAppBar: ToolbarContent {
                         .padding(.top, -7)
                 }
                 .sheet(isPresented: $showTabSettings) {
-                    if let store = tabStore {
-                        TabSettingsView(store: store)
-                    }
+                    TabSettingsView(store: tabSettingsStore)
                 }
             }
         } else {

@@ -29,19 +29,22 @@ struct HomeTimelineView: View {
     @Binding var showLogin: Bool
     @Binding var selectedHomeTab: Int
     @ObservedObject var timelineStore: TimelineStore
+    @ObservedObject var tabSettingsStore: TabSettingsStore
     
     init(router: Router, 
          accountType: AccountType, 
          showSettings: Binding<Bool>, 
          showLogin: Binding<Bool>, 
          selectedHomeTab: Binding<Int>,
-         timelineStore: TimelineStore) {
+         timelineStore: TimelineStore,
+         tabSettingsStore: TabSettingsStore) {
         self.router = router
         self.accountType = accountType
         self._showSettings = showSettings
         self._showLogin = showLogin
         self._selectedHomeTab = selectedHomeTab
         self.timelineStore = timelineStore
+        self.tabSettingsStore = tabSettingsStore
     }
     
     var body: some View {
@@ -54,7 +57,8 @@ struct HomeTimelineView: View {
                     showSettings: $showSettings,
                     showLogin: $showLogin,
                     selectedHomeTab: $selectedHomeTab,
-                    timelineStore: timelineStore
+                    timelineStore: timelineStore,
+                    tabSettingsStore: tabSettingsStore
                 )
             }
     }
@@ -70,10 +74,13 @@ struct HomeContent: View {
     @State var showCompose = false
     @State private var selectedHomeTab = 0
     @StateObject private var timelineStore: TimelineStore
+    @StateObject private var tabSettingsStore: TabSettingsStore
     
     init(accountType: AccountType) {
         self.accountType = accountType
-        self._timelineStore = StateObject(wrappedValue: TimelineStore(accountType: accountType))
+        let timelineStore = TimelineStore(accountType: accountType)
+        self._timelineStore = StateObject(wrappedValue: timelineStore)
+        self._tabSettingsStore = StateObject(wrappedValue: TabSettingsStore(timelineStore: timelineStore))
     }
     
     var body: some View {
@@ -89,7 +96,8 @@ struct HomeContent: View {
                                 showSettings: $showSettings,
                                 showLogin: $showLogin,
                                 selectedHomeTab: $selectedHomeTab,
-                                timelineStore: timelineStore
+                                timelineStore: timelineStore,
+                                tabSettingsStore: tabSettingsStore
                             )
                         }
                     }

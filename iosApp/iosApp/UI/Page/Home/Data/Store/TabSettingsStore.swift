@@ -7,16 +7,50 @@ class TabSettingsStore: ObservableObject {
     @Published var secondaryItems: [FLTabItem] = []
     @Published var allTabs: [FLTabItem] = [] // 合并后的所有items
     @Published var availableTabs: [FLTabItem] = []
+    @Published var currentUser: UiUserV2?
 
-    private let user: UiUserV2
+    private var presenter = ActiveAccountPresenter()
+    private var isInitializing = false
+    private var timelineStore: TimelineStore
 
-    init(user: UiUserV2) {
-        self.user = user
+    init(timelineStore: TimelineStore) {
+        self.timelineStore = timelineStore
+        // 开始观察用户信息
+        observeUser()
+    }
+    
+    private func observeUser() {
+        Task { @MainActor in
+            for await state in presenter.models {
+                if case let .success(data) = onEnum(of: state.user) {
+                    initializeWithUser(data.data)
+                }
+            }
+        }
+    }
+
+    private func initializeWithUser(_ user: UiUserV2) {
+        // 如果正在初始化或已经初始化过相同用户，则不重复初始化
+        if isInitializing || self.currentUser?.key == user.key {
+            return
+        }
+        
+        isInitializing = true
+        self.currentUser = user
         // 加载primary和secondary items
         primaryItems = FLTabSettings.defaultPrimary(user: user)
         secondaryItems = FLTabSettings.defaultSecondary(user: user)
         // 合并items
         updateAllTabs()
+        
+        // 如果没有选中的标签，选中第一个
+        if timelineStore.selectedTabKey == nil {
+            if let firstItem = allTabs.first {
+                timelineStore.updateCurrentPresenter(for: firstItem)
+            }
+        }
+        
+        isInitializing = false
     }
 
     private func updateAllTabs() {

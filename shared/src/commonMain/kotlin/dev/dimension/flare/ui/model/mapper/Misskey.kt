@@ -342,14 +342,14 @@ internal fun Note.renderStatus(
                         displayItem =
                             StatusAction.Item.Retweet(
                                 count = renoteCount.toLong(),
-                                retweeted = renoteId != null,
+                                retweeted = false,
                                 onClicked = {},
                             ),
                         actions =
                             listOfNotNull(
                                 StatusAction.Item.Retweet(
                                     count = renoteCount.toLong(),
-                                    retweeted = renoteId != null,
+                                    retweeted = false,
                                     onClicked = {
                                         event.renote(
                                             statusKey = statusKey,

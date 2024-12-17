@@ -2,6 +2,7 @@
 ![license](https://img.shields.io/github/license/DimensionDev/Flare)
 [![Crowdin](https://badges.crowdin.net/flareapp/localized.svg)](https://crowdin.com/project/flareapp)
 [![Telegram](https://img.shields.io/badge/-telegram-blue?logo=telegram&color=white)](https://t.me/+0UtcP6_qcDoyOWE1)
+[![Line](https://img.shields.io/badge/-Line_Group-green?logo=line&color=white)](https://line.me/ti/g/hf95HyGJ9k)
 
 ![badge-Platform](https://img.shields.io/badge/Supported%20Platform-Mastodon%20|%20Misskey%20|%20Bluesky%20-black)
 

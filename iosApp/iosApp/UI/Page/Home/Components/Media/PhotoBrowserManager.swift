@@ -3,63 +3,7 @@ import shared
 import JXPhotoBrowser
 import Kingfisher
 import UIKit
-
-// 添加原图标记视图
-class OriginalImageMarkView: UIView {
-    private let stackView: UIStackView = {
-        let stack = UIStackView()
-        stack.axis = .horizontal
-        stack.spacing = 4
-        stack.alignment = .center
-        return stack
-    }()
-    
-    private let iconLabel: UILabel = {
-        let label = UILabel()
-        label.text = "HD"
-        label.textColor = .white
-        label.font = .systemFont(ofSize: 12, weight: .bold)
-        return label
-    }()
-    
-    private let sizeLabel: UILabel = {
-        let label = UILabel()
-        label.textColor = .white
-        label.font = .systemFont(ofSize: 11)
-        return label
-    }()
-    
-    init(imageSize: Int?) {
-        super.init(frame: .zero)
-        setupView(imageSize: imageSize)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    private func setupView(imageSize: Int?) {
-        backgroundColor = UIColor.black.withAlphaComponent(0.6)
-        layer.cornerRadius = 4
-        clipsToBounds = true
-        
-        addSubview(stackView)
-        stackView.addArrangedSubview(iconLabel)
-        if let size = imageSize {
-            let mbSize = Double(size) / 1024.0 / 1024.0
-            sizeLabel.text = String(format: "%.1fMB", mbSize)
-            stackView.addArrangedSubview(sizeLabel)
-        }
-        
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 6),
-            stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
-            stackView.topAnchor.constraint(equalTo: topAnchor, constant: 4),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4)
-        ])
-    }
-}
+import Photos
 
 class PhotoBrowserManager {
     static let shared = PhotoBrowserManager()
@@ -119,7 +63,7 @@ class PhotoBrowserManager {
                         }
                     }
                     
-                    // 先加载预览图
+                    // 加载预览图
                     cell.imageView.kf.setImage(
                         with: previewUrl,
                         placeholder: nil,
@@ -188,7 +132,97 @@ class PhotoBrowserManager {
                 }
             case .image:
                 if let imageCell = cell as? JXPhotoBrowserImageCell {
-                    // 如果需要对图片 cell 做额外处理
+                    // 在 cell 即将显示时设置长按手势
+                    imageCell.longPressedAction = { [weak self] cell, _ in
+                        guard let self = self else { return }
+                        print("长按手势被触发")
+                        
+                        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+                        
+                        // 获取当前图片的 URL
+                        let media = images[index]
+                        if case let .image(data) = onEnum(of: media),
+                           let url = URL(string: data.url) {
+                            // 添加下载选项
+                            let downloadAction = UIAlertAction(title: "Save", style: .default) { _ in
+                                // 先显示加载中的 Toast
+                                // self.showToast(message: "正在获取原图...", icon: UIImage(systemName: "arrow.clockwise"))
+                                
+                                // 使用 Kingfisher 获取原图
+                                KingfisherManager.shared.retrieveImage(with: url, options: [.loadDiskFileSynchronously, .cacheOriginalImage]) { result in
+                                    switch result {
+                                    case .success(let value):
+                                        // 保存原图到相册
+                                        self.saveImageToAlbum(image: value.image) { success in
+                                            DispatchQueue.main.async {
+                                                if success {
+                                                    self.showToast(message: "saved", icon: UIImage(systemName: "checkmark.circle.fill"))
+                                                } else {
+                                                    // 保存失败时显示错误提示
+                                                    let alert = UIAlertController(
+                                                        title: "save failed",
+                                                        message: "please check the album access permission",
+                                                        preferredStyle: .alert
+                                                    )
+                                                    alert.addAction(UIAlertAction(title: "OK", style: .default))
+                                                    browser.present(alert, animated: true)
+                                                }
+                                            }
+                                        }
+                                    case .failure:
+                                        DispatchQueue.main.async {
+                                            self.showToast(message: "获取原图失败", icon: UIImage(systemName: "xmark.circle.fill"))
+                                        }
+                                    }
+                                }
+                            }
+                            alert.addAction(downloadAction)
+                            
+                            // 添加分享选项
+                            let shareAction = UIAlertAction(title: "Share", style: .default) { _ in
+                                // 先显示加载中的 Toast
+                                // self.showToast(message: "正在获取原图...", icon: UIImage(systemName: "arrow.clockwise"))
+                                
+                                // 使用 Kingfisher 获取原图
+                                KingfisherManager.shared.retrieveImage(with: url, options: [.loadDiskFileSynchronously, .cacheOriginalImage]) { result in
+                                    switch result {
+                                    case .success(let value):
+                                        DispatchQueue.main.async {
+                                            let activityViewController = UIActivityViewController(
+                                                activityItems: [value.image],
+                                                applicationActivities: nil
+                                            )
+                                            
+                                            // 在 iPad 上需要设置弹出位置
+                                            if let popoverController = activityViewController.popoverPresentationController {
+                                                popoverController.sourceView = cell
+                                                popoverController.sourceRect = cell.bounds
+                                            }
+                                            
+                                            browser.present(activityViewController, animated: true)
+                                        }
+                                    case .failure:
+                                        DispatchQueue.main.async {
+                                            self.showToast(message: "获取原图失败", icon: UIImage(systemName: "xmark.circle.fill"))
+                                        }
+                                    }
+                                }
+                            }
+                            alert.addAction(shareAction)
+                        }
+                        
+                        // 添加取消选项
+                        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+                        alert.addAction(cancelAction)
+                        
+                        // 在 iPad 上需要设置弹出位置
+                        if let popoverController = alert.popoverPresentationController {
+                            popoverController.sourceView = cell
+                            popoverController.sourceRect = cell.bounds
+                        }
+                        
+                        browser.present(alert, animated: true)
+                    }
                 }
             default:
                 break
@@ -202,5 +236,36 @@ class PhotoBrowserManager {
         }
         
         browser.show()
+    }
+    
+    // 保存图片到相册
+    private func saveImageToAlbum(image: UIImage, completion: @escaping (Bool) -> Void) {
+        PHPhotoLibrary.requestAuthorization { status in
+            switch status {
+            case .authorized:
+                PHPhotoLibrary.shared().performChanges({
+                    PHAssetChangeRequest.creationRequestForAsset(from: image)
+                }) { success, error in
+                    completion(success)
+                    if let error = error {
+                        print("保存图片失败: \(error.localizedDescription)")
+                    }
+                }
+            default:
+                completion(false)
+                print("没有相册访问权限")
+            }
+        }
+    }
+    
+    private func showToast(message: String, icon: UIImage? = nil) {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            let toastView = ToastView(
+                icon: icon ?? UIImage(systemName: "checkmark.circle.fill"),
+                message: message
+            )
+            toastView.show(in: window)
+        }
     }
 }

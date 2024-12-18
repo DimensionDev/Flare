@@ -65,5 +65,9 @@
 	</array>
 	<key>NLLanguageUsageDescription</key>
 	<string>We need to access language features to provide translation services.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>需要访问相册权限以保存图片</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>需要访问相册权限以保存图片</string>
 </dict>
 </plist>

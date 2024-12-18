@@ -21,6 +21,15 @@ public struct LensMediaView: View {
                         .aspectRatio(fixedAspectRatio, contentMode: .fill)
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .clipped()
+                        .onAppear {
+                            // 打印预览图片地址
+                            print("Media Preview URL: \(previewUrl)")
+                            // 打印原始图片/视频地址
+                            print("Media Original URL: \(viewModel.url)")
+                            // 打印媒体类型
+                            print("Media Type: \(viewModel.mediaKind)")
+                            print("------------------------")
+                        }
                 } else {
                     Rectangle()
                         .foregroundColor(.gray.opacity(0.2))

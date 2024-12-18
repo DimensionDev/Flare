@@ -54,8 +54,7 @@ class PhotoBrowserManager {
                 if let url = URL(string: data.url),
                    let previewUrl = URL(string: data.previewUrl),
                    let cell = context.cell as? JXPhotoBrowserImageCell {
-                    print("开始加载预览图: \(previewUrl)")
-                    
+                     
                     // 移除已存在的原图标记（如果有）
                     cell.imageView.subviews.forEach { view in
                         if view is OriginalImageMarkView {
@@ -74,8 +73,7 @@ class PhotoBrowserManager {
                     ) { result in
                         switch result {
                         case .success(_):
-                            print("预览图加载完成，开始加载原图: \(url)")
-                            // 预览图加载完成后，加载原图
+                             // 预览图加载完成后，加载原图
                             cell.imageView.kf.setImage(
                                 with: url,
                                 placeholder: cell.imageView.image,
@@ -87,7 +85,7 @@ class PhotoBrowserManager {
                             ) { result in
                                 switch result {
                                 case .success(let value):
-                                    print("原图加载完成: \(url)")
+                                    
                                     // 添加原图标记，并显示图片大小
                                     DispatchQueue.main.async {
                                         let imageSize = value.image.jpegData(compressionQuality: 1.0)?.count
@@ -106,11 +104,11 @@ class PhotoBrowserManager {
                                         ])
                                     }
                                 case .failure(let error):
-                                    print("原图加载失败: \(url), 错误: \(error.localizedDescription)")
+                                    print("load original image failed: \(url), error: \(error.localizedDescription)")
                                 }
                             }
                         case .failure(let error):
-                            print("预览图加载失败: \(previewUrl), 错误: \(error.localizedDescription)")
+                            print("load preview image failed: \(previewUrl), error: \(error.localizedDescription)")
                         }
                     }
                 }
@@ -135,7 +133,6 @@ class PhotoBrowserManager {
                     // 在 cell 即将显示时设置长按手势
                     imageCell.longPressedAction = { [weak self] cell, _ in
                         guard let self = self else { return }
-                        print("长按手势被触发")
                         
                         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
                         
@@ -171,7 +168,7 @@ class PhotoBrowserManager {
                                         }
                                     case .failure:
                                         DispatchQueue.main.async {
-                                            self.showToast(message: "获取原图失败", icon: UIImage(systemName: "xmark.circle.fill"))
+                                            self.showToast(message: "get original image failed", icon: UIImage(systemName: "xmark.circle.fill"))
                                         }
                                     }
                                 }
@@ -203,7 +200,7 @@ class PhotoBrowserManager {
                                         }
                                     case .failure:
                                         DispatchQueue.main.async {
-                                            self.showToast(message: "获取原图失败", icon: UIImage(systemName: "xmark.circle.fill"))
+                                            self.showToast(message: "get original image failed", icon: UIImage(systemName: "xmark.circle.fill"))
                                         }
                                     }
                                 }
@@ -248,12 +245,12 @@ class PhotoBrowserManager {
                 }) { success, error in
                     completion(success)
                     if let error = error {
-                        print("保存图片失败: \(error.localizedDescription)")
+                        print("save image failed: \(error.localizedDescription)")
                     }
                 }
             default:
                 completion(false)
-                print("没有相册访问权限")
+                print("no album access permission")
             }
         }
     }

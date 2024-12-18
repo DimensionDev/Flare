@@ -21,6 +21,8 @@
 		06B8514F2B6B22A500DFA075 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 06B8514E2B6B22A500DFA075 /* GoogleService-Info.plist */; };
 		06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B851502B6B22DD00DFA075 /* AppDelegate.swift */; };
 		06B851552B6B926D00DFA075 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 06B851542B6B926D00DFA075 /* Localizable.xcstrings */; };
+		641817752D12E7350046CEB0 /* OriginalImageMarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 641817732D12E7350046CEB0 /* OriginalImageMarkView.swift */; };
+		641817762D12E7350046CEB0 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 641817742D12E7350046CEB0 /* ToastView.swift */; };
 		642AA5402D1021500088B7E3 /* TimelineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642AA53F2D1021500088B7E3 /* TimelineStore.swift */; };
 		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
 		64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64782BD02CFD65F4008DE526 /* View+Injection.swift */; };
@@ -133,6 +135,8 @@
 		06B851502B6B22DD00DFA075 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		06B851542B6B926D00DFA075 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		06BE4D632B3181B0000C6D7D /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
+		641817732D12E7350046CEB0 /* OriginalImageMarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OriginalImageMarkView.swift; sourceTree = "<group>"; };
+		641817742D12E7350046CEB0 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		642AA53F2D1021500088B7E3 /* TimelineStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineStore.swift; sourceTree = "<group>"; };
 		64655C2C2CFD6CA000255488 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		64782BD02CFD65F4008DE526 /* View+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Injection.swift"; sourceTree = "<group>"; };
@@ -311,6 +315,8 @@
 		64E876B72D0430C7003559B9 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				641817732D12E7350046CEB0 /* OriginalImageMarkView.swift */,
+				641817742D12E7350046CEB0 /* ToastView.swift */,
 				64E876E12D0430C7003559B9 /* WaterfallList */,
 				64E876D02D0430C7003559B9 /* MediaPreview */,
 				64E876AA2D0430C7003559B9 /* Common */,
@@ -1028,6 +1034,8 @@
 				64E8773C2D0430C7003559B9 /* PlaybackState.swift in Sources */,
 				64E8773D2D0430C7003559B9 /* StatusRetweetHeaderComponent.swift in Sources */,
 				64E8773E2D0430C7003559B9 /* StatusMediaScreen.swift in Sources */,
+				641817752D12E7350046CEB0 /* OriginalImageMarkView.swift in Sources */,
+				641817762D12E7350046CEB0 /* ToastView.swift in Sources */,
 				64E8773F2D0430C7003559B9 /* FeaturedScreen.swift in Sources */,
 				64E877402D0430C7003559B9 /* Zoomable.swift in Sources */,
 				64E877412D0430C7003559B9 /* ComposeView.swift in Sources */,

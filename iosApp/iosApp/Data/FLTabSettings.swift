@@ -832,82 +832,73 @@ public enum FLTabSettingsError: Error {
 }
 
 // MARK: - Tab Settings Storage
-//public class FLTabSettingsStorage {
-//    private static let storageKey = "fl_tab_settings"
-//    private let userDefaults: UserDefaults
-//    
-//    public init(userDefaults: UserDefaults = .standard) {
-//        self.userDefaults = userDefaults
-//    }
-//    
-//    public func save(_ settings: FLTabSettings) throws {
-//        do {
-//            let data = try JSONEncoder().encode(settings)
-//            userDefaults.set(data, forKey: Self.storageKey)
-//        } catch {
-//            throw FLTabSettingsError.serializationError("无法序列化标签设置: \(error.localizedDescription)")
-//        }
-//    }
-//    
-//    public func load() throws -> FLTabSettings {
-//        guard let data = userDefaults.data(forKey: Self.storageKey) else {
-//            return .default
-//        }
-//        
-//        do {
-//            return try JSONDecoder().decode(FLTabSettings.self, from: data)
-//        } catch {
-//            throw FLTabSettingsError.corruptionError("无法解析标签设置: \(error.localizedDescription)")
-//        }
-//    }
-//    
-//    public func clear() {
-//        userDefaults.removeObject(forKey: Self.storageKey)
-//    }
-//}
+public class FLTabSettingsStorage {
+    private static let storageKeyPrefix = "fl_tab_settings_"
+    private let userDefaults: UserDefaults
+    
+    public init(userDefaults: UserDefaults = .standard) {
+        self.userDefaults = userDefaults
+    }
+    
+    // 存储启用的tab items
+    public func saveEnabledItems(_ items: [String], for platformType: PlatformType, accountKey: MicroBlogKey) {
+        let key = Self.storageKey(for: platformType, accountKey: accountKey)
+        userDefaults.set(items, forKey: key)
+    }
+    
+    // 读取启用的tab items
+    public func loadEnabledItems(for platformType: PlatformType, accountKey: MicroBlogKey) -> [String] {
+        let key = Self.storageKey(for: platformType, accountKey: accountKey)
+        return userDefaults.array(forKey: key) as? [String] ?? []
+    }
+    
+    // 清除特定平台和账号的设置
+    public func clear(for platformType: PlatformType, accountKey: MicroBlogKey) {
+        let key = Self.storageKey(for: platformType, accountKey: accountKey)
+        userDefaults.removeObject(forKey: key)
+    }
+    
+    // 生成存储key
+    private static func storageKey(for platformType: PlatformType, accountKey: MicroBlogKey) -> String {
+        let platformString = platformType.name // 使用 PlatformType 的 name 属性
+        let accountString = accountKey.id // 使用 MicroBlogKey 的 id 属性
+        return "\(storageKeyPrefix)\(platformString)_\(accountString)"
+    }
+}
 
 // MARK: - Tab Settings Manager
-//public class FLTabSettingsManager {
-//    private let storage: FLTabSettingsStorage
-//    
-//    public init(storage: FLTabSettingsStorage = FLTabSettingsStorage()) {
-//        self.storage = storage
-//    }
-//    
-//    public func getSettings() -> FLTabSettings {
-//        do {
-//            return try storage.load()
-//        } catch {
-//            print("加载标签设置失败: \(error.localizedDescription)")
-//            return .default
-//        }
-//    }
-//    
-//    public func updateSettings(_ settings: FLTabSettings) {
-//        do {
-//            try storage.save(settings)
-//        } catch {
-//            print("保存标签设置失败: \(error.localizedDescription)")
-//        }
-//    }
-//    
-//    public func resetToDefault() {
-//        updateSettings(.default)
-//    }
-//    
-//    public func resetToGuest() {
-//        updateSettings(AccountTypeGuest.shared)
-//    }
-//    
-//    public func updateForUser(_ user: FLUser) {
-//        let settings = FLTabSettings(
-//            items: FLTabSettings.defaultPrimary(user: user),
-//            secondaryItems: FLTabSettings.defaultSecondary(user: user),
-//            homeTabs: [:]
-//        )
-//        updateSettings(settings)
-//    }
-//}
+public class FLTabSettingsManager {
+    private let storage: FLTabSettingsStorage
+    
+    public init(storage: FLTabSettingsStorage = FLTabSettingsStorage()) {
+        self.storage = storage
+    }
+    
+    // 保存启用的items
+    public func saveEnabledItems(_ items: [FLTabItem], for user: UiUserV2) {
+        let itemKeys = items.map { $0.key }
+        storage.saveEnabledItems(itemKeys, for: user.platformType, accountKey: user.key)
+    }
+    
+    // 获取启用的items，如果没有存储则返回nil
+    public func getEnabledItems(for user: UiUserV2) -> [FLTabItem]? {
+        let enabledKeys = storage.loadEnabledItems(for: user.platformType, accountKey: user.key)
+        if enabledKeys.isEmpty {
+            return nil
+        }
+        
+        // 从默认配置中找到对应的items
+        let defaultItems = FLTabSettings.defaultSecondary(user: user)
+        return enabledKeys.compactMap { key in
+            defaultItems.first { $0.key == key }
+        }
+    }
+    
+    // 重置为默认设置
+    public func resetToDefault(for user: UiUserV2) {
+        storage.clear(for: user.platformType, accountKey: user.key)
+    }
+}
 
 // MARK: - Tab Settings Extensions
 extension FLTabSettings {

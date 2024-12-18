@@ -4,53 +4,46 @@ import shared
 struct HomeAppBarSettingsView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var store: TabSettingsStore
-    @State private var showingAddSheet = false
-    @State private var showingDeleteAlert = false
-    @State private var tabToDelete: FLTabItem? = nil
     
     var body: some View {
         NavigationView {
             List {
-                Section(header: Text("")) {
-                    ForEach(store.allTabs, id: \.key) { tab in
-                        TabItemRow(tab: tab, store: store) {
-                            tabToDelete = tab
-                            showingDeleteAlert = true
-                        }
+                // 主要标签（只显示第一个）
+                if let primaryTab = store.primaryItems.first {
+                    Section(header: Text("main tab")) {
+                        TabItemRow(tab: primaryTab, store: store, isPrimary: true)
+                    }
+                }
+                
+                // 次要标签（可更改状态）
+                Section(header: Text("used tabs")) {
+                    ForEach(store.storeItems, id: \.key) { tab in
+                        TabItemRow(tab: tab, store: store, isPrimary: false)
                     }
                     .onMove { source, destination in
                         store.moveTab(from: source, to: destination)
                     }
                 }
+                
+                // 未启用的标签
+                let unusedTabs = store.secondaryItems.filter { tab in
+                    !store.storeItems.contains { $0.key == tab.key }
+                }
+                if !unusedTabs.isEmpty {
+                    Section(header: Text("unused tabs")) {
+                        ForEach(unusedTabs, id: \.key) { tab in
+                            TabItemRow(tab: tab, store: store, isPrimary: false)
+                        }
+                    }
+                }
             }
             .navigationTitle("tab_settings_title")
-            // .navigationBarItems(
-            //     leading: Button("返回") {
-            //         dismiss()
-            //     }
-            //     /*,
-            //     trailing: Button(action: {
-            //         showingAddSheet = true
-            //     }) {
-            //         Image(systemName: "plus")
-            //     }*/
-            // )
-            // .alert(isPresented: $showingDeleteAlert) {
-            //     Alert(
-            //         title: Text("删除标签"),
-            //         message: Text("确定要删除这个标签吗？"),
-            //         primaryButton: .destructive(Text("删除")) {
-            //             if let tab = tabToDelete {
-            //                 store.removeTab(tab.key)
-            //             }
-            //         },
-            //         secondaryButton: .cancel(Text("取消"))
-            //     )
-            // }
+            .navigationBarItems(
+                leading: Button(" ") {
+                    dismiss()
+                }
+            )
         }
-        // .sheet(isPresented: $showingAddSheet) {
-        //     AddTabView(store: store, isPresented: $showingAddSheet)
-        // }
         .environment(\.editMode, .constant(.active))
     }
 }
@@ -58,12 +51,14 @@ struct HomeAppBarSettingsView: View {
 struct TabItemRow: View {
     let tab: FLTabItem
     let store: TabSettingsStore
-    let onDelete: () -> Void
+    let isPrimary: Bool
     
     var body: some View {
         HStack {
-            Image(systemName: "line.3.horizontal")
-                .foregroundColor(.gray)
+            if !isPrimary {
+                Image(systemName: "line.3.horizontal")
+                    .foregroundColor(.gray)
+            }
             
             // 显示图标
             switch tab.metaData.icon {
@@ -93,72 +88,13 @@ struct TabItemRow: View {
             
             Spacer()
             
-            Toggle("", isOn: Binding(
-                get: { true },
-                set: { _ in store.toggleTab(tab.key) }
-            ))
-            
-            // Button(action: onDelete) {
-            //     Image(systemName: "trash")
-            //         .foregroundColor(.red)
-            // }
+            // 次要标签显示开关
+            if !isPrimary {
+                Toggle("", isOn: Binding(
+                    get: { store.storeItems.contains(where: { $0.key == tab.key }) },
+                    set: { _ in store.toggleTab(tab.key) }
+                ))
+            }
         }
     }
 }
-
-// struct AddTabView: View {
-//     @ObservedObject var store: TabSettingsStore
-//     @Binding var isPresented: Bool
-    
-//     var body: some View {
-//         NavigationView {
-//             List {
-//                 ForEach(store.availableTabs, id: \.key) { tab in
-//                     HStack {
-//                         // 显示图标
-//                         switch tab.metaData.icon {
-//                         case .material(let iconName):
-//                             if let materialIcon = FLMaterialIcon(rawValue: iconName) {
-//                                 materialIcon.icon
-//                                     .foregroundColor(.blue)
-//                             }
-//                         case .mixed(let icons):
-//                             if let firstIcon = icons.first,
-//                                let materialIcon = FLMaterialIcon(rawValue: firstIcon) {
-//                                 materialIcon.icon
-//                                     .foregroundColor(.blue)
-//                             }
-//                         case .avatar:
-//                             Image(systemName: "person.circle")
-//                                 .foregroundColor(.blue)
-//                         }
-                        
-//                         // 显示标题
-//                         switch tab.metaData.title {
-//                         case .text(let title):
-//                             Text(title)
-//                         case .localized(let key):
-//                             Text(NSLocalizedString(key, comment: ""))
-//                         }
-                        
-//                         Spacer()
-                        
-//                         Button(action: {
-//                             store.addTab(tab)
-//                             isPresented = false
-//                         }) {
-//                             Image(systemName: "plus.circle.fill")
-//                                 .foregroundColor(.blue)
-//                         }
-//                     }
-//                 }
-//             }
-//             .navigationTitle("添加次要标签")
-//             .navigationBarItems(
-//                 leading: Button("取消") {
-//                     isPresented = false
-//                 }
-//             )
-//         }
-//     }
-// }

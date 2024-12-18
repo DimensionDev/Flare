@@ -63,7 +63,7 @@ struct HomeAppBar: ToolbarContent {
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 24) {
-                            ForEach(tabSettingsStore.allTabs, id: \.key) { tab in
+                            ForEach(tabSettingsStore.availableTabs, id: \.key) { tab in
                                 Button(action: { 
                                     onTabSelected(tab)
                                     // 滚动到选中的标签

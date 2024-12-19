@@ -20,6 +20,7 @@ import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
@@ -60,6 +61,7 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.screen.home.Router
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -75,10 +77,13 @@ internal fun SettingsRoute(
     val uriHandler = LocalUriHandler.current
     val scaffoldNavigator =
         rememberListDetailPaneScaffoldNavigator<SettingsDetailDestination>()
+    val scope = rememberCoroutineScope()
     BackHandler(
         scaffoldNavigator.canNavigateBack(),
     ) {
-        scaffoldNavigator.navigateBack()
+        scope.launch {
+            scaffoldNavigator.navigateBack()
+        }
     }
     ListDetailPaneScaffold(
         directive = scaffoldNavigator.scaffoldDirective,
@@ -87,42 +92,58 @@ internal fun SettingsRoute(
             AnimatedPane {
                 SettingsScreen(
                     toAccounts = {
-                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.Accounts)
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.Accounts)
+                        }
                     },
                     toAppearance = {
-                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.Appearance)
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.Appearance)
+                        }
                     },
                     toStorage = {
-                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.Storage)
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.Storage)
+                        }
                     },
                     toAbout = {
-                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.About)
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.About)
+                        }
                     },
                     toTabCustomization = {
-                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.TabCustomization)
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.TabCustomization)
+                        }
                     },
                     toLocalFilter = {
-                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.LocalFilter)
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.LocalFilter)
+                        }
                     },
                     toGuestSettings = {
                         navigator.navigate(GuestSettingRouteDestination)
                     },
                     toLocalHistory = {
-                        scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.LocalHistory)
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail, SettingsDetailDestination.LocalHistory)
+                        }
                     },
                 )
             }
         },
         detailPane = {
             AnimatedPane {
-                scaffoldNavigator.currentDestination?.content?.let { item ->
+                scaffoldNavigator.currentDestination?.contentKey?.let { item ->
                     Router(navGraph = NavGraphs.root, item.toDestination()) {
                         dependency(
                             ProxyDestinationsNavigator(
                                 scaffoldNavigator,
                                 destinationsNavigator,
                                 navigateBack = {
-                                    scaffoldNavigator.navigateBack()
+                                    scope.launch {
+                                        scaffoldNavigator.navigateBack()
+                                    }
                                 },
                                 uriHandler = uriHandler,
                             ),

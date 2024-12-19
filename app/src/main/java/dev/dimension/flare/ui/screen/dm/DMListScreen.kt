@@ -81,6 +81,7 @@ internal fun DMScreenRoute(
 ) {
     val scaffoldNavigator =
         rememberListDetailPaneScaffoldNavigator<DMPaneNavArgs>()
+    val scope = rememberCoroutineScope()
     if (initialUserKey != null) {
         LaunchedEffect(initialUserKey) {
             scaffoldNavigator.navigateTo(
@@ -92,7 +93,9 @@ internal fun DMScreenRoute(
         BackHandler(
             scaffoldNavigator.canNavigateBack(),
         ) {
-            scaffoldNavigator.navigateBack()
+            scope.launch {
+                scaffoldNavigator.navigateBack()
+            }
         }
     }
 
@@ -104,22 +107,28 @@ internal fun DMScreenRoute(
                 DMListScreen(
                     accountType = accountType,
                     onItemClicked = { key ->
-                        scaffoldNavigator.navigateTo(
-                            ListDetailPaneScaffoldRole.Detail,
-                            DMPaneNavArgs(key.toString(), isUserKey = false),
-                        )
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(
+                                ListDetailPaneScaffoldRole.Detail,
+                                DMPaneNavArgs(key.toString(), isUserKey = false),
+                            )
+                        }
                     },
                 )
             }
         },
         detailPane = {
             AnimatedPane {
-                scaffoldNavigator.currentDestination?.content?.let { args ->
+                scaffoldNavigator.currentDestination?.contentKey?.let { args ->
                     if (args.isUserKey) {
                         UserDMConversationScreen(
                             accountType = accountType,
                             userKey = MicroBlogKey.valueOf(args.key),
-                            onBack = scaffoldNavigator::navigateBack,
+                            onBack = {
+                                scope.launch {
+                                    scaffoldNavigator.navigateBack()
+                                }
+                            },
                             navigationState = navigationState,
                             toProfile = {
                                 navigator.navigate(ProfileRouteDestination(userKey = it, accountType = accountType))
@@ -129,7 +138,11 @@ internal fun DMScreenRoute(
                         DMConversationScreen(
                             accountType = accountType,
                             roomKey = MicroBlogKey.valueOf(args.key),
-                            onBack = scaffoldNavigator::navigateBack,
+                            onBack = {
+                                scope.launch {
+                                    scaffoldNavigator.navigateBack()
+                                }
+                            },
                             navigationState = navigationState,
                             toProfile = {
                                 navigator.navigate(ProfileRouteDestination(userKey = it, accountType = accountType))

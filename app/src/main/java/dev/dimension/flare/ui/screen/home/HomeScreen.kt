@@ -62,6 +62,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.xr.compose.platform.LocalSession
+import androidx.xr.compose.platform.LocalSpatialCapabilities
 import com.ramcosta.composedestinations.DestinationsNavHost
 import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationStyle
 import com.ramcosta.composedestinations.generated.NavGraphs
@@ -86,9 +88,11 @@ import com.ramcosta.composedestinations.utils.dialogComposable
 import com.ramcosta.composedestinations.utils.toDestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.DownLeftAndUpRightToCenter
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Pen
+import compose.icons.fontawesomeicons.solid.UpRightAndDownLeftFromCenter
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.Bluesky
@@ -166,6 +170,8 @@ internal fun HomeScreen(
             navBackStackEntry?.destination?.route
         }
     }
+    val session = LocalSession.current
+    val spatialCapabilities = LocalSpatialCapabilities.current
     val hapticFeedback = LocalHapticFeedback.current
     state.tabs
         .onSuccess { tabs ->
@@ -359,6 +365,38 @@ internal fun HomeScreen(
                             }
                         },
                         footerItems = {
+                            if (!spatialCapabilities.isSpatialUiEnabled) {
+                                item(
+                                    selected = false,
+                                    onClick = {
+                                        if (spatialCapabilities.isSpatialUiEnabled) {
+                                            session?.requestHomeSpaceMode()
+                                        } else {
+                                            session?.requestFullSpaceMode()
+                                        }
+                                    },
+                                    icon = {
+                                        if (spatialCapabilities.isSpatialUiEnabled) {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.DownLeftAndUpRightToCenter,
+                                                contentDescription = null,
+                                            )
+                                        } else {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.UpRightAndDownLeftFromCenter,
+                                                contentDescription = null,
+                                            )
+                                        }
+                                    },
+                                    label = {
+                                        if (spatialCapabilities.isSpatialUiEnabled) {
+                                            Text("Spatial")
+                                        } else {
+                                            Text("Spatial")
+                                        }
+                                    },
+                                )
+                            }
                             accountTypeState.user.onSuccess {
                                 item(
                                     selected = currentRoute == SettingsRouteDestination.route,

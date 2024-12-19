@@ -4,6 +4,7 @@
   <string name="settings_about_source_code">Lähdekoodi</string>
   <string name="settings_about_telegram">Telegram</string>
   <string name="settings_about_telegram_description">Liity meidän Telegram ryhmään</string>
+  <string name="settings_about_line_description">Liity Riviryhmäämme</string>
   <string name="settings_about_localization">Crowdiini</string>
   <string name="settings_about_localization_description">Auta meitä kääntämään Flare</string>
 </resources>

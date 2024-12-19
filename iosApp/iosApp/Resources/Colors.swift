@@ -5,6 +5,12 @@ public enum Colors {
     public enum State {
         public static let active = UIColor(light: UIColor(red: 29/255, green: 161/255, blue: 242/255, alpha: 1.0),
                                           dark: UIColor(red: 29/255, green: 155/255, blue: 240/255, alpha: 1.0))
+        public static let bookmarkActive = UIColor(light: UIColor(red: 255/255, green: 82/255, blue: 82/255, alpha: 1.0),
+                                          dark: UIColor(red: 255/255, green: 82/255, blue: 82/255, alpha: 1.0))
+        public static let likeActive = UIColor(light: UIColor(red: 255/255, green: 64/255, blue: 129/255, alpha: 1.0),
+                                          dark: UIColor(red: 255/255, green: 64/255, blue: 129/255, alpha: 1.0))
+        public static let retweetActive = UIColor(light: UIColor(red: 139/255, green: 195/255, blue: 74/255, alpha: 1.0),
+                                          dark: UIColor(red: 104/255, green: 159/255, blue: 56/255, alpha: 1.0))
         public static let secondActive = UIColor(light: UIColor(red: 83/255, green: 100/255, blue: 113/255, alpha: 1.0),
                                                 dark: UIColor(red: 110/255, green: 118/255, blue: 125/255, alpha: 1.0))
         public static let deactive = UIColor(light: UIColor(red: 139/255, green: 152/255, blue: 165/255, alpha: 1.0),
@@ -13,6 +19,9 @@ public enum Colors {
                                                   dark: UIColor(red: 39/255, green: 44/255, blue: 48/255, alpha: 1.0))
         
         public static var swiftUIActive: Color { Color(uiColor: active) }
+        public static var swiftUIBookmarkActive: Color { Color(uiColor: bookmarkActive) }
+        public static var swiftUILikeActive: Color { Color(uiColor: likeActive) }
+        public static var swiftUIRetweetActive: Color { Color(uiColor: retweetActive) }
         public static var swiftUISecondActive: Color { Color(uiColor: secondActive) }
         public static var swiftUIDeactive: Color { Color(uiColor: deactive) }
         public static var swiftUIDeactiveDarker: Color { Color(uiColor: deactiveDarker) }

@@ -5,6 +5,7 @@ import Kingfisher
 import shared
 import SwiftDate
 import SwiftUI
+import UIKit
 
 // timeline tweet
 struct CommonTimelineStatusComponent: View {
@@ -16,6 +17,53 @@ struct CommonTimelineStatusComponent: View {
     let data: UiTimelineItemContentStatus
     let onMediaClick: (Int, UiMedia) -> Void
     let isDetail: Bool
+    
+    private func showReportToast() {
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            let toastView = ToastView(
+                icon: UIImage(systemName: "flag.fill"),
+                message: String(localized: "report") + " success"
+            )
+            toastView.show(in: window)
+        }
+    }
+
+    private func processActions() -> (mainActions: [StatusAction], moreActions: [StatusActionItem]) {
+        var bottomMainActions: [StatusAction] = []
+        var bottomMoreActions: [StatusActionItem] = []
+        
+        // 处理主要操作
+        for action in data.actions {
+            switch onEnum(of: action) {
+            case .item(let item):
+                // 所有非 More 的 item 都加入主操作
+                if !(item is StatusActionItemMore) {
+                    bottomMainActions.append(action)
+                }
+            case .group(let group):
+                if let displayItem = group.displayItem as? StatusActionItemMore {
+                    // 只处理 More 菜单中的操作
+                    for subAction in group.actions {
+                        if case .item(let item) = onEnum(of: subAction) {
+                            if item is StatusActionItemBookmark {
+                                // 将书签添加到主操作
+                                bottomMainActions.append(subAction)
+                            } else {
+                                // 其他操作添加到更多操作
+                                bottomMoreActions.append(item)
+                            }
+                        }
+                    }
+                } else {
+                    // 其他 group（比如转发组）保持原样
+                    bottomMainActions.append(action)
+                }
+            }
+        }
+        
+        return (bottomMainActions, bottomMoreActions)
+    }
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -88,12 +136,19 @@ struct CommonTimelineStatusComponent: View {
                 Spacer()
                     .frame(height: 10)
                 
-                FlareText(data.content.raw)
-                    .onLinkTap { url in
-                        openURL(url)
-                    }
-                    .font(.system(size: 16))
-                    .foregroundColor(Colors.Text.swiftUIPrimary)
+                if !data.content.raw.isEmpty {
+                    FlareText(data.content.raw)
+                        .onLinkTap { url in
+                            openURL(url)
+                        }
+                        .font(.system(size: 16))
+                        .foregroundColor(Colors.Text.swiftUIPrimary)
+                } else {
+                    // 如果内容为空，显示一个空的 Text
+                    Text("")
+                        .font(.system(size: 16))
+                        .foregroundColor(Colors.Text.swiftUIPrimary)
+                }
             }
             // media
             if !data.images.isEmpty {
@@ -195,14 +250,26 @@ struct CommonTimelineStatusComponent: View {
 
             // bottom action
             if appSettings.appearanceSettings.showActions || isDetail, !data.actions.isEmpty {
+                let processedActions = processActions()
                 HStack {
-                    ForEach(0 ..< data.actions.count, id: \.self) { actionIndex in
-                        if actionIndex == data.actions.count - 1 {
-                            Spacer()
-                        }
-                        let action = data.actions[actionIndex]
+                    // 显示主要操作
+                    ForEach(0 ..< processedActions.mainActions.count, id: \.self) { actionIndex in
+                        let action = processedActions.mainActions[actionIndex]
                         switch onEnum(of: action) {
-                        case let .group(group): Menu {
+                        case let .item(item):
+                            Button(action: {
+                                if let clickable = item as? StatusActionItemClickable {
+                                    clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                                    // 如果是举报操作，显示 Toast
+                                    if case .report = onEnum(of: item) {
+                                        showReportToast()
+                                    }
+                                }
+                            }, label: {
+                                StatusActionLabel(item: item)
+                            })
+                        case let .group(group):
+                            Menu {
                                 ForEach(0 ..< group.actions.count, id: \.self) { subActionIndex in
                                     let subAction = group.actions[subActionIndex]
                                     if case let .item(item) = onEnum(of: subAction) {
@@ -213,29 +280,32 @@ struct CommonTimelineStatusComponent: View {
                                             case .contentColor: nil
                                             case .error: .destructive
                                             }
-                                        } else {
-                                            nil
+                                        } else {   
+                                            nil 
                                         }
                                         Button(role: role, action: {
                                             if let clickable = item as? StatusActionItemClickable {
                                                 clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                                                // 如果是举报操作，显示 Toast
+                                                if case .report = onEnum(of: item) {
+                                                    showReportToast()
+                                                }
                                             }
                                         }, label: {
                                             let text: LocalizedStringKey = switch onEnum(of: item) {
                                             case let .bookmark(data): data.bookmarked ? LocalizedStringKey("status_action_unbookmark") : LocalizedStringKey("status_action_bookmark")
                                             case .delete: LocalizedStringKey("status_action_delete")
                                             case let .like(data): data.liked ? LocalizedStringKey("status_action_unlike") : LocalizedStringKey("status_action_like")
-                                            case .quote: LocalizedStringKey("status_action_quote")
+                                            case .quote: LocalizedStringKey("quote")
                                             case .reaction: LocalizedStringKey("status_action_add_reaction")
                                             case .reply: LocalizedStringKey("status_action_reply")
-                                            case .report: LocalizedStringKey("status_action_report")
-                                            case let .retweet(data): data.retweeted ? LocalizedStringKey("status_action_unretweet") : LocalizedStringKey("status_action_retweet")
+                                            case .report: LocalizedStringKey("report")
+                                            case let .retweet(data): data.retweeted ? LocalizedStringKey("retweet_remove") : LocalizedStringKey("retweet")
                                             case .more: LocalizedStringKey("status_action_more")
                                             }
                                             Label {
                                                 Text(text)
                                             } icon: {
-                                                // bottom action icon
                                                 StatusActionItemIcon(item: item)
                                             }
                                         })
@@ -244,32 +314,68 @@ struct CommonTimelineStatusComponent: View {
                             } label: {
                                 StatusActionLabel(item: group.displayItem)
                             }
-                            .if(actionIndex != data.actions.count - 1) { view in
-                                view
-                                    .frame(minWidth: 56.0, alignment: .leading)
-                            }
-                            .if(actionIndex == data.actions.count - 1) { view in
-                                view
-                                    .frame(alignment: .center)
-                            }
-                        case let .item(item): Button(action: {
-                                if let clickable = item as? StatusActionItemClickable {
-                                    clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                        }
+                        
+                        if actionIndex < processedActions.mainActions.count - 1 {
+                            Spacer()
+                        }
+                    }
+                    
+                    Spacer()
+                        .frame(width: 32)  // 主要操作和 More 按钮之间的间距
+                    
+                    // 显示更多操作菜单
+                    if !processedActions.moreActions.isEmpty {
+                        Menu {
+                            ForEach(0 ..< processedActions.moreActions.count, id: \.self) { index in
+                                let item = processedActions.moreActions[index]
+                                let role: ButtonRole? = if let colorData = item as? StatusActionItemColorized {
+                                    switch colorData.color {
+                                    case .red: .destructive
+                                    case .primaryColor: nil
+                                    case .contentColor: nil
+                                    case .error: .destructive
+                                    }
+                                } else {
+                                    nil
                                 }
-                            }, label: {
-                                StatusActionLabel(item: item)
-                            })
-                            .if(actionIndex != data.actions.count - 1) { view in
-                                view
-                                    .frame(minWidth: 56.0, alignment: .leading)
+                                
+                                Button(role: role, action: {
+                                    if let clickable = item as? StatusActionItemClickable {
+                                        clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                                        // 如果是举报操作，显示 Toast
+                                        if case .report = onEnum(of: item) {
+                                            showReportToast()
+                                        }
+                                    }
+                                }, label: {
+                                    let text: LocalizedStringKey = switch onEnum(of: item) {
+                                    case let .bookmark(data): data.bookmarked ? LocalizedStringKey("status_action_unbookmark") : LocalizedStringKey("status_action_bookmark")
+                                    case .delete: LocalizedStringKey("status_action_delete")
+                                    case let .like(data): data.liked ? LocalizedStringKey("status_action_unlike") : LocalizedStringKey("status_action_like")
+                                    case .quote: LocalizedStringKey("quote")
+                                    case .reaction: LocalizedStringKey("status_action_add_reaction")
+                                    case .reply: LocalizedStringKey("status_action_reply")
+                                    case .report: LocalizedStringKey("report")
+                                    case let .retweet(data): data.retweeted ? LocalizedStringKey("retweet_remove") : LocalizedStringKey("retweet")
+                                    case .more: LocalizedStringKey("status_action_more")
+                                    }
+                                    Label {
+                                        Text(text)
+                                    } icon: {
+                                        StatusActionItemIcon(item: item)
+                                    }
+                                })
                             }
-                            .if(actionIndex == data.actions.count - 1) { view in
-                                view
-                                    .frame(alignment: .center)
-                            }
+                        } label: {
+                            Image(asset: Asset.Image.Status.more)
+                                .renderingMode(.template)
+                                .rotationEffect(.degrees(90)) 
+                                .frame(width: 35, alignment: .trailing)  // 增加宽度并靠右对齐
                         }
                     }
                 }
+                .padding(.horizontal, 16)
                 .labelStyle(CenteredLabelStyle())
                 .buttonStyle(.borderless)
                 .opacity(0.6)
@@ -311,7 +417,7 @@ struct StatusActionItemIcon: View {
             if data.bookmarked {
                 Image(asset: Asset.Image.Status.Toolbar.bookmarkFilled)
                     .renderingMode(.template)
-                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+                    .foregroundColor(Colors.State.swiftUIBookmarkActive)
             } else {
                 Image(asset: Asset.Image.Status.Toolbar.bookmark)
                     .renderingMode(.template)
@@ -325,7 +431,7 @@ struct StatusActionItemIcon: View {
             if data.liked {
                 Image(asset: Asset.Image.Status.Toolbar.favorite)
                     .renderingMode(.template)
-                    .foregroundColor(Colors.State.swiftUIActive)
+                    .foregroundColor(Colors.State.swiftUILikeActive)
             } else {
                 Image(asset: Asset.Image.Status.Toolbar.favoriteBorder)
                     .renderingMode(.template)
@@ -360,7 +466,7 @@ struct StatusActionItemIcon: View {
             if data.retweeted {
                 Image(asset: Asset.Image.Status.Toolbar.repeat)
                     .renderingMode(.template)
-                    .foregroundColor(Colors.State.swiftUIActive)
+                    .foregroundColor(Colors.State.swiftUIRetweetActive)
             } else {
                 Image(asset: Asset.Image.Status.Toolbar.repeat)
                     .renderingMode(.template)
@@ -373,38 +479,32 @@ struct StatusActionItemIcon: View {
 // bottom action
 struct StatusActionLabel: View {
     let item: StatusActionItem
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
         let text = switch onEnum(of: item) {
-        case let .like(data): data.humanizedCount 
-        case let .retweet(data): data.humanizedCount
-        case let .quote(data): data.humanizedCount
-        case let .reply(data): data.humanizedCount
-        case let .bookmark(data): data.humanizedCount
+        case let .like(data): formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
+        case let .retweet(data): formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
+        case let .quote(data): formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
+        case let .reply(data): formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
+        case let .bookmark(data): formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
         default: ""
         }
-        let color = if let colorData = item as? StatusActionItemColorized {
-            switch colorData.color {
-            case .red: Color.red
-            case .primaryColor: Color.accentColor
-            case .contentColor:
-                #if os(iOS)
-                    Color(UIColor.label)
-                #elseif os(macOS)
-                    Color(NSColor.labelColor)
-                #endif
-            case .error: Color.red
-            }
-        } else {
-            #if os(iOS)
-                Color(UIColor.label)
-            #elseif os(macOS)
-                Color(NSColor.labelColor)
-            #endif
+        
+        let color = switch onEnum(of: item) {
+        case let .retweet(data):
+            data.retweeted ? Colors.State.swiftUIRetweetActive : (colorScheme == .dark ? Color.white : Color.black)
+        case let .bookmark(data):
+            data.bookmarked ? Colors.State.swiftUIBookmarkActive : (colorScheme == .dark ? Color.white : Color.black)
+        case let .like(data):
+            data.liked ? Colors.State.swiftUILikeActive : (colorScheme == .dark ? Color.white : Color.black)
+        default:
+            colorScheme == .dark ? Color.white : Color.black
         }
+        
         Label {
             Text(text)
         } icon: {
-            // bottom action icon
             StatusActionItemIcon(item: item)
         }
         .foregroundStyle(color, color)
@@ -429,9 +529,27 @@ struct StatusVisibilityComponent: View {
 
 struct CenteredLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
-        HStack {
-            configuration.icon.frame(alignment: .center)
-            configuration.title.frame(alignment: .center)
+        HStack(spacing: 4) {
+            configuration.icon
+                .frame(alignment: .center)
+            configuration.title
+                .frame(alignment: .center)
+                .font(.system(size: 12))
         }
     }
+}
+
+func formatCount(_ count: Int64) -> String {
+    if count == 0 {
+        return ""
+    }
+    if count < 1000 {
+        return "\(count)"
+    }
+    if count < 1000000 {
+        let k = Double(count) / 1000.0
+        return String(format: "%.1fK", k).replacingOccurrences(of: ".0", with: "")
+    }
+    let m = Double(count) / 1000000.0
+    return String(format: "%.1fM", m).replacingOccurrences(of: ".0", with: "")
 }

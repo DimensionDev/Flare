@@ -510,14 +510,10 @@ private fun ProfileScreen(
                         }
                     },
                     colors =
-                        if (!bigScreen) {
-                            TopAppBarDefaults.centerAlignedTopAppBarColors(
-                                containerColor = Color.Transparent,
-                                scrolledContainerColor = Color.Transparent,
-                            )
-                        } else {
-                            TopAppBarDefaults.centerAlignedTopAppBarColors()
-                        },
+                        TopAppBarDefaults.centerAlignedTopAppBarColors(
+                            containerColor = Color.Transparent,
+                            scrolledContainerColor = Color.Transparent,
+                        ),
                     modifier =
                         Modifier.let {
                             if (!bigScreen) {

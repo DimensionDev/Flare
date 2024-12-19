@@ -4,6 +4,7 @@
   <string name="settings_about_source_code">Código fuente</string>
   <string name="settings_about_telegram">Telegram</string>
   <string name="settings_about_telegram_description">Únete a nuestro grupo de Telegram</string>
+  <string name="settings_about_line_description">Únete a nuestro grupo de línea</string>
   <string name="settings_about_localization">Crowdin</string>
   <string name="settings_about_localization_description">Ayúdanos a traducir bengala</string>
 </resources>

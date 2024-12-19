@@ -12,7 +12,7 @@ struct MediaComponent: View {
     
     var body: some View {
         let showSensitiveButton = medias.allSatisfy { media in
-            media is UiMediaImage
+            media is UiMediaImage || media is UiMediaVideo
         } && sensitive
         
         ZStack(alignment: .topLeading) {

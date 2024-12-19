@@ -4,6 +4,7 @@
   <string name="settings_about_source_code">Bron code</string>
   <string name="settings_about_telegram">Telegram</string>
   <string name="settings_about_telegram_description">Deelnemen aan onze Telegram-groep</string>
+  <string name="settings_about_line_description">Deelnemen aan onze Lijngroep</string>
   <string name="settings_about_localization">Crowdin</string>
   <string name="settings_about_localization_description">Help ons Flare te vertalen</string>
 </resources>

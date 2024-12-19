@@ -4,6 +4,7 @@
   <string name="settings_about_source_code">Kilde kode</string>
   <string name="settings_about_telegram">Telegram</string>
   <string name="settings_about_telegram_description">Tilmeld dig vores Telegram gruppe</string>
+  <string name="settings_about_line_description">Tilmeld dig vores linje gruppe</string>
   <string name="settings_about_localization">Crowdin</string>
   <string name="settings_about_localization_description">Hjælp os med at oversætte Flare</string>
 </resources>

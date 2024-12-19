@@ -4,6 +4,7 @@
   <string name="settings_about_source_code">源代码</string>
   <string name="settings_about_telegram">Telegram</string>
   <string name="settings_about_telegram_description">加入Telegram群组</string>
+  <string name="settings_about_line_description">加入我们的Line组</string>
   <string name="settings_about_localization">Crowdin</string>
   <string name="settings_about_localization_description">帮助我们翻译Flare</string>
 </resources>

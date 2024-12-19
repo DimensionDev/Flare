@@ -47,6 +47,7 @@ firebase-crashlytics = "3.0.2"
 materialKolor = "2.0.0"
 room = "2.7.0-alpha12"
 compose-multiplatform = "1.7.1"
+xr = "1.0.0-alpha01"
 
 [libraries]
 bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }
@@ -90,6 +91,10 @@ room-paging = { group = "androidx.room", name = "room-paging", version.ref = "ro
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version = "2.5.0-alpha12" }
 nestedScrollView = { group = "com.github.Tlaster", name = "NestedScrollView", version = "1.0.3" }
+xr-compose = { group = "androidx.xr.compose", name = "compose", version.ref = "xr" }
+xr-runtime = { group = "androidx.xr.runtime", name = "runtime", version.ref = "xr" }
+xr-scenecore = { group = "androidx.xr.scenecore", name = "scenecore", version.ref = "xr" }
+xr-material3 = { group = "androidx.xr.compose.material3", name = "material3", version.ref = "xr" }
 
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
 media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
@@ -185,6 +190,7 @@ compose-destinations = ["compose-destinations"]
 media3 = ["media3-exoplayer", "media3-ui", "media3-hls"]
 firebase = ["firebase-analytics-ktx", "firebase-crashlytics-ktx"]
 ktorfit = ["ktorfit-lib", "ktorfit-converters-response", "ktorfit-converters-flow", "ktorfit-converters-call"]
+xr = ["xr-compose", "xr-runtime", "xr-scenecore", "xr-material3"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

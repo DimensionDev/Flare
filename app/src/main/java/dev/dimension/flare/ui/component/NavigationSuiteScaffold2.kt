@@ -22,12 +22,15 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -78,6 +81,23 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.xr.compose.material3.EnableXrComponentOverrides
+import androidx.xr.compose.material3.ExperimentalMaterial3XrApi
+import androidx.xr.compose.platform.LocalSession
+import androidx.xr.compose.platform.LocalSpatialCapabilities
+import androidx.xr.compose.spatial.EdgeOffset
+import androidx.xr.compose.spatial.Orbiter
+import androidx.xr.compose.spatial.OrbiterEdge
+import androidx.xr.compose.subspace.SpatialPanel
+import androidx.xr.compose.subspace.layout.SpatialRoundedCornerShape
+import androidx.xr.compose.subspace.layout.SubspaceModifier
+import androidx.xr.compose.subspace.layout.height
+import androidx.xr.compose.subspace.layout.movable
+import androidx.xr.compose.subspace.layout.resizable
+import androidx.xr.compose.subspace.layout.width
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.DownLeftAndUpRightToCenter
 import dev.dimension.flare.ui.component.status.FlareDividerDefaults
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -91,7 +111,7 @@ internal data class BottomBarSettings(
     val withDivider: Boolean = true,
 )
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3XrApi::class)
 @ExperimentalMaterial3AdaptiveNavigationSuiteApi
 @Composable
 fun NavigationSuiteScaffold2(
@@ -148,165 +168,172 @@ fun NavigationSuiteScaffold2(
         color = containerColor,
         contentColor = contentColor,
     ) {
-        val scope by rememberStateOfItems(navigationSuiteItems)
-        val footerScope by rememberStateOfItems(footerItems)
-        val secondaryScope by rememberStateOfItems(secondaryItems)
-        ModalNavigationDrawer(
-            drawerContent = {
-                ModalDrawerSheet(
-                    drawerContainerColor = navigationSuiteColors.navigationDrawerContainerColor,
-                    drawerContentColor = navigationSuiteColors.navigationDrawerContentColor,
-                ) {
-                    DrawerContent(
-                        drawerHeader = drawerHeader,
-                        showPrimaryItems = layoutType != NavigationSuiteType.NavigationBar,
-                        scope = scope,
-                        secondaryScope = secondaryScope,
-                        footerScope = footerScope,
-                        onItemClicked = {
-                            coroutineScope.launch {
-                                drawerState.close()
-                            }
-                        },
-                    )
-                }
-            },
-            gesturesEnabled = layoutType != NavigationSuiteType.NavigationDrawer && drawerGesturesEnabled,
-            drawerState = drawerState,
-        ) {
-            Row {
-                AnimatedVisibility(layoutType == NavigationSuiteType.NavigationRail) {
-                    NavigationRail(
-                        header = railHeader,
-                        containerColor = navigationSuiteColors.navigationRailContainerColor,
-                        contentColor = navigationSuiteColors.navigationRailContentColor,
-                    ) {
-                        scope.itemList.forEach {
-                            NavigationRailItem(
-                                modifier = it.modifier,
-                                selected = it.selected,
-                                onClick = it.onClick,
-                                icon = { NavigationItemIcon(icon = it.icon, badge = it.badge) },
-                                enabled = it.enabled,
-                                label = it.label,
-                                alwaysShowLabel = it.alwaysShowLabel,
-                                colors =
-                                    it.colors?.navigationRailItemColors
-                                        ?: NavigationRailItemDefaults.colors(),
-                                interactionSource = it.interactionSource,
-                            )
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        footerScope.itemList.forEach {
-                            NavigationRailItem(
-                                modifier = it.modifier,
-                                selected = it.selected,
-                                onClick = it.onClick,
-                                icon = { NavigationItemIcon(icon = it.icon, badge = it.badge) },
-                                enabled = it.enabled,
-                                label = it.label,
-                                alwaysShowLabel = it.alwaysShowLabel,
-                                colors =
-                                    it.colors?.navigationRailItemColors
-                                        ?: NavigationRailItemDefaults.colors(),
-                                interactionSource = it.interactionSource,
-                            )
-                        }
-                    }
-                }
-                AnimatedVisibility(layoutType == NavigationSuiteType.NavigationDrawer) {
-                    PermanentDrawerSheet(
-                        modifier =
-                            Modifier
-                                .width(240.dp)
-                                .padding(horizontal = 12.dp),
-                        drawerContainerColor = navigationSuiteColors.navigationDrawerContainerColor,
-                        drawerContentColor = navigationSuiteColors.navigationDrawerContentColor,
-                    ) {
-                        DrawerContent(
-                            drawerHeader = drawerHeader,
-                            showPrimaryItems = true,
-                            scope = scope,
-                            secondaryScope = secondaryScope,
-                            footerScope = footerScope,
-                            onItemClicked = {},
-                        )
-                    }
-                }
-                Box {
-                    CompositionLocalProvider(
-                        LocalBottomBarHeight provides
-                            if (layoutType == NavigationSuiteType.NavigationBar) {
-                                bottomBarHeight
-                            } else {
-                                0.dp
-                            },
-                    ) {
-                        content.invoke()
-                    }
-                    androidx.compose.animation.AnimatedVisibility(
-                        layoutType == NavigationSuiteType.NavigationBar,
-                        enter = slideInVertically { it },
-                        exit = slideOutVertically { it },
-                        modifier =
-                            Modifier
-                                .align(Alignment.BottomCenter)
-                                .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
-                    ) {
-                        Surface(
-//                        color = navigationSuiteColors.navigationBarContainerColor,
-                            contentColor = navigationSuiteColors.navigationBarContentColor,
+        OptionalSubspace {
+            EnableXrComponentOverrides {
+                val scope by rememberStateOfItems(navigationSuiteItems)
+                val footerScope by rememberStateOfItems(footerItems)
+                val secondaryScope by rememberStateOfItems(secondaryItems)
+                ModalNavigationDrawer(
+                    drawerContent = {
+                        ModalDrawerSheet(
+                            drawerContainerColor = navigationSuiteColors.navigationDrawerContainerColor,
+                            drawerContentColor = navigationSuiteColors.navigationDrawerContentColor,
                         ) {
-                            Box {
-                                if (bottomBarDividerEnabled) {
-                                    HorizontalDivider(
-                                        modifier =
-                                            Modifier
-                                                .align(Alignment.TopCenter)
-                                                .fillMaxWidth(),
-                                        color = FlareDividerDefaults.color,
-                                        thickness = FlareDividerDefaults.thickness,
+                            DrawerContent(
+                                drawerHeader = drawerHeader,
+                                showPrimaryItems = layoutType != NavigationSuiteType.NavigationBar,
+                                scope = scope,
+                                secondaryScope = secondaryScope,
+                                footerScope = footerScope,
+                                onItemClicked = {
+                                    coroutineScope.launch {
+                                        drawerState.close()
+                                    }
+                                },
+                            )
+                        }
+                    },
+                    gesturesEnabled = layoutType != NavigationSuiteType.NavigationDrawer && drawerGesturesEnabled,
+                    drawerState = drawerState,
+                ) {
+                    Row {
+                        AnimatedVisibility(layoutType == NavigationSuiteType.NavigationRail) {
+                            NavigationRail(
+                                header = railHeader,
+                                containerColor = navigationSuiteColors.navigationRailContainerColor,
+                                contentColor = navigationSuiteColors.navigationRailContentColor,
+                            ) {
+                                scope.itemList.forEach {
+                                    NavigationRailItem(
+                                        modifier = it.modifier,
+                                        selected = it.selected,
+                                        onClick = it.onClick,
+                                        icon = { NavigationItemIcon(icon = it.icon, badge = it.badge) },
+                                        enabled = it.enabled,
+                                        label = it.label,
+                                        alwaysShowLabel = it.alwaysShowLabel,
+                                        colors =
+                                            it.colors?.navigationRailItemColors
+                                                ?: NavigationRailItemDefaults.colors(),
+                                        interactionSource = it.interactionSource,
                                     )
                                 }
-                                Row(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .windowInsetsPadding(
-                                                WindowInsets.systemBars.only(
-                                                    WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-                                                ),
-                                            ),
-                                    verticalAlignment = Alignment.CenterVertically,
+                                if (!LocalSpatialCapabilities.current.isSpatialUiEnabled) {
+                                    Spacer(modifier = Modifier.weight(1f))
+                                }
+                                footerScope.itemList.forEach {
+                                    NavigationRailItem(
+                                        modifier = it.modifier,
+                                        selected = it.selected,
+                                        onClick = it.onClick,
+                                        icon = { NavigationItemIcon(icon = it.icon, badge = it.badge) },
+                                        enabled = it.enabled,
+                                        label = it.label,
+                                        alwaysShowLabel = it.alwaysShowLabel,
+                                        colors =
+                                            it.colors?.navigationRailItemColors
+                                                ?: NavigationRailItemDefaults.colors(),
+                                        interactionSource = it.interactionSource,
+                                    )
+                                }
+                            }
+                        }
+                        AnimatedVisibility(layoutType == NavigationSuiteType.NavigationDrawer) {
+                            PermanentDrawerSheet(
+                                modifier =
+                                    Modifier
+                                        .width(240.dp)
+                                        .padding(horizontal = 12.dp),
+                                drawerContainerColor = navigationSuiteColors.navigationDrawerContainerColor,
+                                drawerContentColor = navigationSuiteColors.navigationDrawerContentColor,
+                            ) {
+                                DrawerContent(
+                                    drawerHeader = drawerHeader,
+                                    showPrimaryItems = true,
+                                    scope = scope,
+                                    secondaryScope = secondaryScope,
+                                    footerScope = footerScope,
+                                    onItemClicked = {},
+                                )
+                            }
+                        }
+                        Box {
+                            CompositionLocalProvider(
+                                LocalBottomBarHeight provides
+                                    if (layoutType == NavigationSuiteType.NavigationBar) {
+                                        bottomBarHeight
+                                    } else {
+                                        0.dp
+                                    },
+                            ) {
+                                content.invoke()
+                            }
+                            androidx.compose.animation.AnimatedVisibility(
+                                layoutType == NavigationSuiteType.NavigationBar,
+                                enter = slideInVertically { it },
+                                exit = slideOutVertically { it },
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
+                            ) {
+                                Surface(
+                                    //                        color = navigationSuiteColors.navigationBarContainerColor,
+                                    contentColor = navigationSuiteColors.navigationBarContentColor,
                                 ) {
-                                    scope.itemList.forEach {
-                                        Box(
+                                    Box {
+                                        if (bottomBarDividerEnabled) {
+                                            HorizontalDivider(
+                                                modifier =
+                                                    Modifier
+                                                        .align(Alignment.TopCenter)
+                                                        .fillMaxWidth(),
+                                                color = FlareDividerDefaults.color,
+                                                thickness = FlareDividerDefaults.thickness,
+                                            )
+                                        }
+                                        Row(
                                             modifier =
-                                                it.modifier
-                                                    .weight(1f)
-                                                    .combinedClickable(
-                                                        interactionSource = it.interactionSource,
-                                                        onClick = it.onClick,
-                                                        indication = LocalIndication.current,
-                                                        onLongClick = it.onLongClick,
-                                                    ).height(bottomBarHeight),
-                                            contentAlignment = Alignment.Center,
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .windowInsetsPadding(
+                                                        WindowInsets.systemBars.only(
+                                                            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                                        ),
+                                                    ),
+                                            verticalAlignment = Alignment.CenterVertically,
                                         ) {
-                                            val colors = it.colors?.navigationBarItemColors ?: NavigationBarItemDefaults.colors()
-                                            val color =
-                                                with(colors) {
-                                                    when {
-                                                        !it.enabled -> disabledIconColor
-                                                        it.selected -> MaterialTheme.colorScheme.primary
-                                                        else -> unselectedIconColor
+                                            scope.itemList.forEach {
+                                                Box(
+                                                    modifier =
+                                                        it.modifier
+                                                            .weight(1f)
+                                                            .combinedClickable(
+                                                                interactionSource = it.interactionSource,
+                                                                onClick = it.onClick,
+                                                                indication = LocalIndication.current,
+                                                                onLongClick = it.onLongClick,
+                                                            ).height(bottomBarHeight),
+                                                    contentAlignment = Alignment.Center,
+                                                ) {
+                                                    val colors =
+                                                        it.colors?.navigationBarItemColors ?: NavigationBarItemDefaults.colors()
+                                                    val color =
+                                                        with(colors) {
+                                                            when {
+                                                                !it.enabled -> disabledIconColor
+                                                                it.selected -> MaterialTheme.colorScheme.primary
+                                                                else -> unselectedIconColor
+                                                            }
+                                                        }
+                                                    val iconColor by animateColorAsState(
+                                                        targetValue = color,
+                                                        animationSpec = tween(100),
+                                                    )
+                                                    CompositionLocalProvider(LocalContentColor provides iconColor) {
+                                                        NavigationItemIcon(icon = it.icon, badge = it.badge)
                                                     }
                                                 }
-                                            val iconColor by animateColorAsState(
-                                                targetValue = color,
-                                                animationSpec = tween(100),
-                                            )
-                                            CompositionLocalProvider(LocalContentColor provides iconColor) {
-                                                NavigationItemIcon(icon = it.icon, badge = it.badge)
                                             }
                                         }
                                     }
@@ -317,6 +344,45 @@ fun NavigationSuiteScaffold2(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun OptionalSubspace(content: @Composable () -> Unit) {
+    val session = LocalSession.current
+    if (LocalSpatialCapabilities.current.isSpatialUiEnabled) {
+        androidx.xr.compose.spatial.Subspace {
+            SpatialPanel(
+                SubspaceModifier
+                    .width(1280.dp)
+                    .height(800.dp)
+                    .resizable()
+                    .movable(),
+            ) {
+                content.invoke()
+
+                Orbiter(
+                    position = OrbiterEdge.Top,
+                    offset = EdgeOffset.inner(offset = 20.dp),
+                    alignment = Alignment.End,
+                    shape = SpatialRoundedCornerShape(CornerSize(28.dp)),
+                ) {
+                    FilledTonalIconButton(
+                        onClick = {
+                            session?.requestHomeSpaceMode()
+                        },
+                        modifier = Modifier.size(56.dp),
+                    ) {
+                        FAIcon(
+                            FontAwesomeIcons.Solid.DownLeftAndUpRightToCenter,
+                            contentDescription = null,
+                        )
+                    }
+                }
+            }
+        }
+    } else {
+        content.invoke()
     }
 }
 

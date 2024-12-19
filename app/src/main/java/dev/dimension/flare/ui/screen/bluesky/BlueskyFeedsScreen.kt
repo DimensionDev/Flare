@@ -78,10 +78,13 @@ internal fun BlueskyFeedsRoute(
 ) {
     val scaffoldNavigator =
         rememberListDetailPaneScaffoldNavigator<BlueskyFeedUri>()
+    val scope = rememberCoroutineScope()
     BackHandler(
         scaffoldNavigator.canNavigateBack(),
     ) {
-        scaffoldNavigator.navigateBack()
+        scope.launch {
+            scaffoldNavigator.navigateBack()
+        }
     }
 
     ListDetailPaneScaffold(
@@ -92,22 +95,26 @@ internal fun BlueskyFeedsRoute(
                 BlueskyFeedsScreen(
                     accountType = accountType,
                     toFeed = {
-                        scaffoldNavigator.navigateTo(
-                            ListDetailPaneScaffoldRole.Detail,
-                            BlueskyFeedUri(it.id),
-                        )
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(
+                                ListDetailPaneScaffoldRole.Detail,
+                                BlueskyFeedUri(it.id),
+                            )
+                        }
                     },
                 )
             }
         },
         detailPane = {
             AnimatedPane {
-                scaffoldNavigator.currentDestination?.content?.let {
+                scaffoldNavigator.currentDestination?.contentKey?.let {
                     BlueskyFeedScreen(
                         accountType = accountType,
                         uri = it.value,
                         onBack = {
-                            scaffoldNavigator.navigateBack()
+                            scope.launch {
+                                scaffoldNavigator.navigateBack()
+                            }
                         },
                     )
                 }

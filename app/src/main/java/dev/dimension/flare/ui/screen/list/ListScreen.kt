@@ -32,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,6 +79,7 @@ import dev.dimension.flare.ui.screen.home.TimelineRoute
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -93,10 +95,13 @@ internal fun ListScreenRoute(
 ) {
     val scaffoldNavigator =
         rememberListDetailPaneScaffoldNavigator<ListDetailPaneNavArgs>()
+    val scope = rememberCoroutineScope()
     BackHandler(
         scaffoldNavigator.canNavigateBack(),
     ) {
-        scaffoldNavigator.navigateBack()
+        scope.launch {
+            scaffoldNavigator.navigateBack()
+        }
     }
     ListDetailPaneScaffold(
         directive = scaffoldNavigator.scaffoldDirective,
@@ -106,13 +111,15 @@ internal fun ListScreenRoute(
                 ListScreen(
                     accountType = accountType,
                     toList = { item ->
-                        scaffoldNavigator.navigateTo(
-                            ListDetailPaneScaffoldRole.Detail,
-                            ListDetailPaneNavArgs(
-                                id = item.id,
-                                title = item.title,
-                            ),
-                        )
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(
+                                ListDetailPaneScaffoldRole.Detail,
+                                ListDetailPaneNavArgs(
+                                    id = item.id,
+                                    title = item.title,
+                                ),
+                            )
+                        }
                     },
                     createList = {
                         navigator.navigate(CreateListRouteDestination(accountType = accountType))
@@ -139,7 +146,7 @@ internal fun ListScreenRoute(
         },
         detailPane = {
             AnimatedPane {
-                scaffoldNavigator.currentDestination?.content?.let { args ->
+                scaffoldNavigator.currentDestination?.contentKey?.let { args ->
                     TimelineRoute(
                         navigator = navigator,
                         tabItem =

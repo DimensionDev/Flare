@@ -36,17 +36,17 @@ struct QuotedStatus: View {
                     }
                     .padding(.horizontal, 9)
                 }  
-                // Markdown(data.content.markdown)
-                //     .markdownInlineImageProvider(.emoji)
-                //     .padding(.horizontal, 8)
-                //     .foregroundColor(.red)
-                //     .font(.body)
 
+                // 原文和翻译
                 FlareText(data.content.raw, style: .quote)
                     .onLinkTap { url in
                         openURL(url)
                     }
                     .font(.system(size: 16))
+                
+                if appSettings.appearanceSettings.autoTranslate {
+                    TranslatableText(originalText: data.content.raw)
+                }
                 
                 Spacer()
                     .frame(height: 8)
@@ -76,8 +76,6 @@ struct QuotedStatus: View {
     }
 
     private func handleMediaClick(_ index: Int, _ media: UiMedia) {
-        
-
         // Show preview
         PhotoBrowserManager.shared.showPhotoBrowser(
             media: media,
@@ -85,5 +83,4 @@ struct QuotedStatus: View {
             initialIndex: index
         )
     }
- 
 }

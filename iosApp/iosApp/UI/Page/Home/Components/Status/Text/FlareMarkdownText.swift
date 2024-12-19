@@ -132,12 +132,13 @@ public enum FlareMarkdownText {
         let nsAttrString = NSMutableAttributedString(attributedString)
         
         // Apply default style
+        let fullRange = NSRange(location: 0, length: nsAttrString.length)
         nsAttrString.addAttributes(
             [
                 .font: style.font,
                 .foregroundColor: style.textColor
             ],
-            range: NSRange(location: 0, length: text.count)
+            range: fullRange
         )
         
         // Process different types of links
@@ -189,7 +190,8 @@ public enum FlareMarkdownText {
         
         // URLs
         if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) {
-            let matches = detector.matches(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count))
+            let fullRange = NSRange(location: 0, length: text.utf16.count)
+            let matches = detector.matches(in: text, options: [], range: fullRange)
             for match in matches {
                 if let url = match.url {
                     entities.append(Entity(type: .url(url), range: match.range))
@@ -208,7 +210,8 @@ public enum FlareMarkdownText {
             (cashtagPattern, { (text: String, range: NSRange) in LinkType.cashtag(text) })
         ] {
             if let regex = try? NSRegularExpression(pattern: pattern) {
-                let matches = regex.matches(in: text, range: NSRange(text.startIndex..., in: text))
+                let fullRange = NSRange(location: 0, length: text.utf16.count)
+                let matches = regex.matches(in: text, range: fullRange)
                 for match in matches {
                     let range = match.range
                     if let swiftRange = Range(range, in: text) {

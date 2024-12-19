@@ -7,6 +7,7 @@ import SwiftDate
 import SwiftUI
 import UIKit
 
+
 // timeline tweet
 struct CommonTimelineStatusComponent: View {
     @State private var showMedia: Bool = false
@@ -143,6 +144,11 @@ struct CommonTimelineStatusComponent: View {
                         }
                         .font(.system(size: 16))
                         .foregroundColor(Colors.Text.swiftUIPrimary)
+                        
+                    // Add translation component
+                    if appSettings.appearanceSettings.autoTranslate {
+                        TranslatableText(originalText: data.content.raw)
+                    }
                 } else {
                     // 如果内容为空，显示一个空的 Text
                     Text("")

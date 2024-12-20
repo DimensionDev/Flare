@@ -53,16 +53,16 @@ public class GoogleTranslationService: TranslationService {
             throw GoogleTranslationError.invalidURL
         }
         
-        print("翻译URL: \(url.absoluteString)")
+        // print("翻译URL: \(url.absoluteString)")
         
         do {
             let (data, response) = try await URLSession.shared.data(from: url)
             
             if let httpResponse = response as? HTTPURLResponse {
-                print("HTTP状态码: \(httpResponse.statusCode)")
+                // print("HTTP状态码: \(httpResponse.statusCode)")
             }
             
-            print("原始响应数据: \(String(data: data, encoding: .utf8) ?? "无法解码")")
+            // print("原始响应数据: \(String(data: data, encoding: .utf8) ?? "无法解码")")
             
             let json = try JSONSerialization.jsonObject(with: data) as? [Any]
             
@@ -91,9 +91,9 @@ public class GoogleTranslationService: TranslationService {
             let detectedLanguage = (json?.last as? [Any])?[0] as? [String]
             let languageCode = detectedLanguage?.first
             
-            print("翻译结果: \(translatedText)")
-            print("原文: \(originalText)")
-            print("检测到的语言: \(languageCode ?? "unknown")")
+            // print("翻译结果: \(translatedText)")
+            // print("原文: \(originalText)")
+            // print("检测到的语言: \(languageCode ?? "unknown")")
             
             guard !translatedText.isEmpty else {
                 throw GoogleTranslationError.invalidResponse
@@ -109,7 +109,7 @@ public class GoogleTranslationService: TranslationService {
             cache.setObject(result, forKey: cacheKey)
             return result
         } catch {
-            print("翻译错误: \(error)")
+            // print("翻译错误: \(error)")
             throw GoogleTranslationError.networkError(error)
         }
     }

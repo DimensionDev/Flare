@@ -49,8 +49,4 @@ struct TranslatableText: View {
         }
     }
 }
-
-#Preview {
-    TranslatableText(originalText: "你好，世界！这是一条需要翻译的测试消息。")
-        .padding()
-} 
+ 

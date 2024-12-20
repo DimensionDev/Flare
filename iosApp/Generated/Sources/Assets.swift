@@ -127,7 +127,6 @@ public enum Asset {
       public static let surface = ColorAsset(name: "Color/Sys/surface")
     }
     public static let twitter = ColorAsset(name: "Color/Twitter")
-    public static let binance = ColorAsset(name: "Color/binance")
     public static let black = ColorAsset(name: "Color/black")
     public static let blackPure = ColorAsset(name: "Color/black.pure")
     public static let coinbase = ColorAsset(name: "Color/coinbase")

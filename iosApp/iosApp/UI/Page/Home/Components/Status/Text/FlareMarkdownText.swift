@@ -130,9 +130,13 @@ public enum FlareMarkdownText {
         }()
 
         let nsAttrString = NSMutableAttributedString(attributedString)
+        let length = nsAttrString.length
+        
+        // 确保文本长度有效
+        guard length > 0 else { return (AttributedString(), withOutMediaUrls.last, nil) }
         
         // Apply default style
-        let fullRange = NSRange(location: 0, length: nsAttrString.length)
+        let fullRange = NSRange(location: 0, length: length)
         nsAttrString.addAttributes(
             [
                 .font: style.font,
@@ -144,6 +148,13 @@ public enum FlareMarkdownText {
         // Process different types of links
         let entities = parseEntities(from: text)
         for entity in entities {
+            // 验证范围是否有效
+            let isValidRange = entity.range.location >= 0 && 
+                             entity.range.length > 0 && 
+                             (entity.range.location + entity.range.length) <= length
+                             
+            guard isValidRange else { continue }
+            
             var attributes: [NSAttributedString.Key: Any] = [
                 .font: style.font
             ]

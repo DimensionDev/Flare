@@ -257,7 +257,7 @@ struct CommonTimelineStatusComponent: View {
             // bottom action
             if appSettings.appearanceSettings.showActions || isDetail, !data.actions.isEmpty {
                 let processedActions = processActions()
-                HStack {
+                HStack(spacing: 0) {
                     // 显示主要操作
                     ForEach(0 ..< processedActions.mainActions.count, id: \.self) { actionIndex in
                         let action = processedActions.mainActions[actionIndex]
@@ -273,6 +273,7 @@ struct CommonTimelineStatusComponent: View {
                                 }
                             }, label: {
                                 StatusActionLabel(item: item)
+                                    .frame(maxWidth: .infinity)
                             })
                         case let .group(group):
                             Menu {
@@ -319,16 +320,10 @@ struct CommonTimelineStatusComponent: View {
                                 }
                             } label: {
                                 StatusActionLabel(item: group.displayItem)
+                                    .frame(maxWidth: .infinity)
                             }
                         }
-                        
-                        if actionIndex < processedActions.mainActions.count - 1 {
-                            Spacer()
-                        }
                     }
-                    
-                    Spacer()
-                        .frame(width: 32)  // 主要操作和 More 按钮之间的间距
                     
                     // 显示更多操作菜单
                     if !processedActions.moreActions.isEmpty {
@@ -389,10 +384,20 @@ struct CommonTimelineStatusComponent: View {
                     view
                         .font(.caption)
                 }
+                .allowsHitTesting(true)
             }
               Spacer()
                 .frame(height: 2)
         }.frame(alignment: .leading)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            if let tapLocation = (UIApplication.shared.windows.first?.hitTest(UIApplication.shared.windows.first?.convert(CGPoint(x: 0, y: 0), to: nil) ?? .zero, with: nil)) {
+                let bottomActionBarFrame = CGRect(x: 16, y: tapLocation.frame.height - 44, width: tapLocation.frame.width - 32, height: 44)
+                if !bottomActionBarFrame.contains(tapLocation.frame.origin) {
+                    data.onClicked(ClickContext(launcher: AppleUriLauncher(openURL: openURL)))
+                }
+            }
+        }
     }
 
     private func handleMediaClick(_ index: Int, _ media: UiMedia) {
@@ -531,16 +536,17 @@ struct StatusVisibilityComponent: View {
             Awesome.Classic.Solid.at.image
         }
     }
-}
+}  
 
 struct CenteredLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 4) {
             configuration.icon
-                .frame(alignment: .center)
+                .frame(alignment: .leading)
             configuration.title
-                .frame(alignment: .center)
+                .frame(alignment: .leading)
                 .font(.system(size: 12))
+            Spacer() // 添加 Spacer 让内容靠左
         }
     }
 }

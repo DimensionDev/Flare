@@ -10,8 +10,6 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
-import kotlinx.serialization.Required
-import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalPagingApi::class)
 internal class SearchStatusRemoteMediator(
@@ -90,14 +88,3 @@ internal class SearchStatusRemoteMediator(
         }
     }
 }
-
-@Serializable
-data class SearchRequest(
-    val rawQuery: String? = null,
-    val count: Long? = null,
-    val cursor: String? = null,
-    @Required
-    val querySource: String = "typed_query",
-    @Required
-    val product: String = "Top",
-)

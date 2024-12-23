@@ -37,7 +37,7 @@ import kotlin.coroutines.EmptyCoroutineContext
  *
  * @param T the type of value used by [PagingData].
  */
-public class LazyPagingItems<T : Any> internal constructor(
+internal class LazyPagingItems<T : Any> internal constructor(
     /**
      * the [Flow] object which contains a stream of [PagingData] elements.
      */
@@ -179,7 +179,7 @@ private val InitialLoadStates =
  * and [CombinedLoadStates].
  */
 @Composable
-public fun <T : Any> Flow<PagingData<T>>.collectAsLazyPagingItems(context: CoroutineContext = EmptyCoroutineContext): LazyPagingItems<T> {
+internal fun <T : Any> Flow<PagingData<T>>.collectAsLazyPagingItems(context: CoroutineContext = EmptyCoroutineContext): LazyPagingItems<T> {
     val lazyPagingItems = remember(this) { LazyPagingItems(this) }
 
     LaunchedEffect(lazyPagingItems) {

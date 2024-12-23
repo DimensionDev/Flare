@@ -11,41 +11,41 @@ import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
 @Immutable
-sealed class PagingState<T> {
+public sealed class PagingState<T> {
     @Immutable
-    class Loading<T> internal constructor() : PagingState<T>()
+    public class Loading<T> internal constructor() : PagingState<T>()
 
     @Immutable
-    data class Error<T> internal constructor(
+    public data class Error<T> internal constructor(
         val error: Throwable,
     ) : PagingState<T>()
 
     @Immutable
-    data class Empty<T : Any> internal constructor(
+    public data class Empty<T : Any> internal constructor(
         private val onRefresh: () -> Unit,
     ) : PagingState<T>() {
-        fun refresh() {
+        public fun refresh() {
             onRefresh()
         }
     }
 
     @Immutable
-    sealed class Success<T : Any> : PagingState<T>() {
-        abstract val itemCount: Int
-        abstract val isRefreshing: Boolean
-        abstract val appendState: LoadState
+    public sealed class Success<T : Any> : PagingState<T>() {
+        public abstract val itemCount: Int
+        public abstract val isRefreshing: Boolean
+        public abstract val appendState: LoadState
 
-        abstract operator fun get(index: Int): T?
+        public abstract operator fun get(index: Int): T?
 
-        abstract fun peek(index: Int): T?
+        public abstract fun peek(index: Int): T?
 
-        abstract suspend fun refreshSuspend()
+        public abstract suspend fun refreshSuspend()
 
-        abstract fun retry()
+        public abstract fun retry()
 
-        abstract fun itemKey(key: ((item: T) -> Any)? = null): (index: Int) -> Any
+        public abstract fun itemKey(key: ((item: T) -> Any)? = null): (index: Int) -> Any
 
-        abstract fun itemContentType(contentType: ((item: T) -> Any?)? = null): (index: Int) -> Any?
+        public abstract fun itemContentType(contentType: ((item: T) -> Any?)? = null): (index: Int) -> Any?
 
         @Immutable
         internal data class SingleSuccess<T : Any>(
@@ -105,24 +105,24 @@ sealed class PagingState<T> {
     }
 }
 
-val <T : Any> PagingState<T>.isLoading: Boolean
+public val <T : Any> PagingState<T>.isLoading: Boolean
     get() = this is PagingState.Loading
 
-val <T : Any> PagingState<T>.isError: Boolean
+public val <T : Any> PagingState<T>.isError: Boolean
     get() = this is PagingState.Error
 
-val <T : Any> PagingState<T>.isEmpty: Boolean
+public val <T : Any> PagingState<T>.isEmpty: Boolean
     get() = this is PagingState.Empty
 
 @OptIn(ExperimentalContracts::class)
-fun <T : Any> PagingState<T>.isSuccess(): Boolean {
+public fun <T : Any> PagingState<T>.isSuccess(): Boolean {
     contract {
         returns(true) implies (this@isSuccess is PagingState.Success<T>)
     }
     return this is PagingState.Success
 }
 
-val <T : Any> PagingState<T>.isRefreshing: Boolean
+public val <T : Any> PagingState<T>.isRefreshing: Boolean
     get() =
         if (this is PagingState.Success) {
             isRefreshing
@@ -130,55 +130,55 @@ val <T : Any> PagingState<T>.isRefreshing: Boolean
             isLoading
         }
 
-suspend fun <T : Any> PagingState<T>.refreshSuspend() {
+public suspend fun <T : Any> PagingState<T>.refreshSuspend() {
     if (this is PagingState.Success) {
         refreshSuspend()
     }
 }
 
-inline fun <T : Any> PagingState<T>.onLoading(block: () -> Unit): PagingState<T> {
+public inline fun <T : Any> PagingState<T>.onLoading(block: () -> Unit): PagingState<T> {
     if (this is PagingState.Loading) {
         block()
     }
     return this
 }
 
-inline fun <T : Any> PagingState<T>.onError(block: (Throwable) -> Unit): PagingState<T> {
+public inline fun <T : Any> PagingState<T>.onError(block: (Throwable) -> Unit): PagingState<T> {
     if (this is PagingState.Error) {
         block(error)
     }
     return this
 }
 
-inline fun <T : Any> PagingState<T>.onEmpty(block: PagingState.Empty<T>.() -> Unit): PagingState<T> {
+public inline fun <T : Any> PagingState<T>.onEmpty(block: PagingState.Empty<T>.() -> Unit): PagingState<T> {
     if (this is PagingState.Empty) {
         block(this)
     }
     return this
 }
 
-inline fun <T : Any> PagingState<T>.onSuccess(block: PagingState.Success<T>.() -> Unit): PagingState<T> {
+public inline fun <T : Any> PagingState<T>.onSuccess(block: PagingState.Success<T>.() -> Unit): PagingState<T> {
     if (this is PagingState.Success) {
         block(this)
     }
     return this
 }
 
-inline fun LoadState.onLoading(block: () -> Unit): LoadState {
+public inline fun LoadState.onLoading(block: () -> Unit): LoadState {
     if (this is LoadState.Loading) {
         block()
     }
     return this
 }
 
-inline fun LoadState.onError(block: (Throwable) -> Unit): LoadState {
+public inline fun LoadState.onError(block: (Throwable) -> Unit): LoadState {
     if (this is LoadState.Error) {
         block(error)
     }
     return this
 }
 
-inline fun LoadState.onEndOfList(block: () -> Unit): LoadState {
+public inline fun LoadState.onEndOfList(block: () -> Unit): LoadState {
     if (this is LoadState.NotLoading && endOfPaginationReached) {
         block()
     }

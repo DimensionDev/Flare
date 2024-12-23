@@ -13,7 +13,7 @@ import kotlinx.coroutines.IO
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
-val commonModule =
+internal val commonModule =
     module {
         singleOf(::AccountRepository)
         singleOf(::provideAppDatabase)

@@ -17,7 +17,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class ListMembersPresenter(
+public class ListMembersPresenter(
     private val accountType: AccountType,
     private val listId: String,
 ) : PresenterBase<ListMembersState>(),
@@ -44,6 +44,6 @@ class ListMembersPresenter(
 }
 
 @Immutable
-interface ListMembersState {
-    val memberInfo: PagingState<UiUserV2>
+public interface ListMembersState {
+    public val memberInfo: PagingState<UiUserV2>
 }

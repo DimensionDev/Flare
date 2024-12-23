@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class MisskeyReactionPresenter(
+public class MisskeyReactionPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
 ) : PresenterBase<MisskeyReactionState>(),
@@ -81,8 +81,8 @@ class MisskeyReactionPresenter(
 }
 
 @Immutable
-interface MisskeyReactionState {
-    val emojis: UiState<ImmutableListWrapper<UiEmoji>>
+public interface MisskeyReactionState {
+    public val emojis: UiState<ImmutableListWrapper<UiEmoji>>
 
-    fun select(emoji: UiEmoji)
+    public fun select(emoji: UiEmoji)
 }

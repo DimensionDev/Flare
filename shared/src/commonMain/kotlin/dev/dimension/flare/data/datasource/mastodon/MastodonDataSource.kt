@@ -69,7 +69,7 @@ import org.koin.core.component.inject
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
-class MastodonDataSource(
+internal class MastodonDataSource(
 //    override val account: UiAccount.Mastodon,
     override val accountKey: MicroBlogKey,
     val credential: UiAccount.Mastodon.Credential,

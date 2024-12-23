@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class BadgeCount(
+internal data class BadgeCount(
     @SerialName("ntab_unread_count")
     val ntabUnreadCount: Long? = null,
     @SerialName("dm_unread_count")

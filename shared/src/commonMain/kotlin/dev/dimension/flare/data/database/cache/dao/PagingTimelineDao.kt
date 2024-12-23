@@ -14,7 +14,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.model.MicroBlogKey
 
 @Dao
-interface PagingTimelineDao {
+internal interface PagingTimelineDao {
     @Transaction
     @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountKey = :accountKey ORDER BY sortId DESC")
     fun getPagingSource(

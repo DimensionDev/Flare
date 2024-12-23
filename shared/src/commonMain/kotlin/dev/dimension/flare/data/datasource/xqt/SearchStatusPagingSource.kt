@@ -83,7 +83,7 @@ internal class SearchStatusPagingSource(
 }
 
 @Serializable
-data class SearchRequest(
+internal data class SearchRequest(
     val rawQuery: String? = null,
     val count: Long? = null,
     val cursor: String? = null,

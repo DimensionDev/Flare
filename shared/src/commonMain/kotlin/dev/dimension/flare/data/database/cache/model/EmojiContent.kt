@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 // https://github.com/cashapp/sqldelight/issues/1333
 @Serializable
-sealed interface EmojiContent {
+internal sealed interface EmojiContent {
     @Serializable
     @SerialName("Mastodon")
     data class Mastodon internal constructor(

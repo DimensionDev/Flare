@@ -133,7 +133,7 @@ import sh.christian.ozone.api.Nsid
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
-class BlueskyDataSource(
+internal class BlueskyDataSource(
     override val accountKey: MicroBlogKey,
     val credential: UiAccount.Bluesky.Credential,
 ) : AuthenticatedMicroblogDataSource,

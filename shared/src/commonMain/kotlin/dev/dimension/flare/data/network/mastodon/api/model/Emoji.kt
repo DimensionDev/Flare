@@ -15,12 +15,12 @@ internal data class Emoji(
 )
 
 @Serializable
-data class Marker(
+internal data class Marker(
     val notifications: Notifications? = null,
 )
 
 @Serializable
-data class Notifications(
+internal data class Notifications(
     @SerialName("last_read_id")
     val lastReadID: String? = null,
     val version: Long? = null,
@@ -29,13 +29,13 @@ data class Notifications(
 )
 
 @Serializable
-data class MarkerUpdate(
+internal data class MarkerUpdate(
     val home: UpdateContent? = null,
     val notifications: UpdateContent? = null,
 )
 
 @Serializable
-data class UpdateContent(
+internal data class UpdateContent(
     @SerialName("last_read_id")
     val lastReadID: String? = null,
 )

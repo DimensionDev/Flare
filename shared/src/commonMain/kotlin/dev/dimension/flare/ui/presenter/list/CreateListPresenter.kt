@@ -16,7 +16,7 @@ import kotlinx.collections.immutable.ImmutableList
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class CreateListPresenter(
+public class CreateListPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<CreateListState>(),
     KoinComponent {
@@ -44,8 +44,8 @@ class CreateListPresenter(
 }
 
 @Immutable
-interface CreateListState {
-    val supportedMetaData: UiState<ImmutableList<ListMetaDataType>>
+public interface CreateListState {
+    public val supportedMetaData: UiState<ImmutableList<ListMetaDataType>>
 
-    suspend fun createList(listMetaData: ListMetaData)
+    public suspend fun createList(listMetaData: ListMetaData)
 }

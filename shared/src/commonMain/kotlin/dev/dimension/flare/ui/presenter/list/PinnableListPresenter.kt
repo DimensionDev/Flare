@@ -21,7 +21,7 @@ import kotlinx.collections.immutable.toImmutableList
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class PinnableListPresenter(
+public class PinnableListPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<PinnableListState>(),
     KoinComponent {
@@ -75,6 +75,6 @@ class PinnableListPresenter(
 }
 
 @Immutable
-interface PinnableListState {
-    val items: UiState<ImmutableList<UiList>>
+public interface PinnableListState {
+    public val items: UiState<ImmutableList<UiList>>
 }

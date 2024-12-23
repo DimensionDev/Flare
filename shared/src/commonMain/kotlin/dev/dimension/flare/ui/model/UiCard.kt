@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 
 @Immutable
-data class UiCard(
+public data class UiCard internal constructor(
     val title: String,
     val description: String?,
     val media: UiMedia?,

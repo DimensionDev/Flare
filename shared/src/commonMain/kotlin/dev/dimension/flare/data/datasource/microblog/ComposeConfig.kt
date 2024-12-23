@@ -4,7 +4,7 @@ import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.ui.model.UiEmoji
 import kotlinx.collections.immutable.ImmutableList
 
-data class ComposeConfig(
+public data class ComposeConfig internal constructor(
     val text: Text? = null,
     val media: Media? = null,
     val poll: Poll? = null,
@@ -12,40 +12,40 @@ data class ComposeConfig(
     val contentWarning: ContentWarning? = null,
     val visibility: Visibility? = null,
 ) {
-    data class Text(
+    public data class Text internal constructor(
         val maxLength: Int,
     ) {
-        fun merge(other: Text): Text =
+        internal fun merge(other: Text): Text =
             Text(
                 maxLength = minOf(maxLength, other.maxLength),
             )
     }
 
-    data class Media(
+    public data class Media internal constructor(
         val maxCount: Int,
         val canSensitive: Boolean,
     ) {
-        fun merge(other: Media): Media =
+        internal fun merge(other: Media): Media =
             Media(
                 maxCount = minOf(maxCount, other.maxCount),
                 canSensitive = canSensitive && other.canSensitive,
             )
     }
 
-    data class Poll(
+    public data class Poll internal constructor(
         val maxOptions: Int,
     ) {
-        fun merge(other: Poll): Poll =
+        internal fun merge(other: Poll): Poll =
             Poll(
                 maxOptions = minOf(maxOptions, other.maxOptions),
             )
     }
 
-    data class Emoji(
-        val emoji: CacheData<ImmutableList<UiEmoji>>,
+    public data class Emoji internal constructor(
+        internal val emoji: CacheData<ImmutableList<UiEmoji>>,
         val mergeTag: String,
     ) {
-        fun merge(other: Emoji): Emoji? =
+        internal fun merge(other: Emoji): Emoji? =
             if (mergeTag == other.mergeTag) {
                 Emoji(
                     emoji = emoji,
@@ -56,11 +56,11 @@ data class ComposeConfig(
             }
     }
 
-    object ContentWarning
+    public data object ContentWarning
 
-    object Visibility
+    public data object Visibility
 
-    fun merge(other: ComposeConfig): ComposeConfig {
+    internal fun merge(other: ComposeConfig): ComposeConfig {
         val text =
             if (text != null && other.text != null) {
                 text.merge(other.text)

@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class EditListMemberPresenter(
+public class EditListMemberPresenter(
     private val accountType: AccountType,
     private val listId: String,
 ) : PresenterBase<EditListMemberState>(),
@@ -88,14 +88,14 @@ class EditListMemberPresenter(
 }
 
 @Immutable
-interface EditListMemberState {
-    val users: PagingState<Pair<UiUserV2, Boolean>>
+public interface EditListMemberState {
+    public val users: PagingState<Pair<UiUserV2, Boolean>>
 
-    fun setFilter(value: String)
+    public fun setFilter(value: String)
 
-    fun addMember(userKey: MicroBlogKey)
+    public fun addMember(userKey: MicroBlogKey)
 
-    fun removeMember(userKey: MicroBlogKey)
+    public fun removeMember(userKey: MicroBlogKey)
 }
 
-data object EmptyQueryException : Exception("Empty query")
+public data object EmptyQueryException : Exception("Empty query")

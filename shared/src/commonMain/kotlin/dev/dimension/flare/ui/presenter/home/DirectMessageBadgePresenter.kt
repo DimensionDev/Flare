@@ -19,7 +19,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.minutes
 
-class DirectMessageBadgePresenter(
+public class DirectMessageBadgePresenter(
     private val accountType: AccountType,
     private val autoRefresh: Boolean = true,
 ) : PresenterBase<NotificationBadgeState>(),

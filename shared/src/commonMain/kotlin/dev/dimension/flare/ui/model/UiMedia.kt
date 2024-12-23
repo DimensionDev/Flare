@@ -3,11 +3,11 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 
 @Immutable
-sealed interface UiMedia {
-    val url: String
+public sealed interface UiMedia {
+    public val url: String
 
     @Immutable
-    data class Image(
+    public data class Image internal constructor(
         override val url: String,
         val previewUrl: String,
         val description: String?,
@@ -20,7 +20,7 @@ sealed interface UiMedia {
     }
 
     @Immutable
-    data class Video(
+    public data class Video internal constructor(
         override val url: String,
         val thumbnailUrl: String,
         val description: String?,
@@ -32,7 +32,7 @@ sealed interface UiMedia {
     }
 
     @Immutable
-    data class Gif(
+    public data class Gif internal constructor(
         override val url: String,
         val previewUrl: String,
         val description: String?,
@@ -44,7 +44,7 @@ sealed interface UiMedia {
     }
 
     @Immutable
-    data class Audio(
+    public data class Audio internal constructor(
         override val url: String,
         val description: String?,
         val previewUrl: String?,

@@ -35,7 +35,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class GuestMastodonDataSource(
+internal class GuestMastodonDataSource(
     private val host: String,
     private val locale: String,
 ) : MicroblogDataSource,

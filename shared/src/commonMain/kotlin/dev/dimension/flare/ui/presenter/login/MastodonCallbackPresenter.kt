@@ -21,7 +21,7 @@ import io.ktor.http.Url
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class MastodonCallbackPresenter(
+public class MastodonCallbackPresenter(
     private val code: String?,
     private val toHome: () -> Unit,
 ) : PresenterBase<UiState<Nothing>>(),

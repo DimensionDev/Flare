@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class BlueskyFeedPresenter(
+public class BlueskyFeedPresenter(
     private val accountType: AccountType,
     private val uri: String,
 ) : PresenterBase<BlueskyFeedState>(),
@@ -116,18 +116,18 @@ class BlueskyFeedPresenter(
 }
 
 @Immutable
-interface BlueskyFeedState {
-    val info: UiState<UiList>
-    val timeline: PagingState<UiTimeline>
-    val subscribed: UiState<Boolean>
+public interface BlueskyFeedState {
+    public val info: UiState<UiList>
+    public val timeline: PagingState<UiTimeline>
+    public val subscribed: UiState<Boolean>
 
-    suspend fun refreshSuspend()
+    public suspend fun refreshSuspend()
 
-    fun subscribe(list: UiList)
+    public fun subscribe(list: UiList)
 
-    fun unsubscribe(list: UiList)
+    public fun unsubscribe(list: UiList)
 
-    fun favorite(list: UiList)
+    public fun favorite(list: UiList)
 
-    fun unfavorite(list: UiList)
+    public fun unfavorite(list: UiList)
 }

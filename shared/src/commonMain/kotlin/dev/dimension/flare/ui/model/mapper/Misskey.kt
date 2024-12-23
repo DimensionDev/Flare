@@ -147,8 +147,8 @@ internal fun Notification.render(
     )
 }
 
-enum class MisskeyAchievement(
-    val id: String,
+public enum class MisskeyAchievement(
+    internal val id: String,
 ) {
     NOTES1("notes1"),
     NOTES10("notes10"),
@@ -230,7 +230,7 @@ enum class MisskeyAchievement(
     BUBBLE_GAME_DOUBLE_EXPLODING_HEAD("bubbleGameDoubleExplodingHead"),
     ;
 
-    companion object {
+    internal companion object {
         fun fromString(id: String): MisskeyAchievement? = entries.find { it.id == id }
     }
 }

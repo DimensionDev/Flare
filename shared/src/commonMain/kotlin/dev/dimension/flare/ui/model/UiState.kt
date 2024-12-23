@@ -16,22 +16,22 @@ import kotlin.experimental.ExperimentalObjCRefinement
 import kotlin.native.HiddenFromObjC
 
 @Immutable
-sealed class UiState<T : Any> {
+public sealed class UiState<T : Any> {
     @Immutable
-    data class Success<T : Any>(
+    public data class Success<T : Any>(
         val data: T,
     ) : UiState<T>()
 
     @Immutable
-    data class Error<T : Any>(
+    public data class Error<T : Any>(
         val throwable: Throwable,
     ) : UiState<T>()
 
     @Immutable
-    class Loading<T : Any> : UiState<T>()
+    public class Loading<T : Any> : UiState<T>()
 }
 
-inline fun <T : Any, R : Any> UiState<T>.map(transform: (T) -> R): UiState<R> =
+public inline fun <T : Any, R : Any> UiState<T>.map(transform: (T) -> R): UiState<R> =
     when (this) {
         is UiState.Success ->
             try {
@@ -43,14 +43,14 @@ inline fun <T : Any, R : Any> UiState<T>.map(transform: (T) -> R): UiState<R> =
         is UiState.Loading -> UiState.Loading()
     }
 
-inline fun <T : Any, R : Any> UiState<T>.mapNotNull(transform: (T) -> R?): UiState<R> =
+public inline fun <T : Any, R : Any> UiState<T>.mapNotNull(transform: (T) -> R?): UiState<R> =
     when (this) {
         is UiState.Success -> transform(data)?.let { UiState.Success(it) } ?: UiState.Error(IllegalStateException())
         is UiState.Error -> UiState.Error(throwable)
         is UiState.Loading -> UiState.Loading()
     }
 
-inline fun <T : Any, R : Any> UiState<T>.flatMap(
+public inline fun <T : Any, R : Any> UiState<T>.flatMap(
     onError: (Throwable) -> UiState<R> = { UiState.Error(it) },
     transform: (T) -> UiState<R>,
 ): UiState<R> =
@@ -65,7 +65,7 @@ inline fun <T : Any, R : Any> UiState<T>.flatMap(
         is UiState.Loading -> UiState.Loading()
     }
 
-fun <T : Any> List<UiState<T>>.merge(requireAllSuccess: Boolean = true): UiState<List<T>> {
+public fun <T : Any> List<UiState<T>>.merge(requireAllSuccess: Boolean = true): UiState<List<T>> {
     val success = filterIsInstance<UiState.Success<T>>().map { it.data }
     val error = filterIsInstance<UiState.Error<T>>().map { it.throwable }
     val loading = filterIsInstance<UiState.Loading<T>>()
@@ -79,39 +79,39 @@ fun <T : Any> List<UiState<T>>.merge(requireAllSuccess: Boolean = true): UiState
     }
 }
 
-inline fun <T : Any> UiState<T>.onSuccess(action: (T) -> Unit): UiState<T> =
+public inline fun <T : Any> UiState<T>.onSuccess(action: (T) -> Unit): UiState<T> =
     apply {
         if (this is UiState.Success) {
             action(data)
         }
     }
 
-inline fun <T : Any> UiState<T>.onError(action: (Throwable) -> Unit): UiState<T> =
+public inline fun <T : Any> UiState<T>.onError(action: (Throwable) -> Unit): UiState<T> =
     apply {
         if (this is UiState.Error) {
             action(throwable)
         }
     }
 
-inline fun <T : Any> UiState<T>.onLoading(action: () -> Unit): UiState<T> =
+public inline fun <T : Any> UiState<T>.onLoading(action: () -> Unit): UiState<T> =
     apply {
         if (this is UiState.Loading) {
             action()
         }
     }
 
-fun <T : Any> UiState<T>.takeSuccess(): T? = (this as? UiState.Success)?.data
+public fun <T : Any> UiState<T>.takeSuccess(): T? = (this as? UiState.Success)?.data
 
-fun <T : Any> UiState<T>.takeSuccessOr(value: T): T = (this as? UiState.Success)?.data ?: value
+public fun <T : Any> UiState<T>.takeSuccessOr(value: T): T = (this as? UiState.Success)?.data ?: value
 
-val <T : Any> UiState<T>.isSuccess: Boolean get() = this is UiState.Success
-val <T : Any> UiState<T>.isError: Boolean get() = this is UiState.Error
-val <T : Any> UiState<T>.isLoading: Boolean get() = this is UiState.Loading
+public val <T : Any> UiState<T>.isSuccess: Boolean get() = this is UiState.Success
+public val <T : Any> UiState<T>.isError: Boolean get() = this is UiState.Error
+public val <T : Any> UiState<T>.isLoading: Boolean get() = this is UiState.Loading
 
 @OptIn(ExperimentalObjCRefinement::class)
 @Composable
 @HiddenFromObjC
-fun <T : Any> Flow<T>.collectAsUiState(initial: UiState<T> = UiState.Loading()): State<UiState<T>> =
+public fun <T : Any> Flow<T>.collectAsUiState(initial: UiState<T> = UiState.Loading()): State<UiState<T>> =
     produceState(initial, this) {
         onStart {
             value = UiState.Loading()
@@ -122,7 +122,7 @@ fun <T : Any> Flow<T>.collectAsUiState(initial: UiState<T> = UiState.Loading()):
         }
     }
 
-fun <T : Any> CacheableState<T>.toUi(): UiState<T> =
+internal fun <T : Any> CacheableState<T>.toUi(): UiState<T> =
     data?.let {
         UiState.Success(it)
     } ?: run {

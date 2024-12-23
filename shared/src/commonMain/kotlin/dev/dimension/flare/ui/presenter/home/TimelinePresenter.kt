@@ -7,7 +7,7 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.presenter.PresenterBase
 
-abstract class TimelinePresenter : PresenterBase<TimelineState>() {
+public abstract class TimelinePresenter : PresenterBase<TimelineState>() {
     @Composable
     final override fun body(): TimelineState {
         val listState = listState()
@@ -24,12 +24,12 @@ abstract class TimelinePresenter : PresenterBase<TimelineState>() {
     }
 
     @Composable
-    abstract fun listState(): PagingState<UiTimeline>
+    internal abstract fun listState(): PagingState<UiTimeline>
 }
 
 @Immutable
-interface TimelineState {
-    val listState: PagingState<UiTimeline>
+public interface TimelineState {
+    public val listState: PagingState<UiTimeline>
 
-    suspend fun refresh()
+    public suspend fun refresh()
 }

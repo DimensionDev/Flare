@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class EditAccountListPresenter(
+public class EditAccountListPresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey,
 ) : PresenterBase<EditAccountListState>(),
@@ -77,11 +77,11 @@ class EditAccountListPresenter(
 }
 
 @Immutable
-interface EditAccountListState {
-    val lists: PagingState<UiList>
-    val userLists: UiState<ImmutableList<UiList>>
+public interface EditAccountListState {
+    public val lists: PagingState<UiList>
+    public val userLists: UiState<ImmutableList<UiList>>
 
-    fun addList(list: UiList)
+    public fun addList(list: UiList)
 
-    fun removeList(list: UiList)
+    public fun removeList(list: UiList)
 }

@@ -2,6 +2,6 @@ package dev.dimension.flare.ui.render
 
 import kotlinx.datetime.Instant
 
-expect class UiDateTime
+public expect class UiDateTime
 
-expect fun Instant.toUi(): UiDateTime
+internal expect fun Instant.toUi(): UiDateTime

@@ -6,7 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
 
-const val CACHE_DATABASE_VERSION = 14
+internal const val CACHE_DATABASE_VERSION = 14
 
 @Database(
     entities = [
@@ -32,7 +32,7 @@ const val CACHE_DATABASE_VERSION = 14
     dev.dimension.flare.data.database.cache.model.MessageContentConverters::class,
 )
 @ConstructedBy(CacheDatabaseConstructor::class)
-abstract class CacheDatabase : RoomDatabase() {
+internal abstract class CacheDatabase : RoomDatabase() {
     abstract fun emojiDao(): dev.dimension.flare.data.database.cache.dao.EmojiDao
 
     abstract fun statusReferenceDao(): dev.dimension.flare.data.database.cache.dao.StatusReferenceDao
@@ -48,6 +48,6 @@ abstract class CacheDatabase : RoomDatabase() {
 
 // The Room compiler generates the `actual` implementations.
 @Suppress("NO_ACTUAL_FOR_EXPECT")
-expect object CacheDatabaseConstructor : RoomDatabaseConstructor<CacheDatabase> {
+internal expect object CacheDatabaseConstructor : RoomDatabaseConstructor<CacheDatabase> {
     override fun initialize(): CacheDatabase
 }

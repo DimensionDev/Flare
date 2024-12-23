@@ -26,17 +26,17 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class LocalCacheSearchPresenter :
+public class LocalCacheSearchPresenter :
     PresenterBase<LocalCacheSearchPresenter.State>(),
     KoinComponent {
     private val database: CacheDatabase by inject()
     private val accountRepository: AccountRepository by inject()
 
-    interface State {
-        val data: PagingState<UiTimeline>
-        val history: PagingState<UiTimeline>
+    public interface State {
+        public val data: PagingState<UiTimeline>
+        public val history: PagingState<UiTimeline>
 
-        fun setQuery(value: String)
+        public fun setQuery(value: String)
     }
 
     @Composable

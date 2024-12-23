@@ -5,7 +5,7 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 
-data class ComposeData(
+public data class ComposeData(
     val account: UiAccount,
     val content: String,
     val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type =
@@ -18,13 +18,13 @@ data class ComposeData(
     val localOnly: Boolean = false,
     val referenceStatus: ReferenceStatus? = null,
 ) {
-    data class Poll(
+    public data class Poll(
         val options: List<String>,
         val expiredAfter: Long,
         val multiple: Boolean,
     )
 
-    data class ReferenceStatus(
+    public data class ReferenceStatus(
         val data: UiTimeline,
         val composeStatus: ComposeStatus,
     )

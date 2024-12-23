@@ -9,7 +9,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface AccountDao {
+internal interface AccountDao {
     @Query("SELECT * FROM DbAccount ORDER BY last_active DESC LIMIT 1")
     fun activeAccount(): Flow<DbAccount?>
 

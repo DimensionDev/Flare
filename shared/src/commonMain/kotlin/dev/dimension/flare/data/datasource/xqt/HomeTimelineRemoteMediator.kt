@@ -226,7 +226,7 @@ internal class BookmarkTimelineRemoteMediator(
 }
 
 @Serializable
-data class HomeTimelineRequest(
+internal data class HomeTimelineRequest(
     @Required
     val count: Long = 20,
     val cursor: String? = null,

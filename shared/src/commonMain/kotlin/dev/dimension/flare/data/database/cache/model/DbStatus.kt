@@ -12,7 +12,7 @@ import dev.dimension.flare.model.PlatformType
 @Entity(
     indices = [Index(value = ["statusKey", "accountKey"], unique = true)],
 )
-data class DbStatus(
+internal data class DbStatus(
     val statusKey: MicroBlogKey,
     val accountKey: MicroBlogKey,
     val userKey: MicroBlogKey?,
@@ -23,7 +23,7 @@ data class DbStatus(
     val id: String = "${accountKey}_$statusKey",
 )
 
-class StatusContentConverters {
+internal class StatusContentConverters {
     @TypeConverter
     fun fromStatusContent(content: StatusContent): String = content.encodeJson()
 

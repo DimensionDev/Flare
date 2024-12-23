@@ -28,7 +28,7 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class VVOStatusDetailPresenter(
+public class VVOStatusDetailPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
 ) : PresenterBase<VVOStatusDetailState>(),
@@ -121,8 +121,8 @@ class VVOStatusDetailPresenter(
 }
 
 @Immutable
-interface VVOStatusDetailState {
-    val status: UiState<UiTimeline>
-    val comment: PagingState<UiTimeline>
-    val repost: PagingState<UiTimeline>
+public interface VVOStatusDetailState {
+    public val status: UiState<UiTimeline>
+    public val comment: PagingState<UiTimeline>
+    public val repost: PagingState<UiTimeline>
 }

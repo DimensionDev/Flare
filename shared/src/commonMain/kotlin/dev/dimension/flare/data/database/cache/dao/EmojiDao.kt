@@ -8,7 +8,7 @@ import dev.dimension.flare.data.database.cache.model.DbEmoji
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface EmojiDao {
+internal interface EmojiDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(emoji: DbEmoji)
 

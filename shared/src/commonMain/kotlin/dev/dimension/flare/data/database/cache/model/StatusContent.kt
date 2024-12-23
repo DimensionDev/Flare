@@ -9,7 +9,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed interface StatusContent {
+internal sealed interface StatusContent {
     @Serializable
     @SerialName("mastodon")
     data class Mastodon internal constructor(

@@ -16,7 +16,7 @@ import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class BlueskyFeedTimelinePresenter(
+public class BlueskyFeedTimelinePresenter(
     private val accountType: AccountType,
     private val uri: String,
 ) : TimelinePresenter(),

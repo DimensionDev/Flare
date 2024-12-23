@@ -12,7 +12,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class LocalFilterPresenter :
+public class LocalFilterPresenter :
     PresenterBase<LocalFilterState>(),
     KoinComponent {
     private val repository by inject<LocalFilterRepository>()
@@ -51,12 +51,12 @@ class LocalFilterPresenter :
 }
 
 @Immutable
-interface LocalFilterState {
-    val items: UiState<ImmutableListWrapper<UiKeywordFilter>>
+public interface LocalFilterState {
+    public val items: UiState<ImmutableListWrapper<UiKeywordFilter>>
 
-    fun delete(keyword: String)
+    public fun delete(keyword: String)
 
-    fun add(item: UiKeywordFilter)
+    public fun add(item: UiKeywordFilter)
 
-    fun update(item: UiKeywordFilter)
+    public fun update(item: UiKeywordFilter)
 }

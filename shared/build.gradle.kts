@@ -14,6 +14,7 @@ plugins {
 
 val enableLinux = providers.gradleProperty("dev.dimension.flare.linux").orNull == "true"
 kotlin {
+    explicitApi()
     applyDefaultHierarchyTemplate()
 
     androidTarget()

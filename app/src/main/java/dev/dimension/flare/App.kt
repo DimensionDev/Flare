@@ -11,8 +11,8 @@ import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import dev.dimension.flare.common.AnimatedPngDecoder
 import dev.dimension.flare.common.AnimatedWebPDecoder
+import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.di.androidModule
-import dev.dimension.flare.di.appModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -23,7 +23,7 @@ class App :
         super.onCreate()
         startKoin {
             androidContext(this@App)
-            modules(appModule() + androidModule)
+            modules(KoinHelper.modules() + androidModule)
         }
     }
 

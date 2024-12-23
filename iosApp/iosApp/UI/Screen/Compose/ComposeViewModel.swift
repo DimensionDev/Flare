@@ -41,7 +41,7 @@ class ComposeViewModel: MoleculeViewModelProto {
     func send() {
         Task {
             if case .success(let account) = onEnum(of: self.model.account) {
-                let data: ComposeData_ = .init(
+                let data: ComposeData = .init(
                     account: account.data,
                     content: text,
                     visibility: getVisibility(),
@@ -62,16 +62,16 @@ class ComposeViewModel: MoleculeViewModelProto {
                FileItem(name: item.item.itemIdentifier, data: KotlinByteArray.from(data: item.data!))
            }
        }
-    private func getReferenceStatus() -> ComposeData_.ReferenceStatus? {
+    private func getReferenceStatus() -> ComposeData.ReferenceStatus? {
         return if let data = status, let replyState = self.model.replyState, case .success(let timeline) = onEnum(of: replyState) {
-            ComposeData_.ReferenceStatus(data: timeline.data, composeStatus: data)
+            ComposeData.ReferenceStatus(data: timeline.data, composeStatus: data)
         } else {
             nil
         }
     }
-    private func getPoll() -> ComposeData_.Poll? {
+    private func getPoll() -> ComposeData.Poll? {
         return if pollViewModel.enabled {
-            ComposeData_.Poll(options: pollViewModel.choices.map { item in item.text }, expiredAfter: pollViewModel.expired.inWholeMilliseconds, multiple: pollViewModel.pollType == ComposePollType.multiple)
+            ComposeData.Poll(options: pollViewModel.choices.map { item in item.text }, expiredAfter: pollViewModel.expired.inWholeMilliseconds, multiple: pollViewModel.pollType == ComposePollType.multiple)
         } else {
             nil
         }

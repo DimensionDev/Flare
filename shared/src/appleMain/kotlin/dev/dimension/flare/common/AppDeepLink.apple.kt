@@ -171,7 +171,7 @@ public sealed class AppleRoute {
         }
     }
 
-    public data class Search internal constructor(
+    public data class Search(
         val accountType: AccountType,
         val keyword: String,
     ) : AppleRoute() {
@@ -179,7 +179,7 @@ public sealed class AppleRoute {
             get() = RouteType.Screen
     }
 
-    public data class Profile internal constructor(
+    public data class Profile(
         val accountType: AccountType,
         val userKey: MicroBlogKey,
     ) : AppleRoute() {
@@ -187,7 +187,7 @@ public sealed class AppleRoute {
             get() = RouteType.Screen
     }
 
-    public data class ProfileWithNameAndHost internal constructor(
+    public data class ProfileWithNameAndHost(
         val accountType: AccountType,
         val userName: String,
         val host: String,
@@ -196,7 +196,7 @@ public sealed class AppleRoute {
             get() = RouteType.Screen
     }
 
-    public data class StatusDetail internal constructor(
+    public data class StatusDetail(
         val accountType: AccountType,
         val statusKey: MicroBlogKey,
     ) : AppleRoute() {
@@ -205,14 +205,14 @@ public sealed class AppleRoute {
     }
 
     public sealed class Compose : AppleRoute() {
-        public data class New internal constructor(
+        public data class New(
             val accountType: AccountType,
         ) : Compose() {
             override val routeType: RouteType
                 get() = RouteType.Sheet
         }
 
-        public data class Reply internal constructor(
+        public data class Reply(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : Compose() {
@@ -220,7 +220,7 @@ public sealed class AppleRoute {
                 get() = RouteType.Sheet
         }
 
-        public data class Quote internal constructor(
+        public data class Quote(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : Compose() {
@@ -229,7 +229,7 @@ public sealed class AppleRoute {
         }
     }
 
-    public data class RawImage internal constructor(
+    public data class RawImage(
         val url: String,
     ) : AppleRoute() {
         override val routeType: RouteType
@@ -237,7 +237,7 @@ public sealed class AppleRoute {
     }
 
     public sealed class VVO : AppleRoute() {
-        public data class StatusDetail internal constructor(
+        public data class StatusDetail(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : VVO() {
@@ -245,7 +245,7 @@ public sealed class AppleRoute {
                 get() = RouteType.Screen
         }
 
-        public data class CommentDetail internal constructor(
+        public data class CommentDetail(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : VVO() {
@@ -253,7 +253,7 @@ public sealed class AppleRoute {
                 get() = RouteType.Screen
         }
 
-        public data class ReplyToComment internal constructor(
+        public data class ReplyToComment(
             val accountType: AccountType,
             val replyTo: MicroBlogKey,
             val rootId: String,
@@ -263,7 +263,7 @@ public sealed class AppleRoute {
         }
     }
 
-    public data class DeleteStatus internal constructor(
+    public data class DeleteStatus(
         val accountType: AccountType,
         val statusKey: MicroBlogKey,
     ) : AppleRoute() {
@@ -272,7 +272,7 @@ public sealed class AppleRoute {
     }
 
     public sealed class Bluesky : AppleRoute() {
-        public data class ReportStatus internal constructor(
+        public data class ReportStatus(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : Bluesky() {
@@ -282,7 +282,7 @@ public sealed class AppleRoute {
     }
 
     public sealed class Mastodon : AppleRoute() {
-        public data class ReportStatus internal constructor(
+        public data class ReportStatus(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
             val userKey: MicroBlogKey,
@@ -293,7 +293,7 @@ public sealed class AppleRoute {
     }
 
     public sealed class Misskey : AppleRoute() {
-        public data class ReportStatus internal constructor(
+        public data class ReportStatus(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
             val userKey: MicroBlogKey,
@@ -302,7 +302,7 @@ public sealed class AppleRoute {
                 get() = RouteType.Dialog
         }
 
-        public data class AddReaction internal constructor(
+        public data class AddReaction(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : Misskey() {
@@ -311,7 +311,7 @@ public sealed class AppleRoute {
         }
     }
 
-    public data class ProfileMedia internal constructor(
+    public data class ProfileMedia(
         val accountType: AccountType,
         val userKey: MicroBlogKey,
     ) : AppleRoute() {
@@ -319,7 +319,7 @@ public sealed class AppleRoute {
             get() = RouteType.Screen
     }
 
-    public data class StatusMedia internal constructor(
+    public data class StatusMedia(
         val accountType: AccountType,
         val statusKey: MicroBlogKey,
         val index: Int,

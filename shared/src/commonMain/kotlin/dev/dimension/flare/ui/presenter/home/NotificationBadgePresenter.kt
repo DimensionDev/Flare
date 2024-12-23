@@ -20,7 +20,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.minutes
 
-class NotificationBadgePresenter(
+public class NotificationBadgePresenter(
     private val accountType: AccountType,
     private val autoRefresh: Boolean = true,
 ) : PresenterBase<NotificationBadgeState>(),
@@ -61,8 +61,8 @@ class NotificationBadgePresenter(
 }
 
 @Immutable
-interface NotificationBadgeState {
-    val count: UiState<Int>
+public interface NotificationBadgeState {
+    public val count: UiState<Int>
 
-    fun refresh()
+    public fun refresh()
 }

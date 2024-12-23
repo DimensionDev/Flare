@@ -78,7 +78,7 @@ private fun String.trimUrl(): String =
             }
         }
 
-fun createSampleStatus(user: UiUserV2) =
+public fun createSampleStatus(user: UiUserV2): UiTimeline =
     UiTimeline(
         topMessage = null,
         content =

@@ -3,7 +3,7 @@ package dev.dimension.flare.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class ReferenceType {
+internal enum class ReferenceType {
     Retweet,
     Reply,
     Quote,

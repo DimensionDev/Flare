@@ -15,7 +15,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class UserDMConversationPresenter(
+public class UserDMConversationPresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey,
 ) : PresenterBase<UserDMConversationPresenter.State>(),
@@ -23,8 +23,8 @@ class UserDMConversationPresenter(
     private val accountRepository: AccountRepository by inject()
 
     @Immutable
-    interface State {
-        val roomKey: UiState<MicroBlogKey>
+    public interface State {
+        public val roomKey: UiState<MicroBlogKey>
     }
 
     @Composable

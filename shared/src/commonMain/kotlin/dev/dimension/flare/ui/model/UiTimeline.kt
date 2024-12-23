@@ -11,7 +11,7 @@ import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.ImmutableList
 
 @Immutable
-data class UiTimeline internal constructor(
+public data class UiTimeline internal constructor(
     val topMessage: TopMessage?,
     val content: ItemContent?,
     val platformType: PlatformType,
@@ -52,10 +52,10 @@ data class UiTimeline internal constructor(
                 }
             }
 
-    sealed interface ItemContent {
-        val itemKey: String
+    public sealed interface ItemContent {
+        public val itemKey: String
 
-        data class Status(
+        public data class Status internal constructor(
             val images: ImmutableList<UiMedia>,
             val sensitive: Boolean,
             val contentWarning: String?,
@@ -80,32 +80,32 @@ data class UiTimeline internal constructor(
                         append(statusKey)
                     }
 
-            sealed interface BottomContent {
-                data class Reaction(
+            public sealed interface BottomContent {
+                public data class Reaction internal constructor(
                     val emojiReactions: ImmutableList<EmojiReaction>,
                     val myReaction: String?,
                 ) : BottomContent {
-                    data class EmojiReaction(
+                    public data class EmojiReaction internal constructor(
                         val name: String,
                         val url: String,
                         val count: Long,
                         val onClicked: () -> Unit,
                     ) {
-                        val humanizedCount by lazy {
+                        val humanizedCount: String by lazy {
                             count.humanize()
                         }
-                        val isImageReaction by lazy {
+                        val isImageReaction: Boolean by lazy {
                             name.startsWith(":") && name.endsWith(":")
                         }
                     }
                 }
             }
 
-            sealed interface TopEndContent {
-                data class Visibility(
+            public sealed interface TopEndContent {
+                public data class Visibility internal constructor(
                     val visibility: Type,
                 ) : TopEndContent {
-                    enum class Type {
+                    public enum class Type {
                         Public,
                         Home,
                         Followers,
@@ -114,14 +114,14 @@ data class UiTimeline internal constructor(
                 }
             }
 
-            sealed interface AboveTextContent {
-                data class ReplyTo(
+            public sealed interface AboveTextContent {
+                public data class ReplyTo internal constructor(
                     val handle: String,
                 ) : AboveTextContent
             }
         }
 
-        data class User(
+        public data class User internal constructor(
             val value: UiUserV2,
         ) : ItemContent {
             override val itemKey: String
@@ -132,7 +132,7 @@ data class UiTimeline internal constructor(
                     }
         }
 
-        data class UserList(
+        public data class UserList internal constructor(
             val users: ImmutableList<UiUserV2>,
             val status: Status? = null,
         ) : ItemContent {
@@ -148,7 +148,7 @@ data class UiTimeline internal constructor(
         }
     }
 
-    data class TopMessage(
+    public data class TopMessage internal constructor(
         val user: UiUserV2?,
         val icon: Icon,
         val type: MessageType,
@@ -166,7 +166,7 @@ data class UiTimeline internal constructor(
                     append(statusKey.toString())
                 }
 
-        enum class Icon {
+        public enum class Icon {
             Retweet,
             Follow,
             Favourite,
@@ -178,129 +178,129 @@ data class UiTimeline internal constructor(
             Quote,
         }
 
-        sealed interface MessageType {
-            sealed interface Mastodon : MessageType {
-                data class Reblogged(
+        public sealed interface MessageType {
+            public sealed interface Mastodon : MessageType {
+                public data class Reblogged internal constructor(
                     val id: String,
                 ) : Mastodon
 
-                data class Follow(
+                public data class Follow internal constructor(
                     val id: String,
                 ) : Mastodon
 
-                data class Favourite(
+                public data class Favourite internal constructor(
                     val id: String,
                 ) : Mastodon
 
-                data class Mention(
+                public data class Mention internal constructor(
                     val id: String,
                 ) : Mastodon
 
-                data class Poll(
+                public data class Poll internal constructor(
                     val id: String,
                 ) : Mastodon
 
-                data class FollowRequest(
+                public data class FollowRequest internal constructor(
                     val id: String,
                 ) : Mastodon
 
-                data class Status(
+                public data class Status internal constructor(
                     val id: String,
                 ) : Mastodon
 
-                data class Update(
+                public data class Update internal constructor(
                     val id: String,
                 ) : Mastodon
 
-                data class UnKnown(
+                public data class UnKnown internal constructor(
                     val id: String,
                 ) : Mastodon
             }
 
-            sealed interface Misskey : MessageType {
-                data class Follow(
+            public sealed interface Misskey : MessageType {
+                public data class Follow internal constructor(
                     val id: String,
                 ) : Misskey
 
-                data class Mention(
+                public data class Mention internal constructor(
                     val id: String,
                 ) : Misskey
 
-                data class Reply(
+                public data class Reply internal constructor(
                     val id: String,
                 ) : Misskey
 
-                data class Renote(
+                public data class Renote internal constructor(
                     val id: String,
                 ) : Misskey
 
-                data class Quote(
+                public data class Quote internal constructor(
                     val id: String,
                 ) : Misskey
 
-                data class Reaction(
+                public data class Reaction internal constructor(
                     val id: String,
                 ) : Misskey
 
-                data class PollEnded(
+                public data class PollEnded internal constructor(
                     val id: String,
                 ) : Misskey
 
-                data class ReceiveFollowRequest(
+                public data class ReceiveFollowRequest internal constructor(
                     val id: String,
                 ) : Misskey
 
-                data class FollowRequestAccepted(
+                public data class FollowRequestAccepted internal constructor(
                     val id: String,
                 ) : Misskey
 
-                data class AchievementEarned(
+                public data class AchievementEarned internal constructor(
                     val id: String,
                     val achievement: MisskeyAchievement?,
                 ) : Misskey
 
-                data class App(
+                public data class App internal constructor(
                     val id: String,
                 ) : Misskey
             }
 
-            sealed interface Bluesky : MessageType {
-                data object Like : Bluesky
+            public sealed interface Bluesky : MessageType {
+                public data object Like : Bluesky
 
-                data object Repost : Bluesky
+                public data object Repost : Bluesky
 
-                data object Follow : Bluesky
+                public data object Follow : Bluesky
 
-                data object Mention : Bluesky
+                public data object Mention : Bluesky
 
-                data object Reply : Bluesky
+                public data object Reply : Bluesky
 
-                data object Quote : Bluesky
+                public data object Quote : Bluesky
 
-                data object UnKnown : Bluesky
+                public data object UnKnown : Bluesky
 
-                data object StarterpackJoined : Bluesky
+                public data object StarterpackJoined : Bluesky
             }
 
-            sealed interface XQT : MessageType {
-                data object Retweet : XQT
+            public sealed interface XQT : MessageType {
+                public data object Retweet : XQT
 
-                data class Custom(
+                public data class Custom internal constructor(
                     val message: String,
                     val id: String,
                 ) : XQT {
                     override fun toString(): String = "Custom$id"
                 }
 
-                data object Mention : XQT
+                public data object Mention : XQT
             }
 
-            sealed interface VVO : MessageType {
-                data class Custom(
+            public sealed interface VVO : MessageType {
+                public data class Custom internal constructor(
                     val message: String,
                 ) : VVO
 
-                data object Like : VVO
+                public data object Like : VVO
             }
         }
     }

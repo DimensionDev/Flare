@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class BlueskyLoginPresenter(
+public class BlueskyLoginPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<BlueskyLoginState>(),
     KoinComponent {
@@ -97,11 +97,11 @@ class BlueskyLoginPresenter(
 }
 
 @Immutable
-interface BlueskyLoginState {
-    val loading: Boolean
-    val error: Throwable?
+public interface BlueskyLoginState {
+    public val loading: Boolean
+    public val error: Throwable?
 
-    fun login(
+    public fun login(
         baseUrl: String,
         username: String,
         password: String,

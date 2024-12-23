@@ -8,7 +8,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 
 @Entity
-data class DbEmoji(
+internal data class DbEmoji(
     @PrimaryKey
     @ColumnInfo(name = "host")
     val host: String,
@@ -16,7 +16,7 @@ data class DbEmoji(
     val content: EmojiContent,
 )
 
-class EmojiContentConverter {
+internal class EmojiContentConverter {
     @TypeConverter
     fun fromEmojiContent(emojiContent: EmojiContent): String = emojiContent.encodeJson()
 

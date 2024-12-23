@@ -13,15 +13,15 @@ private val json =
         coerceInputValues = true
     }
 
-val JSON get() = json
+internal val JSON get() = json
 
-inline fun <reified T> T.encodeJson(): String = JSON.encodeToString(this)
+internal inline fun <reified T> T.encodeJson(): String = JSON.encodeToString(this)
 
-fun <T> T.encodeJson(serializer: KSerializer<T>): String = JSON.encodeToString(serializer, this)
+public fun <T> T.encodeJson(serializer: KSerializer<T>): String = JSON.encodeToString(serializer, this)
 
-inline fun <reified T> String.decodeJson(): T = JSON.decodeFromString(this)
+internal inline fun <reified T> String.decodeJson(): T = JSON.decodeFromString(this)
 
-fun <T> String.decodeJson(serializer: KSerializer<T>): T = JSON.decodeFromString(serializer, this)
+public fun <T> String.decodeJson(serializer: KSerializer<T>): T = JSON.decodeFromString(serializer, this)
 
-val JsonElement.jsonObjectOrNull: JsonObject?
+internal val JsonElement.jsonObjectOrNull: JsonObject?
     get() = if (this is JsonObject) this else null

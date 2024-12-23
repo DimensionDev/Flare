@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class BlueskyReportStatusPresenter(
+public class BlueskyReportStatusPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
 ) : PresenterBase<BlueskyReportStatusState>(),
@@ -74,13 +74,13 @@ class BlueskyReportStatusPresenter(
 }
 
 @Immutable
-interface BlueskyReportStatusState {
-    val reason: ReportReason?
-    val status: UiState<UiTimeline>
+public interface BlueskyReportStatusState {
+    public val reason: ReportReason?
+    public val status: UiState<UiTimeline>
 
-    val allReasons: ImmutableList<ReportReason>
+    public val allReasons: ImmutableList<ReportReason>
 
-    enum class ReportReason {
+    public enum class ReportReason {
         Spam,
         Violation,
         Misleading,
@@ -89,9 +89,9 @@ interface BlueskyReportStatusState {
         Other,
     }
 
-    fun selectReason(value: ReportReason)
+    public fun selectReason(value: ReportReason)
 
-    fun report(
+    public fun report(
         value: ReportReason,
         status: UiTimeline,
     )

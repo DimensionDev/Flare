@@ -22,17 +22,17 @@ import kotlinx.coroutines.flow.Flow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-abstract class UserListPresenter(
+public abstract class UserListPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<UserListPresenter.State>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
 
     @Immutable
-    interface State {
-        val listState: PagingState<UiUserV2>
+    public interface State {
+        public val listState: PagingState<UiUserV2>
 
-        suspend fun refreshSuspend()
+        public suspend fun refreshSuspend()
     }
 
     @Composable
@@ -57,13 +57,13 @@ abstract class UserListPresenter(
         }
     }
 
-    abstract fun dataSource(
+    internal abstract fun dataSource(
         service: MicroblogDataSource,
         scope: CoroutineScope,
     ): Flow<PagingData<UiUserV2>>
 }
 
-class FollowingPresenter(
+public class FollowingPresenter(
     accountType: AccountType,
     private val userKey: MicroBlogKey,
 ) : UserListPresenter(accountType) {
@@ -73,7 +73,7 @@ class FollowingPresenter(
     ) = service.following(userKey, scope)
 }
 
-class FansPresenter(
+public class FansPresenter(
     accountType: AccountType,
     private val userKey: MicroBlogKey,
 ) : UserListPresenter(accountType) {

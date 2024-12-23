@@ -16,7 +16,7 @@ internal data class Notification(
 )
 
 @Serializable
-enum class NotificationTypes {
+internal enum class NotificationTypes {
     @SerialName("follow")
     Follow,
 

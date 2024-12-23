@@ -54,7 +54,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @OptIn(ExperimentalPagingApi::class)
-class VVODataSource(
+internal class VVODataSource(
     override val accountKey: MicroBlogKey,
     private val credential: UiAccount.VVo.Credential,
 ) : AuthenticatedMicroblogDataSource,

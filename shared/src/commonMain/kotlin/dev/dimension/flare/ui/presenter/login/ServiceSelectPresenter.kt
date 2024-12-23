@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class ServiceSelectPresenter(
+public class ServiceSelectPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<ServiceSelectState>(),
     KoinComponent {
@@ -141,37 +141,37 @@ class ServiceSelectPresenter(
 }
 
 @Immutable
-interface ServiceSelectState : NodeInfoState {
-    val blueskyLoginState: BlueskyLoginState
-    val mastodonLoginState: MastodonLoginState
-    val misskeyLoginState: MisskeyLoginState
-    val loading: Boolean
+public interface ServiceSelectState : NodeInfoState {
+    public val blueskyLoginState: BlueskyLoginState
+    public val mastodonLoginState: MastodonLoginState
+    public val misskeyLoginState: MisskeyLoginState
+    public val loading: Boolean
 }
 
 @Immutable
-interface MastodonLoginState {
-    val loading: Boolean
-    val error: String?
-    val resumedState: UiState<Nothing>?
+public interface MastodonLoginState {
+    public val loading: Boolean
+    public val error: String?
+    public val resumedState: UiState<Nothing>?
 
-    fun login(
+    public fun login(
         host: String,
         launchUrl: (String) -> Unit,
     )
 
-    fun resume(url: String)
+    public fun resume(url: String)
 }
 
 @Immutable
-interface MisskeyLoginState {
-    val loading: Boolean
-    val error: String?
-    val resumedState: UiState<Nothing>?
+public interface MisskeyLoginState {
+    public val loading: Boolean
+    public val error: String?
+    public val resumedState: UiState<Nothing>?
 
-    fun login(
+    public fun login(
         host: String,
         launchUrl: (String) -> Unit,
     )
 
-    fun resume(url: String)
+    public fun resume(url: String)
 }

@@ -15,7 +15,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface MessageDao {
+internal interface MessageDao {
     @Transaction
     @Query("SELECT * FROM DbDirectMessageTimeline WHERE accountKey = :accountKey ORDER BY sortId DESC")
     fun getRoomPagingSource(accountKey: MicroBlogKey): PagingSource<Int, DbDirectMessageTimelineWithRoom>

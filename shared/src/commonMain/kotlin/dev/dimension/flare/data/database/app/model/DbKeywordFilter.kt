@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class DbKeywordFilter(
+internal data class DbKeywordFilter(
     @PrimaryKey
     val keyword: String,
     val for_timeline: Long,

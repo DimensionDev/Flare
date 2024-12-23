@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import dev.dimension.flare.model.PlatformType
 
 @Entity
-data class DbApplication(
+internal data class DbApplication(
     @PrimaryKey val host: String,
     val credential_json: String,
     val platform_type: PlatformType,

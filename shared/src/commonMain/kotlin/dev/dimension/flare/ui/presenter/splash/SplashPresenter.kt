@@ -15,7 +15,7 @@ import kotlinx.coroutines.delay
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class SplashPresenter(
+public class SplashPresenter(
     private val toHome: () -> Unit,
     private val toLogin: () -> Unit,
 ) : PresenterBase<SplashType>(),
@@ -47,7 +47,7 @@ class SplashPresenter(
 }
 
 @Immutable
-enum class SplashType {
+public enum class SplashType {
     Splash,
     Login,
     Home,

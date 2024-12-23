@@ -9,38 +9,38 @@ import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.xqtHost
 
 @Immutable
-sealed interface UiApplication {
-    val host: String
+public sealed interface UiApplication {
+    public val host: String
 
     @Immutable
-    data class Mastodon internal constructor(
+    public data class Mastodon internal constructor(
         override val host: String,
         internal val application: CreateApplicationResponse,
     ) : UiApplication
 
     @Immutable
-    data class Misskey(
+    public data class Misskey internal constructor(
         override val host: String,
         val session: String,
     ) : UiApplication
 
     @Immutable
-    data class Bluesky(
+    public data class Bluesky internal constructor(
         override val host: String,
     ) : UiApplication
 
     @Immutable
-    data object XQT : UiApplication {
+    public data object XQT : UiApplication {
         override val host: String = xqtHost
     }
 
     @Immutable
-    data object VVo : UiApplication {
+    public data object VVo : UiApplication {
         override val host: String = vvoHost
     }
 
-    companion object {
-        fun DbApplication.toUi(): UiApplication =
+    public companion object {
+        internal fun DbApplication.toUi(): UiApplication =
             when (platform_type) {
                 PlatformType.Mastodon ->
                     Mastodon(

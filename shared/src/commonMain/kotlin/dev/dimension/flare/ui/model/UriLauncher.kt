@@ -1,5 +1,5 @@
 package dev.dimension.flare.ui.model
 
-fun interface UriLauncher {
-    fun launch(uri: String)
+public fun interface UriLauncher {
+    public fun launch(uri: String)
 }

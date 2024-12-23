@@ -11,7 +11,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
-interface MicroblogDataSource {
+internal interface MicroblogDataSource {
     fun homeTimeline(
         pageSize: Int = 20,
         pagingKey: String,

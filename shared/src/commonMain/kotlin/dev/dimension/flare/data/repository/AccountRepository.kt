@@ -78,9 +78,9 @@ internal class AccountRepository(
         }
 }
 
-data object NoActiveAccountException : Exception("No active account.")
+public data object NoActiveAccountException : Exception("No active account.")
 
-data object LoginExpiredException : Exception("Login expired.")
+public data object LoginExpiredException : Exception("Login expired.")
 
 @Composable
 internal fun activeAccountPresenter(repository: AccountRepository): State<UiState<UiAccount>> =

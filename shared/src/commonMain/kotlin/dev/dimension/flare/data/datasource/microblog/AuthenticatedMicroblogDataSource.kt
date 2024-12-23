@@ -11,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
-interface AuthenticatedMicroblogDataSource : MicroblogDataSource {
+internal interface AuthenticatedMicroblogDataSource : MicroblogDataSource {
     val accountKey: MicroBlogKey
 
     fun notification(
@@ -44,7 +44,7 @@ interface AuthenticatedMicroblogDataSource : MicroblogDataSource {
     fun notificationBadgeCount(): CacheData<Int> = Cacheable({ }, { flowOf(0) })
 }
 
-data class ComposeProgress(
+internal data class ComposeProgress(
     val progress: Int,
     val total: Int,
 ) {
@@ -52,11 +52,11 @@ data class ComposeProgress(
         get() = progress.toDouble() / total.toDouble()
 }
 
-enum class NotificationFilter {
+public enum class NotificationFilter {
     All,
     Mention,
     Comment,
     Like,
 }
 
-fun AuthenticatedMicroblogDataSource.relationKeyWithUserKey(userKey: MicroBlogKey) = "relation:$accountKey:$userKey"
+internal fun AuthenticatedMicroblogDataSource.relationKeyWithUserKey(userKey: MicroBlogKey) = "relation:$accountKey:$userKey"

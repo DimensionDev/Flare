@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 
 @Immutable
-data class UiRelation(
+public data class UiRelation internal constructor(
     val following: Boolean = false,
     val isFans: Boolean = false,
     val blocking: Boolean = false,

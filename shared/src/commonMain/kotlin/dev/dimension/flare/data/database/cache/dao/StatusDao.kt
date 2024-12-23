@@ -10,7 +10,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface StatusDao {
+internal interface StatusDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(status: DbStatus)
 

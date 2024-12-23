@@ -23,7 +23,7 @@ import kotlinx.collections.immutable.toImmutableList
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class AccountsPresenter :
+public class AccountsPresenter :
     PresenterBase<AccountsState>(),
     KoinComponent {
     private val accountRepository: AccountRepository by inject()
@@ -64,29 +64,29 @@ class AccountsPresenter :
 }
 
 @Immutable
-abstract class AccountsState(
-    val accounts: UiState<ImmutableListWrapper<Pair<UiAccount, UiState<UiProfile>>>>,
-    val activeAccount: UiState<UiAccount>,
+public abstract class AccountsState(
+    public val accounts: UiState<ImmutableListWrapper<Pair<UiAccount, UiState<UiProfile>>>>,
+    public val activeAccount: UiState<UiAccount>,
 ) {
-    abstract fun setActiveAccount(accountKey: MicroBlogKey)
+    public abstract fun setActiveAccount(accountKey: MicroBlogKey)
 
-    abstract fun removeAccount(accountKey: MicroBlogKey)
+    public abstract fun removeAccount(accountKey: MicroBlogKey)
 }
 
 @Immutable
-data class ImmutableListWrapper<T : Any>(
+public data class ImmutableListWrapper<T : Any>(
     private val data: ImmutableList<T>,
 ) {
     val size: Int
         get() = data.size
 
-    operator fun get(index: Int): T = data[index]
+    public operator fun get(index: Int): T = data[index]
 
-    fun indexOf(element: T): Int = data.indexOf(element)
+    public fun indexOf(element: T): Int = data.indexOf(element)
 
-    fun contains(element: T): Boolean = data.contains(element)
+    public fun contains(element: T): Boolean = data.contains(element)
 
-    fun toImmutableList(): ImmutableList<T> = data
+    public fun toImmutableList(): ImmutableList<T> = data
 }
 
-fun <T : Any> ImmutableList<T>.toImmutableListWrapper(): ImmutableListWrapper<T> = ImmutableListWrapper(this)
+internal fun <T : Any> ImmutableList<T>.toImmutableListWrapper(): ImmutableListWrapper<T> = ImmutableListWrapper(this)

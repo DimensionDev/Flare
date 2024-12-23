@@ -48,7 +48,7 @@ internal class ComposeUseCase(
 }
 
 @Immutable
-sealed interface ComposeProgressState {
+internal sealed interface ComposeProgressState {
     @Immutable
     data object Success : ComposeProgressState
 

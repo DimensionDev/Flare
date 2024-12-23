@@ -7,7 +7,7 @@ import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.ImmutableList
 
 @Immutable
-data class UiDMRoom(
+public data class UiDMRoom internal constructor(
     val key: MicroBlogKey,
     val users: ImmutableList<UiUserV2>,
     val lastMessage: UiDMItem?,
@@ -20,16 +20,16 @@ data class UiDMRoom(
             null -> ""
         }
     }
-    val id by lazy {
+    val id: String by lazy {
         key.toString()
     }
-    val user by lazy {
+    val user: UiUserV2? by lazy {
         users.firstOrNull()
     }
 }
 
 @Immutable
-data class UiDMItem(
+public data class UiDMItem internal constructor(
     val key: MicroBlogKey,
     val user: UiUserV2,
     val content: Message,
@@ -37,20 +37,20 @@ data class UiDMItem(
     val isFromMe: Boolean,
     val sendState: SendState?,
 ) {
-    sealed interface Message {
-        data class Text(
+    public sealed interface Message {
+        public data class Text(
             val text: UiRichText,
         ) : Message
 
-        data object Deleted : Message
+        public data object Deleted : Message
     }
 
-    enum class SendState {
+    public enum class SendState {
         Sending,
         Failed,
     }
 
-    val id by lazy {
+    val id: String by lazy {
         key.toString()
     }
 }

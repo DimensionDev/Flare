@@ -22,7 +22,7 @@ import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.Uuid
 
-class MisskeyCallbackPresenter(
+public class MisskeyCallbackPresenter(
     private val session: String?,
     private val toHome: () -> Unit,
 ) : PresenterBase<UiState<Nothing>>(),

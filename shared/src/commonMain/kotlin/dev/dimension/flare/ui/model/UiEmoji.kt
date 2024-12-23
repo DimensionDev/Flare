@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.model
 import androidx.compose.runtime.Immutable
 
 @Immutable
-data class UiEmoji(
+public data class UiEmoji internal constructor(
     val shortcode: String,
     val url: String,
 )

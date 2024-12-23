@@ -8,7 +8,7 @@ import dev.dimension.flare.data.database.app.model.DbSearchHistory
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface SearchHistoryDao {
+internal interface SearchHistoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(searchHistory: DbSearchHistory)
 

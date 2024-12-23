@@ -39,7 +39,7 @@ import kotlinx.collections.immutable.toImmutableList
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class ComposePresenter(
+public class ComposePresenter(
     private val accountType: AccountType,
     private val status: ComposeStatus? = null,
 ) : PresenterBase<ComposeState>(),
@@ -259,56 +259,56 @@ class ComposePresenter(
 }
 
 @Immutable
-interface VisibilityState {
-    val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type
-    val allVisibilities: ImmutableList<UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type>
-    val showVisibilityMenu: Boolean
+public interface VisibilityState {
+    public val visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type
+    public val allVisibilities: ImmutableList<UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type>
+    public val showVisibilityMenu: Boolean
 
-    fun showVisibilityMenu()
+    public fun showVisibilityMenu()
 
-    fun hideVisibilityMenu()
+    public fun hideVisibilityMenu()
 
-    fun setVisibility(value: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type)
+    public fun setVisibility(value: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type)
 }
 
 @Immutable
-sealed interface ComposeStatus {
-    val statusKey: MicroBlogKey
+public sealed interface ComposeStatus {
+    public val statusKey: MicroBlogKey
 
-    data class Quote(
+    public data class Quote(
         override val statusKey: MicroBlogKey,
     ) : ComposeStatus
 
-    open class Reply(
+    public open class Reply(
         override val statusKey: MicroBlogKey,
     ) : ComposeStatus
 
-    data class VVOComment(
+    public data class VVOComment(
         override val statusKey: MicroBlogKey,
         val rootId: String,
     ) : Reply(statusKey)
 }
 
 @Immutable
-abstract class ComposeState(
-    val account: UiState<UiAccount>,
-    val visibilityState: UiState<VisibilityState>,
-    val replyState: UiState<UiTimeline>?,
-    val initialTextState: UiState<InitialText>?,
-    val emojiState: UiState<ImmutableListWrapper<UiEmoji>>,
-    val composeConfig: UiState<ComposeConfig>,
-    val enableCrossPost: UiState<Boolean>,
-    val selectedAccounts: ImmutableList<UiAccount>,
-    val otherAccounts: UiState<ImmutableListWrapper<Pair<UiState<UiUserV2>, UiAccount>>>,
-    val selectedUsers: UiState<ImmutableListWrapper<Pair<UiState<UiUserV2>, UiAccount>>>,
+public abstract class ComposeState(
+    public val account: UiState<UiAccount>,
+    public val visibilityState: UiState<VisibilityState>,
+    public val replyState: UiState<UiTimeline>?,
+    public val initialTextState: UiState<InitialText>?,
+    public val emojiState: UiState<ImmutableListWrapper<UiEmoji>>,
+    public val composeConfig: UiState<ComposeConfig>,
+    public val enableCrossPost: UiState<Boolean>,
+    public val selectedAccounts: ImmutableList<UiAccount>,
+    public val otherAccounts: UiState<ImmutableListWrapper<Pair<UiState<UiUserV2>, UiAccount>>>,
+    public val selectedUsers: UiState<ImmutableListWrapper<Pair<UiState<UiUserV2>, UiAccount>>>,
 ) {
-    abstract fun send(data: ComposeData)
+    public abstract fun send(data: ComposeData)
 
-    abstract fun selectAccount(account: UiAccount)
+    public abstract fun selectAccount(account: UiAccount)
 }
 
 @Immutable
-data class InitialText internal constructor(
+public data class InitialText internal constructor(
     val text: String,
     val cursorPosition: Int,
 )

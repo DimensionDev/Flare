@@ -4,8 +4,8 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.http.Url
 
-object AppDeepLinkHelper {
-    fun parse(url: String): AppleRoute? {
+public object AppDeepLinkHelper {
+    public fun parse(url: String): AppleRoute? {
         val data = Url(url)
         return when (data.host) {
             "Callback" ->
@@ -149,29 +149,29 @@ object AppDeepLinkHelper {
     }
 }
 
-enum class RouteType {
+public enum class RouteType {
     Screen,
     Dialog,
     Sheet,
     FullScreen,
 }
 
-sealed class AppleRoute {
-    abstract val routeType: RouteType
+public sealed class AppleRoute {
+    public abstract val routeType: RouteType
 
-    sealed class Callback : AppleRoute() {
-        data object Mastodon : Callback() {
+    public sealed class Callback : AppleRoute() {
+        public data object Mastodon : Callback() {
             override val routeType: RouteType
                 get() = RouteType.Screen
         }
 
-        data object Misskey : Callback() {
+        public data object Misskey : Callback() {
             override val routeType: RouteType
                 get() = RouteType.Screen
         }
     }
 
-    data class Search(
+    public data class Search(
         val accountType: AccountType,
         val keyword: String,
     ) : AppleRoute() {
@@ -179,7 +179,7 @@ sealed class AppleRoute {
             get() = RouteType.Screen
     }
 
-    data class Profile(
+    public data class Profile(
         val accountType: AccountType,
         val userKey: MicroBlogKey,
     ) : AppleRoute() {
@@ -187,7 +187,7 @@ sealed class AppleRoute {
             get() = RouteType.Screen
     }
 
-    data class ProfileWithNameAndHost(
+    public data class ProfileWithNameAndHost(
         val accountType: AccountType,
         val userName: String,
         val host: String,
@@ -196,7 +196,7 @@ sealed class AppleRoute {
             get() = RouteType.Screen
     }
 
-    data class StatusDetail(
+    public data class StatusDetail(
         val accountType: AccountType,
         val statusKey: MicroBlogKey,
     ) : AppleRoute() {
@@ -204,15 +204,15 @@ sealed class AppleRoute {
             get() = RouteType.Screen
     }
 
-    sealed class Compose : AppleRoute() {
-        data class New(
+    public sealed class Compose : AppleRoute() {
+        public data class New(
             val accountType: AccountType,
         ) : Compose() {
             override val routeType: RouteType
                 get() = RouteType.Sheet
         }
 
-        data class Reply(
+        public data class Reply(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : Compose() {
@@ -220,7 +220,7 @@ sealed class AppleRoute {
                 get() = RouteType.Sheet
         }
 
-        data class Quote(
+        public data class Quote(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : Compose() {
@@ -229,15 +229,15 @@ sealed class AppleRoute {
         }
     }
 
-    data class RawImage(
+    public data class RawImage(
         val url: String,
     ) : AppleRoute() {
         override val routeType: RouteType
             get() = RouteType.FullScreen
     }
 
-    sealed class VVO : AppleRoute() {
-        data class StatusDetail(
+    public sealed class VVO : AppleRoute() {
+        public data class StatusDetail(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : VVO() {
@@ -245,7 +245,7 @@ sealed class AppleRoute {
                 get() = RouteType.Screen
         }
 
-        data class CommentDetail(
+        public data class CommentDetail(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : VVO() {
@@ -253,7 +253,7 @@ sealed class AppleRoute {
                 get() = RouteType.Screen
         }
 
-        data class ReplyToComment(
+        public data class ReplyToComment(
             val accountType: AccountType,
             val replyTo: MicroBlogKey,
             val rootId: String,
@@ -263,7 +263,7 @@ sealed class AppleRoute {
         }
     }
 
-    data class DeleteStatus(
+    public data class DeleteStatus(
         val accountType: AccountType,
         val statusKey: MicroBlogKey,
     ) : AppleRoute() {
@@ -271,8 +271,8 @@ sealed class AppleRoute {
             get() = RouteType.Dialog
     }
 
-    sealed class Bluesky : AppleRoute() {
-        data class ReportStatus(
+    public sealed class Bluesky : AppleRoute() {
+        public data class ReportStatus(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : Bluesky() {
@@ -281,8 +281,8 @@ sealed class AppleRoute {
         }
     }
 
-    sealed class Mastodon : AppleRoute() {
-        data class ReportStatus(
+    public sealed class Mastodon : AppleRoute() {
+        public data class ReportStatus(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
             val userKey: MicroBlogKey,
@@ -292,8 +292,8 @@ sealed class AppleRoute {
         }
     }
 
-    sealed class Misskey : AppleRoute() {
-        data class ReportStatus(
+    public sealed class Misskey : AppleRoute() {
+        public data class ReportStatus(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
             val userKey: MicroBlogKey,
@@ -302,7 +302,7 @@ sealed class AppleRoute {
                 get() = RouteType.Dialog
         }
 
-        data class AddReaction(
+        public data class AddReaction(
             val accountType: AccountType,
             val statusKey: MicroBlogKey,
         ) : Misskey() {
@@ -311,7 +311,7 @@ sealed class AppleRoute {
         }
     }
 
-    data class ProfileMedia(
+    public data class ProfileMedia(
         val accountType: AccountType,
         val userKey: MicroBlogKey,
     ) : AppleRoute() {
@@ -319,7 +319,7 @@ sealed class AppleRoute {
             get() = RouteType.Screen
     }
 
-    data class StatusMedia(
+    public data class StatusMedia(
         val accountType: AccountType,
         val statusKey: MicroBlogKey,
         val index: Int,

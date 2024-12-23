@@ -8,11 +8,11 @@ import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toLocalDateTime
 import java.time.LocalDateTime
 
-actual data class UiDateTime(
+public actual data class UiDateTime(
     val value: Instant,
 //    val value: LocalizedShortTime,
 ) {
-    val shortTime by lazy {
+    public val shortTime: LocalizedShortTime by lazy {
         val compareTo = Clock.System.now()
         val timeZone = TimeZone.currentSystemDefault()
         val time = value.toLocalDateTime(timeZone)
@@ -74,18 +74,18 @@ actual data class UiDateTime(
     }
 }
 
-actual fun Instant.toUi(): UiDateTime = UiDateTime(this)
+internal actual fun Instant.toUi(): UiDateTime = UiDateTime(this)
 
-sealed interface LocalizedShortTime {
-    data class String(
+public sealed interface LocalizedShortTime {
+    public data class String(
         val value: kotlin.String,
     ) : LocalizedShortTime
 
-    data class YearMonthDay(
+    public data class YearMonthDay(
         val localDateTime: LocalDateTime,
     ) : LocalizedShortTime
 
-    data class MonthDay(
+    public data class MonthDay(
         val localDateTime: LocalDateTime,
     ) : LocalizedShortTime
 }

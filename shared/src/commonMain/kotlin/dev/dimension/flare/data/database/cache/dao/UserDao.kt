@@ -11,7 +11,7 @@ import dev.dimension.flare.model.PlatformType
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface UserDao {
+internal interface UserDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(user: DbUser)
 

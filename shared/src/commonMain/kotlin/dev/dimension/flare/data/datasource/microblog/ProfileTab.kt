@@ -6,14 +6,14 @@ import dev.dimension.flare.ui.model.UiTimeline
 import kotlinx.coroutines.flow.Flow
 
 @Immutable
-sealed interface ProfileTab {
+public sealed interface ProfileTab {
     @Immutable
-    data class Timeline(
+    public data class Timeline internal constructor(
         val type: Type,
         val flow: Flow<PagingData<UiTimeline>>,
     ) : ProfileTab {
         @Immutable
-        enum class Type {
+        public enum class Type {
             Status,
             StatusWithReplies,
             Likes,
@@ -21,5 +21,5 @@ sealed interface ProfileTab {
     }
 
     @Immutable
-    data object Media : ProfileTab
+    public data object Media : ProfileTab
 }

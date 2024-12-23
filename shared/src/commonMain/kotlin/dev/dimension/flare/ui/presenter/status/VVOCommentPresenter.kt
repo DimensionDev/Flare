@@ -23,7 +23,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class VVOCommentPresenter(
+public class VVOCommentPresenter(
     private val accountType: AccountType,
     private val commentKey: MicroBlogKey,
 ) : PresenterBase<VVOCommentState>(),
@@ -64,9 +64,9 @@ class VVOCommentPresenter(
 }
 
 @Immutable
-interface VVOCommentState {
-    val root: UiState<UiTimeline>
-    val list: PagingState<UiTimeline>
+public interface VVOCommentState {
+    public val root: UiState<UiTimeline>
+    public val list: PagingState<UiTimeline>
 
-    suspend fun refresh()
+    public suspend fun refresh()
 }

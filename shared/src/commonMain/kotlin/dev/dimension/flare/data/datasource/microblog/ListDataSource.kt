@@ -55,13 +55,13 @@ internal interface ListDataSource {
     fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList>>
 }
 
-data class ListMetaData(
+public data class ListMetaData(
     val title: String,
     val description: String? = null,
     val avatar: FileItem? = null,
 )
 
-enum class ListMetaDataType {
+public enum class ListMetaDataType {
     TITLE,
     DESCRIPTION,
     AVATAR,

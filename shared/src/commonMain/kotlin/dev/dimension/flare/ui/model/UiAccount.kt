@@ -15,21 +15,21 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Immutable
-sealed interface UiAccount {
-    val accountKey: MicroBlogKey
-    val platformType: PlatformType
-    val credential: Credential
-    val dataSource: AuthenticatedMicroblogDataSource
+public sealed class UiAccount {
+    public abstract val accountKey: MicroBlogKey
+    public abstract val platformType: PlatformType
+    internal abstract val credential: Credential
+    internal abstract val dataSource: AuthenticatedMicroblogDataSource
 
     @Immutable
     @Serializable
-    sealed interface Credential
+    internal sealed interface Credential
 
     @Immutable
-    data class Mastodon(
+    internal data class Mastodon(
         override val credential: Credential,
         override val accountKey: MicroBlogKey,
-    ) : UiAccount {
+    ) : UiAccount() {
         override val platformType: PlatformType
             get() = PlatformType.Mastodon
 
@@ -47,10 +47,10 @@ sealed interface UiAccount {
     }
 
     @Immutable
-    data class Misskey(
+    internal data class Misskey(
         override val credential: Credential,
         override val accountKey: MicroBlogKey,
-    ) : UiAccount {
+    ) : UiAccount() {
         override val platformType: PlatformType
             get() = PlatformType.Misskey
 
@@ -68,10 +68,10 @@ sealed interface UiAccount {
     }
 
     @Immutable
-    data class Bluesky(
+    internal data class Bluesky(
         override val credential: Credential,
         override val accountKey: MicroBlogKey,
-    ) : UiAccount {
+    ) : UiAccount() {
         override val platformType: PlatformType
             get() = PlatformType.Bluesky
 
@@ -90,10 +90,10 @@ sealed interface UiAccount {
     }
 
     @Immutable
-    data class XQT(
+    internal data class XQT(
         override val accountKey: MicroBlogKey,
         override val credential: Credential,
-    ) : UiAccount {
+    ) : UiAccount() {
         override val platformType: PlatformType
             get() = PlatformType.xQt
 
@@ -110,10 +110,10 @@ sealed interface UiAccount {
     }
 
     @Immutable
-    data class VVo(
+    internal data class VVo(
         override val accountKey: MicroBlogKey,
         override val credential: Credential,
-    ) : UiAccount {
+    ) : UiAccount() {
         override val platformType: PlatformType
             get() = PlatformType.VVo
 
@@ -129,7 +129,7 @@ sealed interface UiAccount {
         }
     }
 
-    companion object {
+    internal companion object {
         fun DbAccount.toUi(): UiAccount =
             when (platform_type) {
                 PlatformType.Mastodon -> {

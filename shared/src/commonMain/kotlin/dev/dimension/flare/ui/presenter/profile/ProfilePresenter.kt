@@ -41,7 +41,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class ProfilePresenter(
+public class ProfilePresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey?,
 ) : PresenterBase<ProfileState>(),
@@ -220,50 +220,50 @@ class ProfilePresenter(
 }
 
 @Immutable
-abstract class ProfileState(
-    val userState: UiState<UiProfile>,
-    val listState: PagingState<UiTimeline>,
-    val mediaState: PagingState<ProfileMedia>,
-    val relationState: UiState<UiRelation>,
-    val isMe: UiState<Boolean>,
-    val actions: UiState<ImmutableListWrapper<ProfileAction>>,
-    val isGuestMode: Boolean,
-    val isListDataSource: UiState<Boolean>,
-    val myAccountKey: UiState<MicroBlogKey>,
-    val canSendMessage: UiState<Boolean>,
-    val tabs: UiState<ImmutableListWrapper<Tab>>,
+public abstract class ProfileState(
+    public val userState: UiState<UiProfile>,
+    public val listState: PagingState<UiTimeline>,
+    public val mediaState: PagingState<ProfileMedia>,
+    public val relationState: UiState<UiRelation>,
+    public val isMe: UiState<Boolean>,
+    public val actions: UiState<ImmutableListWrapper<ProfileAction>>,
+    public val isGuestMode: Boolean,
+    public val isListDataSource: UiState<Boolean>,
+    public val myAccountKey: UiState<MicroBlogKey>,
+    public val canSendMessage: UiState<Boolean>,
+    public val tabs: UiState<ImmutableListWrapper<Tab>>,
 ) {
-    abstract suspend fun refresh()
+    public abstract suspend fun refresh()
 
-    abstract fun follow(
+    public abstract fun follow(
         userKey: MicroBlogKey,
         data: UiRelation,
     )
 
-    abstract fun onProfileActionClick(
+    public abstract fun onProfileActionClick(
         userKey: MicroBlogKey,
         relation: UiRelation,
         action: ProfileAction,
     )
 
-    abstract fun report(userKey: MicroBlogKey)
+    public abstract fun report(userKey: MicroBlogKey)
 
     @Immutable
-    sealed interface Tab {
+    public sealed interface Tab {
         @Immutable
-        data class Timeline(
+        public data class Timeline internal constructor(
             val type: ProfileTab.Timeline.Type,
             val data: PagingState<UiTimeline>,
         ) : Tab
 
         @Immutable
-        data class Media(
+        public data class Media internal constructor(
             val data: PagingState<ProfileMedia>,
         ) : Tab
     }
 }
 
-class ProfileWithUserNameAndHostPresenter(
+public class ProfileWithUserNameAndHostPresenter(
     private val userName: String,
     private val host: String,
     private val accountType: AccountType,

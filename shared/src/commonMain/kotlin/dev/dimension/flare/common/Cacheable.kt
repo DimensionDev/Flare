@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.transform
 
-class Cacheable<T>(
+internal class Cacheable<T>(
     fetchSource: suspend () -> Unit,
     cacheSource: () -> Flow<T>,
 ) : CacheData<T>(
@@ -26,7 +26,7 @@ class Cacheable<T>(
     )
 
 @Suppress("UNCHECKED_CAST")
-class MemCacheable<T>(
+internal class MemCacheable<T>(
     private val key: String,
     fetchSource: suspend () -> T,
 ) : CacheData<T>(
@@ -64,7 +64,7 @@ class MemCacheable<T>(
     }
 }
 
-sealed class CacheData<T>(
+internal sealed class CacheData<T>(
     private val fetchSource: suspend () -> Unit,
     private val cacheSource: () -> Flow<T>,
 ) {
@@ -100,7 +100,7 @@ sealed class CacheData<T>(
     }
 }
 
-sealed class CacheState<T> {
+internal sealed class CacheState<T> {
     class Empty<T> : CacheState<T>()
 
     data class Success<T>(
@@ -109,7 +109,7 @@ sealed class CacheState<T> {
 }
 
 @Composable
-fun <T> CacheData<T>.collectAsState(): CacheableState<T> {
+internal fun <T> CacheData<T>.collectAsState(): CacheableState<T> {
     val state =
         remember(this) {
             CacheableState(this)
@@ -126,7 +126,7 @@ fun <T> CacheData<T>.collectAsState(): CacheableState<T> {
     return state
 }
 
-class CacheableState<T>(
+internal class CacheableState<T>(
     private val cacheData: CacheData<T>,
 ) {
     fun refresh() {

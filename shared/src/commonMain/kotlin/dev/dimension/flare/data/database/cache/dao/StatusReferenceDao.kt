@@ -8,7 +8,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.model.MicroBlogKey
 
 @Dao
-interface StatusReferenceDao {
+internal interface StatusReferenceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(items: List<DbStatusReference>)
 

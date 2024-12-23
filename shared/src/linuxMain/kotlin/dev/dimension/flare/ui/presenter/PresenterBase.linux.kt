@@ -8,10 +8,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.StateFlow
 
-actual abstract class PresenterBase<Model : Any> {
+public actual abstract class PresenterBase<Model : Any> {
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    actual val models: StateFlow<Model> by lazy {
+    public actual val models: StateFlow<Model> by lazy {
         scope.launchMolecule(mode = RecompositionMode.Immediate) {
             body()
         }

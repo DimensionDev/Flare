@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class MisskeyReportPresenter(
+public class MisskeyReportPresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey,
     private val statusKey: MicroBlogKey?,
@@ -44,6 +44,6 @@ class MisskeyReportPresenter(
 }
 
 @Immutable
-interface MisskeyReportState {
-    fun report()
+public interface MisskeyReportState {
+    public fun report()
 }

@@ -23,7 +23,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class ActiveAccountPresenter :
+public class ActiveAccountPresenter :
     PresenterBase<UserState>(),
     KoinComponent {
     private val accountRepository by inject<AccountRepository>()
@@ -66,6 +66,6 @@ class ActiveAccountPresenter :
 }
 
 @Immutable
-interface UserState {
-    val user: UiState<UiUserV2>
+public interface UserState {
+    public val user: UiState<UiUserV2>
 }

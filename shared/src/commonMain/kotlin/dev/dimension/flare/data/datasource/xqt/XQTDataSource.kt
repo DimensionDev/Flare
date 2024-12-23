@@ -82,7 +82,7 @@ private const val BULK_SIZE: Long = 512 * 1024L // 512 Kib
 private const val MAX_ASYNC_UPLOAD_SIZE = 10
 
 @OptIn(ExperimentalPagingApi::class)
-class XQTDataSource(
+internal class XQTDataSource(
     override val accountKey: MicroBlogKey,
     private val credential: UiAccount.XQT.Credential,
 ) : AuthenticatedMicroblogDataSource,

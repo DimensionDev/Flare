@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 
-class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
+public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     @Composable
     override fun body(): NodeInfoState {
@@ -59,7 +59,7 @@ class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
 
         val detectedPlatformType by remember(filterFlow) {
             filterFlow.flatMapLatest {
-                flow {
+                flow<UiState<PlatformType>> {
                     runCatching {
                         emit(UiState.Loading())
                         NodeInfoService.detectPlatformType(it)
@@ -87,10 +87,10 @@ class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
 }
 
 @Immutable
-interface NodeInfoState {
-    val instances: PagingState<UiInstance>
-    val detectedPlatformType: UiState<PlatformType>
-    val canNext: Boolean
+public interface NodeInfoState {
+    public val instances: PagingState<UiInstance>
+    public val detectedPlatformType: UiState<PlatformType>
+    public val canNext: Boolean
 
-    fun setFilter(value: String)
+    public fun setFilter(value: String)
 }

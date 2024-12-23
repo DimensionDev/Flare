@@ -7,5 +7,5 @@ xcassets:
         forceProvidesNamespaces: true
         publicAccess: true
         enumName: Asset
-        bundle: 'Bundle(identifier: "dev.dimension.flare")'
+        bundle: 'Bundle(identifier: "dev.dimension.flare")!'
       output: Generated/Sources/Assets.swift

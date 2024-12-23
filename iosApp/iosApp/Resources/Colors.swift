@@ -54,7 +54,7 @@ public enum Colors {
     
     public enum Background {
         public static let primary = UIColor(light: UIColor(red: 255/255, green: 255/255, blue: 255/255, alpha: 1.0),
-                                           dark: UIColor(red: 0/255, green: 0/255, blue: 0/255, alpha: 1.0))
+                                           dark: UIColor(red: 24/255, green: 26/255, blue: 32/255, alpha: 1.0))
         public static let secondary = UIColor(light: UIColor(red: 247/255, green: 249/255, blue: 249/255, alpha: 1.0),
                                              dark: UIColor(red: 22/255, green: 24/255, blue: 28/255, alpha: 1.0))
         public static let tertiary = UIColor(light: UIColor(red: 239/255, green: 243/255, blue: 244/255, alpha: 1.0),

@@ -61,6 +61,9 @@ struct HomeTimelineView: View {
                     tabSettingsStore: tabSettingsStore
                 )
             }
+            //appbar 背景色
+            .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)
+             .toolbarBackground(.visible, for: .navigationBar)
     }
 }
 
@@ -190,6 +193,7 @@ struct HomeContent: View {
             }
             .tabViewStyle(.automatic)
             .tabViewCustomization($tabViewCustomization)
+            .background(Colors.Background.swiftUIPrimary)
         }
         .sheet(isPresented: $showLogin) {
             ServiceSelectScreen(toHome: {

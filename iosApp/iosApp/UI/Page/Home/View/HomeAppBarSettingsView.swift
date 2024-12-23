@@ -57,7 +57,7 @@ struct TabItemRow: View {
         HStack {
             if !isPrimary {
                 Image(systemName: "line.3.horizontal")
-                    .foregroundColor(.gray)
+                    .foregroundColor(Color.textTertiary)
             }
             
             // 显示图标
@@ -65,25 +65,27 @@ struct TabItemRow: View {
             case .material(let iconName):
                 if let materialIcon = FLMaterialIcon(rawValue: iconName) {
                     materialIcon.icon
-                        .foregroundColor(.blue)
+                        .foregroundColor(Color.interactiveActive)
                 }
             case .mixed(let icons):
                 if let firstIcon = icons.first,
                    let materialIcon = FLMaterialIcon(rawValue: firstIcon) {
                     materialIcon.icon
-                        .foregroundColor(.blue)
+                        .foregroundColor(Color.interactiveActive)
                 }
             case .avatar:
                 Image(systemName: "person.circle")
-                    .foregroundColor(.blue)
+                    .foregroundColor(Color.interactiveActive)
             }
             
             // 显示标题
             switch tab.metaData.title {
             case .text(let title):
                 Text(title)
+                    .foregroundColor(Color.textPrimary)
             case .localized(let key):
                 Text(NSLocalizedString(key, comment: ""))
+                    .foregroundColor(Color.textPrimary)
             }
             
             Spacer()
@@ -94,7 +96,9 @@ struct TabItemRow: View {
                     get: { store.storeItems.contains(where: { $0.key == tab.key }) },
                     set: { _ in store.toggleTab(tab.key) }
                 ))
+                .tint(Color.interactiveActive)
             }
         }
+        // .background(Color.backgroundSecondary)
     }
 }

@@ -65,6 +65,17 @@ public enum Asset {
       public static let primary = ColorAsset(name: "Color/Colorful/primary")
       public static let purple = ColorAsset(name: "Color/Colorful/purple")
     }
+    public enum Function {
+      public static let error = ColorAsset(name: "Color/error")
+      public static let link = ColorAsset(name: "Color/link")
+      public static let success = ColorAsset(name: "Color/success")
+      public static let warning = ColorAsset(name: "Color/warning")
+    }
+    public enum Interactive {
+      public static let active = ColorAsset(name: "Color/active")
+      public static let disabled = ColorAsset(name: "Color/disabled")
+      public static let inactive = ColorAsset(name: "Color/inactive")
+    }
     public enum Line {
       public static let _01 = ColorAsset(name: "Color/Line/01")
       public static let _02 = ColorAsset(name: "Color/Line/02")
@@ -110,6 +121,10 @@ public enum Asset {
         public static let tertiary = ColorAsset(name: "Color/M3/Sys/tertiary")
       }
     }
+    public enum Navigation {
+      public static let divider = ColorAsset(name: "Color/divider")
+      public static let navbar = ColorAsset(name: "Color/navbar")
+    }
     public enum State {
       public static let active = ColorAsset(name: "Color/State/active")
       public static let deactive = ColorAsset(name: "Color/State/deactive")
@@ -126,7 +141,13 @@ public enum Asset {
       public static let secondary = ColorAsset(name: "Color/Sys/secondary")
       public static let surface = ColorAsset(name: "Color/Sys/surface")
     }
+    public enum Text {
+      public static let primary = ColorAsset(name: "Color/primary")
+      public static let secondary = ColorAsset(name: "Color/secondary")
+      public static let tertiary = ColorAsset(name: "Color/tertiary")
+    }
     public static let twitter = ColorAsset(name: "Color/Twitter")
+    public static let binance = ColorAsset(name: "Color/binance")
     public static let black = ColorAsset(name: "Color/black")
     public static let blackPure = ColorAsset(name: "Color/black.pure")
     public static let coinbase = ColorAsset(name: "Color/coinbase")
@@ -363,7 +384,7 @@ public final class ColorAsset {
   #if os(iOS) || os(tvOS)
   @available(iOS 11.0, tvOS 11.0, *)
   public func color(compatibleWith traitCollection: UITraitCollection) -> Color {
-    let bundle = Bundle(identifier: "dev.dimension.flare")
+    let bundle = Bundle(identifier: "dev.dimension.flare")!
     guard let color = Color(named: name, in: bundle, compatibleWith: traitCollection) else {
       fatalError("Unable to load color asset named \(name).")
     }
@@ -386,7 +407,7 @@ public final class ColorAsset {
 public extension ColorAsset.Color {
   @available(iOS 11.0, tvOS 11.0, watchOS 4.0, macOS 10.13, *)
   convenience init?(asset: ColorAsset) {
-    let bundle = Bundle(identifier: "dev.dimension.flare")
+    let bundle = Bundle(identifier: "dev.dimension.flare")!
     #if os(iOS) || os(tvOS)
     self.init(named: asset.name, in: bundle, compatibleWith: nil)
     #elseif os(macOS)
@@ -401,7 +422,7 @@ public extension ColorAsset.Color {
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
 public extension SwiftUI.Color {
   init(asset: ColorAsset) {
-    let bundle = Bundle(identifier: "dev.dimension.flare")
+    let bundle = Bundle(identifier: "dev.dimension.flare")!
     self.init(asset.name, bundle: bundle)
   }
 }
@@ -418,7 +439,7 @@ public struct ImageAsset {
 
   @available(iOS 8.0, tvOS 9.0, watchOS 2.0, macOS 10.7, *)
   public var image: Image {
-    let bundle = Bundle(identifier: "dev.dimension.flare")
+    let bundle = Bundle(identifier: "dev.dimension.flare")!
     #if os(iOS) || os(tvOS)
     let image = Image(named: name, in: bundle, compatibleWith: nil)
     #elseif os(macOS)
@@ -436,7 +457,7 @@ public struct ImageAsset {
   #if os(iOS) || os(tvOS)
   @available(iOS 8.0, tvOS 9.0, *)
   public func image(compatibleWith traitCollection: UITraitCollection) -> Image {
-    let bundle = Bundle(identifier: "dev.dimension.flare")
+    let bundle = Bundle(identifier: "dev.dimension.flare")!
     guard let result = Image(named: name, in: bundle, compatibleWith: traitCollection) else {
       fatalError("Unable to load image asset named \(name).")
     }
@@ -458,7 +479,7 @@ public extension ImageAsset.Image {
     message: "This initializer is unsafe on macOS, please use the ImageAsset.image property")
   convenience init?(asset: ImageAsset) {
     #if os(iOS) || os(tvOS)
-    let bundle = Bundle(identifier: "dev.dimension.flare")
+    let bundle = Bundle(identifier: "dev.dimension.flare")!
     self.init(named: asset.name, in: bundle, compatibleWith: nil)
     #elseif os(macOS)
     self.init(named: NSImage.Name(asset.name))
@@ -472,17 +493,17 @@ public extension ImageAsset.Image {
 @available(iOS 13.0, tvOS 13.0, watchOS 6.0, macOS 10.15, *)
 public extension SwiftUI.Image {
   init(asset: ImageAsset) {
-    let bundle = Bundle(identifier: "dev.dimension.flare")
+    let bundle = Bundle(identifier: "dev.dimension.flare")!
     self.init(asset.name, bundle: bundle)
   }
 
   init(asset: ImageAsset, label: Text) {
-    let bundle = Bundle(identifier: "dev.dimension.flare")
+    let bundle = Bundle(identifier: "dev.dimension.flare")!
     self.init(asset.name, bundle: bundle, label: label)
   }
 
   init(decorative asset: ImageAsset) {
-    let bundle = Bundle(identifier: "dev.dimension.flare")
+    let bundle = Bundle(identifier: "dev.dimension.flare")!
     self.init(decorative: asset.name, bundle: bundle)
   }
 }

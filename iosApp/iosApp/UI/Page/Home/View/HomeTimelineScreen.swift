@@ -12,9 +12,13 @@ struct TimelineScreen: View {
                         data: state.listState,
                         detailKey: nil
                     )
+                    // .listRowInsets(EdgeInsets())
+                    //首页列表背景色
+                    .listRowBackground(Colors.Background.swiftUIPrimary)
                 }
             }
             .listStyle(.plain)
+            .scrollContentBackground(.hidden)
             .refreshable {
                 try? await timelineStore.refresh()
             }

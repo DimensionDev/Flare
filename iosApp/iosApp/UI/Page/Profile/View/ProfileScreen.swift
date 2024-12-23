@@ -46,6 +46,7 @@ struct ProfileScreen: View {
                     }
                 }
             }
+            .background(Colors.Background.swiftUIPrimary)
         }
         #if os(iOS)
         .frame(width: 384)
@@ -66,6 +67,7 @@ struct ProfileScreen: View {
                     )
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets())
+                    .listRowBackground(Colors.Background.swiftUIPrimary)
                     .allowsHitTesting(true)
                     .zIndex(1)
                     .overlay(alignment: .top) {
@@ -86,12 +88,14 @@ struct ProfileScreen: View {
                         })
                         .buttonStyle(.borderless)
                         .listRowInsets(.none)
+                        .listRowBackground(Colors.Background.swiftUIPrimary)
                     }
                 }
                 StatusTimelineComponent(
                     data: state.listState,
                     detailKey: nil
                 )
+                .listRowBackground(Colors.Background.swiftUIPrimary)
             }
             .coordinateSpace(name: "scroll")
             .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
@@ -101,6 +105,8 @@ struct ProfileScreen: View {
                 try? await state.refresh()
             }
             .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .background(Colors.Background.swiftUIPrimary)
             .scrollDisabled(false)
             .scrollDismissesKeyboard(.immediately)
             .scrollIndicators(.hidden)
@@ -115,6 +121,8 @@ struct ProfileScreen: View {
                 LocalizedStringKey("loading")
             }
             ZStack {
+                Colors.Background.swiftUIPrimary.ignoresSafeArea()
+                
                 #if os(macOS)
                 HSplitView {
                     if horizontalSizeClass != .compact {
@@ -141,6 +149,8 @@ struct ProfileScreen: View {
                 view
                 #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
+                .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)
+                .toolbarBackground(.visible, for: .navigationBar)
                 #endif
                 .navigationTitle(title)
             })

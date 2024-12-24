@@ -1,7 +1,7 @@
 import SwiftUI
 import shared
 import JXPhotoBrowser
-import Kingfisher
+ import Kingfisher
 import UIKit
 import Photos
 

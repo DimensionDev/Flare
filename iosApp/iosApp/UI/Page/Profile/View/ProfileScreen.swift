@@ -7,6 +7,8 @@ struct ProfileScreen: View {
 
     //MicroBlogKey host+id
     let toProfileMedia: (MicroBlogKey) -> Void
+    let accountType: AccountType
+    let userKey: MicroBlogKey?
 
     //包含 user relationState， isme，listState - userTimeline，mediaState，canSendMessage
     @State private var presenter: ProfilePresenter
@@ -19,6 +21,8 @@ struct ProfileScreen: View {
 
      init(accountType: AccountType, userKey: MicroBlogKey?, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
         self.toProfileMedia = toProfileMedia
+        self.accountType = accountType
+        self.userKey = userKey
         presenter = .init(accountType: accountType, userKey: userKey)
      }
 
@@ -55,61 +59,68 @@ struct ProfileScreen: View {
 
     var profileListContent: some View {
         ObservePresenter(presenter: presenter) { state in
-            List {
-                if horizontalSizeClass == .compact {
-                    ProfileHeader(
-                        user: state.userState,
-                        relation: state.relationState,
-                        isMe: state.isMe,
-                        onFollowClick: { user, relation in
-                            state.follow(userKey: user.key, data: relation)
-                        }
-                    )
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Colors.Background.swiftUIPrimary)
-                    .allowsHitTesting(true)
-                    .zIndex(1)
-                    .overlay(alignment: .top) {
-                        GeometryReader { proxy in
-                            Color.clear.preference(
-                                key: ScrollOffsetPreferenceKey.self,
-                                value: proxy.frame(in: .named("scroll")).minY
+            GeometryReader { geometry in
+                VStack(spacing: 0) {
+                    if horizontalSizeClass == .compact {
+                        List {
+                            ProfileHeader(
+                                user: state.userState,
+                                relation: state.relationState,
+                                isMe: state.isMe,
+                                onFollowClick: { user, relation in
+                                    state.follow(userKey: user.key, data: relation)
+                                }
                             )
-                        }
-                        .frame(height: 0)
-                    }
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets())
+                            .listRowBackground(Colors.Background.swiftUIPrimary)
+                            .allowsHitTesting(true)
+                            .zIndex(1)
+                            .overlay(alignment: .top) {
+                                GeometryReader { proxy in
+                                    Color.clear.preference(
+                                        key: ScrollOffsetPreferenceKey.self,
+                                        value: proxy.frame(in: .named("scroll")).minY
+                                    )
+                                }
+                                .frame(height: 0)
+                            }
 
-                    if case .success(let userState) = onEnum(of: state.userState) {
-                        Button(action: {
-                            toProfileMedia(userState.data.key)
-                        }, label: {
-                            SmallProfileMediaPreviews(state: state.mediaState,appSetting: appSettings)
-                        })
-                        .buttonStyle(.borderless)
-                        .listRowInsets(.none)
-                        .listRowBackground(Colors.Background.swiftUIPrimary)
+//                            if case .success(let userState) = onEnum(of: state.userState) {
+//                                Button(action: {
+//                                    toProfileMedia(userState.data.key)
+//                                }, label: {
+//                                    SmallProfileMediaPreviews(state: state.mediaState,appSetting: appSettings)
+//                                })
+//                                .buttonStyle(.borderless)
+//                                .listRowInsets(.none)
+//                                .listRowBackground(Colors.Background.swiftUIPrimary)
+//                            }
+                        }
+                        .listStyle(.plain)
+                        .scrollContentBackground(.hidden)
                     }
+                    
+                    // TabView 部分
+                    ProfileTabView(
+                        tabs: state.tabs,
+                        appSettings: appSettings,
+                        listState: state.listState,
+                        refresh: { try? await state.refresh() },
+                        presenter: presenter,
+                        accountType: accountType,
+                        userKey: userKey
+                    )
+                    .frame(height: geometry.size.height * 0.5)
                 }
-                StatusTimelineComponent(
-                    data: state.listState,
-                    detailKey: nil
-                )
-                .listRowBackground(Colors.Background.swiftUIPrimary)
+                .coordinateSpace(name: "scroll")
+                .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
+                    // 如果需要，可以在这里处理滚动偏移量
+                }
+                .background(Colors.Background.swiftUIPrimary)
+                .scrollDismissesKeyboard(.immediately)
+                .scrollIndicators(.hidden)
             }
-            .coordinateSpace(name: "scroll")
-            .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-                // 如果需要，可以在这里处理滚动偏移量
-            }
-            .refreshable {
-                try? await state.refresh()
-            }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .background(Colors.Background.swiftUIPrimary)
-            .scrollDisabled(false)
-            .scrollDismissesKeyboard(.immediately)
-            .scrollIndicators(.hidden)
         }
     }
 

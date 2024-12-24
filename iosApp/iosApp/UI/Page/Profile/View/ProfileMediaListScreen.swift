@@ -39,7 +39,7 @@ struct ProfileMediaListScreen: View {
     @Environment(\.appSettings) private var appSettings
     @Environment(\.dismiss) private var dismiss
     
-    init(accountType: AccountType, userKey: MicroBlogKey) {
+    init(accountType: AccountType, userKey: MicroBlogKey?) {
         presenter = .init(accountType: accountType, userKey: userKey)
     }
 
@@ -59,7 +59,7 @@ struct ProfileMediaListScreen: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             )
         }
-        .navigationTitle("profile_tab_media")
+//        .navigationTitle("profile_tab_media")
     }
 
     private func showPhotoBrowser(media: UiMedia, images: [UiMedia], initialIndex: Int) {

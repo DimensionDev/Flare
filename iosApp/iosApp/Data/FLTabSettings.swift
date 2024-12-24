@@ -13,13 +13,13 @@ public struct FLTabSettings {
     public let items: [FLTabItem]
     public let secondaryItems: [FLTabItem]?
     public let homeTabs: [String: [FLTabItem]]
-    
+
     enum CodingKeys: String, CodingKey {
         case items
         case secondaryItems
         case homeTabs
     }
-    
+
     // MARK: - Factory Methods
     public static var `default`: FLTabSettings {
         FLTabSettings(
@@ -55,7 +55,7 @@ public struct FLTabSettings {
             homeTabs: [:]
         )
     }
-    
+
     public static var guest: FLTabSettings {
         FLTabSettings(
             items: [
@@ -82,7 +82,7 @@ public struct FLTabSettings {
             homeTabs: [:]
         )
     }
-    
+
     // MARK: - Platform Specific Factory Methods
     public static func defaultPrimary(user: UiUserV2) -> [FLTabItem] {
         switch user.platformType {
@@ -98,7 +98,7 @@ public struct FLTabSettings {
             return vvo(accountKey: user.key)
         }
     }
-    
+
     public static func defaultSecondary(user: UiUserV2) -> [FLTabItem] {
         switch user.platformType {
         case .mastodon:
@@ -113,7 +113,7 @@ public struct FLTabSettings {
             return defaultVVOSecondaryItems(accountKey: user.key)
         }
     }
-    
+
     // MARK: - Platform Specific Items
     private static func mastodon(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
@@ -147,7 +147,7 @@ public struct FLTabSettings {
             )
         ]
     }
-    
+
     private static func defaultMastodonSecondaryItems(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
             FLMastodonLocalTimelineTabItem(
@@ -187,7 +187,7 @@ public struct FLTabSettings {
             )
         ]
     }
-    
+
     // MARK: - Misskey Platform Items
     private static func misskey(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
@@ -222,7 +222,7 @@ public struct FLTabSettings {
             )
         ]
     }
-    
+
     private static func defaultMisskeySecondaryItems(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
             FLMisskeyLocalTimelineTabItem(
@@ -239,7 +239,7 @@ public struct FLTabSettings {
             )
         ]
     }
-    
+
     // MARK: - Bluesky Platform Items
     private static func bluesky(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
@@ -263,7 +263,7 @@ public struct FLTabSettings {
             )
         ]
     }
-    
+
     private static func defaultBlueskySecondaryItems(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
             FLAllListTabItem(
@@ -286,7 +286,7 @@ public struct FLTabSettings {
             )
         ]
     }
-    
+
     // MARK: - XQT (Twitter) Platform Items
     private static func xqt(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
@@ -318,7 +318,7 @@ public struct FLTabSettings {
             )
         ]
     }
-    
+
     private static func defaultXqtSecondaryItems(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
             FLXQTFeaturedTimelineTabItem(
@@ -335,7 +335,7 @@ public struct FLTabSettings {
             )
         ]
     }
-    
+
     // MARK: - VVO Platform Items
     private static func vvo(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
@@ -367,7 +367,7 @@ public struct FLTabSettings {
             )
         ]
     }
-    
+
     private static func defaultVVOSecondaryItems(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [] // VVO 没有次要标签项
     }
@@ -392,7 +392,7 @@ public enum FLMaterialIcon: String, Codable {
     case list = "List"
     case feeds = "Feeds"
     case messages = "Messages"
-    
+
     // TODO: 实现 SwiftUI Image 转换
     public var icon: Image {
         switch self {
@@ -440,7 +440,7 @@ public protocol FLTabItem {
     var metaData: FLTabMetaData { get }
     var account: AccountType { get }
     var key: String { get }
-    
+
     func update(metaData: FLTabMetaData) -> FLTabItem
 }
 
@@ -453,7 +453,7 @@ public protocol FLTimelineTabItem: FLTabItem {
 public struct FLTabMetaData /* : Codable */ {
     public let title: FLTitleType
     public let icon: FLIconType
-    
+
 //    enum CodingKeys: String, CodingKey {
 //        case title
 //        case icon
@@ -464,12 +464,12 @@ public struct FLTabMetaData /* : Codable */ {
 public enum FLTitleType /* : Codable */ {
     case text(String)
     case localized(String)
-    
+
 //    enum CodingKeys: String, CodingKey {
 //        case text
 //        case localized
 //    }
-//    
+//
 //    public func encode(to encoder: Encoder) throws {
 //        var container = encoder.container(keyedBy: CodingKeys.self)
 //        switch self {
@@ -479,7 +479,7 @@ public enum FLTitleType /* : Codable */ {
 //            try container.encode(value, forKey: .localized)
 //        }
 //    }
-//    
+//
 //    public init(from decoder: Decoder) throws {
 //        let container = try decoder.container(keyedBy: CodingKeys.self)
 //        if let value = try? container.decode(String.self, forKey: .text) {
@@ -501,13 +501,13 @@ public enum FLIconType /* : Codable */ {
     case avatar(userKey: MicroBlogKey)
     case material(String)
     case mixed([String])
-    
+
 //    enum CodingKeys: String, CodingKey {
 //        case avatar
 //        case material
 //        case mixed
 //    }
-//    
+//
 //    public func encode(to encoder: Encoder) throws {
 //        var container = encoder.container(keyedBy: CodingKeys.self)
 //        switch self {
@@ -520,7 +520,7 @@ public enum FLIconType /* : Codable */ {
 //            try container.encode(value, forKey: .mixed)
 //        }
 //    }
-//    
+//
 //    public init(from decoder: Decoder) throws {
 //        let container = try decoder.container(keyedBy: CodingKeys.self)
 //        if let _ = try? container.decode(Bool.self, forKey: .avatar) {
@@ -545,7 +545,7 @@ extension FLIconType {
     static func material(_ icon: FLMaterialIcon) -> FLIconType {
         .material(icon.rawValue)
     }
-    
+
     static func mixed(_ icon: FLMaterialIcon, userKey: FLMicroBlogKey) -> FLIconType {
         .mixed([icon.rawValue])
     }
@@ -556,7 +556,7 @@ public struct FLNotificationTabItem: FLTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "notification_\(account)" }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLNotificationTabItem(metaData: metaData, account: account)
     }
@@ -566,11 +566,11 @@ public struct FLHomeTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "home_\(account)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         HomeTimelinePresenter(accountType: account)
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLHomeTimelineTabItem(metaData: metaData, account: account)
     }
@@ -581,11 +581,11 @@ public struct FLListTimelineTabItem: FLTimelineTabItem {
     public let account: AccountType
     public let listKey: String
     public var key: String { "list_\(account)_\(listKey)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         ListTimelinePresenter(accountType: account, listId: listKey)
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLListTimelineTabItem(metaData: metaData, account: account, listKey: listKey)
     }
@@ -595,7 +595,7 @@ public struct FLAllListTabItem: FLTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "list_\(account)" }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLAllListTabItem(metaData: metaData, account: account)
     }
@@ -606,7 +606,7 @@ public struct FLProfileTabItem: FLTabItem {
     public let account: AccountType
     public let userKey: AccountType
     public var key: String { "profile_\(account)_\(userKey)" }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLProfileTabItem(metaData: metaData, account: account, userKey: userKey)
     }
@@ -616,7 +616,7 @@ public struct FLDiscoverTabItem: FLTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "discover_\(account)" }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLDiscoverTabItem(metaData: metaData, account: account)
     }
@@ -629,7 +629,7 @@ public struct FLSettingsTabItem: FLTabItem {
         fatalError("需要实现 AccountTypeActive.shared")
     }
     public var key: String { "settings" }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         self // Settings tab item is immutable
     }
@@ -639,7 +639,7 @@ public struct FLDirectMessageTabItem: FLTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "dm_\(account)" }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLDirectMessageTabItem(metaData: metaData, account: account)
     }
@@ -650,11 +650,11 @@ public struct FLMastodonLocalTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "local_\(account)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         MastodonLocalTimelinePresenter(accountType: account)
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLMastodonLocalTimelineTabItem(metaData: metaData, account: account)
     }
@@ -664,11 +664,11 @@ public struct FLMastodonPublicTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "public_\(account)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         MastodonPublicTimelinePresenter(accountType: account)
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLMastodonPublicTimelineTabItem(metaData: metaData, account: account)
     }
@@ -678,11 +678,11 @@ public struct FLMastodonBookmarkTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "bookmark_\(account)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         MastodonBookmarkTimelinePresenter(accountType: account)
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLMastodonBookmarkTimelineTabItem(metaData: metaData, account: account)
     }
@@ -692,11 +692,11 @@ public struct FLMastodonFavouriteTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "favourite_\(account)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         MastodonFavouriteTimelinePresenter(accountType: account)
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLMastodonFavouriteTimelineTabItem(metaData: metaData, account: account)
     }
@@ -707,11 +707,11 @@ public struct FLMisskeyLocalTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "local_\(account)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         MissKeyLocalTimelinePresenter(accountType: account)
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLMisskeyLocalTimelineTabItem(metaData: metaData, account: account)
     }
@@ -721,11 +721,11 @@ public struct FLMisskeyGlobalTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "global_\(account)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         MissKeyPublicTimelinePresenter(accountType: account)
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLMisskeyGlobalTimelineTabItem(metaData: metaData, account: account)
     }
@@ -736,11 +736,11 @@ public struct FLXQTFeaturedTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "featured_\(account)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         XQTFeaturedTimelinePresenter(accountType: account)
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLXQTFeaturedTimelineTabItem(metaData: metaData, account: account)
     }
@@ -750,11 +750,11 @@ public struct FLXQTBookmarkTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "bookmark_\(account)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         XQTBookmarkTimelinePresenter(accountType: account)
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLXQTBookmarkTimelineTabItem(metaData: metaData, account: account)
     }
@@ -765,7 +765,7 @@ public struct FLBlueskyFeedsTabItem: FLTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
     public var key: String { "feeds_\(account)" }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLBlueskyFeedsTabItem(metaData: metaData, account: account)
     }
@@ -776,11 +776,11 @@ public struct FLBlueskyFeedTabItem: FLTimelineTabItem {
     public let account: AccountType
     public let feedKey: String
     public var key: String { "feed_\(account)_\(feedKey)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         BlueskyFeedTimelinePresenter(accountType: account, uri: feedKey)
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLBlueskyFeedTabItem(metaData: metaData, account: account, feedKey: feedKey)
     }
@@ -801,7 +801,7 @@ public enum FLLocalizedKey: String {
     case list = "home_tab_list_title"
     case feeds = "home_tab_feeds_title"
     case directMessage = "dm_list_title"
-    
+
     public var localizedString: String {
         NSLocalizedString(self.rawValue, comment: "")
     }
@@ -818,7 +818,7 @@ public enum FLTabSettingsError: Error {
     case serializationError(String)
     case corruptionError(String)
     case storageError(String)
-    
+
     var localizedDescription: String {
         switch self {
         case .serializationError(let message):
@@ -835,29 +835,29 @@ public enum FLTabSettingsError: Error {
 public class FLTabSettingsStorage {
     private static let storageKeyPrefix = "fl_tab_settings_"
     private let userDefaults: UserDefaults
-    
+
     public init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
     }
-    
+
     // 存储启用的tab items
     public func saveEnabledItems(_ items: [String], for platformType: PlatformType, accountKey: MicroBlogKey) {
         let key = Self.storageKey(for: platformType, accountKey: accountKey)
         userDefaults.set(items, forKey: key)
     }
-    
+
     // 读取启用的tab items
     public func loadEnabledItems(for platformType: PlatformType, accountKey: MicroBlogKey) -> [String] {
         let key = Self.storageKey(for: platformType, accountKey: accountKey)
         return userDefaults.array(forKey: key) as? [String] ?? []
     }
-    
+
     // 清除特定平台和账号的设置
     public func clear(for platformType: PlatformType, accountKey: MicroBlogKey) {
         let key = Self.storageKey(for: platformType, accountKey: accountKey)
         userDefaults.removeObject(forKey: key)
     }
-    
+
     // 生成存储key
     private static func storageKey(for platformType: PlatformType, accountKey: MicroBlogKey) -> String {
         let platformString = platformType.name // 使用 PlatformType 的 name 属性
@@ -869,31 +869,31 @@ public class FLTabSettingsStorage {
 // MARK: - Tab Settings Manager
 public class FLTabSettingsManager {
     private let storage: FLTabSettingsStorage
-    
+
     public init(storage: FLTabSettingsStorage = FLTabSettingsStorage()) {
         self.storage = storage
     }
-    
+
     // 保存启用的items
     public func saveEnabledItems(_ items: [FLTabItem], for user: UiUserV2) {
         let itemKeys = items.map { $0.key }
         storage.saveEnabledItems(itemKeys, for: user.platformType, accountKey: user.key)
     }
-    
+
     // 获取启用的items，如果没有存储则返回nil
     public func getEnabledItems(for user: UiUserV2) -> [FLTabItem]? {
         let enabledKeys = storage.loadEnabledItems(for: user.platformType, accountKey: user.key)
         if enabledKeys.isEmpty {
             return nil
         }
-        
+
         // 从默认配置中找到对应的items
         let defaultItems = FLTabSettings.defaultSecondary(user: user)
         return enabledKeys.compactMap { key in
             defaultItems.first { $0.key == key }
         }
     }
-    
+
     // 重置为默认设置
     public func resetToDefault(for user: UiUserV2) {
         storage.clear(for: user.platformType, accountKey: user.key)
@@ -940,19 +940,19 @@ extension FLTabItem {
 //        private let key: String
 //        private let defaultValue: T
 //        private let storage: UserDefaults
-//        
+//
 //        public init(key: String, defaultValue: T, storage: UserDefaults = .standard) {
 //            self.key = key
 //            self.defaultValue = defaultValue
 //            self.storage = storage
 //        }
-//        
+//
 //        public var wrappedValue: T {
 //            get {
 //                guard let data = storage.data(forKey: key) else {
 //                    return defaultValue
 //                }
-//                
+//
 //                do {
 //                    return try JSONDecoder().decode(T.self, from: data)
 //                } catch {
@@ -978,11 +978,11 @@ extension FLTabItem {
 //            updateSettings(currentSettings)
 //        }
 //    }
-//    
+//
 //    public convenience init() {
 //        self.init(storage: FLTabSettingsStorage())
 //        self.currentSettings = getSettings()
-//        
+//
 //        #if canImport(Combine)
 //        settingsPublisher()
 //            .assign(to: &$currentSettings)
@@ -1023,7 +1023,7 @@ extension FLTimelineTabItem {
             )
         ]
     }
-    
+
     public static var guest: [FLTabItem] {
         [
             FLHomeTimelineTabItem(
@@ -1069,11 +1069,11 @@ extension FLHomeTimelineTabItem {
 //
 //public class FLDefaultTabSettingsSerializer: FLTabSettingsSerializer {
 //    public init() {}
-//    
+//
 //    public func serialize(_ settings: FLTabSettings) throws -> Data {
 //        try JSONEncoder().encode(settings)
 //    }
-//    
+//
 //    public func deserialize(_ data: Data) throws -> FLTabSettings {
 //        do {
 //            return try JSONDecoder().decode(FLTabSettings.self, from: data)
@@ -1081,7 +1081,7 @@ extension FLHomeTimelineTabItem {
 //            throw FLTabSettingsError.corruptionError("无法解析数据: \(error.localizedDescription)")
 //        }
 //    }
-//    
+//
 //    public var defaultValue: FLTabSettings {
 //        FLTabSettings(items: [], secondaryItems: nil, homeTabs: [:])
 //    }
@@ -1092,12 +1092,12 @@ extension FLHomeTimelineTabItem {
 //    private struct AssociatedKeys {
 //        static var serializer = UnsafeRawPointer(bitPattern: "fl_tab_settings_serializer".hashValue)!
 //    }
-//    
+//
 //    public convenience init(serializer: FLTabSettingsSerializer = FLDefaultTabSettingsSerializer()) {
 //        self.init()
 //        self.serializer = serializer
 //    }
-//    
+//
 //    private var serializer: FLTabSettingsSerializer {
 //        get {
 //            guard let value = objc_getAssociatedObject(self, AssociatedKeys.serializer) as? FLTabSettingsSerializer else {

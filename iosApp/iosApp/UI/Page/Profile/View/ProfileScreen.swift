@@ -4,34 +4,91 @@ import shared
 import SwiftUI
  
 struct ProfileScreen: View {
-
     //MicroBlogKey host+id
     let toProfileMedia: (MicroBlogKey) -> Void
     let accountType: AccountType
     let userKey: MicroBlogKey?
 
     //包含 user relationState， isme，listState - userTimeline，mediaState，canSendMessage
-    @State private var presenter: ProfilePresenter
+    @StateObject private var presenterWrapper: ProfilePresenterWrapper
+    @State private var selectedTab: Int = 0
 
     //横屏 竖屏
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    
     @Environment(\.appSettings) private var appSettings
 
-
-     init(accountType: AccountType, userKey: MicroBlogKey?, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
+    init(accountType: AccountType, userKey: MicroBlogKey?, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
         self.toProfileMedia = toProfileMedia
         self.accountType = accountType
         self.userKey = userKey
-        presenter = .init(accountType: accountType, userKey: userKey)
-     }
+        _presenterWrapper = StateObject(wrappedValue: ProfilePresenterWrapper(accountType: accountType, userKey: userKey))
+    }
 
-    var sideProfileHeader: some View {
-        ObservePresenter(presenter: presenter) { state in
-            ScrollView {
-                VStack {
-                    //header
-                    ProfileHeader(
+    var body: some View {
+        ObservePresenter(presenter: presenterWrapper.presenter) { state in
+            ProfileScreenContent(
+                state: state,
+                selectedTab: $selectedTab,
+                horizontalSizeClass: horizontalSizeClass,
+                appSettings: appSettings,
+                toProfileMedia: toProfileMedia,
+                accountType: accountType,
+                userKey: userKey,
+                presenter: presenterWrapper.presenter
+            )
+        }
+    }
+}
+
+// 使用 ObservableObject 包装 presenter 以确保其生命周期
+class ProfilePresenterWrapper: ObservableObject {
+    let presenter: ProfilePresenter
+    
+    init(accountType: AccountType, userKey: MicroBlogKey?) {
+        self.presenter = .init(accountType: accountType, userKey: userKey)
+    }
+}
+
+private struct ProfileScreenContent: View {
+    let state: ProfileState
+    @Binding var selectedTab: Int
+    let horizontalSizeClass: UserInterfaceSizeClass?
+    let appSettings: AppSettings
+    let toProfileMedia: (MicroBlogKey) -> Void
+    let accountType: AccountType
+    let userKey: MicroBlogKey?
+    let presenter: ProfilePresenter
+    
+    var title: LocalizedStringKey {
+        if case .success(let user) = onEnum(of: state.userState) {
+            LocalizedStringKey(user.data.name.markdown)
+        } else {
+            LocalizedStringKey("loading")
+        }
+    }
+    
+    var body: some View {
+        ZStack {
+            Colors.Background.swiftUIPrimary.ignoresSafeArea()
+            
+            if horizontalSizeClass != .compact {
+                // 宽屏布局
+                #if os(macOS)
+                HSplitView {
+                    sideProfileHeader
+                    profileContent
+                }
+                #else
+                HStack {
+                    sideProfileHeader
+                    profileContent
+                }
+                #endif
+            } else {
+                // 紧凑布局
+                PagingContainerView {
+                    // Header
+                    ProfileHeaderView(
                         user: state.userState,
                         relation: state.relationState,
                         isMe: state.isMe,
@@ -39,185 +96,190 @@ struct ProfileScreen: View {
                             state.follow(userKey: user.key, data: relation)
                         }
                     )
-                    //medias
-                    if case .success(let userState) = onEnum(of: state.userState) {
-                        Button(action: {
-                            toProfileMedia(userState.data.key)
-                        }, label: {
-                            LargeProfileImagePreviews(state: state.mediaState,appSetting: appSettings)
-                        })
-                        .buttonStyle(.borderless)
+                } pinnedView: {
+                    // Tab Bar
+                    if case .success(let tabs) = onEnum(of: state.tabs) {
+                        ProfileTabBarView(
+                            tabs: state.tabs,
+                            selectedTab: $selectedTab,
+                            onTabSelected: { index in
+                                withAnimation {
+                                    selectedTab = index
+                                }
+                            }
+                        )
+                    }
+                } content: {
+                    // Content
+                    if case .success(let tabs) = onEnum(of: state.tabs) {
+                        let sortedTabs = ProfileTabBarView.sortedTabs(tabs.data)
+                        ProfileContentView(
+                            tabs: sortedTabs,
+                            selectedTab: $selectedTab,
+                            refresh: { try? await state.refresh() },
+                            presenter: presenter,
+                            accountType: accountType,
+                            userKey: userKey
+                        )
+                    } else {
+                        List {
+                            StatusTimelineComponent(
+                                data: state.listState,
+                                detailKey: nil
+                            )
+                            .listRowBackground(Colors.Background.swiftUIPrimary)
+                        }
+                        .listStyle(.plain)
+                        .scrollContentBackground(.hidden)
+                        .refreshable {
+                            try? await state.refresh()
+                        }
                     }
                 }
             }
-            .background(Colors.Background.swiftUIPrimary)
         }
+        #if os(iOS)
+        .if(horizontalSizeClass == .compact, transform: { view in
+            view.ignoresSafeArea(edges: .top)
+        })
+        #endif
+        .if(horizontalSizeClass != .compact, transform: { view in
+            view
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            #endif
+            .navigationTitle(title)
+        })
+        .toolbar {
+            if case .success(let isMe) = onEnum(of: state.isMe), !isMe.data.boolValue {
+                Menu {
+                    if case .success(let user) = onEnum(of: state.userState) {
+                        if case .success(let relation) = onEnum(of: state.relationState),
+                           case .success(let actions) = onEnum(of: state.actions),
+                           actions.data.size > 0
+                        {
+                            ForEach(0..<actions.data.size, id: \.self) { index in
+                                let item = actions.data.get(index: index)
+                                Button(action: {
+                                    Task {
+                                        try? await item.invoke(userKey: user.data.key, relation: relation.data)
+                                    }
+                                }, label: {
+                                    let text = switch onEnum(of: item) {
+                                    case .block(let block): if block.relationState(relation: relation.data) {
+                                            String(localized: "unblock")
+                                        } else {
+                                            String(localized: "block")
+                                        }
+                                    case .mute(let mute): if mute.relationState(relation: relation.data) {
+                                            String(localized: "unmute")
+                                        } else {
+                                            String(localized: "mute")
+                                        }
+                                    }
+                                    let icon = switch onEnum(of: item) {
+                                    case .block(let block): if block.relationState(relation: relation.data) {
+                                            "xmark.circle"
+                                        } else {
+                                            "checkmark.circle"
+                                        }
+                                    case .mute(let mute): if mute.relationState(relation: relation.data) {
+                                            "speaker"
+                                        } else {
+                                            "speaker.slash"
+                                        }
+                                    }
+                                    Label(text, systemImage: icon)
+                                })
+                            }
+                        }
+                        Button(action: { state.report(userKey: user.data.key) }, label: {
+                            Label("report", systemImage: "exclamationmark.bubble")
+                        })
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var sideProfileHeader: some View {
+        ScrollView {
+            VStack {
+                //header
+                ProfileHeaderView(
+                    user: state.userState,
+                    relation: state.relationState,
+                    isMe: state.isMe,
+                    onFollowClick: { user, relation in
+                        state.follow(userKey: user.key, data: relation)
+                    }
+                )
+                //medias
+                if case .success(let userState) = onEnum(of: state.userState) {
+                    Button(action: {
+                        toProfileMedia(userState.data.key)
+                    }, label: {
+                        LargeProfileImagePreviews(state: state.mediaState, appSetting: appSettings)
+                    })
+                    .buttonStyle(.borderless)
+                }
+            }
+        }
+        .background(Colors.Background.swiftUIPrimary)
         #if os(iOS)
         .frame(width: 384)
         #endif
     }
-
-    var profileListContent: some View {
-        ObservePresenter(presenter: presenter) { state in
-            GeometryReader { geometry in
-                VStack(spacing: 0) {
-                    if horizontalSizeClass == .compact {
-                        List {
-                            ProfileHeader(
-                                user: state.userState,
-                                relation: state.relationState,
-                                isMe: state.isMe,
-                                onFollowClick: { user, relation in
-                                    state.follow(userKey: user.key, data: relation)
-                                }
-                            )
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets())
-                            .listRowBackground(Colors.Background.swiftUIPrimary)
-                            .allowsHitTesting(true)
-                            .zIndex(1)
-                            .overlay(alignment: .top) {
-                                GeometryReader { proxy in
-                                    Color.clear.preference(
-                                        key: ScrollOffsetPreferenceKey.self,
-                                        value: proxy.frame(in: .named("scroll")).minY
-                                    )
-                                }
-                                .frame(height: 0)
-                            }
-
-//                            if case .success(let userState) = onEnum(of: state.userState) {
-//                                Button(action: {
-//                                    toProfileMedia(userState.data.key)
-//                                }, label: {
-//                                    SmallProfileMediaPreviews(state: state.mediaState,appSetting: appSettings)
-//                                })
-//                                .buttonStyle(.borderless)
-//                                .listRowInsets(.none)
-//                                .listRowBackground(Colors.Background.swiftUIPrimary)
-//                            }
-                        }
-                        .listStyle(.plain)
-                        .scrollContentBackground(.hidden)
-                    }
-                    
-                    // TabView 部分
-                    ProfileTabView(
+    
+    @ViewBuilder
+    private var profileContent: some View {
+        GeometryReader { geometry in
+            VStack(spacing: 0) {
+                // TabView 部分
+                if case .success(let tabs) = onEnum(of: state.tabs) {
+                    let sortedTabs = ProfileTabBarView.sortedTabs(tabs.data)
+                    ProfileTabBarView(
                         tabs: state.tabs,
-                        appSettings: appSettings,
-                        listState: state.listState,
+                        selectedTab: $selectedTab,
+                        onTabSelected: { index in
+                            withAnimation {
+                                selectedTab = index
+                            }
+                        }
+                    )
+                    
+                    ProfileContentView(
+                        tabs: sortedTabs,
+                        selectedTab: $selectedTab,
                         refresh: { try? await state.refresh() },
                         presenter: presenter,
                         accountType: accountType,
                         userKey: userKey
                     )
                     .frame(height: geometry.size.height * 0.5)
-                }
-                .coordinateSpace(name: "scroll")
-                .onPreferenceChange(ScrollOffsetPreferenceKey.self) { value in
-                    // 如果需要，可以在这里处理滚动偏移量
-                }
-                .background(Colors.Background.swiftUIPrimary)
-                .scrollDismissesKeyboard(.immediately)
-                .scrollIndicators(.hidden)
-            }
-        }
-    }
-
-    var body: some View {
-        ObservePresenter(presenter: presenter) { state in
-            let title: LocalizedStringKey = if case .success(let user) = onEnum(of: state.userState) {
-                LocalizedStringKey(user.data.name.markdown)
-            } else {
-                LocalizedStringKey("loading")
-            }
-            ZStack {
-                Colors.Background.swiftUIPrimary.ignoresSafeArea()
-                
-                #if os(macOS)
-                HSplitView {
-                    if horizontalSizeClass != .compact {
-                        sideProfileHeader
+                } else {
+                    List {
+                        StatusTimelineComponent(
+                            data: state.listState,
+                            detailKey: nil
+                        )
+                        .listRowBackground(Colors.Background.swiftUIPrimary)
                     }
-                    profileListContent
-                }
-                #else
-                HStack {
-                    if horizontalSizeClass != .compact {
-                        sideProfileHeader
-                    }
-                    profileListContent
-                }
-                #endif
-            }
-            #if os(iOS)
-            .if(horizontalSizeClass == .compact, transform: { view in
-                view
-                    .ignoresSafeArea(edges: .top)
-            })
-            #endif
-            .if(horizontalSizeClass != .compact, transform: { view in
-                view
-                #if os(iOS)
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)
-                .toolbarBackground(.visible, for: .navigationBar)
-                #endif
-                .navigationTitle(title)
-            })
-            .toolbar {
-                if case .success(let isMe) = onEnum(of: state.isMe), !isMe.data.boolValue {
-                    Menu {
-                        if case .success(let user) = onEnum(of: state.userState) {
-                            if case .success(let relation) = onEnum(of: state.relationState),
-                               case .success(let actions) = onEnum(of: state.actions),
-                               actions.data.size > 0
-                            {
-                                ForEach(0..<actions.data.size, id: \.self) { index in
-                                    let item = actions.data.get(index: index)
-                                    Button(action: {
-                                        Task {
-                                            try? await item.invoke(userKey: user.data.key, relation: relation.data)
-                                        }
-                                    }, label: {
-                                        let text = switch onEnum(of: item) {
-                                        case .block(let block): if block.relationState(relation: relation.data) {
-                                                String(localized: "unblock")
-                                            } else {
-                                                String(localized: "block")
-                                            }
-                                        case .mute(let mute): if mute.relationState(relation: relation.data) {
-                                                String(localized: "unmute")
-                                            } else {
-                                                String(localized: "mute")
-                                            }
-                                        }
-                                        let icon = switch onEnum(of: item) {
-                                        case .block(let block): if block.relationState(relation: relation.data) {
-                                                "xmark.circle"
-                                            } else {
-                                                "checkmark.circle"
-                                            }
-                                        case .mute(let mute): if mute.relationState(relation: relation.data) {
-                                                "speaker"
-                                            } else {
-                                                "speaker.slash"
-                                            }
-                                        }
-                                        Label(text, systemImage: icon)
-                                    })
-                                }
-                            }
-                            Button(action: { state.report(userKey: user.data.key) }, label: {
-                                Label("report", systemImage: "exclamationmark.bubble")
-                            })
-                        }
-
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .refreshable {
+                        try? await state.refresh()
                     }
                 }
             }
+            .background(Colors.Background.swiftUIPrimary)
+            .scrollDismissesKeyboard(.immediately)
+            .scrollIndicators(.hidden)
         }
     }
 }
@@ -330,77 +392,77 @@ struct ProfileHeader: View {
     }
 }
 
-struct ProfileHeaderSuccess: View {
-    let user: UiProfile
-    let relation: UiState<UiRelation>
-    let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiRelation) -> Void
-    var body: some View {
-        CommonProfileHeader(user: user, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
-    }
-}
-
-struct MatrixView: View {
-    let followCount: String
-    let fansCount: String
-    var body: some View {
-        HStack {
-            Text(followCount)
-                .fontWeight(.bold)
-            Text("正在关注")
-                .foregroundColor(.secondary)
-                .font(.footnote)
-            Divider()
-            Text(fansCount)
-                .fontWeight(.bold)
-            Text("关注者")
-                .foregroundColor(.secondary)
-                .font(.footnote)
-        }
-        .font(.caption)
-    }
-}
+//struct ProfileHeaderSuccess: View {
+//    let user: UiProfile
+//    let relation: UiState<UiRelation>
+//    let isMe: UiState<KotlinBoolean>
+//    let onFollowClick: (UiRelation) -> Void
+//    var body: some View {
+//        CommonProfileHeader(user: user, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
+//    }
+//}
+//
+//struct MatrixView: View {
+//    let followCount: String
+//    let fansCount: String
+//    var body: some View {
+//        HStack {
+//            Text(followCount)
+//                .fontWeight(.bold)
+//            Text("正在关注")
+//                .foregroundColor(.secondary)
+//                .font(.footnote)
+//            Divider()
+//            Text(fansCount)
+//                .fontWeight(.bold)
+//            Text("关注者")
+//                .foregroundColor(.secondary)
+//                .font(.footnote)
+//        }
+//        .font(.caption)
+//    }
+//}
 
 // pawoo  的 一些个人 table Info List
-struct FieldsView: View {
-    let fields: [String: UiRichText]
-    var body: some View {
-        if fields.count > 0 {
-            VStack(alignment: .leading) {
-                let keys = fields.map {
-                    $0.key
-                }.sorted()  
-                ForEach(0..<keys.count, id: \.self) { index in
-                    let key = keys[index]
-                    Text(key)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                    Markdown(fields[key]?.markdown ?? "").markdownTextStyle(textStyle: {
-                        FontFamilyVariant(.normal)
-                        FontSize(.em(0.9))
-                        
-//                        LineSpacing(1.3)
-                        ForegroundColor(.primary)
-                    }).markdownInlineImageProvider(.emoji)
-                        .padding(.vertical, 4)
-                    if index != keys.count - 1 {
-                        Divider()
-                    }
-                }
-                .padding(.horizontal)
-            }
-            .padding(.vertical)
-            #if os(iOS)
-                .background(Color(UIColor.secondarySystemBackground))
-            #else
-                .background(Color(NSColor.windowBackgroundColor))
-            #endif
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-        } else {
-            EmptyView()
-        }
-    }
-}
+//struct FieldsView: View {
+//    let fields: [String: UiRichText]
+//    var body: some View {
+//        if fields.count > 0 {
+//            VStack(alignment: .leading) {
+//                let keys = fields.map {
+//                    $0.key
+//                }.sorted()  
+//                ForEach(0..<keys.count, id: \.self) { index in
+//                    let key = keys[index]
+//                    Text(key)
+//                        .font(.subheadline)
+//                        .foregroundColor(.secondary)
+//                    Markdown(fields[key]?.markdown ?? "").markdownTextStyle(textStyle: {
+//                        FontFamilyVariant(.normal)
+//                        FontSize(.em(0.9))
+//                        
+////                        LineSpacing(1.3)
+//                        ForegroundColor(.primary)
+//                    }).markdownInlineImageProvider(.emoji)
+//                        .padding(.vertical, 4)
+//                    if index != keys.count - 1 {
+//                        Divider()
+//                    }
+//                }
+//                .padding(.horizontal)
+//            }
+//            .padding(.vertical)
+//            #if os(iOS)
+//                .background(Color(UIColor.secondarySystemBackground))
+//            #else
+//                .background(Color(NSColor.windowBackgroundColor))
+//            #endif
+//                .clipShape(RoundedRectangle(cornerRadius: 8))
+//        } else {
+//            EmptyView()
+//        }
+//    }
+//}
 
 struct ScrollOffsetPreferenceKey: PreferenceKey {
     static var defaultValue: CGFloat = 0

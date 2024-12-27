@@ -36,6 +36,13 @@
 		6498BDEC2D15F1F500C52324 /* GoogleTranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6498BDE02D15F1F500C52324 /* GoogleTranslationService.swift */; };
 		6498BDED2D15F1F500C52324 /* AppleTranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6498BDDF2D15F1F500C52324 /* AppleTranslationService.swift */; };
 		64BA00252D1AD84D0053F205 /* JXPhotoBrowser in Frameworks */ = {isa = PBXBuildFile; productRef = 64BA00242D1AD84D0053F205 /* JXPhotoBrowser */; };
+		64BA00272D1AE0630053F205 /* ProfilePagingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA00262D1AE0630053F205 /* ProfilePagingView.swift */; };
+		64BA002F2D1AE1020053F205 /* JXPagingListContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA00282D1AE1020053F205 /* JXPagingListContainerView.swift */; };
+		64BA00302D1AE1020053F205 /* JXPagingListRefreshView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA00292D1AE1020053F205 /* JXPagingListRefreshView.swift */; };
+		64BA00312D1AE1020053F205 /* JXPagingSmoothView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA002B2D1AE1020053F205 /* JXPagingSmoothView.swift */; };
+		64BA00322D1AE1020053F205 /* JXPagingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA002C2D1AE1020053F205 /* JXPagingView.swift */; };
+		64BA00332D1AE1020053F205 /* JXRTLFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA002D2D1AE1020053F205 /* JXRTLFlowLayout.swift */; };
+		64BA00342D1AE1020053F205 /* JXPagingMainTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA002A2D1AE1020053F205 /* JXPagingMainTableView.swift */; };
 		64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */ = {isa = PBXBuildFile; productRef = 64BBDA712CFDD8420052E599 /* SwiftDate */; };
 		64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */; };
 		64CD6E712D1AA0C0004D61D0 /* ProfileTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CD6E702D1AA0C0004D61D0 /* ProfileTabView.swift */; };
@@ -134,6 +141,11 @@
 		64E877C92D0842AA003559B9 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877C82D0842AA003559B9 /* SwiftSoup */; };
 		64E877CC2D0842C5003559B9 /* Fuzi in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877CB2D0842C5003559B9 /* Fuzi */; };
 		64EB7DAB2D0C4C0400E41656 /* FLTabSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */; };
+		64F7F1862D1D30ED00EDB720 /* ProfileContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F7F1832D1D30ED00EDB720 /* ProfileContentView.swift */; };
+		64F7F1872D1D30ED00EDB720 /* ProfileTabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F7F1852D1D30ED00EDB720 /* ProfileTabBarView.swift */; };
+		64F7F1882D1D30ED00EDB720 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F7F1842D1D30ED00EDB720 /* ProfileHeaderView.swift */; };
+		64F7F1892D1D30ED00EDB720 /* PagingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F7F1812D1D30ED00EDB720 /* PagingContainerView.swift */; };
+		64FBF1512D1D3536006AAFD0 /* PagingListContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64FBF1502D1D3536006AAFD0 /* PagingListContainerView.swift */; };
 		B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */; };
 /* End PBXBuildFile section */
 
@@ -159,6 +171,13 @@
 		6498BDE32D15F1F500C52324 /* TranslateButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslateButton.swift; sourceTree = "<group>"; };
 		6498BDE42D15F1F500C52324 /* TranslationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationService.swift; sourceTree = "<group>"; };
 		6498BDE52D15F1F500C52324 /* TranslationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationViewModel.swift; sourceTree = "<group>"; };
+		64BA00262D1AE0630053F205 /* ProfilePagingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePagingView.swift; sourceTree = "<group>"; };
+		64BA00282D1AE1020053F205 /* JXPagingListContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingListContainerView.swift; sourceTree = "<group>"; };
+		64BA00292D1AE1020053F205 /* JXPagingListRefreshView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingListRefreshView.swift; sourceTree = "<group>"; };
+		64BA002A2D1AE1020053F205 /* JXPagingMainTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingMainTableView.swift; sourceTree = "<group>"; };
+		64BA002B2D1AE1020053F205 /* JXPagingSmoothView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingSmoothView.swift; sourceTree = "<group>"; };
+		64BA002C2D1AE1020053F205 /* JXPagingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingView.swift; sourceTree = "<group>"; };
+		64BA002D2D1AE1020053F205 /* JXRTLFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXRTLFlowLayout.swift; sourceTree = "<group>"; };
 		64C855FF2CFD7F260071DCD8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		64CD6E702D1AA0C0004D61D0 /* ProfileTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabView.swift; sourceTree = "<group>"; };
 		64E2087B2CF846DE001C64EF /* KotlinByteArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KotlinByteArray.swift; sourceTree = "<group>"; };
@@ -249,6 +268,11 @@
 		64E877C32D083DF6003559B9 /* FlareMarkdownText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareMarkdownText.swift; sourceTree = "<group>"; };
 		64E877C42D083DF6003559B9 /* TwitterTextProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterTextProvider.swift; sourceTree = "<group>"; };
 		64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLTabSettings.swift; sourceTree = "<group>"; };
+		64F7F1812D1D30ED00EDB720 /* PagingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingContainerView.swift; sourceTree = "<group>"; };
+		64F7F1832D1D30ED00EDB720 /* ProfileContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileContentView.swift; sourceTree = "<group>"; };
+		64F7F1842D1D30ED00EDB720 /* ProfileHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileHeaderView.swift; sourceTree = "<group>"; };
+		64F7F1852D1D30ED00EDB720 /* ProfileTabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabBarView.swift; sourceTree = "<group>"; };
+		64FBF1502D1D3536006AAFD0 /* PagingListContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingListContainerView.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* Flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
@@ -330,6 +354,26 @@
 			path = translate;
 			sourceTree = "<group>";
 		};
+		64AD20542D1D5074008C1070 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		64BA002E2D1AE1020053F205 /* JXPagingView */ = {
+			isa = PBXGroup;
+			children = (
+				64BA00282D1AE1020053F205 /* JXPagingListContainerView.swift */,
+				64BA00292D1AE1020053F205 /* JXPagingListRefreshView.swift */,
+				64BA002A2D1AE1020053F205 /* JXPagingMainTableView.swift */,
+				64BA002B2D1AE1020053F205 /* JXPagingSmoothView.swift */,
+				64BA002C2D1AE1020053F205 /* JXPagingView.swift */,
+				64BA002D2D1AE1020053F205 /* JXRTLFlowLayout.swift */,
+			);
+			path = JXPagingView;
+			sourceTree = "<group>";
+		};
 		64E2087D2CF846DE001C64EF /* Common */ = {
 			isa = PBXGroup;
 			children = (
@@ -359,6 +403,7 @@
 		64E876B72D0430C7003559B9 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				64BA002E2D1AE1020053F205 /* JXPagingView */,
 				641817732D12E7350046CEB0 /* OriginalImageMarkView.swift */,
 				641817742D12E7350046CEB0 /* ToastView.swift */,
 				64E876E12D0430C7003559B9 /* WaterfallList */,
@@ -616,6 +661,10 @@
 		64E877052D0430C7003559B9 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				64F7F1822D1D30ED00EDB720 /* PagingContainer */,
+				64F7F1832D1D30ED00EDB720 /* ProfileContentView.swift */,
+				64F7F1842D1D30ED00EDB720 /* ProfileHeaderView.swift */,
+				64F7F1852D1D30ED00EDB720 /* ProfileTabBarView.swift */,
 				64E877032D0430C7003559B9 /* User */,
 				64E877042D0430C7003559B9 /* UserAvatar.swift */,
 			);
@@ -639,6 +688,7 @@
 		64E8770B2D0430C7003559B9 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				64BA00262D1AE0630053F205 /* ProfilePagingView.swift */,
 				64CD6E702D1AA0C0004D61D0 /* ProfileTabView.swift */,
 				64E877082D0430C7003559B9 /* ProfileMediaListScreen.swift */,
 				64E877092D0430C7003559B9 /* ProfileScreen.swift */,
@@ -770,6 +820,7 @@
 		64E877282D0430C7003559B9 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				64AD20542D1D5074008C1070 /* Common */,
 				6406824F2D16C5D5009B6B1E /* Theme */,
 				64E877202D0430C7003559B9 /* Page */,
 				64E877222D0430C7003559B9 /* Navigation */,
@@ -802,6 +853,15 @@
 				64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */,
 			);
 			path = Data;
+			sourceTree = "<group>";
+		};
+		64F7F1822D1D30ED00EDB720 /* PagingContainer */ = {
+			isa = PBXGroup;
+			children = (
+				64FBF1502D1D3536006AAFD0 /* PagingListContainerView.swift */,
+				64F7F1812D1D30ED00EDB720 /* PagingContainerView.swift */,
+			);
+			path = PagingContainer;
 			sourceTree = "<group>";
 		};
 		7555FF72242A565900829871 = {
@@ -1064,6 +1124,10 @@
 				64E877292D0430C7003559B9 /* HomeAppBar.swift in Sources */,
 				64E8772A2D0430C7003559B9 /* UIImage+Extension.swift in Sources */,
 				64EB7DAB2D0C4C0400E41656 /* FLTabSettings.swift in Sources */,
+				64F7F1862D1D30ED00EDB720 /* ProfileContentView.swift in Sources */,
+				64F7F1872D1D30ED00EDB720 /* ProfileTabBarView.swift in Sources */,
+				64F7F1882D1D30ED00EDB720 /* ProfileHeaderView.swift in Sources */,
+				64F7F1892D1D30ED00EDB720 /* PagingContainerView.swift in Sources */,
 				64E8772B2D0430C7003559B9 /* ProfileScreen.swift in Sources */,
 				64E8772C2D0430C7003559B9 /* ServiceSelectScreen.swift in Sources */,
 				64E8772D2D0430C7003559B9 /* HomeContent.swift in Sources */,
@@ -1076,6 +1140,7 @@
 				64E877342D0430C7003559B9 /* UserComponent.swift in Sources */,
 				64E877352D0430C7003559B9 /* CommonProfileHeader.swift in Sources */,
 				64E877362D0430C7003559B9 /* XQTLoginScreen.swift in Sources */,
+				64FBF1512D1D3536006AAFD0 /* PagingListContainerView.swift in Sources */,
 				64E877372D0430C7003559B9 /* BookmarkScreen.swift in Sources */,
 				64E877382D0430C7003559B9 /* StatusDetailScreen.swift in Sources */,
 				64E877392D0430C7003559B9 /* DiscoverScreen.swift in Sources */,
@@ -1119,6 +1184,7 @@
 				64E877C62D083DF6003559B9 /* TwitterTextProvider.swift in Sources */,
 				64E8775B2D0430C7003559B9 /* ShareActivityProvider.swift in Sources */,
 				64E8775C2D0430C7003559B9 /* TabSettingsStore.swift in Sources */,
+				64BA00272D1AE0630053F205 /* ProfilePagingView.swift in Sources */,
 				64E8775D2D0430C7003559B9 /* UIImage.swift in Sources */,
 				64E8775E2D0430C7003559B9 /* MediaPreviewViewModel.swift in Sources */,
 				64E8775F2D0430C7003559B9 /* ProfileWithUserNameScreen.swift in Sources */,
@@ -1135,6 +1201,12 @@
 				64E877682D0430C7003559B9 /* AboutScreen.swift in Sources */,
 				64E877BA2D080DFB003559B9 /* FlareText.swift in Sources */,
 				64E877692D0430C7003559B9 /* SearchScreen.swift in Sources */,
+				64BA002F2D1AE1020053F205 /* JXPagingListContainerView.swift in Sources */,
+				64BA00302D1AE1020053F205 /* JXPagingListRefreshView.swift in Sources */,
+				64BA00312D1AE1020053F205 /* JXPagingSmoothView.swift in Sources */,
+				64BA00322D1AE1020053F205 /* JXPagingView.swift in Sources */,
+				64BA00332D1AE1020053F205 /* JXRTLFlowLayout.swift in Sources */,
+				64BA00342D1AE1020053F205 /* JXPagingMainTableView.swift in Sources */,
 				64E8776A2D0430C7003559B9 /* FullScreenImageViewer.swift in Sources */,
 				64E8776B2D0430C7003559B9 /* FlareTheme.swift in Sources */,
 				64E8776C2D0430C7003559B9 /* ColPosition.swift in Sources */,

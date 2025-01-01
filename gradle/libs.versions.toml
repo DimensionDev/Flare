@@ -101,6 +101,7 @@ kotlinx-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collectio
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-protobuf = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-protobuf", version.ref = "kotlinx-serialization" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-slf4j = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-slf4j", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-play-services = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-play-services", version.ref = "kotlinx-coroutines" }
@@ -175,6 +176,14 @@ compose-cupertino = { module = "io.github.alexzhirkevich:cupertino-core", versio
 
 xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.90.3" }
 
+fluent-ui = { module = "com.konyaco:fluent", version = "0.1.0-SNAPSHOT" }
+
+window-styler = { module = "com.mayakapps.compose:window-styler", version = "0.3.3-SNAPSHOT" }
+
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.17.0" }
+
+jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version = "3.6" }
+
 [bundles]
 compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3", "material3WindowSizeClass", "material3-adaptive-navigation-suite", "material3-adaptive", "material3-adaptive-navigation", "material3-adaptive-layout"]
 navigation = ["navigation-compose"]
@@ -195,6 +204,7 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlintPlugin" }

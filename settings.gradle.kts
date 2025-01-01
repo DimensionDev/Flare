@@ -25,4 +25,5 @@ if (enableLinux) {
 }
 include(":shared")
 include(":shared:ui")
+include(":desktopApp")
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

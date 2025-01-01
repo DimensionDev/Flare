@@ -1,0 +1,57 @@
+package dev.dimension.flare
+
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
+import com.jthemedetecor.OsThemeDetector
+import dev.dimension.flare.ui.theme.FlareTheme
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import java.util.function.Consumer
+
+private val detector = OsThemeDetector.getDetector()
+
+fun main() =
+    application {
+        val state =
+            rememberWindowState(
+                position = WindowPosition(Alignment.Center),
+                size = DpSize(1280.dp, 720.dp),
+            )
+        var isDarkTheme by remember {
+            mutableStateOf(detector.isDark)
+        }
+        val listener =
+            remember {
+                Consumer<Boolean> { isDark ->
+                    isDarkTheme = isDark
+                }
+            }
+        DisposableEffect(Unit) {
+            detector.registerListener(listener)
+            onDispose {
+                detector.removeListener(listener)
+            }
+        }
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = stringResource(Res.string.app_name),
+            icon = painterResource(Res.drawable.flare_logo),
+            state = state,
+        ) {
+            FlareTheme(
+                isDarkTheme = isDarkTheme,
+            ) {
+                FlareApp()
+            }
+        }
+    }

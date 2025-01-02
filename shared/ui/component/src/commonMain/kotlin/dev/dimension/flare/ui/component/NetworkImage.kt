@@ -25,10 +25,9 @@ import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.size.Size
-import io.github.fornewid.placeholder.material3.placeholder
 
 @Composable
-fun NetworkImage(
+public fun NetworkImage(
     model: Any?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
@@ -72,7 +71,7 @@ fun NetworkImage(
 }
 
 @Composable
-internal fun EmojiImage(
+public fun EmojiImage(
     uri: String,
     modifier: Modifier = Modifier,
 ) {

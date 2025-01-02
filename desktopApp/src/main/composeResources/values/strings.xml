@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name" translatable="false">Flare</string>
+
+    <string name="home_compose">Compose</string>
+    <string name="home_login">Login</string>
+    <string name="home_settings">Settings</string>
+
+    <string name="home_timeline">Home</string>
+    <string name="home_discover">Discover</string>
+
 </resources>

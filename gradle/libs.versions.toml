@@ -156,6 +156,7 @@ compose-webview = { group = "io.github.kevinnzou", name = "compose-webview", ver
 compose-webview-multiplatform = { group = "io.github.kevinnzou", name = "compose-webview-multiplatform", version = "1.9.40" }
 
 compose-placeholder-material3 = { group = "io.github.fornewid", name = "placeholder-material3", version = "2.0.0" }
+compose-placeholder-foundation = { group = "io.github.fornewid", name = "placeholder-foundation", version = "2.0.0" }
 
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
@@ -168,7 +169,7 @@ firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-cra
 
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.1.2" }
-material-motion-compose = { module = "io.github.fornewid:material-motion-compose-core", version = "1.2.1" }
+material-motion-compose = { module = "io.github.fornewid:material-motion-compose-core", version = "2.0.1" }
 
 precompose-molecule = { module = "moe.tlaster:precompose-molecule", version = "1.7.0-alpha03" }
 
@@ -183,6 +184,8 @@ window-styler = { module = "com.mayakapps.compose:window-styler", version = "0.3
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.17.0" }
 
 jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version = "3.6" }
+
+jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.8.0-alpha10" }
 
 [bundles]
 compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3", "material3WindowSizeClass", "material3-adaptive-navigation-suite", "material3-adaptive", "material3-adaptive-navigation", "material3-adaptive-layout"]

@@ -25,170 +25,130 @@ public extension FLTabSettings {
     }
     
     // 获取 Profile 的默认三个 tab
-    static func defaultThree(user: UiUserV2, accountKey: MicroBlogKey) -> [FLTabItem] {
+    static func defaultThree(user: UiUserV2) -> [FLTabItem] {
         switch user.platformType {
         case .mastodon:
             return [
-                FLProfileTimelineTabItem(
+                FLProfileMastodonTimelineTabItem(
                     metaData: FLTabMetaData(
                         title: .localized(.profileTimeline),
-                        icon: .mixed(.profile, userKey: accountKey)
+                        icon: .mixed(.profile, userKey: user.key)
                     ),
-                    account: AccountTypeSpecific(accountKey: accountKey),
+                    account: AccountTypeSpecific(accountKey: user.key),
                     userKey: user.key,
                     type: .status
                 ),
-                FLProfileTimelineTabItem(
+                FLProfileMastodonTimelineTabItem(
                     metaData: FLTabMetaData(
                         title: .localized(.profileTimelineWithReply),
-                        icon: .mixed(.profile, userKey: accountKey)
+                        icon: .mixed(.profile, userKey: user.key)
                     ),
-                    account: AccountTypeSpecific(accountKey: accountKey),
+                    account: AccountTypeSpecific(accountKey: user.key),
                     userKey: user.key,
                     type: .statusWithReplies
-                ),
-//                FLProfileMediaTabItem(
-//                    metaData: FLTabMetaData(
-//                        title: .localized(.profileMedia),
-//                        icon: .mixed(.media, userKey: accountKey)
-//                    ),
-//                    account: AccountTypeSpecific(accountKey: accountKey),
-//                    userKey: user.key
-//                )
+                )
             ]
         case .misskey:
             return [
-                FLProfileTimelineTabItem(
+                FLProfileMisskeyTimelineTabItem(
                     metaData: FLTabMetaData(
                         title: .localized(.profileTimeline),
-                        icon: .mixed(.profile, userKey: accountKey)
+                        icon: .mixed(.profile, userKey: user.key)
                     ),
-                    account: AccountTypeSpecific(accountKey: accountKey),
+                    account: AccountTypeSpecific(accountKey: user.key),
                     userKey: user.key,
                     type: .status
                 ),
-                FLProfileTimelineTabItem(
+                FLProfileMisskeyTimelineTabItem(
                     metaData: FLTabMetaData(
                         title: .localized(.profileTimelineWithReply),
-                        icon: .mixed(.profile, userKey: accountKey)
+                        icon: .mixed(.profile, userKey: user.key)
                     ),
-                    account: AccountTypeSpecific(accountKey: accountKey),
+                    account: AccountTypeSpecific(accountKey: user.key),
                     userKey: user.key,
                     type: .statusWithReplies
-                ),
-//                FLProfileMediaTabItem(
-//                    metaData: FLTabMetaData(
-//                        title: .localized(.profileMedia),
-//                        icon: .mixed(.media, userKey: accountKey)
-//                    ),
-//                    account: AccountTypeSpecific(accountKey: accountKey),
-//                    userKey: user.key
-//                )
+                )
             ]
         case .bluesky:
             return [
-                FLProfileTimelineTabItem(
+                FLProfileBlueskyTimelineTabItem(
                     metaData: FLTabMetaData(
                         title: .localized(.profileTimeline),
-                        icon: .mixed(.profile, userKey: accountKey)
+                        icon: .mixed(.profile, userKey: user.key)
                     ),
-                    account: AccountTypeSpecific(accountKey: accountKey),
+                    account: AccountTypeSpecific(accountKey: user.key),
                     userKey: user.key,
                     type: .status
                 ),
-                FLProfileTimelineTabItem(
+                FLProfileBlueskyTimelineTabItem(
                     metaData: FLTabMetaData(
                         title: .localized(.profileTimelineWithReply),
-                        icon: .mixed(.profile, userKey: accountKey)
+                        icon: .mixed(.profile, userKey: user.key)
                     ),
-                    account: AccountTypeSpecific(accountKey: accountKey),
+                    account: AccountTypeSpecific(accountKey: user.key),
                     userKey: user.key,
                     type: .statusWithReplies
                 ),
-//                FLProfileMediaTabItem(
-//                    metaData: FLTabMetaData(
-//                        title: .localized(.profileMedia),
-//                        icon: .mixed(.media, userKey: accountKey)
-//                    ),
-//                    account: AccountTypeSpecific(accountKey: accountKey),
-//                    userKey: user.key
-//                ),
-                FLProfileTimelineTabItem(
+                FLProfileBlueskyTimelineTabItem(
                     metaData: FLTabMetaData(
                         title: .localized(.profileLikes),
-                        icon: .mixed(.heart, userKey: accountKey)
+                        icon: .mixed(.heart, userKey: user.key)
                     ),
-                    account: AccountTypeSpecific(accountKey: accountKey),
+                    account: AccountTypeSpecific(accountKey: user.key),
                     userKey: user.key,
                     type: .likes
                 )
             ]
         case .xQt:
             return [
-                FLProfileTimelineTabItem(
+                FLProfileXQTTimelineTabItem(
                     metaData: FLTabMetaData(
                         title: .localized(.profileTimeline),
-                        icon: .mixed(.profile, userKey: accountKey)
+                        icon: .mixed(.profile, userKey: user.key)
                     ),
-                    account: AccountTypeSpecific(accountKey: accountKey),
+                    account: AccountTypeSpecific(accountKey: user.key),
                     userKey: user.key,
                     type: .status
                 ),
-                FLProfileTimelineTabItem(
+                FLProfileXQTTimelineTabItem(
                     metaData: FLTabMetaData(
                         title: .localized(.profileTimelineWithReply),
-                        icon: .mixed(.profile, userKey: accountKey)
+                        icon: .mixed(.profile, userKey: user.key)
                     ),
-                    account: AccountTypeSpecific(accountKey: accountKey),
+                    account: AccountTypeSpecific(accountKey: user.key),
                     userKey: user.key,
                     type: .statusWithReplies
                 ),
-//                FLProfileMediaTabItem(
-//                    metaData: FLTabMetaData(
-//                        title: .localized(.profileMedia),
-//                        icon: .mixed(.media, userKey: accountKey)
-//                    ),
-//                    account: AccountTypeSpecific(accountKey: accountKey),
-//                    userKey: user.key
-//                ),
-                FLProfileTimelineTabItem(
+                FLProfileXQTTimelineTabItem(
                     metaData: FLTabMetaData(
                         title: .localized(.profileLikes),
-                        icon: .mixed(.heart, userKey: accountKey)
+                        icon: .mixed(.heart, userKey: user.key)
                     ),
-                    account: AccountTypeSpecific(accountKey: accountKey),
+                    account: AccountTypeSpecific(accountKey: user.key),
                     userKey: user.key,
                     type: .likes
                 )
             ]
         case .vvo:
             return [
-                FLProfileTimelineTabItem(
-                    metaData: FLTabMetaData(
-                        title: .localized(.profileTimeline),
-                        icon: .mixed(.profile, userKey: accountKey)
-                    ),
-                    account: AccountTypeSpecific(accountKey: accountKey),
-                    userKey: user.key,
-                    type: .status
-                ),
-                FLProfileTimelineTabItem(
-                    metaData: FLTabMetaData(
-                        title: .localized(.profileTimelineWithReply),
-                        icon: .mixed(.profile, userKey: accountKey)
-                    ),
-                    account: AccountTypeSpecific(accountKey: accountKey),
-                    userKey: user.key,
-                    type: .statusWithReplies
-                ),
-//                FLProfileMediaTabItem(
-//                    metaData: FLTabMetaData(
-//                        title: .localized(.profileMedia),
-//                        icon: .mixed(.media, userKey: accountKey)
-//                    ),
-//                    account: AccountTypeSpecific(accountKey: accountKey),
-//                    userKey: user.key
-//                )
+                // FLProfileTimelineTabItem(
+                //     metaData: FLTabMetaData(
+                //         title: .localized(.profileTimeline),
+                //         icon: .mixed(.profile, userKey: accountKey)
+                //     ),
+                //     account: AccountTypeSpecific(accountKey: accountKey),
+                //     userKey: user.key,
+                //     type: .status
+                // ),
+                // FLProfileTimelineTabItem(
+                //     metaData: FLTabMetaData(
+                //         title: .localized(.profileTimelineWithReply),
+                //         icon: .mixed(.profile, userKey: accountKey)
+                //     ),
+                //     account: AccountTypeSpecific(accountKey: accountKey),
+                //     userKey: user.key,
+                //     type: .statusWithReplies
+                // )
             ]
         default:
             return []
@@ -197,24 +157,39 @@ public extension FLTabSettings {
 }
 
 // MARK: - Profile Tab Items
-public struct FLProfileTimelineTabItem: FLTabItem {
-    public let metaData: FLTabMetaData
-    public let account: AccountType
-    public let userKey: MicroBlogKey
-    public let type: FLTabSettings.FLProfileTabType.TimelineType
-    public var key: String { "profile_timeline_\(account)_\(type)" }
+// public struct FLProfileTimelineTabItem: FLTimelineTabItem {
+//     public let metaData: FLTabMetaData
+//     public let account: AccountType
+//     public let userKey: MicroBlogKey
+//     public let type: FLTabSettings.FLProfileTabType.TimelineType
+//     public var key: String { "profile_timeline_\(account)_\(type)" }
     
-    public init(metaData: FLTabMetaData, account: AccountTypeSpecific, userKey: MicroBlogKey, type: FLTabSettings.FLProfileTabType.TimelineType) {
-        self.metaData = metaData
-        self.account = account
-        self.userKey = userKey
-        self.type = type
-    }
+//     public init(metaData: FLTabMetaData, account: AccountTypeSpecific, userKey: MicroBlogKey, type: FLTabSettings.FLProfileTabType.TimelineType) {
+//         self.metaData = metaData
+//         self.account = account
+//         self.userKey = userKey
+//         self.type = type
+//     }
     
-    public func update(metaData: FLTabMetaData) -> FLTabItem {
-        FLProfileTimelineTabItem(metaData: metaData, account: account as! AccountTypeSpecific, userKey: userKey, type: type)
-    }
-}
+//     public func update(metaData: FLTabMetaData) -> FLTabItem {
+//         FLProfileTimelineTabItem(metaData: metaData, account: account as! AccountTypeSpecific, userKey: userKey, type: type)
+//     }
+
+//     public func createPresenter() -> TimelinePresenter {
+//         switch (account as! AccountTypeSpecific).accountKey.host {
+//         case "bsky.social":
+//             return BlueskyUserTimelinePresenter(accountType: account, userKey: userKey, type: type.toProfileTabType())
+//         case _ where (account as! AccountTypeSpecific).accountKey.host.contains("mastodon"):
+//             return MastodonUserTimelinePresenter(accountType: account, userKey: userKey, type: type.toProfileTabType())
+//         case _ where (account as! AccountTypeSpecific).accountKey.host.contains("misskey"):
+//             return MisskeyUserTimelinePresenter(accountType: account, userKey: userKey, type: type.toProfileTabType())
+//         case "twitter.com":
+//             return XQTUserTimelinePresenter(accountType: account, userKey: userKey, type: type.toProfileTabType())
+//         default:
+//             fatalError("Unsupported account type")
+//         }
+//     }
+// }
 
 //public struct FLProfileMediaTabItem: FLTabItem {
 //    public let metaData: FLTabMetaData

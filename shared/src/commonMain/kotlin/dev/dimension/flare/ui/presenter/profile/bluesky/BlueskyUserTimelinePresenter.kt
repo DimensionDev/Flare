@@ -37,28 +37,28 @@ class BlueskyUserTimelinePresenter(
                 remember(service, userKey, type) {
                     when (type) {
                         ProfileTab.Timeline.Type.Status -> {
-                            service.userTimeline(
+                            service.profileTabs(
                                 userKey = actualUserKey,
                                 scope = scope,
-                                mediaOnly = false,
-                                pagingKey = "user_timeline_${actualUserKey}_status"
-                            )
+                            ).filterIsInstance<ProfileTab.Timeline>()
+                             .first { it.type == type }
+                             .flow
                         }
                         ProfileTab.Timeline.Type.StatusWithReplies -> {
-                            service.userTimeline(
+                            service.profileTabs(
                                 userKey = actualUserKey,
                                 scope = scope,
-                                mediaOnly = false,
-                                pagingKey = "user_timeline_${actualUserKey}_replies"
-                            )
+                            ).filterIsInstance<ProfileTab.Timeline>()
+                             .first { it.type == type }
+                             .flow
                         }
                         ProfileTab.Timeline.Type.Likes -> {
-                            service.userTimeline(
+                            service.profileTabs(
                                 userKey = actualUserKey,
                                 scope = scope,
-                                mediaOnly = false,
-                                pagingKey = "user_timeline_${actualUserKey}_likes"
-                            )
+                            ).filterIsInstance<ProfileTab.Timeline>()
+                             .first { it.type == type }
+                             .flow
                         }
                     }
                 }.collectAsLazyPagingItems()

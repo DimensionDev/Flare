@@ -2,80 +2,63 @@ import SwiftUI
 import shared
 
 struct ProfileContentView: View {
-    let tabs: [ProfileStateTab]
+    let tabs: [FLTabItem]
     @Binding var selectedTab: Int
-    let refresh: () async throws -> Void
-    let presenter: ProfilePresenter
+    let refresh: () async -> Void
     let accountType: AccountType
     let userKey: MicroBlogKey?
-    let tabStore: ProfileTabStore
-    
-    private func handleTabSelection(_ tab: ProfileStateTab) {
-        tabStore.updateCurrentPresenter(for: tab)
-    }
-    
-    @ViewBuilder
-    func tabContent(for tab: ProfileStateTab) -> some View {
-        switch onEnum(of: tab) {
-        case .timeline(let timeline):
-            TimelineTabContent(
-                timeline: timeline,
-                refresh: refresh,
-                tabStore: tabStore,
-                tab: tab
-            )
-        case .media(let media):
-            ProfileMediaListScreen(
-                accountType: accountType,
-                userKey: userKey
-            )
-        }
-    }
+    let tabStore: ProfileTabSettingStore
     
     var body: some View {
-        GeometryReader { geometry in
-            TabView(selection: $selectedTab) {
-                ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
-                    tabContent(for: tab)
-                        .tag(index)
-                        .onChange(of: selectedTab) { newValue in
-                            if newValue == index {
-                                handleTabSelection(tab)
-                            }
-                        }
+        TabView(selection: $selectedTab) {
+            ForEach(Array(tabs.enumerated()), id: \.element.key) { index, tab in
+                if let timelineTab = tab as? FLTimelineTabItem,
+                   let presenter = tabStore.getOrCreatePresenter(for: tab) {
+                    TimelineView(
+                        presenter: presenter,
+                        refresh: refresh
+                    )
+                    .tag(index)
                 }
             }
-            .frame(height: geometry.size.height)
-            .tabViewStyle(.page(indexDisplayMode: .never))
         }
+        .onChange(of: selectedTab) { newIndex in
+            if newIndex < tabs.count {
+                let selectedTab = tabs[newIndex]
+                tabStore.selectTab(selectedTab.key)
+            }
+        }
+        .tabViewStyle(.page(indexDisplayMode: .never))
+        .background(Colors.Background.swiftUIPrimary)
     }
 }
 
-private struct TimelineTabContent: View, Equatable {
-    let timeline: ProfileStateTabTimeline
-    let refresh: () async throws -> Void
-    let tabStore: ProfileTabStore
-    let tab: ProfileStateTab
-    
-    static func == (lhs: TimelineTabContent, rhs: TimelineTabContent) -> Bool {
-        return lhs.timeline.data == rhs.timeline.data
-    }
+private struct TimelineView: View {
+    let presenter: TimelinePresenter?
+    let refresh: () async -> Void
     
     var body: some View {
-        List {
-            StatusTimelineComponent(
-                data: timeline.data,
-                detailKey: nil
-            )
-            .listRowBackground(Colors.Background.swiftUIPrimary)
-        }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .refreshable {
-            try? await refresh()
-        }
-        .onAppear {
-            tabStore.updateCurrentPresenter(for: tab)
+        if let presenter = presenter {
+            ObservePresenter(presenter: presenter) { state in
+                if let timelineState = state as? TimelineState {
+                    List {
+                        StatusTimelineComponent(
+                            data: timelineState.listState,
+                            detailKey: nil
+                        )
+                        .listRowBackground(Colors.Background.swiftUIPrimary)
+                    }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .refreshable {
+                        await refresh()
+                    }
+                }
+            }
+        } else {
+            ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Colors.Background.swiftUIPrimary)
         }
     }
 }

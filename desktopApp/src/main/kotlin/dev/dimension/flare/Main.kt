@@ -12,16 +12,30 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import coil3.ImageLoader
+import coil3.compose.setSingletonImageLoaderFactory
+import coil3.request.crossfade
 import com.jthemedetecor.OsThemeDetector
+import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.ui.theme.FlareTheme
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.core.context.startKoin
 import java.util.function.Consumer
 
 private val detector = OsThemeDetector.getDetector()
 
-fun main() =
+fun main() {
+    startKoin {
+        modules(KoinHelper.modules())
+    }
     application {
+        setSingletonImageLoaderFactory { context ->
+            ImageLoader
+                .Builder(context)
+                .crossfade(true)
+                .build()
+        }
         val state =
             rememberWindowState(
                 position = WindowPosition(Alignment.Center),
@@ -55,3 +69,4 @@ fun main() =
             }
         }
     }
+}

@@ -47,7 +47,6 @@
 		64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */ = {isa = PBXBuildFile; productRef = 64BBDA712CFDD8420052E599 /* SwiftDate */; };
 		64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */; };
 		64CD6E712D1AA0C0004D61D0 /* ProfileTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CD6E702D1AA0C0004D61D0 /* ProfileTabView.swift */; };
-		64CE87B22D1EA7F800853E9A /* ProfileTabStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B12D1EA7F800853E9A /* ProfileTabStore.swift */; };
 		64CE87B42D1EAADE00853E9A /* ProfilePresenterWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B32D1EAADE00853E9A /* ProfilePresenterWrapper.swift */; };
 		64CE87B62D229ABD00853E9A /* ProfileUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B52D229ABD00853E9A /* ProfileUserInfo.swift */; };
 		64CE87B82D23FAF200853E9A /* FLUserProfileSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B72D23FAF200853E9A /* FLUserProfileSettings.swift */; };
@@ -186,7 +185,6 @@
 		64BA002D2D1AE1020053F205 /* JXRTLFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXRTLFlowLayout.swift; sourceTree = "<group>"; };
 		64C855FF2CFD7F260071DCD8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		64CD6E702D1AA0C0004D61D0 /* ProfileTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabView.swift; sourceTree = "<group>"; };
-		64CE87B12D1EA7F800853E9A /* ProfileTabStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabStore.swift; sourceTree = "<group>"; };
 		64CE87B32D1EAADE00853E9A /* ProfilePresenterWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePresenterWrapper.swift; sourceTree = "<group>"; };
 		64CE87B52D229ABD00853E9A /* ProfileUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUserInfo.swift; sourceTree = "<group>"; };
 		64CE87B72D23FAF200853E9A /* FLUserProfileSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLUserProfileSettings.swift; sourceTree = "<group>"; };
@@ -670,7 +668,6 @@
 			children = (
 				642B62E02D2671A8009A4494 /* ProfileTabSettingStore.swift */,
 				64CE87B32D1EAADE00853E9A /* ProfilePresenterWrapper.swift */,
-				64CE87B12D1EA7F800853E9A /* ProfileTabStore.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -1118,7 +1115,6 @@
 				060D00C22AC407DF0087427A /* FlareApp.swift in Sources */,
 				64E877C02D08131D003559B9 /* Colors.swift in Sources */,
 				06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */,
-				64CE87B22D1EA7F800853E9A /* ProfileTabStore.swift in Sources */,
 				64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */,
 				B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */,
 				64E877292D0430C7003559B9 /* HomeAppBar.swift in Sources */,

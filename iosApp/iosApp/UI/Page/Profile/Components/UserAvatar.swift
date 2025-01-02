@@ -27,6 +27,4 @@ func userAvatarPlaceholder(size: CGFloat = 48) -> some View {
     .redacted(reason: .placeholder)
 }
 
-#Preview {
-    UserAvatar(data: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg")
-}
+ 

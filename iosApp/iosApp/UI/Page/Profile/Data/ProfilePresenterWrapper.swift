@@ -1,4 +1,3 @@
-
 import Foundation
 import shared
 import SwiftUI
@@ -31,25 +30,25 @@ class ProfilePresenterWrapper: ObservableObject {
 
 // MARK: - Presenter Extensions
 extension ProfilePresenter {
-    var tabs: [ProfileStateTab] {
-        if case .success(let tabs) = onEnum(of: models.value.tabs) {
-            var result: [ProfileStateTab] = []
-            for i in 0..<tabs.data.size {
-                result.append(tabs.data.get(index: i))
-            }
-            os_log("[📔][ProfilePresenter]获取标签页: count=%{public}d", log: .default, type: .debug, result.count)
-            return result
-        }
-        os_log("[📔][ProfilePresenter]获取标签页: 空", log: .default, type: .debug)
-        return []
-    }
+//    var tabs: [ProfileStateTab] {
+//        if case .success(let tabs) = onEnum(of: models.value.tabs) {
+//            var result: [ProfileStateTab] = []
+//            for i in 0..<tabs.data.size {
+//                result.append(tabs.data.get(index: i))
+//            }
+//            os_log("[📔][ProfilePresenter]获取标签页: count=%{public}d", log: .default, type: .debug, result.count)
+//            return result
+//        }
+//        os_log("[📔][ProfilePresenter]获取标签页: 空", log: .default, type: .debug)
+//        return []
+//    }
     
-    var mediaState: PagingState<ProfileMedia> {
-        let state = models.value.mediaState
-        os_log("[📔][ProfilePresenter]获取媒体状态: %{public}@", log: .default, type: .debug, String(describing: state))
-        return state
-    }
-    
+//    var mediaState: PagingState<ProfileMedia> {
+//        let state = models.value.mediaState
+//        os_log("[📔][ProfilePresenter]获取媒体状态: %{public}@", log: .default, type: .debug, String(describing: state))
+//        return state
+//    }
+//    
     var userState: UiState<UiProfile> {
         let state = models.value.userState
         os_log("[📔][ProfilePresenter]获取用户状态: %{public}@", log: .default, type: .debug, String(describing: state))

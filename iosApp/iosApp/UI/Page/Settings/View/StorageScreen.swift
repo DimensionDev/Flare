@@ -81,7 +81,4 @@ struct StorageScreen: View {
         }
     }
 }
-
-#Preview {
-    StorageScreen()
-}
+ 

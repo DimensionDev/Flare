@@ -26,16 +26,15 @@ struct CompactLabelStyle: LabelStyle {
  * CommonProfileHeader User Profile header(banner -- avatar -- desc -- follow count -- user location/url)
  */
 struct CommonProfileHeader: View {
-    let user: UiProfile
-    let relation: UiState<UiRelation>
-    let isMe: UiState<KotlinBoolean>
+    let userInfo: ProfileUserInfo
+    let state: ProfileState?
     let onFollowClick: (UiRelation) -> Void
     @State private var isBannerValid: Bool = true
 
     var body: some View {
         // banner
         ZStack(alignment: .top) {
-            if let banner = user.banner, !banner.isEmpty && banner.range(of: "^https?://.*example\\.com.*$", options: .regularExpression) == nil && isBannerValid {
+            if let banner = userInfo.profile.banner, !banner.isEmpty && banner.range(of: "^https?://.*example\\.com.*$", options: .regularExpression) == nil && isBannerValid {
                 Color.clear.overlay {
                     KFImage(URL(string: banner))
                         .onSuccess { result in
@@ -47,14 +46,14 @@ struct CommonProfileHeader: View {
                         .scaledToFill()
                         .frame(height: CommonProfileHeaderConstants.headerHeight)
                         .clipped()
-                }
+                }.ignoresSafeArea()
                 .frame(height: CommonProfileHeaderConstants.headerHeight)
             } else {
-                DynamicBannerBackground(avatarUrl: user.avatar)
+                DynamicBannerBackground(avatarUrl: userInfo.profile.avatar).ignoresSafeArea()
             }
             //user avatar
             VStack(alignment: .leading) {
-                
+
          Spacer().frame(height: 16)
 
                 HStack {
@@ -65,22 +64,22 @@ struct CommonProfileHeader: View {
                                 height: CommonProfileHeaderConstants.headerHeight -
                                 CommonProfileHeaderConstants.avatarSize / 2
                             )
-                        UserAvatar(data: user.avatar, size: CommonProfileHeaderConstants.avatarSize)
+                        UserAvatar(data: userInfo.profile.avatar, size: CommonProfileHeaderConstants.avatarSize)
                     }
  
                     //user name
                     VStack(alignment: .leading) {
                         Spacer()
                             .frame(height: CommonProfileHeaderConstants.headerHeight)
-                        Markdown(user.name.markdown)
+                        Markdown(userInfo.profile.name.markdown)
                             .font(.headline)
                             .markdownInlineImageProvider(.emoji)
                         HStack {
-                            Text(user.handle)
+                            Text(userInfo.profile.handle)
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
-                            ForEach(0..<user.mark.count, id: \.self) { index in
-                                let mark = user.mark[index]
+                            ForEach(0..<userInfo.profile.mark.count, id: \.self) { index in
+                                let mark = userInfo.profile.mark[index]
                                 switch mark {
                                 case .cat: Awesome.Classic.Solid.cat.image.opacity(0.6)
                                 case .verified: Awesome.Classic.Solid.circleCheck.image.opacity(0.6)
@@ -92,69 +91,66 @@ struct CommonProfileHeader: View {
 //                        Spacer()
 //                            .frame(height: CommonProfileHeaderConstants.headerHeight)
                         HStack {
-                            MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
+                            UserFollowsFansCount(
+                                followCount: userInfo.followCount,
+                                fansCount: userInfo.fansCount
+                            )
 
                             Spacer()
-                            if case .success(let data) = onEnum(of: isMe), !data.data.boolValue {
-                                switch onEnum(of: relation) {
-                                case .success(let relationState): Button(action: {
-                                    onFollowClick(relationState.data)
-                                }, label: {
-                                    let text = if relationState.data.blocking {
-                                        String(localized: "profile_header_button_blockedblocked")
-                                    } else if relationState.data.following {
-                                        String(localized: "profile_header_button_following")
-                                    } else if relationState.data.hasPendingFollowRequestFromYou {
-                                        String(localized: "profile_header_button_requested")
-                                    } else {
-                                        String(localized: "profile_header_button_follow")
-                                    }
-                                    Text(text)
-                                        .font(.caption)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(Color.gray.opacity(0.2))
-                                        .clipShape(RoundedRectangle(cornerRadius: 15))
-                                })
-                                .buttonStyle(.borderless)
-                                case .loading: Button(action: {}, label: {
-                                    Text("Button")
-                                })
-                                .buttonStyle(.borderless)
-                                .redacted(reason: .placeholder)
-                                case .error: EmptyView()
+                            if !userInfo.isMe {
+                                if let relation = userInfo.relation {
+                                    Button(action: {
+                                        onFollowClick(relation)
+                                    }, label: {
+                                        let text = if relation.blocking {
+                                            String(localized: "profile_header_button_blockedblocked")
+                                        } else if relation.following {
+                                            String(localized: "profile_header_button_following")
+                                        } else if relation.hasPendingFollowRequestFromYou {
+                                            String(localized: "profile_header_button_requested")
+                                        } else {
+                                            String(localized: "profile_header_button_follow")
+                                        }
+                                        Text(text)
+                                            .font(.caption)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(Color.gray.opacity(0.2))
+                                            .clipShape(RoundedRectangle(cornerRadius: 15))
+                                    })
+                                    .buttonStyle(.borderless)
                                 }
                             }
-                            }
+                        }
                     }
                     Spacer()
                     // user relation
                     VStack {
-                     
+
                     }
                 }
                 Spacer()
                 Spacer()
 
                 //user desc
-                if let desc = user.description_?.markdown {
+                if let desc = userInfo.profile.description_?.markdown {
                     Markdown(desc)
                         .markdownInlineImageProvider(.emoji)
                 }
                 Spacer()
                 
                 //user follows -  user fans
-//                MatrixView(followCount: user.matrices.followsCountHumanized, fansCount: user.matrices.fansCountHumanized)
+//                MatrixView(followCount: userInfo.profile.matrices.followsCountHumanized, fansCount: userInfo.profile.matrices.fansCountHumanized)
 
                 Spacer()
                 Spacer()
 
                 //user Location  user url
-                if let bottomContent = user.bottomContent {
+                if let bottomContent = userInfo.profile.bottomContent {
                     switch onEnum(of: bottomContent) {
                     case .fields(let data):
                         // pawoo  的 一些个人 table Info List
-                        FieldsView(fields: data.fields)
+                        UserInfoFieldsView(fields: data.fields)
                     case .iconify(let data):
                         HStack(spacing: 8) {
                             if let locationValue = data.items[.location] {
@@ -196,7 +192,7 @@ struct CommonProfileHeader: View {
                                 .background(Color(.systemGray6))
                                 .cornerRadius(6)
                             }
-                            
+
 //                            if let verifyValue = data.items[.verify] {
 //                                Label(
 //                                    title: {
@@ -220,6 +216,60 @@ struct CommonProfileHeader: View {
 
             }
             .padding([.horizontal])
+        }
+       .toolbar {
+        if let state = state {
+            if case .success(let isMe) = onEnum(of: state.isMe), !isMe.data.boolValue {
+                Menu {
+                    if case .success(let user) = onEnum(of: state.userState) {
+                        if case .success(let relation) = onEnum(of: state.relationState),
+                           case .success(let actions) = onEnum(of: state.actions),
+                           actions.data.size > 0
+                        {
+                            ForEach(0..<actions.data.size, id: \.self) { index in
+                                let item = actions.data.get(index: index)
+                                Button(action: {
+                                    Task {
+                                        try? await item.invoke(userKey: user.data.key, relation: relation.data)
+                                    }
+                                }, label: {
+                                    let text = switch onEnum(of: item) {
+                                    case .block(let block): if block.relationState(relation: relation.data) {
+                                        String(localized: "unblock")
+                                    } else {
+                                        String(localized: "block")
+                                    }
+                                    case .mute(let mute): if mute.relationState(relation: relation.data) {
+                                        String(localized: "unmute")
+                                    } else {
+                                        String(localized: "mute")
+                                    }
+                                    }
+                                    let icon = switch onEnum(of: item) {
+                                    case .block(let block): if block.relationState(relation: relation.data) {
+                                        "xmark.circle"
+                                    } else {
+                                        "checkmark.circle"
+                                    }
+                                    case .mute(let mute): if mute.relationState(relation: relation.data) {
+                                        "speaker"
+                                    } else {
+                                        "speaker.slash"
+                                    }
+                                    }
+                                    Label(text, systemImage: icon)
+                                })
+                            }
+                        }
+                        Button(action: { state.report(userKey: user.data.key) }, label: {
+                            Label("report", systemImage: "exclamationmark.bubble")
+                        })
+                    }
+                } label: {
+                        Image(systemName: "ellipsis.circle")
+                    }
+                }
+            }
         }
     }
 }

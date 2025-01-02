@@ -25,6 +25,7 @@
 		641817752D12E7350046CEB0 /* OriginalImageMarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 641817732D12E7350046CEB0 /* OriginalImageMarkView.swift */; };
 		641817762D12E7350046CEB0 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 641817742D12E7350046CEB0 /* ToastView.swift */; };
 		642AA5402D1021500088B7E3 /* TimelineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642AA53F2D1021500088B7E3 /* TimelineStore.swift */; };
+		642B62E12D2671A8009A4494 /* ProfileTabSettingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642B62E02D2671A8009A4494 /* ProfileTabSettingStore.swift */; };
 		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
 		64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64782BD02CFD65F4008DE526 /* View+Injection.swift */; };
 		6488800B2D1AD43E00EFE72C /* JXSegmentedView in Frameworks */ = {isa = PBXBuildFile; productRef = 6488800A2D1AD43E00EFE72C /* JXSegmentedView */; };
@@ -46,6 +47,10 @@
 		64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */ = {isa = PBXBuildFile; productRef = 64BBDA712CFDD8420052E599 /* SwiftDate */; };
 		64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */; };
 		64CD6E712D1AA0C0004D61D0 /* ProfileTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CD6E702D1AA0C0004D61D0 /* ProfileTabView.swift */; };
+		64CE87B22D1EA7F800853E9A /* ProfileTabStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B12D1EA7F800853E9A /* ProfileTabStore.swift */; };
+		64CE87B42D1EAADE00853E9A /* ProfilePresenterWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B32D1EAADE00853E9A /* ProfilePresenterWrapper.swift */; };
+		64CE87B62D229ABD00853E9A /* ProfileUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B52D229ABD00853E9A /* ProfileUserInfo.swift */; };
+		64CE87B82D23FAF200853E9A /* FLUserProfileSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B72D23FAF200853E9A /* FLUserProfileSettings.swift */; };
 		64E208712CF8458A001C64EF /* FLAnimatedImage in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208702CF8458A001C64EF /* FLAnimatedImage */; };
 		64E208742CF845C2001C64EF /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208732CF845C2001C64EF /* Kingfisher */; };
 		64E208772CF84612001C64EF /* JXPhotoBrowser in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208762CF84612001C64EF /* JXPhotoBrowser */; };
@@ -162,6 +167,7 @@
 		641817732D12E7350046CEB0 /* OriginalImageMarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OriginalImageMarkView.swift; sourceTree = "<group>"; };
 		641817742D12E7350046CEB0 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		642AA53F2D1021500088B7E3 /* TimelineStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineStore.swift; sourceTree = "<group>"; };
+		642B62E02D2671A8009A4494 /* ProfileTabSettingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabSettingStore.swift; sourceTree = "<group>"; };
 		64655C2C2CFD6CA000255488 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		64782BD02CFD65F4008DE526 /* View+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Injection.swift"; sourceTree = "<group>"; };
 		6498BDDF2D15F1F500C52324 /* AppleTranslationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleTranslationService.swift; sourceTree = "<group>"; };
@@ -180,6 +186,10 @@
 		64BA002D2D1AE1020053F205 /* JXRTLFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXRTLFlowLayout.swift; sourceTree = "<group>"; };
 		64C855FF2CFD7F260071DCD8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		64CD6E702D1AA0C0004D61D0 /* ProfileTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabView.swift; sourceTree = "<group>"; };
+		64CE87B12D1EA7F800853E9A /* ProfileTabStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabStore.swift; sourceTree = "<group>"; };
+		64CE87B32D1EAADE00853E9A /* ProfilePresenterWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePresenterWrapper.swift; sourceTree = "<group>"; };
+		64CE87B52D229ABD00853E9A /* ProfileUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUserInfo.swift; sourceTree = "<group>"; };
+		64CE87B72D23FAF200853E9A /* FLUserProfileSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLUserProfileSettings.swift; sourceTree = "<group>"; };
 		64E2087B2CF846DE001C64EF /* KotlinByteArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KotlinByteArray.swift; sourceTree = "<group>"; };
 		64E2087C2CF846DE001C64EF /* ViewExt.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExt.swift; sourceTree = "<group>"; };
 		64E876A92D0430C7003559B9 /* SensitiveContentButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensitiveContentButton.swift; sourceTree = "<group>"; };
@@ -423,20 +433,6 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
-		64E876B82D0430C7003559B9 /* Data */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Data;
-			sourceTree = "<group>";
-		};
-		64E876B92D0430C7003559B9 /* Model */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Model;
-			sourceTree = "<group>";
-		};
 		64E876BC2D0430C7003559B9 /* View */ = {
 			isa = PBXGroup;
 			children = (
@@ -451,8 +447,6 @@
 			children = (
 				6498BDE62D15F1F500C52324 /* translate */,
 				64E876B72D0430C7003559B9 /* Components */,
-				64E876B82D0430C7003559B9 /* Data */,
-				64E876B92D0430C7003559B9 /* Model */,
 				64E876BC2D0430C7003559B9 /* View */,
 			);
 			path = Compose;
@@ -674,6 +668,9 @@
 		64E877062D0430C7003559B9 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				642B62E02D2671A8009A4494 /* ProfileTabSettingStore.swift */,
+				64CE87B32D1EAADE00853E9A /* ProfilePresenterWrapper.swift */,
+				64CE87B12D1EA7F800853E9A /* ProfileTabStore.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -681,6 +678,7 @@
 		64E877072D0430C7003559B9 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				64CE87B52D229ABD00853E9A /* ProfileUserInfo.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -850,6 +848,7 @@
 		64EB7DAA2D0C4C0400E41656 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				64CE87B72D23FAF200853E9A /* FLUserProfileSettings.swift */,
 				64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */,
 			);
 			path = Data;
@@ -1119,6 +1118,7 @@
 				060D00C22AC407DF0087427A /* FlareApp.swift in Sources */,
 				64E877C02D08131D003559B9 /* Colors.swift in Sources */,
 				06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */,
+				64CE87B22D1EA7F800853E9A /* ProfileTabStore.swift in Sources */,
 				64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */,
 				B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */,
 				64E877292D0430C7003559B9 /* HomeAppBar.swift in Sources */,
@@ -1153,6 +1153,7 @@
 				641817762D12E7350046CEB0 /* ToastView.swift in Sources */,
 				64E8773F2D0430C7003559B9 /* FeaturedScreen.swift in Sources */,
 				64E877402D0430C7003559B9 /* Zoomable.swift in Sources */,
+				64CE87B42D1EAADE00853E9A /* ProfilePresenterWrapper.swift in Sources */,
 				64E877412D0430C7003559B9 /* ComposeView.swift in Sources */,
 				64E877422D0430C7003559B9 /* FeedMediaPlayButton.swift in Sources */,
 				64E877432D0430C7003559B9 /* PhotoBrowserManager.swift in Sources */,
@@ -1195,6 +1196,7 @@
 				640682502D16C5D5009B6B1E /* Color+Extension.swift in Sources */,
 				64E877632D0430C7003559B9 /* AppearanceSettings.swift in Sources */,
 				64E877642D0430C7003559B9 /* CGImage+Extension.swift in Sources */,
+				64CE87B82D23FAF200853E9A /* FLUserProfileSettings.swift in Sources */,
 				64E877652D0430C7003559B9 /* FavoriteScreen.swift in Sources */,
 				64E877662D0430C7003559B9 /* ComposeViewModel.swift in Sources */,
 				64E877672D0430C7003559B9 /* SettingsRepository.swift in Sources */,
@@ -1204,6 +1206,7 @@
 				64BA002F2D1AE1020053F205 /* JXPagingListContainerView.swift in Sources */,
 				64BA00302D1AE1020053F205 /* JXPagingListRefreshView.swift in Sources */,
 				64BA00312D1AE1020053F205 /* JXPagingSmoothView.swift in Sources */,
+				64CE87B62D229ABD00853E9A /* ProfileUserInfo.swift in Sources */,
 				64BA00322D1AE1020053F205 /* JXPagingView.swift in Sources */,
 				64BA00332D1AE1020053F205 /* JXRTLFlowLayout.swift in Sources */,
 				64BA00342D1AE1020053F205 /* JXPagingMainTableView.swift in Sources */,
@@ -1227,6 +1230,7 @@
 				64E2087F2CF846DE001C64EF /* ViewExt.swift in Sources */,
 				6498BDE72D15F1F500C52324 /* TranslationService.swift in Sources */,
 				6498BDE82D15F1F500C52324 /* TranslateButton.swift in Sources */,
+				642B62E12D2671A8009A4494 /* ProfileTabSettingStore.swift in Sources */,
 				6498BDE92D15F1F500C52324 /* LanguageDetector.swift in Sources */,
 				6498BDEA2D15F1F500C52324 /* TranslatableText.swift in Sources */,
 				6498BDEB2D15F1F500C52324 /* TranslationViewModel.swift in Sources */,

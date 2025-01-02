@@ -1,48 +1,22 @@
 import SwiftUI
 import shared
 import MarkdownUI
-
+//
 struct ProfileHeaderView: View {
-    let user: UiState<UiProfile>
-    let relation: UiState<UiRelation>
-    let isMe: UiState<KotlinBoolean>
-    let onFollowClick: (UiUserV2, UiRelation) -> Void
-    
-    var body: some View {
-        switch onEnum(of: user) {
-        case .error:
-            Text("error")
-        case .loading:
-            CommonProfileHeader(
-                user: createSampleUser(),
-                relation: relation,
-                isMe: isMe,
-                onFollowClick: { _ in }
-            )
-            .redacted(reason: .placeholder)
-        case .success(let data):
-            ProfileHeaderSuccess(
-                user: data.data,
-                relation: relation,
-                isMe: isMe,
-                onFollowClick: { relation in onFollowClick(data.data, relation) }
-            )
-        }
-    }
-}
-
-struct ProfileHeaderSuccess: View {
-    let user: UiProfile
-    let relation: UiState<UiRelation>
-    let isMe: UiState<KotlinBoolean>
+    let userInfo: ProfileUserInfo
+    let state: ProfileState
     let onFollowClick: (UiRelation) -> Void
-    
+
     var body: some View {
-        CommonProfileHeader(user: user, relation: relation, isMe: isMe, onFollowClick: onFollowClick)
+        CommonProfileHeader(
+            userInfo: userInfo,
+            state: state,
+            onFollowClick: onFollowClick
+        )
     }
 }
 
-struct MatrixView: View {
+struct UserFollowsFansCount: View {
     let followCount: String
     let fansCount: String
     var body: some View {
@@ -63,7 +37,7 @@ struct MatrixView: View {
     }
 }
 
-struct FieldsView: View {
+struct UserInfoFieldsView: View {
     let fields: [String: UiRichText]
     var body: some View {
         if fields.count > 0 {

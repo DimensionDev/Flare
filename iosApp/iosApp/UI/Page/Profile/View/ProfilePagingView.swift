@@ -131,154 +131,155 @@ class ProfileTabListViewController: UIViewController, JXPagingViewListViewDelega
         listViewDidScrollCallback = callback
     }
 }
-
-class ProfilePagingViewController: UIViewController, JXPagingViewDelegate {
-    private var pagingView: JXPagingView!
-    private var headerView: UIView!
-    private var tabs: [ProfileStateTab] = []
-    private var selectedIndex: Int = 0
-    
-    let appSettings: AppSettings
-    let listState: PagingState<UiTimeline>
-    let refresh: () async throws -> Void
-    let presenter: ProfilePresenter
-    let accountType: AccountType
-    let userKey: MicroBlogKey?
-    let selectedTabBinding: Binding<Int>
-    
-    init(tabs: [ProfileStateTab],
-         appSettings: AppSettings,
-         listState: PagingState<UiTimeline>,
-         refresh: @escaping () async throws -> Void,
-         presenter: ProfilePresenter,
-         accountType: AccountType,
-         userKey: MicroBlogKey?,
-         selectedTab: Binding<Int>) {
-        self.tabs = tabs
-        self.appSettings = appSettings
-        self.listState = listState
-        self.refresh = refresh
-        self.presenter = presenter
-        self.accountType = accountType
-        self.userKey = userKey
-        self.selectedTabBinding = selectedTab
-        super.init(nibName: nil, bundle: nil)
-    }
-    
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        // 设置 header view
-        let headerContent = ObservePresenter(presenter: presenter) { state in
-            let user = { () -> UiProfile in 
-                if case .success(let data) = onEnum(of: state.userState) {
-                    return data.data
-                }
-                return createSampleUser()
-            }()
-            return CommonProfileHeader(
-                user: user,
-                relation: state.relationState,
-                isMe: state.isMe,
-                onFollowClick: { relation in
-                    if case .success(let data) = onEnum(of: state.userState) {
-                        Task {
-                            try? await state.follow(userKey: data.data.key, data: relation)
-                        }
-                    }
-                }
-            )
-        }
-        headerView = UIHostingController(rootView: headerContent).view
-        
-        // 设置 paging view
-        pagingView = JXPagingView(delegate: self)
-        pagingView.mainTableView.backgroundColor = .clear
-        pagingView.listContainerView.backgroundColor = .clear
-        
-        view.addSubview(pagingView)
-        pagingView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            pagingView.topAnchor.constraint(equalTo: view.topAnchor),
-            pagingView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            pagingView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            pagingView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        ])
-    }
-    
-    // MARK: - JXPagingViewDelegate
-    
-    func tableHeaderViewHeight(in pagingView: JXPagingView) -> Int {
-        return Int(headerView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height)
-    }
-    
-    func tableHeaderView(in pagingView: JXPagingView) -> UIView {
-        return headerView
-    }
-    
-    func heightForPinSectionHeader(in pagingView: JXPagingView) -> Int {
-        return 44  // Tab bar height
-    }
-    
-    func viewForPinSectionHeader(in pagingView: JXPagingView) -> UIView {
-        let tabView = ProfileTabHeader(
-            tabs: tabs,
-            selectedTab: selectedTabBinding,
-            onTabSelected: { [weak self] index in
-                guard let self = self else { return }
-                withAnimation {
-                    self.selectedTabBinding.wrappedValue = index
-                }
-                self.pagingView?.listContainerView.didClickSelectedItem(at: index)
-            }
-        )
-        return UIHostingController(rootView: tabView).view
-    }
-    
-    func numberOfLists(in pagingView: JXPagingView) -> Int {
-        return tabs.count
-    }
-    
-    func pagingView(_ pagingView: JXPagingView, initListAtIndex index: Int) -> JXPagingViewListViewDelegate {
-        return ProfileTabListViewController(
-            tab: tabs[index],
-            refresh: refresh,
-            presenter: presenter,
-            accountType: accountType,
-            userKey: userKey
-        )
-    }
-}
-
-// ProfilePagingView - SwiftUI wrapper
-struct ProfilePagingView: UIViewControllerRepresentable {
-    let tabs: [ProfileStateTab]
-    let appSettings: AppSettings
-    let listState: PagingState<UiTimeline>
-    let refresh: () async throws -> Void
-    let presenter: ProfilePresenter
-    let accountType: AccountType
-    let userKey: MicroBlogKey?
-    @Binding var selectedTab: Int
-    
-    func makeUIViewController(context: Context) -> ProfilePagingViewController {
-        return ProfilePagingViewController(
-            tabs: tabs,
-            appSettings: appSettings,
-            listState: listState,
-            refresh: refresh,
-            presenter: presenter,
-            accountType: accountType,
-            userKey: userKey,
-            selectedTab: $selectedTab
-        )
-    }
-    
-    func updateUIViewController(_ uiViewController: ProfilePagingViewController, context: Context) {
-        // 不需要在这里更新，因为使用了 Binding
-    }
-} 
+//
+//class ProfilePagingViewController: UIViewController, JXPagingViewDelegate {
+//    private var pagingView: JXPagingView!
+//    private var headerView: UIView!
+//    private var tabs: [ProfileStateTab] = []
+//    private var selectedIndex: Int = 0
+//    
+//    let appSettings: AppSettings
+//    let listState: PagingState<UiTimeline>
+//    let refresh: () async throws -> Void
+//    let presenter: ProfilePresenter
+//    let accountType: AccountType
+//    let userKey: MicroBlogKey?
+//    let selectedTabBinding: Binding<Int>
+//    
+//    init(tabs: [ProfileStateTab],
+//         appSettings: AppSettings,
+//         listState: PagingState<UiTimeline>,
+//         refresh: @escaping () async throws -> Void,
+//         presenter: ProfilePresenter,
+//         accountType: AccountType,
+//         userKey: MicroBlogKey?,
+//         selectedTab: Binding<Int>) {
+//        self.tabs = tabs
+//        self.appSettings = appSettings
+//        self.listState = listState
+//        self.refresh = refresh
+//        self.presenter = presenter
+//        self.accountType = accountType
+//        self.userKey = userKey
+//        self.selectedTabBinding = selectedTab
+//        super.init(nibName: nil, bundle: nil)
+//    }
+//    
+//    required init?(coder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
+//    
+//    override func viewDidLoad() {
+//        super.viewDidLoad()
+//        
+//        // 设置 header view
+//        let headerContent = ObservePresenter(presenter: presenter) { state in
+//            let user = { () -> UiProfile in 
+//                if case .success(let data) = onEnum(of: state.userState) {
+//                    return data.data
+//                }
+//                return createSampleUser()
+//            }()
+//            return CommonProfileHeader(
+//                user: user,
+//                relation: state.relationState,
+//                isMe: state.isMe,
+//                state: state,
+//                onFollowClick: { relation in
+//                    if case .success(let data) = onEnum(of: state.userState) {
+//                        Task {
+//                            try? await state.follow(userKey: data.data.key, data: relation)
+//                        }
+//                    }
+//                }
+//            )
+//        }
+//        headerView = UIHostingController(rootView: headerContent).view
+//        
+//        // 设置 paging view
+//        pagingView = JXPagingView(delegate: self)
+//        pagingView.mainTableView.backgroundColor = .clear
+//        pagingView.listContainerView.backgroundColor = .clear
+//        
+//        view.addSubview(pagingView)
+//        pagingView.translatesAutoresizingMaskIntoConstraints = false
+//        NSLayoutConstraint.activate([
+//            pagingView.topAnchor.constraint(equalTo: view.topAnchor),
+//            pagingView.leftAnchor.constraint(equalTo: view.leftAnchor),
+//            pagingView.rightAnchor.constraint(equalTo: view.rightAnchor),
+//            pagingView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+//        ])
+//    }
+//    
+//    // MARK: - JXPagingViewDelegate
+//    
+//    func tableHeaderViewHeight(in pagingView: JXPagingView) -> Int {
+//        return Int(headerView.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height)
+//    }
+//    
+//    func tableHeaderView(in pagingView: JXPagingView) -> UIView {
+//        return headerView
+//    }
+//    
+//    func heightForPinSectionHeader(in pagingView: JXPagingView) -> Int {
+//        return 44  // Tab bar height
+//    }
+//    
+//    func viewForPinSectionHeader(in pagingView: JXPagingView) -> UIView {
+//        let tabView = ProfileTabHeader(
+//            tabs: tabs,
+//            selectedTab: selectedTabBinding,
+//            onTabSelected: { [weak self] index in
+//                guard let self = self else { return }
+//                withAnimation {
+//                    self.selectedTabBinding.wrappedValue = index
+//                }
+//                self.pagingView?.listContainerView.didClickSelectedItem(at: index)
+//            }
+//        )
+//        return UIHostingController(rootView: tabView).view
+//    }
+//    
+//    func numberOfLists(in pagingView: JXPagingView) -> Int {
+//        return tabs.count
+//    }
+//    
+//    func pagingView(_ pagingView: JXPagingView, initListAtIndex index: Int) -> JXPagingViewListViewDelegate {
+//        return ProfileTabListViewController(
+//            tab: tabs[index],
+//            refresh: refresh,
+//            presenter: presenter,
+//            accountType: accountType,
+//            userKey: userKey
+//        )
+//    }
+//}
+//
+//// ProfilePagingView - SwiftUI wrapper
+//struct ProfilePagingView: UIViewControllerRepresentable {
+//    let tabs: [ProfileStateTab]
+//    let appSettings: AppSettings
+//    let listState: PagingState<UiTimeline>
+//    let refresh: () async throws -> Void
+//    let presenter: ProfilePresenter
+//    let accountType: AccountType
+//    let userKey: MicroBlogKey?
+//    @Binding var selectedTab: Int
+//    
+//    func makeUIViewController(context: Context) -> ProfilePagingViewController {
+//        return ProfilePagingViewController(
+//            tabs: tabs,
+//            appSettings: appSettings,
+//            listState: listState,
+//            refresh: refresh,
+//            presenter: presenter,
+//            accountType: accountType,
+//            userKey: userKey,
+//            selectedTab: $selectedTab
+//        )
+//    }
+//    
+//    func updateUIViewController(_ uiViewController: ProfilePagingViewController, context: Context) {
+//        // 不需要在这里更新，因为使用了 Binding
+//    }
+//} 

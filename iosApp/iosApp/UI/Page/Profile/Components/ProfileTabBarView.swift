@@ -1,63 +1,66 @@
 import SwiftUI
 import shared
+import os.log
 
 struct ProfileTabBarView: View {
-    let tabs: UiState<ImmutableListWrapper<ProfileStateTab>>
+    let tabs: [ProfileStateTab]
     @Binding var selectedTab: Int
     let onTabSelected: (Int) -> Void
-    
+ 
     // 获取排序后的 tabs
-    static func sortedTabs(_ tabs: ImmutableListWrapper<ProfileStateTab>) -> [ProfileStateTab] {
+    static func sortedTabs(_ tabs: [ProfileStateTab]) -> [ProfileStateTab] {
+        os_log("[📔][ProfileTabBarView]开始排序 tabs: count=%{public}d", log: .default, type: .debug, tabs.count)
         var result: [ProfileStateTab] = []
         // 先添加 timeline tabs
-        for i in 0..<tabs.size {
-            let tab = tabs.get(index: i)
+        for tab in tabs {
             if case .timeline = onEnum(of: tab) {
                 result.append(tab)
             }
         }
         // 再添加 media tab
-        for i in 0..<tabs.size {
-            let tab = tabs.get(index: i)
+        for tab in tabs {
             if case .media = onEnum(of: tab) {
                 result.append(tab)
             }
         }
+        os_log("[📔][ProfileTabBarView]排序完成: resultCount=%{public}d", log: .default, type: .debug, result.count)
         return result
     }
     
     var body: some View {
-        if case .success(let tabs) = onEnum(of: tabs) {
-            let sortedTabs = Self.sortedTabs(tabs.data)
-            ScrollViewReader { proxy in
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 24) {
-                        ForEach(Array(sortedTabs.enumerated()), id: \.offset) { index, tab in
-                            TabItemView(
-                                tab: tab,
-                                index: index,
-                                selectedTab: selectedTab,
-                                onTabSelected: { selectedIndex in
-                                    onTabSelected(selectedIndex)
-                                    // 滚动到选中的标签
-                                    withAnimation {
-                                        proxy.scrollTo(selectedIndex, anchor: .center)
-                                    }
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 24) {
+                    ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
+                        TabItemView(
+                            tab: tab,
+                            index: index,
+                            selectedTab: selectedTab,
+                            onTabSelected: { selectedIndex in
+                                os_log("[📔][ProfileTabBarView]点击标签: index=%{public}d", log: .default, type: .debug, selectedIndex)
+                                onTabSelected(selectedIndex)
+                                // 滚动到选中的标签
+                                withAnimation {
+                                    proxy.scrollTo(selectedIndex, anchor: .center)
                                 }
-                            )
-                            .id(index)
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-                .frame(height: 44)
-                .background(Colors.Background.swiftUIPrimary)
-                .onAppear {
-                    // 如果有选中的标签，滚动到该标签
-                    withAnimation {
-                        proxy.scrollTo(selectedTab, anchor: .center)
+                            }
+                        )
+                        .id(index)
                     }
                 }
+                .padding(.horizontal)
+            }
+            .frame(height: 44)
+            .background(Colors.Background.swiftUIPrimary)
+            .onAppear {
+                os_log("[📔][ProfileTabBarView]视图出现: selectedTab=%{public}d, tabsCount=%{public}d", log: .default, type: .debug, selectedTab, tabs.count)
+                // 如果有选中的标签，滚动到该标签
+                withAnimation {
+                    proxy.scrollTo(selectedTab, anchor: .center)
+                }
+            }
+            .onDisappear {
+                os_log("[📔][ProfileTabBarView]视图消失: selectedTab=%{public}d", log: .default, type: .debug, selectedTab)
             }
         }
     }
@@ -100,6 +103,9 @@ private struct TabItemView: View {
             withAnimation {
                 onTabSelected(index)
             }
+        }
+        .onAppear {
+            os_log("[📔][ProfileTabBarView][TabItem]标签项出现: index=%{public}d, title=%{public}@", log: .default, type: .debug, index, title)
         }
     }
 } 

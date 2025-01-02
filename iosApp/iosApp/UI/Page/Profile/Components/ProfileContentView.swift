@@ -8,6 +8,11 @@ struct ProfileContentView: View {
     let presenter: ProfilePresenter
     let accountType: AccountType
     let userKey: MicroBlogKey?
+    let tabStore: ProfileTabStore
+    
+    private func handleTabSelection(_ tab: ProfileStateTab) {
+        tabStore.updateCurrentPresenter(for: tab)
+    }
     
     @ViewBuilder
     func tabContent(for tab: ProfileStateTab) -> some View {
@@ -15,7 +20,9 @@ struct ProfileContentView: View {
         case .timeline(let timeline):
             TimelineTabContent(
                 timeline: timeline,
-                refresh: refresh
+                refresh: refresh,
+                tabStore: tabStore,
+                tab: tab
             )
         case .media(let media):
             ProfileMediaListScreen(
@@ -31,6 +38,11 @@ struct ProfileContentView: View {
                 ForEach(Array(tabs.enumerated()), id: \.offset) { index, tab in
                     tabContent(for: tab)
                         .tag(index)
+                        .onChange(of: selectedTab) { newValue in
+                            if newValue == index {
+                                handleTabSelection(tab)
+                            }
+                        }
                 }
             }
             .frame(height: geometry.size.height)
@@ -39,10 +51,11 @@ struct ProfileContentView: View {
     }
 }
 
-// 将 Timeline 内容提取到单独的视图中
 private struct TimelineTabContent: View, Equatable {
     let timeline: ProfileStateTabTimeline
     let refresh: () async throws -> Void
+    let tabStore: ProfileTabStore
+    let tab: ProfileStateTab
     
     static func == (lhs: TimelineTabContent, rhs: TimelineTabContent) -> Bool {
         return lhs.timeline.data == rhs.timeline.data
@@ -61,5 +74,8 @@ private struct TimelineTabContent: View, Equatable {
         .refreshable {
             try? await refresh()
         }
+        .onAppear {
+            tabStore.updateCurrentPresenter(for: tab)
+        }
     }
-} 
+}

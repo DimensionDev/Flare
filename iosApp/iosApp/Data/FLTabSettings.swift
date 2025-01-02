@@ -7,7 +7,7 @@ import ObjectiveC
 //typealias FLUser = UiUserV2
 typealias FLMicroBlogKey = MicroBlogKey
 
-// MARK: - Tab Settings
+// - Tab Settings
 // : Codable
 public struct FLTabSettings {
     public let items: [FLTabItem]
@@ -20,7 +20,7 @@ public struct FLTabSettings {
         case homeTabs
     }
 
-    // MARK: - Factory Methods
+    // - Factory Methods
     public static var `default`: FLTabSettings {
         FLTabSettings(
             items: [
@@ -83,7 +83,7 @@ public struct FLTabSettings {
         )
     }
 
-    // MARK: - Platform Specific Factory Methods
+    // - Platform Specific Factory Methods
     public static func defaultPrimary(user: UiUserV2) -> [FLTabItem] {
         switch user.platformType {
         case .mastodon:
@@ -114,7 +114,7 @@ public struct FLTabSettings {
         }
     }
 
-    // MARK: - Platform Specific Items
+    // - Platform Specific Items
     private static func mastodon(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
             FLHomeTimelineTabItem(
@@ -188,7 +188,7 @@ public struct FLTabSettings {
         ]
     }
 
-    // MARK: - Misskey Platform Items
+    // - Misskey Platform Items
     private static func misskey(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
             FLHomeTimelineTabItem(
@@ -240,7 +240,7 @@ public struct FLTabSettings {
         ]
     }
 
-    // MARK: - Bluesky Platform Items
+    // - Bluesky Platform Items
     private static func bluesky(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
             FLHomeTimelineTabItem(
@@ -287,7 +287,7 @@ public struct FLTabSettings {
         ]
     }
 
-    // MARK: - XQT (Twitter) Platform Items
+    // - XQT (Twitter) Platform Items
     private static func xqt(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
             FLHomeTimelineTabItem(
@@ -336,7 +336,7 @@ public struct FLTabSettings {
         ]
     }
 
-    // MARK: - VVO Platform Items
+    // - VVO Platform Items
     private static func vvo(accountKey: FLMicroBlogKey) -> [FLTabItem] {
         [
             FLHomeTimelineTabItem(
@@ -373,7 +373,7 @@ public struct FLTabSettings {
     }
 }
 
-// MARK: - Material Icon Type
+// - Material Icon Type
 public enum FLMaterialIcon: String, Codable {
     case home = "Home"
     case notification = "Notification"
@@ -392,6 +392,7 @@ public enum FLMaterialIcon: String, Codable {
     case list = "List"
     case feeds = "Feeds"
     case messages = "Messages"
+    case media = "Media"
 
     // TODO: 实现 SwiftUI Image 转换
     public var icon: Image {
@@ -430,11 +431,13 @@ public enum FLMaterialIcon: String, Codable {
             return Image(systemName: "dot.radiowaves.left.and.right")
         case .messages:
             return Image(systemName: "message.fill")
+        case .media:
+            return Image(systemName: "photo.on.rectangle")
         }
     }
 }
 
-// MARK: - Tab Item Protocol
+// - Tab Item Protocol
 // : Codable
 public protocol FLTabItem {
     var metaData: FLTabMetaData { get }
@@ -444,12 +447,12 @@ public protocol FLTabItem {
     func update(metaData: FLTabMetaData) -> FLTabItem
 }
 
-// MARK: - Timeline Tab Item Protocol
+// - Timeline Tab Item Protocol
 public protocol FLTimelineTabItem: FLTabItem {
     func createPresenter() -> TimelinePresenter
 }
 
-// MARK: - Tab Meta Data
+// - Tab Meta Data
 public struct FLTabMetaData /* : Codable */ {
     public let title: FLTitleType
     public let icon: FLIconType
@@ -460,7 +463,7 @@ public struct FLTabMetaData /* : Codable */ {
 //    }
 }
 
-// MARK: - Title Type
+// - Title Type
 public enum FLTitleType /* : Codable */ {
     case text(String)
     case localized(String)
@@ -496,7 +499,7 @@ public enum FLTitleType /* : Codable */ {
 //    }
 }
 
-// MARK: - Icon Type
+// - Icon Type
 public enum FLIconType /* : Codable */ {
     case avatar(userKey: MicroBlogKey)
     case material(String)
@@ -540,7 +543,7 @@ public enum FLIconType /* : Codable */ {
 //    }
 }
 
-// MARK: - IconType Extensions
+// - IconType Extensions
 extension FLIconType {
     static func material(_ icon: FLMaterialIcon) -> FLIconType {
         .material(icon.rawValue)
@@ -551,7 +554,7 @@ extension FLIconType {
     }
 }
 
-// MARK: - Common Tab Items
+// - Common Tab Items
 public struct FLNotificationTabItem: FLTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
@@ -645,7 +648,7 @@ public struct FLDirectMessageTabItem: FLTabItem {
     }
 }
 
-// MARK: - Mastodon Specific Tab Items
+// - Mastodon Specific Tab Items
 public struct FLMastodonLocalTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
@@ -702,7 +705,7 @@ public struct FLMastodonFavouriteTimelineTabItem: FLTimelineTabItem {
     }
 }
 
-// MARK: - Misskey Specific Tab Items
+// - Misskey Specific Tab Items
 public struct FLMisskeyLocalTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
@@ -731,7 +734,7 @@ public struct FLMisskeyGlobalTimelineTabItem: FLTimelineTabItem {
     }
 }
 
-// MARK: - XQT (Twitter) Specific Tab Items
+// - XQT (Twitter) Specific Tab Items
 public struct FLXQTFeaturedTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
@@ -760,7 +763,7 @@ public struct FLXQTBookmarkTimelineTabItem: FLTimelineTabItem {
     }
 }
 
-// MARK: - Bluesky Specific Tab Items
+// - Bluesky Specific Tab Items
 public struct FLBlueskyFeedsTabItem: FLTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
@@ -786,7 +789,7 @@ public struct FLBlueskyFeedTabItem: FLTimelineTabItem {
     }
 }
 
-// MARK: - Localized Keys
+// - Localized Keys
 public enum FLLocalizedKey: String {
     case home = "home_tab_home_title"
     case notifications = "home_tab_notifications_title"
@@ -801,6 +804,10 @@ public enum FLLocalizedKey: String {
     case list = "home_tab_list_title"
     case feeds = "home_tab_feeds_title"
     case directMessage = "dm_list_title"
+    case profileTimeline = "profile_tab_timeline"
+    case profileTimelineWithReply = "profile_tab_timeline_with_reply"
+    case profileMedia = "profile_tab_media"
+    case profileLikes = "profile_tab_likes"
 
     public var localizedString: String {
         NSLocalizedString(self.rawValue, comment: "")
@@ -813,7 +820,7 @@ extension FLTitleType {
     }
 }
 
-// MARK: - Tab Settings Error
+// - Tab Settings Error
 public enum FLTabSettingsError: Error {
     case serializationError(String)
     case corruptionError(String)
@@ -831,7 +838,7 @@ public enum FLTabSettingsError: Error {
     }
 }
 
-// MARK: - Tab Settings Storage
+// - Tab Settings Storage
 public class FLTabSettingsStorage {
     private static let storageKeyPrefix = "fl_tab_settings_"
     private let userDefaults: UserDefaults
@@ -866,7 +873,7 @@ public class FLTabSettingsStorage {
     }
 }
 
-// MARK: - Tab Settings Manager
+// - Tab Settings Manager
 public class FLTabSettingsManager {
     private let storage: FLTabSettingsStorage
 
@@ -900,22 +907,22 @@ public class FLTabSettingsManager {
     }
 }
 
-// MARK: - Tab Settings Extensions
+// - Tab Settings Extensions
 extension FLTabSettings {
-    // MARK: - Validation
+    // - Validation
     public var isValid: Bool {
         !items.isEmpty && items.allSatisfy { $0.isValid }
     }
 }
 
-// MARK: - Tab Item Extensions
+// - Tab Item Extensions
 extension FLTabItem {
     public var isValid: Bool {
         !key.isEmpty
     }
 }
 
-// MARK: - Combine Support
+// - Combine Support
 //#if canImport(Combine)
 //import Combine
 //
@@ -930,7 +937,7 @@ extension FLTabItem {
 //}
 //#endif
 
-// MARK: - SwiftUI Support
+// - SwiftUI Support
 //#if canImport(SwiftUI)
 //import SwiftUI
 //
@@ -991,7 +998,7 @@ extension FLTabItem {
 //}
 //#endif
 
-// MARK: - Timeline Tab Item Extensions
+// - Timeline Tab Item Extensions
 extension FLTimelineTabItem {
     public static var `default`: [FLTabItem] {
         [
@@ -1048,7 +1055,7 @@ extension FLTimelineTabItem {
     }
 }
 
-// MARK: - Home Timeline Tab Item Extensions
+// - Home Timeline Tab Item Extensions
 extension FLHomeTimelineTabItem {
     public init(accountType: AccountType) {
         self.init(
@@ -1060,7 +1067,7 @@ extension FLHomeTimelineTabItem {
     }
 }
 
-// MARK: - Tab Settings Serialization
+// - Tab Settings Serialization
 //public protocol FLTabSettingsSerializer {
 //    func serialize(_ settings: FLTabSettings) throws -> Data
 //    func deserialize(_ data: Data) throws -> FLTabSettings
@@ -1087,7 +1094,7 @@ extension FLHomeTimelineTabItem {
 //    }
 //}
 
-// MARK: - Tab Settings Storage Extensions
+// - Tab Settings Storage Extensions
 //extension FLTabSettingsStorage {
 //    private struct AssociatedKeys {
 //        static var serializer = UnsafeRawPointer(bitPattern: "fl_tab_settings_serializer".hashValue)!
@@ -1117,4 +1124,3 @@ extension FLHomeTimelineTabItem {
 //        }
 //    }
 //}
-

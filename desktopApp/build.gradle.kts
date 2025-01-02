@@ -35,6 +35,7 @@ dependencies {
     implementation(libs.ksoup)
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
+    implementation(libs.commons.lang3)
 }
 
 compose.desktop {

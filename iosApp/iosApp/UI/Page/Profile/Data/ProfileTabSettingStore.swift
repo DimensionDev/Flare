@@ -86,7 +86,26 @@ class ProfileTabSettingStore: ObservableObject {
     // MARK: - Private Methods
     private func updateTabs(user: UiUserV2) {
         // 根据平台类型获取对应的标签
-        availableTabs = FLTabSettings.defaultThree(user: user)
+        var tabs = FLTabSettings.defaultThree(user: user)
+        
+//       // 添加 media tab 到倒数第二的位置
+//       let mediaTab = FLProfileMediaTabItem(
+//           metaData: FLTabMetaData(
+//               title: .localized(.profileMedia),
+//               icon: .mixed(.media, userKey: user.key)
+//           ),
+//           account: AccountTypeSpecific(accountKey: user.key),
+//           userKey: user.key
+//       )
+//       
+//       // 插入到倒数第二的位置
+//       if tabs.isEmpty {
+//           tabs.append(mediaTab)
+//       } else {
+//           tabs.insert(mediaTab, at: max(0, tabs.count - 1))
+//       }
+//        
+        availableTabs = tabs
         
         // 如果没有选中的标签，选中第一个
         if selectedTabKey == nil, let firstTab = availableTabs.first {

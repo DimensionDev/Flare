@@ -12,6 +12,10 @@ struct ProfileContentView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             ForEach(Array(tabs.enumerated()), id: \.element.key) { index, tab in
+//                if let mediaTab = tab as? FLProfileMediaTabItem {
+//                    ProfileMediaListScreen(accountType: accountType, userKey: userKey)
+//                        .tag(index)
+//                } else
                 if let timelineTab = tab as? FLTimelineTabItem,
                    let presenter = tabStore.getOrCreatePresenter(for: tab) {
                     TimelineView(

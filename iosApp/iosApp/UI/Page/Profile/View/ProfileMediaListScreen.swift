@@ -44,21 +44,21 @@ struct ProfileMediaListScreen: View {
     }
 
     var body: some View {
-        ObservePresenter<ProfileMediaState, ProfileMediaPresenter, AnyView>(presenter: presenter) { state in
-            AnyView(
-                WaterfallCollectionView(state: state) { item in
-                    ProfileMediaItemView(media: item.media, appSetting: appSettings) {
-                        let allImages = state.allMediaItems
-                        if !allImages.isEmpty,
-                           let mediaIndex = allImages.firstIndex(where: { $0 === item.media }) {
-                            print("Debug: Opening browser with \(allImages.count) images at index \(mediaIndex)")
-                            showPhotoBrowser(media: item.media, images: allImages, initialIndex: mediaIndex)
+                ObservePresenter<ProfileMediaState, ProfileMediaPresenter, AnyView>(presenter: presenter) { state in
+                    AnyView(
+                        WaterfallCollectionView(state: state) { item in
+                            ProfileMediaItemView(media: item.media, appSetting: appSettings) {
+                                let allImages = state.allMediaItems
+                                if !allImages.isEmpty,
+                                   let mediaIndex = allImages.firstIndex(where: { $0 === item.media }) {
+                                    print("Debug: Opening browser with \(allImages.count) images at index \(mediaIndex)")
+                                    showPhotoBrowser(media: item.media, images: allImages, initialIndex: mediaIndex)
+                                }
+                            }
                         }
-                    }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    )
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            )
-        }
 //        .navigationTitle("profile_tab_media")
     }
 

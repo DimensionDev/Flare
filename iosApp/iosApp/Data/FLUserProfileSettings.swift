@@ -119,6 +119,16 @@ public extension FLTabSettings {
                     userKey: user.key,
                     type: .statusWithReplies
                 ),
+//                FLProfileMediaTabItem(
+//                    metaData: FLTabMetaData(
+//                        title: .localized(.profileMedia),
+//                        icon: .mixed(.media, userKey: user.key)
+//                    ),
+//                    account: AccountTypeSpecific(accountKey: user.key),
+//                    userKey: user.key,
+//                    type: .media
+//                ),
+                
                 FLProfileXQTTimelineTabItem(
                     metaData: FLTabMetaData(
                         title: .localized(.profileLikes),
@@ -207,6 +217,8 @@ public extension FLTabSettings {
 //        FLProfileMediaTabItem(metaData: metaData, account: account as! AccountTypeSpecific, userKey: userKey)
 //    }
 //}
+
+
 
 // MARK: - Platform Specific Profile Tab Items
 // Bluesky
@@ -336,6 +348,25 @@ public struct FLProfileXQTTimelineTabItem: FLTimelineTabItem {
 //        FLProfileXQTMediaTabItem(metaData: metaData, account: account, userKey: userKey)
 //    }
 //}
+
+
+// MARK: - Profile Tab Items
+public struct FLProfileMediaTabItem: FLTabItem {
+    public let metaData: FLTabMetaData
+    public let account: AccountType
+    public let userKey: MicroBlogKey?
+    public var key: String { "profile_media_\(account)" }
+    
+    public init(metaData: FLTabMetaData, account: AccountTypeSpecific, userKey: MicroBlogKey?) {
+        self.metaData = metaData
+        self.account = account
+        self.userKey = userKey
+    }
+    
+    public func update(metaData: FLTabMetaData) -> FLTabItem {
+        FLProfileMediaTabItem(metaData: metaData, account: account as! AccountTypeSpecific, userKey: userKey)
+    }
+}
 
 // MARK: - Helper Extensions
 extension FLTabSettings.FLProfileTabType.TimelineType {

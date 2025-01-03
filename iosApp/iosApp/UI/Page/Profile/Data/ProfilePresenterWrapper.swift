@@ -3,6 +3,7 @@ import shared
 import SwiftUI
 import os.log
 
+//这个地方缓存ProfilePresenter 没用的。
 class ProfilePresenterWrapper: ObservableObject {
     // MARK: - Properties
     let presenter: ProfilePresenter

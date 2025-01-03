@@ -45,7 +45,6 @@
 		64BA00342D1AE1020053F205 /* JXPagingMainTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA002A2D1AE1020053F205 /* JXPagingMainTableView.swift */; };
 		64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */ = {isa = PBXBuildFile; productRef = 64BBDA712CFDD8420052E599 /* SwiftDate */; };
 		64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */; };
-		64CD6E712D1AA0C0004D61D0 /* ProfileTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CD6E702D1AA0C0004D61D0 /* ProfileTabView.swift */; };
 		64CE87B42D1EAADE00853E9A /* ProfilePresenterWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B32D1EAADE00853E9A /* ProfilePresenterWrapper.swift */; };
 		64CE87B62D229ABD00853E9A /* ProfileUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B52D229ABD00853E9A /* ProfileUserInfo.swift */; };
 		64CE87B82D23FAF200853E9A /* FLUserProfileSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B72D23FAF200853E9A /* FLUserProfileSettings.swift */; };
@@ -182,7 +181,6 @@
 		64BA002C2D1AE1020053F205 /* JXPagingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingView.swift; sourceTree = "<group>"; };
 		64BA002D2D1AE1020053F205 /* JXRTLFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXRTLFlowLayout.swift; sourceTree = "<group>"; };
 		64C855FF2CFD7F260071DCD8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
-		64CD6E702D1AA0C0004D61D0 /* ProfileTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabView.swift; sourceTree = "<group>"; };
 		64CE87B32D1EAADE00853E9A /* ProfilePresenterWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePresenterWrapper.swift; sourceTree = "<group>"; };
 		64CE87B52D229ABD00853E9A /* ProfileUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUserInfo.swift; sourceTree = "<group>"; };
 		64CE87B72D23FAF200853E9A /* FLUserProfileSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLUserProfileSettings.swift; sourceTree = "<group>"; };
@@ -681,7 +679,6 @@
 		64E8770B2D0430C7003559B9 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				64CD6E702D1AA0C0004D61D0 /* ProfileTabView.swift */,
 				64E877082D0430C7003559B9 /* ProfileMediaListScreen.swift */,
 				64E877092D0430C7003559B9 /* ProfileScreen.swift */,
 				64E8770A2D0430C7003559B9 /* ProfileWithUserNameScreen.swift */,
@@ -1173,7 +1170,6 @@
 				64E877582D0430C7003559B9 /* AppearanceScreen.swift in Sources */,
 				64E877592D0430C7003559B9 /* SettingsScreen.swift in Sources */,
 				64E8775A2D0430C7003559B9 /* MediaPreviewImageViewController.swift in Sources */,
-				64CD6E712D1AA0C0004D61D0 /* ProfileTabView.swift in Sources */,
 				64E877C52D083DF6003559B9 /* FlareMarkdownText.swift in Sources */,
 				64E877C62D083DF6003559B9 /* TwitterTextProvider.swift in Sources */,
 				64E8775B2D0430C7003559B9 /* ShareActivityProvider.swift in Sources */,

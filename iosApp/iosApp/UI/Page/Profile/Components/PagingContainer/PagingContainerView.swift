@@ -177,16 +177,18 @@ private class PagingViewController<Content: View>: UIViewController, JXPagingVie
         // 获取安全区域高度
         let topSafeArea = view.safeAreaInsets.top
         
-        // 计算滚动偏移量
+        // 计算滚动偏移量（考虑安全区域）
         let offsetY = scrollView.contentOffset.y + topSafeArea
         
-        // 处理 pinnedView 的位置
+        // 处理 pinnedView 的位置和外观
         if offsetY >= initialHeaderFrame.height {
-            // 固定在安全区域下方
+            // 固定在安全区域下方，并添加背景色
             pinnedVC.view.frame.origin.y = topSafeArea
+            pinnedVC.view.backgroundColor = UIColor(Colors.Background.swiftUIPrimary)
         } else {
             // 跟随滚动
             pinnedVC.view.frame.origin.y = initialHeaderFrame.height - offsetY
+            pinnedVC.view.backgroundColor = .clear
         }
         
         // 添加视差效果

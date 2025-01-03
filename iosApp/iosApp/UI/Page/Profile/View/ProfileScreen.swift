@@ -79,7 +79,7 @@ private struct ProfileScreenContent: View {
         ZStack {
             PagingContainerView {
                 if let info = userInfo {
-                    ProfileHeaderView(
+                    CommonProfileHeader(
                         userInfo: info,
                         state: state,
                         onFollowClick: { relation in

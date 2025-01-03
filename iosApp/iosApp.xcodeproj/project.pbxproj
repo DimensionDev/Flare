@@ -44,6 +44,7 @@
 		64BA00332D1AE1020053F205 /* JXRTLFlowLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA002D2D1AE1020053F205 /* JXRTLFlowLayout.swift */; };
 		64BA00342D1AE1020053F205 /* JXPagingMainTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA002A2D1AE1020053F205 /* JXPagingMainTableView.swift */; };
 		64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */ = {isa = PBXBuildFile; productRef = 64BBDA712CFDD8420052E599 /* SwiftDate */; };
+		64BECA5E2D280D27001D4E57 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BECA5D2D280D27001D4E57 /* ProfileHeaderView.swift */; };
 		64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */; };
 		64CE87B42D1EAADE00853E9A /* ProfilePresenterWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B32D1EAADE00853E9A /* ProfilePresenterWrapper.swift */; };
 		64CE87B62D229ABD00853E9A /* ProfileUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B52D229ABD00853E9A /* ProfileUserInfo.swift */; };
@@ -145,7 +146,6 @@
 		64EB7DAB2D0C4C0400E41656 /* FLTabSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */; };
 		64F7F1862D1D30ED00EDB720 /* ProfileContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F7F1832D1D30ED00EDB720 /* ProfileContentView.swift */; };
 		64F7F1872D1D30ED00EDB720 /* ProfileTabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F7F1852D1D30ED00EDB720 /* ProfileTabBarView.swift */; };
-		64F7F1882D1D30ED00EDB720 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F7F1842D1D30ED00EDB720 /* ProfileHeaderView.swift */; };
 		64F7F1892D1D30ED00EDB720 /* PagingContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F7F1812D1D30ED00EDB720 /* PagingContainerView.swift */; };
 		64FBF1512D1D3536006AAFD0 /* PagingListContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64FBF1502D1D3536006AAFD0 /* PagingListContainerView.swift */; };
 		B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */; };
@@ -180,6 +180,7 @@
 		64BA002B2D1AE1020053F205 /* JXPagingSmoothView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingSmoothView.swift; sourceTree = "<group>"; };
 		64BA002C2D1AE1020053F205 /* JXPagingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingView.swift; sourceTree = "<group>"; };
 		64BA002D2D1AE1020053F205 /* JXRTLFlowLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXRTLFlowLayout.swift; sourceTree = "<group>"; };
+		64BECA5D2D280D27001D4E57 /* ProfileHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileHeaderView.swift; sourceTree = "<group>"; };
 		64C855FF2CFD7F260071DCD8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		64CE87B32D1EAADE00853E9A /* ProfilePresenterWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePresenterWrapper.swift; sourceTree = "<group>"; };
 		64CE87B52D229ABD00853E9A /* ProfileUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUserInfo.swift; sourceTree = "<group>"; };
@@ -274,7 +275,6 @@
 		64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLTabSettings.swift; sourceTree = "<group>"; };
 		64F7F1812D1D30ED00EDB720 /* PagingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingContainerView.swift; sourceTree = "<group>"; };
 		64F7F1832D1D30ED00EDB720 /* ProfileContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileContentView.swift; sourceTree = "<group>"; };
-		64F7F1842D1D30ED00EDB720 /* ProfileHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileHeaderView.swift; sourceTree = "<group>"; };
 		64F7F1852D1D30ED00EDB720 /* ProfileTabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabBarView.swift; sourceTree = "<group>"; };
 		64FBF1502D1D3536006AAFD0 /* PagingListContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingListContainerView.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* Flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -649,9 +649,9 @@
 		64E877052D0430C7003559B9 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				64BECA5D2D280D27001D4E57 /* ProfileHeaderView.swift */,
 				64F7F1822D1D30ED00EDB720 /* PagingContainer */,
 				64F7F1832D1D30ED00EDB720 /* ProfileContentView.swift */,
-				64F7F1842D1D30ED00EDB720 /* ProfileHeaderView.swift */,
 				64F7F1852D1D30ED00EDB720 /* ProfileTabBarView.swift */,
 				64E877032D0430C7003559B9 /* User */,
 				64E877042D0430C7003559B9 /* UserAvatar.swift */,
@@ -1116,7 +1116,6 @@
 				64EB7DAB2D0C4C0400E41656 /* FLTabSettings.swift in Sources */,
 				64F7F1862D1D30ED00EDB720 /* ProfileContentView.swift in Sources */,
 				64F7F1872D1D30ED00EDB720 /* ProfileTabBarView.swift in Sources */,
-				64F7F1882D1D30ED00EDB720 /* ProfileHeaderView.swift in Sources */,
 				64F7F1892D1D30ED00EDB720 /* PagingContainerView.swift in Sources */,
 				64E8772B2D0430C7003559B9 /* ProfileScreen.swift in Sources */,
 				64E8772C2D0430C7003559B9 /* ServiceSelectScreen.swift in Sources */,
@@ -1210,6 +1209,7 @@
 				64E877732D0430C7003559B9 /* StorageScreen.swift in Sources */,
 				64E877742D0430C7003559B9 /* VGrid.swift in Sources */,
 				64E877752D0430C7003559B9 /* AppBarTabItem.swift in Sources */,
+				64BECA5E2D280D27001D4E57 /* ProfileHeaderView.swift in Sources */,
 				64E877762D0430C7003559B9 /* PublicScreen.swift in Sources */,
 				64E877772D0430C7003559B9 /* MediaPreviewViewController.swift in Sources */,
 				64E877782D0430C7003559B9 /* QuotedStatus.swift in Sources */,

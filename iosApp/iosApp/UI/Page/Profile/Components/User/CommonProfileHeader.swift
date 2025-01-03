@@ -46,38 +46,42 @@ struct CommonProfileHeader: View {
                         .scaledToFill()
                         .frame(height: CommonProfileHeaderConstants.headerHeight)
                         .clipped()
-                }.ignoresSafeArea()
+                }
                 .frame(height: CommonProfileHeaderConstants.headerHeight)
+                .ignoresSafeArea(edges: [.top, .horizontal])
             } else {
-                DynamicBannerBackground(avatarUrl: userInfo.profile.avatar).ignoresSafeArea()
+                DynamicBannerBackground(avatarUrl: userInfo.profile.avatar)
+                    .ignoresSafeArea(edges: [.top, .horizontal])
             }
             //user avatar
             VStack(alignment: .leading) {
+                Spacer().frame(height: 1)
 
-         Spacer().frame(height: 16)
-
-                HStack {
+                HStack(alignment: .center) {
                     //avatar
                     VStack {
                         Spacer()
                             .frame(
                                 height: CommonProfileHeaderConstants.headerHeight -
-                                CommonProfileHeaderConstants.avatarSize / 2
+                                CommonProfileHeaderConstants.avatarSize - 1
                             )
                         UserAvatar(data: userInfo.profile.avatar, size: CommonProfileHeaderConstants.avatarSize)
                     }
  
                     //user name
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Spacer()
-                            .frame(height: CommonProfileHeaderConstants.headerHeight)
+                            .frame(height: CommonProfileHeaderConstants.headerHeight -
+                                  CommonProfileHeaderConstants.avatarSize - 1)
                         Markdown(userInfo.profile.name.markdown)
                             .font(.headline)
                             .markdownInlineImageProvider(.emoji)
+                            .lineLimit(1)
                         HStack {
                             Text(userInfo.profile.handle)
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
+                                .lineLimit(1)
                             ForEach(0..<userInfo.profile.mark.count, id: \.self) { index in
                                 let mark = userInfo.profile.mark[index]
                                 switch mark {
@@ -88,13 +92,14 @@ struct CommonProfileHeader: View {
                                 }
                             }
                         }
-//                        Spacer()
-//                            .frame(height: CommonProfileHeaderConstants.headerHeight)
+                        .frame(height: 20)
+
                         HStack {
                             UserFollowsFansCount(
                                 followCount: userInfo.followCount,
                                 fansCount: userInfo.fansCount
                             )
+                            .frame(height: 20)
 
                             Spacer()
                             if !userInfo.isMe {
@@ -123,96 +128,87 @@ struct CommonProfileHeader: View {
                             }
                         }
                     }
-                    Spacer()
-                    // user relation
-                    VStack {
-
-                    }
+                   
                 }
-                Spacer()
-                Spacer()
-
+ 
                 //user desc
                 if let desc = userInfo.profile.description_?.markdown {
                     Markdown(desc)
                         .markdownInlineImageProvider(.emoji)
                 }
-                Spacer()
-                
+                 
                 //user follows -  user fans
 //                MatrixView(followCount: userInfo.profile.matrices.followsCountHumanized, fansCount: userInfo.profile.matrices.fansCountHumanized)
 
-                Spacer()
-                Spacer()
-
+  
                 //user Location  user url
-                if let bottomContent = userInfo.profile.bottomContent {
-                    switch onEnum(of: bottomContent) {
-                    case .fields(let data):
-                        // pawoo  的 一些个人 table Info List
-                        UserInfoFieldsView(fields: data.fields)
-                    case .iconify(let data):
-                        HStack(spacing: 8) {
-                            if let locationValue = data.items[.location] {
-                                    Label(
-                                    title: {
-                                        Markdown(locationValue.markdown)
-                                            .font(.caption2)
-                                            .markdownInlineImageProvider(.emoji)
-                                    },
-                                        icon: {
-                                            Image(uiImage: Asset.Image.Attributes.location.image
-                                                .withRenderingMode(.alwaysTemplate))
-                                            .imageScale(.small)
-                                        }
-                                    )
-                                    .labelStyle(CompactLabelStyle())
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color(.systemGray6))
-                                .cornerRadius(6)
-                                        }
+//                 if let bottomContent = userInfo.profile.bottomContent {
+//                     switch onEnum(of: bottomContent) {
+//                     case .fields(let data):
+//                         // pawoo  的 一些个人 table Info List
+//                         UserInfoFieldsView(fields: data.fields)
+//                     case .iconify(let data):
+//                         HStack(spacing: 8) {
+//                             if let locationValue = data.items[.location] {
+//                                     Label(
+//                                     title: {
+//                                         Markdown(locationValue.markdown)
+//                                             .font(.caption2)
+//                                             .markdownInlineImageProvider(.emoji)
+//                                     },
+//                                         icon: {
+//                                             Image(uiImage: Asset.Image.Attributes.location.image
+//                                                 .withRenderingMode(.alwaysTemplate))
+//                                             .imageScale(.small)
+//                                         }
+//                                     )
+//                                     .labelStyle(CompactLabelStyle())
+//                                 .padding(.horizontal, 8)
+//                                 .padding(.vertical, 4)
+//                                 .background(Color(.systemGray6))
+//                                 .cornerRadius(6)
+//                                         }
                             
-                            if let urlValue = data.items[.url] {
-                                    Label(
-                                    title: {
-                                        Markdown(urlValue.markdown)
-                                            .font(.caption2)
-                                            .markdownInlineImageProvider(.emoji)
-                                    },
-                                        icon: {
-                                            Image(uiImage: Asset.Image.Attributes.globe.image
-                                                .withRenderingMode(.alwaysTemplate))
-                                            .imageScale(.small)
-                                        }
-                                    )
-                                    .labelStyle(CompactLabelStyle())
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 4)
-                                .background(Color(.systemGray6))
-                                .cornerRadius(6)
-                            }
+//                             if let urlValue = data.items[.url] {
+//                                     Label(
+//                                     title: {
+//                                         Markdown(urlValue.markdown)
+//                                             .font(.caption2)
+//                                             .markdownInlineImageProvider(.emoji)
+//                                     },
+//                                         icon: {
+//                                             Image(uiImage: Asset.Image.Attributes.globe.image
+//                                                 .withRenderingMode(.alwaysTemplate))
+//                                             .imageScale(.small)
+//                                         }
+//                                     )
+//                                     .labelStyle(CompactLabelStyle())
+//                                 .padding(.horizontal, 8)
+//                                 .padding(.vertical, 4)
+//                                 .background(Color(.systemGray6))
+//                                 .cornerRadius(6)
+//                             }
 
-//                            if let verifyValue = data.items[.verify] {
-//                                Label(
-//                                    title: {
-//                                        Markdown(verifyValue.markdown)
-//                                            .font(.footnote)
-//                                            .markdownInlineImageProvider(.emoji)
-//                                    },
-//                                    icon: {
-//                                        Image("attributes/calendar").renderingMode(.template)
-//                                    }
-//                                )
-//                                .labelStyle(CompactLabelStyle())
-//                                .padding(.horizontal, 8)
-//                                .padding(.vertical, 4)
-//                                .background(Color(.systemGray6))
-//                                .cornerRadius(6)
-//                            }
-                        }
-                    }
-                }
+// //                            if let verifyValue = data.items[.verify] {
+// //                                Label(
+// //                                    title: {
+// //                                        Markdown(verifyValue.markdown)
+// //                                            .font(.footnote)
+// //                                            .markdownInlineImageProvider(.emoji)
+// //                                    },
+// //                                    icon: {
+// //                                        Image("attributes/calendar").renderingMode(.template)
+// //                                    }
+// //                                )
+// //                                .labelStyle(CompactLabelStyle())
+// //                                .padding(.horizontal, 8)
+// //                                .padding(.vertical, 4)
+// //                                .background(Color(.systemGray6))
+// //                                .cornerRadius(6)
+// //                            }
+//                         }
+//                     }
+//                 }
 
             }
             .padding([.horizontal])
@@ -299,6 +295,7 @@ struct DynamicBannerBackground: View {
                 }
                 .clipped()
         }
+        .frame(maxWidth: .infinity)
         .frame(height: CommonProfileHeaderConstants.headerHeight)
     }
 }

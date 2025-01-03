@@ -37,6 +37,8 @@ struct ProfileTabBarView: View {
             }
             .padding(.horizontal)
         }
+        .frame(height: 44)
+        .padding(.top, 18)
         .background(Colors.Background.swiftUIPrimary)
     }
 } 

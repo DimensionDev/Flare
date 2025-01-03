@@ -32,34 +32,38 @@ extension ProfileMediaState {
 
 // MARK: - ProfileMediaListScreen
 struct ProfileMediaListScreen: View {
-    @State private var presenter: ProfileMediaPresenter
+    @ObservedObject var tabStore: ProfileTabSettingStore
     @State private var refreshing = false
     @State private var selectedMedia: (media: UiMedia, index: Int)?
     @State private var showingMediaPreview = false
     @Environment(\.appSettings) private var appSettings
     @Environment(\.dismiss) private var dismiss
     
-    init(accountType: AccountType, userKey: MicroBlogKey?) {
-        presenter = .init(accountType: accountType, userKey: userKey)
+    init(accountType: AccountType, userKey: MicroBlogKey?, tabStore: ProfileTabSettingStore) {
+        self.tabStore = tabStore
     }
 
     var body: some View {
-                ObservePresenter<ProfileMediaState, ProfileMediaPresenter, AnyView>(presenter: presenter) { state in
-                    AnyView(
-                        WaterfallCollectionView(state: state) { item in
-                            ProfileMediaItemView(media: item.media, appSetting: appSettings) {
-                                let allImages = state.allMediaItems
-                                if !allImages.isEmpty,
-                                   let mediaIndex = allImages.firstIndex(where: { $0 === item.media }) {
-                                    print("Debug: Opening browser with \(allImages.count) images at index \(mediaIndex)")
-                                    showPhotoBrowser(media: item.media, images: allImages, initialIndex: mediaIndex)
-                                }
+        if let presenter = tabStore.currentMediaPresenter {
+            ObservePresenter<ProfileMediaState, ProfileMediaPresenter, AnyView>(presenter: presenter) { state in
+                AnyView(
+                    WaterfallCollectionView(state: state) { item in
+                        ProfileMediaItemView(media: item.media, appSetting: appSettings) {
+                            let allImages = state.allMediaItems
+                            if !allImages.isEmpty,
+                               let mediaIndex = allImages.firstIndex(where: { $0 === item.media }) {
+                                print("Debug: Opening browser with \(allImages.count) images at index \(mediaIndex)")
+                                showPhotoBrowser(media: item.media, images: allImages, initialIndex: mediaIndex)
                             }
                         }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    )
-                }
-//        .navigationTitle("profile_tab_media")
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                )
+            }
+        } else {
+            ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
     }
 
     private func showPhotoBrowser(media: UiMedia, images: [UiMedia], initialIndex: Int) {
@@ -601,41 +605,4 @@ extension MediaBrowserVideoCell: JXPhotoBrowserCell {
         return instance
     }
 }
-
-//struct SensitiveContentButton: View {
-//    let hideSensitive: Bool
-//    let action: () -> Void
-//    
-//    var body: some View {
-//        if hideSensitive {
-//            Button(action: {
-//                action()
-//            }, label: {
-//                Text("status_sensitive_media_show", comment: "Status media sensitive button")
-//                    .foregroundColor(.white)
-//                    .padding(.horizontal, 16)
-//                    .padding(.vertical, 8)
-//                    .background(.ultraThinMaterial)
-//                    .cornerRadius(8)
-//            })
-//            .buttonStyle(.plain)
-//            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-//        } else {
-//            VStack {
-//                HStack {
-//                    Button(action: {
-//                        action()
-//                    }, label: {
-//                        Image(systemName: "eye.slash")
-//                            .foregroundColor(Color(uiColor: UIColor.systemBackground))
-//                    })
-//                    .padding()
-//                    .buttonStyle(.borderedProminent)
-//                    .tint(Color.primary)
-//                    Spacer()
-//                }
-//                Spacer()
-//            }
-//        }
-//    }
-//}
+ 

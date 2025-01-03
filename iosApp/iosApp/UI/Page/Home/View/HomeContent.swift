@@ -176,7 +176,7 @@ struct HomeContent: View {
                                 accountType: accountType,
                                 userKey: nil,
                                 toProfileMedia: { key in
-                                    router.navigate(to: AppleRoute.ProfileMedia(accountType: accountType, userKey: key))
+                                    print("Media tab is now integrated in Profile page")
                                 }
                             )
                         }

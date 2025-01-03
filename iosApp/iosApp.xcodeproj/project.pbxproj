@@ -37,7 +37,6 @@
 		6498BDEC2D15F1F500C52324 /* GoogleTranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6498BDE02D15F1F500C52324 /* GoogleTranslationService.swift */; };
 		6498BDED2D15F1F500C52324 /* AppleTranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6498BDDF2D15F1F500C52324 /* AppleTranslationService.swift */; };
 		64BA00252D1AD84D0053F205 /* JXPhotoBrowser in Frameworks */ = {isa = PBXBuildFile; productRef = 64BA00242D1AD84D0053F205 /* JXPhotoBrowser */; };
-		64BA00272D1AE0630053F205 /* ProfilePagingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA00262D1AE0630053F205 /* ProfilePagingView.swift */; };
 		64BA002F2D1AE1020053F205 /* JXPagingListContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA00282D1AE1020053F205 /* JXPagingListContainerView.swift */; };
 		64BA00302D1AE1020053F205 /* JXPagingListRefreshView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA00292D1AE1020053F205 /* JXPagingListRefreshView.swift */; };
 		64BA00312D1AE1020053F205 /* JXPagingSmoothView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA002B2D1AE1020053F205 /* JXPagingSmoothView.swift */; };
@@ -176,7 +175,6 @@
 		6498BDE32D15F1F500C52324 /* TranslateButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslateButton.swift; sourceTree = "<group>"; };
 		6498BDE42D15F1F500C52324 /* TranslationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationService.swift; sourceTree = "<group>"; };
 		6498BDE52D15F1F500C52324 /* TranslationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationViewModel.swift; sourceTree = "<group>"; };
-		64BA00262D1AE0630053F205 /* ProfilePagingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePagingView.swift; sourceTree = "<group>"; };
 		64BA00282D1AE1020053F205 /* JXPagingListContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingListContainerView.swift; sourceTree = "<group>"; };
 		64BA00292D1AE1020053F205 /* JXPagingListRefreshView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingListRefreshView.swift; sourceTree = "<group>"; };
 		64BA002A2D1AE1020053F205 /* JXPagingMainTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingMainTableView.swift; sourceTree = "<group>"; };
@@ -683,7 +681,6 @@
 		64E8770B2D0430C7003559B9 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				64BA00262D1AE0630053F205 /* ProfilePagingView.swift */,
 				64CD6E702D1AA0C0004D61D0 /* ProfileTabView.swift */,
 				64E877082D0430C7003559B9 /* ProfileMediaListScreen.swift */,
 				64E877092D0430C7003559B9 /* ProfileScreen.swift */,
@@ -1181,7 +1178,6 @@
 				64E877C62D083DF6003559B9 /* TwitterTextProvider.swift in Sources */,
 				64E8775B2D0430C7003559B9 /* ShareActivityProvider.swift in Sources */,
 				64E8775C2D0430C7003559B9 /* TabSettingsStore.swift in Sources */,
-				64BA00272D1AE0630053F205 /* ProfilePagingView.swift in Sources */,
 				64E8775D2D0430C7003559B9 /* UIImage.swift in Sources */,
 				64E8775E2D0430C7003559B9 /* MediaPreviewViewModel.swift in Sources */,
 				64E8775F2D0430C7003559B9 /* ProfileWithUserNameScreen.swift in Sources */,

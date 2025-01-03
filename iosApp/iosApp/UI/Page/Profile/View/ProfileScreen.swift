@@ -6,6 +6,7 @@ import os.log
 
 struct ProfileScreen: View {
     //MicroBlogKey host+id
+    // 已集成到 Profile 页面的 tab 中，不再需要单独导航
     let toProfileMedia: (MicroBlogKey) -> Void
     let accountType: AccountType
     let userKey: MicroBlogKey?
@@ -92,24 +93,25 @@ private struct ProfileScreenContent: View {
                 let _ = os_log("[📔][ProfileScreen]pinnedView: availableTabs=%{public}d", log: .default, type: .debug, tabStore.availableTabs.count)
                 
                 VStack {
-                    ProfileTabBarView(
+                ProfileTabBarView(
                         tabs: tabStore.availableTabs,
-                        selectedTab: $selectedTab,
-                        onTabSelected: { index in
-                            os_log("[📔][ProfileScreen]选择标签页: index=%{public}d", log: .default, type: .debug, index)
-                            withAnimation {
-                                selectedTab = index
-                                if index < tabStore.availableTabs.count {
-                                    tabStore.selectTab(tabStore.availableTabs[index].key)
-                                }
+                    selectedTab: $selectedTab,
+                    onTabSelected: { index in
+                        os_log("[📔][ProfileScreen]选择标签页: index=%{public}d", log: .default, type: .debug, index)
+                        withAnimation {
+                            selectedTab = index
+                            if index < tabStore.availableTabs.count {
+                                let selectedTab = tabStore.availableTabs[index]
+                                tabStore.updateCurrentPresenter(for: selectedTab)
                             }
                         }
+                    }
                     )
                     .onAppear {
                         os_log("[📔][ProfileScreen][pinnedView]ProfileTabBarView 已加载: selectedTab=%{public}d, tabsCount=%{public}d", log: .default, type: .debug, selectedTab, tabStore.availableTabs.count)
-                    }
-                    .onDisappear {
-                        os_log("[📔][ProfileScreen][pinnedView]ProfileTabBarView 已卸载", log: .default, type: .debug)
+                }
+                .onDisappear {
+                    os_log("[📔][ProfileScreen][pinnedView]ProfileTabBarView 已卸载", log: .default, type: .debug)
                     }
                 }
             } content: {

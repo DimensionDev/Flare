@@ -7,33 +7,27 @@ struct ProfileContentView: View {
     let refresh: () async -> Void
     let accountType: AccountType
     let userKey: MicroBlogKey?
-    let tabStore: ProfileTabSettingStore
+    @ObservedObject var tabStore: ProfileTabSettingStore
     
     var body: some View {
-        TabView(selection: $selectedTab) {
-            ForEach(Array(tabs.enumerated()), id: \.element.key) { index, tab in
-//                if let mediaTab = tab as? FLProfileMediaTabItem {
-//                    ProfileMediaListScreen(accountType: accountType, userKey: userKey)
-//                        .tag(index)
-//                } else
-                if let timelineTab = tab as? FLTimelineTabItem,
-                   let presenter = tabStore.getOrCreatePresenter(for: tab) {
-                    TimelineView(
-                        presenter: presenter,
-                        refresh: refresh
-                    )
-                    .tag(index)
-                }
+        if let selectedTab = tabStore.availableTabs.first(where: { $0.key == tabStore.selectedTabKey }) {
+            if selectedTab is FLProfileMediaTabItem {
+                ProfileMediaListScreen(accountType: accountType, userKey: userKey, tabStore: tabStore)
+            } else if let presenter = tabStore.currentPresenter {
+                TimelineView(
+                    presenter: presenter,
+                    refresh: refresh
+                )
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Colors.Background.swiftUIPrimary)
             }
+        } else {
+            ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Colors.Background.swiftUIPrimary)
         }
-        .onChange(of: selectedTab) { newIndex in
-            if newIndex < tabs.count {
-                let selectedTab = tabs[newIndex]
-                tabStore.selectTab(selectedTab.key)
-            }
-        }
-        .tabViewStyle(.page(indexDisplayMode: .never))
-        .background(Colors.Background.swiftUIPrimary)
     }
 }
 

@@ -47,6 +47,16 @@ compose.desktop {
             packageName = "dev.dimension.flare"
             packageVersion = "1.0.0"
         }
+        buildTypes {
+            release {
+                proguard {
+                    version.set("7.6.1")
+                    this.configurationFiles.from(
+                        file("proguard-rules.pro")
+                    )
+                }
+            }
+        }
     }
 }
 

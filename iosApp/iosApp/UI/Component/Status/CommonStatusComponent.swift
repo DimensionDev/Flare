@@ -70,7 +70,7 @@ struct CommonStatusComponent: View {
                         .frame(height: 8)
                 }
             }
-            if expanded || data.contentWarning == nil || data.contentWarning?.raw?.isEmpty == true {
+            if expanded || data.contentWarning == nil || data.contentWarning?.raw.isEmpty == true {
                 Markdown(data.content.markdown)
                     .font(.body)
                     .markdownInlineImageProvider(.emoji)

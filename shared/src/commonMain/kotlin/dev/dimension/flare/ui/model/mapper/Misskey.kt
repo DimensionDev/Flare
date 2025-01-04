@@ -313,7 +313,10 @@ internal fun Note.renderStatus(
                 ?.mapNotNull { file ->
                     file.toUi()
                 }?.toPersistentList() ?: persistentListOf(),
-        contentWarning = cw,
+        contentWarning =
+            cw?.let {
+                misskeyParser.parse(it).toHtml(accountKey).toUi()
+            },
         user = user,
         quote =
             listOfNotNull(

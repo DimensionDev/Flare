@@ -11,18 +11,19 @@ import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.TranslatorOptions
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 
 @Composable
 fun statusTranslatePresenter(
-    contentWarning: String?,
+    contentWarning: UiRichText?,
     content: Element,
 ): TranslateResult {
     val text = content.text()
     val contentWarningState =
         contentWarning?.let {
-            translateText(it)
+            translateText(it.innerText)
         }
     val textState = translateText(text)
     return TranslateResult(

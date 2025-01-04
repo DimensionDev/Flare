@@ -58,7 +58,7 @@ public data class UiTimeline internal constructor(
         public data class Status internal constructor(
             val images: ImmutableList<UiMedia>,
             val sensitive: Boolean,
-            val contentWarning: String?,
+            val contentWarning: UiRichText?,
             val user: UiUserV2?,
             val quote: ImmutableList<Status>,
             val content: UiRichText,

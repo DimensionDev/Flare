@@ -203,7 +203,13 @@ private fun Status.renderStatus(
                 ?.mapNotNull { attachment ->
                     attachment.toUi(sensitive = sensitive ?: false)
                 }?.toPersistentList() ?: persistentListOf(),
-        contentWarning = spoilerText,
+        contentWarning =
+            spoilerText?.let {
+                Element("span")
+                    .apply {
+                        appendText(it)
+                    }.toUi()
+            },
         user = actualUser,
         quote = persistentListOf(),
         content = parseMastodonContent(this, accountKey, host).toUi(),

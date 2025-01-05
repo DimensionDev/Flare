@@ -67,7 +67,7 @@ private fun UiTimeline.contains(keywords: List<String>): Boolean {
         if (content is UiTimeline.ItemContent.Status) {
             listOfNotNull(
                 content.content.raw,
-                content.contentWarning,
+                content.contentWarning?.raw,
             )
         } else {
             emptyList()

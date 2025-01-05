@@ -622,6 +622,10 @@ private val misskeyParser by lazy {
     MFMParser()
 }
 
+private val misskeyNameParser by lazy {
+    MFMParser(emojiOnly = true)
+}
+
 private fun parseName(
     name: String,
     accountKey: MicroBlogKey,
@@ -629,7 +633,7 @@ private fun parseName(
     if (name.isEmpty()) {
         return Element("body")
     }
-    return misskeyParser.parse(name).toHtml(accountKey) as? Element ?: Element("body")
+    return misskeyNameParser.parse(name).toHtml(accountKey) as? Element ?: Element("body")
 }
 
 private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): Element =

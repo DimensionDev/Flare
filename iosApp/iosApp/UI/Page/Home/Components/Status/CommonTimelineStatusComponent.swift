@@ -1,4 +1,5 @@
 import Awesome
+import MarkdownUI
 import JXPhotoBrowser
 import Kingfisher
 // import MarkdownUI
@@ -109,14 +110,16 @@ struct CommonTimelineStatusComponent: View {
                     .frame(height: 4)
             }
 
-            if let cwText = data.contentWarning, !cwText.isEmpty {
+            if let cwText = data.contentWarning, !cwText.raw.isEmpty {
                 Button(action: {
                     withAnimation {
                         expanded = !expanded
                     }
                 }, label: {
                     Image(systemName: "exclamationmark.triangle")
-                    Text(cwText)
+                    Markdown(cwText.markdown)
+                                           .font(.body)
+                                           .markdownInlineImageProvider(.emoji)
                     Spacer()
                     if expanded {
                         Image(systemName: "arrowtriangle.down.circle.fill")
@@ -133,7 +136,7 @@ struct CommonTimelineStatusComponent: View {
                 }
             }
             // tweet content
-            if expanded || data.contentWarning == nil || data.contentWarning?.isEmpty == true {
+            if expanded || data.contentWarning == nil || data.contentWarning?.raw.isEmpty == true {
                 Spacer()
                     .frame(height: 10)
                 

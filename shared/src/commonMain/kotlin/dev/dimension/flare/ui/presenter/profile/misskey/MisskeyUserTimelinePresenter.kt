@@ -19,7 +19,7 @@ import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class MisskeyUserTimelinePresenter(
+public class MisskeyUserTimelinePresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey?,
     private val type: ProfileTab.Timeline.Type

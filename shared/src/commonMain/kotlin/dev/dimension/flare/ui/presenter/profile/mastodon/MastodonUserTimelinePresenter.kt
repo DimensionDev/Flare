@@ -22,14 +22,18 @@ import org.koin.core.component.inject
 public class MastodonUserTimelinePresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey?,
-    private val type: ProfileTab.Timeline.Type
-) : TimelinePresenter(), KoinComponent {
+    private val type: ProfileTab.Timeline.Type,
+) : TimelinePresenter(),
+    KoinComponent {
     private val accountRepository: AccountRepository by inject()
 
     @Composable
     override fun listState(): PagingState<UiTimeline> {
         val scope = rememberCoroutineScope()
-        val serviceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
+        val serviceState = accountServiceProvider(
+            accountType = accountType,
+            repository = accountRepository,
+        )
         return serviceState
             .map { service ->
                 require(service is MastodonDataSource)
@@ -40,28 +44,32 @@ public class MastodonUserTimelinePresenter(
                             service.profileTabs(
                                 userKey = actualUserKey,
                                 scope = scope,
-                            ).filterIsInstance<ProfileTab.Timeline>()
-                             .first { it.type == type }
-                             .flow
+                            )
+                                .filterIsInstance<ProfileTab.Timeline>()
+                                .first { it.type == type }
+                                .flow
                         }
                         ProfileTab.Timeline.Type.StatusWithReplies -> {
                             service.profileTabs(
                                 userKey = actualUserKey,
                                 scope = scope,
-                            ).filterIsInstance<ProfileTab.Timeline>()
-                             .first { it.type == type }
-                             .flow
+                            )
+                                .filterIsInstance<ProfileTab.Timeline>()
+                                .first { it.type == type }
+                                .flow
                         }
                         ProfileTab.Timeline.Type.Likes -> {
                             service.profileTabs(
                                 userKey = actualUserKey,
                                 scope = scope,
-                            ).filterIsInstance<ProfileTab.Timeline>()
-                             .first { it.type == type }
-                             .flow
+                            )
+                                .filterIsInstance<ProfileTab.Timeline>()
+                                .first { it.type == type }
+                                .flow
                         }
                     }
                 }.collectAsLazyPagingItems()
-            }.toPagingState()
+            }
+            .toPagingState()
     }
 } 

@@ -262,6 +262,11 @@ public data class UiTimeline internal constructor(
                 public data class App internal constructor(
                     val id: String,
                 ) : Misskey
+
+                public data class UnKnown internal constructor(
+                    val type: String,
+                    val id: String,
+                ) : Misskey
             }
 
             public sealed interface Bluesky : MessageType {

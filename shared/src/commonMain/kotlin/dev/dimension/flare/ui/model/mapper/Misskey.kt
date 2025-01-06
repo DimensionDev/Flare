@@ -59,8 +59,12 @@ internal fun Notification.render(
         (references[ReferenceType.Notification] as? StatusContent.Misskey)
             ?.data
             ?.renderStatus(accountKey, event)
+    val notificationType =
+        runCatching {
+            NotificationType.entries.first { it.value == type }
+        }.getOrNull()
     val topMessageType =
-        when (this.type) {
+        when (notificationType) {
             NotificationType.Follow ->
                 UiTimeline.TopMessage.MessageType.Misskey
                     .Follow(id = id)
@@ -99,9 +103,12 @@ internal fun Notification.render(
             NotificationType.App ->
                 UiTimeline.TopMessage.MessageType.Misskey
                     .App(id = id)
+            else ->
+                UiTimeline.TopMessage.MessageType.Misskey
+                    .UnKnown(id = id, type = type)
         }
     val icon =
-        when (this.type) {
+        when (notificationType) {
             NotificationType.Follow -> UiTimeline.TopMessage.Icon.Follow
             NotificationType.Mention -> UiTimeline.TopMessage.Icon.Mention
             NotificationType.Reply -> UiTimeline.TopMessage.Icon.Reply
@@ -113,6 +120,7 @@ internal fun Notification.render(
             NotificationType.FollowRequestAccepted -> UiTimeline.TopMessage.Icon.Follow
             NotificationType.AchievementEarned -> UiTimeline.TopMessage.Icon.Info
             NotificationType.App -> UiTimeline.TopMessage.Icon.Info
+            else -> UiTimeline.TopMessage.Icon.Info
         }
     val topMessage =
         UiTimeline.TopMessage(
@@ -130,7 +138,7 @@ internal fun Notification.render(
         topMessage = topMessage,
         content =
             when {
-                type in
+                notificationType in
                     listOf(
                         NotificationType.Follow,
                         NotificationType.FollowRequestAccepted,

@@ -309,7 +309,7 @@ internal interface AccountApi {
      *
      * @param inotificationsRequest * @return [kotlin.collections.List<Notification>]
      */
-    @POST("i/notifications-grouped")
+    @POST("i/notifications")
     suspend fun iNotifications(
         @Body inotificationsRequest: INotificationsRequest,
     ): Response<kotlin.collections.List<Notification>>

@@ -62,63 +62,52 @@ struct ServiceSelectScreen: View {
                     }
                 }
                 .padding()
-                List {
-                    if state.canNext,
-                       case let .success(success) = onEnum(of: state.detectedPlatformType)
-                    {
-                        switch success.data.toSwiftEnum() {
-                        case .bluesky:
-                            blueskyLoginView(state: state)
-                        case .mastodon:
-                            mastodonLoginView(state: state)
-                        case .misskey:
-                            misskeyLoginView(state: state)
-                        case .xQt:
-                            xqtLoginView(state: state)
-                        case .vvo:
-                            vvoLoginView(state: state)
-                        }
-                    } else if case let .success(success) = onEnum(of: state.instances) {
-                        LazyVStack(spacing: 10) {
+                ScrollView {
+                    LazyVStack(spacing: 8) {
+                        if state.canNext,
+                           case let .success(success) = onEnum(of: state.detectedPlatformType)
+                        {
+                            switch success.data.toSwiftEnum() {
+                            case .bluesky:
+                                blueskyLoginView(state: state)
+                            case .mastodon:
+                                mastodonLoginView(state: state)
+                            case .misskey:
+                                misskeyLoginView(state: state)
+                            case .xQt:
+                                xqtLoginView(state: state)
+                            case .vvo:
+                                vvoLoginView(state: state)
+                            }
+                        } else if case let .success(success) = onEnum(of: state.instances) {
                             ForEach(0 ..< success.itemCount, id: \.self) { index in
                                 let item = success.peek(index: index)
-                                ZStack {
-                                    switch item {
-                                    case let .some(instance):
-                                        Button(action: {
-                                            instanceURL = instance.domain
-                                            state.setFilter(value: instance.domain)
-                                        }, label: {
-                                            instanceCardView(instance: instance)
-                                        })
-                                        .buttonStyle(.plain)
-                                        .clipShape(RoundedRectangle(cornerRadius: 12))
-                                        .shadow(radius: 2)
-                                        // .padding(.horizontal)
-                                        .padding(.vertical, 4)
-                                    case .none:
-                                        InstancePlaceHolder()
-                                    }
+                                if let instance = item {
+                                    Button(action: {
+                                        instanceURL = instance.domain
+                                        state.setFilter(value: instance.domain)
+                                    }, label: {
+                                        instanceCardView(instance: instance)
+                                    })
+                                    .buttonStyle(.plain)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                                    .shadow(radius: 2)
+                                    .padding(.vertical, 4)
+                                } else {
+                                    InstancePlaceHolder()
                                 }
-                                .onAppear {
-                                    success.get(index: index)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .listRowSeparator(.hidden)
                             }
+                        } else if state.instances.isLoading {
+                            ForEach(0 ... 5, id: \.self) { _ in  // 减少占位符数量
+                                InstancePlaceHolder()
+                            }
+                        } else {
+                            Text("service_select_no_instance")
                         }
-                    } else if state.instances.isLoading {
-                        ForEach(0 ... 10, id: \.self) { _ in
-                            InstancePlaceHolder()
-                                .listRowSeparator(.hidden)
-                        }
-                    } else {
-                        Text("service_select_no_instance")
-                            .listRowSeparator(.hidden)
                     }
+                    .padding(.horizontal)
                 }
             }
-            .listStyle(.plain)
             .frame(maxHeight: .infinity, alignment: .top)
             .sheet(isPresented: $showXQT) {
                 XQTLoginScreen(toHome: {
@@ -252,6 +241,12 @@ struct ServiceSelectScreen: View {
                 // 背景层
                 if let bannerUrl = instance.bannerUrl {
                     KFImage(URL(string: bannerUrl))
+                        .placeholder { // 添加占位符
+                            Rectangle()
+                                .foregroundColor(.gray.opacity(0.2))
+                        }
+                        .setProcessor(DownsamplingImageProcessor(size: CGSize(width: 300, height: 80)))
+                        .fade(duration: 0.25)
                         .resizable()
                         .scaledToFill()
                         .frame(maxWidth: .infinity)
@@ -264,6 +259,12 @@ struct ServiceSelectScreen: View {
                     Group {
                         if let iconUrl = instance.iconUrl, !iconUrl.isEmpty, URL(string: iconUrl) != nil {
                             KFImage(URL(string: iconUrl))
+                                .placeholder { // 添加占位符
+                                    Circle()
+                                        .foregroundColor(.gray.opacity(0.2))
+                                }
+                                .setProcessor(DownsamplingImageProcessor(size: CGSize(width: 48, height: 48)))
+                                .fade(duration: 0.25)
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 48, height: 48)

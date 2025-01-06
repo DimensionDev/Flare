@@ -1,4 +1,5 @@
 import SwiftUI
+import Generated
 import shared
 import Awesome
 
@@ -84,6 +85,11 @@ struct HomeContent: View {
         let timelineStore = TimelineStore(accountType: accountType)
         self._timelineStore = StateObject(wrappedValue: timelineStore)
         self._tabSettingsStore = StateObject(wrappedValue: TabSettingsStore(timelineStore: timelineStore))
+        
+        if accountType is AccountTypeGuest {
+            //未登录
+            timelineStore.currentPresenter = HomeTimelinePresenter(accountType: accountType)
+        }
     }
     
     var body: some View {

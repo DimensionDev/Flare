@@ -4,21 +4,19 @@ import PackageDescription
 let package = Package(
     name: "Generated",
     platforms: [
-        .iOS(.v14),
-        .macOS(.v11)
+        .iOS(.v14)
     ],
     products: [
         .library(
             name: "Generated",
-            type: .dynamic,
             targets: ["Generated"]),
     ],
+    dependencies: [],
     targets: [
         .target(
             name: "Generated",
             dependencies: [],
-            path: "Sources",
-            publicHeadersPath: nil
+            path: "Sources"
         )
     ]
 )

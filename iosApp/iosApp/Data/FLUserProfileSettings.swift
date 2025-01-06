@@ -10,7 +10,7 @@ public typealias UiUserV2 = shared.UiUserV2
 public typealias ProfileTab = shared.ProfileTab
 public typealias AccountTypeSpecific = shared.AccountTypeSpecific
 
-// MARK: - Profile Tab Settings
+//  - Profile Tab Settings
 public extension FLTabSettings {
     // Profile Tab 类型
     public enum FLProfileTabType {
@@ -166,7 +166,7 @@ public extension FLTabSettings {
     }
 }
 
-// MARK: - Profile Tab Items
+//  - Profile Tab Items
 // public struct FLProfileTimelineTabItem: FLTimelineTabItem {
 //     public let metaData: FLTabMetaData
 //     public let account: AccountType
@@ -220,7 +220,7 @@ public extension FLTabSettings {
 
 
 
-// MARK: - Platform Specific Profile Tab Items
+//  - Platform Specific Profile Tab Items
 // Bluesky
 public struct FLProfileBlueskyTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
@@ -350,7 +350,7 @@ public struct FLProfileXQTTimelineTabItem: FLTimelineTabItem {
 //}
 
 
-// MARK: - Profile Tab Items
+//  - Profile Tab Items
 public struct FLProfileMediaTabItem: FLTabItem {
     public let metaData: FLTabMetaData
     public let account: AccountType
@@ -368,7 +368,7 @@ public struct FLProfileMediaTabItem: FLTabItem {
     }
 }
 
-// MARK: - Helper Extensions
+//  - Helper Extensions
 extension FLTabSettings.FLProfileTabType.TimelineType {
     func toProfileTabType() -> ProfileTabTimeline.Type_ {
         switch self {

@@ -6,14 +6,14 @@ import OrderedCollections
 import Kingfisher
 import JXPhotoBrowser
 
-// MARK: - ProfileMediaGridItem
+//  - ProfileMediaGridItem
 struct ProfileMediaGridItem: Identifiable {
     let id: Int
     let media: UiMedia
     let mediaState: UiTimeline
 }
 
-// MARK: - ProfileMediaState Extension
+//  - ProfileMediaState Extension
 extension ProfileMediaState {
     var allMediaItems: [UiMedia] {
         var items: [UiMedia] = []
@@ -30,7 +30,7 @@ extension ProfileMediaState {
     }
 }
 
-// MARK: - ProfileMediaListScreen
+//  - ProfileMediaListScreen
 struct ProfileMediaListScreen: View {
     @ObservedObject var tabStore: ProfileTabSettingStore
     @State private var refreshing = false
@@ -151,7 +151,7 @@ struct ProfileMediaListScreen: View {
     }
 }
 
-// MARK: - WaterfallCollectionView
+//  - WaterfallCollectionView
 struct WaterfallCollectionView: UIViewRepresentable {
     let state: ProfileMediaState
     let content: (ProfileMediaGridItem) -> AnyView
@@ -207,7 +207,7 @@ struct WaterfallCollectionView: UIViewRepresentable {
             }
         }
 
-        // MARK: - UICollectionViewDataSource
+        //  - UICollectionViewDataSource
         func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
             print("numberOfItemsInSection: \(items.count)")
             return items.count
@@ -221,7 +221,7 @@ struct WaterfallCollectionView: UIViewRepresentable {
             return cell
         }
 
-        // MARK: - ZJFlexibleDataSource
+        //  - ZJFlexibleDataSource
         func numberOfCols(at section: Int) -> Int {
             return 2
         }
@@ -274,7 +274,7 @@ struct WaterfallCollectionView: UIViewRepresentable {
     }
 }
 
-// MARK: - HostingCell
+//  - HostingCell
 class HostingCell: UICollectionViewCell {
     private var hostingController: UIHostingController<AnyView>?
 
@@ -434,7 +434,7 @@ struct ProfileMediaItemView: View {
     }
 }
 
-// MARK: - VideoCell
+//  - VideoCell
 class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
     weak var photoBrowser: JXPhotoBrowser?
     private var videoViewController: MediaPreviewVideoViewController?
@@ -597,7 +597,7 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
     }
 }
 
-// MARK: - JXPhotoBrowserCell
+//  - JXPhotoBrowserCell
 extension MediaBrowserVideoCell: JXPhotoBrowserCell {
     static func generate(with browser: JXPhotoBrowser) -> Self {
         let instance = Self.init(frame: .zero)

@@ -5,11 +5,11 @@ import os.log
 
 //这个地方缓存ProfilePresenter 没用的。
 class ProfilePresenterWrapper: ObservableObject {
-    // MARK: - Properties
+    //  - Properties
     let presenter: ProfilePresenter
 //    @Published private(set) var tabStore: ProfileTabStore
     
-    // MARK: - Init
+    //  - Init
     init(accountType: AccountType, userKey: MicroBlogKey?) {
         os_log("[📔][ProfilePresenterWrapper - init]初始化: accountType=%{public}@, userKey=%{public}@", log: .default, type: .debug, String(describing: accountType), userKey?.description ?? "nil")
      
@@ -17,7 +17,7 @@ class ProfilePresenterWrapper: ObservableObject {
 //        self.tabStore = ProfileTabStore(accountType: accountType, userKey: userKey)
     }
     
-    // MARK: - Memory Management
+    //  - Memory Management
     func handleMemoryWarning() {
         os_log("[📔][ProfilePresenterWrapper]处理内存警告", log: .default, type: .debug)
 //        tabStore.handleMemoryWarning()
@@ -29,7 +29,7 @@ class ProfilePresenterWrapper: ObservableObject {
     }
 }
 
-// MARK: - Presenter Extensions
+//  - Presenter Extensions
 extension ProfilePresenter {
 //    var tabs: [ProfileStateTab] {
 //        if case .success(let tabs) = onEnum(of: models.value.tabs) {

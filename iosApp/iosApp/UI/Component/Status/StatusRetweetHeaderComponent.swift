@@ -43,7 +43,7 @@ struct StatusRetweetHeaderComponent: View {
             case .receiveFollowRequest: String(localized: "misskey_notification_receive_follow_request")
             case .renote: String(localized: "misskey_notification_renote")
             case .reply: String(localized: "misskey_notification_reply")
-            case .unknown: String(localized: "misskey_notification_unknown")
+            case .unKnown: String(localized: "misskey_notification_unknown")
             }
         case .vVO(let data):
             switch onEnum(of: data) {

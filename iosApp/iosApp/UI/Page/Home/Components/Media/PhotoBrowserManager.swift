@@ -1,12 +1,13 @@
 import SwiftUI
 import shared
 import JXPhotoBrowser
- import Kingfisher
+import Kingfisher
 import UIKit
 import Photos
 
 class PhotoBrowserManager {
     static let shared = PhotoBrowserManager()
+    private var currentVideoCell: MediaBrowserVideoCell?
     
     private init() {}
     
@@ -117,18 +118,21 @@ class PhotoBrowserManager {
             }
         }
         
-        browser.cellWillAppear = { cell, index in
+        browser.cellWillAppear = { [weak self] cell, index in
             let media = images[index]
             switch onEnum(of: media) {
             case .video:
                 if let videoCell = cell as? MediaBrowserVideoCell {
+                    self?.currentVideoCell = videoCell
                     videoCell.willDisplay()
                 }
             case .gif:
                 if let videoCell = cell as? MediaBrowserVideoCell {
+                    self?.currentVideoCell = videoCell
                     videoCell.willDisplay()
                 }
             case .image:
+                self?.currentVideoCell = nil
                 if let imageCell = cell as? JXPhotoBrowserImageCell {
                     // 在 cell 即将显示时设置长按手势
                     imageCell.longPressedAction = { [weak self] cell, _ in
@@ -222,12 +226,45 @@ class PhotoBrowserManager {
                     }
                 }
             default:
+                self?.currentVideoCell = nil
                 break
             }
         }
         
+        browser.cellWillDisappear = { [weak self] cell, index in
+            let media = images[index]
+            switch onEnum(of: media) {
+            case .video, .gif:
+                if let videoCell = cell as? MediaBrowserVideoCell {
+                    videoCell.didEndDisplaying()
+                    // 停止音频会话
+                    try? AVAudioSession.sharedInstance().setCategory(.ambient)
+                    try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+                    self?.currentVideoCell = nil
+                }
+            default:
+                break
+            }
+        }
+        
+        browser.willDismiss = { [weak self] _ in
+            // 使用记录的当前视频 cell
+            if let videoCell = self?.currentVideoCell {
+                videoCell.didEndDisplaying()
+                // 停止音频会话
+                try? AVAudioSession.sharedInstance().setCategory(.ambient)
+                try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+                self?.currentVideoCell = nil
+            }
+            return true
+        }
+        
         if let onDismiss = onDismiss {
-            browser.didDismiss = { _ in
+            browser.didDismiss = { [weak self] _ in
+                // 确保在 dismiss 时也停止音频会话
+                try? AVAudioSession.sharedInstance().setCategory(.ambient)
+                try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+                self?.currentVideoCell = nil
                 onDismiss()
             }
         }

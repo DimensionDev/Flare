@@ -1,4 +1,5 @@
 import Awesome
+import Generated
 import MarkdownUI
 import JXPhotoBrowser
 import Kingfisher

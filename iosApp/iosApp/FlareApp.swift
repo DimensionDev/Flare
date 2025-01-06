@@ -18,13 +18,13 @@ struct FlareApp: SwiftUI.App {
             #if os(macOS)
             ProvideWindowSizeClass {
                 RouterView()
-                    .enableInjection()
+//                    .enableInjection()
                     .preferredColorScheme(.light)  // 强制使用浅色模式
             }
             .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
             #else
             RouterView()
-                .enableInjection()
+//                .enableInjection()
                 // .preferredColorScheme(.light)  // 强制使用浅色模式
             #endif
         }

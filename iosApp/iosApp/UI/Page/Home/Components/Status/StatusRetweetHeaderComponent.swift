@@ -32,18 +32,19 @@ struct StatusRetweetHeaderComponent: View {
             }
         case .misskey(let data):
             switch onEnum(of: data) {
-            case .achievementEarned:  String(localized: "misskey_notification_item_achievement_earned")
-            case .app: String(localized: "misskey_notification_item_app")
-            case .follow: String(localized: "misskey_notification_item_followed_you")
-            case .followRequestAccepted: String(localized: "misskey_notification_item_follow_request_accepted")
-            case .mention: String(localized: "misskey_notification_item_mentioned_you")
-            case .pollEnded: String(localized: "misskey_notification_item_poll_ended")
-            case .quote: String(localized: "misskey_notification_item_quoted_your_status")
-            case .reaction: String(localized: "misskey_notification_item_reacted_to_your_status")
-            case .receiveFollowRequest: String(localized: "misskey_notification_item_follow_request_accepted")
-            case .renote: String(localized: "misskey_notification_item_reposted_your_status")
-            case .reply: String(localized: "misskey_notification_item_replied_to_you")
-            }
+            case .achievementEarned:  String(localized: "misskey_notification_achievement_earned")
+            case .app: String(localized: "misskey_notification_app")
+            case .follow: String(localized: "misskey_notification_follow")
+            case .followRequestAccepted: String(localized: "misskey_notification_follow_request_accepted")
+            case .mention: String(localized: "misskey_notification_mention")
+            case .pollEnded: String(localized: "misskey_notification_poll_ended")
+            case .quote: String(localized: "misskey_notification_quote")
+            case .reaction: String(localized: "misskey_notification_reaction")
+            case .receiveFollowRequest: String(localized: "misskey_notification_receive_follow_request")
+            case .renote: String(localized: "misskey_notification_renote")
+            case .reply: String(localized: "misskey_notification_reply")
+            case .unKnown: String(localized: "misskey_notification_unknown")
+             }
         case .vVO(let data):
             switch onEnum(of: data) {
             case .custom(let message): message.message

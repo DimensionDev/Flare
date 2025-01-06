@@ -25,7 +25,7 @@ import kotlinx.serialization.Serializable
 internal data class Notification(
     @SerialName(value = "id") val id: kotlin.String,
     @SerialName(value = "createdAt") val createdAt: kotlin.String,
-    @SerialName(value = "type") val type: NotificationType,
+    @SerialName(value = "type") val type: String,
     @SerialName(value = "user") val user: UserLite? = null,
     @SerialName(value = "userId") val userId: kotlin.String? = null,
     @SerialName(value = "note") val note: Note? = null,

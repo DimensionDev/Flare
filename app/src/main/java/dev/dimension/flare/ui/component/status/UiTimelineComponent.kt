@@ -325,6 +325,12 @@ private fun TopMessageComponent(
                         stringResource(
                             id = R.string.misskey_notification_item_replied_to_you,
                         )
+
+                    is UiTimeline.TopMessage.MessageType.Misskey.UnKnown ->
+                        stringResource(
+                            id = R.string.misskey_notification_unknwon,
+                            type.type,
+                        )
                 }
 
             is UiTimeline.TopMessage.MessageType.VVO ->

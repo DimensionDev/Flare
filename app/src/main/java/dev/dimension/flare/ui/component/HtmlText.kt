@@ -116,42 +116,40 @@ private fun RenderContent(
                 linkStyle = linkStyle,
             )
         }
-    if (value.text.isNotEmpty() && value.text.isNotBlank()) {
-        Text(
-            modifier = modifier,
-            maxLines = maxLines,
-            color = color,
-            fontSize = fontSize,
-            fontStyle = fontStyle,
-            fontWeight = fontWeight,
-            fontFamily = fontFamily,
-            letterSpacing = letterSpacing,
-            textDecoration = textDecoration,
-            textAlign = textAlign,
-            lineHeight = lineHeight,
-            overflow = overflow,
-            softWrap = softWrap,
-            text = value,
-            inlineContent =
-                mapOf(
-                    ID_IMAGE to
-                        InlineTextContent(
-                            Placeholder(
-                                width = 1.em,
-                                height = 1.em,
-                                placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
-                            ),
-                        ) { target ->
-                            EmojiImage(
-                                uri = target,
-                                modifier =
-                                    Modifier
-                                        .fillMaxSize(),
-                            )
-                        },
-                ),
-        )
-    }
+    Text(
+        modifier = modifier,
+        maxLines = maxLines,
+        color = color,
+        fontSize = fontSize,
+        fontStyle = fontStyle,
+        fontWeight = fontWeight,
+        fontFamily = fontFamily,
+        letterSpacing = letterSpacing,
+        textDecoration = textDecoration,
+        textAlign = textAlign,
+        lineHeight = lineHeight,
+        overflow = overflow,
+        softWrap = softWrap,
+        text = value,
+        inlineContent =
+            mapOf(
+                ID_IMAGE to
+                    InlineTextContent(
+                        Placeholder(
+                            width = 1.em,
+                            height = 1.em,
+                            placeholderVerticalAlign = PlaceholderVerticalAlign.TextCenter,
+                        ),
+                    ) { target ->
+                        EmojiImage(
+                            uri = target,
+                            modifier =
+                                Modifier
+                                    .fillMaxSize(),
+                        )
+                    },
+            ),
+    )
 }
 
 @ExperimentalUnitApi

@@ -4,12 +4,12 @@ import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.round
 
-fun Float.humanizePercentage(): String {
+internal fun Float.humanizePercentage(): String {
     val roundedNumber = round(this * 100 * 100).toDouble() / 100
     return "$roundedNumber%"
 }
 
-fun Long.humanize(digitPosition: Int = 1): String =
+internal fun Long.humanize(digitPosition: Int = 1): String =
     when {
         this < 0 -> "-" + (-this).humanize(digitPosition)
         this == 0L -> "0"

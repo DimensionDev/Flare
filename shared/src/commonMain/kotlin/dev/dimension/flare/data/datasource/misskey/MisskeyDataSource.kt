@@ -58,7 +58,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 @OptIn(ExperimentalPagingApi::class)
-class MisskeyDataSource(
+internal class MisskeyDataSource(
     override val accountKey: MicroBlogKey,
     val credential: UiAccount.Misskey.Credential,
 ) : AuthenticatedMicroblogDataSource,

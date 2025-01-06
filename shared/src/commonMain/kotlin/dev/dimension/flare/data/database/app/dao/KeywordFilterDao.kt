@@ -8,7 +8,7 @@ import dev.dimension.flare.data.database.app.model.DbKeywordFilter
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface KeywordFilterDao {
+internal interface KeywordFilterDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(keywordFilter: DbKeywordFilter)
 

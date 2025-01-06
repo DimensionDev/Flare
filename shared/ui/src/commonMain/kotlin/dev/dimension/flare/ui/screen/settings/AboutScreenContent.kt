@@ -21,12 +21,15 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.brands.Github
+import compose.icons.fontawesomeicons.brands.Line
 import compose.icons.fontawesomeicons.brands.Telegram
 import compose.icons.fontawesomeicons.solid.Language
 import dev.dimension.flare.Res
 import dev.dimension.flare.app_name
 import dev.dimension.flare.ic_launcher_foreground
 import dev.dimension.flare.settings_about_description
+import dev.dimension.flare.settings_about_line
+import dev.dimension.flare.settings_about_line_description
 import dev.dimension.flare.settings_about_localization
 import dev.dimension.flare.settings_about_localization_description
 import dev.dimension.flare.settings_about_source_code
@@ -36,7 +39,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun AboutScreenContent(
+public fun AboutScreenContent(
     version: String,
     modifier: Modifier = Modifier,
 ) {
@@ -106,6 +109,27 @@ fun AboutScreenContent(
             leadingContent = {
                 Icon(
                     imageVector = FontAwesomeIcons.Brands.Telegram,
+                    contentDescription = stringResource(resource = Res.string.settings_about_telegram),
+                    modifier = Modifier.size(24.dp),
+                )
+            },
+        )
+        ListItem(
+            headlineContent = {
+                Text(text = stringResource(resource = Res.string.settings_about_line))
+            },
+            supportingContent = {
+                Text(
+                    text = stringResource(resource = Res.string.settings_about_line_description),
+                )
+            },
+            modifier =
+                Modifier.clickable {
+                    uriHandler.openUri("https://line.me/ti/g/hf95HyGJ9k")
+                },
+            leadingContent = {
+                Icon(
+                    imageVector = FontAwesomeIcons.Brands.Line,
                     contentDescription = stringResource(resource = Res.string.settings_about_telegram),
                     modifier = Modifier.size(24.dp),
                 )

@@ -5,7 +5,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.humanizer.humanize
 
 @Immutable
-data class UiList(
+public data class UiList internal constructor(
     val id: String,
     val title: String,
     val description: String? = null,
@@ -16,11 +16,11 @@ data class UiList(
     val platformType: PlatformType,
     val type: Type = Type.List,
 ) {
-    val likedCountHumanized by lazy {
+    val likedCountHumanized: String by lazy {
         likedCount.humanize()
     }
 
-    enum class Type {
+    public enum class Type {
         Feed,
         List,
     }

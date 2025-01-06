@@ -1,21 +1,21 @@
 package dev.dimension.flare.common
 
-interface InAppNotification {
-    fun onProgress(
+public interface InAppNotification {
+    public fun onProgress(
         message: Message,
         progress: Int,
         total: Int,
     )
 
-    fun onSuccess(message: Message)
+    public fun onSuccess(message: Message)
 
-    fun onError(
+    public fun onError(
         message: Message,
         throwable: Throwable,
     )
 }
 
-enum class Message {
+public enum class Message {
     Compose,
     LoginExpired,
 }

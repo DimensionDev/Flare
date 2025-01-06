@@ -28,7 +28,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Duration.Companion.seconds
 
-class DMConversationPresenter(
+public class DMConversationPresenter(
     private val accountType: AccountType,
     private val roomKey: MicroBlogKey,
 ) : PresenterBase<DMConversationState>(),
@@ -98,13 +98,13 @@ class DMConversationPresenter(
 }
 
 @Immutable
-interface DMConversationState {
-    val items: PagingState<UiDMItem>
-    val users: UiState<ImmutableList<UiUserV2>>
+public interface DMConversationState {
+    public val items: PagingState<UiDMItem>
+    public val users: UiState<ImmutableList<UiUserV2>>
 
-    fun send(message: String)
+    public fun send(message: String)
 
-    fun retry(key: MicroBlogKey)
+    public fun retry(key: MicroBlogKey)
 
-    fun leave()
+    public fun leave()
 }

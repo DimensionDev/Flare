@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 
 @Immutable
 @Serializable
-enum class PlatformType {
+public enum class PlatformType {
     Mastodon,
     Misskey,
     Bluesky,
@@ -17,7 +17,7 @@ enum class PlatformType {
     VVo,
 }
 
-val PlatformType.logoUrl: String
+public val PlatformType.logoUrl: String
     get() =
         when (this) {
             PlatformType.Mastodon -> "https://joinmastodon.org/logos/logo-purple.svg"
@@ -33,7 +33,7 @@ val PlatformType.logoUrl: String
                     "0a286d8ee91af2e78ff2ee8e5065c3.webp"
         }
 
-val xqtHost: String =
+public val xqtHost: String =
     buildString {
         append("dHc=".decodeBase64String())
         append("aXR0".decodeBase64String())
@@ -41,26 +41,26 @@ val xqtHost: String =
         append("LmNvbQ==".decodeBase64String())
     }
 
-val vvo: String =
+public val vvo: String =
     buildString {
         append("d2Vp".decodeBase64String())
         append("Ym8=".decodeBase64String())
     }
 
-val vvoHost: String =
+public val vvoHost: String =
     buildString {
         append("bS53".decodeBase64String())
         append("ZWli".decodeBase64String())
         append("by5jbg==".decodeBase64String())
     }
 
-val vvoHostShort: String =
+public val vvoHostShort: String =
     buildString {
         append(vvo)
         append("LmNu".decodeBase64String())
     }
 
-val vvoHostLong: String =
+public val vvoHostLong: String =
     buildString {
         append("d2Vp".decodeBase64String())
         append("Ym8uY29t".decodeBase64String())

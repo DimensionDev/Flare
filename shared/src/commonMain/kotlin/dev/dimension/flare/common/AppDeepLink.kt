@@ -4,191 +4,202 @@ import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.http.encodeURLPathPart
 import io.ktor.http.encodeURLQueryComponent
 
-const val APPSCHEMA = "flare"
+public const val APPSCHEMA: String = "flare"
 
-object AppDeepLink {
-    object Callback {
-        const val MASTODON = "$APPSCHEMA://Callback/SignIn/Mastodon"
-        const val MISSKEY = "$APPSCHEMA://Callback/SignIn/Misskey"
+public object AppDeepLink {
+    public object Callback {
+        public const val MASTODON: String = "$APPSCHEMA://Callback/SignIn/Mastodon"
+        public const val MISSKEY: String = "$APPSCHEMA://Callback/SignIn/Misskey"
     }
 
-    object Search {
-        const val ROUTE = "$APPSCHEMA://Search/{keyword}?accountKey={accountKey}"
+    public object Search {
+        public const val ROUTE: String = "$APPSCHEMA://Search/{keyword}?accountKey={accountKey}"
 
-        operator fun invoke(
+        public operator fun invoke(
             accountKey: MicroBlogKey?,
             keyword: String,
-        ) = "$APPSCHEMA://Search/${keyword.encodeURLPathPart()}${accountKey?.let {
-            "?accountKey=${it.toString().encodeURLQueryComponent()}"
-        } ?: ""}"
+        ): String =
+            "$APPSCHEMA://Search/${keyword.encodeURLPathPart()}${accountKey?.let {
+                "?accountKey=${it.toString().encodeURLQueryComponent()}"
+            } ?: ""}"
     }
 
-    object Profile {
-        const val ROUTE = "$APPSCHEMA://Profile/{userKey}?accountKey={accountKey}"
+    public object Profile {
+        public const val ROUTE: String = "$APPSCHEMA://Profile/{userKey}?accountKey={accountKey}"
 
-        operator fun invoke(
+        public operator fun invoke(
             accountKey: MicroBlogKey?,
             userKey: MicroBlogKey,
-        ) = "$APPSCHEMA://Profile/${userKey.toString().encodeURLPathPart()}${accountKey?.let {
-            "?accountKey=${it.toString().encodeURLQueryComponent()}"
-        } ?: ""}"
+        ): String =
+            "$APPSCHEMA://Profile/${userKey.toString().encodeURLPathPart()}${accountKey?.let {
+                "?accountKey=${it.toString().encodeURLQueryComponent()}"
+            } ?: ""}"
     }
 
-    object ProfileWithNameAndHost {
-        const val ROUTE = "$APPSCHEMA://ProfileWithNameAndHost/{userName}/{host}?accountKey={accountKey}"
+    public object ProfileWithNameAndHost {
+        public const val ROUTE: String = "$APPSCHEMA://ProfileWithNameAndHost/{userName}/{host}?accountKey={accountKey}"
 
-        operator fun invoke(
+        public operator fun invoke(
             accountKey: MicroBlogKey?,
             userName: String,
             host: String,
-        ) = "$APPSCHEMA://ProfileWithNameAndHost/${userName.encodeURLPathPart()}/${host.encodeURLPathPart()}${accountKey?.let {
-            "?accountKey=${it.toString().encodeURLQueryComponent()}"
-        } ?: ""}"
+        ): String =
+            "$APPSCHEMA://ProfileWithNameAndHost/${userName.encodeURLPathPart()}/${host.encodeURLPathPart()}${accountKey?.let {
+                "?accountKey=${it.toString().encodeURLQueryComponent()}"
+            } ?: ""}"
     }
 
-    object StatusDetail {
-        const val ROUTE = "$APPSCHEMA://StatusDetail/{statusKey}?accountKey={accountKey}"
+    public object StatusDetail {
+        public const val ROUTE: String = "$APPSCHEMA://StatusDetail/{statusKey}?accountKey={accountKey}"
 
-        operator fun invoke(
+        public operator fun invoke(
             accountKey: MicroBlogKey?,
             statusKey: MicroBlogKey,
-        ) = "$APPSCHEMA://StatusDetail/${statusKey.toString().encodeURLPathPart()}${accountKey?.let {
-            "?accountKey=${it.toString().encodeURLQueryComponent()}"
-        } ?: ""}"
+        ): String =
+            "$APPSCHEMA://StatusDetail/${statusKey.toString().encodeURLPathPart()}${accountKey?.let {
+                "?accountKey=${it.toString().encodeURLQueryComponent()}"
+            } ?: ""}"
     }
 
-    object VVO {
-        object StatusDetail {
-            const val ROUTE = "$APPSCHEMA://VVO/StatusDetail/{accountKey}/{statusKey}"
+    public object VVO {
+        public object StatusDetail {
+            public const val ROUTE: String = "$APPSCHEMA://VVO/StatusDetail/{accountKey}/{statusKey}"
 
-            operator fun invoke(
+            public operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://VVO/StatusDetail/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
+            ): String =
+                "$APPSCHEMA://VVO/StatusDetail/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
 
-        object CommentDetail {
-            const val ROUTE = "$APPSCHEMA://VVO/CommentDetail/{accountKey}/{statusKey}"
+        public object CommentDetail {
+            public const val ROUTE: String = "$APPSCHEMA://VVO/CommentDetail/{accountKey}/{statusKey}"
 
-            operator fun invoke(
+            public operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://VVO/CommentDetail/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
+            ): String =
+                "$APPSCHEMA://VVO/CommentDetail/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
 
-        object ReplyToComment {
-            const val ROUTE = "$APPSCHEMA://VVO/ReplyToComment/{accountKey}/{replyTo}/{rootId}"
+        public object ReplyToComment {
+            public const val ROUTE: String = "$APPSCHEMA://VVO/ReplyToComment/{accountKey}/{replyTo}/{rootId}"
 
-            operator fun invoke(
+            public operator fun invoke(
                 accountKey: MicroBlogKey,
                 replyTo: MicroBlogKey,
                 rootId: String,
-            ) =
+            ): String =
                 "$APPSCHEMA://VVO/ReplyToComment/${accountKey.toString().encodeURLPathPart()}/${replyTo.toString().encodeURLPathPart()}/${rootId.encodeURLPathPart()}"
         }
     }
 
-    object Compose {
-        object Reply {
-            const val ROUTE = "$APPSCHEMA://Compose/Reply/{accountKey}/{statusKey}"
+    public object Compose {
+        public object Reply {
+            public const val ROUTE: String = "$APPSCHEMA://Compose/Reply/{accountKey}/{statusKey}"
 
-            operator fun invoke(
+            public operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Compose/Reply/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
+            ): String =
+                "$APPSCHEMA://Compose/Reply/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
 
-        object Quote {
-            const val ROUTE = "$APPSCHEMA://Compose/Quote/{accountKey}/{statusKey}"
+        public object Quote {
+            public const val ROUTE: String = "$APPSCHEMA://Compose/Quote/{accountKey}/{statusKey}"
 
-            operator fun invoke(
+            public operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Compose/Quote/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
+            ): String =
+                "$APPSCHEMA://Compose/Quote/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
 
-        object New {
-            const val ROUTE = "$APPSCHEMA://Compose/New/{accountKey}"
+        public object New {
+            public const val ROUTE: String = "$APPSCHEMA://Compose/New/{accountKey}"
 
-            operator fun invoke(accountKey: MicroBlogKey) = "$APPSCHEMA://Compose/New/${accountKey.toString().encodeURLPathPart()}"
+            public operator fun invoke(accountKey: MicroBlogKey): String =
+                "$APPSCHEMA://Compose/New/${accountKey.toString().encodeURLPathPart()}"
         }
     }
 
-    object DeleteStatus {
-        const val ROUTE = "$APPSCHEMA://DeleteStatus/{accountKey}/{statusKey}"
+    public object DeleteStatus {
+        public const val ROUTE: String = "$APPSCHEMA://DeleteStatus/{accountKey}/{statusKey}"
 
-        operator fun invoke(
+        public operator fun invoke(
             accountKey: MicroBlogKey,
             statusKey: MicroBlogKey,
-        ) = "$APPSCHEMA://DeleteStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
+        ): String = "$APPSCHEMA://DeleteStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
     }
 
-    object Bluesky {
-        object ReportStatus {
-            const val ROUTE = "$APPSCHEMA://Bluesky/ReportStatus/{accountKey}/{statusKey}"
+    public object Bluesky {
+        public object ReportStatus {
+            public const val ROUTE: String = "$APPSCHEMA://Bluesky/ReportStatus/{accountKey}/{statusKey}"
 
-            operator fun invoke(
+            public operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Bluesky/ReportStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
+            ): String =
+                "$APPSCHEMA://Bluesky/ReportStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
     }
 
-    object Mastodon {
-        object ReportStatus {
-            const val ROUTE = "$APPSCHEMA://Mastodon/ReportStatus/{accountKey}/{statusKey}/{userKey}"
+    public object Mastodon {
+        public object ReportStatus {
+            public const val ROUTE: String = "$APPSCHEMA://Mastodon/ReportStatus/{accountKey}/{statusKey}/{userKey}"
 
-            operator fun invoke(
+            public operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
                 userKey: MicroBlogKey,
-            ) =
+            ): String =
                 "$APPSCHEMA://Mastodon/ReportStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}/${userKey.toString().encodeURLPathPart()}"
         }
     }
 
-    object Misskey {
-        object ReportStatus {
-            const val ROUTE = "$APPSCHEMA://Misskey/ReportStatus/{accountKey}/{statusKey}/{userKey}"
+    public object Misskey {
+        public object ReportStatus {
+            public const val ROUTE: String = "$APPSCHEMA://Misskey/ReportStatus/{accountKey}/{statusKey}/{userKey}"
 
-            operator fun invoke(
+            public operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
                 userKey: MicroBlogKey,
-            ) =
+            ): String =
                 "$APPSCHEMA://Misskey/ReportStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}/${userKey.toString().encodeURLPathPart()}"
         }
 
-        object AddReaction {
-            const val ROUTE = "$APPSCHEMA://Misskey/AddReaction/{accountKey}/{statusKey}"
+        public object AddReaction {
+            public const val ROUTE: String = "$APPSCHEMA://Misskey/AddReaction/{accountKey}/{statusKey}"
 
-            operator fun invoke(
+            public operator fun invoke(
                 accountKey: MicroBlogKey,
                 statusKey: MicroBlogKey,
-            ) = "$APPSCHEMA://Misskey/AddReaction/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
+            ): String =
+                "$APPSCHEMA://Misskey/AddReaction/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
     }
 
-    object RawImage {
-        const val ROUTE = "$APPSCHEMA://RawImage/{uri}"
+    public object RawImage {
+        public const val ROUTE: String = "$APPSCHEMA://RawImage/{uri}"
 
-        operator fun invoke(url: String) = "$APPSCHEMA://RawImage/${url.encodeURLPathPart()}"
+        public operator fun invoke(url: String): String = "$APPSCHEMA://RawImage/${url.encodeURLPathPart()}"
     }
 
-    object StatusMedia {
-        const val ROUTE = "$APPSCHEMA://StatusMedia/{statusKey}/{mediaIndex}?accountKey={accountKey}&preview={preview}"
+    public object StatusMedia {
+        public const val ROUTE: String = "$APPSCHEMA://StatusMedia/{statusKey}/{mediaIndex}?accountKey={accountKey}&preview={preview}"
 
-        operator fun invoke(
+        public operator fun invoke(
             accountKey: MicroBlogKey?,
             statusKey: MicroBlogKey,
             mediaIndex: Int,
             preview: String?,
         ): String {
-            val query =
+            val query: String =
                 listOfNotNull(
                     accountKey?.let { "accountKey=${it.toString().encodeURLQueryComponent()}" },
                     preview?.let { "preview=${it.encodeURLQueryComponent()}" },
-                ).joinToString(separator = "&")
+                ).joinToString("&")
             return "$APPSCHEMA://StatusMedia/${statusKey.toString().encodeURLPathPart()}/$mediaIndex?$query"
         }
     }

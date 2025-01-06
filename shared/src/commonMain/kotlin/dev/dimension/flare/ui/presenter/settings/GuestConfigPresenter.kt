@@ -33,7 +33,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class GuestConfigPresenter :
+public class GuestConfigPresenter :
     PresenterBase<GuestConfigPresenter.State>(),
     KoinComponent {
     private val accountRepository by inject<AccountRepository>()
@@ -41,16 +41,16 @@ class GuestConfigPresenter :
     private val coroutineScope by inject<CoroutineScope>()
 
     @Immutable
-    interface State {
-        val data: UiState<String>
-        val platformType: UiState<PlatformType>
-        val supportedPlatforms: ImmutableList<PlatformType>
+    public interface State {
+        public val data: UiState<String>
+        public val platformType: UiState<PlatformType>
+        public val supportedPlatforms: ImmutableList<PlatformType>
 
-        fun setHost(value: String)
+        public fun setHost(value: String)
 
-        val canSave: Boolean
+        public val canSave: Boolean
 
-        fun save(
+        public fun save(
             host: String,
             platformType: PlatformType,
         )

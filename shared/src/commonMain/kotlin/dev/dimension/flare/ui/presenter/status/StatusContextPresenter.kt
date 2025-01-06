@@ -18,7 +18,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class StatusContextPresenter(
+public class StatusContextPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
 ) : PresenterBase<StatusContextState>(),
@@ -49,8 +49,8 @@ class StatusContextPresenter(
 }
 
 @Immutable
-abstract class StatusContextState(
-    val listState: PagingState<UiTimeline>,
+public abstract class StatusContextState(
+    public val listState: PagingState<UiTimeline>,
 ) {
-    abstract suspend fun refresh()
+    public abstract suspend fun refresh()
 }

@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class VVOLoginPresenter(
+public class VVOLoginPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<VVOLoginState>(),
     KoinComponent {
@@ -84,11 +84,11 @@ class VVOLoginPresenter(
 }
 
 @Immutable
-interface VVOLoginState {
-    val loading: Boolean
-    val error: Throwable?
+public interface VVOLoginState {
+    public val loading: Boolean
+    public val error: Throwable?
 
-    fun checkChocolate(cookie: String): Boolean
+    public fun checkChocolate(cookie: String): Boolean
 
-    fun login(chocolate: String)
+    public fun login(chocolate: String)
 }

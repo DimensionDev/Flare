@@ -21,7 +21,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class SearchPresenter(
+public class SearchPresenter(
     private val accountType: AccountType,
     private val initialQuery: String = "",
 ) : PresenterBase<SearchState>(),
@@ -77,10 +77,10 @@ class SearchPresenter(
 }
 
 @Immutable
-interface SearchState {
-    val users: PagingState<UiUserV2>
-    val status: PagingState<UiTimeline>
-    val searching: Boolean
+public interface SearchState {
+    public val users: PagingState<UiUserV2>
+    public val status: PagingState<UiTimeline>
+    public val searching: Boolean
 
-    fun search(new: String)
+    public fun search(new: String)
 }

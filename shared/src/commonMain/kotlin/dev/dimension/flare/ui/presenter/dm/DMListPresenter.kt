@@ -18,7 +18,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class DMListPresenter(
+public class DMListPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<DMListState>(),
     KoinComponent {
@@ -51,9 +51,9 @@ class DMListPresenter(
 }
 
 @Immutable
-interface DMListState {
-    val items: PagingState<UiDMRoom>
-    val isRefreshing: Boolean
+public interface DMListState {
+    public val items: PagingState<UiDMRoom>
+    public val isRefreshing: Boolean
 
-    suspend fun refreshSuspend()
+    public suspend fun refreshSuspend()
 }

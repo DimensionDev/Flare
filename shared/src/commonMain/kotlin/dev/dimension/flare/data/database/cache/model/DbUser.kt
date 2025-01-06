@@ -14,7 +14,7 @@ import dev.dimension.flare.model.PlatformType
         Index(value = ["handle", "host", "platformType"], unique = true),
     ],
 )
-data class DbUser(
+internal data class DbUser(
     @PrimaryKey
     val userKey: MicroBlogKey,
     val platformType: PlatformType,
@@ -24,7 +24,7 @@ data class DbUser(
     val content: UserContent,
 )
 
-class UserContentConverters {
+internal class UserContentConverters {
     @TypeConverter
     fun fromUserContent(content: UserContent): String = content.encodeJson()
 

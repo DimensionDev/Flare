@@ -11,7 +11,7 @@ import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
 
-actual val platformModule: Module =
+internal actual val platformModule: Module =
     module {
         single {
             AppDataStore { fileName ->

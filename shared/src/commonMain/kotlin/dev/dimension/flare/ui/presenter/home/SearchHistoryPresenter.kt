@@ -13,7 +13,7 @@ import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class SearchHistoryPresenter :
+public class SearchHistoryPresenter :
     PresenterBase<SearchHistoryState>(),
     KoinComponent {
     private val repository: SearchHistoryRepository by inject()
@@ -39,10 +39,10 @@ class SearchHistoryPresenter :
 }
 
 @Immutable
-interface SearchHistoryState {
-    val searchHistories: UiState<ImmutableListWrapper<UiSearchHistory>>
+public interface SearchHistoryState {
+    public val searchHistories: UiState<ImmutableListWrapper<UiSearchHistory>>
 
-    fun addSearchHistory(keyword: String)
+    public fun addSearchHistory(keyword: String)
 
-    fun deleteSearchHistory(keyword: String)
+    public fun deleteSearchHistory(keyword: String)
 }

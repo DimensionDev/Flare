@@ -17,19 +17,19 @@ import org.koin.core.component.inject
 import kotlin.getValue
 import kotlin.uuid.Uuid
 
-class LogStatusHistoryPresenter(
+public class LogStatusHistoryPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
 ) : PresenterBase<LogStatusHistoryPresenter.State>(),
     KoinComponent {
-    companion object {
+    internal companion object {
         const val PAGING_KEY = "status_history"
     }
 
     private val accountRepository: AccountRepository by inject()
     private val cacheDatabase: CacheDatabase by inject()
 
-    interface State
+    public interface State
 
     @Composable
     override fun body(): State {

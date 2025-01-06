@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Immutable
-data class MicroBlogKey(
+public data class MicroBlogKey(
     val id: String,
     val host: String,
 ) {
@@ -36,8 +36,8 @@ data class MicroBlogKey(
 
     private fun isSpecialChar(ch: Char): Boolean = ch == '\\' || ch == '@' || ch == ','
 
-    companion object {
-        fun valueOf(str: String): MicroBlogKey {
+    public companion object {
+        public fun valueOf(str: String): MicroBlogKey {
             var escaping = false
             var idFinished = false
             val idBuilder = StringBuilder(str.length)

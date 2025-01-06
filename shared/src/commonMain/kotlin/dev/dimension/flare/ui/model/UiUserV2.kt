@@ -6,11 +6,11 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.render.UiRichText
 
 @Immutable
-sealed interface UiUserV2 {
-    val avatar: String
-    val name: UiRichText
-    val handle: String
-    val key: MicroBlogKey
-    val platformType: PlatformType
-    val onClicked: ClickContext.() -> Unit
+public sealed interface UiUserV2 {
+    public val avatar: String
+    public val name: UiRichText
+    public val handle: String
+    public val key: MicroBlogKey
+    public val platformType: PlatformType
+    public val onClicked: ClickContext.() -> Unit
 }

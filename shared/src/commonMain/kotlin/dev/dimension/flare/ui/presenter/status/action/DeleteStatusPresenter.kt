@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class DeleteStatusPresenter(
+public class DeleteStatusPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
 ) : PresenterBase<DeleteStatusState>(),
@@ -44,6 +44,6 @@ class DeleteStatusPresenter(
 }
 
 @Immutable
-interface DeleteStatusState {
-    fun delete()
+public interface DeleteStatusState {
+    public fun delete()
 }

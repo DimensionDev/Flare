@@ -6,7 +6,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 
 @Entity
-data class DbAccount(
+internal data class DbAccount(
     @PrimaryKey val account_key: MicroBlogKey,
     val credential_json: String,
     val platform_type: PlatformType,

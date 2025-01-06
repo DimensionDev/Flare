@@ -16,7 +16,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class StatusPresenter(
+public class StatusPresenter(
     private val accountType: AccountType,
     private val statusKey: MicroBlogKey,
 ) : PresenterBase<StatusState>(),
@@ -41,6 +41,6 @@ class StatusPresenter(
 }
 
 @Immutable
-interface StatusState {
-    val status: UiState<UiTimeline>
+public interface StatusState {
+    public val status: UiState<UiTimeline>
 }

@@ -28,7 +28,7 @@ import kotlinx.collections.immutable.toImmutableList
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class NotificationPresenter(
+public class NotificationPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<NotificationState>(),
     KoinComponent {
@@ -97,12 +97,12 @@ class NotificationPresenter(
 }
 
 @Immutable
-abstract class NotificationState(
-    val listState: PagingState<UiTimeline>,
-    val notificationType: NotificationFilter?,
-    val allTypes: UiState<ImmutableList<NotificationFilter>>,
+public abstract class NotificationState(
+    public val listState: PagingState<UiTimeline>,
+    public val notificationType: NotificationFilter?,
+    public val allTypes: UiState<ImmutableList<NotificationFilter>>,
 ) {
-    abstract suspend fun refresh()
+    public abstract suspend fun refresh()
 
-    abstract fun onNotificationTypeChanged(value: NotificationFilter)
+    public abstract fun onNotificationTypeChanged(value: NotificationFilter)
 }

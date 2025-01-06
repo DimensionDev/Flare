@@ -16,7 +16,7 @@ import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class ListTimelinePresenter(
+public class ListTimelinePresenter(
     private val accountType: AccountType,
     private val listId: String,
 ) : TimelinePresenter(),

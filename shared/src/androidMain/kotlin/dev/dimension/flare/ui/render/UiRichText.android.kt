@@ -4,15 +4,15 @@ import androidx.compose.ui.unit.LayoutDirection
 import com.fleeksoft.ksoup.nodes.Element
 import java.text.Bidi
 
-actual data class UiRichText(
+public actual data class UiRichText(
     val data: Element,
     val direction: LayoutDirection,
 ) {
-    val innerText = data.text()
+    public val innerText: String = data.text()
     actual val raw: String = data.text()
 }
 
-actual fun Element.toUi(): UiRichText =
+internal actual fun Element.toUi(): UiRichText =
     UiRichText(
         data = this,
         direction =

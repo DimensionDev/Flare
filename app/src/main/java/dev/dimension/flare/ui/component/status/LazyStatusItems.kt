@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.component.status
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,9 +14,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +29,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowWidthSizeClass
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -66,13 +69,17 @@ internal fun LazyStaggeredGridScope.status(
                     it.itemType
                 },
         ) {
-            Column {
-                val item = get(it)
-                StatusItem(
-                    item,
-                    detailStatusKey = detailStatusKey,
-                    modifier =
-                        Modifier
+            val item = get(it)
+            AdaptiveCard(
+                content = {
+                    val windowInfo = currentWindowAdaptiveInfo()
+                    val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT
+                    Column {
+                        StatusItem(
+                            item,
+                            detailStatusKey = detailStatusKey,
+//                        modifier =
+//                        Modifier
 //                            .let {
 //                                if (item != null) {
 //                                    it.sharedBounds(
@@ -90,15 +97,18 @@ internal fun LazyStaggeredGridScope.status(
 //                                    it
 //                                }
 //                            }
-                            .background(MaterialTheme.colorScheme.background),
-                )
-                if (it != itemCount - 1) {
-                    HorizontalDivider(
-                        color = FlareDividerDefaults.color,
-                        thickness = FlareDividerDefaults.thickness,
-                    )
-                }
-            }
+//                            .background(MaterialTheme.colorScheme.background),
+                        )
+
+                        if (it != itemCount - 1 && !bigScreen) {
+                            HorizontalDivider(
+                                color = FlareDividerDefaults.color,
+                                thickness = FlareDividerDefaults.thickness,
+                            )
+                        }
+                    }
+                },
+            )
         }
         appendState
             .onError {
@@ -109,7 +119,11 @@ internal fun LazyStaggeredGridScope.status(
                 }
             }.onLoading {
                 items(10) {
-                    OnLoading()
+                    AdaptiveCard(
+                        content = {
+                            OnLoading()
+                        },
+                    )
                 }
             }.onEndOfList {
                 item(
@@ -140,7 +154,11 @@ internal fun LazyStaggeredGridScope.status(
     }
     onLoading {
         items(10) {
-            OnLoading()
+            AdaptiveCard(
+                content = {
+                    OnLoading()
+                },
+            )
         }
     }
     onEmpty {
@@ -171,17 +189,54 @@ internal fun LazyStaggeredGridScope.status(
 }
 
 @Composable
+private fun AdaptiveCard(
+    content: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val windowInfo = currentWindowAdaptiveInfo()
+    val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT
+    if (bigScreen) {
+        Card(
+            modifier =
+                modifier
+                    .padding(
+                        horizontal = 2.dp,
+                        vertical = 6.dp,
+                    ),
+            elevation = CardDefaults.elevatedCardElevation(),
+            colors = CardDefaults.elevatedCardColors(),
+        ) {
+            content.invoke()
+        }
+    } else {
+        Box(
+            modifier = modifier,
+        ) {
+            content.invoke()
+        }
+    }
+}
+
+@Composable
 private fun OnLoading(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
     ) {
         StatusPlaceholder(
-            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+            modifier =
+                Modifier
+                    .padding(
+                        horizontal = screenHorizontalPadding,
+                        vertical = 8.dp,
+                    ),
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        HorizontalDivider(
-            modifier = Modifier.alpha(DisabledAlpha),
-        )
+        val windowInfo = currentWindowAdaptiveInfo()
+        val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT
+        if (!bigScreen) {
+            HorizontalDivider(
+                modifier = Modifier.alpha(DisabledAlpha),
+            )
+        }
     }
 }
 

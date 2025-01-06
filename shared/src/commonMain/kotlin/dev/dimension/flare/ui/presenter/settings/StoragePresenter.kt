@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class StoragePresenter :
+public class StoragePresenter :
     PresenterBase<StorageState>(),
     KoinComponent {
     private val cacheDatabase by inject<CacheDatabase>()
@@ -47,9 +47,9 @@ class StoragePresenter :
 }
 
 @Immutable
-interface StorageState {
-    val userCount: Long
-    val statusCount: Long
+public interface StorageState {
+    public val userCount: Long
+    public val statusCount: Long
 
-    fun clearCache()
+    public fun clearCache()
 }

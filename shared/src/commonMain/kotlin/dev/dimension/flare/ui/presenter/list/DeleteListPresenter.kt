@@ -11,7 +11,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class DeleteListPresenter(
+public class DeleteListPresenter(
     private val accountType: AccountType,
     private val listId: String,
 ) : PresenterBase<DeleteListState>(),
@@ -34,6 +34,6 @@ class DeleteListPresenter(
 }
 
 @Immutable
-interface DeleteListState {
-    suspend fun deleteList()
+public interface DeleteListState {
+    public suspend fun deleteList()
 }

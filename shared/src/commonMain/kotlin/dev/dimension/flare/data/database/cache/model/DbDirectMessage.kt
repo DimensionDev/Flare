@@ -20,7 +20,7 @@ import kotlinx.serialization.Serializable
         ),
     ],
 )
-data class DbDirectMessageTimeline(
+internal data class DbDirectMessageTimeline(
     val accountKey: MicroBlogKey,
     val roomKey: MicroBlogKey,
     val sortId: Long,
@@ -29,7 +29,7 @@ data class DbDirectMessageTimeline(
     val _id: String = "$accountKey-$roomKey",
 )
 
-data class DbDirectMessageTimelineWithRoom(
+internal data class DbDirectMessageTimelineWithRoom(
     @Embedded
     val timeline: DbDirectMessageTimeline,
     @Relation(
@@ -52,7 +52,7 @@ data class DbDirectMessageTimelineWithRoom(
 // )
 
 @Entity
-data class DbMessageRoom(
+internal data class DbMessageRoom(
     @PrimaryKey
     val roomKey: MicroBlogKey,
     val platformType: PlatformType,
@@ -60,14 +60,14 @@ data class DbMessageRoom(
 )
 
 @Entity
-data class DbMessageRoomReference(
+internal data class DbMessageRoomReference(
     val roomKey: MicroBlogKey,
     val userKey: MicroBlogKey,
     @PrimaryKey
     val _id: String = "$roomKey-$userKey",
 )
 
-data class DbMessageRoomReferenceWithUser(
+internal data class DbMessageRoomReferenceWithUser(
     @Embedded
     val reference: DbMessageRoomReference,
     @Relation(
@@ -77,7 +77,7 @@ data class DbMessageRoomReferenceWithUser(
     val user: DbUser,
 )
 
-data class DbMessageRoomWithLastMessageAndUser(
+internal data class DbMessageRoomWithLastMessageAndUser(
     @Embedded
     val room: DbMessageRoom,
     @Relation(
@@ -95,7 +95,7 @@ data class DbMessageRoomWithLastMessageAndUser(
 )
 
 @Entity
-data class DbMessageItem(
+internal data class DbMessageItem(
     @PrimaryKey
     val messageKey: MicroBlogKey,
     val roomKey: MicroBlogKey,
@@ -105,7 +105,7 @@ data class DbMessageItem(
     val isLocal: Boolean = false,
 )
 
-data class DbMessageItemWithUser(
+internal data class DbMessageItemWithUser(
     @Embedded
     val message: DbMessageItem,
     @Relation(
@@ -116,7 +116,7 @@ data class DbMessageItemWithUser(
 )
 
 @Serializable
-sealed interface MessageContent {
+internal sealed interface MessageContent {
     @Serializable
     sealed interface Bluesky : MessageContent {
         @Serializable
@@ -146,7 +146,7 @@ sealed interface MessageContent {
     }
 }
 
-class MessageContentConverters {
+internal class MessageContentConverters {
     @TypeConverter
     fun fromMessageContent(content: MessageContent): String = content.encodeJson()
 

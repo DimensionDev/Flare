@@ -10,7 +10,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 
-class AppearancePresenter : PresenterBase<AppearanceState>() {
+public class AppearancePresenter : PresenterBase<AppearanceState>() {
     @Composable
     override fun body(): AppearanceState {
         val account =
@@ -27,6 +27,6 @@ class AppearancePresenter : PresenterBase<AppearanceState>() {
 }
 
 @Immutable
-interface AppearanceState {
-    val sampleStatus: UiState<UiTimeline>
+public interface AppearanceState {
+    public val sampleStatus: UiState<UiTimeline>
 }

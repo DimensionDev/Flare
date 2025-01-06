@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class XQTLoginPresenter(
+public class XQTLoginPresenter(
     private val toHome: () -> Unit,
 ) : PresenterBase<XQTLoginState>(),
     KoinComponent {
@@ -89,11 +89,11 @@ class XQTLoginPresenter(
 }
 
 @Immutable
-interface XQTLoginState {
-    val loading: Boolean
-    val error: Throwable?
+public interface XQTLoginState {
+    public val loading: Boolean
+    public val error: Throwable?
 
-    fun checkChocolate(cookie: String): Boolean
+    public fun checkChocolate(cookie: String): Boolean
 
-    fun login(chocolate: String)
+    public fun login(chocolate: String)
 }

@@ -19,7 +19,7 @@ import dev.dimension.flare.model.ReferenceType
         ),
     ],
 )
-data class DbStatusReference(
+internal data class DbStatusReference(
     /**
      * Id that being used in the database
      */

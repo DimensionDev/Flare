@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class MastodonReportPresenter(
+public class MastodonReportPresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey,
     private val statusKey: MicroBlogKey?,
@@ -44,6 +44,6 @@ class MastodonReportPresenter(
 }
 
 @Immutable
-interface MastodonReportState {
-    fun report()
+public interface MastodonReportState {
+    public fun report()
 }

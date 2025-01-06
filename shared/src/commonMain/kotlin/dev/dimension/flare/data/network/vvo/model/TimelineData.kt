@@ -560,7 +560,7 @@ internal data class Attitude(
 )
 
 @Serializable
-data class UploadResponse(
+internal data class UploadResponse(
     @SerialName("pic_id")
     val picID: String? = null,
     @SerialName("thumbnail_pic")
@@ -572,7 +572,7 @@ data class UploadResponse(
 )
 
 @Serializable
-data class UnreadData(
+internal data class UnreadData(
     val cmt: Long? = null,
     val status: Long? = null,
     val follower: Long? = null,

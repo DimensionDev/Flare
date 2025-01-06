@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class ProfileMediaPresenter(
+public class ProfileMediaPresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey?,
 ) : PresenterBase<ProfileMediaState>(),
@@ -74,12 +74,12 @@ class ProfileMediaPresenter(
 }
 
 @Immutable
-interface ProfileMediaState {
-    val mediaState: PagingState<ProfileMedia>
+public interface ProfileMediaState {
+    public val mediaState: PagingState<ProfileMedia>
 }
 
 @Immutable
-data class ProfileMedia(
+public data class ProfileMedia internal constructor(
     val media: UiMedia,
     val status: UiTimeline,
     val index: Int,

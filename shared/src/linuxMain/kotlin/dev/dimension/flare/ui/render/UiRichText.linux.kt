@@ -4,12 +4,12 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 
-actual data class UiRichText(
+public actual data class UiRichText internal constructor(
     val html: String,
     actual val raw: String,
 )
 
-actual fun Element.toUi(): UiRichText =
+internal actual fun Element.toUi(): UiRichText =
     UiRichText(
         html = toPango(),
         raw = text(),

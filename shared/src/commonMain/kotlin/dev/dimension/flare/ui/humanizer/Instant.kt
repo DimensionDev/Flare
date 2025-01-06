@@ -9,7 +9,7 @@ private fun Int.withLeadingZero(): String =
         this.toString()
     }
 
-fun Duration.humanize(): String =
+public fun Duration.humanize(): String =
     this.toComponents { days, hours, minutes, seconds, _ ->
         buildString {
             if (days > 0) {

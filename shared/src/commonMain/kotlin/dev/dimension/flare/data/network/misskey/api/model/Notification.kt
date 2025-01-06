@@ -43,7 +43,7 @@ internal data class Notification(
  * Values: Follow,Mention,Reply,Renote,Quote,Reaction,PollEnded,ReceiveFollowRequest,FollowRequestAccepted,AchievementEarned,App
  */
 @Serializable
-enum class NotificationType(
+internal enum class NotificationType(
     val value: kotlin.String,
 ) {
     @SerialName(value = "follow")

@@ -15,7 +15,7 @@ import dev.dimension.flare.ui.model.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class HomeTimelinePresenter(
+public class HomeTimelinePresenter(
     private val accountType: AccountType,
 ) : TimelinePresenter(),
     KoinComponent {

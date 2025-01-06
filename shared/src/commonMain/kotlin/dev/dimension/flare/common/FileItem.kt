@@ -1,7 +1,7 @@
 package dev.dimension.flare.common
 
-expect class FileItem {
-    suspend fun readBytes(): ByteArray
+public expect class FileItem {
+    internal suspend fun readBytes(): ByteArray
 
-    val name: String?
+    internal val name: String?
 }

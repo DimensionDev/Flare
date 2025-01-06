@@ -40,6 +40,7 @@ internal data object NodeInfoService {
     private val misskeyNodeInfoName =
         listOf(
             "misskey",
+            "sharkey",
         )
 
     suspend fun fetchNodeInfo(host: String): String? {

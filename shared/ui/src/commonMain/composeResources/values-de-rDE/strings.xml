@@ -4,6 +4,7 @@
   <string name="settings_about_source_code">Quellcode</string>
   <string name="settings_about_telegram">Telegramm</string>
   <string name="settings_about_telegram_description">Testen Sie unserer Telegram-Gruppe</string>
+  <string name="settings_about_line_description">Trete unserer Liniengruppe bei</string>
   <string name="settings_about_localization">Crowdin</string>
   <string name="settings_about_localization_description">Hilf uns, Flare zu übersetzen</string>
 </resources>

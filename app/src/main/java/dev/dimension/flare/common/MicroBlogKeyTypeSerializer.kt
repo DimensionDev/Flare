@@ -15,14 +15,14 @@ class MicroBlogKeyTypeSerializer : DestinationsNavTypeSerializer<MicroBlogKey> {
 
 @NavTypeSerializer
 class AccountTypeTypeSerializer : DestinationsNavTypeSerializer<AccountType> {
-    override fun toRouteString(value: AccountType): String = value.encodeJson()
+    override fun toRouteString(value: AccountType): String = value.encodeJson(AccountType.serializer())
 
-    override fun fromRouteString(routeStr: String): AccountType = routeStr.decodeJson()
+    override fun fromRouteString(routeStr: String): AccountType = routeStr.decodeJson(AccountType.serializer())
 }
 
 @NavTypeSerializer
 class TimelineTabItemTypeSerializer : DestinationsNavTypeSerializer<TimelineTabItem> {
-    override fun toRouteString(value: TimelineTabItem): String = value.encodeJson()
+    override fun toRouteString(value: TimelineTabItem): String = value.encodeJson(TimelineTabItem.serializer())
 
-    override fun fromRouteString(routeStr: String): TimelineTabItem = routeStr.decodeJson()
+    override fun fromRouteString(routeStr: String): TimelineTabItem = routeStr.decodeJson(TimelineTabItem.serializer())
 }

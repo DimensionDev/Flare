@@ -147,8 +147,8 @@ internal fun Notification.render(
     )
 }
 
-enum class MisskeyAchievement(
-    val id: String,
+public enum class MisskeyAchievement(
+    internal val id: String,
 ) {
     NOTES1("notes1"),
     NOTES10("notes10"),
@@ -230,7 +230,7 @@ enum class MisskeyAchievement(
     BUBBLE_GAME_DOUBLE_EXPLODING_HEAD("bubbleGameDoubleExplodingHead"),
     ;
 
-    companion object {
+    internal companion object {
         fun fromString(id: String): MisskeyAchievement? = entries.find { it.id == id }
     }
 }
@@ -313,7 +313,10 @@ internal fun Note.renderStatus(
                 ?.mapNotNull { file ->
                     file.toUi()
                 }?.toPersistentList() ?: persistentListOf(),
-        contentWarning = cw,
+        contentWarning =
+            cw?.let {
+                misskeyParser.parse(it).toHtml(accountKey).toUi()
+            },
         user = user,
         quote =
             listOfNotNull(
@@ -342,14 +345,14 @@ internal fun Note.renderStatus(
                         displayItem =
                             StatusAction.Item.Retweet(
                                 count = renoteCount.toLong(),
-                                retweeted = renoteId != null,
+                                retweeted = false,
                                 onClicked = {},
                             ),
                         actions =
                             listOfNotNull(
                                 StatusAction.Item.Retweet(
                                     count = renoteCount.toLong(),
-                                    retweeted = renoteId != null,
+                                    retweeted = false,
                                     onClicked = {
                                         event.renote(
                                             statusKey = statusKey,
@@ -619,6 +622,10 @@ private val misskeyParser by lazy {
     MFMParser()
 }
 
+private val misskeyNameParser by lazy {
+    MFMParser(emojiOnly = true)
+}
+
 private fun parseName(
     name: String,
     accountKey: MicroBlogKey,
@@ -626,7 +633,7 @@ private fun parseName(
     if (name.isEmpty()) {
         return Element("body")
     }
-    return misskeyParser.parse(name).toHtml(accountKey) as? Element ?: Element("body")
+    return misskeyNameParser.parse(name).toHtml(accountKey) as? Element ?: Element("body")
 }
 
 private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): Element =

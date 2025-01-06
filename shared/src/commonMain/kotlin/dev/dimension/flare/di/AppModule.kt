@@ -1,3 +1,3 @@
 package dev.dimension.flare.di
 
-fun appModule() = listOf(commonModule, platformModule)
+internal fun appModule() = listOf(commonModule, platformModule)

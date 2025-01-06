@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
@@ -15,6 +16,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.window.core.layout.WindowWidthSizeClass
 import com.materialkolor.rememberDynamicColorScheme
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
@@ -46,6 +48,20 @@ private fun ColorScheme.withPureColorLightMode(): ColorScheme =
         onSurfaceVariant = MoreColors.Gray800,
     )
 
+private fun ColorScheme.withPureColorLightModeInBigScreen(): ColorScheme =
+    copy(
+        background = MoreColors.Gray50,
+        surface = MoreColors.Gray50,
+        onBackground = Color.Black,
+        onSurface = Color.Black,
+        surfaceContainer = Color.White,
+        surfaceContainerLow = Color.White,
+        surfaceContainerHigh = Color.White,
+        surfaceContainerLowest = Color.White,
+        surfaceContainerHighest = Color.White,
+        onSurfaceVariant = Color.Black,
+    )
+
 private fun ColorScheme.withPureColorDarkMode(): ColorScheme =
     copy(
         background = Color.Black,
@@ -69,6 +85,8 @@ fun FlareTheme(
 ) {
     val seed = Color(LocalAppearanceSettings.current.colorSeed)
     val pureColorMode = LocalAppearanceSettings.current.pureColorMode
+    val windowInfo = currentWindowAdaptiveInfo()
+    val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
     val colorScheme =
         when {
             dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -90,7 +108,11 @@ fun FlareTheme(
                         dynamicLightColorScheme(context)
                             .let {
                                 if (pureColorMode) {
-                                    it.withPureColorLightMode()
+                                    if (bigScreen) {
+                                        it.withPureColorLightModeInBigScreen()
+                                    } else {
+                                        it.withPureColorLightMode()
+                                    }
                                 } else {
                                     it
                                 }

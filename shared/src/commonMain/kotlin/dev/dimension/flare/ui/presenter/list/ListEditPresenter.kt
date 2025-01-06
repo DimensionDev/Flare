@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class ListEditPresenter(
+public class ListEditPresenter(
     private val accountType: AccountType,
     private val listId: String,
 ) : PresenterBase<EditListState>(),
@@ -80,13 +80,13 @@ class ListEditPresenter(
 }
 
 @Immutable
-interface EditListState :
+public interface EditListState :
     EditListMemberState,
     ListMembersState,
     ListInfoState {
-    val supportedMetaData: UiState<ImmutableList<ListMetaDataType>>
+    public val supportedMetaData: UiState<ImmutableList<ListMetaDataType>>
 
-    fun refresh()
+    public fun refresh()
 
-    suspend fun updateList(listMetaData: ListMetaData)
+    public suspend fun updateList(listMetaData: ListMetaData)
 }

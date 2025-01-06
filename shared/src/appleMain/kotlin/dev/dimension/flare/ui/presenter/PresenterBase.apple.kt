@@ -9,10 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.experimental.ExperimentalObjCRefinement
 
-actual abstract class PresenterBase<Model : Any> {
+public actual abstract class PresenterBase<Model : Any> {
     private val scope = CoroutineScope(Dispatchers.Main + DisplayLinkClock)
 
-    actual val models: StateFlow<Model> by lazy {
+    public actual val models: StateFlow<Model> by lazy {
         scope.launchMolecule(mode = RecompositionMode.ContextClock) {
             body()
         }

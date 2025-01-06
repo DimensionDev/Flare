@@ -12,7 +12,7 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 
 @Immutable
-data class UiProfile internal constructor(
+public data class UiProfile internal constructor(
     override val key: MicroBlogKey,
     override val handle: String,
     override val avatar: String,
@@ -26,22 +26,22 @@ data class UiProfile internal constructor(
     val bottomContent: BottomContent?,
 ) : UiUserV2 {
     @Immutable
-    data class Matrices(
+    public data class Matrices internal constructor(
         val fansCount: Long,
         val followsCount: Long,
         val statusesCount: Long,
         val platformFansCount: String? = null,
     ) {
-        val fansCountHumanized = platformFansCount ?: fansCount.humanize()
-        val followsCountHumanized = followsCount.humanize()
-        val statusesCountHumanized = statusesCount.humanize()
+        val fansCountHumanized: String = platformFansCount ?: fansCount.humanize()
+        val followsCountHumanized: String = followsCount.humanize()
+        val statusesCountHumanized: String = statusesCount.humanize()
     }
 
-    val handleWithoutAt by lazy {
+    val handleWithoutAt: String by lazy {
         handle.removePrefix("@")
     }
 
-    val handleWithoutAtAndHost by lazy {
+    val handleWithoutAtAndHost: String by lazy {
         run {
             handle
                 .removePrefix("@")
@@ -57,15 +57,15 @@ data class UiProfile internal constructor(
         }
     }
 
-    sealed interface BottomContent {
-        data class Fields(
+    public sealed interface BottomContent {
+        public data class Fields internal constructor(
             val fields: ImmutableMap<String, UiRichText>,
         ) : BottomContent
 
-        data class Iconify(
+        public data class Iconify internal constructor(
             val items: ImmutableMap<Icon, UiRichText>,
         ) : BottomContent {
-            enum class Icon {
+            public enum class Icon {
                 Location,
                 Url,
                 Verify,
@@ -73,7 +73,7 @@ data class UiProfile internal constructor(
         }
     }
 
-    enum class Mark {
+    public enum class Mark {
         Verified,
         Cat,
         Bot,
@@ -81,7 +81,7 @@ data class UiProfile internal constructor(
     }
 }
 
-fun createSampleUser(): UiProfile =
+public fun createSampleUser(): UiProfile =
     UiProfile(
         key = MicroBlogKey("sampleKey", "sampleHost"),
         handle = "@sampleUser",

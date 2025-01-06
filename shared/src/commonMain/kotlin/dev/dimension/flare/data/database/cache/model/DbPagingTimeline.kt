@@ -19,7 +19,7 @@ import dev.dimension.flare.model.ReferenceType
         ),
     ],
 )
-data class DbPagingTimeline(
+internal data class DbPagingTimeline(
     @PrimaryKey
     val _id: String,
     val accountKey: MicroBlogKey,
@@ -28,7 +28,7 @@ data class DbPagingTimeline(
     val sortId: Long,
 )
 
-data class DbPagingTimelineWithStatus(
+internal data class DbPagingTimelineWithStatus(
     @Embedded
     val timeline: DbPagingTimeline,
     @Relation(
@@ -39,14 +39,14 @@ data class DbPagingTimelineWithStatus(
     val status: DbStatusWithReference,
 )
 
-data class DbStatusWithUser(
+internal data class DbStatusWithUser(
     @Embedded
     val data: DbStatus,
     @Relation(parentColumn = "userKey", entityColumn = "userKey")
     val user: DbUser?,
 )
 
-data class DbStatusReferenceWithStatus(
+internal data class DbStatusReferenceWithStatus(
     @Embedded
     val reference: DbStatusReference,
     @Relation(
@@ -57,7 +57,7 @@ data class DbStatusReferenceWithStatus(
     val status: DbStatusWithUser,
 )
 
-data class DbStatusWithReference(
+internal data class DbStatusWithReference(
     @Embedded
     val status: DbStatusWithUser,
     @Relation(
@@ -68,7 +68,7 @@ data class DbStatusWithReference(
     val references: List<DbStatusReferenceWithStatus>,
 )
 
-class StatusConverter {
+internal class StatusConverter {
     @TypeConverter
     fun fromStatusContent(value: StatusContent): String = value.encodeJson()
 

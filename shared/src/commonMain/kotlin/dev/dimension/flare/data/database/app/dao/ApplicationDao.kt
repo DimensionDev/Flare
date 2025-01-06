@@ -9,7 +9,7 @@ import dev.dimension.flare.model.PlatformType
 import kotlinx.coroutines.flow.Flow
 
 @Dao
-interface ApplicationDao {
+internal interface ApplicationDao {
     @Query("SELECT * FROM DbApplication")
     fun allApplication(): Flow<List<DbApplication>>
 

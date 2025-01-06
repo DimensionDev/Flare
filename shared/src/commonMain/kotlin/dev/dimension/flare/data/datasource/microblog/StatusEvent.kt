@@ -2,7 +2,7 @@ package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.model.MicroBlogKey
 
-sealed interface StatusEvent {
+internal sealed interface StatusEvent {
     interface Mastodon : StatusEvent {
         fun reblog(
             statusKey: MicroBlogKey,

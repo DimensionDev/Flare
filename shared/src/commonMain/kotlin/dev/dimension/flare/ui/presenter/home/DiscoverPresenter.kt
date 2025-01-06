@@ -20,7 +20,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class DiscoverPresenter(
+public class DiscoverPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<DiscoverState>(),
     KoinComponent {
@@ -91,8 +91,8 @@ class DiscoverPresenter(
 }
 
 @Immutable
-interface DiscoverState {
-    val users: PagingState<UiUserV2>
-    val status: PagingState<UiTimeline>
-    val hashtags: PagingState<UiHashtag>
+public interface DiscoverState {
+    public val users: PagingState<UiUserV2>
+    public val status: PagingState<UiTimeline>
+    public val hashtags: PagingState<UiHashtag>
 }

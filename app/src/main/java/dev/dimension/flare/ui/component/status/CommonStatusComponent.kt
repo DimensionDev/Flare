@@ -95,6 +95,7 @@ import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.screen.status.statusTranslatePresenter
 import dev.dimension.flare.ui.theme.MediumAlpha
 import io.github.fornewid.placeholder.material3.placeholder
@@ -408,7 +409,7 @@ private fun StatusReactionComponent(
 @Composable
 private fun TranslationComponent(
     statusKey: MicroBlogKey,
-    contentWarning: String?,
+    contentWarning: UiRichText?,
     rawContent: String,
     content: Element,
 ) {
@@ -720,7 +721,7 @@ private fun StatusContentComponent(
     rawContent: String,
     content: Element,
     contentDirection: LayoutDirection,
-    contentWarning: String?,
+    contentWarning: UiRichText?,
     poll: UiPoll?,
     maxLines: Int,
     modifier: Modifier = Modifier,
@@ -732,29 +733,36 @@ private fun StatusContentComponent(
         modifier = modifier,
     ) {
         contentWarning?.let {
-            if (it.isNotEmpty()) {
-                Row(
+            if (it.raw.isNotEmpty()) {
+                Column(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .alpha(MediumAlpha)
-                            .clickable {
-                                expanded = !expanded
-                            },
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            .padding(vertical = 4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.Lock,
-                        contentDescription = stringResource(id = R.string.mastodon_item_content_warning),
+                    HtmlText(
+                        element = it.data,
+                        layoutDirection = it.direction,
                     )
-                    Text(
-                        text = it,
-                    )
+                    FilledTonalButton(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth(),
+                        onClick = {
+                            expanded = !expanded
+                        },
+                    ) {
+                        if (expanded) {
+                            Text(stringResource(R.string.mastodon_item_show_less))
+                        } else {
+                            Text(stringResource(R.string.mastodon_item_show_more))
+                        }
+                    }
                 }
             }
         }
-        AnimatedVisibility(visible = expanded || contentWarning.isNullOrEmpty()) {
+        AnimatedVisibility(visible = expanded || contentWarning?.raw.isNullOrEmpty()) {
             Column {
                 if (rawContent.isNotEmpty() && rawContent.isNotBlank()) {
                     HtmlText(

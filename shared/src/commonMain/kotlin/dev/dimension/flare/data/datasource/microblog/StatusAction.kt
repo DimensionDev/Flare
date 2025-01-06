@@ -4,21 +4,21 @@ import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.ClickContext
 import kotlinx.collections.immutable.ImmutableList
 
-sealed interface StatusAction {
-    data class Group(
+public sealed interface StatusAction {
+    public data class Group internal constructor(
         val displayItem: Item,
         val actions: ImmutableList<StatusAction>,
     ) : StatusAction
 
-    sealed interface Item : StatusAction {
-        sealed interface Clickable {
-            val onClicked: ClickContext.() -> Unit
+    public sealed interface Item : StatusAction {
+        public sealed interface Clickable {
+            public val onClicked: ClickContext.() -> Unit
         }
 
-        sealed interface Colorized {
-            val color: Color
+        public sealed interface Colorized {
+            public val color: Color
 
-            enum class Color {
+            public enum class Color {
                 Red,
                 Error,
                 ContentColor,
@@ -26,16 +26,16 @@ sealed interface StatusAction {
             }
         }
 
-        data object More : Item
+        public data object More : Item
 
-        data class Like(
+        public data class Like internal constructor(
             val count: Long,
             val liked: Boolean,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable,
             Colorized {
-            val humanizedCount by lazy {
+            public val humanizedCount: String by lazy {
                 count
                     .takeIf {
                         it > 0
@@ -47,14 +47,14 @@ sealed interface StatusAction {
                 get() = if (liked) Colorized.Color.Red else Colorized.Color.ContentColor
         }
 
-        data class Retweet(
+        public data class Retweet internal constructor(
             val count: Long,
             val retweeted: Boolean,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable,
             Colorized {
-            val humanizedCount by lazy {
+            public val humanizedCount: String by lazy {
                 count
                     .takeIf {
                         it > 0
@@ -66,12 +66,12 @@ sealed interface StatusAction {
                 get() = if (retweeted) Colorized.Color.PrimaryColor else Colorized.Color.ContentColor
         }
 
-        data class Reply(
+        public data class Reply internal constructor(
             val count: Long,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable {
-            val humanizedCount by lazy {
+            public val humanizedCount: String by lazy {
                 count
                     .takeIf {
                         it > 0
@@ -80,12 +80,12 @@ sealed interface StatusAction {
             }
         }
 
-        data class Quote(
+        public data class Quote internal constructor(
             val count: Long,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable {
-            val humanizedCount by lazy {
+            public val humanizedCount: String by lazy {
                 count
                     .takeIf {
                         it > 0
@@ -94,13 +94,13 @@ sealed interface StatusAction {
             }
         }
 
-        data class Bookmark(
+        public data class Bookmark internal constructor(
             val count: Long,
             val bookmarked: Boolean,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Clickable {
-            val humanizedCount by lazy {
+            public val humanizedCount: String by lazy {
                 count
                     .takeIf {
                         it > 0
@@ -109,7 +109,7 @@ sealed interface StatusAction {
             }
         }
 
-        data class Delete(
+        public data class Delete internal constructor(
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Colorized,
@@ -118,7 +118,7 @@ sealed interface StatusAction {
                 get() = Colorized.Color.Error
         }
 
-        data class Report(
+        public data class Report internal constructor(
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,
             Colorized,
@@ -127,7 +127,7 @@ sealed interface StatusAction {
                 get() = Colorized.Color.Error
         }
 
-        data class Reaction(
+        public data class Reaction internal constructor(
             val reacted: Boolean,
             override val onClicked: ClickContext.() -> Unit,
         ) : Item,

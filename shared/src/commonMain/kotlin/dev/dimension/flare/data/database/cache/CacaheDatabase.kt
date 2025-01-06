@@ -6,7 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
 
-internal const val CACHE_DATABASE_VERSION = 14
+internal const val CACHE_DATABASE_VERSION = 15
 
 @Database(
     entities = [
@@ -19,6 +19,7 @@ internal const val CACHE_DATABASE_VERSION = 14
         dev.dimension.flare.data.database.cache.model.DbMessageItem::class,
         dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline::class,
         dev.dimension.flare.data.database.cache.model.DbMessageRoomReference::class,
+        dev.dimension.flare.data.database.cache.model.DbUserHistory::class,
     ],
     version = CACHE_DATABASE_VERSION,
     exportSchema = false,

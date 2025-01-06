@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
+import dev.dimension.flare.data.database.cache.model.DbUserHistory
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountProvider
 import dev.dimension.flare.model.AccountType
@@ -14,15 +14,14 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.datetime.Clock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.uuid.Uuid
 
-public class LogStatusHistoryPresenter(
+public class LogUserHistoryPresenter(
     private val accountType: AccountType,
-    private val statusKey: MicroBlogKey,
-) : PresenterBase<LogStatusHistoryPresenter.State>(),
+    private val userKey: MicroBlogKey,
+) : PresenterBase<LogUserHistoryPresenter.State>(),
     KoinComponent {
     internal companion object {
-        const val PAGING_KEY = "status_history"
+        const val PAGING_KEY = "user_history"
     }
 
     private val accountRepository: AccountRepository by inject()
@@ -38,15 +37,11 @@ public class LogStatusHistoryPresenter(
         )
         accountState.onSuccess {
             LaunchedEffect(Unit) {
-                cacheDatabase.pagingTimelineDao().insertAll(
-                    listOf(
-                        DbPagingTimeline(
-                            _id = Uuid.random().toString(),
-                            accountKey = it.accountKey,
-                            statusKey = statusKey,
-                            pagingKey = PAGING_KEY,
-                            sortId = Clock.System.now().toEpochMilliseconds(),
-                        ),
+                cacheDatabase.userDao().insertHistory(
+                    DbUserHistory(
+                        userKey = userKey,
+                        accountKey = it.accountKey,
+                        lastVisit = Clock.System.now().toEpochMilliseconds(),
                     ),
                 )
             }

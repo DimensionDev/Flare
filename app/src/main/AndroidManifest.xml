@@ -57,9 +57,6 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
-        <meta-data
-            android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="langid" />
     </application>
 
 </manifest>

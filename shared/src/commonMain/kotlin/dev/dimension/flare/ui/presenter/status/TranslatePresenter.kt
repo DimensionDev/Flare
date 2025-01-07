@@ -22,31 +22,35 @@ public class TranslatePresenter(
     override fun body(): UiState<String> {
         val baseUrl = "https://translate.google.com/translate_a/single"
         return produceState(UiState.Loading()) {
-            val response =
-                ktorClient()
-                    .get {
-                        url(baseUrl)
-                        parameter("client", "gtx")
-                        parameter("sl", "auto")
-                        parameter("tl", targetLanguage)
-                        parameter("dt", "t")
-                        parameter("q", source)
-                        parameter("ie", "UTF-8")
-                        parameter("oe", "UTF-8")
-                    }.body<JsonArray>()
-            val result =
-                buildString {
-                    response.firstOrNull()?.jsonArray?.forEach {
-                        it.jsonArray.firstOrNull()?.let {
-                            val content = it.jsonPrimitive.content
-                            if (content.isNotEmpty()) {
-                                append(content)
-                                append("\n")
+            value =
+                runCatching {
+                    val response =
+                        ktorClient()
+                            .get {
+                                url(baseUrl)
+                                parameter("client", "gtx")
+                                parameter("sl", "auto")
+                                parameter("tl", targetLanguage)
+                                parameter("dt", "t")
+                                parameter("q", source)
+                                parameter("ie", "UTF-8")
+                                parameter("oe", "UTF-8")
+                            }.body<JsonArray>()
+                    buildString {
+                        response.firstOrNull()?.jsonArray?.forEach {
+                            it.jsonArray.firstOrNull()?.let {
+                                val content = it.jsonPrimitive.content
+                                if (content.isNotEmpty()) {
+                                    append(content)
+                                    append("\n")
+                                }
                             }
                         }
                     }
-                }
-            value = UiState.Success(result)
+                }.fold(
+                    onSuccess = { UiState.Success(it) },
+                    onFailure = { UiState.Error(it) },
+                )
         }.value
     }
 }

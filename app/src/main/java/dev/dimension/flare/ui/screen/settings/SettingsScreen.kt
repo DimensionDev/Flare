@@ -125,6 +125,7 @@ internal fun SettingsRoute(
                                     scaffoldNavigator.navigateBack()
                                 },
                                 uriHandler = uriHandler,
+                                rootNavigator = navigator,
                             ),
                         )
                         dependency(navigationState)
@@ -164,6 +165,7 @@ internal class ProxyDestinationsNavigator(
     private val navigator: DestinationsNavigator,
     private val navigateBack: () -> Unit,
     val uriHandler: UriHandler,
+    val rootNavigator: DestinationsNavigator,
 ) : DestinationsNavigator by navigator {
     override fun navigateUp(): Boolean =
         if (navigator.navigateUp()) {

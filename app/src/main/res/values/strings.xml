@@ -691,5 +691,6 @@
     <string name="fans_title">Follower</string>
 
     <string name="local_history_search_placeholder">Search local cache</string>
-
+    <string name="local_history_search_status_title">Status</string>
+    <string name="local_history_search_user_title">User</string>
 </resources>

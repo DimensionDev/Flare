@@ -53,4 +53,11 @@ internal interface UserDao {
     @Transaction
     @Query("SELECT * FROM DbUserHistory ORDER BY lastVisit DESC")
     fun getUserHistory(): PagingSource<Int, DbUserHistoryWithUser>
+
+    @Transaction
+    @Query(
+        "SELECT * FROM DbUser " +
+            "WHERE DbUser.name like :query OR DbUser.handle like :query",
+    )
+    fun searchUser(query: String): PagingSource<Int, DbUser>
 }

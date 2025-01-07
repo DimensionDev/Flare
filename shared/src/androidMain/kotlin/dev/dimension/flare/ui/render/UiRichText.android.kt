@@ -10,6 +10,7 @@ public actual data class UiRichText(
 ) {
     public val innerText: String = data.text()
     actual val raw: String = data.text()
+    public val isEmpty: Boolean = raw.isEmpty() && data.getAllElements().size <= 1
 }
 
 internal actual fun Element.toUi(): UiRichText =

@@ -54,7 +54,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.fleeksoft.ksoup.nodes.Element
 import compose.icons.FontAwesomeIcons
@@ -183,9 +182,7 @@ fun CommonStatusComponent(
         if (isDetail) {
             SelectionContainer {
                 StatusContentComponent(
-                    rawContent = item.content.innerText,
-                    content = item.content.data,
-                    contentDirection = item.content.direction,
+                    content = item.content,
                     contentWarning = item.contentWarning,
                     poll = item.poll,
                     maxLines = Int.MAX_VALUE,
@@ -193,9 +190,7 @@ fun CommonStatusComponent(
             }
         } else {
             StatusContentComponent(
-                rawContent = item.content.innerText,
-                content = item.content.data,
-                contentDirection = item.content.direction,
+                content = item.content,
                 contentWarning = item.contentWarning,
                 poll = item.poll,
                 maxLines = 6,
@@ -718,9 +713,7 @@ private fun StatusReplyComponent(
 
 @Composable
 private fun StatusContentComponent(
-    rawContent: String,
-    content: Element,
-    contentDirection: LayoutDirection,
+    content: UiRichText,
     contentWarning: UiRichText?,
     poll: UiPoll?,
     maxLines: Int,
@@ -764,10 +757,10 @@ private fun StatusContentComponent(
         }
         AnimatedVisibility(visible = expanded || contentWarning?.raw.isNullOrEmpty()) {
             Column {
-                if (rawContent.isNotEmpty() && rawContent.isNotBlank()) {
+                if (!content.isEmpty) {
                     HtmlText(
-                        element = content,
-                        layoutDirection = contentDirection,
+                        element = content.data,
+                        layoutDirection = content.direction,
                         modifier = Modifier.fillMaxWidth(),
                         maxLines = maxLines,
                     )

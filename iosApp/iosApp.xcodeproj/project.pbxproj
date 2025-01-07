@@ -143,6 +143,11 @@
 		64E877C62D083DF6003559B9 /* TwitterTextProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877C42D083DF6003559B9 /* TwitterTextProvider.swift */; };
 		64E877C92D0842AA003559B9 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877C82D0842AA003559B9 /* SwiftSoup */; };
 		64E877CC2D0842C5003559B9 /* Fuzi in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877CB2D0842C5003559B9 /* Fuzi */; };
+		64E890742D2D28400001B93D /* MJRefresh in Frameworks */ = {isa = PBXBuildFile; productRef = 64E890732D2D28400001B93D /* MJRefresh */; };
+		64E890AC2D2D3C3F0001B93D /* ProfileStretchRefreshControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E890A72D2D3C3F0001B93D /* ProfileStretchRefreshControl.swift */; };
+		64E890AE2D2D3C3F0001B93D /* ProfileRefreshViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E890A62D2D3C3F0001B93D /* ProfileRefreshViewController.swift */; };
+		64E890AF2D2D3C3F0001B93D /* ProfileListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E8909D2D2D3C3F0001B93D /* ProfileListViewController.swift */; };
+		64E890B42D2D3D040001B93D /* ProfileNewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E890B32D2D3D040001B93D /* ProfileNewScreen.swift */; };
 		64EB7DAB2D0C4C0400E41656 /* FLTabSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */; };
 		64F7F1862D1D30ED00EDB720 /* ProfileContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F7F1832D1D30ED00EDB720 /* ProfileContentView.swift */; };
 		64F7F1872D1D30ED00EDB720 /* ProfileTabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64F7F1852D1D30ED00EDB720 /* ProfileTabBarView.swift */; };
@@ -273,6 +278,10 @@
 		64E877BD2D08131D003559B9 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		64E877C32D083DF6003559B9 /* FlareMarkdownText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareMarkdownText.swift; sourceTree = "<group>"; };
 		64E877C42D083DF6003559B9 /* TwitterTextProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterTextProvider.swift; sourceTree = "<group>"; };
+		64E8909D2D2D3C3F0001B93D /* ProfileListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileListViewController.swift; sourceTree = "<group>"; };
+		64E890A62D2D3C3F0001B93D /* ProfileRefreshViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRefreshViewController.swift; sourceTree = "<group>"; };
+		64E890A72D2D3C3F0001B93D /* ProfileStretchRefreshControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileStretchRefreshControl.swift; sourceTree = "<group>"; };
+		64E890B32D2D3D040001B93D /* ProfileNewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileNewScreen.swift; sourceTree = "<group>"; };
 		64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLTabSettings.swift; sourceTree = "<group>"; };
 		64F7F1812D1D30ED00EDB720 /* PagingContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PagingContainerView.swift; sourceTree = "<group>"; };
 		64F7F1832D1D30ED00EDB720 /* ProfileContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileContentView.swift; sourceTree = "<group>"; };
@@ -304,6 +313,7 @@
 				64E2087A2CF84670001C64EF /* Generated in Frameworks */,
 				64BA00252D1AD84D0053F205 /* JXPhotoBrowser in Frameworks */,
 				06B8514B2B6B228600DFA075 /* FirebaseAnalytics in Frameworks */,
+				64E890742D2D28400001B93D /* MJRefresh in Frameworks */,
 				64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */,
 				64E877C92D0842AA003559B9 /* SwiftSoup in Frameworks */,
 				64E208772CF84612001C64EF /* JXPhotoBrowser in Frameworks */,
@@ -782,6 +792,7 @@
 		64E877202D0430C7003559B9 /* Page */ = {
 			isa = PBXGroup;
 			children = (
+				64E890A92D2D3C3F0001B93D /* ProfileNew */,
 				64E876BD2D0430C7003559B9 /* Compose */,
 				64E876F92D0430C7003559B9 /* Home */,
 				64E877012D0430C7003559B9 /* OAuth */,
@@ -836,6 +847,33 @@
 				64E877BD2D08131D003559B9 /* Colors.swift */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		64E8909E2D2D3C3F0001B93D /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				64E8909D2D2D3C3F0001B93D /* ProfileListViewController.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		64E890A82D2D3C3F0001B93D /* View */ = {
+			isa = PBXGroup;
+			children = (
+				64E890B32D2D3D040001B93D /* ProfileNewScreen.swift */,
+				64E890A62D2D3C3F0001B93D /* ProfileRefreshViewController.swift */,
+				64E890A72D2D3C3F0001B93D /* ProfileStretchRefreshControl.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		64E890A92D2D3C3F0001B93D /* ProfileNew */ = {
+			isa = PBXGroup;
+			children = (
+				64E8909E2D2D3C3F0001B93D /* Common */,
+				64E890A82D2D3C3F0001B93D /* View */,
+			);
+			path = ProfileNew;
 			sourceTree = "<group>";
 		};
 		64EB7DAA2D0C4C0400E41656 /* Data */ = {
@@ -970,6 +1008,7 @@
 				6488800A2D1AD43E00EFE72C /* JXSegmentedView */,
 				64BA00242D1AD84D0053F205 /* JXPhotoBrowser */,
 				64FF2E122D2BC4E80046A32B /* Generated */,
+				64E890732D2D28400001B93D /* MJRefresh */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
@@ -1016,6 +1055,7 @@
 				648880092D1AD43E00EFE72C /* XCRemoteSwiftPackageReference "JXSegmentedView" */,
 				64BA00232D1AD84D0053F205 /* XCRemoteSwiftPackageReference "PhotoBrowser" */,
 				64FF2E112D2BC4E80046A32B /* XCLocalSwiftPackageReference "Generated" */,
+				64E890722D2D28400001B93D /* XCRemoteSwiftPackageReference "MJRefresh" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -1144,6 +1184,9 @@
 				641817752D12E7350046CEB0 /* OriginalImageMarkView.swift in Sources */,
 				641817762D12E7350046CEB0 /* ToastView.swift in Sources */,
 				64E8773F2D0430C7003559B9 /* FeaturedScreen.swift in Sources */,
+				64E890AC2D2D3C3F0001B93D /* ProfileStretchRefreshControl.swift in Sources */,
+				64E890AE2D2D3C3F0001B93D /* ProfileRefreshViewController.swift in Sources */,
+				64E890AF2D2D3C3F0001B93D /* ProfileListViewController.swift in Sources */,
 				64E877402D0430C7003559B9 /* Zoomable.swift in Sources */,
 				64CE87B42D1EAADE00853E9A /* ProfilePresenterWrapper.swift in Sources */,
 				64E877412D0430C7003559B9 /* ComposeView.swift in Sources */,
@@ -1152,6 +1195,7 @@
 				64E877442D0430C7003559B9 /* ComposeScreen.swift in Sources */,
 				64E877452D0430C7003559B9 /* CommonTimelineStatusComponent.swift in Sources */,
 				64E877462D0430C7003559B9 /* SwitUIInAppNotification.swift in Sources */,
+				64E890B42D2D3D040001B93D /* ProfileNewScreen.swift in Sources */,
 				64E877472D0430C7003559B9 /* MarkdownTheme.swift in Sources */,
 				64E877482D0430C7003559B9 /* HomeScreen.swift in Sources */,
 				64E877492D0430C7003559B9 /* VVOLoginScreen.swift in Sources */,
@@ -1592,6 +1636,14 @@
 				minimumVersion = 3.1.3;
 			};
 		};
+		64E890722D2D28400001B93D /* XCRemoteSwiftPackageReference "MJRefresh" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/CoderMJLee/MJRefresh";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.7.9;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1677,6 +1729,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 64E877CA2D0842C5003559B9 /* XCRemoteSwiftPackageReference "Fuzi" */;
 			productName = Fuzi;
+		};
+		64E890732D2D28400001B93D /* MJRefresh */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64E890722D2D28400001B93D /* XCRemoteSwiftPackageReference "MJRefresh" */;
+			productName = MJRefresh;
 		};
 		64FF2E122D2BC4E80046A32B /* Generated */ = {
 			isa = XCSwiftPackageProductDependency;

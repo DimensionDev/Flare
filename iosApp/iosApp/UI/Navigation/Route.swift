@@ -113,13 +113,8 @@ struct TabItem<Content: View>: View {
             case .reportStatus(let data): EmptyView()
             }
         case .profile(let data):
-            ProfileScreen(
-                accountType: data.accountType,
-                userKey: data.userKey,
-                toProfileMedia: { userKey in
-                    print("Media tab is now integrated in Profile page")
-                }
-            )
+            ProfileNewScreen(
+             )
         case .profileMedia(let data):
             // 已集成到 Profile 页面的 tab 中，不再需要单独导航
             ProfileMediaListScreen(

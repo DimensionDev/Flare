@@ -1,32 +1,22 @@
 package dev.dimension.flare.data.network.bluesky
 
-import com.atproto.server.RefreshSessionResponse
 import dev.dimension.flare.common.JSON
-import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.data.database.app.dao.AccountDao
 import dev.dimension.flare.data.network.authorization.BearerAuthorization
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
 import io.ktor.client.HttpClient
 import io.ktor.client.call.HttpClientCall
-import io.ktor.client.call.body
 import io.ktor.client.call.save
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpClientPlugin
 import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.plugin
 import io.ktor.client.request.HttpRequestPipeline
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.post
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.http.Url
 import io.ktor.util.AttributeKey
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
 import sh.christian.ozone.BlueskyApi
 import sh.christian.ozone.XrpcBlueskyApi
@@ -40,7 +30,7 @@ internal data class BlueskyService(
     private val accountKey: MicroBlogKey? = null,
 ) : BlueskyApi by XrpcBlueskyApi(
         ktorClient(
-            authorization = bearerToken?.let { BearerAuthorization(it) }
+            authorization = bearerToken?.let { BearerAuthorization(it) },
         ) {
             install(DefaultRequest) {
                 val hostUrl = Url(baseUrl)

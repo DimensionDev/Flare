@@ -5,10 +5,13 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import app.bsky.feed.GetTimelineQueryParams
+import dev.dimension.flare.common.InAppNotification
+import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
@@ -17,6 +20,7 @@ internal class HomeTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val database: CacheDatabase,
     private val pagingKey: String,
+    private val inAppNotification: InAppNotification,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
     var cursor: String? = null
 
@@ -69,6 +73,12 @@ internal class HomeTimelineRemoteMediator(
                 endOfPaginationReached = cursor == null,
             )
         } catch (e: Throwable) {
+            if (e is LoginExpiredException) {
+                inAppNotification.onError(
+                    Message.LoginExpired,
+                    LoginExpiredException,
+                )
+            }
             MediatorResult.Error(e)
         }
     }

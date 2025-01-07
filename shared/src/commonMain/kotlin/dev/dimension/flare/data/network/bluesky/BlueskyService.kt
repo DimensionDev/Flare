@@ -1,30 +1,22 @@
 package dev.dimension.flare.data.network.bluesky
 
-import com.atproto.server.RefreshSessionResponse
 import dev.dimension.flare.common.JSON
-import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.data.database.app.dao.AccountDao
+import dev.dimension.flare.data.network.authorization.BearerAuthorization
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
 import io.ktor.client.HttpClient
 import io.ktor.client.call.HttpClientCall
-import io.ktor.client.call.body
 import io.ktor.client.call.save
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpClientPlugin
 import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.plugin
 import io.ktor.client.request.HttpRequestPipeline
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.post
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpHeaders.Authorization
 import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.http.Url
 import io.ktor.util.AttributeKey
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
 import sh.christian.ozone.BlueskyApi
 import sh.christian.ozone.XrpcBlueskyApi
@@ -34,10 +26,12 @@ import sh.christian.ozone.unspecced.XrpcUnspeccedBlueskyApi
 
 internal data class BlueskyService(
     private val baseUrl: String,
+    private val bearerToken: String? = null,
     private val accountKey: MicroBlogKey? = null,
-    private val accountQueries: AccountDao? = null,
 ) : BlueskyApi by XrpcBlueskyApi(
-        ktorClient {
+        ktorClient(
+            authorization = bearerToken?.let { BearerAuthorization(it) },
+        ) {
             install(DefaultRequest) {
                 val hostUrl = Url(baseUrl)
                 url.protocol = hostUrl.protocol
@@ -46,8 +40,6 @@ internal data class BlueskyService(
             }
             install(XrpcAuthPlugin) {
                 json = JSON
-                this.accountKey = accountKey
-                this.accountQueries = accountQueries
             }
             install(AtprotoProxyPlugin)
 
@@ -85,13 +77,9 @@ private class AtprotoProxyPlugin {
  */
 internal class XrpcAuthPlugin(
     private val json: Json,
-    private val accountKey: MicroBlogKey?,
-    private val accountQueries: AccountDao?,
 ) {
     class Config(
         var json: Json = Json { ignoreUnknownKeys = true },
-        var accountKey: MicroBlogKey? = null,
-        var accountQueries: AccountDao? = null,
     )
 
     companion object : HttpClientPlugin<Config, XrpcAuthPlugin> {
@@ -99,7 +87,7 @@ internal class XrpcAuthPlugin(
 
         override fun prepare(block: Config.() -> Unit): XrpcAuthPlugin {
             val config = Config().apply(block)
-            return XrpcAuthPlugin(config.json, config.accountKey, config.accountQueries)
+            return XrpcAuthPlugin(config.json)
         }
 
         override fun install(
@@ -107,17 +95,6 @@ internal class XrpcAuthPlugin(
             scope: HttpClient,
         ) {
             scope.plugin(HttpSend).intercept { context ->
-                if (!context.headers.contains(Authorization) && plugin.accountKey != null && plugin.accountQueries != null) {
-                    val account =
-                        plugin.accountQueries
-                            .get(plugin.accountKey)
-                            .firstOrNull()
-                            ?.toUi() as? UiAccount.Bluesky
-                    if (account != null) {
-                        context.bearerAuth(account.credential.accessToken)
-                    }
-                }
-
                 var result: HttpClientCall = execute(context)
                 if (result.response.status != BadRequest) {
                     return@intercept result
@@ -131,37 +108,8 @@ internal class XrpcAuthPlugin(
                         plugin.json.decodeFromString(result.response.bodyAsText())
                     }
 
-                if (response.getOrNull()?.error == "ExpiredToken" && plugin.accountKey != null && plugin.accountQueries != null) {
-                    val account =
-                        plugin.accountQueries
-                            .get(plugin.accountKey)
-                            .firstOrNull()
-                            ?.toUi() as? UiAccount.Bluesky
-                    if (account != null) {
-                        val refreshResponse =
-                            scope.post("/xrpc/com.atproto.server.refreshSession") {
-                                bearerAuth(account.credential.refreshToken)
-                            }
-                        runCatching { refreshResponse.body<RefreshSessionResponse>() }
-                            .getOrNull()
-                            ?.let { refreshed ->
-                                val newAccessToken = refreshed.accessJwt
-                                val newRefreshToken = refreshed.refreshJwt
-                                plugin.accountQueries.setCredential(
-                                    credentialJson =
-                                        UiAccount.Bluesky
-                                            .Credential(
-                                                baseUrl = account.credential.baseUrl,
-                                                accessToken = newAccessToken,
-                                                refreshToken = newRefreshToken,
-                                            ).encodeJson(),
-                                    accountKey = plugin.accountKey,
-                                )
-                                context.headers.remove(Authorization)
-                                context.bearerAuth(newAccessToken)
-                                result = execute(context)
-                            }
-                    }
+                if (response.getOrNull()?.error == "ExpiredToken") {
+                    throw LoginExpiredException
                 }
 
                 result
@@ -169,10 +117,3 @@ internal class XrpcAuthPlugin(
         }
     }
 }
-
-// internal fun UiAccount.Bluesky.getService(appDatabase: AppDatabase) =
-//    BlueskyService(
-//        baseUrl = credential.baseUrl,
-//        accountKey = accountKey,
-//        accountQueries = appDatabase.accountDao(),
-//    )

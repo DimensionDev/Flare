@@ -16,6 +16,7 @@ import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
@@ -35,6 +36,8 @@ public class LocalCacheSearchPresenter :
     public interface State {
         public val data: PagingState<UiTimeline>
         public val history: PagingState<UiTimeline>
+        public val userHistory: PagingState<UiUserV2>
+        public val searchUser: PagingState<UiUserV2>
 
         public fun setQuery(value: String)
     }
@@ -63,7 +66,9 @@ public class LocalCacheSearchPresenter :
                     Pager(
                         config = PagingConfig(pageSize = 20),
                     ) {
-                        database.pagingTimelineDao().getStatusHistoryPagingSource(pagingKey = LogStatusHistoryPresenter.PAGING_KEY)
+                        database
+                            .pagingTimelineDao()
+                            .getStatusHistoryPagingSource(pagingKey = LogStatusHistoryPresenter.PAGING_KEY)
                     }.flow.map {
                         it.map {
                             val accountKey = it.status.status.data.accountKey
@@ -92,6 +97,42 @@ public class LocalCacheSearchPresenter :
                 it.collectAsLazyPagingItems()
             }.toPagingState()
 
+        val userHistory =
+            remember {
+                Pager(
+                    config = PagingConfig(pageSize = 20),
+                ) {
+                    database.userDao().getUserHistory()
+                }.flow.map {
+                    it.map {
+                        it.user.render(it.data.accountKey) as UiUserV2
+                    }
+                }
+            }.collectAsLazyPagingItems().toPagingState()
+
+        val searchUser =
+            remember(query, allAccounts) {
+                if (query.isEmpty()) {
+                    UiState.Error(Throwable("Query is empty"))
+                } else {
+                    allAccounts.map { accounts ->
+                        Pager(
+                            config = PagingConfig(pageSize = 20),
+                        ) {
+                            database.userDao().searchUser(query)
+                        }.flow.map {
+                            it.map { user ->
+                                // TODO: potential bug: after logout, there might be no such a platform type for this user
+                                val account = accounts.first { it.platformType == user.platformType }
+                                user.render(account.accountKey) as UiUserV2
+                            }
+                        }
+                    }
+                }
+            }.map {
+                it.collectAsLazyPagingItems()
+            }.toPagingState()
+
         return object : State {
             override fun setQuery(value: String) {
                 query = value
@@ -99,6 +140,8 @@ public class LocalCacheSearchPresenter :
 
             override val data: PagingState<UiTimeline> = data
             override val history: PagingState<UiTimeline> = history
+            override val userHistory: PagingState<UiUserV2> = userHistory
+            override val searchUser: PagingState<UiUserV2> = searchUser
         }
     }
 }

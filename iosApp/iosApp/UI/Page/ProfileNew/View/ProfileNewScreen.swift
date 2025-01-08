@@ -11,6 +11,7 @@ struct ProfileNewScreen: View {
     
     var body: some View {
         ProfileNewRefreshViewControllerWrapper(showBackButton: showBackButton)
+            .ignoresSafeArea(edges: .top)
     }
 }
 

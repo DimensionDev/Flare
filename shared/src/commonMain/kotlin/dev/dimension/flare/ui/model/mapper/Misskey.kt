@@ -386,12 +386,20 @@ internal fun Note.renderStatus(
                 StatusAction.Item.Reaction(
                     reacted = myReaction != null,
                     onClicked = {
-                        launcher.launch(
-                            AppDeepLink.Misskey.AddReaction(
-                                accountKey = accountKey,
+                        if (myReaction == null) {
+                            launcher.launch(
+                                AppDeepLink.Misskey.AddReaction(
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
+                                ),
+                            )
+                        } else {
+                            event.react(
                                 statusKey = statusKey,
-                            ),
-                        )
+                                hasReacted = true,
+                                reaction = myReaction,
+                            )
+                        }
                     },
                 ),
                 StatusAction.Group(

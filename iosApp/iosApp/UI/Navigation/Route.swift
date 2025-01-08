@@ -114,6 +114,11 @@ struct TabItem<Content: View>: View {
             }
         case .profile(let data):
             ProfileNewScreen(
+                     accountType: data.accountType,
+                            userKey: data.userKey,
+                            toProfileMedia: { userKey in
+                                print("Media tab is now integrated in Profile page")
+                            }
              )
         case .profileMedia(let data):
             // 已集成到 Profile 页面的 tab 中，不再需要单独导航
@@ -122,14 +127,15 @@ struct TabItem<Content: View>: View {
                 userKey: data.userKey,
                 tabStore: ProfileTabSettingStore(timelineStore: TimelineStore(accountType: data.accountType))
             )
-        case .profileWithNameAndHost(let data):
-            ProfileWithUserNameScreen(
-                accountType: data.accountType,
-                userName: data.userName,
-                host: data.host
-            ) { userKey in
-                onNavigate(AppleRoute.ProfileMedia(accountType: data.accountType, userKey: userKey))
-            }
+       case .profileWithNameAndHost(let data):
+           
+           ProfileWithUserNameScreen(
+               accountType: data.accountType,
+               userName: data.userName,
+               host: data.host
+           ) { userKey in
+               onNavigate(AppleRoute.ProfileMedia(accountType: data.accountType, userKey: userKey))
+           }
         case .rawImage:
             EmptyView()
         case .search(let data):

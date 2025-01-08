@@ -178,7 +178,7 @@ struct HomeContent: View {
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .profile) {
                         TabItem { router in
-                            ProfileScreen(
+                            ProfileNewScreen(
                                 accountType: accountType,
                                 userKey: nil,
                                 toProfileMedia: { key in

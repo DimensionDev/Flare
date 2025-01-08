@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="settings_about_description">究極の次世代オープンソースAIは分散型ソーシャルネットワーククライアントです。</string>
-  <string name="settings_about_source_code">ソース コード</string>
+  <string name="settings_about_description">究極で次世代のオープンソースなAIを搭載した分散型ソーシャルネットワーククライアント。</string>
+  <string name="settings_about_source_code">ソースコード</string>
   <string name="settings_about_telegram">Telegram</string>
-  <string name="settings_about_telegram_description">Telegramグループに参加</string>
+  <string name="settings_about_telegram_description">Telegramグループに参加する</string>
   <string name="settings_about_line_description">Lineグループに参加する</string>
   <string name="settings_about_localization">Crowdin</string>
-  <string name="settings_about_localization_description">Flare の翻訳にご協力ください</string>
+  <string name="settings_about_localization_description">Flareの翻訳にご協力ください</string>
 </resources>

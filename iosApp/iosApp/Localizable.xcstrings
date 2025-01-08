@@ -662,7 +662,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "About"
+            "value": "このアプリについて"
           }
         },
         "ko": {
@@ -1964,7 +1964,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "Generic"
+            "value": "全般"
           }
         },
         "ko": {
@@ -3638,7 +3638,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "常にセンシティブなコンテンツをステータスに表示する"
+            "value": "ステータスのセンシティブなコンテンツを常に表示する"
           }
         },
         "ko": {
@@ -6986,7 +6986,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "法令違反またはサービス利用規約の"
+            "value": "法令またはサービス利用規約の違反"
           }
         },
         "ko": {
@@ -7172,7 +7172,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "この投稿は誤解を招いています"
+            "value": "誤解を招く投稿"
           }
         },
         "ko": {
@@ -7730,7 +7730,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "ヌーディティまたはポルノとしてラベル付けされていません"
+            "value": "ヌードまたはポルノとしてラベル付けされていない"
           }
         },
         "ko": {
@@ -18890,7 +18890,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "フォローリクエストを承認しました"
+            "value": "がフォローリクエストを承認しました"
           }
         },
         "ko": {
@@ -24656,7 +24656,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "フレアへようこそ"
+            "value": "Flareへようこそ"
           }
         },
         "ko": {
@@ -24842,7 +24842,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "About"
+            "value": "このアプリについて"
           }
         },
         "ko": {

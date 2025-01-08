@@ -66,4 +66,8 @@ internal interface PagingTimelineDao {
 
     @Query("DELETE FROM DbPagingTimeline")
     suspend fun clear()
+
+    @Transaction
+    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId ASC LIMIT 1")
+    suspend fun getLastPagingTimeline(pagingKey: String): DbPagingTimelineWithStatus?
 }

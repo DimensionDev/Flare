@@ -45,7 +45,7 @@ internal class MentionRemoteMediator(
 
                     LoadType.APPEND -> {
                         val lastItem =
-                            state.lastItemOrNull()
+                            database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
                                 ?: return MediatorResult.Success(
                                     endOfPaginationReached = true,
                                 )

@@ -75,7 +75,7 @@ internal class UserTimelineRemoteMediator(
                     LoadType.APPEND -> {
                         page++
                         val lastItem =
-                            state.lastItemOrNull()
+                            database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
                                 ?: return MediatorResult.Success(
                                     endOfPaginationReached = true,
                                 )

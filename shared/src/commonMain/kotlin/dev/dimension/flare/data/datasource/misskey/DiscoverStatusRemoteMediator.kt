@@ -29,15 +29,19 @@ internal class DiscoverStatusRemoteMediator(
                         service.notesFeatured(NotesFeaturedRequest(limit = state.config.initialLoadSize))
                     }
                     LoadType.APPEND -> {
+                        val lastItem =
+                            database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
+                                ?: return MediatorResult.Success(
+                                    endOfPaginationReached = true,
+                                )
                         service.notesFeatured(
                             NotesFeaturedRequest(
                                 limit = state.config.pageSize,
                                 untilId =
-                                    state
-                                        .lastItemOrNull()
-                                        ?.timeline
-                                        ?.statusKey
-                                        ?.id,
+                                    lastItem
+                                        .timeline
+                                        .statusKey
+                                        .id,
                             ),
                         )
                     }

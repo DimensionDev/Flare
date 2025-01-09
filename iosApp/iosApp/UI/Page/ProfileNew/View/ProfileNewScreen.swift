@@ -31,7 +31,7 @@ struct ProfileNewScreen: View {
         _presenterWrapper = StateObject(wrappedValue: ProfilePresenterWrapper(accountType: accountType, userKey: userKey))
         
         // 初始化 tabStore
-        let tabStore = ProfileTabSettingStore(timelineStore: timelineStore)
+        let tabStore = ProfileTabSettingStore(timelineStore: timelineStore, userKey: userKey)
         _tabStore = StateObject(wrappedValue: tabStore)
         
         os_log("[📔][ProfileNewScreen - init]初始化: accountType=%{public}@, userKey=%{public}@", log: .default, type: .debug, String(describing: accountType), userKey?.description ?? "nil")

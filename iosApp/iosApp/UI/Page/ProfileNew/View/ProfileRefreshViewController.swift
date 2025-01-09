@@ -5,6 +5,7 @@ import SwiftUI
 import shared
 import MarkdownUI
 import Generated
+import os.log
 
 // 让JXPagingListContainerView实现JXSegmentedViewListContainer协议
 extension JXPagingListContainerView: JXSegmentedViewListContainer {}
@@ -21,6 +22,7 @@ class ProfileNewRefreshViewController: UIViewController {
     private var userKey: MicroBlogKey?
     private var tabStore: ProfileTabSettingStore?
     
+    // UI Components
     var pagingView: JXPagingView!
     var userHeaderView: ProfileNewHeaderView!
     var segmentedView: JXSegmentedView!
@@ -28,6 +30,22 @@ class ProfileNewRefreshViewController: UIViewController {
     var isHeaderRefreshed = false
     private var titles: [String] = []
     private var refreshControl: ProfileStretchRefreshControl?
+    
+    // Navigation Components
+    private var navigationBar: UINavigationBar = {
+        let nav = UINavigationBar()
+        nav.backgroundColor = .systemBackground
+        return nav
+    }()
+    private var segmentedBackButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setImage(UIImage(systemName: "chevron.left"), for: .normal)
+        button.isHidden = true
+        return button
+    }()
+    private var lastContentOffset: CGFloat = 0
+    private let navigationBarHeight: CGFloat = 44
+    private var isNavigationBarHidden = false
     
     // 配置方法
     func configure(
@@ -50,6 +68,26 @@ class ProfileNewRefreshViewController: UIViewController {
         self.accountType = accountType
         self.userKey = userKey
         self.tabStore = tabStore
+        
+        // 确保导航栏已经初始化
+        if navigationBar == nil {
+            setupNavigationBar()
+        }
+        
+        // 根据是否是自己的 profile 来控制导航栏显示
+        let isOwnProfile = userKey == nil
+        navigationBar.isHidden = true  // 始终隐藏自定义导航栏
+        navigationBar.alpha = 0
+        
+        // 如果是自己的 profile，显示系统导航栏，隐藏返回按钮
+        if isOwnProfile {
+            navigationController?.setNavigationBarHidden(false, animated: false)
+            segmentedBackButton.isHidden = true
+        } else {
+            // 如果是其他用户的 profile，初始时隐藏系统导航栏和返回按钮
+            navigationController?.setNavigationBarHidden(true, animated: false)
+            segmentedBackButton.isHidden = true
+        }
         
         // 更新UI
         updateUI()
@@ -88,6 +126,15 @@ class ProfileNewRefreshViewController: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .systemBackground
+        
+        // 设置导航栏
+        setupNavigationBar()
+        
+        // 初始时显示系统导航栏，隐藏自定义导航栏和返回按钮
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        navigationBar.alpha = 0
+        segmentedBackButton.isHidden = true
+        isNavigationBarHidden = false
         
         // 配置头部视图 - 只设置宽度，让高度自适应
         userHeaderView = ProfileNewHeaderView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 0))
@@ -223,6 +270,7 @@ class ProfileNewRefreshViewController: UIViewController {
     @objc private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
         let offset = pagingView.mainTableView.contentOffset.y
         refreshControl?.scrollViewDidScroll(withOffset: offset)
+        updateNavigationBarVisibility(with: offset)
     }
     
     private func refreshContent() {
@@ -237,6 +285,85 @@ class ProfileNewRefreshViewController: UIViewController {
                 currentList.headerRefresh()
             }
         }
+    }
+    
+    private func setupNavigationBar() {
+        // 设置导航栏frame
+        navigationBar.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: navigationBarHeight)
+        
+        // 设置导航栏项
+        let navigationItem = UINavigationItem()
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(backButtonTapped))
+        navigationItem.leftBarButtonItem = backButton
+        navigationBar.items = [navigationItem]
+        
+        // 添加到视图
+        view.addSubview(navigationBar)
+        
+        // 设置返回按钮事件
+        segmentedBackButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
+    }
+    
+    @objc private func backButtonTapped() {
+        // 返回上一页
+        if let navigationController = self.parent?.navigationController {
+            navigationController.popViewController(animated: true)
+        } else {
+            self.dismiss(animated: true)
+        }
+    }
+    
+    private func updateNavigationBarVisibility(with offset: CGFloat) {
+        let threshold: CGFloat = 100 // 触发导航栏隐藏的阈值
+        let isOwnProfile = userKey == nil
+        
+        // 如果是自己的 profile，不显示返回按钮
+        if isOwnProfile {
+            return
+        }
+        
+        // 判断滚动方向和位置
+        if offset > lastContentOffset && offset > threshold {
+            // 向上滚动且超过阈值，显示返回按钮，隐藏系统导航栏
+            if !isNavigationBarHidden {
+                UIView.animate(withDuration: 0.3) {
+                    self.navigationBar.alpha = 0
+                    self.segmentedBackButton.isHidden = false
+                    self.navigationController?.setNavigationBarHidden(true, animated: true)
+                }
+                isNavigationBarHidden = true
+            }
+        } else if offset < lastContentOffset || offset < threshold {
+            // 向下滚动或回到顶部，隐藏返回按钮，显示系统导航栏
+            if isNavigationBarHidden {
+                UIView.animate(withDuration: 0.3) {
+                    self.navigationBar.alpha = 0
+                    self.segmentedBackButton.isHidden = true
+                    self.navigationController?.setNavigationBarHidden(false, animated: true)
+                }
+                isNavigationBarHidden = false
+            }
+        }
+        
+        lastContentOffset = offset
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        let isOwnProfile = userKey == nil
+        // 如果是自己的 profile，显示系统导航栏
+        if isOwnProfile {
+            navigationController?.setNavigationBarHidden(false, animated: animated)
+        } else {
+            // 如果是其他用户的 profile，初始时隐藏系统导航栏
+            navigationController?.setNavigationBarHidden(true, animated: animated)
+        }
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        // 离开时恢复系统导航栏状态
+        navigationController?.setNavigationBarHidden(false, animated: animated)
     }
 }
 
@@ -262,11 +389,33 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
     }
     
     func heightForPinSectionHeader(in pagingView: JXPagingView) -> Int {
-        return 50
+        // 获取安全区域高度
+        let window = UIApplication.shared.windows.first { $0.isKeyWindow }
+        let safeAreaTop = window?.safeAreaInsets.top ?? 0
+        
+        // 返回 tab bar 高度 + 安全区域高度
+        return Int(50 + safeAreaTop)
     }
     
     func viewForPinSectionHeader(in pagingView: JXPagingView) -> UIView {
-        return segmentedView
+        // 创建一个容器视图，包含安全区域的空白和 segmentedView
+        let containerView = UIView()
+        containerView.backgroundColor = .systemBackground
+        
+        // 获取安全区域高度
+        let window = UIApplication.shared.windows.first { $0.isKeyWindow }
+        let safeAreaTop = window?.safeAreaInsets.top ?? 0
+        
+        // 调整 segmentedView 的位置，放在安全区域下方
+        segmentedView.frame = CGRect(x: 0, y: safeAreaTop, width: view.bounds.width, height: 50)
+        containerView.addSubview(segmentedView)
+        
+        // 添加返回按钮到 segmentedView，初始时隐藏
+        segmentedBackButton.frame = CGRect(x: 16, y: safeAreaTop + 10, width: 30, height: 30)
+        segmentedBackButton.isHidden = true
+        containerView.addSubview(segmentedBackButton)
+        
+        return containerView
     }
     
     func numberOfLists(in pagingView: JXPagingView) -> Int {
@@ -278,16 +427,27 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
         list.isNeedHeader = true
         list.isNeedFooter = true
         
-        // 设置不同tab的示例数据
-        switch index {
-        case 0:
-            list.dataSource = (0...20).map { "推文 \($0)" }
-        case 1:
-            list.dataSource = (0...20).map { "媒体 \($0)" }
-        case 2:
-            list.dataSource = (0...20).map { "喜欢 \($0)" }
-        default:
-            break
+        // 使用 ProfileContentView 显示内容
+        if let tabStore = tabStore {
+            let contentView = ProfileContentView(
+                tabs: tabStore.availableTabs,
+                selectedTab: .constant(selectedTab?.wrappedValue ?? 0),
+                refresh: { [weak self] in
+                    guard let self = self,
+                          let state = self.state else { return }
+                    try? await state.refresh()
+                },
+                accountType: accountType ?? AccountTypeSpecific(accountKey: userKey ?? MicroBlogKey(id: "", host: "")),
+                userKey: userKey,
+                tabStore: tabStore
+            )
+            
+            let hostingController = UIHostingController(rootView: contentView)
+            list.addChild(hostingController)
+            list.view.addSubview(hostingController.view)
+            hostingController.view.frame = list.view.bounds
+            hostingController.view.autoresizingMask = [UIView.AutoresizingMask.flexibleWidth, UIView.AutoresizingMask.flexibleHeight]
+            hostingController.didMove(toParent: list)
         }
         
         return list
@@ -297,13 +457,29 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
 // 添加 JXSegmentedViewDelegate
 extension ProfileNewRefreshViewController: JXSegmentedViewDelegate {
     func segmentedView(_ segmentedView: JXSegmentedView, didSelectedItemAt index: Int) {
+        os_log("[📔][ProfileNewScreen]选择标签页: index=%{public}d", log: .default, type: .debug, index)
+        
         // 更新选中状态
         selectedTab?.wrappedValue = index
         
         // 更新当前选中的标签页的presenter
         if let tabStore = tabStore, index < tabStore.availableTabs.count {
             let selectedTab = tabStore.availableTabs[index]
-            tabStore.updateCurrentPresenter(for: selectedTab)
+            // 使用 async 来模拟 SwiftUI 的 withAnimation
+            DispatchQueue.main.async {
+                tabStore.updateCurrentPresenter(for: selectedTab)
+                // 只重新加载当前选中的列表视图
+                if let currentList = self.pagingView.validListDict[index] as? ProfileNewListViewController {
+                    currentList.tableView.reloadData()
+                }
+            }
+        }
+    }
+    
+    func segmentedView(_ segmentedView: JXSegmentedView, didClickSelectedItemAt index: Int) {
+        // 如果点击已选中的标签，可以触发刷新
+        if let currentList = pagingView.validListDict[index] as? ProfileNewListViewController {
+            currentList.tableView.mj_header?.beginRefreshing()
         }
     }
 }
@@ -516,7 +692,7 @@ class ProfileNewHeaderView: UIView {
         nameLabel.text = userInfo.profile.name.markdown
         
         // 设置用户handle
-        handleLabel.text = "@\(userInfo.profile.handle)"
+        handleLabel.text = "\(userInfo.profile.handle)"
         
         // 设置头像
         if let url = URL(string: userInfo.profile.avatar) {

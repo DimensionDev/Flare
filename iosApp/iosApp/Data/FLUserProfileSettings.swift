@@ -25,7 +25,9 @@ public extension FLTabSettings {
     }
     
     // 获取 Profile 的默认三个 tab
-    static func defaultThree(user: UiUserV2) -> [FLTabItem] {
+    static func defaultThree(user: UiUserV2, userKey: MicroBlogKey?) -> [FLTabItem] {
+        let actualUserKey = userKey ?? user.key
+        
         switch user.platformType {
         case .mastodon:
             return [
@@ -35,7 +37,7 @@ public extension FLTabSettings {
                         icon: .mixed(.profile, userKey: user.key)
                     ),
                     account: AccountTypeSpecific(accountKey: user.key),
-                    userKey: user.key,
+                    userKey: actualUserKey,
                     type: .status
                 ),
                 FLProfileMastodonTimelineTabItem(
@@ -44,7 +46,7 @@ public extension FLTabSettings {
                         icon: .mixed(.profile, userKey: user.key)
                     ),
                     account: AccountTypeSpecific(accountKey: user.key),
-                    userKey: user.key,
+                    userKey: actualUserKey,
                     type: .statusWithReplies
                 )
             ]
@@ -56,7 +58,7 @@ public extension FLTabSettings {
                         icon: .mixed(.profile, userKey: user.key)
                     ),
                     account: AccountTypeSpecific(accountKey: user.key),
-                    userKey: user.key,
+                    userKey: actualUserKey,
                     type: .status
                 ),
                 FLProfileMisskeyTimelineTabItem(
@@ -65,7 +67,7 @@ public extension FLTabSettings {
                         icon: .mixed(.profile, userKey: user.key)
                     ),
                     account: AccountTypeSpecific(accountKey: user.key),
-                    userKey: user.key,
+                    userKey: actualUserKey,
                     type: .statusWithReplies
                 )
             ]
@@ -77,7 +79,7 @@ public extension FLTabSettings {
                         icon: .mixed(.profile, userKey: user.key)
                     ),
                     account: AccountTypeSpecific(accountKey: user.key),
-                    userKey: user.key,
+                    userKey: actualUserKey,
                     type: .status
                 ),
                 FLProfileBlueskyTimelineTabItem(
@@ -86,7 +88,7 @@ public extension FLTabSettings {
                         icon: .mixed(.profile, userKey: user.key)
                     ),
                     account: AccountTypeSpecific(accountKey: user.key),
-                    userKey: user.key,
+                    userKey: actualUserKey,
                     type: .statusWithReplies
                 ),
                 FLProfileBlueskyTimelineTabItem(
@@ -95,7 +97,7 @@ public extension FLTabSettings {
                         icon: .mixed(.heart, userKey: user.key)
                     ),
                     account: AccountTypeSpecific(accountKey: user.key),
-                    userKey: user.key,
+                    userKey: actualUserKey,
                     type: .likes
                 )
             ]
@@ -107,7 +109,7 @@ public extension FLTabSettings {
                         icon: .mixed(.profile, userKey: user.key)
                     ),
                     account: AccountTypeSpecific(accountKey: user.key),
-                    userKey: user.key,
+                    userKey: actualUserKey,
                     type: .status
                 ),
                 FLProfileXQTTimelineTabItem(
@@ -116,26 +118,16 @@ public extension FLTabSettings {
                         icon: .mixed(.profile, userKey: user.key)
                     ),
                     account: AccountTypeSpecific(accountKey: user.key),
-                    userKey: user.key,
+                    userKey: actualUserKey,
                     type: .statusWithReplies
                 ),
-//                FLProfileMediaTabItem(
-//                    metaData: FLTabMetaData(
-//                        title: .localized(.profileMedia),
-//                        icon: .mixed(.media, userKey: user.key)
-//                    ),
-//                    account: AccountTypeSpecific(accountKey: user.key),
-//                    userKey: user.key,
-//                    type: .media
-//                ),
-                
                 FLProfileXQTTimelineTabItem(
                     metaData: FLTabMetaData(
                         title: .localized(.profileLikes),
                         icon: .mixed(.heart, userKey: user.key)
                     ),
                     account: AccountTypeSpecific(accountKey: user.key),
-                    userKey: user.key,
+                    userKey: actualUserKey,
                     type: .likes
                 )
             ]

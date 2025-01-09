@@ -18,23 +18,23 @@ class ProfileTabSettingStore: ObservableObject {
     private var mediaPresenterCache: [String: ProfileMediaPresenter] = [:] // 媒体presenter缓存
     
     //  - Initialization
-    init(timelineStore: TimelineStore) {
+    init(timelineStore: TimelineStore, userKey: MicroBlogKey?) {
         self.timelineStore = timelineStore
-        observeUser()
+        observeUser(userKey: userKey)
     }
     
-    private func observeUser() {
+    private func observeUser(userKey: MicroBlogKey?) {
         Task { @MainActor in
             for await state in presenter.models {
                 if case let .success(data) = onEnum(of: state.user) {
-                    initializeWithUser(data.data)
+                    initializeWithUser(data.data, userKey: userKey)
                 }
             }
         }
     }
     
     //  - Public Methods
-    func initializeWithUser(_ user: UiUserV2) {
+    func initializeWithUser(_ user: UiUserV2, userKey: MicroBlogKey?) {
         if isInitializing || self.currentUser?.key == user.key {
             return
         }
@@ -43,7 +43,7 @@ class ProfileTabSettingStore: ObservableObject {
         self.currentUser = user
         
         // 更新可用标签
-        updateTabs(user: user)
+        updateTabs(user: user, userKey: userKey)
         
         // 如果没有选中的标签，选中第一个
         if selectedTabKey == nil {
@@ -65,12 +65,13 @@ class ProfileTabSettingStore: ObservableObject {
     func updateCurrentPresenter(for tab: FLTabItem) {
         selectedTabKey = tab.key
         if tab is FLProfileMediaTabItem {
-            if let user = currentUser {
-                let cacheKey = "\(user.key)"
+            if let mediaTab = tab as? FLProfileMediaTabItem {
+                // 使用 userKey 作为缓存键
+                let cacheKey = "\(mediaTab.userKey?.description ?? "self")"
                 if let cachedPresenter = mediaPresenterCache[cacheKey] {
                     currentMediaPresenter = cachedPresenter
                 } else {
-                    let newPresenter = ProfileMediaPresenter(accountType: tab.account, userKey: user.key)
+                    let newPresenter = ProfileMediaPresenter(accountType: mediaTab.account, userKey: mediaTab.userKey)
                     mediaPresenterCache[cacheKey] = newPresenter
                     currentMediaPresenter = newPresenter
                 }
@@ -104,27 +105,27 @@ class ProfileTabSettingStore: ObservableObject {
     }
     
     //  - Private Methods
-    private func updateTabs(user: UiUserV2) {
+    private func updateTabs(user: UiUserV2, userKey: MicroBlogKey?) {
         // 根据平台类型获取对应的标签
-        var tabs = FLTabSettings.defaultThree(user: user)
+        var tabs = FLTabSettings.defaultThree(user: user, userKey: userKey)
         
-      // 添加 media tab 到倒数第二的位置
-      let mediaTab = FLProfileMediaTabItem(
-          metaData: FLTabMetaData(
-              title: .localized(.profileMedia),
-              icon: .mixed(.media, userKey: user.key)
-          ),
-          account: AccountTypeSpecific(accountKey: user.key),
-          userKey: user.key
-      )
-      
-      // 插入到倒数第二的位置
-      if tabs.isEmpty {
-          tabs.append(mediaTab)
-      } else {
-          tabs.insert(mediaTab, at: max(0, tabs.count - 1))
-      }
-       
+        // 添加 media tab 到倒数第二的位置
+        let mediaTab = FLProfileMediaTabItem(
+            metaData: FLTabMetaData(
+                title: .localized(.profileMedia),
+                icon: .mixed(.media, userKey: user.key)
+            ),
+            account: AccountTypeSpecific(accountKey: user.key),
+            userKey: userKey
+        )
+        
+        // 插入到倒数第二的位置
+        if tabs.isEmpty {
+            tabs.append(mediaTab)
+        } else {
+            tabs.insert(mediaTab, at: max(0, tabs.count - 1))
+        }
+        
         availableTabs = tabs
         
         // 如果没有选中的标签，选中第一个

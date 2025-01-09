@@ -125,10 +125,10 @@ struct TabItem<Content: View>: View {
             ProfileMediaListScreen(
                 accountType: data.accountType,
                 userKey: data.userKey,
-                tabStore: ProfileTabSettingStore(timelineStore: TimelineStore(accountType: data.accountType))
+                tabStore: ProfileTabSettingStore(timelineStore: TimelineStore(accountType: data.accountType), userKey: data.accountType as! MicroBlogKey)
             )
        case .profileWithNameAndHost(let data):
-           
+            EmptyView()
            ProfileWithUserNameScreen(
                accountType: data.accountType,
                userName: data.userName,

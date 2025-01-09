@@ -62,9 +62,9 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.OutlinedTextField2
+import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.status.FlareDividerDefaults
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.localizedShortTime
@@ -116,8 +116,8 @@ internal fun DMConversationScreen(
                 title = {
                     state.users.onSuccess {
                         if (it.size == 1) {
-                            HtmlText(
-                                element = it.first().name.data,
+                            RichText(
+                                text = it.first().name,
                                 maxLines = 1,
                             )
                         } else {
@@ -347,8 +347,8 @@ private fun DMItem(
                 }
                 when (val message = item.content) {
                     is UiDMItem.Message.Text ->
-                        HtmlText(
-                            element = message.text.data,
+                        RichText(
+                            text = message.text,
                             modifier =
                                 Modifier
                                     .background(

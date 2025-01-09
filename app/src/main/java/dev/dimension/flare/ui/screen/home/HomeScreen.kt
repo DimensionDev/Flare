@@ -102,9 +102,9 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
+import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -562,8 +562,8 @@ private fun ColumnScope.DrawerHeader(
                     size = 64.dp,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                HtmlText(
-                    element = data.name.data,
+                RichText(
+                    text = data.name,
                     textStyle = MaterialTheme.typography.titleMedium,
                 )
                 Text(

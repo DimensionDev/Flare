@@ -67,7 +67,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.window.core.layout.WindowWidthSizeClass
-import com.fleeksoft.ksoup.nodes.Element
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.annotation.parameters.DeepLink
@@ -110,10 +109,10 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.MatricesDisplay
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
+import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.UserFields
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -135,6 +134,7 @@ import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
+import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.screen.home.RegisterTabCallback
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -500,8 +500,8 @@ private fun ProfileScreen(
                 FlareTopAppBar(
                     title = {
                         state.state.userState.onSuccess {
-                            HtmlText(
-                                element = it.name.data,
+                            RichText(
+                                text = it.name,
                                 modifier =
                                     Modifier.graphicsLayer {
                                         alpha = titleAlpha
@@ -1071,7 +1071,7 @@ private fun ProfileHeaderSuccess(
         modifier = modifier,
         bannerUrl = user.banner,
         avatarUrl = user.avatar,
-        displayName = user.name.data,
+        displayName = user.name,
         userKey = user.key,
         handle = user.handle,
         isBigScreen = isBigScreen,
@@ -1193,9 +1193,8 @@ private fun ProfileHeaderSuccess(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 user.description?.let {
-                    HtmlText(
-                        element = it.data,
-                        layoutDirection = it.direction,
+                    RichText(
+                        text = it,
                     )
                 }
                 when (val content = user.bottomContent) {
@@ -1217,7 +1216,7 @@ private fun ProfileHeaderSuccess(
                                         UiProfile.BottomContent.Iconify.Icon.Verify -> FontAwesomeIcons.Solid.CircleCheck
                                     }
                                 FAIcon(icon, contentDescription = null)
-                                HtmlText(element = value.data, layoutDirection = value.direction)
+                                RichText(text = value)
                             }
                         }
                     }
@@ -1250,7 +1249,7 @@ private fun ProfileHeaderSuccess(
 internal fun CommonProfileHeader(
     bannerUrl: String?,
     avatarUrl: String?,
-    displayName: Element,
+    displayName: UiRichText,
     userKey: MicroBlogKey,
     handle: String,
     isBigScreen: Boolean,
@@ -1368,8 +1367,8 @@ internal fun CommonProfileHeader(
                                 .weight(1f)
                                 .padding(top = actualBannerHeight),
                     ) {
-                        HtmlText(
-                            element = displayName,
+                        RichText(
+                            text = displayName,
                             textStyle = MaterialTheme.typography.titleMedium,
 //                        modifier =
 //                            Modifier
@@ -1416,8 +1415,8 @@ internal fun CommonProfileHeader(
                         Modifier
                             .padding(horizontal = screenHorizontalPadding),
                 ) {
-                    HtmlText(
-                        element = displayName,
+                    RichText(
+                        text = displayName,
                         textStyle = MaterialTheme.typography.titleMedium,
 //                        modifier =
 //                            Modifier

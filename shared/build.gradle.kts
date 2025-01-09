@@ -84,19 +84,24 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
+        val androidJvmMain by creating {
+            dependsOn(commonMain)
+            dependencies {
+                implementation(compose.foundation)
+                implementation(libs.ktor.client.okhttp)
+            }
+        }
         val androidMain by getting {
+            dependsOn(androidJvmMain)
             dependencies {
                 implementation(project.dependencies.platform(libs.compose.bom))
-                implementation(libs.compose.foundation)
                 implementation(libs.core.ktx)
-                implementation(libs.ktor.client.okhttp)
                 implementation(libs.koin.android)
             }
         }
         val jvmMain by getting {
+            dependsOn(androidJvmMain)
             dependencies {
-                implementation(compose.foundation)
-                implementation(libs.ktor.client.okhttp)
                 implementation(libs.commons.lang3)
             }
         }

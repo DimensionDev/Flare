@@ -14,8 +14,7 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
 
-@ExperimentalUnitApi
-public fun buildContentAnnotatedString(
+internal fun buildContentAnnotatedString(
     element: Element,
     textStyle: TextStyle,
     linkStyle: TextStyle,

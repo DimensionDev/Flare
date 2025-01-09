@@ -1,3 +1,4 @@
+import org.jetbrains.compose.compose
 import java.util.Locale
 
 plugins {
@@ -22,11 +23,14 @@ kotlin {
                 implementation(compose.ui)
                 implementation(compose.runtime)
                 implementation(compose.foundation)
+                implementation(compose.uiUtil)
+                implementation(compose("org.jetbrains.compose.ui:ui-graphics"))
                 implementation(compose.components.resources)
                 implementation(libs.composeIcons.fontAwesome)
                 implementation(libs.coil3.compose)
                 implementation(libs.compose.placeholder.foundation)
                 implementation(libs.ksoup)
+                implementation(libs.kotlinx.immutable)
             }
         }
         val commonTest by getting {
@@ -37,6 +41,7 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation(libs.compose.placeholder.material3)
+                implementation(compose.material3)
             }
         }
         val jvmMain by getting {

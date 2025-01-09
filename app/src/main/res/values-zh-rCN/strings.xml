@@ -77,6 +77,7 @@
   <string name="misskey_notification_item_app">应用</string>
   <string name="misskey_notification_item_followed_you">关注了你</string>
   <string name="misskey_notification_item_requested_follow">向你发送了关注请求</string>
+  <string name="misskey_notification_unknwon">未知通知 %1$s</string>
   <string name="misskey_item_reblogged_status">转了你的帖子</string>
   <string name="xqt_item_reblogged_status">转推了</string>
   <string name="xqt_item_mention_status">提及了您</string>
@@ -533,4 +534,6 @@
   <string name="following_title">正在关注</string>
   <string name="fans_title">粉丝</string>
   <string name="local_history_search_placeholder">搜索本地缓存</string>
+  <string name="local_history_search_status_title">状态</string>
+  <string name="local_history_search_user_title">用户</string>
 </resources>

@@ -76,6 +76,7 @@
   <string name="misskey_notification_item_app">Application</string>
   <string name="misskey_notification_item_followed_you">vous a suivi</string>
   <string name="misskey_notification_item_requested_follow">a demandé à vous suivre</string>
+  <string name="misskey_notification_unknwon">Notification inconnue %1$s</string>
   <string name="misskey_item_reblogged_status">a reproduit un statut</string>
   <string name="xqt_item_reblogged_status">retweeté</string>
   <string name="xqt_item_mention_status">vous mentionne</string>
@@ -530,4 +531,6 @@
   <string name="following_title">Abonnements</string>
   <string name="fans_title">Abonné</string>
   <string name="local_history_search_placeholder">Rechercher dans la cache locale</string>
+  <string name="local_history_search_status_title">Statut</string>
+  <string name="local_history_search_user_title">Utilisateur</string>
 </resources>

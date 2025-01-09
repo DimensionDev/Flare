@@ -76,6 +76,7 @@
   <string name="misskey_notification_item_app">Aplikace</string>
   <string name="misskey_notification_item_followed_you">vás sleduje</string>
   <string name="misskey_notification_item_requested_follow">požádáno o sledování</string>
+  <string name="misskey_notification_unknwon">Neznámé oznámení %1$s</string>
   <string name="misskey_item_reblogged_status">přeposlán stav</string>
   <string name="xqt_item_reblogged_status">retweetované</string>
   <string name="xqt_item_mention_status">vás zmiňuje</string>
@@ -530,4 +531,6 @@
   <string name="following_title">Sledovat</string>
   <string name="fans_title">Sledující</string>
   <string name="local_history_search_placeholder">Hledat místní keš</string>
+  <string name="local_history_search_status_title">Stav</string>
+  <string name="local_history_search_user_title">Uživatel</string>
 </resources>

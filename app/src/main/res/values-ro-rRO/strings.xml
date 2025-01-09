@@ -76,6 +76,7 @@
   <string name="misskey_notification_item_app">Aplicație</string>
   <string name="misskey_notification_item_followed_you">te urmărește</string>
   <string name="misskey_notification_item_requested_follow">solicitat să vă urmărească</string>
+  <string name="misskey_notification_unknwon">Notificare necunoscută %1$s</string>
   <string name="misskey_item_reblogged_status">a repostat un statut</string>
   <string name="xqt_item_reblogged_status">retușat</string>
   <string name="xqt_item_mention_status">Te menționează</string>
@@ -530,4 +531,6 @@
   <string name="following_title">Urmăriți</string>
   <string name="fans_title">Urmăritor</string>
   <string name="local_history_search_placeholder">Caută cache local</string>
+  <string name="local_history_search_status_title">Status</string>
+  <string name="local_history_search_user_title">Utilizator</string>
 </resources>

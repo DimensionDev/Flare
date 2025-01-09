@@ -46,8 +46,8 @@ fun UserField(
             text = key,
             style = MaterialTheme.typography.bodySmall,
         )
-        HtmlText(
-            element = value.data,
+        RichText(
+            text = value,
         )
     }
 }

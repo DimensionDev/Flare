@@ -25,6 +25,7 @@ import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.size.Size
+import dev.dimension.flare.ui.component.platform.placeholder
 
 @Composable
 public fun NetworkImage(
@@ -71,7 +72,7 @@ public fun NetworkImage(
 }
 
 @Composable
-public fun EmojiImage(
+internal fun EmojiImage(
     uri: String,
     modifier: Modifier = Modifier,
 ) {

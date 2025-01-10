@@ -387,10 +387,14 @@ private fun StatusReactionComponent(
                                 reaction.onClicked.invoke()
                             }.padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
-                    EmojiImage(
-                        uri = reaction.url,
-                        modifier = Modifier.height(16.dp),
-                    )
+                    if (reaction.isUnicode) {
+                        Text(reaction.name)
+                    } else {
+                        EmojiImage(
+                            uri = reaction.url,
+                            modifier = Modifier.height(16.dp),
+                        )
+                    }
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = reaction.humanizedCount,

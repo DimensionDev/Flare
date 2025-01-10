@@ -661,7 +661,10 @@ internal fun Router(
     modifier: Modifier = Modifier,
     dependenciesContainerBuilder: @Composable DependenciesContainerBuilder<*>.() -> Unit = {},
 ) {
-    val innerNavController = rememberNavController()
+    val bottomSheetNavigator =
+        com.stefanoq21.material3.navigation
+            .rememberBottomSheetNavigator()
+    val innerNavController = rememberNavController(bottomSheetNavigator)
     val uriHandler = LocalUriHandler.current
     CompositionLocalProvider(
         LocalUriHandler provides
@@ -672,14 +675,18 @@ internal fun Router(
                 )
             },
     ) {
-        DestinationsNavHost(
-            modifier = modifier,
-            navController = innerNavController,
-            navGraph = navGraph,
-            defaultTransitions = rememberNavAnimX(),
-            start = direction,
-            dependenciesContainerBuilder = dependenciesContainerBuilder,
-        )
+        com.stefanoq21.material3.navigation.ModalBottomSheetLayout(
+            bottomSheetNavigator = bottomSheetNavigator,
+        ) {
+            DestinationsNavHost(
+                modifier = modifier,
+                navController = innerNavController,
+                navGraph = navGraph,
+                defaultTransitions = rememberNavAnimX(),
+                start = direction,
+                dependenciesContainerBuilder = dependenciesContainerBuilder,
+            )
+        }
     }
 }
 

@@ -36,6 +36,7 @@ internal data class UserLite(
     @SerialName(value = "isModerator") val isModerator: kotlin.Boolean? = false,
     @SerialName(value = "isBot") val isBot: kotlin.Boolean? = null,
     @SerialName(value = "isCat") val isCat: kotlin.Boolean? = null,
+    @SerialName(value = "emojis") val emojis: Map<kotlin.String, kotlin.String> = emptyMap(),
 ) {
     /**
      * *

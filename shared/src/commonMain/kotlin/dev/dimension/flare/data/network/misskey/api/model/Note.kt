@@ -54,4 +54,5 @@ internal data class Note(
     @SerialName(value = "uri") val uri: kotlin.String? = null,
     @SerialName(value = "url") val url: kotlin.String? = null,
     @SerialName(value = "myReaction") val myReaction: kotlin.String? = null,
+    @SerialName(value = "emojis") val emojis: Map<kotlin.String, kotlin.String> = emptyMap(),
 )

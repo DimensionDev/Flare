@@ -31,6 +31,7 @@ kotlin {
                 implementation(libs.compose.placeholder.foundation)
                 implementation(libs.ksoup)
                 implementation(libs.kotlinx.immutable)
+                implementation(libs.precompose.molecule)
             }
         }
         val commonTest by getting {

@@ -22,8 +22,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.RadioButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -78,8 +76,10 @@ import dev.dimension.flare.ui.component.HorizontalDivider
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformCard
+import dev.dimension.flare.ui.component.platform.PlatformCheckbox
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuItem
 import dev.dimension.flare.ui.component.platform.PlatformFilledTonalButton
+import dev.dimension.flare.ui.component.platform.PlatformRadioButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextButton
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
@@ -95,7 +95,6 @@ import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.render.UiRichText
-import dev.dimension.flare.ui.screen.status.statusTranslatePresenter
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformContentColor
 import dev.dimension.flare.ui.theme.PlatformTheme
@@ -966,7 +965,7 @@ private fun PollOption(
             trailingContent = {
                 if (canVote || selected) {
                     if (multiple) {
-                        Checkbox(
+                        PlatformCheckbox(
                             checked = selected,
                             onCheckedChange = {
                                 onClick.invoke()
@@ -975,7 +974,7 @@ private fun PollOption(
                             enabled = canVote,
                         )
                     } else {
-                        RadioButton(
+                        PlatformRadioButton(
                             selected = selected,
                             onClick = onClick,
                             interactionSource = mutableInteractionSource,
@@ -984,7 +983,7 @@ private fun PollOption(
                     }
                 } else {
                     // keep the height consist
-                    RadioButton(
+                    PlatformRadioButton(
                         selected = false,
                         onClick = {},
                         enabled = false,

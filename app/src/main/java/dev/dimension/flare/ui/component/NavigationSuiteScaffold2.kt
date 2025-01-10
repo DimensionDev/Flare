@@ -78,7 +78,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import dev.dimension.flare.ui.component.status.FlareDividerDefaults
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 

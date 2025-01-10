@@ -409,7 +409,7 @@ private fun StatusReactionComponent(
                             }.padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
                     if (reaction.isUnicode) {
-                        Text(reaction.name)
+                        PlatformText(reaction.name)
                     } else {
                         EmojiImage(
                             uri = reaction.url,
@@ -484,7 +484,7 @@ private fun TranslationComponent(
 }
 
 @Composable
-internal fun StatusVisibilityComponent(
+public fun StatusVisibilityComponent(
     visibility: UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type,
     modifier: Modifier = Modifier,
 ) {
@@ -962,7 +962,7 @@ private fun PollOption(
                     .fillMaxHeight()
                     .fillMaxWidth(option.percentage)
                     .background(
-                        color = PlatformTheme.colorScheme.surfaceVariant,
+                        color = PlatformTheme.colorScheme.cardAlt,
                         shape = PlatformTheme.shapes.small,
                     ),
         )

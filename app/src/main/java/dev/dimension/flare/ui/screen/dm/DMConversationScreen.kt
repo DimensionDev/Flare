@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.screen.dm
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,12 +59,12 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareDividerDefaults
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.RichText
-import dev.dimension.flare.ui.component.status.FlareDividerDefaults
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.model.onSuccess
@@ -79,7 +78,6 @@ import moe.tlaster.precompose.molecule.producePresenter
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalLayoutApi::class,
-    ExperimentalFoundationApi::class,
 )
 @Composable
 internal fun DMConversationScreen(

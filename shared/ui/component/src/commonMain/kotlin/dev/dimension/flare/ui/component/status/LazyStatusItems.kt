@@ -14,9 +14,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +43,7 @@ import dev.dimension.flare.ui.component.login_expired
 import dev.dimension.flare.ui.component.login_expired_message
 import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformText
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.component.status_empty
 import dev.dimension.flare.ui.component.status_loadmore_end
@@ -56,32 +54,31 @@ import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
-internal fun LazyStaggeredGridScope.status(
+public fun LazyStaggeredGridScope.status(
     pagingState: PagingState<UiTimeline>,
     detailStatusKey: MicroBlogKey? = null,
-) = with(pagingState) {
-    onSuccess {
-        items(
-            itemCount,
-            key =
-                itemKey {
-                    it.itemKey
-                },
-            contentType =
-                itemContentType {
-                    it.itemType
-                },
-        ) {
-            val item = get(it)
-            AdaptiveCard(
-                content = {
-                    val windowInfo = calculateWindowSizeClass()
-                    val bigScreen = windowInfo.widthSizeClass >= WindowWidthSizeClass.Medium
-                    Column {
-                        StatusItem(
-                            item,
-                            detailStatusKey = detailStatusKey,
+): Unit =
+    with(pagingState) {
+        onSuccess {
+            items(
+                itemCount,
+                key =
+                    itemKey {
+                        it.itemKey
+                    },
+                contentType =
+                    itemContentType {
+                        it.itemType
+                    },
+            ) {
+                val item = get(it)
+                AdaptiveCard(
+                    content = {
+                        val bigScreen = isBigScreen()
+                        Column {
+                            StatusItem(
+                                item,
+                                detailStatusKey = detailStatusKey,
 //                        modifier =
 //                        Modifier
 //                            .let {
@@ -102,101 +99,99 @@ internal fun LazyStaggeredGridScope.status(
 //                                }
 //                            }
 //                            .background(MaterialTheme.colorScheme.background),
-                        )
+                            )
 
-                        if (it != itemCount - 1 && !bigScreen) {
+                            if (it != itemCount - 1 && !bigScreen) {
+                                HorizontalDivider()
+                            }
+                        }
+                    },
+                )
+            }
+            appendState
+                .onError {
+                    item(
+                        span = StaggeredGridItemSpan.FullLine,
+                    ) {
+                        OnError(error = it, onRetry = { retry() })
+                    }
+                }.onLoading {
+                    items(10) {
+                        AdaptiveCard(
+                            content = {
+                                OnLoading()
+                            },
+                        )
+                    }
+                }.onEndOfList {
+                    item(
+                        span = StaggeredGridItemSpan.FullLine,
+                    ) {
+                        Column(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
                             HorizontalDivider()
+                            Spacer(modifier = Modifier.height(8.dp))
+                            PlatformText(
+                                text = stringResource(Res.string.status_loadmore_end),
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
-                },
-            )
-        }
-        appendState
-            .onError {
-                item(
-                    span = StaggeredGridItemSpan.FullLine,
-                ) {
-                    OnError(error = it, onRetry = { retry() })
                 }
-            }.onLoading {
-                items(10) {
-                    AdaptiveCard(
-                        content = {
-                            OnLoading()
-                        },
+        }
+        onError {
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
+                OnError(error = it, onRetry = { })
+            }
+        }
+        onLoading {
+            items(10) {
+                AdaptiveCard(
+                    content = {
+                        OnLoading()
+                    },
+                )
+            }
+        }
+        onEmpty {
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
+                Column(
+                    modifier =
+                        Modifier
+                            .clickable {
+                                refresh()
+                            },
+                    verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.File,
+                        contentDescription = null,
+                        modifier = Modifier.size(48.dp),
+                    )
+                    PlatformText(
+                        text = stringResource(resource = Res.string.status_empty),
+                        modifier = Modifier.padding(16.dp),
                     )
                 }
-            }.onEndOfList {
-                item(
-                    span = StaggeredGridItemSpan.FullLine,
-                ) {
-                    Column(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        HorizontalDivider()
-                        Spacer(modifier = Modifier.height(8.dp))
-                        PlatformText(
-                            text = stringResource(Res.string.status_loadmore_end),
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                }
-            }
-    }
-    onError {
-        item(
-            span = StaggeredGridItemSpan.FullLine,
-        ) {
-            OnError(error = it, onRetry = { })
-        }
-    }
-    onLoading {
-        items(10) {
-            AdaptiveCard(
-                content = {
-                    OnLoading()
-                },
-            )
-        }
-    }
-    onEmpty {
-        item(
-            span = StaggeredGridItemSpan.FullLine,
-        ) {
-            Column(
-                modifier =
-                    Modifier
-                        .clickable {
-                            refresh()
-                        },
-                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                FAIcon(
-                    imageVector = FontAwesomeIcons.Solid.File,
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp),
-                )
-                PlatformText(
-                    text = stringResource(resource = Res.string.status_empty),
-                    modifier = Modifier.padding(16.dp),
-                )
             }
         }
     }
-}
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
-internal fun AdaptiveCard(
+public fun AdaptiveCard(
     content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val windowInfo = calculateWindowSizeClass()
-    val bigScreen = windowInfo.widthSizeClass >= WindowWidthSizeClass.Medium
+    val bigScreen = isBigScreen()
     if (bigScreen) {
         PlatformCard(
             modifier =
@@ -220,7 +215,6 @@ internal fun AdaptiveCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 private fun OnLoading(modifier: Modifier = Modifier) {
     Column(
@@ -234,8 +228,7 @@ private fun OnLoading(modifier: Modifier = Modifier) {
                         vertical = 8.dp,
                     ),
         )
-        val windowInfo = calculateWindowSizeClass()
-        val bigScreen = windowInfo.widthSizeClass >= WindowWidthSizeClass.Medium
+        val bigScreen = isBigScreen()
         if (!bigScreen) {
             HorizontalDivider()
         }
@@ -302,7 +295,7 @@ private fun LoginExpiredError(modifier: Modifier = Modifier) {
 }
 
 @Composable
-internal fun StatusItem(
+public fun StatusItem(
     item: UiTimeline?,
 //    event: StatusEvent,
     modifier: Modifier = Modifier,
@@ -330,7 +323,7 @@ internal fun StatusItem(
 }
 
 @Composable
-internal fun StatusPlaceholder(modifier: Modifier = Modifier) {
+public fun StatusPlaceholder(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
     ) {
@@ -349,7 +342,7 @@ internal fun StatusPlaceholder(modifier: Modifier = Modifier) {
 }
 
 @Composable
-internal fun UserPlaceholder(modifier: Modifier = Modifier) {
+public fun UserPlaceholder(modifier: Modifier = Modifier) {
     Row(
         modifier =
             modifier

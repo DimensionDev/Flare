@@ -32,7 +32,6 @@ kotlin {
                 implementation(libs.ksoup)
                 implementation(libs.kotlinx.immutable)
                 implementation(libs.precompose.molecule)
-                implementation(compose("org.jetbrains.compose.material3:material3-window-size-class"))
             }
         }
         val commonTest by getting {
@@ -43,6 +42,7 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation(libs.compose.placeholder.material3)
+                implementation(libs.material3.adaptive)
                 implementation(compose.material3)
                 implementation(libs.bundles.media3)
                 implementation(libs.bundles.koin)
@@ -51,6 +51,7 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(libs.fluent.ui)
+                implementation(compose("org.jetbrains.compose.material3:material3-window-size-class"))
             }
         }
     }

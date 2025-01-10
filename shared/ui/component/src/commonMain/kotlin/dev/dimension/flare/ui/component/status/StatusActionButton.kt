@@ -29,7 +29,7 @@ import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.theme.PlatformContentColor
 
 @Composable
-internal fun StatusActionButton(
+public fun StatusActionButton(
     icon: ImageVector,
     text: String?,
     onClicked: () -> Unit,

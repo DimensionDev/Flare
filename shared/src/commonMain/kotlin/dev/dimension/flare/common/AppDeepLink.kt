@@ -7,6 +7,8 @@ import io.ktor.http.encodeURLQueryComponent
 public const val APPSCHEMA: String = "flare"
 
 public object AppDeepLink {
+    public const val LOGIN: String = "$APPSCHEMA://Login"
+
     public object Callback {
         public const val MASTODON: String = "$APPSCHEMA://Callback/SignIn/Mastodon"
         public const val MISSKEY: String = "$APPSCHEMA://Callback/SignIn/Misskey"

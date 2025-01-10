@@ -9,5 +9,6 @@ internal expect fun PlatformCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null,
     shape: Shape? = null,
+    elevated: Boolean = false,
     content: @Composable () -> Unit,
 )

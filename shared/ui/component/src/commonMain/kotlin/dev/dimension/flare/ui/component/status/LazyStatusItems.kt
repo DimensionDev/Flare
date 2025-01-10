@@ -14,28 +14,24 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowWidthSizeClass
-import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleExclamation
 import compose.icons.fontawesomeicons.solid.File
 import compose.icons.fontawesomeicons.solid.FileCircleExclamation
-import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.deeplink
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onEndOfList
 import dev.dimension.flare.common.onError
@@ -45,15 +41,22 @@ import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.HorizontalDivider
+import dev.dimension.flare.ui.component.Res
+import dev.dimension.flare.ui.component.login_expired
+import dev.dimension.flare.ui.component.login_expired_message
 import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.placeholder
+import dev.dimension.flare.ui.component.status_empty
+import dev.dimension.flare.ui.component.status_loadmore_end
+import dev.dimension.flare.ui.component.status_loadmore_error
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import io.github.fornewid.placeholder.material3.placeholder
+import org.jetbrains.compose.resources.stringResource
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 internal fun LazyStaggeredGridScope.status(
     pagingState: PagingState<UiTimeline>,
     detailStatusKey: MicroBlogKey? = null,
@@ -73,8 +76,8 @@ internal fun LazyStaggeredGridScope.status(
             val item = get(it)
             AdaptiveCard(
                 content = {
-                    val windowInfo = currentWindowAdaptiveInfo()
-                    val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT
+                    val windowInfo = calculateWindowSizeClass()
+                    val bigScreen = windowInfo.widthSizeClass >= WindowWidthSizeClass.Medium
                     Column {
                         StatusItem(
                             item,
@@ -136,7 +139,7 @@ internal fun LazyStaggeredGridScope.status(
                         HorizontalDivider()
                         Spacer(modifier = Modifier.height(8.dp))
                         PlatformText(
-                            text = stringResource(R.string.status_loadmore_end),
+                            text = stringResource(Res.string.status_loadmore_end),
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
@@ -178,7 +181,7 @@ internal fun LazyStaggeredGridScope.status(
                     modifier = Modifier.size(48.dp),
                 )
                 PlatformText(
-                    text = stringResource(id = R.string.status_empty),
+                    text = stringResource(resource = Res.string.status_empty),
                     modifier = Modifier.padding(16.dp),
                 )
             }
@@ -186,13 +189,14 @@ internal fun LazyStaggeredGridScope.status(
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 internal fun AdaptiveCard(
     content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val windowInfo = currentWindowAdaptiveInfo()
-    val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT
+    val windowInfo = calculateWindowSizeClass()
+    val bigScreen = windowInfo.widthSizeClass >= WindowWidthSizeClass.Medium
     if (bigScreen) {
         PlatformCard(
             modifier =
@@ -201,8 +205,9 @@ internal fun AdaptiveCard(
                         horizontal = 2.dp,
                         vertical = 6.dp,
                     ),
-            elevation = CardDefaults.elevatedCardElevation(),
-            colors = CardDefaults.elevatedCardColors(),
+            elevated = true,
+//            elevation = CardDefaults.elevatedCardElevation(),
+//            colors = CardDefaults.elevatedCardColors(),
         ) {
             content.invoke()
         }
@@ -215,6 +220,7 @@ internal fun AdaptiveCard(
     }
 }
 
+@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 private fun OnLoading(modifier: Modifier = Modifier) {
     Column(
@@ -228,8 +234,8 @@ private fun OnLoading(modifier: Modifier = Modifier) {
                         vertical = 8.dp,
                     ),
         )
-        val windowInfo = currentWindowAdaptiveInfo()
-        val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT
+        val windowInfo = calculateWindowSizeClass()
+        val bigScreen = windowInfo.widthSizeClass >= WindowWidthSizeClass.Medium
         if (!bigScreen) {
             HorizontalDivider()
         }
@@ -263,7 +269,7 @@ private fun OnError(
                     contentDescription = null,
                     modifier = Modifier.size(48.dp),
                 )
-                PlatformText(text = stringResource(R.string.status_loadmore_error))
+                PlatformText(text = stringResource(Res.string.status_loadmore_error))
             }
         }
     }
@@ -276,7 +282,7 @@ private fun LoginExpiredError(modifier: Modifier = Modifier) {
         modifier =
             modifier
                 .clickable {
-                    uriHandler.openUri(ServiceSelectRouteDestination.deeplink())
+                    uriHandler.openUri(AppDeepLink.LOGIN)
                 },
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -287,10 +293,10 @@ private fun LoginExpiredError(modifier: Modifier = Modifier) {
             modifier = Modifier.size(48.dp),
         )
         PlatformText(
-            text = stringResource(id = R.string.login_expired),
+            text = stringResource(resource = Res.string.login_expired),
         )
         PlatformText(
-            text = stringResource(id = R.string.login_expired_message),
+            text = stringResource(resource = Res.string.login_expired_message),
         )
     }
 }

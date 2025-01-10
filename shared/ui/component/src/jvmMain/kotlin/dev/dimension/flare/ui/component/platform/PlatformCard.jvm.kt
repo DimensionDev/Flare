@@ -11,6 +11,7 @@ internal actual fun PlatformCard(
     modifier: Modifier,
     onClick: (() -> Unit)?,
     shape: Shape?,
+    elevated: Boolean,
     content: @Composable () -> Unit,
 ) {
     if (onClick == null) {

@@ -39,7 +39,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -64,7 +63,6 @@ import compose.icons.fontawesomeicons.solid.QuoteLeft
 import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
 import compose.icons.fontawesomeicons.solid.Trash
-import dev.dimension.flare.R
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AdaptiveGrid
@@ -74,7 +72,19 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDividerDefaults
 import dev.dimension.flare.ui.component.HorizontalDivider
 import dev.dimension.flare.ui.component.LocalComponentAppearance
+import dev.dimension.flare.ui.component.Res
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.bookmark_add
+import dev.dimension.flare.ui.component.bookmark_remove
+import dev.dimension.flare.ui.component.delete
+import dev.dimension.flare.ui.component.like
+import dev.dimension.flare.ui.component.mastodon_item_show_less
+import dev.dimension.flare.ui.component.mastodon_item_show_more
+import dev.dimension.flare.ui.component.mastodon_visibility_direct
+import dev.dimension.flare.ui.component.mastodon_visibility_private
+import dev.dimension.flare.ui.component.mastodon_visibility_public
+import dev.dimension.flare.ui.component.mastodon_visibility_unlisted
+import dev.dimension.flare.ui.component.more
 import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformCheckbox
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuItem
@@ -84,6 +94,20 @@ import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextButton
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.platform.placeholder
+import dev.dimension.flare.ui.component.poll_expired
+import dev.dimension.flare.ui.component.poll_expired_at
+import dev.dimension.flare.ui.component.quote
+import dev.dimension.flare.ui.component.reaction_add
+import dev.dimension.flare.ui.component.reaction_remove
+import dev.dimension.flare.ui.component.reply
+import dev.dimension.flare.ui.component.reply_to
+import dev.dimension.flare.ui.component.report
+import dev.dimension.flare.ui.component.retweet
+import dev.dimension.flare.ui.component.retweet_remove
+import dev.dimension.flare.ui.component.show_media
+import dev.dimension.flare.ui.component.status_detail_translate
+import dev.dimension.flare.ui.component.unlike
+import dev.dimension.flare.ui.component.vote
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiPoll
@@ -101,6 +125,7 @@ import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 public fun CommonStatusComponent(
@@ -302,7 +327,7 @@ private fun StatusMediasComponent(
         ) {
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Image,
-                contentDescription = stringResource(id = R.string.show_media),
+                contentDescription = stringResource(resource = Res.string.show_media),
                 modifier =
                     Modifier
                         .size(12.dp)
@@ -310,7 +335,7 @@ private fun StatusMediasComponent(
             )
             Spacer(modifier = Modifier.width(4.dp))
             PlatformText(
-                text = stringResource(id = R.string.show_media),
+                text = stringResource(resource = Res.string.show_media),
                 style = PlatformTheme.typography.caption,
                 modifier =
                     Modifier
@@ -421,7 +446,7 @@ private fun TranslationComponent(
         PlatformText(
             text =
                 stringResource(
-                    id = R.string.status_detail_translate,
+                    resource = Res.string.status_detail_translate,
                     Locale.current.platformLocale.displayLanguage,
                 ),
         )
@@ -467,28 +492,28 @@ internal fun StatusVisibilityComponent(
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Globe,
-                contentDescription = stringResource(id = R.string.mastodon_visibility_public),
+                contentDescription = stringResource(resource = Res.string.mastodon_visibility_public),
                 modifier = modifier,
             )
 
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.LockOpen,
-                contentDescription = stringResource(id = R.string.mastodon_visibility_unlisted),
+                contentDescription = stringResource(resource = Res.string.mastodon_visibility_unlisted),
                 modifier = modifier,
             )
 
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.Lock,
-                contentDescription = stringResource(id = R.string.mastodon_visibility_private),
+                contentDescription = stringResource(resource = Res.string.mastodon_visibility_private),
                 modifier = modifier,
             )
 
         UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified ->
             FAIcon(
                 imageVector = FontAwesomeIcons.Solid.At,
-                contentDescription = stringResource(id = R.string.mastodon_visibility_direct),
+                contentDescription = stringResource(resource = Res.string.mastodon_visibility_direct),
                 modifier = modifier,
             )
     }
@@ -707,38 +732,38 @@ private fun statusActionItemText(item: StatusAction.Item) =
     when (item) {
         is StatusAction.Item.Bookmark -> {
             if (item.bookmarked) {
-                stringResource(id = R.string.bookmark_remove)
+                stringResource(resource = Res.string.bookmark_remove)
             } else {
-                stringResource(id = R.string.bookmark_add)
+                stringResource(resource = Res.string.bookmark_add)
             }
         }
 
-        is StatusAction.Item.Delete -> stringResource(id = R.string.delete)
+        is StatusAction.Item.Delete -> stringResource(resource = Res.string.delete)
         is StatusAction.Item.Like -> {
             if (item.liked) {
-                stringResource(id = R.string.unlike)
+                stringResource(resource = Res.string.unlike)
             } else {
-                stringResource(id = R.string.like)
+                stringResource(resource = Res.string.like)
             }
         }
 
-        StatusAction.Item.More -> stringResource(id = R.string.more)
-        is StatusAction.Item.Quote -> stringResource(id = R.string.quote)
+        StatusAction.Item.More -> stringResource(resource = Res.string.more)
+        is StatusAction.Item.Quote -> stringResource(resource = Res.string.quote)
         is StatusAction.Item.Reaction -> {
             if (item.reacted) {
-                stringResource(id = R.string.reaction_remove)
+                stringResource(resource = Res.string.reaction_remove)
             } else {
-                stringResource(id = R.string.reaction_add)
+                stringResource(resource = Res.string.reaction_add)
             }
         }
 
-        is StatusAction.Item.Reply -> stringResource(id = R.string.reply)
-        is StatusAction.Item.Report -> stringResource(id = R.string.report)
+        is StatusAction.Item.Reply -> stringResource(resource = Res.string.reply)
+        is StatusAction.Item.Report -> stringResource(resource = Res.string.report)
         is StatusAction.Item.Retweet -> {
             if (item.retweeted) {
-                stringResource(id = R.string.retweet_remove)
+                stringResource(resource = Res.string.retweet_remove)
             } else {
-                stringResource(id = R.string.retweet)
+                stringResource(resource = Res.string.retweet)
             }
         }
     }
@@ -757,13 +782,13 @@ private fun StatusReplyComponent(
     ) {
         FAIcon(
             imageVector = FontAwesomeIcons.Solid.Reply,
-            contentDescription = stringResource(id = R.string.reply_to),
+            contentDescription = stringResource(resource = Res.string.reply_to),
             modifier =
                 Modifier
                     .size(12.dp),
         )
         PlatformText(
-            text = stringResource(id = R.string.reply_to, replyHandle),
+            text = stringResource(resource = Res.string.reply_to, replyHandle),
             style = PlatformTheme.typography.caption,
             maxLines = 1,
         )
@@ -805,9 +830,9 @@ private fun StatusContentComponent(
                         },
                     ) {
                         if (expanded) {
-                            PlatformText(stringResource(R.string.mastodon_item_show_less))
+                            PlatformText(stringResource(Res.string.mastodon_item_show_less))
                         } else {
-                            PlatformText(stringResource(R.string.mastodon_item_show_more))
+                            PlatformText(stringResource(Res.string.mastodon_item_show_more))
                         }
                     }
                 }
@@ -869,7 +894,7 @@ private fun StatusPollComponent(
         }
         if (poll.expired) {
             PlatformText(
-                text = stringResource(id = R.string.poll_expired),
+                text = stringResource(resource = Res.string.poll_expired),
                 modifier =
                     Modifier
                         .align(Alignment.End)
@@ -880,7 +905,7 @@ private fun StatusPollComponent(
             PlatformText(
                 text =
                     stringResource(
-                        id = R.string.poll_expired_at,
+                        resource = Res.string.poll_expired_at,
                         poll.expiredAt.value.localizedFullTime,
                     ),
                 modifier =
@@ -898,7 +923,7 @@ private fun StatusPollComponent(
                 },
             ) {
                 PlatformText(
-                    text = stringResource(id = R.string.vote),
+                    text = stringResource(resource = Res.string.vote),
                 )
             }
         }

@@ -1,11 +1,5 @@
 package dev.dimension.flare.ui.component.status
 
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.Network
-import android.net.NetworkCapabilities
-import android.net.NetworkRequest
-import android.os.Build
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,13 +8,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.PlatformTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -31,29 +21,29 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
 import compose.icons.fontawesomeicons.solid.EyeSlash
-import dev.dimension.flare.R
-import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AudioPlayer
+import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.NetworkImage
-import dev.dimension.flare.ui.component.VideoPlayer
+import dev.dimension.flare.ui.component.Res
+import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
 import dev.dimension.flare.ui.component.platform.PlatformIconButton
 import dev.dimension.flare.ui.component.platform.PlatformText
+import dev.dimension.flare.ui.component.platform.PlatformVideoPlayer
+import dev.dimension.flare.ui.component.platform.rememberPlatformWifiState
+import dev.dimension.flare.ui.component.status_sensitive_media
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.theme.PlatformTheme
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
+import org.jetbrains.compose.resources.stringResource
 import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
@@ -106,11 +96,12 @@ internal fun StatusMediaComponent(
                 Modifier
                     .clip(PlatformTheme.shapes.medium)
                     .let {
-                        if (hideSensitive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            it.blur(32.dp)
-                        } else {
-                            it
-                        }
+                        it.blur(32.dp)
+//                        if (hideSensitive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//                            it.blur(32.dp)
+//                        } else {
+//                            it
+//                        }
                     },
             expandedSize = appearanceSettings.expandMediaSize,
         )
@@ -120,11 +111,12 @@ internal fun StatusMediaComponent(
                     Modifier
                         .matchParentSize()
                         .let {
-                            if (hideSensitive && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                                it.background(PlatformTheme.colorScheme.surfaceContainer)
-                            } else {
-                                it
-                            }
+                            it
+//                            if (hideSensitive && Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+//                                it.background(PlatformTheme.colorScheme.surfaceContainer)
+//                            } else {
+//                                it
+//                            }
                         }.let {
                             if (hideSensitive) {
                                 it.clickable {
@@ -153,7 +145,7 @@ internal fun StatusMediaComponent(
                                         .padding(16.dp),
                             ) {
                                 PlatformText(
-                                    text = stringResource(R.string.status_sensitive_media),
+                                    text = stringResource(Res.string.status_sensitive_media),
                                 )
                             }
                         } else {
@@ -182,7 +174,7 @@ internal fun StatusMediaComponent(
 }
 
 @Composable
-fun MediaItem(
+public fun MediaItem(
     media: UiMedia,
     modifier: Modifier = Modifier,
     keepAspectRatio: Boolean = true,
@@ -213,14 +205,14 @@ fun MediaItem(
         }
 
         is UiMedia.Video -> {
-            val wifiState by wifiState()
+            val wifiState by rememberPlatformWifiState()
             val shouldPlay =
                 remember(appearanceSettings.videoAutoplay, wifiState) {
-                    appearanceSettings.videoAutoplay == VideoAutoplay.ALWAYS ||
-                        (appearanceSettings.videoAutoplay == VideoAutoplay.WIFI && wifiState)
+                    appearanceSettings.videoAutoplay == ComponentAppearance.VideoAutoplay.ALWAYS ||
+                        (appearanceSettings.videoAutoplay == ComponentAppearance.VideoAutoplay.WIFI && wifiState)
                 }
             if (shouldPlay) {
-                VideoPlayer(
+                PlatformVideoPlayer(
                     contentScale = contentScale,
                     uri = media.url,
                     muted = true,
@@ -255,7 +247,7 @@ fun MediaItem(
                                         .fillMaxSize(),
                             )
                         }
-                        CircularProgressIndicator(
+                        PlatformCircularProgressIndicator(
                             modifier =
                                 Modifier
                                     .align(Alignment.BottomStart)
@@ -337,7 +329,7 @@ fun MediaItem(
         }
 
         is UiMedia.Gif ->
-            VideoPlayer(
+            PlatformVideoPlayer(
                 contentScale = contentScale,
                 uri = media.url,
                 muted = true,
@@ -372,7 +364,7 @@ fun MediaItem(
                                 .fillMaxSize(),
                     )
                 }
-                CircularProgressIndicator(
+                PlatformCircularProgressIndicator(
                     modifier =
                         Modifier
                             .align(Alignment.BottomStart)
@@ -383,35 +375,3 @@ fun MediaItem(
             }
     }
 }
-
-@Composable
-fun wifiState(): State<Boolean> {
-    val context = LocalContext.current
-    return produceState(initialValue = false) {
-        context.observeWifiStateAsFlow().collect { value = it }
-    }
-}
-
-fun Context.observeWifiStateAsFlow() =
-    callbackFlow {
-        val connectivityManager =
-            getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val networkRequest =
-            NetworkRequest
-                .Builder()
-                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                .build()
-        val networkCallback =
-            object : ConnectivityManager.NetworkCallback() {
-                override fun onCapabilitiesChanged(
-                    network: Network,
-                    networkCapabilities: NetworkCapabilities,
-                ) {
-                    trySend(networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI))
-                }
-            }
-        connectivityManager.registerNetworkCallback(networkRequest, networkCallback)
-        awaitClose {
-            connectivityManager.unregisterNetworkCallback(networkCallback)
-        }
-    }

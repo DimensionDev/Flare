@@ -141,7 +141,9 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
 
 compose-destinations = { group = "io.github.raamcosta.compose-destinations", name = "core", version.ref = "compose-destinations" }
+compose-destinations-bottom-sheet = { group = "io.github.raamcosta.compose-destinations", name = "bottom-sheet", version.ref = "compose-destinations" }
 compose-destinations-ksp = { group = "io.github.raamcosta.compose-destinations", name = "ksp", version.ref = "compose-destinations" }
+material3-navigation = { group = "io.github.stefanoq21", name = "material3-navigation", version = "0.0.12" }
 
 compose-lint-checks = { group = "com.slack.lint.compose", name = "compose-lint-checks", version.ref = "compose-lint-checks" }
 
@@ -177,7 +179,7 @@ ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "k
 coil3 = ["coil3-compose", "coil3-svg", "coil3-ktor3"]
 coil3-extensions = ["apng", "awebp", "vectordrawable-animated", "zoomable-image", "coil3-gif"]
 accompanist = ["accompanist-permissions", "accompanist-drawablepainter"]
-compose-destinations = ["compose-destinations"]
+compose-destinations = ["compose-destinations", "material3-navigation"]
 media3 = ["media3-exoplayer", "media3-ui", "media3-hls"]
 firebase = ["firebase-analytics-ktx", "firebase-crashlytics-ktx"]
 ktorfit = ["ktorfit-lib", "ktorfit-converters-response", "ktorfit-converters-flow", "ktorfit-converters-call"]

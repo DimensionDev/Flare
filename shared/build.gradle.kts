@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.skie)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.room)
 }
 
@@ -18,6 +19,8 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     androidTarget()
+
+    jvm()
 
     listOf(
         iosX64(),
@@ -79,13 +82,25 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
+        val androidJvmMain by creating {
+            dependsOn(commonMain)
+            dependencies {
+                implementation(compose.foundation)
+                implementation(libs.ktor.client.okhttp)
+            }
+        }
         val androidMain by getting {
+            dependsOn(androidJvmMain)
             dependencies {
                 implementation(project.dependencies.platform(libs.compose.bom))
-                implementation(libs.compose.foundation)
                 implementation(libs.core.ktx)
-                implementation(libs.ktor.client.okhttp)
                 implementation(libs.koin.android)
+            }
+        }
+        val jvmMain by getting {
+            dependsOn(androidJvmMain)
+            dependencies {
+                implementation(libs.commons.lang3)
             }
         }
         val appleMain by getting {

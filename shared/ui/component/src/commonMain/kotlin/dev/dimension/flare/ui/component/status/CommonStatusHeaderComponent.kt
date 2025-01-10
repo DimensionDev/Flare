@@ -23,7 +23,7 @@ import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformTheme
 
 @Composable
-internal fun CommonStatusHeaderComponent(
+public fun CommonStatusHeaderComponent(
     data: UiUserV2,
     onUserClick: (MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
@@ -75,7 +75,7 @@ internal fun CommonStatusHeaderComponent(
 }
 
 @Composable
-internal fun ListComponent(
+public fun ListComponent(
     headlineContent: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier,
     leadingContent: @Composable RowScope.() -> Unit = {},

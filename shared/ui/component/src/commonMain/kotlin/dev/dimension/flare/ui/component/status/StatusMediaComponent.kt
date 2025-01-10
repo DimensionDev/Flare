@@ -96,7 +96,11 @@ internal fun StatusMediaComponent(
                 Modifier
                     .clip(PlatformTheme.shapes.medium)
                     .let {
-                        it.blur(32.dp)
+                        if (hideSensitive) {
+                            it.blur(32.dp)
+                        } else {
+                            it
+                        }
 //                        if (hideSensitive && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 //                            it.blur(32.dp)
 //                        } else {
@@ -141,7 +145,7 @@ internal fun StatusMediaComponent(
                                     Modifier
                                         .align(Alignment.Center)
                                         .clip(PlatformTheme.shapes.medium)
-                                        .background(PlatformTheme.colorScheme.surface)
+                                        .background(PlatformTheme.colorScheme.card)
                                         .padding(16.dp),
                             ) {
                                 PlatformText(
@@ -158,7 +162,7 @@ internal fun StatusMediaComponent(
                                         .align(Alignment.TopStart)
                                         .alpha(0.5f)
                                         .clip(PlatformTheme.shapes.medium)
-                                        .background(PlatformTheme.colorScheme.surface),
+                                        .background(PlatformTheme.colorScheme.card),
                             ) {
                                 FAIcon(
                                     imageVector = FontAwesomeIcons.Solid.EyeSlash,

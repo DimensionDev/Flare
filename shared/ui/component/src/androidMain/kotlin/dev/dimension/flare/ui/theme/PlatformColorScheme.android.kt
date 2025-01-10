@@ -14,4 +14,13 @@ internal actual object PlatformColorScheme {
     actual val caption: Color
         @Composable
         get() = MaterialTheme.colorScheme.onSurfaceVariant
+    actual val outline: Color
+        @Composable
+        get() = MaterialTheme.colorScheme.outline.copy(alpha = MediumAlpha)
+    actual val card: Color
+        @Composable
+        get() = MaterialTheme.colorScheme.surface
+    public actual val cardAlt: Color
+        @Composable
+        get() = MaterialTheme.colorScheme.surfaceVariant
 }

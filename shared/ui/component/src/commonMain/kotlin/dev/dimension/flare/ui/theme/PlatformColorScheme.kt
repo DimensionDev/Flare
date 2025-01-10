@@ -15,4 +15,10 @@ internal expect object PlatformColorScheme {
 
     @get:Composable
     val outline: Color
+
+    @get:Composable
+    val card: Color
+
+    @get:Composable
+    val cardAlt: Color
 }

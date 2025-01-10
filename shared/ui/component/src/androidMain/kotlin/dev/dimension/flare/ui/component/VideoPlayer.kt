@@ -4,7 +4,7 @@ import android.content.Context
 import android.view.Surface
 import androidx.annotation.OptIn
 import androidx.collection.lruCache
-import androidx.compose.foundation.AndroidExternalSurface
+import androidx.compose.foundation.AndroidEmbeddedExternalSurface
 import androidx.compose.foundation.AndroidExternalSurfaceScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -284,5 +284,5 @@ private fun PlayerSurface(
             surface.onDestroyed { onSurfaceDestroyed() }
         }
     }
-    AndroidExternalSurface(modifier = modifier, onInit = onSurfaceInitialized)
+    AndroidEmbeddedExternalSurface(modifier = modifier, onInit = onSurfaceInitialized)
 }

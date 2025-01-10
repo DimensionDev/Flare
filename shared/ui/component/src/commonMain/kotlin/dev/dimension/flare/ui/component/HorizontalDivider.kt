@@ -25,10 +25,10 @@ internal fun HorizontalDivider(
     )
 }
 
-internal object FlareDividerDefaults {
-    val color: Color
+public object FlareDividerDefaults {
+    public val color: Color
         @Composable
         get() = PlatformTheme.colorScheme.outline
 
-    val thickness = 0.8.dp
+    public val thickness: Dp = 0.8.dp
 }

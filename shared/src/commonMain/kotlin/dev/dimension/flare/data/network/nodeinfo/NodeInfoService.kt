@@ -41,6 +41,7 @@ internal data object NodeInfoService {
         listOf(
             "misskey",
             "sharkey",
+            "cherrypick",
         )
 
     suspend fun fetchNodeInfo(host: String): String? {

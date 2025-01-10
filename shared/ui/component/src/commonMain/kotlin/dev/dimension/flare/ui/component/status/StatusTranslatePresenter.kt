@@ -1,4 +1,4 @@
-package dev.dimension.flare.ui.screen.status
+package dev.dimension.flare.ui.component.status
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -8,7 +8,7 @@ import dev.dimension.flare.ui.presenter.status.TranslatePresenter
 import dev.dimension.flare.ui.render.UiRichText
 
 @Composable
-fun statusTranslatePresenter(
+internal fun statusTranslatePresenter(
     contentWarning: UiRichText?,
     content: Element,
 ): TranslateResult {

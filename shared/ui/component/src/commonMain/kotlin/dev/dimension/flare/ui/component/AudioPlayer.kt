@@ -1,56 +1,83 @@
 package dev.dimension.flare.ui.component
 
-import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.media3.common.MediaItem
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePause
 import compose.icons.fontawesomeicons.solid.CirclePlay
-import dev.dimension.flare.common.observeState
+import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
+import dev.dimension.flare.ui.component.platform.PlatformIconButton
+import dev.dimension.flare.ui.component.platform.PlatformSlider
 import kotlin.math.roundToLong
 
-@OptIn(UnstableApi::class)
+@Immutable
+internal interface PlayerState {
+    val playing: Boolean
+    val loading: Boolean
+    val duration: Long
+    val progress: Float
+
+    fun play()
+
+    fun pause()
+
+    fun seekTo(position: Long)
+}
+
+// @Immutable
+// internal data class PlayerState(
+//    val playing: Boolean,
+//    val loading: Boolean,
+//    val position: Long,
+//    val duration: Long,
+// ) {
+//    val progress: Float
+//        get() =
+//            if (duration > 0) {
+//                position.toFloat() / duration
+//            } else {
+//                0f
+//            }
+// }
+
 @Composable
-fun AudioPlayer(
+internal expect fun rememberPlayerState(uri: String): PlayerState
+
+@Composable
+internal fun AudioPlayer(
     uri: String,
     previewUri: String?,
     contentDescription: String?,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val player =
-        remember {
-            ExoPlayer
-                .Builder(context)
-                .build()
-                .apply {
-                    setMediaItem(MediaItem.fromUri(uri))
-                }
-        }
-    val state = player.observeState()
-    DisposableEffect(player) {
-        onDispose {
-            player.release()
-        }
-    }
+//    val context = LocalContext.current
+//    val player =
+//        remember {
+//            ExoPlayer
+//                .Builder(context)
+//                .build()
+//                .apply {
+//                    setMediaItem(MediaItem.fromUri(uri))
+//                }
+//        }
+//    val state = player.observeState()
+//    DisposableEffect(player) {
+//        onDispose {
+//            player.release()
+//        }
+//    }
+    val state = rememberPlayerState(uri)
     Row(
         modifier = modifier,
         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
@@ -68,20 +95,19 @@ fun AudioPlayer(
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         ) {
             if (state.loading) {
-                CircularProgressIndicator(
+                PlatformCircularProgressIndicator(
                     modifier =
                         Modifier
                             .padding(horizontal = 8.dp)
                             .size(24.dp),
                 )
             } else {
-                IconButton(
+                PlatformIconButton(
                     onClick = {
                         if (state.playing) {
-                            player.pause()
+                            state.pause()
                         } else {
-                            player.prepare()
-                            player.play()
+                            state.play()
                         }
                     },
                 ) {
@@ -97,13 +123,13 @@ fun AudioPlayer(
             }
             AnimatedVisibility(state.duration > 0) {
                 var progress by remember(state.progress) { mutableFloatStateOf(state.progress) }
-                Slider(
+                PlatformSlider(
                     progress,
                     onValueChange = {
                         progress = it
                     },
                     onValueChangeFinished = {
-                        player.seekTo((progress * state.duration).roundToLong())
+                        state.seekTo((progress * state.duration).roundToLong())
                     },
                     enabled = !state.loading,
                 )

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,12 +63,12 @@ internal fun StatusActionButton(
                     .clickable(
                         onClick = onClicked,
                         enabled = enabled,
-                        interactionSource = interactionSource,
-                        indication =
-                            ripple(
-                                bounded = false,
-                                radius = 20.dp,
-                            ),
+//                        interactionSource = interactionSource,
+//                        indication =
+//                            ripple(
+//                                bounded = false,
+//                                radius = 20.dp,
+//                            ),
                     ),
             tint = color,
         )

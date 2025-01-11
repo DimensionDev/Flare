@@ -76,6 +76,7 @@
   <string name="misskey_notification_item_app">Aplicativo</string>
   <string name="misskey_notification_item_followed_you">seguiu você</string>
   <string name="misskey_notification_item_requested_follow">solicitado para seguir você</string>
+  <string name="misskey_notification_unknwon">Notificação desconhecida %1$s</string>
   <string name="misskey_item_reblogged_status">postou novamente um status</string>
   <string name="xqt_item_reblogged_status">retuitado</string>
   <string name="xqt_item_mention_status">menciona você</string>
@@ -530,4 +531,6 @@
   <string name="following_title">Seguinte</string>
   <string name="fans_title">Seguidor</string>
   <string name="local_history_search_placeholder">Pesquisar cache local</string>
+  <string name="local_history_search_status_title">SItuação</string>
+  <string name="local_history_search_user_title">Usuário</string>
 </resources>

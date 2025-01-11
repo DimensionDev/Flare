@@ -76,6 +76,7 @@
   <string name="misskey_notification_item_app">Приложение</string>
   <string name="misskey_notification_item_followed_you">подписался на вас</string>
   <string name="misskey_notification_item_requested_follow">попросил подписаться на вас</string>
+  <string name="misskey_notification_unknwon">Неизвестное уведомление %1$s</string>
   <string name="misskey_item_reblogged_status">статус был изменен</string>
   <string name="xqt_item_reblogged_status">ретвит</string>
   <string name="xqt_item_mention_status">упоминает вас</string>
@@ -528,4 +529,6 @@
   <string name="following_title">Подписка</string>
   <string name="fans_title">Фольклор</string>
   <string name="local_history_search_placeholder">Поиск локального кэша</string>
+  <string name="local_history_search_status_title">Статус</string>
+  <string name="local_history_search_user_title">Пользователь</string>
 </resources>

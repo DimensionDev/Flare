@@ -77,6 +77,7 @@
   <string name="misskey_notification_item_app">アプリ</string>
   <string name="misskey_notification_item_followed_you">があなたをフォローしました</string>
   <string name="misskey_notification_item_requested_follow">がフォローをリクエストしました</string>
+  <string name="misskey_notification_unknwon">不明な通知 %1$s</string>
   <string name="misskey_item_reblogged_status">リノートしました</string>
   <string name="xqt_item_reblogged_status">リツイート</string>
   <string name="xqt_item_mention_status">あなたをメンションする</string>
@@ -293,7 +294,7 @@
   <string name="tab_settings_secondary">セカンダリタブ</string>
   <string name="date_format_year_month_day">yyyy年M月d日</string>
   <string name="date_format_month_day">M月d日</string>
-  <string name="date_format_full">yyyy年M月d日 HHH:mm</string>
+  <string name="date_format_full">yyyy年M月d日 HH:mm</string>
   <string name="vvo_notification_like">あなたのステータスがいいね！されました</string>
   <string name="status_detail_comment">コメント</string>
   <string name="status_detail_repost">リポスト</string>
@@ -533,4 +534,6 @@
   <string name="following_title">フォロー中</string>
   <string name="fans_title">フォロワー</string>
   <string name="local_history_search_placeholder">ローカルキャッシュを検索</string>
+  <string name="local_history_search_status_title">ステータス</string>
+  <string name="local_history_search_user_title">ユーザー</string>
 </resources>

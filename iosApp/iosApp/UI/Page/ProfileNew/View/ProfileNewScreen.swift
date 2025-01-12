@@ -101,4 +101,3 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
     }
 }
 
- 

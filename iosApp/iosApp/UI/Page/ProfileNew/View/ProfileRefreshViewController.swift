@@ -6,12 +6,12 @@ import shared
 import MarkdownUI
 import Generated
 import os.log
+import Kingfisher
 
-// 让JXPagingListContainerView实现JXSegmentedViewListContainer协议
 extension JXPagingListContainerView: JXSegmentedViewListContainer {}
 
 class ProfileNewRefreshViewController: UIViewController {
-    // 数据源
+    // MARK: - Properties
     private var userInfo: ProfileUserInfo?
     private var state: ProfileState?
     private var selectedTab: Binding<Int>?
@@ -21,6 +21,7 @@ class ProfileNewRefreshViewController: UIViewController {
     private var accountType: AccountType?
     private var userKey: MicroBlogKey?
     private var tabStore: ProfileTabSettingStore?
+    private var listViewControllers: [Int: JXPagingViewListViewDelegate] = [:]
     
     // UI Components
     var pagingView: JXPagingView!
@@ -84,15 +85,19 @@ class ProfileNewRefreshViewController: UIViewController {
             navigationController?.setNavigationBarHidden(false, animated: false)
             segmentedBackButton.isHidden = true
         } else {
+               // 默认显示系统导航栏
+               // 每次切换tab后，上级就刷新，然后 这边就又有问题了，无解， 此bug 得解决上层刷新问题。
+        navigationController?.setNavigationBarHidden(false, animated: false)
+        
             // 如果是其他用户的 profile，初始时隐藏系统导航栏和返回按钮
-            navigationController?.setNavigationBarHidden(true, animated: false)
+            // navigationController?.setNavigationBarHidden(true, animated: false)
             segmentedBackButton.isHidden = true
         }
-        
+    
         // 更新UI
         updateUI()
     }
-    
+
     private func updateUI() {
         guard let userInfo = userInfo else { return }
         
@@ -124,7 +129,7 @@ class ProfileNewRefreshViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+
         view.backgroundColor = .systemBackground
         
         // 设置导航栏
@@ -274,7 +279,7 @@ class ProfileNewRefreshViewController: UIViewController {
     }
     
     private func refreshContent() {
-        // 模拟刷新过程
+         // 模拟刷新过程
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             self.isHeaderRefreshed = true
             self.refreshControl?.endRefreshing()
@@ -284,7 +289,28 @@ class ProfileNewRefreshViewController: UIViewController {
             if let currentList = self.pagingView.validListDict[self.segmentedView.selectedIndex] as? ProfileNewListViewController {
                 currentList.headerRefresh()
             }
+            Task {
+                // 获取当前选中的列表视图
+                if let currentList = self.pagingView.validListDict[self.segmentedView.selectedIndex] {
+                    if let timelineVC = currentList as? ProfileNewTimelineViewController,
+                       let timelineState = timelineVC.presenter?.models.value as? TimelineState {
+                        // 触发时间线刷新
+                        try? await timelineState.refresh()
+                    } else if let mediaVC = currentList as? ProfileMediaViewController,
+                              let state = mediaVC.state {
+                        // 触发媒体列表刷新
+                        try? await state.refresh()
+                    }
+                    
+                    await MainActor.run {
+                        self.isHeaderRefreshed = true
+                        self.refreshControl?.endRefreshing()
+                    }
+                }
+            }
         }
+            
+       
     }
     
     private func setupNavigationBar() {
@@ -365,6 +391,14 @@ class ProfileNewRefreshViewController: UIViewController {
         // 离开时恢复系统导航栏状态
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
+    
+    deinit {
+        cleanupListViewControllers()
+    }
+    
+    private func cleanupListViewControllers() {
+        listViewControllers.removeAll()
+    }
 }
 
 // MARK: - UIGestureRecognizerDelegate
@@ -419,38 +453,43 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
     }
     
     func numberOfLists(in pagingView: JXPagingView) -> Int {
-        return titles.count
+        return tabStore?.availableTabs.count ?? 0
     }
     
     func pagingView(_ pagingView: JXPagingView, initListAtIndex index: Int) -> JXPagingViewListViewDelegate {
-        let list = ProfileNewListViewController()
-        list.isNeedHeader = true
-        list.isNeedFooter = true
-        
-        // 使用 ProfileContentView 显示内容
-        if let tabStore = tabStore {
-            let contentView = ProfileContentView(
-                tabs: tabStore.availableTabs,
-                selectedTab: .constant(selectedTab?.wrappedValue ?? 0),
-                refresh: { [weak self] in
-                    guard let self = self,
-                          let state = self.state else { return }
-                    try? await state.refresh()
-                },
-                accountType: accountType ?? AccountTypeSpecific(accountKey: userKey ?? MicroBlogKey(id: "", host: "")),
-                userKey: userKey,
-                tabStore: tabStore
-            )
-            
-            let hostingController = UIHostingController(rootView: contentView)
-            list.addChild(hostingController)
-            list.view.addSubview(hostingController.view)
-            hostingController.view.frame = list.view.bounds
-            hostingController.view.autoresizingMask = [UIView.AutoresizingMask.flexibleWidth, UIView.AutoresizingMask.flexibleHeight]
-            hostingController.didMove(toParent: list)
+        // 如果已经存在，直接返回
+        if let existingVC = listViewControllers[index] {
+            return existingVC
         }
         
-        return list
+        guard let tabStore = tabStore,
+              index < tabStore.availableTabs.count else {
+            let emptyVC = UIViewController()
+            return emptyVC as! JXPagingViewListViewDelegate
+        }
+        
+        let tab = tabStore.availableTabs[index]
+        
+        if tab is FLProfileMediaTabItem {
+            let mediaVC = ProfileMediaViewController()
+            if let state = state {
+                mediaVC.updatePresenter(state)  // 直接传入 ProfileState
+            }
+            if let appSettings = appSettings {
+                mediaVC.configure(with: appSettings)
+            }
+            // 保存到字典中
+            listViewControllers[index] = mediaVC
+            return mediaVC
+        } else {
+            let timelineVC = ProfileNewTimelineViewController()
+            if let presenter = tabStore.currentPresenter {
+                timelineVC.updatePresenter(presenter)
+            }
+            // 保存到字典中
+            listViewControllers[index] = timelineVC
+            return timelineVC
+        }
     }
 }
 
@@ -465,12 +504,20 @@ extension ProfileNewRefreshViewController: JXSegmentedViewDelegate {
         // 更新当前选中的标签页的presenter
         if let tabStore = tabStore, index < tabStore.availableTabs.count {
             let selectedTab = tabStore.availableTabs[index]
-            // 使用 async 来模拟 SwiftUI 的 withAnimation
-            DispatchQueue.main.async {
-                tabStore.updateCurrentPresenter(for: selectedTab)
-                // 只重新加载当前选中的列表视图
-                if let currentList = self.pagingView.validListDict[index] as? ProfileNewListViewController {
-                    currentList.tableView.reloadData()
+            
+            // 直接更新 presenter
+            tabStore.updateCurrentPresenter(for: selectedTab)
+            
+            // 获取当前的列表视图并更新其 presenter
+            if let currentList = self.pagingView.validListDict[index] {
+                if let timelineVC = currentList as? ProfileNewTimelineViewController,
+                   let presenter = tabStore.currentPresenter {
+                    // 更新 timeline presenter
+                    timelineVC.updatePresenter(presenter)
+                } else if let mediaVC = currentList as? ProfileMediaViewController,
+                          let state = self.state {
+                    // 更新 media presenter
+                    mediaVC.updatePresenter(state)
                 }
             }
         }
@@ -615,7 +662,7 @@ class ProfileNewHeaderView: UIView {
         // More Menu Button
         moreButton.addTarget(self, action: #selector(moreMenuTapped), for: .touchUpInside)
         addSubview(moreButton)
-        moreButton.frame = CGRect(x: frame.width - 40, y: 120, width: 30, height: 30)
+        moreButton.frame = CGRect(x: frame.width - 44, y: 60, width: 30, height: 30)
         
         // Name Label
         addSubview(nameLabel)
@@ -694,34 +741,46 @@ class ProfileNewHeaderView: UIView {
         // 设置用户handle
         handleLabel.text = "\(userInfo.profile.handle)"
         
-        // 设置头像
+        // 设置头像 - 使用 Kingfisher 缓存
         if let url = URL(string: userInfo.profile.avatar) {
-            URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-                if let data = data, let image = UIImage(data: data) {
-                    DispatchQueue.main.async {
-                        self?.avatarView.image = image
-                    }
-                }
-            }.resume()
+            avatarView.kf.setImage(
+                with: url,
+                options: [
+                    .transition(.fade(0.25)),
+                    .processor(DownsamplingImageProcessor(size: CGSize(width: 160, height: 160))),
+                    .scaleFactor(UIScreen.main.scale),
+                    .cacheOriginalImage
+                ]
+            )
         }
         
-        // 设置banner
+        // 设置banner - 使用 Kingfisher 缓存
         if let url = URL(string: userInfo.profile.banner ?? ""),
            !(userInfo.profile.banner ?? "").isEmpty,
            (userInfo.profile.banner ?? "").range(of: "^https?://.*example\\.com.*$", options: .regularExpression) == nil {
-            URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-                if let data = data, let image = UIImage(data: data) {
+            bannerImageView.kf.setImage(
+                with: url,
+                options: [
+                    .transition(.fade(0.25)),
+                    .processor(DownsamplingImageProcessor(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 300))),
+                    .scaleFactor(UIScreen.main.scale),
+                    .cacheOriginalImage
+                ]
+            ) { result in
+                switch result {
+                case .success(let imageResult):
                     // 检查图片是否有效
-                    if image.size.width > 10 && image.size.height > 10 {
-                        DispatchQueue.main.async {
-                            self?.bannerImageView.image = image
-                        }
+                    if imageResult.image.size.width > 10 && imageResult.image.size.height > 10 {
+                        // 图片有效，保持现状
                     } else {
                         // 如果图片无效，使用头像作为背景
-                        self?.setupDynamicBannerBackground(avatarUrl: userInfo.profile.avatar)
+                        self.setupDynamicBannerBackground(avatarUrl: userInfo.profile.avatar)
                     }
+                case .failure(_):
+                    // 加载失败，使用头像作为背景
+                    self.setupDynamicBannerBackground(avatarUrl: userInfo.profile.avatar)
                 }
-            }.resume()
+            }
         } else {
             // 如果没有banner，使用头像作为背景
             setupDynamicBannerBackground(avatarUrl: userInfo.profile.avatar)
@@ -766,11 +825,14 @@ class ProfileNewHeaderView: UIView {
         
         // 设置描述文本
         if let description = userInfo.profile.description_?.markdown, !description.isEmpty {
-            descriptionLabel.text = description
-            let descriptionWidth = frame.width - 32
-            let descriptionSize = descriptionLabel.sizeThatFits(CGSize(width: descriptionWidth, height: .greatestFiniteMagnitude))
-            descriptionLabel.frame = CGRect(x: 16, y: currentY, width: descriptionWidth, height: descriptionSize.height)
-            currentY = descriptionLabel.frame.maxY + 16
+            let descriptionView = UIHostingController(
+                rootView: Markdown(description)
+                    .markdownInlineImageProvider(.emoji)
+            )
+            addSubview(descriptionView.view)
+            descriptionView.view.frame = CGRect(x: 16, y: currentY, width: frame.width - 32, height: 0)
+            descriptionView.view.sizeToFit()
+            currentY = descriptionView.view.frame.maxY + 16
         }
         
         // 设置用户位置和URL
@@ -853,15 +915,17 @@ class ProfileNewHeaderView: UIView {
     private func setupDynamicBannerBackground(avatarUrl: String?) {
         guard let avatarUrl = avatarUrl, let url = URL(string: avatarUrl) else { return }
         
-        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            if let data = data, let image = UIImage(data: data) {
-                DispatchQueue.main.async {
-                    self?.bannerImageView.image = image
-                    self?.bannerImageView.contentMode = .scaleAspectFill
-                    self?.blurEffectView.alpha = 0.7 // 增加模糊效果
-                }
-            }
-        }.resume()
+        bannerImageView.kf.setImage(
+            with: url,
+            options: [
+                .transition(.fade(0.25)),
+                .processor(DownsamplingImageProcessor(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 300))),
+                .scaleFactor(UIScreen.main.scale),
+                .cacheOriginalImage
+            ]
+        ) { [weak self] _ in
+            self?.blurEffectView.alpha = 0.7 // 增加模糊效果
+        }
     }
     
     private func updateFollowButton(with userInfo: ProfileUserInfo) {

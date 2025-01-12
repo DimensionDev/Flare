@@ -25,20 +25,6 @@
 		641817752D12E7350046CEB0 /* OriginalImageMarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 641817732D12E7350046CEB0 /* OriginalImageMarkView.swift */; };
 		641817762D12E7350046CEB0 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 641817742D12E7350046CEB0 /* ToastView.swift */; };
 		642AA5402D1021500088B7E3 /* TimelineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642AA53F2D1021500088B7E3 /* TimelineStore.swift */; };
-		645B24552D2FAFB1007D9AD9 /* CommonProfileHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B24422D2FAFB1007D9AD9 /* CommonProfileHeader.swift */; };
-		645B24562D2FAFB1007D9AD9 /* ProfileListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B24402D2FAFB1007D9AD9 /* ProfileListViewController.swift */; };
-		645B24572D2FAFB1007D9AD9 /* ProfileContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B24442D2FAFB1007D9AD9 /* ProfileContentView.swift */; };
-		645B24582D2FAFB1007D9AD9 /* ProfileWithUserNameScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B24522D2FAFB1007D9AD9 /* ProfileWithUserNameScreen.swift */; };
-		645B24592D2FAFB1007D9AD9 /* ProfileTabSettingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B244A2D2FAFB1007D9AD9 /* ProfileTabSettingStore.swift */; };
-		645B245A2D2FAFB1007D9AD9 /* ProfileNewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B244F2D2FAFB1007D9AD9 /* ProfileNewScreen.swift */; };
-		645B245B2D2FAFB1007D9AD9 /* UserAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B24472D2FAFB1007D9AD9 /* UserAvatar.swift */; };
-		645B245C2D2FAFB1007D9AD9 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B24452D2FAFB1007D9AD9 /* ProfileHeaderView.swift */; };
-		645B245D2D2FAFB1007D9AD9 /* ProfileTabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B24462D2FAFB1007D9AD9 /* ProfileTabBarView.swift */; };
-		645B245E2D2FAFB1007D9AD9 /* ProfileRefreshViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B24502D2FAFB1007D9AD9 /* ProfileRefreshViewController.swift */; };
-		645B245F2D2FAFB1007D9AD9 /* ProfilePresenterWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B24492D2FAFB1007D9AD9 /* ProfilePresenterWrapper.swift */; };
-		645B24602D2FAFB1007D9AD9 /* ProfileUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B244C2D2FAFB1007D9AD9 /* ProfileUserInfo.swift */; };
-		645B24612D2FAFB1007D9AD9 /* ProfileMediaListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B244E2D2FAFB1007D9AD9 /* ProfileMediaListScreen.swift */; };
-		645B24622D2FAFB1007D9AD9 /* ProfileStretchRefreshControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645B24512D2FAFB1007D9AD9 /* ProfileStretchRefreshControl.swift */; };
 		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
 		64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64782BD02CFD65F4008DE526 /* View+Injection.swift */; };
 		6488800B2D1AD43E00EFE72C /* JXSegmentedView in Frameworks */ = {isa = PBXBuildFile; productRef = 6488800A2D1AD43E00EFE72C /* JXSegmentedView */; };
@@ -49,6 +35,24 @@
 		6498BDEB2D15F1F500C52324 /* TranslationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6498BDE52D15F1F500C52324 /* TranslationViewModel.swift */; };
 		6498BDEC2D15F1F500C52324 /* GoogleTranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6498BDE02D15F1F500C52324 /* GoogleTranslationService.swift */; };
 		6498BDED2D15F1F500C52324 /* AppleTranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6498BDDF2D15F1F500C52324 /* AppleTranslationService.swift */; };
+		649E7A222D318F5100AC2F62 /* ProfileMediaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A0E2D318F5100AC2F62 /* ProfileMediaViewController.swift */; };
+		649E7A232D318F5100AC2F62 /* ProfileNewTimelineViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A1C2D318F5100AC2F62 /* ProfileNewTimelineViewController.swift */; };
+		649E7A242D318F5100AC2F62 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A0D2D318F5100AC2F62 /* ProfileHeaderView.swift */; };
+		649E7A252D318F5100AC2F62 /* ProfileNewTimelineCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A1B2D318F5100AC2F62 /* ProfileNewTimelineCell.swift */; };
+		649E7A262D318F5100AC2F62 /* ProfileRefreshViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A1D2D318F5100AC2F62 /* ProfileRefreshViewController.swift */; };
+		649E7A272D318F5100AC2F62 /* ProfileNewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A1A2D318F5100AC2F62 /* ProfileNewScreen.swift */; };
+		649E7A282D318F5100AC2F62 /* UserAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A122D318F5100AC2F62 /* UserAvatar.swift */; };
+		649E7A292D318F5100AC2F62 /* ProfileMediaListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A192D318F5100AC2F62 /* ProfileMediaListScreen.swift */; };
+		649E7A2A2D318F5100AC2F62 /* ProfileUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A172D318F5100AC2F62 /* ProfileUserInfo.swift */; };
+		649E7A2B2D318F5100AC2F62 /* ProfileContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A0C2D318F5100AC2F62 /* ProfileContentView.swift */; };
+		649E7A2C2D318F5100AC2F62 /* CommonProfileHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A092D318F5100AC2F62 /* CommonProfileHeader.swift */; };
+		649E7A2D2D318F5100AC2F62 /* ProfileListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A072D318F5100AC2F62 /* ProfileListViewController.swift */; };
+		649E7A2E2D318F5100AC2F62 /* ProfilePresenterWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A142D318F5100AC2F62 /* ProfilePresenterWrapper.swift */; };
+		649E7A2F2D318F5100AC2F62 /* ProfileWithUserNameScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A1F2D318F5100AC2F62 /* ProfileWithUserNameScreen.swift */; };
+		649E7A312D318F5100AC2F62 /* ProfileStretchRefreshControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A1E2D318F5100AC2F62 /* ProfileStretchRefreshControl.swift */; };
+		649E7A332D318F5100AC2F62 /* MediaCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A0B2D318F5100AC2F62 /* MediaCollectionViewCell.swift */; };
+		649E7A342D318F5100AC2F62 /* ProfileTabBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A112D318F5100AC2F62 /* ProfileTabBarView.swift */; };
+		649E7A352D318F5100AC2F62 /* ProfileTabSettingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A152D318F5100AC2F62 /* ProfileTabSettingStore.swift */; };
 		64BA00252D1AD84D0053F205 /* JXPhotoBrowser in Frameworks */ = {isa = PBXBuildFile; productRef = 64BA00242D1AD84D0053F205 /* JXPhotoBrowser */; };
 		64BA002F2D1AE1020053F205 /* JXPagingListContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA00282D1AE1020053F205 /* JXPagingListContainerView.swift */; };
 		64BA00302D1AE1020053F205 /* JXPagingListRefreshView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA00292D1AE1020053F205 /* JXPagingListRefreshView.swift */; };
@@ -167,20 +171,6 @@
 		641817732D12E7350046CEB0 /* OriginalImageMarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OriginalImageMarkView.swift; sourceTree = "<group>"; };
 		641817742D12E7350046CEB0 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		642AA53F2D1021500088B7E3 /* TimelineStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineStore.swift; sourceTree = "<group>"; };
-		645B24402D2FAFB1007D9AD9 /* ProfileListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileListViewController.swift; sourceTree = "<group>"; };
-		645B24422D2FAFB1007D9AD9 /* CommonProfileHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonProfileHeader.swift; sourceTree = "<group>"; };
-		645B24442D2FAFB1007D9AD9 /* ProfileContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileContentView.swift; sourceTree = "<group>"; };
-		645B24452D2FAFB1007D9AD9 /* ProfileHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileHeaderView.swift; sourceTree = "<group>"; };
-		645B24462D2FAFB1007D9AD9 /* ProfileTabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabBarView.swift; sourceTree = "<group>"; };
-		645B24472D2FAFB1007D9AD9 /* UserAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAvatar.swift; sourceTree = "<group>"; };
-		645B24492D2FAFB1007D9AD9 /* ProfilePresenterWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePresenterWrapper.swift; sourceTree = "<group>"; };
-		645B244A2D2FAFB1007D9AD9 /* ProfileTabSettingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabSettingStore.swift; sourceTree = "<group>"; };
-		645B244C2D2FAFB1007D9AD9 /* ProfileUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUserInfo.swift; sourceTree = "<group>"; };
-		645B244E2D2FAFB1007D9AD9 /* ProfileMediaListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMediaListScreen.swift; sourceTree = "<group>"; };
-		645B244F2D2FAFB1007D9AD9 /* ProfileNewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileNewScreen.swift; sourceTree = "<group>"; };
-		645B24502D2FAFB1007D9AD9 /* ProfileRefreshViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRefreshViewController.swift; sourceTree = "<group>"; };
-		645B24512D2FAFB1007D9AD9 /* ProfileStretchRefreshControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileStretchRefreshControl.swift; sourceTree = "<group>"; };
-		645B24522D2FAFB1007D9AD9 /* ProfileWithUserNameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileWithUserNameScreen.swift; sourceTree = "<group>"; };
 		64655C2C2CFD6CA000255488 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		64782BD02CFD65F4008DE526 /* View+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Injection.swift"; sourceTree = "<group>"; };
 		6498BDDF2D15F1F500C52324 /* AppleTranslationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleTranslationService.swift; sourceTree = "<group>"; };
@@ -190,6 +180,24 @@
 		6498BDE32D15F1F500C52324 /* TranslateButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslateButton.swift; sourceTree = "<group>"; };
 		6498BDE42D15F1F500C52324 /* TranslationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationService.swift; sourceTree = "<group>"; };
 		6498BDE52D15F1F500C52324 /* TranslationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TranslationViewModel.swift; sourceTree = "<group>"; };
+		649E7A072D318F5100AC2F62 /* ProfileListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileListViewController.swift; sourceTree = "<group>"; };
+		649E7A092D318F5100AC2F62 /* CommonProfileHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonProfileHeader.swift; sourceTree = "<group>"; };
+		649E7A0B2D318F5100AC2F62 /* MediaCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaCollectionViewCell.swift; sourceTree = "<group>"; };
+		649E7A0C2D318F5100AC2F62 /* ProfileContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileContentView.swift; sourceTree = "<group>"; };
+		649E7A0D2D318F5100AC2F62 /* ProfileHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileHeaderView.swift; sourceTree = "<group>"; };
+		649E7A0E2D318F5100AC2F62 /* ProfileMediaViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMediaViewController.swift; sourceTree = "<group>"; };
+		649E7A112D318F5100AC2F62 /* ProfileTabBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabBarView.swift; sourceTree = "<group>"; };
+		649E7A122D318F5100AC2F62 /* UserAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAvatar.swift; sourceTree = "<group>"; };
+		649E7A142D318F5100AC2F62 /* ProfilePresenterWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePresenterWrapper.swift; sourceTree = "<group>"; };
+		649E7A152D318F5100AC2F62 /* ProfileTabSettingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabSettingStore.swift; sourceTree = "<group>"; };
+		649E7A172D318F5100AC2F62 /* ProfileUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUserInfo.swift; sourceTree = "<group>"; };
+		649E7A192D318F5100AC2F62 /* ProfileMediaListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMediaListScreen.swift; sourceTree = "<group>"; };
+		649E7A1A2D318F5100AC2F62 /* ProfileNewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileNewScreen.swift; sourceTree = "<group>"; };
+		649E7A1B2D318F5100AC2F62 /* ProfileNewTimelineCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileNewTimelineCell.swift; sourceTree = "<group>"; };
+		649E7A1C2D318F5100AC2F62 /* ProfileNewTimelineViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileNewTimelineViewController.swift; sourceTree = "<group>"; };
+		649E7A1D2D318F5100AC2F62 /* ProfileRefreshViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRefreshViewController.swift; sourceTree = "<group>"; };
+		649E7A1E2D318F5100AC2F62 /* ProfileStretchRefreshControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileStretchRefreshControl.swift; sourceTree = "<group>"; };
+		649E7A1F2D318F5100AC2F62 /* ProfileWithUserNameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileWithUserNameScreen.swift; sourceTree = "<group>"; };
 		64BA00282D1AE1020053F205 /* JXPagingListContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingListContainerView.swift; sourceTree = "<group>"; };
 		64BA00292D1AE1020053F205 /* JXPagingListRefreshView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingListRefreshView.swift; sourceTree = "<group>"; };
 		64BA002A2D1AE1020053F205 /* JXPagingMainTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JXPagingMainTableView.swift; sourceTree = "<group>"; };
@@ -342,75 +350,6 @@
 			path = Theme;
 			sourceTree = "<group>";
 		};
-		645B24412D2FAFB1007D9AD9 /* Common */ = {
-			isa = PBXGroup;
-			children = (
-				645B24402D2FAFB1007D9AD9 /* ProfileListViewController.swift */,
-			);
-			path = Common;
-			sourceTree = "<group>";
-		};
-		645B24432D2FAFB1007D9AD9 /* User */ = {
-			isa = PBXGroup;
-			children = (
-				645B24422D2FAFB1007D9AD9 /* CommonProfileHeader.swift */,
-			);
-			path = User;
-			sourceTree = "<group>";
-		};
-		645B24482D2FAFB1007D9AD9 /* Components */ = {
-			isa = PBXGroup;
-			children = (
-				645B24432D2FAFB1007D9AD9 /* User */,
-				645B24442D2FAFB1007D9AD9 /* ProfileContentView.swift */,
-				645B24452D2FAFB1007D9AD9 /* ProfileHeaderView.swift */,
-				645B24462D2FAFB1007D9AD9 /* ProfileTabBarView.swift */,
-				645B24472D2FAFB1007D9AD9 /* UserAvatar.swift */,
-			);
-			path = Components;
-			sourceTree = "<group>";
-		};
-		645B244B2D2FAFB1007D9AD9 /* Data */ = {
-			isa = PBXGroup;
-			children = (
-				645B24492D2FAFB1007D9AD9 /* ProfilePresenterWrapper.swift */,
-				645B244A2D2FAFB1007D9AD9 /* ProfileTabSettingStore.swift */,
-			);
-			path = Data;
-			sourceTree = "<group>";
-		};
-		645B244D2D2FAFB1007D9AD9 /* Model */ = {
-			isa = PBXGroup;
-			children = (
-				645B244C2D2FAFB1007D9AD9 /* ProfileUserInfo.swift */,
-			);
-			path = Model;
-			sourceTree = "<group>";
-		};
-		645B24532D2FAFB1007D9AD9 /* View */ = {
-			isa = PBXGroup;
-			children = (
-				645B244E2D2FAFB1007D9AD9 /* ProfileMediaListScreen.swift */,
-				645B244F2D2FAFB1007D9AD9 /* ProfileNewScreen.swift */,
-				645B24502D2FAFB1007D9AD9 /* ProfileRefreshViewController.swift */,
-				645B24512D2FAFB1007D9AD9 /* ProfileStretchRefreshControl.swift */,
-				645B24522D2FAFB1007D9AD9 /* ProfileWithUserNameScreen.swift */,
-			);
-			path = View;
-			sourceTree = "<group>";
-		};
-		645B24542D2FAFB1007D9AD9 /* ProfileNew */ = {
-			isa = PBXGroup;
-			children = (
-				645B24412D2FAFB1007D9AD9 /* Common */,
-				645B24482D2FAFB1007D9AD9 /* Components */,
-				645B244B2D2FAFB1007D9AD9 /* Data */,
-				645B244D2D2FAFB1007D9AD9 /* Model */,
-				645B24532D2FAFB1007D9AD9 /* View */,
-			);
-			path = ProfileNew;
-			sourceTree = "<group>";
-		};
 		64782BD12CFD65F4008DE526 /* Extension */ = {
 			isa = PBXGroup;
 			children = (
@@ -431,6 +370,79 @@
 				6498BDE52D15F1F500C52324 /* TranslationViewModel.swift */,
 			);
 			path = translate;
+			sourceTree = "<group>";
+		};
+		649E7A082D318F5100AC2F62 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				649E7A072D318F5100AC2F62 /* ProfileListViewController.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		649E7A0A2D318F5100AC2F62 /* User */ = {
+			isa = PBXGroup;
+			children = (
+				649E7A092D318F5100AC2F62 /* CommonProfileHeader.swift */,
+			);
+			path = User;
+			sourceTree = "<group>";
+		};
+		649E7A132D318F5100AC2F62 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				649E7A0A2D318F5100AC2F62 /* User */,
+				649E7A0C2D318F5100AC2F62 /* ProfileContentView.swift */,
+				649E7A0D2D318F5100AC2F62 /* ProfileHeaderView.swift */,
+				649E7A112D318F5100AC2F62 /* ProfileTabBarView.swift */,
+				649E7A122D318F5100AC2F62 /* UserAvatar.swift */,
+				649E7A1B2D318F5100AC2F62 /* ProfileNewTimelineCell.swift */,
+				649E7A0B2D318F5100AC2F62 /* MediaCollectionViewCell.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		649E7A162D318F5100AC2F62 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				649E7A142D318F5100AC2F62 /* ProfilePresenterWrapper.swift */,
+				649E7A152D318F5100AC2F62 /* ProfileTabSettingStore.swift */,
+			);
+			path = Data;
+			sourceTree = "<group>";
+		};
+		649E7A182D318F5100AC2F62 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				649E7A172D318F5100AC2F62 /* ProfileUserInfo.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		649E7A202D318F5100AC2F62 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				649E7A1A2D318F5100AC2F62 /* ProfileNewScreen.swift */,
+				649E7A1D2D318F5100AC2F62 /* ProfileRefreshViewController.swift */,
+				649E7A1C2D318F5100AC2F62 /* ProfileNewTimelineViewController.swift */,
+				649E7A0E2D318F5100AC2F62 /* ProfileMediaViewController.swift */,
+				649E7A1E2D318F5100AC2F62 /* ProfileStretchRefreshControl.swift */,
+				649E7A1F2D318F5100AC2F62 /* ProfileWithUserNameScreen.swift */,
+				649E7A192D318F5100AC2F62 /* ProfileMediaListScreen.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		649E7A212D318F5100AC2F62 /* ProfileNew */ = {
+			isa = PBXGroup;
+			children = (
+				649E7A082D318F5100AC2F62 /* Common */,
+				649E7A132D318F5100AC2F62 /* Components */,
+				649E7A162D318F5100AC2F62 /* Data */,
+				649E7A182D318F5100AC2F62 /* Model */,
+				649E7A202D318F5100AC2F62 /* View */,
+			);
+			path = ProfileNew;
 			sourceTree = "<group>";
 		};
 		64AD20542D1D5074008C1070 /* Common */ = {
@@ -796,7 +808,7 @@
 		64E877202D0430C7003559B9 /* Page */ = {
 			isa = PBXGroup;
 			children = (
-				645B24542D2FAFB1007D9AD9 /* ProfileNew */,
+				649E7A212D318F5100AC2F62 /* ProfileNew */,
 				64E876BD2D0430C7003559B9 /* Compose */,
 				64E876F92D0430C7003559B9 /* Home */,
 				64E877012D0430C7003559B9 /* OAuth */,
@@ -1204,22 +1216,26 @@
 				64E8776F2D0430C7003559B9 /* HomeAppBarSettingsView.swift in Sources */,
 				64E877702D0430C7003559B9 /* WebView.swift in Sources */,
 				64E877712D0430C7003559B9 /* VVOStatusDetailScreen.swift in Sources */,
+				649E7A222D318F5100AC2F62 /* ProfileMediaViewController.swift in Sources */,
+				649E7A232D318F5100AC2F62 /* ProfileNewTimelineViewController.swift in Sources */,
+				649E7A242D318F5100AC2F62 /* ProfileHeaderView.swift in Sources */,
+				649E7A252D318F5100AC2F62 /* ProfileNewTimelineCell.swift in Sources */,
+				649E7A262D318F5100AC2F62 /* ProfileRefreshViewController.swift in Sources */,
+				649E7A272D318F5100AC2F62 /* ProfileNewScreen.swift in Sources */,
+				649E7A282D318F5100AC2F62 /* UserAvatar.swift in Sources */,
+				649E7A292D318F5100AC2F62 /* ProfileMediaListScreen.swift in Sources */,
+				649E7A2A2D318F5100AC2F62 /* ProfileUserInfo.swift in Sources */,
+				649E7A2B2D318F5100AC2F62 /* ProfileContentView.swift in Sources */,
+				649E7A2C2D318F5100AC2F62 /* CommonProfileHeader.swift in Sources */,
+				649E7A2D2D318F5100AC2F62 /* ProfileListViewController.swift in Sources */,
+				649E7A2E2D318F5100AC2F62 /* ProfilePresenterWrapper.swift in Sources */,
+				649E7A2F2D318F5100AC2F62 /* ProfileWithUserNameScreen.swift in Sources */,
+				649E7A312D318F5100AC2F62 /* ProfileStretchRefreshControl.swift in Sources */,
+				649E7A332D318F5100AC2F62 /* MediaCollectionViewCell.swift in Sources */,
+				649E7A342D318F5100AC2F62 /* ProfileTabBarView.swift in Sources */,
+				649E7A352D318F5100AC2F62 /* ProfileTabSettingStore.swift in Sources */,
 				64E877722D0430C7003559B9 /* MediaPreviewImageView.swift in Sources */,
 				64E877732D0430C7003559B9 /* StorageScreen.swift in Sources */,
-				645B24552D2FAFB1007D9AD9 /* CommonProfileHeader.swift in Sources */,
-				645B24562D2FAFB1007D9AD9 /* ProfileListViewController.swift in Sources */,
-				645B24572D2FAFB1007D9AD9 /* ProfileContentView.swift in Sources */,
-				645B24582D2FAFB1007D9AD9 /* ProfileWithUserNameScreen.swift in Sources */,
-				645B24592D2FAFB1007D9AD9 /* ProfileTabSettingStore.swift in Sources */,
-				645B245A2D2FAFB1007D9AD9 /* ProfileNewScreen.swift in Sources */,
-				645B245B2D2FAFB1007D9AD9 /* UserAvatar.swift in Sources */,
-				645B245C2D2FAFB1007D9AD9 /* ProfileHeaderView.swift in Sources */,
-				645B245D2D2FAFB1007D9AD9 /* ProfileTabBarView.swift in Sources */,
-				645B245E2D2FAFB1007D9AD9 /* ProfileRefreshViewController.swift in Sources */,
-				645B245F2D2FAFB1007D9AD9 /* ProfilePresenterWrapper.swift in Sources */,
-				645B24602D2FAFB1007D9AD9 /* ProfileUserInfo.swift in Sources */,
-				645B24612D2FAFB1007D9AD9 /* ProfileMediaListScreen.swift in Sources */,
-				645B24622D2FAFB1007D9AD9 /* ProfileStretchRefreshControl.swift in Sources */,
 				64E877742D0430C7003559B9 /* VGrid.swift in Sources */,
 				64E877752D0430C7003559B9 /* AppBarTabItem.swift in Sources */,
 				64E877762D0430C7003559B9 /* PublicScreen.swift in Sources */,

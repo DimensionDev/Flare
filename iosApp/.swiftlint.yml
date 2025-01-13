@@ -7,6 +7,7 @@ disabled_rules:
   - line_length
   - file_length
   - function_body_length
+  - function_parameter_count
 
 # 排除第三方库的检查
 excluded:

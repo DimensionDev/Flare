@@ -67,7 +67,7 @@ public class MisskeyReactionPresenter(
                                     dataSource.react(
                                         statusKey = statusKey,
                                         hasReacted = bottomContent.myReaction != null,
-                                        reaction = emoji.shortcode,
+                                        reaction = ":${emoji.shortcode}:",
                                     )
                                 }
                             }

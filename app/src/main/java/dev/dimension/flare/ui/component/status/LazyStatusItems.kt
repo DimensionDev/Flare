@@ -189,7 +189,7 @@ internal fun LazyStaggeredGridScope.status(
 }
 
 @Composable
-private fun AdaptiveCard(
+internal fun AdaptiveCard(
     content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {

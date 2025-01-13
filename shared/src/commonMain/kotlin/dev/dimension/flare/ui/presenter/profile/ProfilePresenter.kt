@@ -35,6 +35,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
+import dev.dimension.flare.ui.presenter.status.LogUserHistoryPresenter
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -69,6 +70,12 @@ public class ProfilePresenter(
                     }.collectAsState()
                 }
             }
+        accountServiceState.onSuccess {
+            val userKey = userKey ?: if (it is AuthenticatedMicroblogDataSource) it.accountKey else null
+            if (userKey != null) {
+                remember { LogUserHistoryPresenter(accountType, userKey) }.body()
+            }
+        }
 
         val mediaState =
             remember {

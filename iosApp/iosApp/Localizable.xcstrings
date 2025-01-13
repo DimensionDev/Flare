@@ -4,17 +4,7 @@
     "" : {
 
     },
-    "%lld users, %lld statuses" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld users, %2$lld statuses"
-          }
-        }
-      }
-    },
-    "about_title" : {
+    " " : {
 
     },
     "account_item_error_message" : {
@@ -281,9 +271,6 @@
         }
       }
     },
-    "accounts_management_title" : {
-
-    },
     "app_name" : {
       "comment" : "",
       "extractionState" : "stale",
@@ -295,72 +282,6 @@
           }
         }
       }
-    },
-    "app_theme_auto" : {
-
-    },
-    "app_theme_dark" : {
-
-    },
-    "app_theme_light" : {
-
-    },
-    "AppBar 标签" : {
-
-    },
-    "appearance_avatar_shape_description" : {
-
-    },
-    "appearance_avatar_shape_title" : {
-
-    },
-    "appearance_settings_generic" : {
-
-    },
-    "appearance_show_actions_description" : {
-
-    },
-    "appearance_show_actions_title" : {
-
-    },
-    "appearance_show_link_preview_description" : {
-
-    },
-    "appearance_show_link_preview_title" : {
-
-    },
-    "appearance_show_media_description" : {
-
-    },
-    "appearance_show_media_title" : {
-
-    },
-    "appearance_show_numbers_description" : {
-
-    },
-    "appearance_show_numbers_title" : {
-
-    },
-    "appearance_show_sensitive_content_description" : {
-
-    },
-    "appearance_show_sensitive_content_title" : {
-
-    },
-    "appearance_theme_description" : {
-
-    },
-    "appearance_theme_title" : {
-
-    },
-    "appearance_title" : {
-
-    },
-    "avatar_shape_circle" : {
-
-    },
-    "avatar_shape_square" : {
-
     },
     "block" : {
 
@@ -1157,12 +1078,8 @@
         }
       }
     },
-    "bluesky_notification_follow" : {
-
-    },
     "bluesky_notification_item_favourited_your_status" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1294,7 +1211,6 @@
     },
     "bluesky_notification_item_followed_you" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1426,7 +1342,6 @@
     },
     "bluesky_notification_item_mentioned_you" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1690,7 +1605,6 @@
     },
     "bluesky_notification_item_quoted_your_status" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1822,7 +1736,6 @@
     },
     "bluesky_notification_item_reblogged_your_status" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -1954,7 +1867,6 @@
     },
     "bluesky_notification_item_replied_to_you" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2086,7 +1998,6 @@
     },
     "bluesky_notification_item_starterpack_joined" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2218,7 +2129,6 @@
     },
     "bluesky_notification_item_unKnown" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2347,27 +2257,6 @@
           }
         }
       }
-    },
-    "bluesky_notification_like" : {
-
-    },
-    "bluesky_notification_mention" : {
-
-    },
-    "bluesky_notification_quote" : {
-
-    },
-    "bluesky_notification_reply" : {
-
-    },
-    "bluesky_notification_repost" : {
-
-    },
-    "bluesky_notification_starterpackJoined" : {
-
-    },
-    "bluesky_notification_unKnown" : {
-
     },
     "bluesky_notification_unknown_message" : {
       "comment" : "",
@@ -3425,13 +3314,7 @@
         }
       }
     },
-    "Button" : {
-
-    },
-    "Clear Database Cache" : {
-
-    },
-    "Clear Image Cache" : {
+    "cancel" : {
 
     },
     "compose_add_option" : {
@@ -3568,7 +3451,6 @@
     },
     "compose_content_warning_hint" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3698,12 +3580,8 @@
         }
       }
     },
-    "compose_cw_placeholder" : {
-
-    },
     "compose_hint" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -3833,12 +3711,8 @@
         }
       }
     },
-    "compose_media_mark_sensitive" : {
-
-    },
     "compose_media_sensitive" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -4759,15 +4633,6 @@
           }
         }
       }
-    },
-    "compose_placeholder" : {
-
-    },
-    "compose_poll_choice_placeholder" : {
-
-    },
-    "compose_poll_expiration" : {
-
     },
     "compose_poll_expiration_1_day" : {
       "comment" : "",
@@ -5827,7 +5692,6 @@
     },
     "compose_poll_expiration_at" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -5959,7 +5823,6 @@
     },
     "compose_poll_multiple_choice" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -6091,7 +5954,6 @@
     },
     "compose_poll_option_hint" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -6355,7 +6217,6 @@
     },
     "compose_poll_single_choice" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -6486,12 +6347,6 @@
       }
     },
     "compose_poll_type" : {
-
-    },
-    "compose_poll_type_multiple" : {
-
-    },
-    "compose_poll_type_single" : {
 
     },
     "compose_title" : {
@@ -6626,12 +6481,6 @@
       }
     },
     "confirm" : {
-
-    },
-    "Current size: %@" : {
-
-    },
-    "Database Cache" : {
 
     },
     "date_format_full" : {
@@ -7445,7 +7294,6 @@
     },
     "discover_hashtags" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -7574,9 +7422,6 @@
           }
         }
       }
-    },
-    "discover_hashtags_title" : {
-
     },
     "discover_search_placeholder" : {
       "comment" : "",
@@ -7712,7 +7557,6 @@
     },
     "discover_status" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -7842,15 +7686,8 @@
         }
       }
     },
-    "discover_status_title" : {
-
-    },
-    "discover_title" : {
-
-    },
     "discover_users" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -7979,9 +7816,6 @@
           }
         }
       }
-    },
-    "discover_users_title" : {
-
     },
     "dm_conversation" : {
       "comment" : "",
@@ -12347,7 +12181,6 @@
     },
     "home_tab_discover_title" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -13271,7 +13104,6 @@
     },
     "home_tab_notifications_title" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -13534,9 +13366,6 @@
       }
     },
     "home_timeline_title" : {
-
-    },
-    "Image Cache" : {
 
     },
     "like" : {
@@ -17529,6 +17358,9 @@
     "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl quis aliqua" : {
 
     },
+    "main tab" : {
+
+    },
     "mastodon_item_bookmark" : {
       "comment" : "",
       "extractionState" : "stale",
@@ -19113,18 +18945,8 @@
         }
       }
     },
-    "mastodon_notification_favourite" : {
-
-    },
-    "mastodon_notification_follow" : {
-
-    },
-    "mastodon_notification_follow_request" : {
-
-    },
     "mastodon_notification_item_favourited_your_status" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19256,7 +19078,6 @@
     },
     "mastodon_notification_item_followed_you" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19388,7 +19209,6 @@
     },
     "mastodon_notification_item_mentioned_you" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19520,7 +19340,6 @@
     },
     "mastodon_notification_item_poll_ended" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19652,7 +19471,6 @@
     },
     "mastodon_notification_item_posted_status" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19784,7 +19602,6 @@
     },
     "mastodon_notification_item_reblogged_your_status" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -19916,7 +19733,6 @@
     },
     "mastodon_notification_item_requested_follow" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -20048,7 +19864,6 @@
     },
     "mastodon_notification_item_updated_status" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -20177,21 +19992,6 @@
           }
         }
       }
-    },
-    "mastodon_notification_mention" : {
-
-    },
-    "mastodon_notification_poll" : {
-
-    },
-    "mastodon_notification_reblog" : {
-
-    },
-    "mastodon_notification_status" : {
-
-    },
-    "mastodon_notification_update" : {
-
     },
     "mastodon_report_description" : {
       "comment" : "",
@@ -21776,9 +21576,6 @@
           }
         }
       }
-    },
-    "Media" : {
-
     },
     "media_menu_save" : {
       "comment" : "",
@@ -47553,6 +47350,9 @@
     "misskey_notification_reply" : {
 
     },
+    "misskey_notification_unknown" : {
+
+    },
     "misskey_visibility_followers" : {
       "comment" : "",
       "extractionState" : "stale",
@@ -49806,9 +49606,6 @@
         }
       }
     },
-    "notification_title" : {
-
-    },
     "notification_type" : {
 
     },
@@ -50343,9 +50140,11 @@
         }
       }
     },
+    "profile_header_button_blockedblocked" : {
+
+    },
     "profile_header_button_follow" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -50477,7 +50276,6 @@
     },
     "profile_header_button_following" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -50633,7 +50431,6 @@
     },
     "profile_header_button_requested" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -52289,7 +52086,6 @@
     },
     "quote" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -52682,18 +52478,6 @@
           }
         }
       }
-    },
-    "relation_blocked" : {
-
-    },
-    "relation_follow" : {
-
-    },
-    "relation_following" : {
-
-    },
-    "relation_requested" : {
-
     },
     "reply" : {
       "comment" : "",
@@ -54943,7 +54727,6 @@
     },
     "retweet" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -55075,7 +54858,6 @@
     },
     "retweet_remove" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -55622,9 +55404,6 @@
     "service_select_bluesky_base_url_placeholder" : {
 
     },
-    "service_select_description" : {
-
-    },
     "service_select_empty_message" : {
       "comment" : "",
       "extractionState" : "stale",
@@ -55759,7 +55538,6 @@
     },
     "service_select_instance_input_placeholder" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -55888,9 +55666,6 @@
           }
         }
       }
-    },
-    "service_select_instance_url_placeholder" : {
-
     },
     "service_select_mastodon" : {
       "comment" : "",
@@ -56063,12 +55838,8 @@
         }
       }
     },
-    "service_select_title" : {
-
-    },
     "service_select_welcome_message" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "cs" : {
           "stringUnit" : {
@@ -56188,7 +55959,6 @@
     },
     "service_select_welcome_title" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -56451,7 +56221,6 @@
     },
     "settings_about_title" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -56580,9 +56349,6 @@
           }
         }
       }
-    },
-    "settings_account_manage" : {
-
     },
     "settings_accounts_remove" : {
       "comment" : "",
@@ -56718,7 +56484,6 @@
     },
     "settings_accounts_title" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -56850,7 +56615,6 @@
     },
     "settings_appearance_avatar_shape" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -56982,7 +56746,6 @@
     },
     "settings_appearance_avatar_shape_description" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -57114,7 +56877,6 @@
     },
     "settings_appearance_avatar_shape_round" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -57246,7 +57008,6 @@
     },
     "settings_appearance_avatar_shape_square" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -59357,7 +59118,6 @@
     },
     "settings_appearance_show_actions" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -59489,7 +59249,6 @@
     },
     "settings_appearance_show_actions_description" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -59621,7 +59380,6 @@
     },
     "settings_appearance_show_cw_img" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -59753,7 +59511,6 @@
     },
     "settings_appearance_show_cw_img_description" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -59885,7 +59642,6 @@
     },
     "settings_appearance_show_link_previews" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -60017,7 +59773,6 @@
     },
     "settings_appearance_show_link_previews_description" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -60149,7 +59904,6 @@
     },
     "settings_appearance_show_media" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -60281,7 +60035,6 @@
     },
     "settings_appearance_show_media_description" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -60413,7 +60166,6 @@
     },
     "settings_appearance_show_numbers" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -60545,7 +60297,6 @@
     },
     "settings_appearance_show_numbers_description" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -61469,7 +61220,6 @@
     },
     "settings_appearance_theme_auto" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -61601,7 +61351,6 @@
     },
     "settings_appearance_theme_color" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -61733,7 +61482,6 @@
     },
     "settings_appearance_theme_color_description" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -61865,7 +61613,6 @@
     },
     "settings_appearance_theme_dark" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -62129,7 +61876,6 @@
     },
     "settings_appearance_theme_light" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -62525,7 +62271,6 @@
     },
     "settings_appearance_title" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -64361,7 +64106,6 @@
     },
     "settings_storage_clear_database" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -64493,7 +64237,6 @@
     },
     "settings_storage_clear_database_description" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -64619,7 +64362,6 @@
     },
     "settings_storage_clear_image_cache" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -64751,7 +64493,6 @@
     },
     "settings_storage_clear_image_cache_description" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -65689,25 +65430,13 @@
     "status_action_more" : {
 
     },
-    "status_action_quote" : {
-
-    },
     "status_action_reply" : {
-
-    },
-    "status_action_report" : {
-
-    },
-    "status_action_retweet" : {
 
     },
     "status_action_unbookmark" : {
 
     },
     "status_action_unlike" : {
-
-    },
-    "status_action_unretweet" : {
 
     },
     "status_detail" : {
@@ -66639,8 +66368,7 @@
       }
     },
     "status_sensitive_media" : {
-      "comment" : "",
-      "extractionState" : "stale",
+      "comment" : "Status media sensitive button",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -66769,9 +66497,6 @@
           }
         }
       }
-    },
-    "status_sensitive_media_show" : {
-      "comment" : "Status media sensitive button"
     },
     "status_title" : {
       "comment" : "",
@@ -66904,9 +66629,6 @@
           }
         }
       }
-    },
-    "Storage" : {
-
     },
     "swipe_action_add_reaction" : {
       "comment" : "",
@@ -68758,7 +68480,6 @@
     },
     "tab_settings_title" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -68922,6 +68643,12 @@
       }
     },
     "unmute" : {
+
+    },
+    "unused tabs" : {
+
+    },
+    "used tabs" : {
 
     },
     "user_block" : {
@@ -70092,7 +69819,6 @@
     },
     "xqt_item_mention_status" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70224,7 +69950,6 @@
     },
     "xqt_item_reblogged_status" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -70354,12 +70079,6 @@
         }
       }
     },
-    "xqt_notification_mention" : {
-
-    },
-    "xqt_notification_retweet" : {
-
-    },
     "书签页面" : {
 
     },
@@ -70369,13 +70088,7 @@
     "关注者" : {
 
     },
-    "删除" : {
-
-    },
-    "删除标签" : {
-
-    },
-    "取消" : {
+    "已翻译" : {
 
     },
     "收藏页面" : {
@@ -70384,22 +70097,19 @@
     "本地页面" : {
 
     },
-    "标签设置" : {
-
-    },
     "正在关注" : {
-
-    },
-    "添加次要标签" : {
-
-    },
-    "确定要删除这个标签吗？" : {
 
     },
     "精选页面" : {
 
     },
-    "返回" : {
+    "翻译" : {
+
+    },
+    "自动翻译" : {
+
+    },
+    "自动翻译非当前语言的内容" : {
 
     }
   },

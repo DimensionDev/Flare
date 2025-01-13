@@ -102,6 +102,7 @@ internal data class User(
     @SerialName(value = "email") val email: kotlin.String? = null,
     @SerialName(value = "emailVerified") val emailVerified: kotlin.Boolean? = null,
     @SerialName(value = "securityKeysList") val securityKeysList: kotlin.collections.List<kotlin.String>? = null,
+    @SerialName(value = "emojis") val emojis: Map<kotlin.String, kotlin.String> = emptyMap(),
 ) {
     /**
      * *

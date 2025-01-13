@@ -305,7 +305,8 @@ internal fun Note.renderStatus(
                 UiTimeline.ItemContent.Status.BottomContent.Reaction.EmojiReaction(
                     name = emoji.key,
                     count = emoji.value,
-                    url = resolveMisskeyEmoji(emoji.key, accountKey.host),
+                    url = resolveMisskeyEmoji(emoji.key, accountKey.host, emojis),
+                    isUnicode = !emoji.key.startsWith(':') && !emoji.key.endsWith(':'),
                     onClicked = {
                         event.react(
                             statusKey = statusKey,
@@ -314,7 +315,8 @@ internal fun Note.renderStatus(
                         )
                     },
                 )
-            }.toPersistentList()
+            }.sortedByDescending { it.count }
+            .toPersistentList()
     return UiTimeline.ItemContent.Status(
         images =
             files
@@ -323,7 +325,7 @@ internal fun Note.renderStatus(
                 }?.toPersistentList() ?: persistentListOf(),
         contentWarning =
             cw?.let {
-                misskeyParser.parse(it).toHtml(accountKey).toUi()
+                misskeyParser.parse(it).toHtml(accountKey, emojis).toUi()
             },
         user = user,
         quote =
@@ -334,7 +336,7 @@ internal fun Note.renderStatus(
                     null
                 },
             ).toImmutableList(),
-        content = misskeyParser.parse(text.orEmpty()).toHtml(accountKey).toUi(),
+        content = misskeyParser.parse(text.orEmpty()).toHtml(accountKey, emojis).toUi(),
         actions =
             listOfNotNull(
                 StatusAction.Item.Reply(
@@ -386,12 +388,20 @@ internal fun Note.renderStatus(
                 StatusAction.Item.Reaction(
                     reacted = myReaction != null,
                     onClicked = {
-                        launcher.launch(
-                            AppDeepLink.Misskey.AddReaction(
-                                accountKey = accountKey,
+                        if (myReaction == null) {
+                            launcher.launch(
+                                AppDeepLink.Misskey.AddReaction(
+                                    accountKey = accountKey,
+                                    statusKey = statusKey,
+                                ),
+                            )
+                        } else {
+                            event.react(
                                 statusKey = statusKey,
-                            ),
-                        )
+                                hasReacted = true,
+                                reaction = myReaction,
+                            )
+                        }
                     },
                 ),
                 StatusAction.Group(
@@ -530,7 +540,7 @@ internal fun UserLite.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatarUrl.orEmpty(),
-        name = parseName(name.orEmpty(), accountKey).toUi(),
+        name = parseName(name.orEmpty(), accountKey, emojis).toUi(),
         handle = "@$username@$remoteHost",
         key = userKey,
         banner = null,
@@ -564,11 +574,11 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         )
     return UiProfile(
         avatar = avatarUrl.orEmpty(),
-        name = parseName(name.orEmpty(), accountKey).toUi(),
+        name = parseName(name.orEmpty(), accountKey, emojis).toUi(),
         handle = "@$username@$remoteHost",
         key = userKey,
         banner = bannerUrl,
-        description = description?.let { misskeyParser.parse(it).toHtml(accountKey).toUi() },
+        description = description?.let { misskeyParser.parse(it).toHtml(accountKey, emojis).toUi() },
         matrices =
             UiProfile.Matrices(
                 fansCount = followersCount.toLong(),
@@ -597,7 +607,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                         fields =
                             it
                                 .associate { (key, value) ->
-                                    key to misskeyParser.parse(value).toHtml(accountKey).toUi()
+                                    key to misskeyParser.parse(value).toHtml(accountKey, emojis).toUi()
                                 }.toImmutableMap(),
                     )
                 },
@@ -617,12 +627,15 @@ internal fun EmojiSimple.toUi(): UiEmoji =
 internal fun resolveMisskeyEmoji(
     name: String,
     accountHost: String,
+    emojis: Map<String, String>,
 ): String =
     name.trim(':').let {
-        if (it.endsWith("@.")) {
-            "https://$accountHost/emoji/${it.dropLast(2)}.webp"
-        } else {
-            "https://$accountHost/emoji/$it.webp"
+        emojis.getOrElse(it) {
+            if (it.endsWith("@.")) {
+                "https://$accountHost/emoji/${it.dropLast(2)}.webp"
+            } else {
+                "https://$accountHost/emoji/$it.webp"
+            }
         }
     }
 
@@ -637,19 +650,23 @@ private val misskeyNameParser by lazy {
 private fun parseName(
     name: String,
     accountKey: MicroBlogKey,
+    emojis: Map<String, String>,
 ): Element {
     if (name.isEmpty()) {
         return Element("body")
     }
-    return misskeyNameParser.parse(name).toHtml(accountKey) as? Element ?: Element("body")
+    return misskeyNameParser.parse(name).toHtml(accountKey, emojis) as? Element ?: Element("body")
 }
 
-private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): Element =
+private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
+    accountKey: MicroBlogKey,
+    emojis: Map<String, String>,
+): Element =
     when (this) {
         is CenterNode -> {
             Element("center").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey, emojis))
                 }
             }
         }
@@ -683,7 +700,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is QuoteNode -> {
             Element("blockquote").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey, emojis))
                 }
             }
         }
@@ -697,7 +714,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is BoldNode -> {
             Element("strong").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey, emojis))
                 }
             }
         }
@@ -707,7 +724,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
 //                attributes["name"] = name
                 attributes().put("name", name)
                 content.forEach {
-                    appendChild(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey, emojis))
                 }
             }
         }
@@ -715,7 +732,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is ItalicNode -> {
             Element("em").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey, emojis))
                 }
             }
         }
@@ -723,7 +740,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is RootNode -> {
             Element("body").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey, emojis))
                 }
             }
         }
@@ -731,7 +748,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is SmallNode -> {
             Element("small").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey, emojis))
                 }
             }
         }
@@ -739,7 +756,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
         is StrikeNode -> {
             Element("s").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey, emojis))
                 }
             }
         }
@@ -756,7 +773,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
             Element("img").apply {
 //                attributes["src"] = resolveMisskeyEmoji(emoji, accountKey.host)
 //                attributes["alt"] = emoji
-                attributes().put("src", resolveMisskeyEmoji(emoji, accountKey.host))
+                attributes().put("src", resolveMisskeyEmoji(emoji, accountKey.host, emojis))
                 attributes().put("alt", emoji)
             }
         }
@@ -780,7 +797,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(accountKey: MicroBlogKey): E
 //                attributes["href"] = url
                 attributes().put("href", url)
                 content.forEach {
-                    appendChild(it.toHtml(accountKey))
+                    appendChild(it.toHtml(accountKey, emojis))
                 }
             }
         }

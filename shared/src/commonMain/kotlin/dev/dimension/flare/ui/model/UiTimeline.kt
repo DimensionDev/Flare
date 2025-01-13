@@ -90,6 +90,8 @@ public data class UiTimeline internal constructor(
                         val url: String,
                         val count: Long,
                         val onClicked: () -> Unit,
+                        // TODO: make EmojiReaction a sealed interface
+                        val isUnicode: Boolean,
                     ) {
                         val humanizedCount: String by lazy {
                             count.humanize()

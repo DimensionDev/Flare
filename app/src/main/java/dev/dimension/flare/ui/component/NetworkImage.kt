@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.isUnspecified
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.graphics.FilterQuality
@@ -92,7 +93,11 @@ internal fun EmojiImage(
         val aspectRatio =
             remember(painter.intrinsicSize) {
                 val size = painter.intrinsicSize
-                (size.width / size.height).takeUnless { it.isNaN() } ?: 1f
+                if (size.isUnspecified) {
+                    1f
+                } else {
+                    (size.width / size.height).takeUnless { it.isNaN() } ?: 1f
+                }
             }
         Image(
             painter = painter,

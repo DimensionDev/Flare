@@ -62,6 +62,7 @@ import com.atproto.repo.StrongRef
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -145,11 +146,12 @@ internal class BlueskyDataSource(
     private val appDatabase: AppDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
+    private val inAppNotification: InAppNotification by inject()
     private val service by lazy {
         BlueskyService(
             baseUrl = credential.baseUrl,
             accountKey = accountKey,
-            accountQueries = appDatabase.accountDao(),
+            bearerToken = credential.accessToken,
         )
     }
 
@@ -189,6 +191,7 @@ internal class BlueskyDataSource(
                     accountKey,
                     database,
                     pagingKey,
+                    inAppNotification = inAppNotification,
                 ),
         )
 

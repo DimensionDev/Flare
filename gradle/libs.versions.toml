@@ -17,7 +17,7 @@ paging = "3.3.5"
 navigation = "2.8.5"
 kotlinx-datetime = "0.6.1"
 kotlinx-collections-immutable = "0.3.8"
-kotlinx-serialization = "1.7.3"
+kotlinx-serialization = "1.8.0"
 coil3 = "3.0.4"
 ktorfit = "2.2.0"
 ktor = "3.0.1"
@@ -31,7 +31,7 @@ compose-lint-checks = "1.4.2"
 ktlintPlugin = "12.1.2"
 apng-android = "3.0.2"
 ktlint = "1.3.1"
-okio = "3.9.1"
+okio = "3.10.2"
 skie = "0.10.0"
 ksoup = "0.2.0"
 versionUpdate = "0.51.0"
@@ -141,7 +141,9 @@ accompanist-permissions = { group = "com.google.accompanist", name = "accompanis
 accompanist-drawablepainter = { group = "com.google.accompanist", name = "accompanist-drawablepainter", version.ref = "accompanist" }
 
 compose-destinations = { group = "io.github.raamcosta.compose-destinations", name = "core", version.ref = "compose-destinations" }
+compose-destinations-bottom-sheet = { group = "io.github.raamcosta.compose-destinations", name = "bottom-sheet", version.ref = "compose-destinations" }
 compose-destinations-ksp = { group = "io.github.raamcosta.compose-destinations", name = "ksp", version.ref = "compose-destinations" }
+material3-navigation = { group = "io.github.stefanoq21", name = "material3-navigation", version = "0.0.12" }
 
 compose-lint-checks = { group = "com.slack.lint.compose", name = "compose-lint-checks", version.ref = "compose-lint-checks" }
 
@@ -160,10 +162,6 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
 
-mlkit-language-id-debug = { group = "com.google.mlkit", name = "language-id", version = "17.0.6" }
-mlkit-language-id = { group = "com.google.android.gms", name = "play-services-mlkit-language-id", version = "17.0.0" }
-mlkit-translate = { group = "com.google.mlkit", name = "translate", version = "17.0.3" }
-
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.1.2" }
 material-motion-compose = { module = "io.github.fornewid:material-motion-compose-core", version = "1.2.1" }
@@ -181,7 +179,7 @@ ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "k
 coil3 = ["coil3-compose", "coil3-svg", "coil3-ktor3"]
 coil3-extensions = ["apng", "awebp", "vectordrawable-animated", "zoomable-image", "coil3-gif"]
 accompanist = ["accompanist-permissions", "accompanist-drawablepainter"]
-compose-destinations = ["compose-destinations"]
+compose-destinations = ["compose-destinations", "material3-navigation"]
 media3 = ["media3-exoplayer", "media3-ui", "media3-hls"]
 firebase = ["firebase-analytics-ktx", "firebase-crashlytics-ktx"]
 ktorfit = ["ktorfit-lib", "ktorfit-converters-response", "ktorfit-converters-flow", "ktorfit-converters-call"]

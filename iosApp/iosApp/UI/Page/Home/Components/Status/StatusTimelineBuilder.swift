@@ -46,6 +46,14 @@ struct StatusItemView: View {
     @Environment(\.openURL) private var openURL
     let data: UiTimeline
     let detailKey: MicroBlogKey?
+    let enableTranslation: Bool
+    
+    init(data: UiTimeline, detailKey: MicroBlogKey?, enableTranslation: Bool = true) {
+        self.data = data
+        self.detailKey = detailKey
+        self.enableTranslation = enableTranslation
+    }
+    
     var body: some View {
         if let topMessage = data.topMessage {
             Button(action: {
@@ -67,7 +75,8 @@ struct StatusItemView: View {
                     onMediaClick: { index, media in
                         data.onMediaClicked(.init(launcher: AppleUriLauncher(openURL: openURL)), media, KotlinInt(integerLiteral: index))
                     },
-                    isDetail: detailKey == data.statusKey
+                    isDetail: detailKey == data.statusKey,
+                    enableTranslation: enableTranslation
                 )
             })
             .buttonStyle(.plain)

@@ -20,7 +20,15 @@ struct CommonTimelineStatusComponent: View {
     let data: UiTimelineItemContentStatus
     let onMediaClick: (Int, UiMedia) -> Void
     let isDetail: Bool
+    let enableTranslation: Bool
     
+    init(data: UiTimelineItemContentStatus, onMediaClick: @escaping (Int, UiMedia) -> Void, isDetail: Bool, enableTranslation: Bool = true) {
+        self.data = data
+        self.onMediaClick = onMediaClick
+        self.isDetail = isDetail
+        self.enableTranslation = enableTranslation
+    }
+
     private func showReportToast() {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
@@ -150,7 +158,7 @@ struct CommonTimelineStatusComponent: View {
                         .foregroundColor(Colors.Text.swiftUIPrimary)
                         
                     // Add translation component
-                    if appSettings.appearanceSettings.autoTranslate {
+                    if appSettings.appearanceSettings.autoTranslate && enableTranslation {
                         TranslatableText(originalText: data.content.raw)
                     }
                 } else {

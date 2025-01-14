@@ -1,0 +1,207 @@
+//
+//  MediaPreviewVideoViewController.swift
+//  TwidereX
+//
+//  Created by MainasuK on 2021-12-8.
+//  Copyright 2021 Twidere. All rights reserved.
+//
+
+import os.log
+import UIKit
+import AVKit
+import Combine
+//import MaskCore
+//import MaskUI
+import Kingfisher
+
+final class MediaPreviewVideoViewController: UIViewController {
+    
+    var disposeBag = Set<AnyCancellable>()
+    var viewModel: MediaPreviewVideoViewModel!
+    
+    let playerViewController = AVPlayerViewController()
+    let previewImageView = UIImageView()
+    
+    // 添加 loading 指示器
+    private lazy var loadingIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.color = .white
+        indicator.hidesWhenStopped = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
+    }()
+
+    deinit {
+        playerViewController.player?.pause()
+        try? AVAudioSession.sharedInstance().setCategory(.ambient)
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+        
+        os_log("%{public}s[%{public}ld], %{public}s", ((#file as NSString).lastPathComponent), #line, #function)
+    }
+    
+}
+
+extension MediaPreviewVideoViewController {
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        addChild(playerViewController)
+        playerViewController.view.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(playerViewController.view)
+        NSLayoutConstraint.activate([
+            playerViewController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            playerViewController.view.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            playerViewController.view.widthAnchor.constraint(equalTo: view.widthAnchor),
+            playerViewController.view.heightAnchor.constraint(equalTo: view.heightAnchor),
+        ])
+        playerViewController.didMove(toParent: self)
+        
+        // 添加 loading 指示器
+        view.addSubview(loadingIndicator)
+        NSLayoutConstraint.activate([
+            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+        ])
+        
+        if let contentOverlayView = playerViewController.contentOverlayView {
+            previewImageView.translatesAutoresizingMaskIntoConstraints = false
+            contentOverlayView.addSubview(previewImageView)
+            NSLayoutConstraint.activate([
+                previewImageView.topAnchor.constraint(equalTo: contentOverlayView.topAnchor),
+                previewImageView.leadingAnchor.constraint(equalTo: contentOverlayView.leadingAnchor),
+                previewImageView.trailingAnchor.constraint(equalTo: contentOverlayView.trailingAnchor),
+                previewImageView.bottomAnchor.constraint(equalTo: contentOverlayView.bottomAnchor),
+            ])
+        }
+        
+        playerViewController.view.backgroundColor = .clear
+        playerViewController.player = viewModel.player
+        playerViewController.delegate = self
+        
+        switch viewModel.item {
+        case .gif:
+            playerViewController.showsPlaybackControls = false
+        default:
+            break
+        }
+        
+        // 监听视频加载状态
+        viewModel.player?.currentItem?.publisher(for: \.status)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                guard let self = self else { return }
+                switch status {
+                case .unknown:
+                    // 开始加载时显示 loading
+                    self.loadingIndicator.startAnimating()
+                case .readyToPlay:
+                    // 视频准备好时停止 loading
+                    self.loadingIndicator.stopAnimating()
+                case .failed:
+                    // 加载失败时停止 loading
+                    self.loadingIndicator.stopAnimating()
+                }
+            }
+            .store(in: &disposeBag)
+        
+        // 监听视频是否在播放
+        viewModel.player?.publisher(for: \.timeControlStatus)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
+                guard let self = self else { return }
+                switch status {
+                case .waitingToPlayAtSpecifiedRate:
+                    // 等待播放时（例如在缓冲）显示 loading
+                    self.loadingIndicator.startAnimating()
+                case .playing:
+                    // 正在播放时隐藏 loading
+                    self.loadingIndicator.stopAnimating()
+                case .paused:
+                    // 暂停时也隐藏 loading
+                    self.loadingIndicator.stopAnimating()
+                }
+            }
+            .store(in: &disposeBag)
+        
+        // 初始化时不自动播放
+        viewModel.player?.pause()
+        viewModel.playbackState = .paused
+        
+        if let previewURL = viewModel.item.previewURL {
+            previewImageView.contentMode = .scaleAspectFit
+            previewImageView.kf.setImage(
+                with: previewURL,
+                placeholder: UIImage.placeholder(color: .systemFill)
+            )
+            
+            playerViewController.publisher(for: \.isReadyForDisplay)
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] isReadyForDisplay in
+                    guard let self = self else { return }
+                    self.previewImageView.isHidden = isReadyForDisplay
+                }
+                .store(in: &disposeBag)
+        }
+    }
+    
+}
+
+// MARK: - ShareActivityProvider
+extension MediaPreviewVideoViewController: ShareActivityProvider {
+    var activities: [Any] {
+        return []
+    }
+    
+    var applicationActivities: [UIActivity] {
+        switch viewModel.item {
+        case .gif(let mediaContext):
+            guard let url = mediaContext.assetURL else { return [] }
+            // TODO: 实现自定义的 SavePhotoActivity
+            return []
+        default:
+            return []
+        }
+    }
+}
+
+// MARK: - MediaPreviewTransitionViewController
+//extension MediaPreviewVideoViewController: MediaPreviewTransitionViewController {
+//    var mediaPreviewTransitionContext: MediaPreviewTransitionContext? {
+//        guard let playerView = playerViewController.view else { return nil }
+//        let _currentFrame: UIImage? = {
+//            guard let player = playerViewController.player else { return nil }
+//            guard let asset = player.currentItem?.asset else { return nil }
+//            let assetImageGenerator = AVAssetImageGenerator(asset: asset)
+//            assetImageGenerator.appliesPreferredTrackTransform = true   // fix orientation
+//            do {
+//                let cgImage = try assetImageGenerator.copyCGImage(at: player.currentTime(), actualTime: nil)
+//                let image = UIImage(cgImage: cgImage)
+//                return image
+//            } catch {
+//                return previewImageView.image
+//            }
+//        }()
+//        let _snapshot: UIView? = {
+//            guard let currentFrame = _currentFrame ?? previewImageView.image else { return nil }
+//            let size = AVMakeRect(aspectRatio: currentFrame.size, insideRect: view.frame).size
+//            let imageView = UIImageView(frame: CGRect(origin: .zero, size: size))
+//            imageView.image = currentFrame
+//            return imageView
+//        }()
+//        guard let snapshot = _snapshot else {
+//            assertionFailure()
+//            return nil
+//        }
+//        
+//        return MediaPreviewTransitionContext(
+//            transitionView: playerView,
+//            supplementaryViews: [],
+//            snapshot: snapshot,
+//            snapshotTransitioning: snapshot
+//        )
+//    }
+//}
+
+// MARK: - AVPlayerViewControllerDelegate
+extension MediaPreviewVideoViewController: AVPlayerViewControllerDelegate { }

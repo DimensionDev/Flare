@@ -1,2 +1,30 @@
 cyclomatic_complexity:
   ignores_case_statements: true
+
+disabled_rules:
+  - force_cast
+  - identifier_name
+  - line_length
+  - file_length
+  - function_body_length
+  - function_parameter_count
+
+# 排除第三方库的检查
+excluded:
+  - Pods
+  - Carthage
+  - DerivedData
+  - .build
+  - build
+  - vendor
+  - Frameworks
+
+# 如果你后续想启用line_length规则但是想调整长度限制，可以使用下面的配置
+# line_length:
+#   warning: 250
+#   error: 300
+
+# 如果你后续想启用file_length规则但是想调整长度限制，可以使用下面的配置
+# file_length:
+#   warning: 500
+#   error: 1200

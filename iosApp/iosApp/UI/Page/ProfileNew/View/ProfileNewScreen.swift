@@ -17,6 +17,7 @@ struct ProfileNewScreen: View {
     @StateObject private var tabStore: ProfileTabSettingStore
     @State private var selectedTab: Int = 0
     @State private var userInfo: ProfileUserInfo?
+    @State private var isShowAppBar: Bool? = nil  // nil: 初始状态, true: 显示, false: 隐藏
     
     //横屏 竖屏
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -47,6 +48,7 @@ struct ProfileNewScreen: View {
                 userInfo: userInfo,
                 state: state as! ProfileNewState,
                 selectedTab: $selectedTab,
+                isShowAppBar: $isShowAppBar,
                 horizontalSizeClass: horizontalSizeClass,
                 appSettings: appSettings,
                 toProfileMedia: toProfileMedia,
@@ -64,6 +66,7 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
     let userInfo: ProfileUserInfo?
     let state: ProfileNewState
     @Binding var selectedTab: Int
+    @Binding var isShowAppBar: Bool?
     let horizontalSizeClass: UserInterfaceSizeClass?
     let appSettings: AppSettings
     let toProfileMedia: (MicroBlogKey) -> Void
@@ -79,6 +82,7 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
             userInfo: userInfo,
             state: state,
             selectedTab: $selectedTab,
+            isShowAppBar: $isShowAppBar,
             horizontalSizeClass: horizontalSizeClass,
             appSettings: appSettings,
             toProfileMedia: toProfileMedia,
@@ -96,6 +100,7 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
             userInfo: userInfo,
             state: state,
             selectedTab: $selectedTab,
+            isShowAppBar: $isShowAppBar,
             horizontalSizeClass: horizontalSizeClass,
             appSettings: appSettings,
             toProfileMedia: toProfileMedia,

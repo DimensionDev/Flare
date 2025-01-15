@@ -15,6 +15,7 @@ class ProfileNewRefreshViewController: UIViewController {
     private var userInfo: ProfileUserInfo?
     private var state: ProfileNewState?
     private var selectedTab: Binding<Int>?
+    private var isShowAppBar: Binding<Bool?>?
     private var horizontalSizeClass: UserInterfaceSizeClass?
     private var appSettings: AppSettings?
     private var toProfileMedia: ((MicroBlogKey) -> Void)?
@@ -54,6 +55,7 @@ class ProfileNewRefreshViewController: UIViewController {
         userInfo: ProfileUserInfo?,
         state: ProfileNewState,
         selectedTab: Binding<Int>,
+        isShowAppBar: Binding<Bool?>,
         horizontalSizeClass: UserInterfaceSizeClass?,
         appSettings: AppSettings,
         toProfileMedia: @escaping (MicroBlogKey) -> Void,
@@ -65,6 +67,7 @@ class ProfileNewRefreshViewController: UIViewController {
         self.userInfo = userInfo
         self.state = state
         self.selectedTab = selectedTab
+        self.isShowAppBar = isShowAppBar
         self.horizontalSizeClass = horizontalSizeClass
         self.appSettings = appSettings
         self.toProfileMedia = toProfileMedia
@@ -73,26 +76,41 @@ class ProfileNewRefreshViewController: UIViewController {
         self.tabStore = tabStore
         self.mediaPresenterWrapper = mediaPresenterWrapper
         
-        // 确保导航栏已经初始化
-        if navigationBar == nil {
-            setupNavigationBar()
-        }
-        
         // 根据是否是自己的 profile 来控制导航栏显示
         let isOwnProfile = userKey == nil
-        navigationBar.isHidden = true  // 始终隐藏自定义导航栏
-        navigationBar.alpha = 0
         
-        // 如果是自己的 profile，显示系统导航栏，隐藏返回按钮和更多按钮
-        if isOwnProfile {
-            navigationController?.setNavigationBarHidden(false, animated: false)
-            segmentedBackButton.isHidden = true
-            navigationBar.items?.first?.rightBarButtonItem = nil
+        // 根据 isShowAppBar 的状态来控制导航栏显示
+        if let showAppBar = isShowAppBar.wrappedValue {
+            navigationController?.setNavigationBarHidden(!showAppBar, animated: false)
+            if showAppBar {
+                // 显示导航栏时，根据是否是自己的 profile 来控制按钮
+                if isOwnProfile {
+                    navigationController?.navigationBar.topItem?.leftBarButtonItem = nil
+                    navigationController?.navigationBar.topItem?.rightBarButtonItem = nil
+                } else {
+                    let moreButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), style: .plain, target: self, action: #selector(handleMoreMenuTap))
+                    navigationController?.navigationBar.topItem?.rightBarButtonItem = moreButton
+                }
+                segmentedBackButton.isHidden = true
+            } else {
+                // 隐藏导航栏时，显示 segmentedBackButton
+                if !isOwnProfile {
+                    segmentedBackButton.isHidden = false
+                }
+            }
         } else {
-            // 如果是其他用户的 profile，显示更多按钮
+            // 初始状态，显示导航栏
             navigationController?.setNavigationBarHidden(false, animated: false)
-            let moreButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), style: .plain, target: self, action: #selector(handleMoreMenuTap))
-            navigationController?.navigationBar.topItem?.rightBarButtonItem = moreButton
+            if isOwnProfile {
+                navigationController?.navigationBar.topItem?.leftBarButtonItem = nil
+                navigationController?.navigationBar.topItem?.rightBarButtonItem = nil
+            } else {
+                let moreButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), style: .plain, target: self, action: #selector(handleMoreMenuTap))
+                navigationController?.navigationBar.topItem?.rightBarButtonItem = moreButton
+            }
+            segmentedBackButton.isHidden = true
+            // 设置初始状态
+            isShowAppBar.wrappedValue = true
         }
         
         // 更新UI
@@ -447,29 +465,25 @@ class ProfileNewRefreshViewController: UIViewController {
         let threshold: CGFloat = 100 // 触发导航栏隐藏的阈值
         let isOwnProfile = userKey == nil
         
-        // 如果是自己的 profile，不显示返回按钮
+        // 如果是自己的 profile，不处理导航栏隐藏
         if isOwnProfile {
             return
         }
         
         // 判断滚动方向和位置
         if offset > lastContentOffset && offset > threshold {
-            // 向上滚动且超过阈值，显示返回按钮，隐藏系统导航栏
+            // 向上滚动且超过阈值，隐藏导航栏，显示返回按钮
             if !isNavigationBarHidden {
                 UIView.animate(withDuration: 0.3) {
-                    self.navigationBar.alpha = 0
-                    self.segmentedBackButton.isHidden = false
-                    self.navigationController?.setNavigationBarHidden(true, animated: true)
+                    self.isShowAppBar?.wrappedValue = false
                 }
                 isNavigationBarHidden = true
             }
         } else if offset < lastContentOffset || offset < threshold {
-            // 向下滚动或回到顶部，隐藏返回按钮，显示系统导航栏
+            // 向下滚动或回到顶部，显示导航栏，隐藏返回按钮
             if isNavigationBarHidden {
                 UIView.animate(withDuration: 0.3) {
-                    self.navigationBar.alpha = 0
-                    self.segmentedBackButton.isHidden = true
-                    self.navigationController?.setNavigationBarHidden(false, animated: true)
+                    self.isShowAppBar?.wrappedValue = true
                 }
                 isNavigationBarHidden = false
             }
@@ -544,16 +558,20 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
         let window = UIApplication.shared.windows.first { $0.isKeyWindow }
         let safeAreaTop = window?.safeAreaInsets.top ?? 0
         
+        // 设置返回按钮的位置和大小
+        segmentedBackButton.frame = CGRect(x: 16, y: safeAreaTop + 10, width: 30, height: 30)
+        segmentedBackButton.addTarget(self, action: #selector(handleBackButtonTap), for: .touchUpInside)
+        containerView.addSubview(segmentedBackButton)
+        
         // 调整 segmentedView 的位置，放在安全区域下方
         segmentedView.frame = CGRect(x: 0, y: safeAreaTop, width: view.bounds.width, height: 50)
         containerView.addSubview(segmentedView)
         
-        // 添加返回按钮到 segmentedView，初始时隐藏
-        segmentedBackButton.frame = CGRect(x: 16, y: safeAreaTop + 10, width: 30, height: 30)
-        segmentedBackButton.isHidden = true
-        containerView.addSubview(segmentedBackButton)
-        
         return containerView
+    }
+    
+    @objc private func handleBackButtonTap() {
+        navigationController?.popViewController(animated: true)
     }
     
     func numberOfLists(in pagingView: JXPagingView) -> Int {

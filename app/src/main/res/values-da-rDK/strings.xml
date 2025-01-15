@@ -76,6 +76,7 @@
   <string name="misskey_notification_item_app">App</string>
   <string name="misskey_notification_item_followed_you">fulgte dig</string>
   <string name="misskey_notification_item_requested_follow">anmodede om at følge dig</string>
+  <string name="misskey_notification_unknwon">Ukendt notifikation %1$s</string>
   <string name="misskey_item_reblogged_status">ompostet en status</string>
   <string name="xqt_item_reblogged_status">retweeteret</string>
   <string name="xqt_item_mention_status">nævner dig</string>
@@ -530,4 +531,6 @@
   <string name="following_title">Følger</string>
   <string name="fans_title">Følger</string>
   <string name="local_history_search_placeholder">Søg i lokal cache</string>
+  <string name="local_history_search_status_title">Status</string>
+  <string name="local_history_search_user_title">Bruger</string>
 </resources>

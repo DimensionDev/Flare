@@ -74,6 +74,7 @@
   <string name="misskey_notification_item_app">Застосунок</string>
   <string name="misskey_notification_item_followed_you">підписався на вас</string>
   <string name="misskey_notification_item_requested_follow">запит підписатися на вас</string>
+  <string name="misskey_notification_unknwon">Невідоме повідомлення %1$s</string>
   <string name="misskey_item_reblogged_status">перерозміщувати статус</string>
   <string name="xqt_item_reblogged_status">ретвітнуто</string>
   <string name="xqt_item_mention_status">згадує вас</string>
@@ -524,4 +525,6 @@
   <string name="notification_login_expired">Вхід закінчився, будь ласка, увійдіть знову</string>
   <string name="following_title">Слідкую</string>
   <string name="fans_title">Підписник</string>
+  <string name="local_history_search_status_title">Статус</string>
+  <string name="local_history_search_user_title">Користувач</string>
 </resources>

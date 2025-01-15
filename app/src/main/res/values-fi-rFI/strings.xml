@@ -76,6 +76,7 @@
   <string name="misskey_notification_item_app">Sovellus</string>
   <string name="misskey_notification_item_followed_you">seurasi sinua</string>
   <string name="misskey_notification_item_requested_follow">pyysi seuraamaan sinua</string>
+  <string name="misskey_notification_unknwon">Tuntematon ilmoitus %1$s</string>
   <string name="misskey_item_reblogged_status">uudelleenlähetetty tila</string>
   <string name="xqt_item_reblogged_status">retweeted</string>
   <string name="xqt_item_mention_status">mainitsee sinut</string>
@@ -530,4 +531,6 @@
   <string name="following_title">Seurataan</string>
   <string name="fans_title">Seuraaja</string>
   <string name="local_history_search_placeholder">Etsi paikallista välimuistia</string>
+  <string name="local_history_search_status_title">Tila</string>
+  <string name="local_history_search_user_title">Käyttäjä</string>
 </resources>

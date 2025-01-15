@@ -76,6 +76,7 @@
   <string name="misskey_notification_item_app">App</string>
   <string name="misskey_notification_item_followed_you">volgt jou nu</string>
   <string name="misskey_notification_item_requested_follow">aangevraagd om je te volgen</string>
+  <string name="misskey_notification_unknwon">Onbekende melding %1$s</string>
   <string name="misskey_item_reblogged_status">publiceerde een status</string>
   <string name="xqt_item_reblogged_status">geretweet</string>
   <string name="xqt_item_mention_status">vermeldt je</string>
@@ -530,4 +531,6 @@
   <string name="following_title">Volgt</string>
   <string name="fans_title">Volger</string>
   <string name="local_history_search_placeholder">Zoek lokale cache</string>
+  <string name="local_history_search_status_title">status</string>
+  <string name="local_history_search_user_title">Gebruiker</string>
 </resources>

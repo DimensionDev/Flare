@@ -75,6 +75,7 @@
   <string name="misskey_notification_item_app">التطبيق</string>
   <string name="misskey_notification_item_followed_you">تابعك</string>
   <string name="misskey_notification_item_requested_follow">طلب منك متابعتك</string>
+  <string name="misskey_notification_unknwon">إشعار غير معروف %1$s</string>
   <string name="misskey_item_reblogged_status">إعادة نشر حالة</string>
   <string name="xqt_item_reblogged_status">معتدلة</string>
   <string name="xqt_item_mention_status">يذكر لك</string>
@@ -528,4 +529,6 @@
   <string name="following_title">تابع</string>
   <string name="fans_title">متابع</string>
   <string name="local_history_search_placeholder">البحث عن ذاكرة التخزين المؤقت المحلية</string>
+  <string name="local_history_search_status_title">الحالة</string>
+  <string name="local_history_search_user_title">المستخدم</string>
 </resources>

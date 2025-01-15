@@ -72,6 +72,7 @@
   <string name="misskey_notification_item_app">Εφαρμογή</string>
   <string name="misskey_notification_item_followed_you">σας ακολούθησε</string>
   <string name="misskey_notification_item_requested_follow">ζήτησε να σε ακολουθήσει</string>
+  <string name="misskey_notification_unknwon">Άγνωστη ειδοποίηση %1$s</string>
   <string name="misskey_item_reblogged_status">επαναναρτήθηκε μια κατάσταση</string>
   <string name="xqt_item_reblogged_status">retweeted</string>
   <string name="xqt_item_mention_status">σας αναφέρει</string>
@@ -525,4 +526,6 @@
   <string name="following_title">Ακολουθεί</string>
   <string name="fans_title">Ακόλουθος</string>
   <string name="local_history_search_placeholder">Αναζήτηση τοπικής προσωρινής μνήμης</string>
+  <string name="local_history_search_status_title">Κατάσταση</string>
+  <string name="local_history_search_user_title">Χρήστης</string>
 </resources>

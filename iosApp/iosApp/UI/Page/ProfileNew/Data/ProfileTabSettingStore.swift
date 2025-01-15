@@ -77,9 +77,11 @@ class ProfileTabSettingStore: ObservableObject {
                 }
             }
         } else if let presenter = getOrCreatePresenter(for: tab) {
-            currentPresenter = nil  // 先设置为 nil 触发 UI 更新
+            // currentPresenter = nil  // 先设置为 nil 触发 UI 更新
 //            DispatchQueue.main.async {
+withAnimation {
                 self.currentPresenter = presenter
+}
 //            }
         }
     }

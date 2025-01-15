@@ -8,7 +8,7 @@ import Kingfisher
 
 class ProfileMediaViewController: UIViewController {
     //  - Properties
-      var state: ProfileState?
+    private var presenterWrapper: ProfileMediaPresenterWrapper?
     private var scrollCallback: ((UIScrollView) -> ())?
     private var appSettings: AppSettings?
     
@@ -28,11 +28,11 @@ class ProfileMediaViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-//        setupRefresh()
+        setupRefresh()
     }
     
     deinit {
-        state = nil
+        presenterWrapper = nil
         scrollCallback = nil
     }
     
@@ -48,39 +48,54 @@ class ProfileMediaViewController: UIViewController {
         ])
     }
     
-//    private func setupRefresh() {
-//        // 下拉刷新
-//        collectionView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
-//            Task {
-//                if let state = self?.state {
-//                    try? await state.refresh()
-//                    await MainActor.run {
-//                        self?.collectionView.mj_header?.endRefreshing()
-//                    }
-//                }
-//            }
-//        })
-//        
-//        // 上拉加载更多
-//        collectionView.mj_footer = MJRefreshAutoNormalFooter(refreshingBlock: { [weak self] in
-//            Task {
-//                if let profileState = self?.state,
-//                   case .success(let data) = onEnum(of: profileState.mediaState) {
+    private func setupRefresh() {
+        // 下拉刷新
+        collectionView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
+            Task {
+//                if let mediaPresenterWrapper = self?.presenterWrapper,
+//                   case .success(let data) = onEnum(of: mediaPresenterWrapper.presenter.models.value.mediaState) {
 //                    data.retry()
 //                    await MainActor.run {
-//                        self?.collectionView.mj_footer?.endRefreshing()
+                        self?.collectionView.mj_header?.endRefreshing()
 //                    }
 //                }
-//            }
-//        })
-//    }
+            }
+        })
+        
+        // 上拉加载更多
+        collectionView.mj_footer = MJRefreshAutoNormalFooter(refreshingBlock: { [weak self] in
+            Task {
+//                if let mediaPresenterWrapper = self?.presenterWrapper,
+//                   case .success(let data) = onEnum(of: mediaPresenterWrapper.presenter.models.value.mediaState) {
+//                    // 检查是否还有更多数据
+//                    let appendState = data.appendState
+//                    if let notLoading = appendState as? Paging_commonLoadState.NotLoading,
+//                       !notLoading.endOfPaginationReached {
+//                        data.retry()
+//                    }
+//                    await MainActor.run {
+//                        if let notLoading = appendState as? Paging_commonLoadState.NotLoading,
+//                           notLoading.endOfPaginationReached {
+//                            self?.collectionView.mj_footer?.endRefreshingWithNoMoreData()
+//                        } else {
+                            self?.collectionView.mj_footer?.endRefreshing()
+//                        }
+//                    }
+//                }
+             }
+        })
+    }
     
     //  - Public Methods
-    func updatePresenter(_ state: ProfileState) {
-        self.state = state
-        // 直接处理当前状态
-        self.handleState(state.mediaState)
-        //缺少监听，即没下一页，得后续改造。
+    func updateMediaPresenter(presenterWrapper: ProfileMediaPresenterWrapper) {
+        self.presenterWrapper = presenterWrapper
+        // 监听数据变化
+        Task { @MainActor in
+            let presenter = presenterWrapper.presenter
+            for await state in presenter.models {
+                self.handleState(state.mediaState)
+            }
+        }
     }
     
     func configure(with appSettings: AppSettings) {

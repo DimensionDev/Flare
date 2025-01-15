@@ -13,7 +13,7 @@ extension JXPagingListContainerView: JXSegmentedViewListContainer {}
 class ProfileNewRefreshViewController: UIViewController {
     // MARK: - Properties
     private var userInfo: ProfileUserInfo?
-    private var state: ProfileState?
+    private var state: ProfileNewState?
     private var selectedTab: Binding<Int>?
     private var horizontalSizeClass: UserInterfaceSizeClass?
     private var appSettings: AppSettings?
@@ -21,6 +21,7 @@ class ProfileNewRefreshViewController: UIViewController {
     private var accountType: AccountType?
     private var userKey: MicroBlogKey?
     private var tabStore: ProfileTabSettingStore?
+    private var mediaPresenterWrapper: ProfileMediaPresenterWrapper?
     private var listViewControllers: [Int: JXPagingViewListViewDelegate] = [:]
     
     // UI Components
@@ -51,14 +52,15 @@ class ProfileNewRefreshViewController: UIViewController {
     // 配置方法
     func configure(
         userInfo: ProfileUserInfo?,
-        state: ProfileState,
+        state: ProfileNewState,
         selectedTab: Binding<Int>,
         horizontalSizeClass: UserInterfaceSizeClass?,
         appSettings: AppSettings,
         toProfileMedia: @escaping (MicroBlogKey) -> Void,
         accountType: AccountType,
         userKey: MicroBlogKey?,
-        tabStore: ProfileTabSettingStore
+        tabStore: ProfileTabSettingStore,
+        mediaPresenterWrapper: ProfileMediaPresenterWrapper
     ) {
         self.userInfo = userInfo
         self.state = state
@@ -69,6 +71,7 @@ class ProfileNewRefreshViewController: UIViewController {
         self.accountType = accountType
         self.userKey = userKey
         self.tabStore = tabStore
+        self.mediaPresenterWrapper = mediaPresenterWrapper
         
         // 确保导航栏已经初始化
         if navigationBar == nil {
@@ -296,7 +299,7 @@ class ProfileNewRefreshViewController: UIViewController {
     
     private func refreshContent() {
          // 模拟刷新过程
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+        let workItem = DispatchWorkItem {
             self.isHeaderRefreshed = true
             self.refreshControl?.endRefreshing()
             self.pagingView.reloadData()
@@ -313,9 +316,10 @@ class ProfileNewRefreshViewController: UIViewController {
                         // 触发时间线刷新
                         try? await timelineState.refresh()
                     } else if let mediaVC = currentList as? ProfileMediaViewController,
-                              let state = mediaVC.state {
+                              let mediaPresenterWrapper = self.mediaPresenterWrapper,
+                              case .success(let data) = onEnum(of: mediaPresenterWrapper.presenter.models.value.mediaState) {
                         // 触发媒体列表刷新
-                        try? await state.refresh()
+                        data.retry()
                     }
                     
                     await MainActor.run {
@@ -325,8 +329,8 @@ class ProfileNewRefreshViewController: UIViewController {
                 }
             }
         }
-            
-       
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: workItem)
     }
     
     private func setupNavigationBar() {
@@ -572,8 +576,8 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
         
         if tab is FLProfileMediaTabItem {
             let mediaVC = ProfileMediaViewController()
-            if let state = state {
-                mediaVC.updatePresenter(state)  // 直接传入 ProfileState
+            if let mediaPresenterWrapper = mediaPresenterWrapper {
+                mediaVC.updateMediaPresenter(presenterWrapper: mediaPresenterWrapper)
             }
             if let appSettings = appSettings {
                 mediaVC.configure(with: appSettings)
@@ -615,9 +619,9 @@ extension ProfileNewRefreshViewController: JXSegmentedViewDelegate {
                     // 更新 timeline presenter
                     timelineVC.updatePresenter(presenter)
                 } else if let mediaVC = currentList as? ProfileMediaViewController,
-                          let state = self.state {
+                          let mediaPresenterWrapper = self.mediaPresenterWrapper {
                     // 更新 media presenter
-                    mediaVC.updatePresenter(state)
+                    mediaVC.updateMediaPresenter(presenterWrapper: mediaPresenterWrapper)
                 }
             }
         }

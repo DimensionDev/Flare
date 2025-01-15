@@ -17,7 +17,7 @@ import Kingfisher
 
 // 头部视图
 class ProfileNewHeaderView: UIView {
-    private var state: ProfileState?
+    private var state: ProfileNewState?
     
     // 添加关注按钮回调
     var onFollowClick: ((UiRelation) -> Void)?
@@ -206,7 +206,7 @@ class ProfileNewHeaderView: UIView {
         return frame.height
     }
     
-    func configure(with userInfo: ProfileUserInfo, state: ProfileState? = nil) {
+    func configure(with userInfo: ProfileUserInfo, state: ProfileNewState? = nil) {
         self.userInfo = userInfo  // 需要保存 userInfo 以便在点击时使用
         self.state = state
         

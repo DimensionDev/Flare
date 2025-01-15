@@ -12,7 +12,7 @@ struct ProfileUserInfo {
     let canSendMessage: Bool
     
     // 从 ProfileState 创建
-    static func from(state: ProfileState) -> ProfileUserInfo? {
+    static func from(state: ProfileNewState) -> ProfileUserInfo? {
         // 只有在用户信息加载成功时才创建
         guard case let .success(user) = onEnum(of: state.userState),
               let profile = user.data as? UiProfile else {

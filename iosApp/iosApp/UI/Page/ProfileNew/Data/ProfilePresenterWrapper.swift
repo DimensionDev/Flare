@@ -6,7 +6,7 @@ import os.log
 //这个地方缓存ProfilePresenter 没用的。
 class ProfilePresenterWrapper: ObservableObject {
     //  - Properties
-    let presenter: ProfilePresenter
+    let presenter: ProfileNewPresenter
 //    @Published private(set) var tabStore: ProfileTabStore
     
     //  - Init
@@ -84,5 +84,25 @@ extension ProfilePresenter {
         let state = models.value.canSendMessage
         os_log("[📔][ProfilePresenter]获取是否可以发送消息: %{public}@", log: .default, type: .debug, String(describing: state))
         return state
+    }
+}
+
+class ProfileMediaPresenterWrapper: ObservableObject {
+    //  - Properties
+    let presenter: ProfileMediaPresenter
+    
+    //  - Init
+    init(accountType: AccountType, userKey: MicroBlogKey?) {
+        os_log("[📔][ProfileMediaPresenterWrapper - init]初始化: accountType=%{public}@, userKey=%{public}@", log: .default, type: .debug, String(describing: accountType), userKey?.description ?? "nil")
+        self.presenter = .init(accountType: accountType, userKey: userKey)
+    }
+    
+    //  - Memory Management
+    func handleMemoryWarning() {
+        os_log("[📔][ProfileMediaPresenterWrapper]处理内存警告", log: .default, type: .debug)
+    }
+    
+    func handleBackground() {
+        os_log("[📔][ProfileMediaPresenterWrapper]处理后台", log: .default, type: .debug)
     }
 }

@@ -13,6 +13,7 @@ struct ProfileNewScreen: View {
     
     //包含 user relationState， isme，listState - userTimeline，mediaState，canSendMessage
     @StateObject private var presenterWrapper: ProfilePresenterWrapper
+    @StateObject private var mediaPresenterWrapper: ProfileMediaPresenterWrapper
     @StateObject private var tabStore: ProfileTabSettingStore
     @State private var selectedTab: Int = 0
     @State private var userInfo: ProfileUserInfo?
@@ -29,6 +30,7 @@ struct ProfileNewScreen: View {
         
         let timelineStore = TimelineStore(accountType: accountType)
         _presenterWrapper = StateObject(wrappedValue: ProfilePresenterWrapper(accountType: accountType, userKey: userKey))
+        _mediaPresenterWrapper = StateObject(wrappedValue: ProfileMediaPresenterWrapper(accountType: accountType, userKey: userKey))
         
         // 初始化 tabStore
         let tabStore = ProfileTabSettingStore(timelineStore: timelineStore, userKey: userKey)
@@ -39,18 +41,19 @@ struct ProfileNewScreen: View {
     
     var body: some View {
         ObservePresenter(presenter: presenterWrapper.presenter) { state in
-            let userInfo = ProfileUserInfo.from(state: state as! ProfileState)
+            let userInfo = ProfileUserInfo.from(state: state as! ProfileNewState)
             
             ProfileNewRefreshViewControllerWrapper(
                 userInfo: userInfo,
-                state: state as! ProfileState,
+                state: state as! ProfileNewState,
                 selectedTab: $selectedTab,
                 horizontalSizeClass: horizontalSizeClass,
                 appSettings: appSettings,
                 toProfileMedia: toProfileMedia,
                 accountType: accountType,
                 userKey: userKey,
-                tabStore: tabStore
+                tabStore: tabStore,
+                mediaPresenterWrapper: mediaPresenterWrapper
             )
             .ignoresSafeArea(edges: .top)
         }
@@ -59,7 +62,7 @@ struct ProfileNewScreen: View {
 
 struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
     let userInfo: ProfileUserInfo?
-    let state: ProfileState
+    let state: ProfileNewState
     @Binding var selectedTab: Int
     let horizontalSizeClass: UserInterfaceSizeClass?
     let appSettings: AppSettings
@@ -67,6 +70,7 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
     let accountType: AccountType
     let userKey: MicroBlogKey?
     let tabStore: ProfileTabSettingStore
+    let mediaPresenterWrapper: ProfileMediaPresenterWrapper
     
     func makeUIViewController(context: Context) -> ProfileNewRefreshViewController {
         let controller = ProfileNewRefreshViewController()
@@ -80,7 +84,8 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
             toProfileMedia: toProfileMedia,
             accountType: accountType,
             userKey: userKey,
-            tabStore: tabStore
+            tabStore: tabStore,
+            mediaPresenterWrapper: mediaPresenterWrapper
         )
         return controller
     }
@@ -96,7 +101,8 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
             toProfileMedia: toProfileMedia,
             accountType: accountType,
             userKey: userKey,
-            tabStore: tabStore
+            tabStore: tabStore,
+            mediaPresenterWrapper: mediaPresenterWrapper
         )
     }
 }

@@ -35,7 +35,7 @@ class ProfileNewTimelineCell: UITableViewCell {
         hostingController = nil
         
         // 创建新的 StatusItemView
-        let statusView = StatusItemView(data: item, detailKey: nil)
+        let statusView = StatusItemView(data: item, detailKey: nil, enableTranslation: false)
         let hostingController = UIHostingController(rootView: statusView)
         self.hostingController = hostingController
         

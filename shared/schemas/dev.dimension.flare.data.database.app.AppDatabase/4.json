@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "254782b3237e8fbc34a2e5f26647a2fb",
+    "identityHash": "7f851509975964fb11a67225ecd00f90",
     "entities": [
       {
         "tableName": "DbAccount",
@@ -143,39 +143,38 @@
         }
       },
       {
-        "tableName": "DbGuestData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `host` TEXT NOT NULL, `platformType` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "tableName": "DbRssSources",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`url` TEXT NOT NULL, `title` TEXT, `lastUpdate` INTEGER NOT NULL, PRIMARY KEY(`url`))",
         "fields": [
           {
-            "fieldPath": "id",
-            "columnName": "id",
+            "fieldPath": "url",
+            "columnName": "url",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "title",
+            "columnName": "title",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "lastUpdate",
+            "columnName": "lastUpdate",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "host",
-            "columnName": "host",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "platformType",
-            "columnName": "platformType",
-            "affinity": "TEXT",
             "notNull": true
           }
         ],
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "id"
+            "url"
           ]
         }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '254782b3237e8fbc34a2e5f26647a2fb')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7f851509975964fb11a67225ecd00f90')"
     ]
   }
 }

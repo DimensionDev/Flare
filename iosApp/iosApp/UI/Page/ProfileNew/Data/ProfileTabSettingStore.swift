@@ -1,6 +1,7 @@
 import Foundation
 import shared
 import SwiftUI
+import os.log
 
 class ProfileTabSettingStore: ObservableObject {
     //  - Published Properties
@@ -46,11 +47,11 @@ class ProfileTabSettingStore: ObservableObject {
         updateTabs(user: user, userKey: userKey)
         
         // 如果没有选中的标签，选中第一个
-        if selectedTabKey == nil {
+//        if selectedTabKey == nil {
             if let firstItem = availableTabs.first {
                 selectTab(firstItem.key)
             }
-        }
+//        }
         
         isInitializing = false
     }
@@ -77,12 +78,13 @@ class ProfileTabSettingStore: ObservableObject {
                 }
             }
         } else if let presenter = getOrCreatePresenter(for: tab) {
-            // currentPresenter = nil  // 先设置为 nil 触发 UI 更新
-//            DispatchQueue.main.async {
-withAnimation {
-                self.currentPresenter = presenter
-}
-//            }
+            // 直接设置 presenter，不使用 withAnimation
+            self.currentPresenter = presenter
+            
+            // 确保 presenter 已经设置完成
+            DispatchQueue.main.async {
+                os_log("[📔][ProfileTabSettingStore]更新当前 presenter: tab=%{public}@, presenter=%{public}@", log: .default, type: .debug, tab.key, String(describing: self.currentPresenter))
+            }
         }
     }
     

@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct StatusTimelineComponent: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -8,18 +8,18 @@ struct StatusTimelineComponent: View {
     var body: some View {
         switch onEnum(of: data) {
         case .empty: Text("timeline_load_empty", comment: "Timeline is empty")
-        case .error(let error):
+        case let .error(error):
             Text("timeline_load_error", comment: "Timeline loading error")
             Text(error.error.message ?? "")
         case .loading:
-            ForEach((-10)...(-1), id: \.self) { _ in
+            ForEach((-10) ... -1, id: \.self) { _ in
                 StatusPlaceHolder()
                     .if(horizontalSizeClass != .compact) { view in
                         view.padding([.horizontal])
                     }
             }
-        case .success(let success):
-            ForEach(0..<success.itemCount, id: \.self) { index in
+        case let .success(success):
+            ForEach(0 ..< success.itemCount, id: \.self) { index in
                 let data = success.peek(index: index)
                 VStack {
                     if let status = data {
@@ -47,13 +47,13 @@ struct StatusItemView: View {
     let data: UiTimeline
     let detailKey: MicroBlogKey?
     let enableTranslation: Bool
-    
+
     init(data: UiTimeline, detailKey: MicroBlogKey?, enableTranslation: Bool = true) {
         self.data = data
         self.detailKey = detailKey
         self.enableTranslation = enableTranslation
     }
-    
+
     var body: some View {
         if let topMessage = data.topMessage {
             Button(action: {
@@ -65,22 +65,22 @@ struct StatusItemView: View {
         }
         if let content = data.content {
             switch onEnum(of: content) {
-            case .status(let data): Button(action: {
-                if detailKey != data.statusKey {
-                    data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                }
-            }, label: {
-                CommonTimelineStatusComponent(
-                    data: data,
-                    onMediaClick: { index, media in
-                        data.onMediaClicked(.init(launcher: AppleUriLauncher(openURL: openURL)), media, KotlinInt(integerLiteral: index))
-                    },
-                    isDetail: detailKey == data.statusKey,
-                    enableTranslation: enableTranslation
-                )
-            })
-            .buttonStyle(.plain)
-            case .user(let data):
+            case let .status(data): Button(action: {
+                    if detailKey != data.statusKey {
+                        data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                    }
+                }, label: {
+                    CommonTimelineStatusComponent(
+                        data: data,
+                        onMediaClick: { index, media in
+                            data.onMediaClicked(.init(launcher: AppleUriLauncher(openURL: openURL)), media, KotlinInt(integerLiteral: index))
+                        },
+                        isDetail: detailKey == data.statusKey,
+                        enableTranslation: enableTranslation
+                    )
+                })
+                .buttonStyle(.plain)
+            case let .user(data):
                 HStack {
                     UserComponent(
                         user: data.value,
@@ -91,7 +91,7 @@ struct StatusItemView: View {
                     )
                     Spacer()
                 }
-            case .userList(let data):
+            case let .userList(data):
                 HStack {
                     ForEach(data.users, id: \.key) { user in
                         UserAvatar(data: user.avatar, size: 48)

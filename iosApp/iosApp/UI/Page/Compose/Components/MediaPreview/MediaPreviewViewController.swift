@@ -6,24 +6,26 @@
 //  Copyright © 2020 Twidere. All rights reserved.
 //
 
-import os.log
-import UIKit
 import Combine
 import CoreData
-//import CoreDataStack
+import os.log
+import UIKit
+
+// import CoreDataStack
 import Kingfisher
-//import Pageboy
-//import MetaTextArea
-//import MaskCore
-//import MaskUI
-//import Resources
+
+// import Pageboy
+// import MetaTextArea
+// import MaskCore
+// import MaskUI
+// import Resources
 //
-//protocol MediaPreviewViewControllerDelegate: AnyObject {
+// protocol MediaPreviewViewControllerDelegate: AnyObject {
 //    func mediaPreviewViewController(_ viewController: MediaPreviewViewController, longPressGestureRecognizerTriggered longPressGestureRecognizer: UILongPressGestureRecognizer)
-//}
+// }
 //
-//final class MediaPreviewViewController: UIViewController {
-//    
+// final class MediaPreviewViewController: UIViewController {
+//
 //    let logger = Logger(subsystem: "MediaPreviewViewController", category: "ViewController")
 //
 //    var disposeBag = Set<AnyCancellable>()
@@ -61,15 +63,15 @@ import Kingfisher
 //        pageControl.isUserInteractionEnabled = false    // avoid tap gesture conflict
 //        return pageControl
 //    }()
-//    
+//
 //    deinit {
 //        os_log(.info, log: .debug, "%{public}s[%{public}ld], %{public}s:", ((#file as NSString).lastPathComponent), #line, #function)
 //    }
-//    
-//}
 //
-//extension MediaPreviewViewController {
-//    
+// }
+//
+// extension MediaPreviewViewController {
+//
 //    override func viewDidLoad() {
 //        super.viewDidLoad()
 //
@@ -122,22 +124,22 @@ import Kingfisher
 ////            pageControl.trailingAnchor.constraint(equalTo: pageControlBackgroundVisualEffectView.trailingAnchor),
 ////            pageControl.bottomAnchor.constraint(equalTo: pageControlBackgroundVisualEffectView.bottomAnchor),
 ////        ])
-//        
+//
 ////        pageControl.numberOfPages = viewModel.viewControllers.count
 ////        pageControl.isHidden = viewModel.viewControllers.count == 1
 ////        pageControl.isUserInteractionEnabled = false
 ////        pageControl.addTarget(self, action: #selector(MediaPreviewViewController.pageControlValueDidChanged(_:)), for: .valueChanged)
-//        
+//
 //        viewModel.mediaPreviewImageViewControllerDelegate = self
-//        
+//
 //        pageViewController.interPageSpacing = 10
 //        pageViewController.delegate = self
 //        pageViewController.dataSource = viewModel
-//        
+//
 ////        mediaInfoDescriptionView.delegate = self
-//        
+//
 //        closeButton.addTarget(self, action: #selector(MediaPreviewViewController.closeButtonPressed(_:)), for: .touchUpInside)
-//        
+//
 //        // bind view model
 //        viewModel.$currentPage
 //            .receive(on: DispatchQueue.main)
@@ -147,13 +149,13 @@ import Kingfisher
 //                self.pageControl.currentPage = index
 //            }
 //            .store(in: &disposeBag)
-//        
+//
 //        viewModel.$currentPage
 //            .receive(on: DispatchQueue.main)
 //            .sink { [weak self] _ in
 //                guard let self = self else { return }
 //                guard let currentViewController = self.pageViewController.currentViewController else { return }
-//                
+//
 //                switch currentViewController {
 //                case is MediaPreviewVideoViewController:
 //                    self.toggleControlDisplay(isHidden: true)
@@ -169,16 +171,16 @@ import Kingfisher
 //
 //        visualEffectView.frame = view.bounds
 //    }
-//    
-//}
 //
-//extension MediaPreviewViewController {
+// }
+//
+// extension MediaPreviewViewController {
 //
 //    @objc private func closeButtonPressed(_ sender: UIButton) {
 //        os_log(.info, log: .debug, "%{public}s[%{public}ld], %{public}s", ((#file as NSString).lastPathComponent), #line, #function)
 //        dismiss(animated: true, completion: nil)
 //    }
-//    
+//
 //    @objc private func pageControlValueDidChanged(_ sender: UIPageControl) {
 //        logger.log(level: .debug, "\((#file as NSString).lastPathComponent, privacy: .public)[\(#line, privacy: .public)], \(#function, privacy: .public)")
 //        let currentPage = sender.currentPage
@@ -186,22 +188,22 @@ import Kingfisher
 //              currentPage >= 0,
 //              currentPage < pageCount
 //        else { return }
-//        
+//
 //        pageViewController.scrollToPage(.at(index: currentPage), animated: true, completion: nil)
 //    }
 //
-//}
+// }
 //
-//extension MediaPreviewViewController {
-//    
+// extension MediaPreviewViewController {
+//
 //    func toggleControlDisplay(isHidden: Bool) {
 //        closeButtonBackground.alpha = isHidden ? 0 : 1
 //    }
-//    
-//}
+//
+// }
 //
 //// MARK: - PageboyViewControllerDelegate
-//extension MediaPreviewViewController: PageboyViewControllerDelegate {
+// extension MediaPreviewViewController: PageboyViewControllerDelegate {
 //    func pageboyViewController(
 //        _ pageboyViewController: PageboyViewController,
 //        willScrollToPageAt index: PageboyViewController.PageIndex,
@@ -237,31 +239,31 @@ import Kingfisher
 //        // do nothing
 //    }
 //
-//}
+// }
 //
 //// MARK: - MediaPreviewingViewController
-//extension MediaPreviewViewController: MediaPreviewingViewController {
+// extension MediaPreviewViewController: MediaPreviewingViewController {
 //
 //    func isInteractiveDismissible() -> Bool {
 //        if let mediaPreviewImageViewController = pageViewController.currentViewController as? MediaPreviewImageViewController {
 //            let previewImageView = mediaPreviewImageViewController.previewImageView
-//            
+//
 //            // TODO: allow zooming pan dismiss
 //            guard previewImageView.zoomScale == previewImageView.minimumZoomScale else {
 //                return false
 //            }
-//            
+//
 //            return true
-//            
+//
 //            // let safeAreaInsets = previewImageView.safeAreaInsets
 //            // let statusBarFrameHeight = view.window?.windowScene?.statusBarManager?.statusBarFrame.height ?? 0
-//            
+//
 //            // let allowInteractiveDismiss = previewImageView.contentOffset.y <= -(safeAreaInsets.top - statusBarFrameHeight)
 //            // logger.log(level: .debug, "\((#file as NSString).lastPathComponent, privacy: .public)[\(#line, privacy: .public)], \(#function, privacy: .public): allow interactive dismiss: \(allowInteractiveDismiss) (\(previewImageView.contentOffset.y) <= \(-(safeAreaInsets.top - statusBarFrameHeight)))")
-//            
+//
 //            // return allowInteractiveDismiss
 //        }
-//        
+//
 //        if let _ = pageViewController.currentViewController as? MediaPreviewVideoViewController {
 //            return true
 //        }
@@ -269,15 +271,15 @@ import Kingfisher
 //        return false
 //    }
 //
-//}
+// }
 //
 //// MARK: - MediaPreviewImageViewControllerDelegate
-//extension MediaPreviewViewController: MediaPreviewImageViewControllerDelegate {
+// extension MediaPreviewViewController: MediaPreviewImageViewControllerDelegate {
 //
 //    func mediaPreviewImageViewController(_ viewController: MediaPreviewImageViewController, tapGestureRecognizerDidTrigger tapGestureRecognizer: UITapGestureRecognizer) {
 //        let location = tapGestureRecognizer.location(in: viewController.previewImageView.imageView)
 //        let isContainsTap = viewController.previewImageView.imageView.frame.contains(location)
-//        
+//
 //        guard !isContainsTap else { return }
 //        dismiss(animated: true, completion: nil)
 //    }
@@ -285,29 +287,29 @@ import Kingfisher
 //    func mediaPreviewImageViewController(_ viewController: MediaPreviewImageViewController, longPressGestureRecognizerDidTrigger longPressGestureRecognizer: UILongPressGestureRecognizer) {
 //        let impactFeedbackGenerator = UIImpactFeedbackGenerator(style: .light)
 //        impactFeedbackGenerator.impactOccurred()
-//        
+//
 //        Task {
-//            await AppFacade.responseToMediaShareAction(context: viewModel.context, viewController: self)            
+//            await AppFacade.responseToMediaShareAction(context: viewModel.context, viewController: self)
 //        }
 //    }
 //
-//}
+// }
 //
 //// MARK: - ShareActivityProvider
-//extension MediaPreviewViewController: ShareActivityProvider {
+// extension MediaPreviewViewController: ShareActivityProvider {
 //    var activities: [Any] {
 //        if let provider = pageViewController.currentViewController as? ShareActivityProvider {
 //            return provider.activities
 //        }
-//        
+//
 //        return []
 //    }
-//    
+//
 //    var applicationActivities: [UIActivity] {
 //        if let provider = pageViewController.currentViewController as? ShareActivityProvider {
 //            return provider.applicationActivities
 //        }
-//        
+//
 //        return []
 //    }
-//}
+// }

@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 class AppleUriLauncher: UriLauncher {
     private let openURL: OpenURLAction

@@ -4,12 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.common.flatten
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
@@ -24,7 +21,6 @@ import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
@@ -32,7 +28,6 @@ import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import dev.dimension.flare.ui.presenter.status.LogUserHistoryPresenter
@@ -271,11 +266,11 @@ public abstract class ProfileNewState(
     }
 }
 //
-//public class ProfileWithUserNameAndHostPresenter(
+// public class ProfileWithUserNameAndHostPresenter(
 //    private val userName: String,
 //    private val host: String,
 //    private val accountType: AccountType,
-//) : PresenterBase<UserState>(),
+// ) : PresenterBase<UserState>(),
 //    KoinComponent {
 //    private val accountRepository: AccountRepository by inject()
 //
@@ -292,4 +287,4 @@ public abstract class ProfileNewState(
 //                get() = userState
 //        }
 //    }
-//}
+// }

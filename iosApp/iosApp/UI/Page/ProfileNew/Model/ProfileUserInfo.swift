@@ -10,15 +10,16 @@ struct ProfileUserInfo {
     let fansCount: String
     let fields: [String: UiRichText]
     let canSendMessage: Bool
-    
+
     // 从 ProfileState 创建
     static func from(state: ProfileNewState) -> ProfileUserInfo? {
         // 只有在用户信息加载成功时才创建
         guard case let .success(user) = onEnum(of: state.userState),
-              let profile = user.data as? UiProfile else {
+              let profile = user.data as? UiProfile
+        else {
             return nil
         }
-        
+
         // 获取关系状态
         let relation: UiRelation? = {
             if case let .success(rel) = onEnum(of: state.relationState) {
@@ -26,7 +27,7 @@ struct ProfileUserInfo {
             }
             return nil
         }()
-        
+
         // 获取是否是当前用户
         let isMe: Bool = {
             if case let .success(me) = onEnum(of: state.isMe) {
@@ -34,7 +35,7 @@ struct ProfileUserInfo {
             }
             return false
         }()
-        
+
         // 获取是否可以发送消息
         let canSendMessage: Bool = {
             if case let .success(can) = onEnum(of: state.canSendMessage) {
@@ -42,20 +43,21 @@ struct ProfileUserInfo {
             }
             return false
         }()
-        
+
         // 获取关注和粉丝数
         let followCount = profile.matrices.followsCountHumanized
         let fansCount = profile.matrices.fansCountHumanized
-        
+
         // 获取用户字段信息
         let fields: [String: UiRichText] = {
             if let bottomContent = profile.bottomContent,
-               let fieldsContent = bottomContent as? UiProfileBottomContentFields {
+               let fieldsContent = bottomContent as? UiProfileBottomContentFields
+            {
                 return fieldsContent.fields
             }
             return [:]
         }()
-        
+
         return ProfileUserInfo(
             profile: profile,
             relation: relation,
@@ -66,4 +68,4 @@ struct ProfileUserInfo {
             canSendMessage: canSendMessage
         )
     }
-} 
+}

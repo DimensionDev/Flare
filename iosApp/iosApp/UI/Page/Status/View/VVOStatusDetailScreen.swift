@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct VVOStatusDetailScreen: View {
     @State private var presenter: VVOStatusDetailPresenter
@@ -11,12 +11,13 @@ struct VVOStatusDetailScreen: View {
         presenter = .init(accountType: accountType, statusKey: statusKey)
         self.statusKey = statusKey
     }
+
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
             HStack {
                 if horizontalSizeClass != .compact {
                     switch onEnum(of: state.status) {
-                    case .success(let data): StatusItemView(data: data.data, detailKey: statusKey)
+                    case let .success(data): StatusItemView(data: data.data, detailKey: statusKey)
                     case .loading: StatusPlaceHolder()
                     case .error: EmptyView()
                     }
@@ -24,7 +25,7 @@ struct VVOStatusDetailScreen: View {
                 List {
                     if horizontalSizeClass == .compact {
                         switch onEnum(of: state.status) {
-                        case .success(let data): StatusItemView(data: data.data, detailKey: statusKey)
+                        case let .success(data): StatusItemView(data: data.data, detailKey: statusKey)
                         case .loading: StatusPlaceHolder()
                         case .error: EmptyView()
                         }
@@ -48,7 +49,7 @@ struct VVOStatusDetailScreen: View {
             }
             .navigationTitle("status_detail")
             #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
+                .navigationBarTitleDisplayMode(.inline)
 //            #else
 //            .toolbar {
 //                ToolbarItem(placement: .confirmationAction) {
@@ -62,19 +63,19 @@ struct VVOStatusDetailScreen: View {
 //                }
 //            }
             #endif
-            .toolbar {
-                if horizontalSizeClass != .compact {
-                    ToolbarItem(placement: .primaryAction) {
-                        Picker("notification_type", selection: $type) {
-                            Text("status_detail_repost")
-                                .tag(DetailStatusType.repost)
-                            Text("status_detail_comment")
-                                .tag(DetailStatusType.comment)
+                .toolbar {
+                    if horizontalSizeClass != .compact {
+                        ToolbarItem(placement: .primaryAction) {
+                            Picker("notification_type", selection: $type) {
+                                Text("status_detail_repost")
+                                    .tag(DetailStatusType.repost)
+                                Text("status_detail_comment")
+                                    .tag(DetailStatusType.comment)
+                            }
+                            .pickerStyle(.segmented)
                         }
-                        .pickerStyle(.segmented)
                     }
                 }
-            }
         }
     }
 }

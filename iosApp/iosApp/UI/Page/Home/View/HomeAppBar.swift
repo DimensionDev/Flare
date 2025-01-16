@@ -1,7 +1,7 @@
 import Awesome
+import MarkdownUI
 import shared
 import SwiftUI
-import MarkdownUI
 
 struct HomeAppBar: ToolbarContent {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -16,29 +16,30 @@ struct HomeAppBar: ToolbarContent {
     @ObservedObject var tabSettingsStore: TabSettingsStore
     @State private var scrollOffset: CGFloat = 0
     @State private var scrollReader: ScrollViewProxy?
-    
-    init(router: Router, 
-         accountType: AccountType, 
-         showSettings: Binding<Bool>, 
-         showLogin: Binding<Bool>, 
+
+    init(router: Router,
+         accountType: AccountType,
+         showSettings: Binding<Bool>,
+         showLogin: Binding<Bool>,
          selectedHomeTab: Binding<Int>,
          timelineStore: TimelineStore,
-         tabSettingsStore: TabSettingsStore) {
+         tabSettingsStore: TabSettingsStore)
+    {
         self.router = router
         self.accountType = accountType
-        self._showSettings = showSettings
-        self._showLogin = showLogin
-        self._selectedHomeTab = selectedHomeTab
+        _showSettings = showSettings
+        _showLogin = showLogin
+        _selectedHomeTab = selectedHomeTab
         self.timelineStore = timelineStore
         self.tabSettingsStore = tabSettingsStore
     }
-    
+
     private func onTabSelected(_ tab: FLTabItem) {
         withAnimation {
             timelineStore.updateCurrentPresenter(for: tab)
         }
     }
-    
+
     var body: some ToolbarContent {
         if !(accountType is AccountTypeGuest) {
             // 左边的用户头像按钮
@@ -57,14 +58,14 @@ struct HomeAppBar: ToolbarContent {
                     }
                 }
             }
-            
+
             // 中间的标签栏
             ToolbarItem(placement: .principal) {
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 24) {
                             ForEach(tabSettingsStore.availableTabs, id: \.key) { tab in
-                                Button(action: { 
+                                Button(action: {
                                     onTabSelected(tab)
                                     // 滚动到选中的标签
                                     withAnimation {
@@ -73,18 +74,18 @@ struct HomeAppBar: ToolbarContent {
                                 }) {
                                     VStack(spacing: 4) {
                                         switch tab.metaData.title {
-                                        case .text(let title):
+                                        case let .text(title):
                                             Text(title)
                                                 .font(.system(size: 16))
                                                 .foregroundColor(timelineStore.selectedTabKey == tab.key ? .primary : .gray)
                                                 .fontWeight(timelineStore.selectedTabKey == tab.key ? .semibold : .regular)
-                                        case .localized(let key):
+                                        case let .localized(key):
                                             Text(NSLocalizedString(key, comment: ""))
                                                 .font(.system(size: 16))
                                                 .foregroundColor(timelineStore.selectedTabKey == tab.key ? .primary : .gray)
                                                 .fontWeight(timelineStore.selectedTabKey == tab.key ? .semibold : .regular)
                                         }
-                                        
+
                                         Rectangle()
                                             .fill(timelineStore.selectedTabKey == tab.key ? Color.accentColor : Color.clear)
                                             .frame(height: 2)
@@ -108,7 +109,7 @@ struct HomeAppBar: ToolbarContent {
                     }
                 }
             }
-            
+
             // 右边的设置按钮
             ToolbarItem(placement: .primaryAction) {
                 Button {
@@ -136,4 +137,3 @@ struct HomeAppBar: ToolbarContent {
         }
     }
 }
- 

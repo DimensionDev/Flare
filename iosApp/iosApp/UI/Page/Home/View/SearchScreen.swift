@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct SearchScreen: View {
     var searchText: String = ""
@@ -16,15 +16,15 @@ struct SearchScreen: View {
         ObservePresenter(presenter: presenter) { state in
             List {
                 switch onEnum(of: state.users) {
-                case .success(let data):
+                case let .success(data):
                     Section("search_users_title") {
                         ScrollView(.horizontal, showsIndicators: false) {
                             LazyHStack {
-                                ForEach(0..<data.itemCount, id: \.self) { index in
+                                ForEach(0 ..< data.itemCount, id: \.self) { index in
                                     if let item = data.peek(index: index) {
                                         UserComponent(
                                             user: item,
-                                            topEndContent:nil,
+                                            topEndContent: nil,
                                             onUserClicked: {
                                                 onUserClicked(item)
                                             }

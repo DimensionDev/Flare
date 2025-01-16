@@ -1,21 +1,23 @@
-import SwiftUI
 import FirebaseCore
+import SwiftUI
+
 #if os(iOS)
-typealias ApplicationDelegate = UIApplicationDelegate
+    typealias ApplicationDelegate = UIApplicationDelegate
 #elseif os(macOS)
-typealias ApplicationDelegate = NSApplicationDelegate
+    typealias ApplicationDelegate = NSApplicationDelegate
 #endif
 
 class AppDelegate: NSObject, ApplicationDelegate {
     #if os(macOS)
-    func applicationDidFinishLaunching(_ notification: Notification) {
-        FirebaseApp.configure()
-    }
+        func applicationDidFinishLaunching(_: Notification) {
+            FirebaseApp.configure()
+        }
     #else
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        func application(_: UIApplication,
+                         didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool
+        {
 //      FirebaseApp.configure()
-      return true
-    }
+            true
+        }
     #endif
 }

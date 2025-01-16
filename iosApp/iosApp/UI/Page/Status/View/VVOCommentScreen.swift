@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct VVOCommentScreen: View {
     @State private var presenter: VVOCommentPresenter
@@ -15,7 +15,7 @@ struct VVOCommentScreen: View {
         ObservePresenter(presenter: presenter) { state in
             List {
                 switch onEnum(of: state.root) {
-                case .success(let data): StatusItemView(data: data.data, detailKey: nil)
+                case let .success(data): StatusItemView(data: data.data, detailKey: nil)
                 case .loading: StatusPlaceHolder()
                 case .error: EmptyView()
                 }

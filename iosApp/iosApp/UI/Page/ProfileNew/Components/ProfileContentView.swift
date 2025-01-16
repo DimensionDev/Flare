@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct ProfileContentView: View {
     let tabs: [FLTabItem]
@@ -8,7 +8,7 @@ struct ProfileContentView: View {
     let accountType: AccountType
     let userKey: MicroBlogKey?
     @ObservedObject var tabStore: ProfileTabSettingStore
-    
+
     var body: some View {
         if let selectedTab = tabStore.availableTabs.first(where: { $0.key == tabStore.selectedTabKey }) {
             if selectedTab is FLProfileMediaTabItem {
@@ -34,9 +34,9 @@ struct ProfileContentView: View {
 private struct TimelineView: View {
     let presenter: TimelinePresenter?
     let refresh: () async -> Void
-    
+
     var body: some View {
-        if let presenter = presenter {
+        if let presenter {
             ObservePresenter(presenter: presenter) { state in
                 if let timelineState = state as? TimelineState {
                     List {

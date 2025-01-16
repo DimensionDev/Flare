@@ -1,5 +1,5 @@
-import SwiftUI
 import sharedUI
+import SwiftUI
 
 struct AboutScreen: View {
     @Environment(\.colorScheme) var colorScheme

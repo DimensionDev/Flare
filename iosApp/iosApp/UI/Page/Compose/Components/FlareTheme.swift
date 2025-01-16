@@ -10,7 +10,7 @@ struct FlareTheme<Child>: View where Child: View {
         case .light: .light
         }
         ZStack {
-          Colors.Background.swiftUIPrimary.ignoresSafeArea()
+            Colors.Background.swiftUIPrimary.ignoresSafeArea()
             content()
         }
         .preferredColorScheme(schema)

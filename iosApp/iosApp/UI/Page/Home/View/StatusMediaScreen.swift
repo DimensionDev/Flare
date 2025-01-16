@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct StatusMediaScreen: View {
     @State private var presenter: StatusPresenter
@@ -9,7 +9,7 @@ struct StatusMediaScreen: View {
 
     init(accountType: AccountType, statusKey: MicroBlogKey, index: Int32, dismiss: @escaping () -> Void) {
         presenter = .init(accountType: accountType, statusKey: statusKey)
-        self.initialIndex = index
+        initialIndex = index
         self.dismiss = dismiss
         selectedImage = .init(index + 1)
     }
@@ -22,18 +22,18 @@ struct StatusMediaScreen: View {
                     Text("error")
                 case .loading:
                     Text("loading")
-                case .success(let success):
-                    if case .status(let data) = onEnum(of: success.data.content) {
+                case let .success(success):
+                    if case let .status(data) = onEnum(of: success.data.content) {
                         TabView(selection: $selectedImage) {
-                            ForEach(0..<data.images.count, id: \.self) { index in
+                            ForEach(0 ..< data.images.count, id: \.self) { index in
                                 let item = data.images[index]
                                 FullScreenImageViewer(media: item)
                                     .tag(index)
                             }
                         }
-#if os(iOS)
+                        #if os(iOS)
                         .tabViewStyle(.page)
-#endif
+                        #endif
                     }
                 }
                 VStack {

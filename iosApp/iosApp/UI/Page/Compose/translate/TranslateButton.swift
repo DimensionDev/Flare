@@ -5,7 +5,7 @@ struct TranslateButton: View {
     let onTranslate: () -> Void
     let isTranslating: Bool
     let isTranslated: Bool
-    
+
     var body: some View {
         Button(action: onTranslate) {
             HStack(spacing: 4) {
@@ -37,14 +37,14 @@ struct TranslateButton: View {
             isTranslating: false,
             isTranslated: false
         )
-        
+
         TranslateButton(
             text: "Hello World",
             onTranslate: {},
             isTranslating: true,
             isTranslated: false
         )
-        
+
         TranslateButton(
             text: "Hello World",
             onTranslate: {},
@@ -52,4 +52,4 @@ struct TranslateButton: View {
             isTranslated: true
         )
     }
-} 
+}

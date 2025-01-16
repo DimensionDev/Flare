@@ -1,8 +1,9 @@
-import SwiftUI
-import shared
 import MarkdownUI
+import shared
+import SwiftUI
+
 //
-//struct ProfileHeaderView: View {
+// struct ProfileHeaderView: View {
 //    let userInfo: ProfileUserInfo
 //    let state: ProfileState
 //    let onFollowClick: (UiRelation) -> Void
@@ -14,7 +15,7 @@ import MarkdownUI
 //            onFollowClick: onFollowClick
 //        )
 //    }
-//}
+// }
 
 struct UserFollowsFansCount: View {
     let followCount: String
@@ -42,10 +43,8 @@ struct UserInfoFieldsView: View {
     var body: some View {
         if fields.count > 0 {
             VStack(alignment: .leading) {
-                let keys = fields.map {
-                    $0.key
-                }.sorted()  
-                ForEach(0..<keys.count, id: \.self) { index in
+                let keys = fields.map(\.key).sorted()
+                ForEach(0 ..< keys.count, id: \.self) { index in
                     let key = keys[index]
                     Text(key)
                         .font(.subheadline)
@@ -73,4 +72,4 @@ struct UserInfoFieldsView: View {
             EmptyView()
         }
     }
-} 
+}

@@ -1,6 +1,6 @@
+import shared
 import SwiftUI
 import WebKit
-import shared
 
 struct XQTLoginScreen: View {
     @State var viewModel: XQTViewModel
@@ -9,6 +9,7 @@ struct XQTLoginScreen: View {
         viewModel = .init(toHome: toHome)
         viewModel.clearCookie()
     }
+
     var body: some View {
         Observing(viewModel.presenter.models) { _ in
             ZStack {
@@ -31,11 +32,13 @@ class XQTViewModel {
     init(toHome: @escaping () -> Void) {
         presenter = .init(toHome: toHome)
     }
+
     var configuration: WKWebViewConfiguration {
         let configuration = WKWebViewConfiguration()
         configuration.defaultWebpagePreferences.allowsContentJavaScript = true
         return configuration
     }
+
     func clearCookie() {
         let dataStore = WKWebsiteDataStore.default()
         dataStore.fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
@@ -48,13 +51,15 @@ class XQTViewModel {
             )
         }
     }
+
     func observe(webView: WKWebView) {
         observers.append(webView.observe(\.url, options: .new) { _, _ in
             self.getCookies(webView: webView)
         })
     }
+
     func getCookies(webView: WKWebView) {
-        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { (cookies) in
+        webView.configuration.websiteDataStore.httpCookieStore.getAllCookies { cookies in
             var cookieString = ""
             for cookie in cookies {
                 cookieString += "\(cookie.name)=\(cookie.value); "
@@ -64,6 +69,7 @@ class XQTViewModel {
             }
         }
     }
+
     deinit {
         observers.removeAll()
     }

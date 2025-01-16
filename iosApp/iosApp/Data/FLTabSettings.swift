@@ -1,10 +1,10 @@
 import Foundation
+import ObjectiveC
 import shared
 import SwiftUI
-import ObjectiveC
 
 // 类型别名定义
-//typealias FLUser = UiUserV2
+// typealias FLUser = UiUserV2
 typealias FLMicroBlogKey = MicroBlogKey
 
 // - Tab Settings
@@ -49,7 +49,7 @@ public struct FLTabSettings {
                     ),
                     account: AccountTypeActive.shared,
                     userKey: AccountTypeActive.shared
-                )
+                ),
             ],
             secondaryItems: nil,
             homeTabs: [:]
@@ -63,7 +63,7 @@ public struct FLTabSettings {
                     metaData: FLTabMetaData(
                         title: .localized("Home"),
                         icon: .material(.home)
-                    ), account:AccountTypeGuest.shared
+                    ), account: AccountTypeGuest.shared
                 ),
                 FLDiscoverTabItem(
                     metaData: FLTabMetaData(
@@ -76,7 +76,7 @@ public struct FLTabSettings {
                         title: .localized("Settings"),
                         icon: .material(.settings)
                     )
-                )
+                ),
             ],
             secondaryItems: nil,
             homeTabs: [:]
@@ -87,30 +87,30 @@ public struct FLTabSettings {
     public static func defaultPrimary(user: UiUserV2) -> [FLTabItem] {
         switch user.platformType {
         case .mastodon:
-            return mastodon(accountKey: user.key)
+            mastodon(accountKey: user.key)
         case .misskey:
-            return misskey(accountKey: user.key)
+            misskey(accountKey: user.key)
         case .bluesky:
-            return bluesky(accountKey: user.key)
+            bluesky(accountKey: user.key)
         case .xQt:
-            return xqt(accountKey: user.key)
+            xqt(accountKey: user.key)
         case .vvo:
-            return vvo(accountKey: user.key)
+            vvo(accountKey: user.key)
         }
     }
 
     public static func defaultSecondary(user: UiUserV2) -> [FLTabItem] {
         switch user.platformType {
         case .mastodon:
-            return defaultMastodonSecondaryItems(accountKey: user.key)
+            defaultMastodonSecondaryItems(accountKey: user.key)
         case .misskey:
-            return defaultMisskeySecondaryItems(accountKey: user.key)
+            defaultMisskeySecondaryItems(accountKey: user.key)
         case .bluesky:
-            return defaultBlueskySecondaryItems(accountKey: user.key)
+            defaultBlueskySecondaryItems(accountKey: user.key)
         case .xQt:
-            return defaultXqtSecondaryItems(accountKey: user.key)
+            defaultXqtSecondaryItems(accountKey: user.key)
         case .vvo:
-            return defaultVVOSecondaryItems(accountKey: user.key)
+            defaultVVOSecondaryItems(accountKey: user.key)
         }
     }
 
@@ -144,7 +144,7 @@ public struct FLTabSettings {
                 ),
                 account: AccountTypeSpecific(accountKey: accountKey),
                 userKey: AccountTypeSpecific(accountKey: accountKey)
-            )
+            ),
         ]
     }
 
@@ -184,7 +184,7 @@ public struct FLTabSettings {
                     icon: .mixed(.list, userKey: accountKey)
                 ),
                 account: AccountTypeSpecific(accountKey: accountKey)
-            )
+            ),
         ]
     }
 
@@ -219,7 +219,7 @@ public struct FLTabSettings {
                 ),
                 account: AccountTypeSpecific(accountKey: accountKey),
                 userKey: AccountTypeSpecific(accountKey: accountKey)
-            )
+            ),
         ]
     }
 
@@ -236,7 +236,7 @@ public struct FLTabSettings {
                     title: .localized(.mastodonPublic),
                     icon: .mixed(.world, userKey: accountKey)
                 ), account: AccountTypeSpecific(accountKey: accountKey)
-            )
+            ),
         ]
     }
 
@@ -260,7 +260,7 @@ public struct FLTabSettings {
                     title: .localized(.discover),
                     icon: .mixed(.search, userKey: accountKey)
                 ), account: AccountTypeSpecific(accountKey: accountKey)
-            )
+            ),
         ]
     }
 
@@ -283,7 +283,7 @@ public struct FLTabSettings {
                     title: .localized(.directMessage),
                     icon: .mixed(.messages, userKey: accountKey)
                 ), account: AccountTypeSpecific(accountKey: accountKey)
-            )
+            ),
         ]
     }
 
@@ -315,7 +315,7 @@ public struct FLTabSettings {
                 ),
                 account: AccountTypeSpecific(accountKey: accountKey),
                 userKey: AccountTypeSpecific(accountKey: accountKey)
-            )
+            ),
         ]
     }
 
@@ -332,7 +332,7 @@ public struct FLTabSettings {
                     title: .localized(.bookmark),
                     icon: .mixed(.bookmark, userKey: accountKey)
                 ), account: AccountTypeSpecific(accountKey: accountKey)
-            )
+            ),
         ]
     }
 
@@ -364,11 +364,11 @@ public struct FLTabSettings {
                 ),
                 account: AccountTypeSpecific(accountKey: accountKey),
                 userKey: AccountTypeSpecific(accountKey: accountKey)
-            )
+            ),
         ]
     }
 
-    private static func defaultVVOSecondaryItems(accountKey: FLMicroBlogKey) -> [FLTabItem] {
+    private static func defaultVVOSecondaryItems(accountKey _: FLMicroBlogKey) -> [FLTabItem] {
         [] // VVO 没有次要标签项
     }
 }
@@ -398,41 +398,41 @@ public enum FLMaterialIcon: String, Codable {
     public var icon: Image {
         switch self {
         case .home:
-            return Image(systemName: "house.fill")
+            Image(systemName: "house.fill")
         case .notification:
-            return Image(systemName: "bell.fill")
+            Image(systemName: "bell.fill")
         case .search:
-            return Image(systemName: "magnifyingglass")
+            Image(systemName: "magnifyingglass")
         case .profile:
-            return Image(systemName: "person.circle.fill")
+            Image(systemName: "person.circle.fill")
         case .settings:
-            return Image(systemName: "gear")
+            Image(systemName: "gear")
         case .local:
-            return Image(systemName: "person.2.fill")
+            Image(systemName: "person.2.fill")
         case .world:
-            return Image(systemName: "globe")
+            Image(systemName: "globe")
         case .featured:
-            return Image(systemName: "star.fill")
+            Image(systemName: "star.fill")
         case .bookmark:
-            return Image(systemName: "bookmark.fill")
+            Image(systemName: "bookmark.fill")
         case .heart:
-            return Image(systemName: "heart.fill")
+            Image(systemName: "heart.fill")
         case .twitter:
-            return Image(systemName: "bird.fill")
+            Image(systemName: "bird.fill")
         case .mastodon:
-            return Image("mastodon") // 需要添加自定义图标
+            Image("mastodon") // 需要添加自定义图标
         case .misskey:
-            return Image("misskey") // 需要添加自定义图标
+            Image("misskey") // 需要添加自定义图标
         case .bluesky:
-            return Image("bluesky") // 需要添加自定义图标
+            Image("bluesky") // 需要添加自定义图标
         case .list:
-            return Image(systemName: "list.bullet")
+            Image(systemName: "list.bullet")
         case .feeds:
-            return Image(systemName: "dot.radiowaves.left.and.right")
+            Image(systemName: "dot.radiowaves.left.and.right")
         case .messages:
-            return Image(systemName: "message.fill")
+            Image(systemName: "message.fill")
         case .media:
-            return Image(systemName: "photo.on.rectangle")
+            Image(systemName: "photo.on.rectangle")
         }
     }
 }
@@ -549,7 +549,7 @@ extension FLIconType {
         .material(icon.rawValue)
     }
 
-    static func mixed(_ icon: FLMaterialIcon, userKey: FLMicroBlogKey) -> FLIconType {
+    static func mixed(_ icon: FLMaterialIcon, userKey _: FLMicroBlogKey) -> FLIconType {
         .mixed([icon.rawValue])
     }
 }
@@ -631,9 +631,10 @@ public struct FLSettingsTabItem: FLTabItem {
         // TODO: 需要实现 AccountTypeActive.shared
         fatalError("需要实现 AccountTypeActive.shared")
     }
+
     public var key: String { "settings" }
 
-    public func update(metaData: FLTabMetaData) -> FLTabItem {
+    public func update(metaData _: FLTabMetaData) -> FLTabItem {
         self // Settings tab item is immutable
     }
 }
@@ -810,7 +811,7 @@ public enum FLLocalizedKey: String {
     case profileLikes = "profile_tab_likes"
 
     public var localizedString: String {
-        NSLocalizedString(self.rawValue, comment: "")
+        NSLocalizedString(rawValue, comment: "")
     }
 }
 
@@ -828,12 +829,12 @@ public enum FLTabSettingsError: Error {
 
     var localizedDescription: String {
         switch self {
-        case .serializationError(let message):
-            return "序列化错误: \(message)"
-        case .corruptionError(let message):
-            return "数据损坏: \(message)"
-        case .storageError(let message):
-            return "存储错误: \(message)"
+        case let .serializationError(message):
+            "序列化错误: \(message)"
+        case let .corruptionError(message):
+            "数据损坏: \(message)"
+        case let .storageError(message):
+            "存储错误: \(message)"
         }
     }
 }
@@ -883,7 +884,7 @@ public class FLTabSettingsManager {
 
     // 保存启用的items
     public func saveEnabledItems(_ items: [FLTabItem], for user: UiUserV2) {
-        let itemKeys = items.map { $0.key }
+        let itemKeys = items.map(\.key)
         storage.saveEnabledItems(itemKeys, for: user.platformType, accountKey: user.key)
     }
 
@@ -908,25 +909,25 @@ public class FLTabSettingsManager {
 }
 
 // - Tab Settings Extensions
-extension FLTabSettings {
+public extension FLTabSettings {
     // - Validation
-    public var isValid: Bool {
-        !items.isEmpty && items.allSatisfy { $0.isValid }
+    var isValid: Bool {
+        !items.isEmpty && items.allSatisfy(\.isValid)
     }
 }
 
 // - Tab Item Extensions
-extension FLTabItem {
-    public var isValid: Bool {
+public extension FLTabItem {
+    var isValid: Bool {
         !key.isEmpty
     }
 }
 
 // - Combine Support
-//#if canImport(Combine)
-//import Combine
+// #if canImport(Combine)
+// import Combine
 //
-//extension FLTabSettingsManager {
+// extension FLTabSettingsManager {
 //    public func settingsPublisher() -> AnyPublisher<FLTabSettings, Never> {
 //        NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
 //            .map { [weak self] _ in
@@ -934,14 +935,14 @@ extension FLTabItem {
 //            }
 //            .eraseToAnyPublisher()
 //    }
-//}
-//#endif
+// }
+// #endif
 
 // - SwiftUI Support
-//#if canImport(SwiftUI)
-//import SwiftUI
+// #if canImport(SwiftUI)
+// import SwiftUI
 //
-//extension FLTabSettings {
+// extension FLTabSettings {
 //    @propertyWrapper
 //    public struct UserDefault<T: Codable> {
 //        private let key: String
@@ -976,10 +977,10 @@ extension FLTabItem {
 //            }
 //        }
 //    }
-//}
+// }
 
-//@available(iOS 13.0, *)
-//extension FLTabSettingsManager: ObservableObject {
+// @available(iOS 13.0, *)
+// extension FLTabSettingsManager: ObservableObject {
 //    @Published public private(set) var currentSettings: FLTabSettings {
 //        didSet {
 //            updateSettings(currentSettings)
@@ -995,12 +996,12 @@ extension FLTabItem {
 //            .assign(to: &$currentSettings)
 //        #endif
 //    }
-//}
-//#endif
+// }
+// #endif
 
 // - Timeline Tab Item Extensions
-extension FLTimelineTabItem {
-    public static var `default`: [FLTabItem] {
+public extension FLTimelineTabItem {
+    static var `default`: [FLTabItem] {
         [
             FLHomeTimelineTabItem(
                 metaData: FLTabMetaData(
@@ -1027,11 +1028,11 @@ extension FLTimelineTabItem {
                 ),
                 account: AccountTypeActive.shared,
                 userKey: AccountTypeActive.shared
-            )
+            ),
         ]
     }
 
-    public static var guest: [FLTabItem] {
+    static var guest: [FLTabItem] {
         [
             FLHomeTimelineTabItem(
                 metaData: FLTabMetaData(
@@ -1050,14 +1051,14 @@ extension FLTimelineTabItem {
                     title: .localized(.settings),
                     icon: .material(.settings)
                 )
-            )
+            ),
         ]
     }
 }
 
 // - Home Timeline Tab Item Extensions
-extension FLHomeTimelineTabItem {
-    public init(accountType: AccountType) {
+public extension FLHomeTimelineTabItem {
+    init(accountType: AccountType) {
         self.init(
             metaData: FLTabMetaData(
                 title: .localized(.home),
@@ -1068,13 +1069,13 @@ extension FLHomeTimelineTabItem {
 }
 
 // - Tab Settings Serialization
-//public protocol FLTabSettingsSerializer {
+// public protocol FLTabSettingsSerializer {
 //    func serialize(_ settings: FLTabSettings) throws -> Data
 //    func deserialize(_ data: Data) throws -> FLTabSettings
 //    var defaultValue: FLTabSettings { get }
-//}
+// }
 //
-//public class FLDefaultTabSettingsSerializer: FLTabSettingsSerializer {
+// public class FLDefaultTabSettingsSerializer: FLTabSettingsSerializer {
 //    public init() {}
 //
 //    public func serialize(_ settings: FLTabSettings) throws -> Data {
@@ -1092,10 +1093,10 @@ extension FLHomeTimelineTabItem {
 //    public var defaultValue: FLTabSettings {
 //        FLTabSettings(items: [], secondaryItems: nil, homeTabs: [:])
 //    }
-//}
+// }
 
 // - Tab Settings Storage Extensions
-//extension FLTabSettingsStorage {
+// extension FLTabSettingsStorage {
 //    private struct AssociatedKeys {
 //        static var serializer = UnsafeRawPointer(bitPattern: "fl_tab_settings_serializer".hashValue)!
 //    }
@@ -1123,4 +1124,4 @@ extension FLHomeTimelineTabItem {
 //            )
 //        }
 //    }
-//}
+// }

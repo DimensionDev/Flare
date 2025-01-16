@@ -1,8 +1,8 @@
-import SwiftUI
-import shared
-import PhotosUI
-import Kingfisher
 import Awesome
+import Kingfisher
+import PhotosUI
+import shared
+import SwiftUI
 
 // 添加 PollExpiration 枚举
 enum PollExpiration: String, CaseIterable {
@@ -14,17 +14,17 @@ enum PollExpiration: String, CaseIterable {
     case days1
     case days3
     case days7
-    
+
     var localizedKey: String {
         switch self {
-        case .minutes5: return "compose_poll_expiration_5_minutes"
-        case .minutes30: return "compose_poll_expiration_30_minutes"
-        case .hours1: return "compose_poll_expiration_1_hour"
-        case .hours6: return "compose_poll_expiration_6_hours"
-        case .hours12: return "compose_poll_expiration_12_hours"
-        case .days1: return "compose_poll_expiration_1_day"
-        case .days3: return "compose_poll_expiration_3_days"
-        case .days7: return "compose_poll_expiration_7_days"
+        case .minutes5: "compose_poll_expiration_5_minutes"
+        case .minutes30: "compose_poll_expiration_30_minutes"
+        case .hours1: "compose_poll_expiration_1_hour"
+        case .hours6: "compose_poll_expiration_6_hours"
+        case .hours12: "compose_poll_expiration_12_hours"
+        case .days1: "compose_poll_expiration_1_day"
+        case .days3: "compose_poll_expiration_3_days"
+        case .days7: "compose_poll_expiration_7_days"
         }
     }
 }
@@ -39,6 +39,7 @@ struct ComposeScreen: View {
         self.onBack = onBack
         _viewModel = .init(initialValue: .init(accountType: accountType, status: status))
     }
+
     var body: some View {
         FlareTheme {
             HStack(alignment: .top) {
@@ -69,13 +70,27 @@ struct ComposeScreen: View {
                                         ForEach(viewModel.mediaViewModel.items.indices, id: \.self) { index in
                                             let item = viewModel.mediaViewModel.items[index]
                                             if let image = item.image {
-#if os(macOS)
-                                                Image(nsImage: image)
-                                                    .resizable()
-                                                    .scaledToFill()
-                                                    .frame(width: 128, height: 128)
-                                                    .cornerRadius(8)
-                                                    .contextMenu {
+                                                #if os(macOS)
+                                                    Image(nsImage: image)
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: 128, height: 128)
+                                                        .cornerRadius(8)
+                                                        .contextMenu {
+                                                            Button(action: {
+                                                                withAnimation {
+                                                                    viewModel.mediaViewModel.remove(item: item)
+                                                                }
+                                                            }, label: {
+                                                                Label {
+                                                                    Text("delete")
+                                                                } icon: {
+                                                                    Awesome.Classic.Solid.trash.image
+                                                                }
+                                                            })
+                                                        }
+                                                #else
+                                                    Menu {
                                                         Button(action: {
                                                             withAnimation {
                                                                 viewModel.mediaViewModel.remove(item: item)
@@ -87,28 +102,14 @@ struct ComposeScreen: View {
                                                                 Awesome.Classic.Solid.trash.image
                                                             }
                                                         })
+                                                    } label: {
+                                                        Image(uiImage: image)
+                                                            .resizable()
+                                                            .scaledToFill()
+                                                            .frame(width: 128, height: 128)
+                                                            .cornerRadius(8)
                                                     }
-#else
-                                                Menu {
-                                                    Button(action: {
-                                                        withAnimation {
-                                                            viewModel.mediaViewModel.remove(item: item)
-                                                        }
-                                                    }, label: {
-                                                        Label {
-                                                            Text("delete")
-                                                        } icon: {
-                                                            Awesome.Classic.Solid.trash.image
-                                                        }
-                                                    })
-                                                } label: {
-                                                    Image(uiImage: image)
-                                                        .resizable()
-                                                        .scaledToFill()
-                                                        .frame(width: 128, height: 128)
-                                                        .cornerRadius(8)
-                                                }
-#endif
+                                                #endif
                                             }
                                         }
                                     }
@@ -134,9 +135,9 @@ struct ComposeScreen: View {
                                         Awesome.Classic.Solid.plus.image
                                     }.disabled(viewModel.pollViewModel.choices.count >= 4)
                                 }
-#if os(iOS)
+                                #if os(iOS)
                                 .padding(.vertical)
-#endif
+                                #endif
                                 ForEach(Array(viewModel.pollViewModel.choices.enumerated()), id: \.element.id) { index, choice in
                                     HStack {
                                         TextField(text: $viewModel.pollViewModel.choices[index].text) {
@@ -144,7 +145,7 @@ struct ComposeScreen: View {
                                         }
                                         .textFieldStyle(.roundedBorder)
                                         Button {
-                                            withAnimation { 
+                                            withAnimation {
                                                 viewModel.pollViewModel.remove(choice: choice)
                                             }
                                         } label: {
@@ -152,9 +153,9 @@ struct ComposeScreen: View {
                                         }
                                         .disabled(viewModel.pollViewModel.choices.count <= 2)
                                     }
-#if os(iOS)
+                                    #if os(iOS)
                                     .padding(.bottom)
-#endif
+                                    #endif
                                 }
                                 HStack {
                                     Spacer()
@@ -175,8 +176,9 @@ struct ComposeScreen: View {
                                 }
                             }
                             if let replyState = viewModel.model.replyState,
-                               case .success(let reply) = onEnum(of: replyState),
-                               let content = reply.data.content as? UiTimelineItemContentStatus {
+                               case let .success(reply) = onEnum(of: replyState),
+                               let content = reply.data.content as? UiTimelineItemContentStatus
+                            {
                                 Spacer()
                                     .frame(height: 8)
                                 QuotedStatus(
@@ -203,8 +205,9 @@ struct ComposeScreen: View {
                                 }
                             }
                             if viewModel.mediaViewModel.selectedItems.count == 0,
-                            case .success(let data) = onEnum(of: viewModel.model.composeConfig),
-                               let poll = data.data.poll {
+                               case let .success(data) = onEnum(of: viewModel.model.composeConfig),
+                               let poll = data.data.poll
+                            {
                                 Button(action: {
                                     withAnimation {
                                         viewModel.togglePoll()
@@ -214,7 +217,7 @@ struct ComposeScreen: View {
                                         .frame(width: iconSize, height: iconSize)
                                 })
                             }
-                            if case .success(let visibilityState) = onEnum(of: viewModel.model.visibilityState) {
+                            if case let .success(visibilityState) = onEnum(of: viewModel.model.visibilityState) {
                                 Menu {
                                     ForEach(visibilityState.data.allVisibilities, id: \.self) { visibility in
                                         Button {
@@ -222,15 +225,15 @@ struct ComposeScreen: View {
                                         } label: {
                                             Text(visibility.name)
                                         }
-
                                     }
                                 } label: {
                                     StatusVisibilityComponent(visibility: visibilityState.data.visibility)
                                         .frame(width: iconSize, height: iconSize)
                                 }
                             }
-                            if case .success(let data) = onEnum(of: viewModel.model.composeConfig),
-                                data.data.contentWarning != nil {
+                            if case let .success(data) = onEnum(of: viewModel.model.composeConfig),
+                               data.data.contentWarning != nil
+                            {
                                 Button(action: {
                                     withAnimation {
                                         viewModel.toggleCW()
@@ -253,22 +256,20 @@ struct ComposeScreen: View {
                                         .frame(width: iconSize, height: iconSize)
                                 })
                                 .popover(isPresented: $viewModel.showEmoji) {
-                                    if case .success(let emojis) = onEnum(of: viewModel.model.emojiState) {
+                                    if case let .success(emojis) = onEnum(of: viewModel.model.emojiState) {
                                         ScrollView {
                                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
-                                                ForEach(1...emojis.data.size, id: \.self) { index in
+                                                ForEach(1 ... emojis.data.size, id: \.self) { index in
                                                     let item = emojis.data.get(index: index - 1)
                                                     Button(action: {
                                                         viewModel.addEmoji(emoji: item)
                                                     }, label: {
-                                                         
-                                                            KFImage(URL(string: item.url))
-                                                                .resizable()
-                                                                .scaledToFit()
-                                                         
+                                                        KFImage(URL(string: item.url))
+                                                            .resizable()
+                                                            .scaledToFit()
+
                                                     })
                                                     .buttonStyle(.plain)
-
                                                 }
                                             }
                                             .if(horizontalSizeClass == .compact, transform: { view in

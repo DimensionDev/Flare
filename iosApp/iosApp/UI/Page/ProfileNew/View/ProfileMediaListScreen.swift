@@ -1,10 +1,10 @@
-import SwiftUI
-import shared
 import AVKit
+import JXPhotoBrowser
+import Kingfisher
 import MarkdownUI
 import OrderedCollections
-import Kingfisher
-import JXPhotoBrowser
+import shared
+import SwiftUI
 
 //  - ProfileMediaGridItem
 struct ProfileMediaGridItem: Identifiable {
@@ -17,10 +17,11 @@ struct ProfileMediaGridItem: Identifiable {
 extension ProfileMediaState {
     var allMediaItems: [UiMedia] {
         var items: [UiMedia] = []
-        if case .success(let data) = onEnum(of: mediaState) {
-            for i in 0..<data.itemCount {
+        if case let .success(data) = onEnum(of: mediaState) {
+            for i in 0 ..< data.itemCount {
                 if let mediaItem = data.peek(index: i),
-                   case .status(let statusData) = onEnum(of: mediaItem.status.content) {
+                   case let .status(statusData) = onEnum(of: mediaItem.status.content)
+                {
                     // 按照 timeline 顺序收集所有媒体
                     items.append(contentsOf: statusData.images)
                 }
@@ -38,8 +39,8 @@ struct ProfileMediaListScreen: View {
     @State private var showingMediaPreview = false
     @Environment(\.appSettings) private var appSettings
     @Environment(\.dismiss) private var dismiss
-    
-    init(accountType: AccountType, userKey: MicroBlogKey?, tabStore: ProfileTabSettingStore) {
+
+    init(accountType _: AccountType, userKey _: MicroBlogKey?, tabStore: ProfileTabSettingStore) {
         self.tabStore = tabStore
     }
 
@@ -51,7 +52,8 @@ struct ProfileMediaListScreen: View {
                         ProfileMediaItemView(media: item.media, appSetting: appSettings) {
                             let allImages = state.allMediaItems
                             if !allImages.isEmpty,
-                               let mediaIndex = allImages.firstIndex(where: { $0 === item.media }) {
+                               let mediaIndex = allImages.firstIndex(where: { $0 === item.media })
+                            {
                                 print("Debug: Opening browser with \(allImages.count) images at index \(mediaIndex)")
                                 showPhotoBrowser(media: item.media, images: allImages, initialIndex: mediaIndex)
                             }
@@ -66,7 +68,7 @@ struct ProfileMediaListScreen: View {
         }
     }
 
-    private func showPhotoBrowser(media: UiMedia, images: [UiMedia], initialIndex: Int) {
+    private func showPhotoBrowser(media _: UiMedia, images: [UiMedia], initialIndex: Int) {
         let browser = JXPhotoBrowser()
         browser.scrollDirection = .horizontal
         browser.numberOfItems = { images.count }
@@ -92,22 +94,25 @@ struct ProfileMediaListScreen: View {
             let media = images[context.index]
 
             switch onEnum(of: media) {
-            case .video(let data):
+            case let .video(data):
                 if let url = URL(string: data.url),
-                   let cell = context.cell as? MediaBrowserVideoCell {
+                   let cell = context.cell as? MediaBrowserVideoCell
+                {
                     cell.load(url: url, previewUrl: URL(string: data.thumbnailUrl), isGIF: false)
                 }
-            case .gif(let data):
+            case let .gif(data):
                 if let url = URL(string: data.url),
-                   let cell = context.cell as? MediaBrowserVideoCell {
+                   let cell = context.cell as? MediaBrowserVideoCell
+                {
                     cell.load(url: url, previewUrl: URL(string: data.previewUrl), isGIF: true)
                 }
-            case .image(let data):
+            case let .image(data):
                 if let url = URL(string: data.url),
-                   let cell = context.cell as? JXPhotoBrowserImageCell {
+                   let cell = context.cell as? JXPhotoBrowserImageCell
+                {
                     cell.imageView.kf.setImage(with: url, options: [
                         .transition(.fade(0.25)),
-                        .processor(DownsamplingImageProcessor(size: UIScreen.main.bounds.size))
+                        .processor(DownsamplingImageProcessor(size: UIScreen.main.bounds.size)),
                     ])
                 }
             default:
@@ -144,7 +149,7 @@ struct ProfileMediaListScreen: View {
         // 即将关闭时的处理
         browser.willDismiss = { _ in
             // 返回 true 表示执行动画
-            return true
+            true
         }
 
         browser.show()
@@ -198,8 +203,8 @@ struct WaterfallCollectionView: UIViewRepresentable {
         }
 
         func updateItems() {
-            if case .success(let success) = onEnum(of: parent.state.mediaState) {
-                items = (0..<success.itemCount).compactMap { index -> ProfileMediaGridItem? in
+            if case let .success(success) = onEnum(of: parent.state.mediaState) {
+                items = (0 ..< success.itemCount).compactMap { index -> ProfileMediaGridItem? in
                     guard let item = success.peek(index: index) else { return nil }
                     return ProfileMediaGridItem(id: Int(index), media: item.media, mediaState: item.status)
                 }
@@ -208,7 +213,7 @@ struct WaterfallCollectionView: UIViewRepresentable {
         }
 
         //  - UICollectionViewDataSource
-        func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        func collectionView(_: UICollectionView, numberOfItemsInSection _: Int) -> Int {
             print("numberOfItemsInSection: \(items.count)")
             return items.count
         }
@@ -222,8 +227,8 @@ struct WaterfallCollectionView: UIViewRepresentable {
         }
 
         //  - ZJFlexibleDataSource
-        func numberOfCols(at section: Int) -> Int {
-            return 2
+        func numberOfCols(at _: Int) -> Int {
+            2
         }
 
         func sizeOfItemAtIndexPath(at indexPath: IndexPath) -> CGSize {
@@ -232,15 +237,15 @@ struct WaterfallCollectionView: UIViewRepresentable {
             let height: CGFloat
 
             switch onEnum(of: item.media) {
-            case .image(let data):
+            case let .image(data):
                 print("Image size - width: \(data.width), height: \(data.height)")
                 let aspectRatio = CGFloat(data.width / (data.height == 0 ? 1 : data.height)).isZero ? 1 : CGFloat(data.width / data.height)
                 height = width / aspectRatio
-            case .video(let data):
+            case let .video(data):
                 print("Video size - width: \(data.width), height: \(data.height)")
                 let aspectRatio = CGFloat(data.width / (data.height == 0 ? 1 : data.height)).isZero ? 1 : CGFloat(data.width / data.height)
                 height = width / aspectRatio
-            case .gif(let data):
+            case let .gif(data):
                 print("Gif size - width: \(data.width), height: \(data.height)")
                 let aspectRatio = CGFloat(data.width / (data.height == 0 ? 1 : data.height)).isZero ? 1 : CGFloat(data.width / data.height)
                 height = width / aspectRatio
@@ -256,20 +261,20 @@ struct WaterfallCollectionView: UIViewRepresentable {
             return CGSize(width: width, height: height)
         }
 
-        func spaceOfCells(at section: Int) -> CGFloat {
-            return 4
+        func spaceOfCells(at _: Int) -> CGFloat {
+            4
         }
 
-        func sectionInsets(at section: Int) -> UIEdgeInsets {
-            return UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 4)  // 减小边距
+        func sectionInsets(at _: Int) -> UIEdgeInsets {
+            UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 4) // 减小边距
         }
 
-        func sizeOfHeader(at section: Int) -> CGSize {
-            return .zero
+        func sizeOfHeader(at _: Int) -> CGSize {
+            .zero
         }
 
-        func heightOfAdditionalContent(at indexPath: IndexPath) -> CGFloat {
-            return 0
+        func heightOfAdditionalContent(at _: IndexPath) -> CGFloat {
+            0
         }
     }
 }
@@ -279,7 +284,7 @@ class HostingCell: UICollectionViewCell {
     private var hostingController: UIHostingController<AnyView>?
 
     func setup(with view: AnyView) {
-        if let hostingController = hostingController {
+        if let hostingController {
             hostingController.rootView = view
         } else {
             let controller = UIHostingController(rootView: view)
@@ -292,7 +297,7 @@ class HostingCell: UICollectionViewCell {
                 controller.view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
                 controller.view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
                 controller.view.topAnchor.constraint(equalTo: contentView.topAnchor),
-                controller.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+                controller.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             ])
         }
     }
@@ -303,21 +308,21 @@ struct ProfileMediaItemView: View {
     let appSetting: AppSettings
     let onTap: () -> Void
     @State private var hideSensitive: Bool
-    
+
     init(media: UiMedia, appSetting: AppSettings, onTap: @escaping () -> Void) {
         self.media = media
         self.appSetting = appSetting
         self.onTap = onTap
-        
+
         // 初始化 hideSensitive
         switch onEnum(of: media) {
-        case .image(let image):
-            self._hideSensitive = State(initialValue: !appSetting.appearanceSettings.showSensitiveContent && image.sensitive)
+        case let .image(image):
+            _hideSensitive = State(initialValue: !appSetting.appearanceSettings.showSensitiveContent && image.sensitive)
         default:
-            self._hideSensitive = State(initialValue: false)
+            _hideSensitive = State(initialValue: false)
         }
     }
-    
+
     var body: some View {
         ZStack {
             switch onEnum(of: media) {
@@ -337,7 +342,7 @@ struct ProfileMediaItemView: View {
 //                            .cornerRadius(8)
 //                    }
                 }
-            case .gif(let gif):
+            case let .gif(gif):
                 ZStack {
                     KFImage(URL(string: gif.previewUrl))
                         .cacheOriginalImage()
@@ -367,7 +372,7 @@ struct ProfileMediaItemView: View {
                 .onTapGesture {
                     onTap()
                 }
-            case .image(let image):
+            case let .image(image):
                 ZStack {
                     KFImage(URL(string: image.previewUrl))
                         .cacheOriginalImage()
@@ -387,14 +392,14 @@ struct ProfileMediaItemView: View {
                             view.blur(radius: 32)
                         }
 
-                    if !appSetting.appearanceSettings.showSensitiveContent && image.sensitive {
+                    if !appSetting.appearanceSettings.showSensitiveContent, image.sensitive {
                         SensitiveContentButton(
                             hideSensitive: hideSensitive,
                             action: { hideSensitive.toggle() }
                         )
                     }
                 }
-            case .video(let video):
+            case let .video(video):
                 ZStack {
                     KFImage(URL(string: video.thumbnailUrl))
                         .cacheOriginalImage()
@@ -442,7 +447,8 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
     private var currentURL: URL?
     private var existedPan: UIPanGestureRecognizer?
 
-    required init?(coder: NSCoder) {
+    @available(*, unavailable)
+    required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
@@ -502,9 +508,9 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
     }
 
     // UIGestureRecognizerDelegate
-    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+    public func gestureRecognizer(_: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith _: UIGestureRecognizer) -> Bool {
         // 允许同时识别多个手势
-        return true
+        true
     }
 
     func load(url: URL, previewUrl: URL?, isGIF: Bool) {
@@ -521,7 +527,7 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
         let viewModel = MediaPreviewVideoViewModel(
             mediaSaver: mediaSaver,
             item: isGIF ? .gif(.init(assetURL: url, previewURL: previewUrl))
-                       : .video(.init(assetURL: url, previewURL: previewUrl))
+                : .video(.init(assetURL: url, previewURL: previewUrl))
         )
 
         // Create and setup new view controller
@@ -534,7 +540,7 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
         newVC.view.translatesAutoresizingMaskIntoConstraints = false
 
         // Add as child view controller
-        if let parentViewController = self.findViewController() {
+        if let parentViewController = findViewController() {
             parentViewController.addChild(newVC)
             newVC.didMove(toParent: parentViewController)
         }
@@ -543,7 +549,7 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
             newVC.view.leadingAnchor.constraint(equalTo: leadingAnchor),
             newVC.view.trailingAnchor.constraint(equalTo: trailingAnchor),
             newVC.view.topAnchor.constraint(equalTo: topAnchor),
-            newVC.view.bottomAnchor.constraint(equalTo: bottomAnchor)
+            newVC.view.bottomAnchor.constraint(equalTo: bottomAnchor),
         ])
 
         // 默认不自动播放，等待 willDisplay 时再播放
@@ -553,9 +559,10 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
     private func cleanupCurrentVideo() {
         // 暂停当前播放的视频
         if let viewModel = videoViewController?.viewModel,
-           let player = viewModel.player {
+           let player = viewModel.player
+        {
             player.pause()
-            player.replaceCurrentItem(with: nil)  // 清除播放器项
+            player.replaceCurrentItem(with: nil) // 清除播放器项
         }
 
         // 移除视频控制器
@@ -571,7 +578,8 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
     func willDisplay() {
         // 显示时开始播放视频
         if let viewModel = videoViewController?.viewModel,
-           let player = viewModel.player {
+           let player = viewModel.player
+        {
             player.play()
         }
     }
@@ -600,9 +608,8 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
 //  - JXPhotoBrowserCell
 extension MediaBrowserVideoCell: JXPhotoBrowserCell {
     static func generate(with browser: JXPhotoBrowser) -> Self {
-        let instance = Self.init(frame: .zero)
+        let instance = Self(frame: .zero)
         instance.photoBrowser = browser
         return instance
     }
 }
- 

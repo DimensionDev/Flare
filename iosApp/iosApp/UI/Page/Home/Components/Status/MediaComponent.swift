@@ -1,20 +1,20 @@
-import SwiftUI
-import shared
-import Kingfisher
 import AVKit
+import Kingfisher
+import shared
+import SwiftUI
 
-//medias
+// medias
 struct MediaComponent: View {
     @State var hideSensitive: Bool
     let medias: [UiMedia]
     let onMediaClick: (Int, UiMedia) -> Void
     let sensitive: Bool
-    
+
     var body: some View {
         let showSensitiveButton = medias.allSatisfy { media in
             media is UiMediaImage || media is UiMediaVideo
         } && sensitive
-        
+
         ZStack(alignment: .topLeading) {
             let mediaViewModels = medias.map { media -> FeedMediaViewModel in
                 switch media {
@@ -30,7 +30,7 @@ struct MediaComponent: View {
                     fatalError("Unsupported media type")
                 }
             }
-            
+
             // build tweet medias layout
             FeedMediaGridView(
                 action: { ctx in
@@ -44,12 +44,11 @@ struct MediaComponent: View {
                 preferredPaddingGridLayoutOnly: false,
                 preferredApplyCornerRadius: true
             )
-            //视频sensitive 模糊遮照层
+            // 视频sensitive 模糊遮照层
             .if(hideSensitive, transform: { view in
-                 view.blur(radius: 32)
-             })
- 
-            
+                view.blur(radius: 32)
+            })
+
             if showSensitiveButton {
                 SensitiveContentButton(
                     hideSensitive: hideSensitive,
@@ -62,10 +61,10 @@ struct MediaComponent: View {
     }
 }
 
-//这个地方要合并，重构掉 todo:
+// 这个地方要合并，重构掉 todo:
 struct MediaItemComponent: View {
     let media: UiMedia
-    
+
     var body: some View {
         let viewModel = FeedMediaViewModel(media: media)
         LensMediaView(
@@ -77,7 +76,7 @@ struct MediaItemComponent: View {
     }
 }
 
-//struct MutedVideoPlayer: View {
+// struct MutedVideoPlayer: View {
 //    let player: AVPlayer
 //    let autoPlay: Bool
 //    init(url: String, autoPlay: Bool = true) {
@@ -97,4 +96,4 @@ struct MediaItemComponent: View {
 //                    }
 //            }
 //    }
-//}
+// }

@@ -6,31 +6,33 @@
 //  Copyright © 2020 Twidere. All rights reserved.
 //
 
-import UIKit
 import Combine
 import CoreData
-//import CoreDataStack
-//import Pageboy
-//import MaskCore
-//import TwitterSDK
+import UIKit
+
+// import CoreDataStack
+// import Pageboy
+// import MaskCore
+// import TwitterSDK
 import Kingfisher
+
 //
-//final class MediaPreviewViewModel: NSObject {
-//    
+// final class MediaPreviewViewModel: NSObject {
+//
 //    var observations = Set<NSKeyValueObservation>()
-//    
+//
 //    weak var mediaPreviewImageViewControllerDelegate: MediaPreviewImageViewControllerDelegate?
 //
 //    // input
 //    let context: AppContext
 //    let item: Item
 //    let transitionItem: MediaPreviewTransitionItem
-//    
+//
 //    @Published var currentPage: Int
-//    
+//
 //    // output
 //    let viewControllers: [UIViewController]
-//    
+//
 //    init(
 //        context: AppContext,
 //        item: Item,
@@ -90,7 +92,7 @@ import Kingfisher
 //                        // FIXME:
 //                        // assertionFailure("Use system AVPlayerViewController directly")
 //                        // viewControllers.append(UIViewController())
-//                        
+//
 //                        let viewController = MediaPreviewImageViewController()
 //                        viewController.viewModel = MediaPreviewImageViewModel(
 //                            context: context,
@@ -120,21 +122,21 @@ import Kingfisher
 //        }()
 //        super.init()
 //    }
-//    
-//}
 //
-//extension MediaPreviewViewModel {
-//    
+// }
+//
+// extension MediaPreviewViewModel {
+//
 //    enum Item {
 //        case media(MediaPreviewContext)
 //        case statusMedia(StatusMediaPreviewContext)
 //    }
-//    
+//
 //    struct MediaPreviewContext {
 //        let sources: [Kingfisher.Source?]
 //        let initialIndex: Int
 //        let preloadThumbnails: [UIImage?]
-//        
+//
 //        func thumbnail(at index: Int) -> UIImage? {
 //            guard index < preloadThumbnails.count else { return nil }
 //            return preloadThumbnails[index]
@@ -146,18 +148,18 @@ import Kingfisher
 //        let attachments: [Twitter.Entity.V2.Media]
 //        let initialIndex: Int
 //        let preloadThumbnails: [UIImage?]
-//        
+//
 //        func thumbnail(at index: Int) -> UIImage? {
 //            guard index < preloadThumbnails.count else { return nil }
 //            return preloadThumbnails[index]
 //        }
 //    }
-//       
-//}
+//
+// }
 //
 //// MARK: - PageboyViewControllerDataSource
-//extension MediaPreviewViewModel: PageboyViewControllerDataSource {
-//    
+// extension MediaPreviewViewModel: PageboyViewControllerDataSource {
+//
 //    func numberOfViewControllers(in pageboyViewController: PageboyViewController) -> Int {
 //        return viewControllers.count
 //    }
@@ -178,5 +180,5 @@ import Kingfisher
 //            return .at(index: previewContext.initialIndex)
 //        }
 //    }
-//    
-//}
+//
+// }

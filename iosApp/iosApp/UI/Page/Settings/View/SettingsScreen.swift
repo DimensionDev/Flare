@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct SettingsScreen: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
@@ -77,6 +77,6 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
     case storage
     case about
     public var id: String {
-        self.rawValue
+        rawValue
     }
 }

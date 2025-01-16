@@ -1,14 +1,13 @@
-import UIKit
 import MJRefresh
-
+import UIKit
 
 class ProfileNewListViewController: UIViewController {
-    lazy var tableView: UITableView = UITableView(frame: CGRect.zero, style: .plain)
-    var dataSource: [String] = [String]()
+    lazy var tableView: UITableView = .init(frame: CGRect.zero, style: .plain)
+    var dataSource: [String] = .init()
     var isNeedHeader = false
     var isNeedFooter = false
     var isHeaderRefreshed = false
-    var listViewDidScrollCallback: ((UIScrollView) -> ())?
+    var listViewDidScrollCallback: ((UIScrollView) -> Void)?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,7 +18,7 @@ class ProfileNewListViewController: UIViewController {
         tableView.delegate = self
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         view.addSubview(tableView)
-        
+
         if isNeedHeader {
             tableView.mj_header = MJRefreshNormalHeader(refreshingTarget: self, refreshingAction: #selector(headerRefresh))
         }
@@ -29,7 +28,7 @@ class ProfileNewListViewController: UIViewController {
                 tableView.contentInsetAdjustmentBehavior = .never
             }
         } else {
-            //列表的contentInsetAdjustmentBehavior失效，需要自己设置底部inset
+            // 列表的contentInsetAdjustmentBehavior失效，需要自己设置底部inset
             tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         }
         beginFirstRefresh()
@@ -69,9 +68,10 @@ class ProfileNewListViewController: UIViewController {
 }
 
 // MARK: - UITableViewDataSource, UITableViewDelegate
+
 extension ProfileNewListViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return isHeaderRefreshed ? dataSource.count : 0
+    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
+        isHeaderRefreshed ? dataSource.count : 0
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -80,22 +80,23 @@ extension ProfileNewListViewController: UITableViewDataSource, UITableViewDelega
         return cell
     }
 
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 50
+    func tableView(_: UITableView, heightForRowAt _: IndexPath) -> CGFloat {
+        50
     }
-    
+
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         listViewDidScrollCallback?(scrollView)
     }
 }
 
 // MARK: - JXPagingViewListViewDelegate
+
 extension ProfileNewListViewController: JXPagingViewListViewDelegate {
     func listView() -> UIView { view }
-    
+
     func listScrollView() -> UIScrollView { tableView }
-    
-    func listViewDidScrollCallback(callback: @escaping (UIScrollView) -> ()) {
-        self.listViewDidScrollCallback = callback
+
+    func listViewDidScrollCallback(callback: @escaping (UIScrollView) -> Void) {
+        listViewDidScrollCallback = callback
     }
-} 
+}

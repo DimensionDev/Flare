@@ -5,7 +5,7 @@ struct AppBarTabItem: Identifiable, Hashable, Codable {
     var title: String
     var tag: Int
     var isEnabled: Bool
-    
+
     init(id: String = UUID().uuidString, title: String, tag: Int, isEnabled: Bool = true) {
         self.id = id
         self.title = title

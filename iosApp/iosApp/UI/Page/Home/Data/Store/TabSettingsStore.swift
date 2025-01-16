@@ -18,7 +18,7 @@ class TabSettingsStore: ObservableObject {
         self.timelineStore = timelineStore
         observeUser()
     }
-    
+
     private func observeUser() {
         Task { @MainActor in
             for await state in presenter.models {
@@ -30,30 +30,30 @@ class TabSettingsStore: ObservableObject {
     }
 
     private func initializeWithUser(_ user: UiUserV2) {
-        if isInitializing || self.currentUser?.key == user.key {
+        if isInitializing || currentUser?.key == user.key {
             return
         }
-        
+
         isInitializing = true
-        self.currentUser = user
-        
+        currentUser = user
+
         // 1. 加载默认配置
         primaryItems = FLTabSettings.defaultPrimary(user: user)
         secondaryItems = FLTabSettings.defaultSecondary(user: user)
-        
+
         // 2. 加载存储的配置
         loadStoredItems(user)
-        
+
         // 3. 更新可用标签
         updateAvailableTabs()
-        
+
         // 4. 如果没有选中的标签，选中第一个
         if timelineStore.selectedTabKey == nil {
             if let firstItem = availableTabs.first {
                 timelineStore.updateCurrentPresenter(for: firstItem)
             }
         }
-        
+
         isInitializing = false
     }
 
@@ -78,7 +78,7 @@ class TabSettingsStore: ObservableObject {
 
     func toggleTab(_ id: String) {
         guard let user = currentUser else { return }
-        
+
         if storeItems.contains(where: { $0.key == id }) {
             // 关闭标签：从 storeItems 中移除
             storeItems.removeAll { $0.key == id }
@@ -88,7 +88,7 @@ class TabSettingsStore: ObservableObject {
                 storeItems.append(item)
             }
         }
-        
+
         saveTabs()
     }
 

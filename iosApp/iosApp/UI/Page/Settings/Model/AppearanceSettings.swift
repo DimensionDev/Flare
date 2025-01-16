@@ -1,8 +1,8 @@
 import Foundation
 
 struct AppearanceSettings: Codable, Changeable {
-    var theme: Theme = Theme.auto
-    var avatarShape: AvatarShape = AvatarShape.circle
+    var theme: Theme = .auto
+    var avatarShape: AvatarShape = .circle
     var showActions: Bool = true
     var showNumbers: Bool = true
     var showLinkPreview: Bool = true
@@ -10,13 +10,13 @@ struct AppearanceSettings: Codable, Changeable {
     var showSensitiveContent: Bool = false
     var swipeGestures: Bool = false
     var autoTranslate: Bool = false
-    var mastodon: Mastodon = Mastodon()
-    var misskey: Misskey = Misskey()
-    var bluesky: Bluesky = Bluesky()
+    var mastodon: Mastodon = .init()
+    var misskey: Misskey = .init()
+    var bluesky: Bluesky = .init()
     struct Mastodon: Codable, Changeable {
         var showVisibility: Bool = true
-        var swipeLeft: SwipeActions = SwipeActions.reply
-        var swipeRight: SwipeActions = SwipeActions.none
+        var swipeLeft: SwipeActions = .reply
+        var swipeRight: SwipeActions = .none
         enum SwipeActions: Codable {
             case none
             case reply
@@ -25,11 +25,12 @@ struct AppearanceSettings: Codable, Changeable {
             case bookmark
         }
     }
+
     struct Misskey: Codable, Changeable {
         var showVisibility: Bool = true
         var showReaction: Bool = true
-        var swipeLeft: SwipeActions = SwipeActions.reply
-        var swipeRight: SwipeActions = SwipeActions.none
+        var swipeLeft: SwipeActions = .reply
+        var swipeRight: SwipeActions = .none
         enum SwipeActions: Codable {
             case none
             case reply
@@ -37,9 +38,10 @@ struct AppearanceSettings: Codable, Changeable {
             case favourite
         }
     }
+
     struct Bluesky: Codable, Changeable {
-        var swipeLeft: SwipeActions = SwipeActions.reply
-        var swipeRight: SwipeActions = SwipeActions.none
+        var swipeLeft: SwipeActions = .reply
+        var swipeRight: SwipeActions = .none
         enum SwipeActions: Codable {
             case none
             case reply

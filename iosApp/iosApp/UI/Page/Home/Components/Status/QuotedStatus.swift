@@ -1,8 +1,8 @@
-import SwiftUI
-import shared
 import MarkdownUI
+import shared
+import SwiftUI
 
-//引用
+// 引用
 struct QuotedStatus: View {
     @State private var showMedia: Bool = false
     @Environment(\.openURL) private var openURL
@@ -10,7 +10,7 @@ struct QuotedStatus: View {
 
     let data: UiTimelineItemContentStatus
     let onMediaClick: (Int, UiMedia) -> Void
-    
+
     var body: some View {
         Button(action: {
             data.onClicked(ClickContext(launcher: AppleUriLauncher(openURL: openURL)))
@@ -35,7 +35,7 @@ struct QuotedStatus: View {
                             .foregroundColor(.gray)
                     }
                     .padding(.horizontal, 9)
-                }  
+                }
 
                 // 原文和翻译
                 FlareText(data.content.raw, style: .quote)
@@ -43,11 +43,11 @@ struct QuotedStatus: View {
                         openURL(url)
                     }
                     .font(.system(size: 16))
-                
+
                 if appSettings.appearanceSettings.autoTranslate {
                     TranslatableText(originalText: data.content.raw)
                 }
-                
+
                 Spacer()
                     .frame(height: 8)
                 if !data.images.isEmpty {

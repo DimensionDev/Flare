@@ -1,5 +1,5 @@
-import SwiftUI
 import Kingfisher
+import SwiftUI
 
 // tweet 方格 单个 Media View ，最底层的了
 public struct LensMediaView: View {
@@ -7,7 +7,7 @@ public struct LensMediaView: View {
     let isSingleVideo: Bool
     let fixedAspectRatio: CGFloat?
     let action: () -> Void
-    
+
     public var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -21,7 +21,7 @@ public struct LensMediaView: View {
                         .aspectRatio(fixedAspectRatio, contentMode: .fill)
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .clipped()
-                         
+
                 } else {
                     Rectangle()
                         .foregroundColor(.gray.opacity(0.2))

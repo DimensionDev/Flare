@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct ObservePresenter<Value, Presenter: PresenterBase<Value>, Content: View>: View {
     let presenter: Presenter
@@ -8,7 +8,7 @@ struct ObservePresenter<Value, Presenter: PresenterBase<Value>, Content: View>: 
 
     init(presenter: Presenter, @ViewBuilder content: @escaping (Value) -> Content) {
         self.presenter = presenter
-        self.state = self.presenter.models.value
+        state = self.presenter.models.value
         self.content = content
     }
 

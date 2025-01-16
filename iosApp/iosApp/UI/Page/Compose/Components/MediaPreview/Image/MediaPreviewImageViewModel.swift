@@ -6,27 +6,28 @@
 //  Copyright © 2020 Twidere. All rights reserved.
 //
 
-import UIKit
 import Combine
-//import MaskCore
+import UIKit
+
+// import MaskCore
 import Kingfisher
 
-//class MediaPreviewImageViewModel {
-//    
+// class MediaPreviewImageViewModel {
+//
 //    // input
 //    let context: AppContext
 //    let item: Item
-//        
+//
 //    init(context: AppContext, item: Item) {
 //        self.context = context
 //        self.item = item
 //    }
-//        
-//}
 //
-//extension MediaPreviewImageViewModel {
+// }
+//
+// extension MediaPreviewImageViewModel {
 //    struct Item {
 //        let source: Kingfisher.Source?
 //        let thumbnail: UIImage?
 //    }
-//}
+// }

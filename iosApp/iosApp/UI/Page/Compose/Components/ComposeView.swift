@@ -3,10 +3,9 @@ import SwiftUI
 
 struct ComposeView: UIViewControllerRepresentable {
     let controller: UIViewController
-    func makeUIViewController(context: Context) -> UIViewController {
-        return controller
+    func makeUIViewController(context _: Context) -> UIViewController {
+        controller
     }
 
-    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
-    }
+    func updateUIViewController(_: UIViewController, context _: Context) {}
 }

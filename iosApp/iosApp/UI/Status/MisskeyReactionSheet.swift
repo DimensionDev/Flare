@@ -1,6 +1,6 @@
-import SwiftUI
-import shared
 import Kingfisher
+import shared
+import SwiftUI
 
 struct MisskeyReactionSheet: View {
     @State private var presenter: MisskeyReactionPresenter
@@ -15,9 +15,9 @@ struct MisskeyReactionSheet: View {
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
             ScrollView {
-                if case .success(let data) = onEnum(of: state.emojis) {
+                if case let .success(data) = onEnum(of: state.emojis) {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
-                        ForEach(0..<data.data.size, id: \.self) { index in
+                        ForEach(0 ..< data.data.size, id: \.self) { index in
                             let item = data.data.get(index: index)
                             Button(action: {
                                 state.select(emoji: item)

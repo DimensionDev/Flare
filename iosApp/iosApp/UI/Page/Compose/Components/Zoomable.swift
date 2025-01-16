@@ -1,8 +1,7 @@
-import SwiftUI
 import NetworkImage
+import SwiftUI
 
 struct Zoomable: View {
-
     let url: String
 
     @State private var scale: CGFloat = 1
@@ -86,6 +85,6 @@ struct Zoomable: View {
                 offset = newOffset
             }
         }
-        self.lastTranslation = .zero
+        lastTranslation = .zero
     }
 }

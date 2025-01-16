@@ -3,9 +3,9 @@ import SwiftUI
 struct SensitiveContentButton: View {
     let hideSensitive: Bool
     let action: () -> Void
-    
+
     var body: some View {
-        ZStack() {
+        ZStack {
             if hideSensitive {
                 Button(action: {
                     withAnimation {
@@ -13,22 +13,22 @@ struct SensitiveContentButton: View {
                     }
                 }, label: {
                     Text("status_sensitive_media", comment: "Status media sensitive button")
-                        .foregroundColor(.white) 
+                        .foregroundColor(.white)
                         .padding(.horizontal, 16)
                         .padding(.vertical, 8)
                         .background(.ultraThinMaterial)
                         .cornerRadius(8)
-                }) 
+                })
                 .buttonStyle(.plain)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             } else {
                 Button(action: {
                     withAnimation {
                         action()
-                    } 
+                    }
                 }, label: {
                     Image(systemName: "eye.slash")
-                        .foregroundColor(.white) 
+                        .foregroundColor(.white)
                 })
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)

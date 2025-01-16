@@ -7,7 +7,7 @@ public struct FlareText: View {
     private let twitterTextProvider: TwitterTextProvider
     private let style: FlareMarkdownText.Style
     private var linkHandler: ((URL) -> Void)?
-    
+
     public init(
         _ text: String,
         twitterTextProvider: TwitterTextProvider = SwiftTwitterTextProvider(),
@@ -17,13 +17,13 @@ public struct FlareText: View {
         self.twitterTextProvider = twitterTextProvider
         self.style = style
     }
-    
+
     public func onLinkTap(_ handler: @escaping (URL) -> Void) -> FlareText {
         var view = self
         view.linkHandler = handler
         return view
     }
-    
+
     public var body: some View {
         Text(AttributedString(processText(text)))
             .multilineTextAlignment(.leading)
@@ -35,7 +35,7 @@ public struct FlareText: View {
                 return .handled
             })
     }
-    
+
     private func processText(_ text: String) -> NSAttributedString {
         let (attributedString, _, _) = FlareMarkdownText.attributeString(
             of: text,
@@ -46,26 +46,26 @@ public struct FlareText: View {
 }
 
 #if DEBUG
-struct FlareText_Previews: PreviewProvider {
-    static var previews: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            FlareText("Hello @user! Check out #swiftui and $AAPL")
-            
-            FlareText(
-                "Custom style example",
-                style: .init(
-                    font: .systemFont(ofSize: 18, weight: .medium),
-                    textColor: .darkText,
-                    linkColor: .systemPurple,
-                    mentionColor: .systemGreen,
-                    hashtagColor: .systemOrange,
-                    cashtagColor: .systemRed
+    struct FlareText_Previews: PreviewProvider {
+        static var previews: some View {
+            VStack(alignment: .leading, spacing: 20) {
+                FlareText("Hello @user! Check out #swiftui and $AAPL")
+
+                FlareText(
+                    "Custom style example",
+                    style: .init(
+                        font: .systemFont(ofSize: 18, weight: .medium),
+                        textColor: .darkText,
+                        linkColor: .systemPurple,
+                        mentionColor: .systemGreen,
+                        hashtagColor: .systemOrange,
+                        cashtagColor: .systemRed
+                    )
                 )
-            )
-            
-            FlareText("https://example.com and **bold** text")
+
+                FlareText("https://example.com and **bold** text")
+            }
+            .padding()
         }
-        .padding()
     }
-}
 #endif

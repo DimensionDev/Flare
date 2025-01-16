@@ -1,35 +1,35 @@
-import SwiftUI
 import shared
+import SwiftUI
 
-//tweet medias 布局gridView layout view
+// tweet medias 布局gridView layout view
 public struct FeedMediaGridView: View {
     static var spacing: CGFloat { 8 }
     static var cornerRadius: CGFloat { 12 }
-    
+
     public let action: (ActionContext) -> Void
-    
+
     @State
     public var viewModels: [FeedMediaViewModel]
-    
+
     @State
     private var contentSize: CGSize = .zero
-    
+
     public let idealWidth: CGFloat?
     public let idealHeight: CGFloat
     public var fixedAspectRatio: CGFloat?
-    
+
     var cornerRadius: CGFloat {
         option.preferredApplyCornerRadius
             ? FeedMediaGridView.cornerRadius
             : .zero
     }
-    
+
     public struct Option {
         public var horizontalPadding: CGFloat
         public var preferredPaddingGridLayout: Bool
         public var preferredApplyCornerRadius: Bool
         public var layoutAllMedias: Bool
-        
+
         public init(
             horizontalPadding: CGFloat,
             preferredPaddingGridLayout: Bool,
@@ -42,9 +42,9 @@ public struct FeedMediaGridView: View {
             self.layoutAllMedias = layoutAllMedias
         }
     }
-    
+
     public let option: Option
-    
+
     public init(
         action: @escaping (ActionContext) -> Void = { _ in },
         viewModels: [FeedMediaViewModel],
@@ -68,7 +68,7 @@ public struct FeedMediaGridView: View {
             layoutAllMedias: layoutAllMedias
         )
     }
-    
+
     public struct ActionContext {
         public let index: Int
         public let viewModels: [FeedMediaViewModel]
@@ -77,11 +77,11 @@ public struct FeedMediaGridView: View {
             self.viewModels = viewModels
         }
     }
-    
+
     public var body: some View {
         Group {
             let viewModels = viewModels.filter(\.isActive)
-            
+
             switch viewModels.count {
             case 0:
                 EmptyView()
@@ -132,8 +132,8 @@ public struct FeedMediaGridView: View {
             }
         }
     }
-    
-    //tweet 单张图片
+
+    // tweet 单张图片
     private func singleMediaView(of viewModel: FeedMediaViewModel) -> some View {
         LensMediaView(
             viewModel: viewModel,
@@ -165,8 +165,8 @@ public struct FeedMediaGridView: View {
             }
         }
     }
-    
-    //方格中 --- 单个图片的view
+
+    // 方格中 --- 单个图片的view
     private func mediaView(of viewModel: FeedMediaViewModel, at index: Int) -> some View {
         LensMediaView(
             viewModel: viewModel,

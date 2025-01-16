@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct AccountsScreen: View {
     @State private var presenter = AccountsPresenter()
@@ -9,27 +9,27 @@ struct AccountsScreen: View {
         ObservePresenter(presenter: presenter) { state in
             List {
                 switch onEnum(of: state.accounts) {
-                case .success(let data):
+                case let .success(data):
                     if data.data.size > 0 {
-                        ForEach(0..<data.data.size, id: \.self) { index in
+                        ForEach(0 ..< data.data.size, id: \.self) { index in
                             let item = data.data.get(index: index)
                             switch onEnum(of: item.second) {
-                            case .success(let user):
+                            case let .success(user):
                                 Button {
                                     NotificationCenter.default.post(name: .accountChanged, object: nil)
                                     state.setActiveAccount(accountKey: user.data.key)
                                 } label: {
                                     HStack {
-                                        UserComponent(user: user.data,topEndContent:nil ,onUserClicked: {})
+                                        UserComponent(user: user.data, topEndContent: nil, onUserClicked: {})
                                         Spacer()
                                         switch onEnum(of: state.activeAccount) {
-                                        case .success(let activeAccount):
+                                        case let .success(activeAccount):
                                             Image(
                                                 systemName: activeAccount.data.accountKey == user.data.key ?
                                                     "checkmark.circle.fill" :
                                                     "circle"
                                             )
-                                                .foregroundStyle(.blue)
+                                            .foregroundStyle(.blue)
                                         default:
                                             Image(systemName: "circle")
                                                 .foregroundStyle(.blue)
@@ -45,13 +45,13 @@ struct AccountsScreen: View {
                                 }
                                 .buttonStyle(.plain)
                                 #if os(macOS)
-                                .contextMenu {
-                                    Button(role: .destructive) {
-                                        state.removeAccount(accountKey: user.data.key)
-                                    } label: {
-                                        Label("delete", systemImage: "trash")
+                                    .contextMenu {
+                                        Button(role: .destructive) {
+                                            state.removeAccount(accountKey: user.data.key)
+                                        } label: {
+                                            Label("delete", systemImage: "trash")
+                                        }
                                     }
-                                }
                                 #endif
                             case .error:
                                 Text("error")

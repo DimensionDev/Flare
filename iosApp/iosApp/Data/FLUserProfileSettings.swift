@@ -13,21 +13,21 @@ public typealias AccountTypeSpecific = shared.AccountTypeSpecific
 //  - Profile Tab Settings
 public extension FLTabSettings {
     // Profile Tab 类型
-    public enum FLProfileTabType {
+    enum FLProfileTabType {
         case timeline(TimelineType)
         case media
-        
+
         public enum TimelineType {
             case status
             case statusWithReplies
             case likes
         }
     }
-    
+
     // 获取 Profile 的默认三个 tab
     static func defaultThree(user: UiUserV2, userKey: MicroBlogKey?) -> [FLTabItem] {
         let actualUserKey = userKey ?? user.key
-        
+
         switch user.platformType {
         case .mastodon:
             return [
@@ -48,7 +48,7 @@ public extension FLTabSettings {
                     account: AccountTypeSpecific(accountKey: user.key),
                     userKey: actualUserKey,
                     type: .statusWithReplies
-                )
+                ),
             ]
         case .misskey:
             return [
@@ -69,7 +69,7 @@ public extension FLTabSettings {
                     account: AccountTypeSpecific(accountKey: user.key),
                     userKey: actualUserKey,
                     type: .statusWithReplies
-                )
+                ),
             ]
         case .bluesky:
             return [
@@ -99,7 +99,7 @@ public extension FLTabSettings {
                     account: AccountTypeSpecific(accountKey: user.key),
                     userKey: actualUserKey,
                     type: .likes
-                )
+                ),
             ]
         case .xQt:
             return [
@@ -129,7 +129,7 @@ public extension FLTabSettings {
                     account: AccountTypeSpecific(accountKey: user.key),
                     userKey: actualUserKey,
                     type: .likes
-                )
+                ),
             ]
         case .vvo:
             return [
@@ -165,14 +165,14 @@ public extension FLTabSettings {
 //     public let userKey: MicroBlogKey
 //     public let type: FLTabSettings.FLProfileTabType.TimelineType
 //     public var key: String { "profile_timeline_\(account)_\(type)" }
-    
+
 //     public init(metaData: FLTabMetaData, account: AccountTypeSpecific, userKey: MicroBlogKey, type: FLTabSettings.FLProfileTabType.TimelineType) {
 //         self.metaData = metaData
 //         self.account = account
 //         self.userKey = userKey
 //         self.type = type
 //     }
-    
+
 //     public func update(metaData: FLTabMetaData) -> FLTabItem {
 //         FLProfileTimelineTabItem(metaData: metaData, account: account as! AccountTypeSpecific, userKey: userKey, type: type)
 //     }
@@ -193,24 +193,22 @@ public extension FLTabSettings {
 //     }
 // }
 
-//public struct FLProfileMediaTabItem: FLTabItem {
+// public struct FLProfileMediaTabItem: FLTabItem {
 //    public let metaData: FLTabMetaData
 //    public let account: AccountType
 //    public let userKey: MicroBlogKey
 //    public var key: String { "profile_media_\(account)" }
-//    
+//
 //    public init(metaData: FLTabMetaData, account: AccountTypeSpecific, userKey: MicroBlogKey) {
 //        self.metaData = metaData
 //        self.account = account
 //        self.userKey = userKey
 //    }
-//    
+//
 //    public func update(metaData: FLTabMetaData) -> FLTabItem {
 //        FLProfileMediaTabItem(metaData: metaData, account: account as! AccountTypeSpecific, userKey: userKey)
 //    }
-//}
-
-
+// }
 
 //  - Platform Specific Profile Tab Items
 // Bluesky
@@ -220,30 +218,30 @@ public struct FLProfileBlueskyTimelineTabItem: FLTimelineTabItem {
     public let userKey: MicroBlogKey?
     public let type: FLTabSettings.FLProfileTabType.TimelineType
     public var key: String { "profile_timeline_bluesky_\(account)_\(type)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         BlueskyUserTimelinePresenter(accountType: account, userKey: userKey, type: type.toProfileTabType())
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLProfileBlueskyTimelineTabItem(metaData: metaData, account: account, userKey: userKey, type: type)
     }
 }
 
-//public struct FLProfileBlueskyMediaTabItem: FLTimelineTabItem {
+// public struct FLProfileBlueskyMediaTabItem: FLTimelineTabItem {
 //    public let metaData: FLTabMetaData
 //    public let account: AccountType
 //    public let userKey: MicroBlogKey?
 //    public var key: String { "profile_media_bluesky_\(account)" }
-//    
+//
 //    public func createPresenter() -> TimelinePresenter {
 //        BlueskyUserMediaPresenter(accountType: account, userKey: userKey)
 //    }
-//    
+//
 //    public func update(metaData: FLTabMetaData) -> FLTabItem {
 //        FLProfileBlueskyMediaTabItem(metaData: metaData, account: account, userKey: userKey)
 //    }
-//}
+// }
 
 // Mastodon
 public struct FLProfileMastodonTimelineTabItem: FLTimelineTabItem {
@@ -252,30 +250,30 @@ public struct FLProfileMastodonTimelineTabItem: FLTimelineTabItem {
     public let userKey: MicroBlogKey?
     public let type: FLTabSettings.FLProfileTabType.TimelineType
     public var key: String { "profile_timeline_mastodon_\(account)_\(type)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         MastodonUserTimelinePresenter(accountType: account, userKey: userKey, type: type.toProfileTabType())
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLProfileMastodonTimelineTabItem(metaData: metaData, account: account, userKey: userKey, type: type)
     }
 }
 
-//public struct FLProfileMastodonMediaTabItem: FLTimelineTabItem {
+// public struct FLProfileMastodonMediaTabItem: FLTimelineTabItem {
 //    public let metaData: FLTabMetaData
 //    public let account: AccountType
 //    public let userKey: MicroBlogKey?
 //    public var key: String { "profile_media_mastodon_\(account)" }
-//    
+//
 //    public func createPresenter() -> TimelinePresenter {
 //        MastodonUserMediaPresenter(accountType: account, userKey: userKey)
 //    }
-//    
+//
 //    public func update(metaData: FLTabMetaData) -> FLTabItem {
 //        FLProfileMastodonMediaTabItem(metaData: metaData, account: account, userKey: userKey)
 //    }
-//}
+// }
 
 // Misskey
 public struct FLProfileMisskeyTimelineTabItem: FLTimelineTabItem {
@@ -284,30 +282,30 @@ public struct FLProfileMisskeyTimelineTabItem: FLTimelineTabItem {
     public let userKey: MicroBlogKey?
     public let type: FLTabSettings.FLProfileTabType.TimelineType
     public var key: String { "profile_timeline_misskey_\(account)_\(type)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         MisskeyUserTimelinePresenter(accountType: account, userKey: userKey, type: type.toProfileTabType())
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLProfileMisskeyTimelineTabItem(metaData: metaData, account: account, userKey: userKey, type: type)
     }
 }
 
-//public struct FLProfileMisskeyMediaTabItem: FLTimelineTabItem {
+// public struct FLProfileMisskeyMediaTabItem: FLTimelineTabItem {
 //    public let metaData: FLTabMetaData
 //    public let account: AccountType
 //    public let userKey: MicroBlogKey?
 //    public var key: String { "profile_media_misskey_\(account)" }
-//    
+//
 //    public func createPresenter() -> TimelinePresenter {
 //        MisskeyUserMediaPresenter(accountType: account, userKey: userKey)
 //    }
-//    
+//
 //    public func update(metaData: FLTabMetaData) -> FLTabItem {
 //        FLProfileMisskeyMediaTabItem(metaData: metaData, account: account, userKey: userKey)
 //    }
-//}
+// }
 
 // XQT
 public struct FLProfileXQTTimelineTabItem: FLTimelineTabItem {
@@ -316,31 +314,30 @@ public struct FLProfileXQTTimelineTabItem: FLTimelineTabItem {
     public let userKey: MicroBlogKey?
     public let type: FLTabSettings.FLProfileTabType.TimelineType
     public var key: String { "profile_timeline_xqt_\(account)_\(type)" }
-    
+
     public func createPresenter() -> TimelinePresenter {
         XQTUserTimelinePresenter(accountType: account, userKey: userKey, type: type.toProfileTabType())
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLProfileXQTTimelineTabItem(metaData: metaData, account: account, userKey: userKey, type: type)
     }
 }
 
-//public struct FLProfileXQTMediaTabItem: FLTimelineTabItem {
+// public struct FLProfileXQTMediaTabItem: FLTimelineTabItem {
 //    public let metaData: FLTabMetaData
 //    public let account: AccountType
 //    public let userKey: MicroBlogKey?
 //    public var key: String { "profile_media_xqt_\(account)" }
-//    
+//
 //    public func createPresenter() -> TimelinePresenter {
 //        XQTUserMediaPresenter(accountType: account, userKey: userKey)
 //    }
-//    
+//
 //    public func update(metaData: FLTabMetaData) -> FLTabItem {
 //        FLProfileXQTMediaTabItem(metaData: metaData, account: account, userKey: userKey)
 //    }
-//}
-
+// }
 
 //  - Profile Tab Items
 public struct FLProfileMediaTabItem: FLTabItem {
@@ -348,13 +345,13 @@ public struct FLProfileMediaTabItem: FLTabItem {
     public let account: AccountType
     public let userKey: MicroBlogKey?
     public var key: String { "profile_media_\(account)" }
-    
+
     public init(metaData: FLTabMetaData, account: AccountTypeSpecific, userKey: MicroBlogKey?) {
         self.metaData = metaData
         self.account = account
         self.userKey = userKey
     }
-    
+
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLProfileMediaTabItem(metaData: metaData, account: account as! AccountTypeSpecific, userKey: userKey)
     }
@@ -365,12 +362,11 @@ extension FLTabSettings.FLProfileTabType.TimelineType {
     func toProfileTabType() -> ProfileTabTimeline.Type_ {
         switch self {
         case .status:
-            return .status
+            .status
         case .statusWithReplies:
-            return .statusWithReplies
+            .statusWithReplies
         case .likes:
-            return .likes
+            .likes
         }
     }
 }
-

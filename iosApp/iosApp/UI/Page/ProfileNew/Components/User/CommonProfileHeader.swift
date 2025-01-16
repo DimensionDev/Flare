@@ -1,12 +1,12 @@
-import SwiftUI
-import MarkdownUI
-import Kingfisher
-import shared
 import Awesome
 import Foundation
+import Kingfisher
+import MarkdownUI
+import shared
+import SwiftUI
 
 // Generated
-//@_exported import Generated
+// @_exported import Generated
 
 enum CommonProfileHeaderConstants {
     static let headerHeight: CGFloat = 200
@@ -27,14 +27,14 @@ struct CompactLabelStyle: LabelStyle {
  */
 struct CommonProfileHeader: View {
     let userInfo: ProfileUserInfo
-    let state: ProfileState?
+    let state: ProfileNewState?
     let onFollowClick: (UiRelation) -> Void
     @State private var isBannerValid: Bool = true
 
     var body: some View {
         // banner
         ZStack(alignment: .top) {
-            if let banner = userInfo.profile.banner, !banner.isEmpty && banner.range(of: "^https?://.*example\\.com.*$", options: .regularExpression) == nil && isBannerValid {
+            if let banner = userInfo.profile.banner, !banner.isEmpty, banner.range(of: "^https?://.*example\\.com.*$", options: .regularExpression) == nil, isBannerValid {
                 Color.clear.overlay {
                     KFImage(URL(string: banner))
                         .onSuccess { result in
@@ -53,26 +53,26 @@ struct CommonProfileHeader: View {
                 DynamicBannerBackground(avatarUrl: userInfo.profile.avatar)
                     .ignoresSafeArea(edges: [.top, .horizontal])
             }
-            //user avatar
+            // user avatar
             VStack(alignment: .leading) {
                 Spacer().frame(height: 1)
 
                 HStack(alignment: .center) {
-                    //avatar
+                    // avatar
                     VStack {
                         Spacer()
                             .frame(
                                 height: CommonProfileHeaderConstants.headerHeight -
-                                CommonProfileHeaderConstants.avatarSize - 1
+                                    CommonProfileHeaderConstants.avatarSize - 1
                             )
                         UserAvatar(data: userInfo.profile.avatar, size: CommonProfileHeaderConstants.avatarSize)
                     }
- 
-                    //user name
+
+                    // user name
                     VStack(alignment: .leading, spacing: 4) {
                         Spacer()
                             .frame(height: CommonProfileHeaderConstants.headerHeight -
-                                  CommonProfileHeaderConstants.avatarSize - 1)
+                                CommonProfileHeaderConstants.avatarSize - 1)
                         Markdown(userInfo.profile.name.markdown)
                             .font(.headline)
                             .markdownInlineImageProvider(.emoji)
@@ -82,7 +82,7 @@ struct CommonProfileHeader: View {
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                                 .lineLimit(1)
-                            ForEach(0..<userInfo.profile.mark.count, id: \.self) { index in
+                            ForEach(0 ..< userInfo.profile.mark.count, id: \.self) { index in
                                 let mark = userInfo.profile.mark[index]
                                 switch mark {
                                 case .cat: Awesome.Classic.Solid.cat.image.opacity(0.6)
@@ -128,20 +128,18 @@ struct CommonProfileHeader: View {
                             }
                         }
                     }
-                   
                 }
- 
-                //user desc
+
+                // user desc
                 if let desc = userInfo.profile.description_?.markdown {
                     Markdown(desc)
                         .markdownInlineImageProvider(.emoji)
                 }
-                 
-                //user follows -  user fans
+
+                // user follows -  user fans
 //                MatrixView(followCount: userInfo.profile.matrices.followsCountHumanized, fansCount: userInfo.profile.matrices.fansCountHumanized)
 
-  
-                //user Location  user url
+                // user Location  user url
 //                 if let bottomContent = userInfo.profile.bottomContent {
 //                     switch onEnum(of: bottomContent) {
 //                     case .fields(let data):
@@ -168,7 +166,7 @@ struct CommonProfileHeader: View {
 //                                 .background(Color(.systemGray6))
 //                                 .cornerRadius(6)
 //                                         }
-                            
+
 //                             if let urlValue = data.items[.url] {
 //                                     Label(
 //                                     title: {
@@ -189,79 +187,78 @@ struct CommonProfileHeader: View {
 //                                 .cornerRadius(6)
 //                             }
 
-// //                            if let verifyValue = data.items[.verify] {
-// //                                Label(
-// //                                    title: {
-// //                                        Markdown(verifyValue.markdown)
-// //                                            .font(.footnote)
-// //                                            .markdownInlineImageProvider(.emoji)
-// //                                    },
-// //                                    icon: {
-// //                                        Image("attributes/calendar").renderingMode(.template)
-// //                                    }
-// //                                )
-// //                                .labelStyle(CompactLabelStyle())
-// //                                .padding(.horizontal, 8)
-// //                                .padding(.vertical, 4)
-// //                                .background(Color(.systemGray6))
-// //                                .cornerRadius(6)
-// //                            }
+                // //                            if let verifyValue = data.items[.verify] {
+                // //                                Label(
+                // //                                    title: {
+                // //                                        Markdown(verifyValue.markdown)
+                // //                                            .font(.footnote)
+                // //                                            .markdownInlineImageProvider(.emoji)
+                // //                                    },
+                // //                                    icon: {
+                // //                                        Image("attributes/calendar").renderingMode(.template)
+                // //                                    }
+                // //                                )
+                // //                                .labelStyle(CompactLabelStyle())
+                // //                                .padding(.horizontal, 8)
+                // //                                .padding(.vertical, 4)
+                // //                                .background(Color(.systemGray6))
+                // //                                .cornerRadius(6)
+                // //                            }
 //                         }
 //                     }
 //                 }
-
             }
             .padding([.horizontal])
         }
-       .toolbar {
-        if let state = state {
-            if case .success(let isMe) = onEnum(of: state.isMe), !isMe.data.boolValue {
-                Menu {
-                    if case .success(let user) = onEnum(of: state.userState) {
-                        if case .success(let relation) = onEnum(of: state.relationState),
-                           case .success(let actions) = onEnum(of: state.actions),
-                           actions.data.size > 0
-                        {
-                            ForEach(0..<actions.data.size, id: \.self) { index in
-                                let item = actions.data.get(index: index)
-                                Button(action: {
-                                    Task {
-                                        try? await item.invoke(userKey: user.data.key, relation: relation.data)
-                                    }
-                                }, label: {
-                                    let text = switch onEnum(of: item) {
-                                    case .block(let block): if block.relationState(relation: relation.data) {
-                                        String(localized: "unblock")
-                                    } else {
-                                        String(localized: "block")
-                                    }
-                                    case .mute(let mute): if mute.relationState(relation: relation.data) {
-                                        String(localized: "unmute")
-                                    } else {
-                                        String(localized: "mute")
-                                    }
-                                    }
-                                    let icon = switch onEnum(of: item) {
-                                    case .block(let block): if block.relationState(relation: relation.data) {
-                                        "xmark.circle"
-                                    } else {
-                                        "checkmark.circle"
-                                    }
-                                    case .mute(let mute): if mute.relationState(relation: relation.data) {
-                                        "speaker"
-                                    } else {
-                                        "speaker.slash"
-                                    }
-                                    }
-                                    Label(text, systemImage: icon)
-                                })
+        .toolbar {
+            if let state {
+                if case let .success(isMe) = onEnum(of: state.isMe), !isMe.data.boolValue {
+                    Menu {
+                        if case let .success(user) = onEnum(of: state.userState) {
+                            if case let .success(relation) = onEnum(of: state.relationState),
+                               case let .success(actions) = onEnum(of: state.actions),
+                               actions.data.size > 0
+                            {
+                                ForEach(0 ..< actions.data.size, id: \.self) { index in
+                                    let item = actions.data.get(index: index)
+                                    Button(action: {
+                                        Task {
+                                            try? await item.invoke(userKey: user.data.key, relation: relation.data)
+                                        }
+                                    }, label: {
+                                        let text = switch onEnum(of: item) {
+                                        case let .block(block): if block.relationState(relation: relation.data) {
+                                                String(localized: "unblock")
+                                            } else {
+                                                String(localized: "block")
+                                            }
+                                        case let .mute(mute): if mute.relationState(relation: relation.data) {
+                                                String(localized: "unmute")
+                                            } else {
+                                                String(localized: "mute")
+                                            }
+                                        }
+                                        let icon = switch onEnum(of: item) {
+                                        case let .block(block): if block.relationState(relation: relation.data) {
+                                                "xmark.circle"
+                                            } else {
+                                                "checkmark.circle"
+                                            }
+                                        case let .mute(mute): if mute.relationState(relation: relation.data) {
+                                                "speaker"
+                                            } else {
+                                                "speaker.slash"
+                                            }
+                                        }
+                                        Label(text, systemImage: icon)
+                                    })
+                                }
                             }
+                            Button(action: { state.report(userKey: user.data.key) }, label: {
+                                Label("report", systemImage: "exclamationmark.bubble")
+                            })
                         }
-                        Button(action: { state.report(userKey: user.data.key) }, label: {
-                            Label("report", systemImage: "exclamationmark.bubble")
-                        })
-                    }
-                } label: {
+                    } label: {
                         Image(systemName: "ellipsis.circle")
                     }
                 }
@@ -272,7 +269,7 @@ struct CommonProfileHeader: View {
 
 struct DynamicBannerBackground: View {
     let avatarUrl: String
-    
+
     var body: some View {
         ZStack {
             // 放大的头像背景
@@ -287,7 +284,7 @@ struct DynamicBannerBackground: View {
                         gradient: Gradient(colors: [
                             Color.black.opacity(0.3),
                             Color.black.opacity(0.1),
-                            Color.black.opacity(0.3)
+                            Color.black.opacity(0.3),
                         ]),
                         startPoint: .leading,
                         endPoint: .trailing
@@ -304,27 +301,27 @@ extension UIImage {
     var averageColor: UIColor? {
         guard let inputImage = CIImage(image: self) else { return nil }
         let extentVector = CIVector(x: inputImage.extent.origin.x,
-                                  y: inputImage.extent.origin.y,
-                                  z: inputImage.extent.size.width,
-                                  w: inputImage.extent.size.height)
+                                    y: inputImage.extent.origin.y,
+                                    z: inputImage.extent.size.width,
+                                    w: inputImage.extent.size.height)
 
         guard let filter = CIFilter(name: "CIAreaAverage",
-                                  parameters: [kCIInputImageKey: inputImage,
-                                             kCIInputExtentKey: extentVector]) else { return nil }
+                                    parameters: [kCIInputImageKey: inputImage,
+                                                 kCIInputExtentKey: extentVector]) else { return nil }
         guard let outputImage = filter.outputImage else { return nil }
 
         var bitmap = [UInt8](repeating: 0, count: 4)
         let context = CIContext(options: [.workingColorSpace: kCFNull as Any])
         context.render(outputImage,
-                      toBitmap: &bitmap,
-                      rowBytes: 4,
-                      bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
-                      format: .RGBA8,
-                      colorSpace: nil)
+                       toBitmap: &bitmap,
+                       rowBytes: 4,
+                       bounds: CGRect(x: 0, y: 0, width: 1, height: 1),
+                       format: .RGBA8,
+                       colorSpace: nil)
 
         return UIColor(red: CGFloat(bitmap[0]) / 255,
-                      green: CGFloat(bitmap[1]) / 255,
-                      blue: CGFloat(bitmap[2]) / 255,
-                      alpha: CGFloat(bitmap[3]) / 255)
+                       green: CGFloat(bitmap[1]) / 255,
+                       blue: CGFloat(bitmap[2]) / 255,
+                       alpha: CGFloat(bitmap[3]) / 255)
     }
 }

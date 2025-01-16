@@ -1,4 +1,5 @@
 import Foundation
+import os.log
 import shared
 import SwiftUI
 
@@ -9,20 +10,20 @@ class ProfileTabSettingStore: ObservableObject {
     @Published var currentUser: UiUserV2?
     @Published var currentPresenter: TimelinePresenter?
     @Published var currentMediaPresenter: ProfileMediaPresenter?
-    
+
     //  - Private Properties
     private var timelineStore: TimelineStore
     private var isInitializing = false
     private var presenter = ActiveAccountPresenter()
-    private var presenterCache: [String: TimelinePresenter] = [:]  // 添加缓存
+    private var presenterCache: [String: TimelinePresenter] = [:] // 添加缓存
     private var mediaPresenterCache: [String: ProfileMediaPresenter] = [:] // 媒体presenter缓存
-    
+
     //  - Initialization
     init(timelineStore: TimelineStore, userKey: MicroBlogKey?) {
         self.timelineStore = timelineStore
         observeUser(userKey: userKey)
     }
-    
+
     private func observeUser(userKey: MicroBlogKey?) {
         Task { @MainActor in
             for await state in presenter.models {
@@ -32,36 +33,36 @@ class ProfileTabSettingStore: ObservableObject {
             }
         }
     }
-    
+
     //  - Public Methods
     func initializeWithUser(_ user: UiUserV2, userKey: MicroBlogKey?) {
-        if isInitializing || self.currentUser?.key == user.key {
+        if isInitializing || currentUser?.key == user.key {
             return
         }
-        
+
         isInitializing = true
-        self.currentUser = user
-        
+        currentUser = user
+
         // 更新可用标签
         updateTabs(user: user, userKey: userKey)
-        
+
         // 如果没有选中的标签，选中第一个
-        if selectedTabKey == nil {
-            if let firstItem = availableTabs.first {
-                selectTab(firstItem.key)
-            }
+//        if selectedTabKey == nil {
+        if let firstItem = availableTabs.first {
+            selectTab(firstItem.key)
         }
-        
+//        }
+
         isInitializing = false
     }
-    
+
     func selectTab(_ key: String) {
         selectedTabKey = key
         if let selectedItem = availableTabs.first(where: { $0.key == key }) {
             updateCurrentPresenter(for: selectedItem)
         }
     }
-    
+
     func updateCurrentPresenter(for tab: FLTabItem) {
         selectedTabKey = tab.key
         if tab is FLProfileMediaTabItem {
@@ -77,13 +78,16 @@ class ProfileTabSettingStore: ObservableObject {
                 }
             }
         } else if let presenter = getOrCreatePresenter(for: tab) {
-            currentPresenter = nil  // 先设置为 nil 触发 UI 更新
-//            DispatchQueue.main.async {
-                self.currentPresenter = presenter
-//            }
+            // 直接设置 presenter，不使用 withAnimation
+            currentPresenter = presenter
+
+            // 确保 presenter 已经设置完成
+            DispatchQueue.main.async {
+                os_log("[📔][ProfileTabSettingStore]更新当前 presenter: tab=%{public}@, presenter=%{public}@", log: .default, type: .debug, tab.key, String(describing: self.currentPresenter))
+            }
         }
     }
-    
+
     func getOrCreatePresenter(for tab: FLTabItem) -> TimelinePresenter? {
         if let timelineItem = tab as? FLTimelineTabItem {
             let key = tab.key
@@ -97,18 +101,18 @@ class ProfileTabSettingStore: ObservableObject {
         }
         return nil
     }
-    
+
     func clearCache() {
         presenterCache.removeAll()
         mediaPresenterCache.removeAll()
         currentMediaPresenter = nil
     }
-    
+
     //  - Private Methods
     private func updateTabs(user: UiUserV2, userKey: MicroBlogKey?) {
         // 根据平台类型获取对应的标签
         var tabs = FLTabSettings.defaultThree(user: user, userKey: userKey)
-        
+
         // 添加 media tab 到倒数第二的位置
         let mediaTab = FLProfileMediaTabItem(
             metaData: FLTabMetaData(
@@ -118,19 +122,19 @@ class ProfileTabSettingStore: ObservableObject {
             account: AccountTypeSpecific(accountKey: user.key),
             userKey: userKey
         )
-        
+
         // 插入到倒数第二的位置
         if tabs.isEmpty {
             tabs.append(mediaTab)
         } else {
             tabs.insert(mediaTab, at: max(0, tabs.count - 1))
         }
-        
+
         availableTabs = tabs
-        
+
         // 如果没有选中的标签，选中第一个
         if selectedTabKey == nil, let firstTab = availableTabs.first {
             selectTab(firstTab.key)
         }
     }
-} 
+}

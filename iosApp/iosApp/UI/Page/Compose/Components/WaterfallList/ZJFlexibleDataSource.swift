@@ -1,5 +1,5 @@
 //
-//  ZJFlexibleLayoutDataSource.swift
+//  ZJFlexibleDataSource.swift
 //  ZJFlexibleLayoutDemo
 //
 //  Created by ZhuFaner on 2017/10/24.
@@ -8,35 +8,35 @@
 
 import UIKit
 
-public protocol ZJFlexibleDataSource: class{
-    //控制对应section的瀑布流列数
+public protocol ZJFlexibleDataSource: AnyObject {
+    // 控制对应section的瀑布流列数
     func numberOfCols(at section: Int) -> Int
-    //控制每个cell的尺寸，实际上就是获取宽高比
-    func sizeOfItemAtIndexPath(at indexPath : IndexPath) -> CGSize
-    //控制瀑布流cell的间距
+    // 控制每个cell的尺寸，实际上就是获取宽高比
+    func sizeOfItemAtIndexPath(at indexPath: IndexPath) -> CGSize
+    // 控制瀑布流cell的间距
     func spaceOfCells(at section: Int) -> CGFloat
-    //边距
+    // 边距
     func sectionInsets(at section: Int) -> UIEdgeInsets
-    //每个section的header尺寸
+    // 每个section的header尺寸
     func sizeOfHeader(at section: Int) -> CGSize
-    //每个cell的额外高度
-    func heightOfAdditionalContent(at indexPath : IndexPath) -> CGFloat
+    // 每个cell的额外高度
+    func heightOfAdditionalContent(at indexPath: IndexPath) -> CGFloat
 }
 
-extension ZJFlexibleDataSource{
-    func spaceOfCells(at section: Int) -> CGFloat{
-        return 0
+extension ZJFlexibleDataSource {
+    func spaceOfCells(at _: Int) -> CGFloat {
+        0
     }
-    
-    func sectionInsets(at section: Int) -> UIEdgeInsets{
-        return UIEdgeInsets.zero
+
+    func sectionInsets(at _: Int) -> UIEdgeInsets {
+        UIEdgeInsets.zero
     }
-    
-    func sizeOfHeader(at section: Int) -> CGSize{
-        return CGSize.zero
+
+    func sizeOfHeader(at _: Int) -> CGSize {
+        CGSize.zero
     }
-    
-    func heightOfAdditionalContent(at indexPath : IndexPath) -> CGFloat{
-        return 0
+
+    func heightOfAdditionalContent(at _: IndexPath) -> CGFloat {
+        0
     }
 }

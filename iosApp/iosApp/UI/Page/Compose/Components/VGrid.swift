@@ -15,10 +15,10 @@ struct CustomGrid<Item, ItemView>: View where ItemView: View {
                     itemBuilder(firstItem)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
-                
+
                 // Right column with two items
                 VStack(spacing: 0.3) {
-                    ForEach(1..<3) { index in
+                    ForEach(1 ..< 3) { index in
                         itemBuilder(items[index])
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
@@ -28,9 +28,9 @@ struct CustomGrid<Item, ItemView>: View where ItemView: View {
         } else {
             // Default grid layout for other cases
             VStack(spacing: 0.3) {
-                ForEach(0..<rowsCount, id: \.self) { rowIndex in
+                ForEach(0 ..< rowsCount, id: \.self) { rowIndex in
                     HStack(spacing: 0.3) {
-                        ForEach(0..<columns, id: \.self) { columnIndex in
+                        ForEach(0 ..< columns, id: \.self) { columnIndex in
                             if let item = itemFor(row: rowIndex, column: columnIndex) {
                                 itemBuilder(item)
                                     .frame(maxWidth: .infinity)

@@ -98,7 +98,7 @@ struct ServiceSelectScreen: View {
                                 }
                             }
                         } else if state.instances.isLoading {
-                            ForEach(0 ... 5, id: \.self) { _ in  // 减少占位符数量
+                            ForEach(0 ... 5, id: \.self) { _ in // 减少占位符数量
                                 InstancePlaceHolder()
                             }
                         } else {
@@ -339,23 +339,23 @@ struct ServiceSelectScreen: View {
         // 移除常见的HTML标签
         var result = html
         let patterns = [
-            "<[^>]+>",  // 移除所有HTML标签
-            "&nbsp;",   // 替换特殊字符
+            "<[^>]+>", // 移除所有HTML标签
+            "&nbsp;", // 替换特殊字符
             "&amp;",
             "&lt;",
             "&gt;",
-            "&quot;"
+            "&quot;",
         ]
-        
+
         let replacements = [
-            "",         // 对应标签的替换
+            "", // 对应标签的替换
             " ",
             "&",
             "<",
             ">",
-            "\""
+            "\"",
         ]
-        
+
         for (pattern, replacement) in zip(patterns, replacements) {
             if let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive) {
                 result = regex.stringByReplacingMatches(
@@ -366,7 +366,7 @@ struct ServiceSelectScreen: View {
                 )
             }
         }
-        
+
         // 处理连续的空白字符
         if let regex = try? NSRegularExpression(pattern: "\\s+", options: .caseInsensitive) {
             result = regex.stringByReplacingMatches(
@@ -376,7 +376,7 @@ struct ServiceSelectScreen: View {
                 withTemplate: " "
             )
         }
-        
+
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 

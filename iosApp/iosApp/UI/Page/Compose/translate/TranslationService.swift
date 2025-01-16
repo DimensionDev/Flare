@@ -15,7 +15,7 @@ public class TranslationResult: NSObject {
     public let sourceLanguage: String?
     public let targetLanguage: String
     public let provider: TranslationProvider
-    
+
     public init(translatedText: String, sourceLanguage: String?, targetLanguage: String, provider: TranslationProvider) {
         self.translatedText = translatedText
         self.sourceLanguage = sourceLanguage
@@ -32,21 +32,21 @@ public enum TranslationError: LocalizedError {
     case translationFailed
     case permissionDenied
     case versionNotSupported
-    
+
     public var errorDescription: String? {
         switch self {
         case .serviceUnavailable:
-            return "Translation service is not available on this device"
-        case .languageNotSupported(let language):
-            return "Language '\(language)' is not supported"
-        case .networkError(let error):
-            return "Network error: \(error.localizedDescription)"
+            "Translation service is not available on this device"
+        case let .languageNotSupported(language):
+            "Language '\(language)' is not supported"
+        case let .networkError(error):
+            "Network error: \(error.localizedDescription)"
         case .translationFailed:
-            return "Translation failed"
+            "Translation failed"
         case .permissionDenied:
-            return "Translation permission denied"
+            "Translation permission denied"
         case .versionNotSupported:
-            return "Translation requires iOS 15.0 or later"
+            "Translation requires iOS 15.0 or later"
         }
     }
 }

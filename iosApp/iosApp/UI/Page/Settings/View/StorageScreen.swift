@@ -1,16 +1,16 @@
-import SwiftUI
-import shared
 import Kingfisher
+import shared
+import SwiftUI
 
 struct StorageScreen: View {
     @State private var presenter = StoragePresenter()
     @State private var imageCacheSize: String = "Calculating..."
     @State private var isCleaningCache = false
-    
+
     private func calculateImageCacheSize() {
         ImageCache.default.calculateDiskStorageSize { result in
             switch result {
-            case .success(let size):
+            case let .success(size):
                 let sizeInMB = Double(size) / 1024.0 / 1024.0
                 imageCacheSize = String(format: "%.1f MB", sizeInMB)
             case .failure:
@@ -18,7 +18,7 @@ struct StorageScreen: View {
             }
         }
     }
-    
+
     private func clearImageCache() {
         isCleaningCache = true
         ImageCache.default.clearDiskCache {
@@ -48,7 +48,7 @@ struct StorageScreen: View {
                     }
                     .buttonStyle(.borderless)
                 }
-                
+
                 // Image Cache Section
                 Section("settings_storage_clear_image_cache") {
                     Button(role: .destructive) {
@@ -81,4 +81,3 @@ struct StorageScreen: View {
         }
     }
 }
- 

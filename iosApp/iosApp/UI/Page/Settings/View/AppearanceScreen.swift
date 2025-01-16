@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct AppearanceScreen: View {
     @Environment(\.appSettings) private var appSettings
@@ -8,7 +8,7 @@ struct AppearanceScreen: View {
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
             List {
-                if case .success(let success) = onEnum(of: state.sampleStatus) {
+                if case let .success(success) = onEnum(of: state.sampleStatus) {
                     StatusItemView(
                         data: success.data,
                         detailKey: nil
@@ -30,7 +30,7 @@ struct AppearanceScreen: View {
                         Text("settings_appearance_theme_color")
                         Text("settings_appearance_theme_color_description")
                     })
-                    
+
                     Toggle(isOn: Binding(get: {
                         appSettings.appearanceSettings.autoTranslate
                     }, set: { value in
@@ -39,7 +39,7 @@ struct AppearanceScreen: View {
                         Text("自动翻译")
                         Text("自动翻译非当前语言的内容")
                     }
-                    
+
                     Picker(selection: Binding(get: {
                         appSettings.appearanceSettings.avatarShape
                     }, set: { value in

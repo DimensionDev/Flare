@@ -8,6 +8,7 @@ class AppSettings {
             UserDefaults.standard.appearanceSettings = appearanceSettings
         }
     }
+
     func update(newValue: AppearanceSettings) {
         withAnimation {
             appearanceSettings = newValue
@@ -37,6 +38,7 @@ extension UserDefaults {
 private struct AppSettingsKey: EnvironmentKey {
     static let defaultValue = AppSettings()
 }
+
 extension EnvironmentValues {
     var appSettings: AppSettings {
         get { self[AppSettingsKey.self] }

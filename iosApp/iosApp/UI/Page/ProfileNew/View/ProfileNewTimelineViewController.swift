@@ -1,14 +1,14 @@
-import UIKit
-import SwiftUI
-import shared
 import JXSegmentedView
 import MJRefresh
+import shared
+import SwiftUI
+import UIKit
 
 class ProfileNewTimelineViewController: UIViewController {
     //  - Properties
     var presenter: TimelinePresenter?
-    private var scrollCallback: ((UIScrollView) -> ())?
-    
+    private var scrollCallback: ((UIScrollView) -> Void)?
+
     private lazy var tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .plain)
         table.register(ProfileNewTimelineCell.self, forCellReuseIdentifier: "cell")
@@ -20,19 +20,19 @@ class ProfileNewTimelineViewController: UIViewController {
         table.tableFooterView = UIView()
         return table
     }()
-    
+
     //  - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-       setupRefresh()
+        setupRefresh()
     }
-    
+
     deinit {
         presenter = nil
         scrollCallback = nil
     }
-    
+
     //   - Setup
     private func setupUI() {
         view.addSubview(tableView)
@@ -41,10 +41,10 @@ class ProfileNewTimelineViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
     }
-    
+
     private func setupRefresh() {
         // 下拉刷新
         tableView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
@@ -52,25 +52,25 @@ class ProfileNewTimelineViewController: UIViewController {
 //                if let timelineState = self?.presenter?.models.value as? TimelineState {
 //                    try? await timelineState.refresh()
 //                    await MainActor.run {
-                        self?.tableView.mj_header?.endRefreshing()
+                self?.tableView.mj_header?.endRefreshing()
 //                    }
 //                }
             }
         })
-        
+
         // 上拉加载更多
         tableView.mj_footer = MJRefreshAutoNormalFooter(refreshingBlock: { [weak self] in
             Task {
 //                if let timelineState = self?.presenter?.models.value as? TimelineState {
 //                    try? await timelineState.refresh()
 //                    await MainActor.run {
-                        self?.tableView.mj_footer?.endRefreshing()
+                self?.tableView.mj_footer?.endRefreshing()
 //                    }
 //                }
             }
         })
     }
-    
+
     //   - Public Methods
     func updatePresenter(_ presenter: TimelinePresenter) {
         self.presenter = presenter
@@ -83,24 +83,24 @@ class ProfileNewTimelineViewController: UIViewController {
             }
         }
     }
-    
+
     // MARK: - Private Methods
+
     private func handleState(_ state: PagingState<UiTimeline>) {
         switch onEnum(of: state) {
         case .loading:
             // 显示加载状态
             break
-        case .success(let data):
+        case let .success(data):
             // 更新数据并刷新表格
             tableView.reloadData()
             // 结束刷新状态
             tableView.mj_header?.endRefreshing()
             tableView.mj_footer?.endRefreshing()
-        case .error(let error):
+        case let .error(error):
             // 显示错误提示
             tableView.mj_header?.endRefreshing()
             tableView.mj_footer?.endRefreshing()
-            break
         case .empty:
             // 显示空状态
             tableView.reloadData()
@@ -112,24 +112,26 @@ class ProfileNewTimelineViewController: UIViewController {
 
 //  - UITableViewDataSource & UITableViewDelegate
 extension ProfileNewTimelineViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         if let timelineState = presenter?.models.value as? TimelineState,
-           case let .success(data) = onEnum(of: timelineState.listState) {
+           case let .success(data) = onEnum(of: timelineState.listState)
+        {
             return Int(data.itemCount)
         }
         return 0
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! ProfileNewTimelineCell
         if let timelineState = presenter?.models.value as? TimelineState,
            case let .success(data) = onEnum(of: timelineState.listState),
-           let item = data.get(index: Int32(indexPath.row)) {
+           let item = data.get(index: Int32(indexPath.row))
+        {
             cell.configure(with: item)
         }
         return cell
     }
-    
+
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         scrollCallback?(scrollView)
     }
@@ -138,14 +140,14 @@ extension ProfileNewTimelineViewController: UITableViewDataSource, UITableViewDe
 //  - JXPagingViewListViewDelegate
 extension ProfileNewTimelineViewController: JXPagingViewListViewDelegate {
     func listView() -> UIView {
-        return view
+        view
     }
-    
+
     func listScrollView() -> UIScrollView {
-        return tableView
+        tableView
     }
-    
-    func listViewDidScrollCallback(callback: @escaping (UIScrollView) -> ()) {
-        self.scrollCallback = callback
+
+    func listViewDidScrollCallback(callback: @escaping (UIScrollView) -> Void) {
+        scrollCallback = callback
     }
-} 
+}

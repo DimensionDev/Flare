@@ -25,14 +25,14 @@ struct UserComponent: View {
                     .lineLimit(1)
                     .font(.headline)
                     .markdownInlineImageProvider(.emoji)
-                HStack{
+                HStack {
                     Text(user.handle)
                         .lineLimit(1)
                         .font(.subheadline)
                         .foregroundColor(.gray)
                     // 设置 pawoo 用户的可见状态
                     if topEndContent != nil {
-                        if let topEndContent =  topEndContent {
+                        if let topEndContent {
                             switch onEnum(of: topEndContent) {
                             case let .visibility(data): StatusVisibilityComponent(visibility: data.visibility).foregroundColor(.gray)
                             }

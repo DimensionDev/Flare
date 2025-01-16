@@ -1,7 +1,7 @@
 import Foundation
 import PhotosUI
-import SwiftUI
 import shared
+import SwiftUI
 
 @Observable
 class ComposeViewModel: MoleculeViewModelProto {
@@ -21,12 +21,15 @@ class ComposeViewModel: MoleculeViewModelProto {
         presenter = .init(accountType: accountType, status: status)
         model = presenter.models.value
     }
+
     func showEmojiPanel() {
         showEmoji = true
     }
+
     func toggleCW() {
         enableCW = !enableCW
     }
+
     func togglePoll() {
         if pollViewModel.enabled {
             pollViewModel = PollViewModel()
@@ -34,13 +37,15 @@ class ComposeViewModel: MoleculeViewModelProto {
             pollViewModel.enabled = true
         }
     }
+
     func addEmoji(emoji: UiEmoji) {
         text += " :" + emoji.shortcode + ": "
         showEmoji = false
     }
+
     func send() {
         Task {
-            if case .success(let account) = onEnum(of: self.model.account) {
+            if case let .success(account) = onEnum(of: self.model.account) {
                 let data: ComposeData = .init(
                     account: account.data,
                     content: text,
@@ -57,27 +62,31 @@ class ComposeViewModel: MoleculeViewModelProto {
             }
         }
     }
+
     private func getMedia() -> [FileItem] {
-           return mediaViewModel.items.map { item in
-               FileItem(name: item.item.itemIdentifier, data: KotlinByteArray.from(data: item.data!))
-           }
-       }
+        mediaViewModel.items.map { item in
+            FileItem(name: item.item.itemIdentifier, data: KotlinByteArray.from(data: item.data!))
+        }
+    }
+
     private func getReferenceStatus() -> ComposeData.ReferenceStatus? {
-        return if let data = status, let replyState = self.model.replyState, case .success(let timeline) = onEnum(of: replyState) {
+        if let data = status, let replyState = model.replyState, case let .success(timeline) = onEnum(of: replyState) {
             ComposeData.ReferenceStatus(data: timeline.data, composeStatus: data)
         } else {
             nil
         }
     }
+
     private func getPoll() -> ComposeData.Poll? {
-        return if pollViewModel.enabled {
+        if pollViewModel.enabled {
             ComposeData.Poll(options: pollViewModel.choices.map { item in item.text }, expiredAfter: pollViewModel.expired.inWholeMilliseconds, multiple: pollViewModel.pollType == ComposePollType.multiple)
         } else {
             nil
         }
     }
+
     private func getVisibility() -> UiTimelineItemContentStatusTopEndContentVisibility.Type_ {
-        return if case .success(let data) = onEnum(of: model.visibilityState) {
+        if case let .success(data) = onEnum(of: model.visibilityState) {
             data.data.visibility
         } else {
             UiTimelineItemContentStatusTopEndContentVisibility.Type_.public
@@ -92,7 +101,7 @@ class MediaViewModel {
     var sensitive = false
     func update() {
         if selectedItems.count > 4 {
-            selectedItems = Array(selectedItems[(selectedItems.count - 4)...(selectedItems.count - 1)])
+            selectedItems = Array(selectedItems[(selectedItems.count - 4) ... (selectedItems.count - 1)])
         } else {
             selectedItems = selectedItems
         }
@@ -100,6 +109,7 @@ class MediaViewModel {
             MediaItem(item: item)
         }
     }
+
     func remove(item: MediaItem) {
         if let index = items.firstIndex(of: item) {
             items.remove(at: index)
@@ -113,6 +123,7 @@ class MediaItem: Equatable {
     static func == (lhs: MediaItem, rhs: MediaItem) -> Bool {
         lhs.item == rhs.item
     }
+
     let item: PhotosPickerItem
     var image: UIImage?
     var data: Data?
@@ -128,8 +139,7 @@ class MediaItem: Equatable {
                         }
                     }
                 }
-            } catch {
-            }
+            } catch {}
         }
     }
 }
@@ -148,13 +158,14 @@ class PollViewModel {
         ComposePollExpired.hours12,
         ComposePollExpired.days1,
         ComposePollExpired.days3,
-        ComposePollExpired.days7
+        ComposePollExpired.days7,
     ]
     func add() {
         if choices.count < 4 {
             choices.append(PollChoice())
         }
     }
+
     func remove(choice: PollChoice) {
         if choices.count > 2 {
             choices.removeAll { value in
@@ -186,21 +197,21 @@ enum ComposePollExpired: String {
     var inWholeMilliseconds: Int64 {
         switch self {
         case .minutes5:
-            return 5 * 60 * 1000
+            5 * 60 * 1000
         case .minutes30:
-            return 30 * 60 * 1000
+            30 * 60 * 1000
         case .hours1:
-            return 1 * 60 * 60 * 1000
+            1 * 60 * 60 * 1000
         case .hours6:
-            return 6 * 60 * 60 * 1000
+            6 * 60 * 60 * 1000
         case .hours12:
-            return 12 * 60 * 60 * 1000
+            12 * 60 * 60 * 1000
         case .days1:
-            return 24 * 60 * 60 * 1000
+            24 * 60 * 60 * 1000
         case .days3:
-            return 3 * 24 * 60 * 60 * 1000
+            3 * 24 * 60 * 60 * 1000
         case .days7:
-            return 7 * 24 * 60 * 60 * 1000
+            7 * 24 * 60 * 60 * 1000
         }
     }
 }

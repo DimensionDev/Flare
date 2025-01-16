@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct LinkPreview: View {
     let card: UiCard
@@ -29,11 +29,11 @@ struct LinkPreview: View {
         }
         .frame(maxWidth: 600)
         .buttonStyle(.plain)
-#if os(iOS)
-        .background(Color(UIColor.secondarySystemBackground))
-#else
-        .background(Color(NSColor.windowBackgroundColor))
-#endif
-        .cornerRadius(8)
+        #if os(iOS)
+            .background(Color(UIColor.secondarySystemBackground))
+        #else
+            .background(Color(NSColor.windowBackgroundColor))
+        #endif
+            .cornerRadius(8)
     }
 }

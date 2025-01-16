@@ -1,10 +1,10 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct HomeAppBarSettingsView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var store: TabSettingsStore
-    
+
     var body: some View {
         NavigationView {
             List {
@@ -14,7 +14,7 @@ struct HomeAppBarSettingsView: View {
                         TabItemRow(tab: primaryTab, store: store, isPrimary: true)
                     }
                 }
-                
+
                 // 次要标签（可更改状态）
                 Section(header: Text("used tabs")) {
                     ForEach(store.storeItems, id: \.key) { tab in
@@ -24,7 +24,7 @@ struct HomeAppBarSettingsView: View {
                         store.moveTab(from: source, to: destination)
                     }
                 }
-                
+
                 // 未启用的标签
                 let unusedTabs = store.secondaryItems.filter { tab in
                     !store.storeItems.contains { $0.key == tab.key }
@@ -52,24 +52,25 @@ struct TabItemRow: View {
     let tab: FLTabItem
     let store: TabSettingsStore
     let isPrimary: Bool
-    
+
     var body: some View {
         HStack {
             if !isPrimary {
                 Image(systemName: "line.3.horizontal")
                     .foregroundColor(Color.textTertiary)
             }
-            
+
             // 显示图标
             switch tab.metaData.icon {
-            case .material(let iconName):
+            case let .material(iconName):
                 if let materialIcon = FLMaterialIcon(rawValue: iconName) {
                     materialIcon.icon
                         .foregroundColor(Color.interactiveActive)
                 }
-            case .mixed(let icons):
+            case let .mixed(icons):
                 if let firstIcon = icons.first,
-                   let materialIcon = FLMaterialIcon(rawValue: firstIcon) {
+                   let materialIcon = FLMaterialIcon(rawValue: firstIcon)
+                {
                     materialIcon.icon
                         .foregroundColor(Color.interactiveActive)
                 }
@@ -77,19 +78,19 @@ struct TabItemRow: View {
                 Image(systemName: "person.circle")
                     .foregroundColor(Color.interactiveActive)
             }
-            
+
             // 显示标题
             switch tab.metaData.title {
-            case .text(let title):
+            case let .text(title):
                 Text(title)
                     .foregroundColor(Color.textPrimary)
-            case .localized(let key):
+            case let .localized(key):
                 Text(NSLocalizedString(key, comment: ""))
                     .foregroundColor(Color.textPrimary)
             }
-            
+
             Spacer()
-            
+
             // 次要标签显示开关
             if !isPrimary {
                 Toggle("", isOn: Binding(

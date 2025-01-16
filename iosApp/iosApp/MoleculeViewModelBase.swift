@@ -1,12 +1,12 @@
 import Foundation
-import SwiftUI
 import shared
+import SwiftUI
 
 @Observable
 class MoleculeViewModelBase<Model, Presenter: PresenterBase<Model>>: MoleculeViewModelProto {
     typealias Model = Model
     typealias Presenter = Presenter
-    internal let presenter = Presenter()
+    let presenter = Presenter()
     var model: Model
     init() {
         model = presenter.models.value
@@ -48,7 +48,7 @@ extension MoleculeViewModelProto {
 
 extension View {
     func activateViewModel(viewModel: some MoleculeViewModelProto) -> some View {
-        return task {
+        task {
             await viewModel.activate()
         }
     }

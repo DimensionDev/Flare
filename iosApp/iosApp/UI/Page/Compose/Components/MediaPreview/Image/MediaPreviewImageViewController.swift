@@ -6,48 +6,50 @@
 //  Copyright © 2020 Twidere. All rights reserved.
 //
 
+import Combine
 import os.log
 import UIKit
-import Combine
-//import MaskUI
-import Kingfisher 
-import WebKit
+
+// import MaskUI
+import Kingfisher
 import SwiftUICore
-//import MaskCore
-//import Resources
+import WebKit
+
+// import MaskCore
+// import Resources
 //
-//protocol MediaPreviewImageViewControllerDelegate: AnyObject {
+// protocol MediaPreviewImageViewControllerDelegate: AnyObject {
 //    func mediaPreviewImageViewController(_ viewController: MediaPreviewImageViewController, tapGestureRecognizerDidTrigger tapGestureRecognizer: UITapGestureRecognizer)
 //    func mediaPreviewImageViewController(_ viewController: MediaPreviewImageViewController, longPressGestureRecognizerDidTrigger longPressGestureRecognizer: UILongPressGestureRecognizer)
-//}
+// }
 //
-//final class MediaPreviewImageViewController: UIViewController {
-//    
+// final class MediaPreviewImageViewController: UIViewController {
+//
 //    var disposeBag = Set<AnyCancellable>()
 //    var viewModel: MediaPreviewImageViewModel!
 //    weak var delegate: MediaPreviewImageViewControllerDelegate?
 //
 //    let progressBarView = ProgressBarView()
-//    
+//
 //    let containerView = UIView()
 //    let previewImageView = MediaPreviewImageView()
 //    let webView = WKWebView()
 //
 //    let tapGestureRecognizer = UITapGestureRecognizer()
 //    let longPressGestureRecognizer = UILongPressGestureRecognizer()
-//    
+//
 //    deinit {
 //        os_log("%{public}s[%{public}ld], %{public}s", ((#file as NSString).lastPathComponent), #line, #function)
 //        previewImageView.imageView.kf.cancelDownloadTask()
 //    }
-//    
-//}
 //
-//extension MediaPreviewImageViewController {
-//    
+// }
+//
+// extension MediaPreviewImageViewController {
+//
 //    override func viewDidLoad() {
 //        super.viewDidLoad()
-//        
+//
 //        progressBarView.tintColor = Colors.white.color
 //        progressBarView.translatesAutoresizingMaskIntoConstraints = false
 //        view.addSubview(progressBarView)
@@ -57,7 +59,7 @@ import SwiftUICore
 //            progressBarView.widthAnchor.constraint(equalToConstant: 120),
 //            progressBarView.heightAnchor.constraint(equalToConstant: 44),
 //        ])
-//        
+//
 //        containerView.translatesAutoresizingMaskIntoConstraints = false
 //        view.addSubview(containerView)
 //        NSLayoutConstraint.activate([
@@ -66,7 +68,7 @@ import SwiftUICore
 //            containerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
 //            containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 //        ])
-//        
+//
 //        previewImageView.translatesAutoresizingMaskIntoConstraints = false
 //        containerView.addSubview(previewImageView)
 //        NSLayoutConstraint.activate([
@@ -75,14 +77,14 @@ import SwiftUICore
 //            previewImageView.frameLayoutGuide.trailingAnchor.constraint(equalTo: containerView.trailingAnchor),
 //            previewImageView.frameLayoutGuide.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
 //        ])
-//        
+//
 //        tapGestureRecognizer.addTarget(self, action: #selector(MediaPreviewImageViewController.tapGestureRecognizerHandler(_:)))
 //        longPressGestureRecognizer.addTarget(self, action: #selector(MediaPreviewImageViewController.longPressGestureRecognizerHandler(_:)))
 //        tapGestureRecognizer.require(toFail: previewImageView.doubleTapGestureRecognizer)
 //        tapGestureRecognizer.require(toFail: longPressGestureRecognizer)
 //        previewImageView.addGestureRecognizer(tapGestureRecognizer)
 //        previewImageView.addGestureRecognizer(longPressGestureRecognizer)
-//        
+//
 //        progressBarView.isHidden = viewModel.item.thumbnail != nil
 //        previewImageView.imageView.kf.setImage(
 //            with: viewModel.item.source,
@@ -106,11 +108,11 @@ import SwiftUICore
 //            }
 //        }
 //        os_log(.info, log: .debug, "%{public}s[%{public}ld], %{public}s: setImage url: %s", ((#file as NSString).lastPathComponent), #line, #function, viewModel.item.source?.url.debugDescription ?? "nil")
-//        
+//
 //        if let url = viewModel.item.source?.url, url.pathExtension.lowercased() == "svg" {
 //            progressBarView.isHidden = true
 //            previewImageView.isHidden = true
-//            
+//
 //            webView.translatesAutoresizingMaskIntoConstraints = false
 //            containerView.addSubview(webView)
 //            NSLayoutConstraint.activate([
@@ -124,16 +126,16 @@ import SwiftUICore
 //            webView.loadHTMLString(html, baseURL: nil)
 //        }
 //    }
-//    
-//}
 //
-//extension MediaPreviewImageViewController {
-//    
+// }
+//
+// extension MediaPreviewImageViewController {
+//
 //    @objc private func tapGestureRecognizerHandler(_ sender: UITapGestureRecognizer) {
 //        os_log(.info, log: .debug, "%{public}s[%{public}ld], %{public}s", ((#file as NSString).lastPathComponent), #line, #function)
 //        delegate?.mediaPreviewImageViewController(self, tapGestureRecognizerDidTrigger: sender)
 //    }
-//    
+//
 //    @objc private func longPressGestureRecognizerHandler(_ sender: UILongPressGestureRecognizer) {
 //        os_log(.info, log: .debug, "%{public}s[%{public}ld], %{public}s", ((#file as NSString).lastPathComponent), #line, #function)
 //        switch sender.state {
@@ -143,29 +145,29 @@ import SwiftUICore
 //            break
 //        }
 //    }
-//    
-//}
+//
+// }
 //
 //// MARK: - ShareActivityProvider
-//extension MediaPreviewImageViewController: ShareActivityProvider {
+// extension MediaPreviewImageViewController: ShareActivityProvider {
 //    var activities: [Any] {
 //        return []
 //    }
-//    
+//
 //    var applicationActivities: [UIActivity] {
 //        guard let url = viewModel.item.source?.url else { return [] }
 //        return [
 //            SavePhotoActivity(context: viewModel.context, url: url, resourceType: .photo)
 //        ]
 //    }
-//}
+// }
 //
 //// MARK: - MediaPreviewTransitionViewController
-//extension MediaPreviewImageViewController: MediaPreviewTransitionViewController {
+// extension MediaPreviewImageViewController: MediaPreviewTransitionViewController {
 //    var mediaPreviewTransitionContext: MediaPreviewTransitionContext? {
 //        let transitionView = containerView
 //        let _snapshot: UIView? = containerView.superview?.snapshotView(afterScreenUpdates: false)
-//        
+//
 //        guard let snapshot = _snapshot else {
 //            return nil
 //        }
@@ -177,13 +179,13 @@ import SwiftUICore
 //            snapshotTransitioning: snapshot
 //        )
 //    }
-//}
+// }
 //
 //// MARK: - WKNavigationDelegate
-//extension MediaPreviewImageViewController: WKNavigationDelegate {
+// extension MediaPreviewImageViewController: WKNavigationDelegate {
 //    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
 //        webView.isOpaque = false
 //        webView.backgroundColor = .clear
 //        webView.scrollView.backgroundColor = .clear
 //    }
-//}
+// }

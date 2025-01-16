@@ -6,13 +6,14 @@
 //  Copyright © 2020 Twidere. All rights reserved.
 //
 
-import os.log
 import func AVFoundation.AVMakeRect
-import UIKit
 import FLAnimatedImage
+import os.log
+import UIKit
+
 //
-//final class MediaPreviewImageView: UIScrollView {
-//    
+// final class MediaPreviewImageView: UIScrollView {
+//
 //    let imageView: FLAnimatedImageView = {
 //        let imageView = FLAnimatedImageView()
 //        imageView.contentMode = .scaleAspectFit
@@ -22,29 +23,29 @@ import FLAnimatedImage
 //        imageView.isAccessibilityElement = true
 //        return imageView
 //    }()
-//    
+//
 //    let doubleTapGestureRecognizer: UITapGestureRecognizer = {
 //        let tapGestureRecognizer = UITapGestureRecognizer()
 //        tapGestureRecognizer.numberOfTapsRequired = 2
 //        return tapGestureRecognizer
 //    }()
-//    
+//
 //    private var containerFrame: CGRect?
-//    
+//
 //    override init(frame: CGRect) {
 //        super.init(frame: frame)
 //        _init()
 //    }
-//    
+//
 //    required init?(coder: NSCoder) {
 //        super.init(coder: coder)
 //        _init()
 //    }
-//    
-//}
 //
-//extension MediaPreviewImageView {
-//    
+// }
+//
+// extension MediaPreviewImageView {
+//
 //    private func _init() {
 //        isUserInteractionEnabled = true
 //        showsVerticalScrollIndicator = false
@@ -53,29 +54,29 @@ import FLAnimatedImage
 //        bouncesZoom = true
 //        minimumZoomScale = 1.0
 //        maximumZoomScale = 4.0
-//        
+//
 //        addSubview(imageView)
-//        
+//
 //        doubleTapGestureRecognizer.addTarget(self, action: #selector(MediaPreviewImageView.doubleTapGestureRecognizerHandler(_:)))
 //        imageView.addGestureRecognizer(doubleTapGestureRecognizer)
-//        
+//
 //        delegate = self
 //    }
-//    
+//
 //    override func layoutSubviews() {
 //        super.layoutSubviews()
-//        
+//
 //        guard let image = imageView.image else { return }
 //        setup(image: image, container: self)
 //    }
 //
-//}
+// }
 //
-//extension MediaPreviewImageView {
-// 
+// extension MediaPreviewImageView {
+//
 //    @objc private func doubleTapGestureRecognizerHandler(_ sender: UITapGestureRecognizer) {
 //        os_log(.info, log: .debug, "%{public}s[%{public}ld], %{public}s", ((#file as NSString).lastPathComponent), #line, #function)
-//        
+//
 //        let middleZoomScale = 0.5 * maximumZoomScale
 //        if zoomScale >= middleZoomScale {
 //            setZoomScale(minimumZoomScale, animated: true)
@@ -94,24 +95,24 @@ import FLAnimatedImage
 //            zoom(to: zoomRect, animated: true)
 //        }
 //    }
-//    
-//}
 //
-//extension MediaPreviewImageView {
+// }
+//
+// extension MediaPreviewImageView {
 //
 //    func setup(image: UIImage, container: UIView, forceUpdate: Bool = false) {
 //        guard image.size.width > 0, image.size.height > 0 else  { return }
 //        guard container.bounds.width > 0, container.bounds.height > 0 else  { return }
-//        
+//
 //        // do not setup when frame not change except force update
 //        if containerFrame == container.frame && !forceUpdate {
 //            return
 //        }
 //        containerFrame = container.frame
-//        
+//
 //        // reset to normal
 //        zoomScale = minimumZoomScale
-//        
+//
 //        let imageViewSize = AVMakeRect(aspectRatio: image.size, insideRect: container.bounds).size
 //        let imageContentInset: UIEdgeInsets = {
 //            if imageViewSize.width == container.bounds.width {
@@ -124,36 +125,36 @@ import FLAnimatedImage
 //        imageView.image = image
 //        contentSize = imageViewSize
 //        contentInset = imageContentInset
-//        
+//
 //        centerScrollViewContents()
 //        contentOffset = CGPoint(x: -contentInset.left, y: -contentInset.top)
-//        
+//
 //        os_log(.info, log: .debug, "%{public}s[%{public}ld], %{public}s: setup image for container %s", ((#file as NSString).lastPathComponent), #line, #function, container.frame.debugDescription)
 //    }
-//    
-//}
+//
+// }
 //
 //// MARK: - UIScrollViewDelegate
-//extension MediaPreviewImageView: UIScrollViewDelegate {
-//    
+// extension MediaPreviewImageView: UIScrollViewDelegate {
+//
 //    func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
 //        return false
 //    }
-//    
+//
 //    func scrollViewDidZoom(_ scrollView: UIScrollView) {
 //        os_log(.info, log: .debug, "%{public}s[%{public}ld], %{public}s", ((#file as NSString).lastPathComponent), #line, #function)
 //        centerScrollViewContents()
 //    }
-//    
+//
 //    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
 //        return imageView
 //    }
-//    
-//}
+//
+// }
 //
 //// Ref: https://stackoverflow.com/questions/14069571/keep-zoomable-image-in-center-of-uiscrollview
-//extension MediaPreviewImageView {
-//    
+// extension MediaPreviewImageView {
+//
 //    private var scrollViewVisibleSize: CGSize {
 //        let contentInset = self.contentInset
 //        let scrollViewSize = bounds.standardized.size
@@ -213,5 +214,5 @@ import FLAnimatedImage
 //
 //        imageView.center = imageCenter
 //    }
-//    
-//}
+//
+// }

@@ -1,14 +1,14 @@
 import Awesome
 import Generated
-import MarkdownUI
 import JXPhotoBrowser
 import Kingfisher
+import MarkdownUI
+
 // import MarkdownUI
 import shared
 import SwiftDate
 import SwiftUI
 import UIKit
-
 
 // timeline tweet
 struct CommonTimelineStatusComponent: View {
@@ -21,7 +21,7 @@ struct CommonTimelineStatusComponent: View {
     let onMediaClick: (Int, UiMedia) -> Void
     let isDetail: Bool
     let enableTranslation: Bool
-    
+
     init(data: UiTimelineItemContentStatus, onMediaClick: @escaping (Int, UiMedia) -> Void, isDetail: Bool, enableTranslation: Bool = true) {
         self.data = data
         self.onMediaClick = onMediaClick
@@ -31,7 +31,8 @@ struct CommonTimelineStatusComponent: View {
 
     private func showReportToast() {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
+           let window = windowScene.windows.first
+        {
             let toastView = ToastView(
                 icon: UIImage(systemName: "flag.fill"),
                 message: String(localized: "report") + " success"
@@ -43,20 +44,20 @@ struct CommonTimelineStatusComponent: View {
     private func processActions() -> (mainActions: [StatusAction], moreActions: [StatusActionItem]) {
         var bottomMainActions: [StatusAction] = []
         var bottomMoreActions: [StatusActionItem] = []
-        
+
         // 处理主要操作
         for action in data.actions {
             switch onEnum(of: action) {
-            case .item(let item):
+            case let .item(item):
                 // 所有非 More 的 item 都加入主操作
                 if !(item is StatusActionItemMore) {
                     bottomMainActions.append(action)
                 }
-            case .group(let group):
+            case let .group(group):
                 if let displayItem = group.displayItem as? StatusActionItemMore {
                     // 只处理 More 菜单中的操作
                     for subAction in group.actions {
-                        if case .item(let item) = onEnum(of: subAction) {
+                        if case let .item(item) = onEnum(of: subAction) {
                             if item is StatusActionItemBookmark {
                                 // 将书签添加到主操作
                                 bottomMainActions.append(subAction)
@@ -72,7 +73,7 @@ struct CommonTimelineStatusComponent: View {
                 }
             }
         }
-        
+
         return (bottomMainActions, bottomMoreActions)
     }
 
@@ -81,7 +82,6 @@ struct CommonTimelineStatusComponent: View {
             Spacer()
                 .frame(height: 2)
             HStack(alignment: .top) {
-                 
                 if let user = data.user {
                     UserComponent(
                         user: user,
@@ -89,7 +89,7 @@ struct CommonTimelineStatusComponent: View {
                         onUserClicked: {
                             user.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
                         }
-                    ) 
+                    )
                 }
                 Spacer()
                 // icon + time
@@ -127,8 +127,8 @@ struct CommonTimelineStatusComponent: View {
                 }, label: {
                     Image(systemName: "exclamationmark.triangle")
                     Markdown(cwText.markdown)
-                                           .font(.body)
-                                           .markdownInlineImageProvider(.emoji)
+                        .font(.body)
+                        .markdownInlineImageProvider(.emoji)
                     Spacer()
                     if expanded {
                         Image(systemName: "arrowtriangle.down.circle.fill")
@@ -148,7 +148,7 @@ struct CommonTimelineStatusComponent: View {
             if expanded || data.contentWarning == nil || data.contentWarning?.raw.isEmpty == true {
                 Spacer()
                     .frame(height: 10)
-                
+
                 if !data.content.raw.isEmpty {
                     FlareText(data.content.raw)
                         .onLinkTap { url in
@@ -156,9 +156,9 @@ struct CommonTimelineStatusComponent: View {
                         }
                         .font(.system(size: 16))
                         .foregroundColor(Colors.Text.swiftUIPrimary)
-                        
+
                     // Add translation component
-                    if appSettings.appearanceSettings.autoTranslate && enableTranslation {
+                    if appSettings.appearanceSettings.autoTranslate, enableTranslation {
                         TranslatableText(originalText: data.content.raw)
                     }
                 } else {
@@ -171,14 +171,14 @@ struct CommonTimelineStatusComponent: View {
             // media
             if !data.images.isEmpty {
                 Spacer().frame(height: 8)
-                
+
                 // if appSettings.appearanceSettings.showMedia || showMedia {
-                    MediaComponent(
-                        hideSensitive: data.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
-                        medias: data.images,
-                        onMediaClick: handleMediaClick, //打开预览
-                        sensitive: data.sensitive
-                    )
+                MediaComponent(
+                    hideSensitive: data.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
+                    medias: data.images,
+                    onMediaClick: handleMediaClick, // 打开预览
+                    sensitive: data.sensitive
+                )
                 // } else {
                 //     Button {
                 //         withAnimation {
@@ -223,7 +223,6 @@ struct CommonTimelineStatusComponent: View {
 //                #else
 //                .background(Color(NSColor.windowBackgroundColor))
 //                #endif
-               
             }
             //
             if let bottomContent = data.bottomContent {
@@ -299,8 +298,8 @@ struct CommonTimelineStatusComponent: View {
                                             case .contentColor: nil
                                             case .error: .destructive
                                             }
-                                        } else {   
-                                            nil 
+                                        } else {
+                                            nil
                                         }
                                         Button(role: role, action: {
                                             if let clickable = item as? StatusActionItemClickable {
@@ -336,7 +335,7 @@ struct CommonTimelineStatusComponent: View {
                             }
                         }
                     }
-                    
+
                     // 显示更多操作菜单
                     if !processedActions.moreActions.isEmpty {
                         Menu {
@@ -352,7 +351,7 @@ struct CommonTimelineStatusComponent: View {
                                 } else {
                                     nil
                                 }
-                                
+
                                 Button(role: role, action: {
                                     if let clickable = item as? StatusActionItemClickable {
                                         clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
@@ -383,8 +382,8 @@ struct CommonTimelineStatusComponent: View {
                         } label: {
                             Image(asset: Asset.Image.Status.more)
                                 .renderingMode(.template)
-                                .rotationEffect(.degrees(90)) 
-                                .frame(width: 35, alignment: .trailing)  // 增加宽度并靠右对齐
+                                .rotationEffect(.degrees(90))
+                                .frame(width: 35, alignment: .trailing) // 增加宽度并靠右对齐
                         }
                     }
                 }
@@ -398,22 +397,21 @@ struct CommonTimelineStatusComponent: View {
                 }
                 .allowsHitTesting(true)
             }
-              Spacer()
+            Spacer()
                 .frame(height: 2)
         }.frame(alignment: .leading)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            if let tapLocation = (UIApplication.shared.windows.first?.hitTest(UIApplication.shared.windows.first?.convert(CGPoint(x: 0, y: 0), to: nil) ?? .zero, with: nil)) {
-                let bottomActionBarFrame = CGRect(x: 16, y: tapLocation.frame.height - 44, width: tapLocation.frame.width - 32, height: 44)
-                if !bottomActionBarFrame.contains(tapLocation.frame.origin) {
-                    data.onClicked(ClickContext(launcher: AppleUriLauncher(openURL: openURL)))
+            .contentShape(Rectangle())
+            .onTapGesture {
+                if let tapLocation = (UIApplication.shared.windows.first?.hitTest(UIApplication.shared.windows.first?.convert(CGPoint(x: 0, y: 0), to: nil) ?? .zero, with: nil)) {
+                    let bottomActionBarFrame = CGRect(x: 16, y: tapLocation.frame.height - 44, width: tapLocation.frame.width - 32, height: 44)
+                    if !bottomActionBarFrame.contains(tapLocation.frame.origin) {
+                        data.onClicked(ClickContext(launcher: AppleUriLauncher(openURL: openURL)))
+                    }
                 }
             }
-        }
     }
 
     private func handleMediaClick(_ index: Int, _ media: UiMedia) {
-        
         // Show preview
         PhotoBrowserManager.shared.showPhotoBrowser(
             media: media,
@@ -433,7 +431,7 @@ func dateFormatter(_ date: Date) -> some View {
 struct StatusActionItemIcon: View {
     let item: StatusActionItem
     @Environment(\.colorScheme) var colorScheme
-    
+
     var body: some View {
         switch onEnum(of: item) {
         case let .bookmark(data):
@@ -503,7 +501,7 @@ struct StatusActionItemIcon: View {
 struct StatusActionLabel: View {
     let item: StatusActionItem
     @Environment(\.colorScheme) var colorScheme
-    
+
     var body: some View {
         let text = switch onEnum(of: item) {
         case let .like(data): formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
@@ -513,7 +511,7 @@ struct StatusActionLabel: View {
         case let .bookmark(data): formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
         default: ""
         }
-        
+
         let color = switch onEnum(of: item) {
         case let .retweet(data):
             data.retweeted ? Colors.State.swiftUIRetweetActive : (colorScheme == .dark ? Color.white : Color.black)
@@ -524,7 +522,7 @@ struct StatusActionLabel: View {
         default:
             colorScheme == .dark ? Color.white : Color.black
         }
-        
+
         Label {
             Text(text)
         } icon: {
@@ -548,7 +546,7 @@ struct StatusVisibilityComponent: View {
             Awesome.Classic.Solid.at.image
         }
     }
-}  
+}
 
 struct CenteredLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
@@ -570,10 +568,10 @@ func formatCount(_ count: Int64) -> String {
     if count < 1000 {
         return "\(count)"
     }
-    if count < 1000000 {
+    if count < 1_000_000 {
         let k = Double(count) / 1000.0
         return String(format: "%.1fK", k).replacingOccurrences(of: ".0", with: "")
     }
-    let m = Double(count) / 1000000.0
+    let m = Double(count) / 1_000_000.0
     return String(format: "%.1fM", m).replacingOccurrences(of: ".0", with: "")
 }

@@ -1,9 +1,9 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct TimelineScreen: View {
     @ObservedObject var timelineStore: TimelineStore
-    
+
     var body: some View {
         if let presenter = timelineStore.currentPresenter {
             List {
@@ -13,7 +13,7 @@ struct TimelineScreen: View {
                         detailKey: nil
                     )
                     // .listRowInsets(EdgeInsets())
-                    //首页列表背景色
+                    // 首页列表背景色
                     .listRowBackground(Colors.Background.swiftUIPrimary)
                 }
             }
@@ -33,16 +33,16 @@ struct HomeTimelineScreen: View {
     @StateObject private var timelineStore: TimelineStore
     private let accountType: AccountType
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-    
+
     init(accountType: AccountType) {
         self.accountType = accountType
-        self._timelineStore = StateObject(wrappedValue: TimelineStore(accountType: accountType))
+        _timelineStore = StateObject(wrappedValue: TimelineStore(accountType: accountType))
     }
-    
+
     var body: some View {
         TimelineScreen(timelineStore: timelineStore)
             .navigationBarTitleDisplayMode(.inline)
-            #if !os(iOS)
+        #if !os(iOS)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(action: {
@@ -54,7 +54,7 @@ struct HomeTimelineScreen: View {
                     })
                 }
             }
-            #endif
+        #endif
             .navigationTitle("home_timeline_title")
     }
 }

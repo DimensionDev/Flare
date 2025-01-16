@@ -13,10 +13,10 @@ class TimelineStore: ObservableObject {
     @Published private(set) var selectedTabKey: String?
     @Published private(set) var isRefreshing: Bool = false
     private var presenterCache: [String: TimelinePresenter] = [:]
-    
+
     init(accountType: AccountType) {
         homeTimelinePresenter = HomeTimelinePresenter(accountType: accountType)
-        
+
         // 监听账号切换事件
         NotificationCenter.default.addObserver(
             self,
@@ -25,18 +25,18 @@ class TimelineStore: ObservableObject {
             object: nil
         )
     }
-    
+
     @objc private func handleAccountChanged() {
         // 完全重置状态
         selectedTabKey = nil
         currentPresenter = nil
         presenterCache.removeAll()
     }
-    
+
     deinit {
         NotificationCenter.default.removeObserver(self)
     }
-    
+
     func getOrCreatePresenter(for tab: FLTabItem) -> TimelinePresenter? {
         if let timelineItem = tab as? FLTimelineTabItem {
             let key = tab.key
@@ -50,7 +50,7 @@ class TimelineStore: ObservableObject {
         }
         return nil
     }
-    
+
     func updateCurrentPresenter(for tab: FLTabItem) {
         selectedTabKey = tab.key
         if let presenter = getOrCreatePresenter(for: tab) {
@@ -71,30 +71,30 @@ class TimelineStore: ObservableObject {
         //     }
         // }
     }
-    
+
     func refresh() async throws {
         guard let presenter = currentPresenter else { return }
-        
+
         await MainActor.run {
             isRefreshing = true
         }
-        
+
         defer {
             Task { @MainActor in
                 isRefreshing = false
             }
         }
-        
+
         let state = presenter.models.value
         try await state.refresh()
     }
-    
+
     func reset() {
         selectedTabKey = nil
         currentPresenter = nil
         clearCache()
     }
-    
+
     func clearCache() {
         // 保留当前 presenter，清理其他缓存
         let currentKey = selectedTabKey
@@ -104,12 +104,12 @@ class TimelineStore: ObservableObject {
             presenterCache[key] = current
         }
     }
-    
+
     func handleMemoryWarning() {
         clearCache()
     }
-    
+
     func handleBackground() {
         clearCache()
     }
-} 
+}

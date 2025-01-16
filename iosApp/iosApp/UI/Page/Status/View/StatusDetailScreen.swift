@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 struct StatusDetailScreen: View {
     @State private var presenter: StatusContextPresenter
@@ -21,14 +21,14 @@ struct StatusDetailScreen: View {
                 .listRowBackground(Colors.Background.swiftUIPrimary)
             }
             .listStyle(.plain)
-            //列表背景色
+            // 列表背景色
             .scrollContentBackground(.hidden)
             .background(Colors.Background.swiftUIPrimary)
             .refreshable {
                 try? await state.refresh()
             }
         }
-        //导航栏背景色
+        // 导航栏背景色
         // .navigationBarTitleDisplayMode(.inline)
         // .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)
         // .toolbarBackground(.visible, for: .navigationBar)

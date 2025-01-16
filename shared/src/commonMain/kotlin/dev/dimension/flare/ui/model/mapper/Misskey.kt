@@ -151,7 +151,6 @@ internal fun Notification.render(
                 else ->
                     status ?: user?.let { UiTimeline.ItemContent.User(it) }
             },
-        platformType = PlatformType.Misskey,
     )
 }
 
@@ -276,7 +275,6 @@ internal fun Note.render(
     return UiTimeline(
         topMessage = topMessage,
         content = actualStatus.renderStatus(accountKey, event),
-        platformType = PlatformType.Misskey,
     )
 }
 
@@ -484,6 +482,7 @@ internal fun Note.renderStatus(
                 ),
             )
         },
+        platformType = PlatformType.Misskey,
         onMediaClicked = { media, index ->
             launcher.launch(
                 AppDeepLink.StatusMedia(

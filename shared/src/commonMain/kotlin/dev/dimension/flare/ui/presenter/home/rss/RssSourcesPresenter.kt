@@ -7,6 +7,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectPagingState
 import dev.dimension.flare.data.database.app.AppDatabase
+import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -20,7 +21,7 @@ public class RssSourcesPresenter :
     KoinComponent {
     private val appDatabase by inject<AppDatabase>()
 
-    public interface State {
+    public interface State : CheckRssSourcePresenter.State {
         public val sources: PagingState<UiRssSource>
 
         public fun add(
@@ -41,13 +42,17 @@ public class RssSourcesPresenter :
                 }
             }
         }.collectPagingState()
-        return object : State {
+        val checkRssSourcePresenterState = remember { CheckRssSourcePresenter() }.body()
+        return object : State, CheckRssSourcePresenter.State by checkRssSourcePresenterState {
             override val sources: PagingState<UiRssSource> = sources
 
             override fun add(
                 url: String,
                 title: String,
             ) {
+                scope.launch {
+                    appDatabase.rssSourceDao().insert(DbRssSources(url = url, title = title, lastUpdate = 0))
+                }
             }
 
             override fun delete(url: String) {

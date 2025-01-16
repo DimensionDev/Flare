@@ -14,12 +14,10 @@ import kotlinx.collections.immutable.ImmutableList
 public data class UiTimeline internal constructor(
     val topMessage: TopMessage?,
     val content: ItemContent?,
-    val platformType: PlatformType,
 ) {
     val itemKey: String
         get() =
             buildString {
-                append(platformType.name)
                 if (topMessage != null) {
                     append("withTopMessage")
                     append(topMessage.itemKey)
@@ -55,7 +53,18 @@ public data class UiTimeline internal constructor(
     public sealed interface ItemContent {
         public val itemKey: String
 
+        public data class Feed internal constructor(
+            val title: String,
+            val description: String,
+            val url: String,
+            val image: String?,
+        ) : ItemContent {
+            override val itemKey: String
+                get() = "Feed_$url"
+        }
+
         public data class Status internal constructor(
+            val platformType: PlatformType,
             val images: ImmutableList<UiMedia>,
             val sensitive: Boolean,
             val contentWarning: UiRichText?,
@@ -76,6 +85,7 @@ public data class UiTimeline internal constructor(
             override val itemKey: String
                 get() =
                     buildString {
+                        append(platformType.name)
                         append("Status")
                         append(statusKey)
                     }

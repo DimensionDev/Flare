@@ -46,7 +46,6 @@ internal fun Status.render(
                 )
             },
         content = renderStatus(accountKey, event),
-        platformType = PlatformType.VVo,
     )
 }
 
@@ -235,6 +234,7 @@ internal fun Status.renderStatus(
                 ),
             )
         },
+        platformType = PlatformType.VVo,
         onMediaClicked = { media, index ->
             launcher.launch(
                 AppDeepLink.StatusMedia(
@@ -322,7 +322,6 @@ internal fun Comment.render(
     UiTimeline(
         topMessage = null,
         content = renderStatus(accountKey, event),
-        platformType = PlatformType.VVo,
     )
 
 internal fun Comment.renderStatus(
@@ -444,6 +443,7 @@ internal fun Comment.renderStatus(
                 ),
             )
         },
+        platformType = PlatformType.VVo,
         onMediaClicked = { media, index ->
             launcher.launch(
                 AppDeepLink.StatusMedia(
@@ -488,7 +488,6 @@ internal fun Attitude.render(
                 statusKey = MicroBlogKey(id.toString(), vvoHost),
             ),
         content = content,
-        platformType = PlatformType.VVo,
     )
 }
 

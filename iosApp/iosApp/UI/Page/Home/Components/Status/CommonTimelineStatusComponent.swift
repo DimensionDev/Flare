@@ -14,6 +14,7 @@ import UIKit
 struct CommonTimelineStatusComponent: View {
     @State private var showMedia: Bool = false
     @State private var expanded: Bool = false
+    @State private var showShareMenu: Bool = false
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
 
@@ -335,118 +336,66 @@ struct CommonTimelineStatusComponent: View {
                                 }
                             }, label: {
                                 StatusActionLabel(item: item)
-                                    .frame(maxWidth: .infinity)
                             })
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 12)  // 添加水平内边距
                         case let .group(group):
-                        EmptyView()
-                            // Menu {
-                            //     ForEach(0 ..< group.actions.count, id: \.self) { subActionIndex in
-                            //         let subAction = group.actions[subActionIndex]
-                            //         if case let .item(item) = onEnum(of: subAction) {
-                            //             let role: ButtonRole? = if let colorData = item as? StatusActionItemColorized {
-                            //                 switch colorData.color {
-                            //                 case .red: .destructive
-                            //                 case .primaryColor: nil
-                            //                 case .contentColor: nil
-                            //                 case .error: .destructive
-                            //                 }
-                            //             } else {
-                            //                 nil
-                            //             }
-                            //             Button(role: role, action: {
-                            //                 if let clickable = item as? StatusActionItemClickable {
-                            //                     clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                            //                     // 如果是举报操作，显示 Toast
-                            //                     if case .report = onEnum(of: item) {
-                            //                         showReportToast()
-                            //                     }
-                            //                 }
-                            //             }, label: {
-                            //                 let text: LocalizedStringKey = switch onEnum(of: item) {
-                            //                 case let .bookmark(data): data.bookmarked ? LocalizedStringKey("status_action_unbookmark") : LocalizedStringKey("status_action_bookmark")
-                            //                 case .delete: LocalizedStringKey("status_action_delete")
-                            //                 case let .like(data): data.liked ? LocalizedStringKey("status_action_unlike") : LocalizedStringKey("status_action_like")
-                            //                 case .quote: LocalizedStringKey("quote")
-                            //                 case .reaction: LocalizedStringKey("status_action_add_reaction")
-                            //                 case .reply: LocalizedStringKey("status_action_reply")
-                            //                 case .report: LocalizedStringKey("report")
-                            //                 case let .retweet(data): data.retweeted ? LocalizedStringKey("retweet_remove") : LocalizedStringKey("retweet")
-                            //                 case .more: LocalizedStringKey("status_action_more")
-                            //                 }
-                            //                 Label {
-                            //                     Text(text)
-                            //                 } icon: {
-                            //                     StatusActionItemIcon(item: item)
-                            //                 }
-                            //             })
-                            //         }
-                            //     }
-                            // } label: {
-                            //     StatusActionLabel(item: group.displayItem)
-                            //         .frame(maxWidth: .infinity)
-                            // }
+                            Menu {
+                                ForEach(0 ..< group.actions.count, id: \.self) { subActionIndex in
+                                    let subAction = group.actions[subActionIndex]
+                                    if case let .item(item) = onEnum(of: subAction) {
+                                        let role: ButtonRole? = if let colorData = item as? StatusActionItemColorized {
+                                            switch colorData.color {
+                                            case .red: .destructive
+                                            case .primaryColor: nil
+                                            case .contentColor: nil
+                                            case .error: .destructive
+                                            }
+                                        } else {
+                                            nil
+                                        }
+                                        Button(role: role, action: {
+                                            if let clickable = item as? StatusActionItemClickable {
+                                                clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                                            }
+                                        }, label: {
+                                            let text: LocalizedStringKey = switch onEnum(of: item) {
+                                            case let .bookmark(data): data.bookmarked ? LocalizedStringKey("status_action_unbookmark") : LocalizedStringKey("status_action_bookmark")
+                                            case .delete: LocalizedStringKey("status_action_delete")
+                                            case let .like(data): data.liked ? LocalizedStringKey("status_action_unlike") : LocalizedStringKey("status_action_like")
+                                            case .quote: LocalizedStringKey("quote")
+                                            case .reaction: LocalizedStringKey("status_action_add_reaction")
+                                            case .reply: LocalizedStringKey("status_action_reply")
+                                            case .report: LocalizedStringKey("report")
+                                            case let .retweet(data): data.retweeted ? LocalizedStringKey("retweet_remove") : LocalizedStringKey("retweet")
+                                            case .more: LocalizedStringKey("status_action_more")
+                                            }
+                                            Label {
+                                                Text(text)
+                                            } icon: {
+                                                StatusActionItemIcon(item: item)
+                                            }
+                                        })
+                                    }
+                                }
+                            } label: {
+                                StatusActionLabel(item: group.displayItem)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 12)  // 添加水平内边距
                         }
                     }
-
-                    // 显示更多操作菜单
-                    // if !processedActions.moreActions.isEmpty {
-                    //     Menu {
-                    //         ForEach(0 ..< processedActions.moreActions.count, id: \.self) { index in
-                    //             let item = processedActions.moreActions[index]
-                    //             let role: ButtonRole? = if let colorData = item as? StatusActionItemColorized {
-                    //                 switch colorData.color {
-                    //                 case .red: .destructive
-                    //                 case .primaryColor: nil
-                    //                 case .contentColor: nil
-                    //                 case .error: .destructive
-                    //                 }
-                    //             } else {
-                    //                 nil
-                    //             }
-
-                    //             Button(role: role, action: {
-                    //                 if let clickable = item as? StatusActionItemClickable {
-                    //                     clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                    //                     // 如果是举报操作，显示 Toast
-                    //                     if case .report = onEnum(of: item) {
-                    //                         showReportToast()
-                    //                     }
-                    //                 }
-                    //             }, label: {
-                    //                 let text: LocalizedStringKey = switch onEnum(of: item) {
-                    //                 case let .bookmark(data): data.bookmarked ? LocalizedStringKey("status_action_unbookmark") : LocalizedStringKey("status_action_bookmark")
-                    //                 case .delete: LocalizedStringKey("status_action_delete")
-                    //                 case let .like(data): data.liked ? LocalizedStringKey("status_action_unlike") : LocalizedStringKey("status_action_like")
-                    //                 case .quote: LocalizedStringKey("quote")
-                    //                 case .reaction: LocalizedStringKey("status_action_add_reaction")
-                    //                 case .reply: LocalizedStringKey("status_action_reply")
-                    //                 case .report: LocalizedStringKey("report")
-                    //                 case let .retweet(data): data.retweeted ? LocalizedStringKey("retweet_remove") : LocalizedStringKey("retweet")
-                    //                 case .more: LocalizedStringKey("status_action_more")
-                    //                 }
-                    //                 Label {
-                    //                     Text(text)
-                    //                 } icon: {
-                    //                     StatusActionItemIcon(item: item)
-                    //                 }
-                    //             })
-                    //         }
-                    //     } label: {
-                    //         Image(asset: Asset.Image.Status.more)
-                    //             .renderingMode(.template)
-                    //             .rotationEffect(.degrees(0))
-                    //             .foregroundColor(.gray)
-                    //             .modifier(SmallIconModifier())
-                    //     }
-                    // }
+                    
+                    // 使用新的 ShareButton
+                    ShareButton(content: data.content.raw, view: self)
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 0)  // 添加水平内边距
                 }
-                .padding(.horizontal, 16)
                 .labelStyle(CenteredLabelStyle())
                 .buttonStyle(.borderless)
                 .opacity(0.6)
                 .if(!isDetail) { view in
-                    view
-                        .font(.caption)
+                    view.font(.caption)
                 }
                 .allowsHitTesting(true)
             }
@@ -605,12 +554,11 @@ struct CenteredLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 4) {
             configuration.icon
-                .frame(alignment: .leading)
             configuration.title
-                .frame(alignment: .leading)
                 .font(.system(size: 12))
             Spacer() // 添加 Spacer 让内容靠左
         }
+        .frame(maxWidth: .infinity, alignment: .center)
     }
 }
 
@@ -635,5 +583,70 @@ struct SmallIconModifier: ViewModifier {
             .imageScale(.small)
             .scaleEffect(0.8)
             .frame(width: 24, height: 24)
+    }
+}
+
+// 添加一个新的 View 来处理分享按钮
+struct ShareButton: View {
+    @Environment(\.colorScheme) var colorScheme
+    let content: String
+    let view: CommonTimelineStatusComponent
+    
+    var body: some View {
+        Menu {
+            Button(action: {
+                // 系统分享
+                let activityVC = UIActivityViewController(activityItems: [content], applicationActivities: nil)
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let window = windowScene.windows.first,
+                   let rootVC = window.rootViewController {
+                    activityVC.popoverPresentationController?.sourceView = window
+                    rootVC.present(activityVC, animated: true)
+                }
+            }) {
+                Label {
+                    Text("Share")
+                } icon: {
+                    Image(systemName: "square.and.arrow.up")
+                }
+            }
+            
+            Button(action: {
+                // 截图分享
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let window = windowScene.windows.first {
+                    let renderer = ImageRenderer(content: view)
+                    if let uiImage = renderer.uiImage {
+                        let activityVC = UIActivityViewController(activityItems: [uiImage], applicationActivities: nil)
+                        if let rootVC = window.rootViewController {
+                            activityVC.popoverPresentationController?.sourceView = window
+                            rootVC.present(activityVC, animated: true)
+                        }
+                    }
+                }
+            }) {
+                Label {
+                    Text("Screenshot Share")
+                } icon: {
+                    Image(systemName: "camera")
+                }
+            }
+        } label: {
+            HStack {
+                Spacer()  
+                Spacer()
+                Label {
+                    Text("")  // 空文本，保持与其他按钮一致的结构
+                } icon: {
+                    Image(systemName: "square.and.arrow.up")
+                        .imageScale(.medium)
+                        .font(.system(size: 13))
+                        .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+                }
+                Spacer()
+            }
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
+        }
     }
 }

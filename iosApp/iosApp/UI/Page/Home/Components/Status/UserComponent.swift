@@ -20,7 +20,7 @@ struct UserComponent: View {
                 }
             )
             .buttonStyle(.borderless)
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 2) {
                 Markdown(user.name.markdown)
                     .lineLimit(1)
                     .font(.headline)
@@ -34,12 +34,15 @@ struct UserComponent: View {
                     if topEndContent != nil {
                         if let topEndContent {
                             switch onEnum(of: topEndContent) {
-                            case let .visibility(data): StatusVisibilityComponent(visibility: data.visibility).foregroundColor(.gray)
+                            case let .visibility(data): StatusVisibilityComponent(visibility: data.visibility)
+                                .foregroundColor(.gray)
+                                .font(.caption)
                             }
                         }
                     }
                 }
             }
+            .padding(.bottom, 2)
         }
     }
 }

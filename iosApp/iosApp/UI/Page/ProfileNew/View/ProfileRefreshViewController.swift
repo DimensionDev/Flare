@@ -8,7 +8,7 @@ import shared
 import SwiftUI
 import UIKit
 
-extension JXPagingListContainerView: JXSegmentedViewListContainer {}
+//extension JXPagingListContainerView:  JXSegmentedViewListContainer {}
 
 class ProfileNewRefreshViewController: UIViewController {
     // MARK: - Properties

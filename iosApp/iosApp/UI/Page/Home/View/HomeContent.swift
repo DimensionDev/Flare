@@ -50,22 +50,29 @@ struct HomeTimelineView: View {
     }
 
     var body: some View {
-        TimelineScreen(timelineStore: timelineStore)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                HomeAppBar(
-                    router: router,
-                    accountType: accountType,
-                    showSettings: $showSettings,
-                    showLogin: $showLogin,
-                    selectedHomeTab: $selectedHomeTab,
-                    timelineStore: timelineStore,
-                    tabSettingsStore: tabSettingsStore
-                )
-            }
-            // appbar 背景色
-            .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
+        HomeJXPagingWrapper(
+            router: router,
+            accountType: accountType,
+            showSettings: $showSettings,
+            showLogin: $showLogin,
+            selectedHomeTab: $selectedHomeTab,
+            timelineStore: timelineStore,
+            tabSettingsStore: tabSettingsStore
+        )
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            HomeAppBar(
+                router: router,
+                accountType: accountType,
+                showSettings: $showSettings,
+                showLogin: $showLogin,
+                selectedHomeTab: $selectedHomeTab,
+                timelineStore: timelineStore,
+                tabSettingsStore: tabSettingsStore
+            )
+        }
+        .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
     }
 }
 

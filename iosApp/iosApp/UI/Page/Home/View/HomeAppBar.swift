@@ -36,7 +36,23 @@ struct HomeAppBar: ToolbarContent {
 
     private func onTabSelected(_ tab: FLTabItem) {
         withAnimation {
-            timelineStore.updateCurrentPresenter(for: tab)
+            // 找到选中的tab的索引
+            if let index = tabSettingsStore.availableTabs.firstIndex(where: { $0.key == tab.key }) {
+                // 先更新选中的索引
+                selectedHomeTab = index
+                
+                // 通知 JXPagingView 切换页面
+                NotificationCenter.default.post(
+                    name: NSNotification.Name("ScrollToPage"),
+                    object: nil,
+                    userInfo: ["index": index]
+                )
+                
+                // 最后更新数据源
+                DispatchQueue.main.async {
+                    timelineStore.updateCurrentPresenter(for: tab)
+                }
+            }
         }
     }
 

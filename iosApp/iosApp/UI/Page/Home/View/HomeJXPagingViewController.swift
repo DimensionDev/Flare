@@ -7,7 +7,6 @@ extension JXPagingListContainerView: JXSegmentedViewListContainer {}
 
 class HomeJXPagingViewController: UIViewController {
     private var pagingView: JXPagingView!
-    private var segmentedView: JXSegmentedView!
     private var router: Router!
     private var accountType: AccountType!
     private var showSettings: Binding<Bool>!
@@ -23,8 +22,22 @@ class HomeJXPagingViewController: UIViewController {
     private var lastSelectedIndex: Int = 0
     
     deinit {
+        NotificationCenter.default.removeObserver(self)
         // 清理资源
         listViewControllers.removeAll()
+    }
+    
+    func scrollToPage(at index: Int, animated: Bool = true) {
+        guard index >= 0 && index < tabSettingsStore.availableTabs.count else { return }
+        
+        // 确保 ViewController 已经创建
+        _ = getOrCreateTimelineViewController(at: index)
+        
+        // 使用 JXPagingView 的方法来切换页面
+        pagingView.listContainerView.didClickSelectedItem(at: index)
+        
+        // 更新上一次选中的索引
+        lastSelectedIndex = index
     }
     
     func configure(
@@ -48,31 +61,12 @@ class HomeJXPagingViewController: UIViewController {
         self.lastSelectedIndex = selectedHomeTab.wrappedValue
         
         setupUI()
+        
+        // 监听 selectedHomeTab 的变化
+        selectedHomeTab.wrappedValue = lastSelectedIndex
     }
     
     private func setupUI() {
-        // 配置 JXSegmentedView
-        segmentedView = JXSegmentedView(frame: CGRect(x: 0, y: 0, width: view.bounds.width, height: 44))
-        let dataSource = JXSegmentedTitleDataSource()
-        dataSource.titles = tabSettingsStore.availableTabs.map { tab in
-            switch tab.metaData.title {
-            case .text(let title): title
-            case .localized(let key): NSLocalizedString(key, comment: "")
-            }
-        }
-        dataSource.titleNormalColor = .gray
-        dataSource.titleSelectedColor = .label
-        dataSource.titleNormalFont = .systemFont(ofSize: 15)
-        dataSource.titleSelectedFont = .systemFont(ofSize: 15, weight: .medium)
-        dataSource.isTitleColorGradientEnabled = true
-        segmentedView.dataSource = dataSource
-        
-        // 配置指示器
-        let indicator = JXSegmentedIndicatorLineView()
-        indicator.indicatorColor = UIColor.systemBlue
-        indicator.indicatorWidth = 30
-        segmentedView.indicators = [indicator]
-        
         // 配置 JXPagingView
         pagingView = JXPagingView(delegate: self)
         view.addSubview(pagingView)
@@ -81,26 +75,36 @@ class HomeJXPagingViewController: UIViewController {
         // 设置 listContainerView 的代理
         pagingView.listContainerView.delegate = self
         
-        // 关联 - 直接设置，不需要类型转换
-        segmentedView.listContainer = pagingView.listContainerView
-        
-        // 设置 segmentedView 代理
-        segmentedView.delegate = self
+        // 添加通知监听
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleScrollToPage(_:)),
+            name: NSNotification.Name("ScrollToPage"),
+            object: nil
+        )
         
         // 设置初始选中项
         if let index = selectedHomeTab?.wrappedValue,
            index >= 0 && index < tabSettingsStore.availableTabs.count {
-            segmentedView.defaultSelectedIndex = index
+            // 确保 ViewController 已经创建
+            _ = getOrCreateTimelineViewController(at: index)
             let tab = tabSettingsStore.availableTabs[index]
             timelineStore.updateCurrentPresenter(for: tab)
         } else {
             // 如果index无效，设置为0
             selectedHomeTab?.wrappedValue = 0
-            segmentedView.defaultSelectedIndex = 0
             if !tabSettingsStore.availableTabs.isEmpty {
+                // 确保 ViewController 已经创建
+                _ = getOrCreateTimelineViewController(at: 0)
                 let tab = tabSettingsStore.availableTabs[0]
                 timelineStore.updateCurrentPresenter(for: tab)
             }
+        }
+    }
+    
+    @objc private func handleScrollToPage(_ notification: Notification) {
+        if let index = notification.userInfo?["index"] as? Int {
+            scrollToPage(at: index)
         }
     }
     
@@ -145,11 +149,11 @@ extension HomeJXPagingViewController: JXPagingViewDelegate {
     }
     
     func heightForPinSectionHeader(in pagingView: JXPagingView) -> Int {
-        return 44  // segmentedView 的高度
+        return 0  // 移除 segmentedView 的高度
     }
     
     func viewForPinSectionHeader(in pagingView: JXPagingView) -> UIView {
-        return segmentedView
+        return UIView()  // 返回空视图，因为我们不再使用 segmentedView
     }
     
     func numberOfLists(in pagingView: JXPagingView) -> Int {
@@ -160,7 +164,8 @@ extension HomeJXPagingViewController: JXPagingViewDelegate {
         return getOrCreateTimelineViewController(at: index)
     }
 }
- // MARK: - JXPagingListContainerViewDelegate
+
+// MARK: - JXPagingListContainerViewDelegate
 extension HomeJXPagingViewController: JXPagingListContainerViewDelegate {
     func listContainerViewDidEndScrolling(_ listContainerView: JXPagingListContainerView) {
         // 获取当前页面索引
@@ -168,9 +173,6 @@ extension HomeJXPagingViewController: JXPagingListContainerViewDelegate {
         
         // 只有当索引真的改变时才更新
         if currentIndex != lastSelectedIndex {
-            // 更新 segmentedView 的选中状态
-            segmentedView.selectItemAt(index: currentIndex)
-            
             // 使用 async 延迟更新状态
             DispatchQueue.main.async {
                 // 更新选中的 tab
@@ -189,9 +191,6 @@ extension HomeJXPagingViewController: JXPagingListContainerViewDelegate {
     func listContainerView(_ listContainerView: JXPagingListContainerView, listDidAppearAt index: Int) {
         // 只有当索引真的改变时才更新
         if index != lastSelectedIndex {
-          // 更新 segmentedView 的选中状态
-            segmentedView.selectItemAt(index: index)
-            
             // 使用 async 延迟更新状态
             DispatchQueue.main.async {
                 // 更新选中的 tab
@@ -204,37 +203,6 @@ extension HomeJXPagingViewController: JXPagingListContainerViewDelegate {
             
             // 更新上一次选中的索引
             lastSelectedIndex = index
-        }
-    }
-}
-
-// MARK: - JXSegmentedViewDelegate
-extension HomeJXPagingViewController: JXSegmentedViewDelegate {
-    func segmentedView(_ segmentedView: JXSegmentedView, didSelectedItemAt index: Int) {
-        // 只有当索引真的改变时才更新
-        if index != lastSelectedIndex {
-            // 同步分页视图
-            pagingView.listContainerView.didClickSelectedItem(at: index)
-            
-            // 使用 async 延迟更新状态
-            DispatchQueue.main.async {
-                // 更新选中的tab
-                self.selectedHomeTab?.wrappedValue = index
-                
-                // 更新数据源
-                let tab = self.tabSettingsStore.availableTabs[index]
-                self.timelineStore.updateCurrentPresenter(for: tab)
-            }
-            
-            // 更新上一次选中的索引
-            lastSelectedIndex = index
-        }
-    }
-    
-    func segmentedView(_ segmentedView: JXSegmentedView, didClickSelectedItemAt index: Int) {
-        // 处理重复点击，可以添加回到顶部等功能
-        if let viewController = listViewControllers[index] {
-            viewController.scrollToTop()
         }
     }
 } 

@@ -284,6 +284,12 @@ internal fun Note.renderStatus(
     accountKey: MicroBlogKey,
     event: StatusEvent.Misskey,
 ): UiTimeline.ItemContent.Status {
+    val remoteHost =
+        if (user.host.isNullOrEmpty()) {
+            accountKey.host
+        } else {
+            user.host
+        }
     val user = user.render(accountKey)
     val isFromMe = user.key == accountKey
     val canReblog = visibility in listOf(Visibility.Public, Visibility.Home)
@@ -325,7 +331,7 @@ internal fun Note.renderStatus(
                 }?.toPersistentList() ?: persistentListOf(),
         contentWarning =
             cw?.let {
-                misskeyParser.parse(it).toHtml(accountKey, emojis).toUi()
+                misskeyParser.parse(it).toHtml(accountKey, emojis, remoteHost).toUi()
             },
         user = user,
         quote =
@@ -336,7 +342,7 @@ internal fun Note.renderStatus(
                     null
                 },
             ).toImmutableList(),
-        content = misskeyParser.parse(text.orEmpty()).toHtml(accountKey, emojis).toUi(),
+        content = misskeyParser.parse(text.orEmpty()).toHtml(accountKey, emojis, remoteHost).toUi(),
         actions =
             listOfNotNull(
                 StatusAction.Item.Reply(
@@ -578,7 +584,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
         handle = "@$username@$remoteHost",
         key = userKey,
         banner = bannerUrl,
-        description = description?.let { misskeyParser.parse(it).toHtml(accountKey, emojis).toUi() },
+        description = description?.let { misskeyParser.parse(it).toHtml(accountKey, emojis, remoteHost).toUi() },
         matrices =
             UiProfile.Matrices(
                 fansCount = followersCount.toLong(),
@@ -607,7 +613,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                         fields =
                             it
                                 .associate { (key, value) ->
-                                    key to misskeyParser.parse(value).toHtml(accountKey, emojis).toUi()
+                                    key to misskeyParser.parse(value).toHtml(accountKey, emojis, remoteHost).toUi()
                                 }.toImmutableMap(),
                     )
                 },
@@ -655,18 +661,19 @@ private fun parseName(
     if (name.isEmpty()) {
         return Element("body")
     }
-    return misskeyNameParser.parse(name).toHtml(accountKey, emojis) as? Element ?: Element("body")
+    return misskeyNameParser.parse(name).toHtml(accountKey, emojis, accountKey.host) as? Element ?: Element("body")
 }
 
 private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
     accountKey: MicroBlogKey,
     emojis: Map<String, String>,
+    remoteHost: String,
 ): Element =
     when (this) {
         is CenterNode -> {
             Element("center").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis))
+                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
                 }
             }
         }
@@ -700,7 +707,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         is QuoteNode -> {
             Element("blockquote").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis))
+                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
                 }
             }
         }
@@ -714,7 +721,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         is BoldNode -> {
             Element("strong").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis))
+                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
                 }
             }
         }
@@ -724,7 +731,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
 //                attributes["name"] = name
                 attributes().put("name", name)
                 content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis))
+                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
                 }
             }
         }
@@ -732,7 +739,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         is ItalicNode -> {
             Element("em").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis))
+                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
                 }
             }
         }
@@ -740,7 +747,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         is RootNode -> {
             Element("body").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis))
+                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
                 }
             }
         }
@@ -748,7 +755,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         is SmallNode -> {
             Element("small").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis))
+                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
                 }
             }
         }
@@ -756,7 +763,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
         is StrikeNode -> {
             Element("s").apply {
                 content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis))
+                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
                 }
             }
         }
@@ -797,7 +804,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
 //                attributes["href"] = url
                 attributes().put("href", url)
                 content.forEach {
-                    appendChild(it.toHtml(accountKey, emojis))
+                    appendChild(it.toHtml(accountKey, emojis, remoteHost))
                 }
             }
         }
@@ -812,10 +819,7 @@ private fun moe.tlaster.mfm.parser.tree.Node.toHtml(
 
         is MentionNode -> {
             Element("a").apply {
-                val deeplink =
-                    host?.let {
-                        AppDeepLink.ProfileWithNameAndHost(accountKey, userName, it)
-                    } ?: AppDeepLink.ProfileWithNameAndHost(accountKey, userName, accountKey.host)
+                val deeplink = AppDeepLink.ProfileWithNameAndHost(accountKey, userName, host ?: remoteHost)
 //                attributes["href"] = deeplink
                 attributes().put("href", deeplink)
                 appendChild(

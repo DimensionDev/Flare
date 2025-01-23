@@ -6,7 +6,7 @@ import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
 import nl.adaptivity.xmlutil.serialization.XML
 
-internal object Rss {
+internal object RssService {
     private val xml by lazy {
         XML {
             defaultPolicy {

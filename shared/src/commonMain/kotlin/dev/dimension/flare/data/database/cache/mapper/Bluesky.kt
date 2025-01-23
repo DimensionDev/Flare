@@ -243,7 +243,6 @@ internal fun List<ListNotificationsNotification>.toDb(
                                     ),
                                 accountKey = accountKey,
                                 userKey = null,
-                                platformType = PlatformType.Bluesky,
                                 content = content,
                                 text = null,
                             ),
@@ -278,7 +277,6 @@ internal fun List<ListNotificationsNotification>.toDb(
                                     ),
                                 accountKey = accountKey,
                                 userKey = null,
-                                platformType = PlatformType.Bluesky,
                                 content = content,
                                 text = null,
                             ),
@@ -311,7 +309,6 @@ internal fun List<ListNotificationsNotification>.toDb(
                                         ),
                                     accountKey = accountKey,
                                     userKey = user.userKey,
-                                    platformType = PlatformType.Bluesky,
                                     content = content,
                                     text = null,
                                 ),
@@ -349,7 +346,6 @@ private fun ListNotificationsNotification.toDbStatus(accountKey: MicroBlogKey): 
                 uri.atUri + "_" + user.userKey,
                 accountKey.host,
             ),
-        platformType = PlatformType.Bluesky,
         userKey = user.userKey,
         content = StatusContent.BlueskyNotification.Normal(this),
         accountKey = accountKey,
@@ -381,7 +377,6 @@ internal fun List<FeedViewPost>.toDbPagingTimeline(
                                         it.post.uri.atUri + "_reblog_${user.userKey}",
                                         accountKey.host,
                                     ),
-                                platformType = PlatformType.Bluesky,
                                 userKey =
                                     data.value.by
                                         .toDbUser(accountKey.host)
@@ -429,7 +424,6 @@ private fun PostView.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithU
                     uri.atUri,
                     host = user.userKey.host,
                 ),
-            platformType = PlatformType.Bluesky,
             content = StatusContent.Bluesky(this),
             userKey = user.userKey,
             accountKey = accountKey,

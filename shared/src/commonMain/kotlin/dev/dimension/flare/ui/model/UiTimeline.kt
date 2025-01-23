@@ -30,7 +30,7 @@ public data class UiTimeline internal constructor(
     val itemType: String
         get() =
             buildString {
-                append(platformType.name)
+//                append(platformType.name)
                 if (topMessage != null) {
                     append("withTopMessage")
                 }
@@ -46,6 +46,10 @@ public data class UiTimeline internal constructor(
                         is ItemContent.UserList -> {
                             append("UserList")
                         }
+
+                        is ItemContent.Feed -> {
+                            append("Feed")
+                        }
                     }
                 }
             }
@@ -55,9 +59,10 @@ public data class UiTimeline internal constructor(
 
         public data class Feed internal constructor(
             val title: String,
-            val description: String,
+            val description: String?,
             val url: String,
             val image: String?,
+            val createdAt: UiDateTime?,
         ) : ItemContent {
             override val itemKey: String
                 get() = "Feed_$url"

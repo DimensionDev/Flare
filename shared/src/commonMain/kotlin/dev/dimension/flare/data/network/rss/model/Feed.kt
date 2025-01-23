@@ -19,7 +19,7 @@ internal sealed interface Feed {
         val title: Text,
         @XmlSerialName("updated")
         @XmlElement(true)
-        val updated: String, // ISO-8601 datetime string
+        val updated: String?, // ISO-8601 datetime string
         @XmlSerialName("author")
         @XmlElement(true)
         val authors: List<Person> = emptyList(),
@@ -89,7 +89,38 @@ internal sealed interface Feed {
             @XmlSerialName("category")
             @XmlElement(true)
             val categories: List<Category> = emptyList(),
+            @XmlSerialName("group", prefix = "media", namespace = "http://search.yahoo.com/mrss/")
+            @XmlElement(true)
+            val media: Media? = null,
         )
+
+        @Serializable
+        data class Media(
+            @XmlSerialName("title", prefix = "media")
+            @XmlElement(true)
+            val title: Text? = null,
+            @XmlSerialName("content", prefix = "media")
+            @XmlElement(true)
+            val content: Content? = null,
+            @XmlSerialName("thumbnail", prefix = "media")
+            @XmlElement(true)
+            val thumbnail: Content? = null,
+            @XmlSerialName("description", prefix = "media")
+            @XmlElement(true)
+            val description: Text? = null,
+        ) {
+            @Serializable
+            data class Content(
+                @XmlElement(false)
+                val type: String? = null,
+                @XmlElement(false)
+                val url: String,
+                @XmlElement(false)
+                val width: Int? = null,
+                @XmlElement(false)
+                val height: Int? = null,
+            )
+        }
 
         @Serializable
         data class Person(

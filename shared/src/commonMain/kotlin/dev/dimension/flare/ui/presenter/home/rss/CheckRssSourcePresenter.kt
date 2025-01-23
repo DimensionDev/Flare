@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import dev.dimension.flare.data.network.rss.Rss
+import dev.dimension.flare.data.network.rss.RssService
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -28,7 +28,7 @@ public class CheckRssSourcePresenter : PresenterBase<CheckRssSourcePresenter.Sta
                 snapshotFlow { url }
                     .map {
                         runCatching {
-                            Rss.fetch(it)
+                            RssService.fetch(it)
                         }.fold(
                             onSuccess = {
                                 UiState.Success(true) as UiState<Boolean>

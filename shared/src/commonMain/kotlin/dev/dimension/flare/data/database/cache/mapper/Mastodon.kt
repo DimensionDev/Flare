@@ -78,7 +78,6 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
                 this.id ?: throw IllegalStateException("id is null"),
                 user.userKey.host,
             ),
-        platformType = PlatformType.Mastodon,
         userKey = user.userKey,
         content = StatusContent.MastodonNotification(this),
         accountKey = accountKey,
@@ -119,7 +118,6 @@ private fun Status.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUse
                     id ?: throw IllegalArgumentException("mastodon Status.idStr should not be null"),
                     host = user.userKey.host,
                 ),
-            platformType = PlatformType.Mastodon,
             content =
                 dev.dimension.flare.data.database.cache.model.StatusContent
                     .Mastodon(this),

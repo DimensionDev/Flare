@@ -146,7 +146,6 @@ internal fun TopLevel.renderNotifications(
                             statusKey = MicroBlogKey(id = notification.id.orEmpty(), host = accountKey.host),
                         ),
                     content = itemContent,
-                    platformType = PlatformType.xQt,
                 )
             } else if (mentionTweet != null) {
                 val tweet = globalObjects?.tweets?.get(mentionTweet.id) ?: return@mapNotNull null
@@ -192,7 +191,6 @@ internal fun TopLevel.renderNotifications(
                             statusKey = MicroBlogKey(id = notification?.id.orEmpty(), host = accountKey.host),
                         ),
                     content = data,
-                    platformType = PlatformType.xQt,
                 )
             } else {
                 null
@@ -230,7 +228,6 @@ internal fun Tweet.render(
     return UiTimeline(
         content = actualTweet,
         topMessage = topMessage,
-        platformType = PlatformType.xQt,
     )
 }
 
@@ -515,6 +512,7 @@ internal fun Tweet.renderStatus(
         onClicked = {
             launcher.launch(AppDeepLink.StatusDetail(accountKey = accountKey, statusKey = statusKey))
         },
+        platformType = PlatformType.xQt,
         onMediaClicked = { media, index ->
             launcher.launch(
                 AppDeepLink.StatusMedia(

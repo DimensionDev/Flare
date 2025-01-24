@@ -73,6 +73,7 @@ import com.ramcosta.composedestinations.generated.destinations.HomeTimelineRoute
 import com.ramcosta.composedestinations.generated.destinations.ListScreenRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.MeRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.NotificationRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.RssRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.SettingsRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.TimelineRouteDestination
@@ -97,6 +98,7 @@ import dev.dimension.flare.data.model.DiscoverTabItem
 import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.NotificationTabItem
 import dev.dimension.flare.data.model.ProfileTabItem
+import dev.dimension.flare.data.model.RssTabItem
 import dev.dimension.flare.data.model.SettingsTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
@@ -652,6 +654,7 @@ private fun getDirection(
         is AllListTabItem -> ListScreenRouteDestination(accountType)
         is Bluesky.FeedsTabItem -> BlueskyFeedsRouteDestination(accountType)
         is DirectMessageTabItem -> DMScreenRouteDestination(accountType)
+        is RssTabItem -> RssRouteDestination
     }
 
 @Composable

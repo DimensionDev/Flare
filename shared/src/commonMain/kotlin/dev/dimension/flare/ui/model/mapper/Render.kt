@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
 import com.fleeksoft.ksoup.nodes.Element
+import dev.dimension.flare.data.database.app.model.DbRssSources
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimelineWithRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageItemWithUser
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -14,6 +15,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
+import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.toImmutableList
@@ -162,4 +164,12 @@ internal fun DbMessageItemWithUser.render(accountKey: MicroBlogKey) =
                     }
                 is MessageContent.Bluesky -> null
             },
+    )
+
+internal fun DbRssSources.render() =
+    UiRssSource(
+        url = url,
+        title = title,
+        lastUpdate = Instant.fromEpochMilliseconds(lastUpdate).toUi(),
+        id = id,
     )

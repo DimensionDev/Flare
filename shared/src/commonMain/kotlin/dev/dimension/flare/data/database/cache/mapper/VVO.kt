@@ -77,7 +77,6 @@ private fun Status.toDbStatus(accountKey: MicroBlogKey): DbStatus =
         statusKey = MicroBlogKey(id = id, host = vvoHost),
         accountKey = accountKey,
         userKey = user?.id?.let { MicroBlogKey(id = it.toString(), host = vvoHost) },
-        platformType = dev.dimension.flare.model.PlatformType.VVo,
         content =
             dev.dimension.flare.data.database.cache.model.StatusContent
                 .VVO(data = this),
@@ -114,7 +113,6 @@ private fun Comment.toDbStatus(accountKey: MicroBlogKey): DbStatus =
         statusKey = MicroBlogKey(id = id, host = vvoHost),
         accountKey = accountKey,
         userKey = user?.id?.let { MicroBlogKey(id = it.toString(), host = vvoHost) },
-        platformType = dev.dimension.flare.model.PlatformType.VVo,
         content =
             dev.dimension.flare.data.database.cache.model.StatusContent
                 .VVOComment(data = this),

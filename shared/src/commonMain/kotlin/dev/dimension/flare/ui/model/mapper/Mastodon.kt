@@ -119,7 +119,6 @@ internal fun Notification.render(
 
                 else -> status ?: UiTimeline.ItemContent.User(user)
             },
-        platformType = PlatformType.Mastodon,
     )
 }
 
@@ -171,7 +170,6 @@ internal fun Status.render(
     return UiTimeline(
         topMessage = topMessage,
         content = actualStatus.renderStatus(host, accountKey, event),
-        platformType = PlatformType.Mastodon,
     )
 }
 
@@ -354,6 +352,7 @@ private fun Status.renderStatus(
                 ),
             )
         },
+        platformType = PlatformType.Mastodon,
         onMediaClicked = { media, index ->
             launcher.launch(
                 AppDeepLink.StatusMedia(

@@ -214,7 +214,6 @@ internal fun FeedViewPostReasonUnion.render(
                 )
             },
         content = data?.renderStatus(accountKey, event),
-        platformType = PlatformType.Bluesky,
     )
 }
 
@@ -243,7 +242,6 @@ internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
             UiTimeline(
                 topMessage = topMessage,
                 content = content,
-                platformType = PlatformType.Bluesky,
             )
         }
         is StatusContent.BlueskyNotification.Post ->
@@ -281,7 +279,6 @@ internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
             return UiTimeline(
                 topMessage = topMessage,
                 content = content,
-                platformType = PlatformType.Bluesky,
             )
         }
     }
@@ -319,7 +316,6 @@ internal fun PostView.render(
 ) = UiTimeline(
     topMessage = null,
     content = renderStatus(accountKey, event),
-    platformType = PlatformType.Bluesky,
 )
 
 internal fun PostView.renderStatus(
@@ -335,6 +331,7 @@ internal fun PostView.renderStatus(
         )
 
     return UiTimeline.ItemContent.Status(
+        platformType = PlatformType.Bluesky,
         user = user,
         images = findMedias(this),
         card = findCard(this),
@@ -843,6 +840,7 @@ private fun render(
                         ),
                     )
                 },
+                platformType = PlatformType.Bluesky,
                 onMediaClicked = { media, index ->
                     launcher.launch(
                         AppDeepLink.StatusMedia(

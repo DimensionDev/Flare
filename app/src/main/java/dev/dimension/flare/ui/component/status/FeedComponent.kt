@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.model.UiTimeline
@@ -30,7 +31,10 @@ internal fun FeedComponent(
                 contentDescription = data.title,
                 modifier =
                     Modifier
-                        .aspectRatio(16f / 9f),
+                        .aspectRatio(16f / 9f)
+                        .clip(
+                            MaterialTheme.shapes.medium,
+                        ),
             )
         }
         Text(
@@ -38,7 +42,12 @@ internal fun FeedComponent(
             style = MaterialTheme.typography.titleMedium,
         )
         data.description?.let {
-            Text(text = it)
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 2,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }

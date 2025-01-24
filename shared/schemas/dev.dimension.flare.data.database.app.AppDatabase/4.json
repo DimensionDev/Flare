@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "7f851509975964fb11a67225ecd00f90",
+    "identityHash": "0397d63e37bd0c71a785f99961100885",
     "entities": [
       {
         "tableName": "DbAccount",
@@ -144,8 +144,14 @@
       },
       {
         "tableName": "DbRssSources",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`url` TEXT NOT NULL, `title` TEXT, `lastUpdate` INTEGER NOT NULL, PRIMARY KEY(`url`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `url` TEXT NOT NULL, `title` TEXT, `lastUpdate` INTEGER NOT NULL)",
         "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
           {
             "fieldPath": "url",
             "columnName": "url",
@@ -165,16 +171,16 @@
           }
         ],
         "primaryKey": {
-          "autoGenerate": false,
+          "autoGenerate": true,
           "columnNames": [
-            "url"
+            "id"
           ]
         }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7f851509975964fb11a67225ecd00f90')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0397d63e37bd0c71a785f99961100885')"
     ]
   }
 }

@@ -11,6 +11,8 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.map
 
 public class CheckRssSourcePresenter : PresenterBase<CheckRssSourcePresenter.State>() {
@@ -20,12 +22,14 @@ public class CheckRssSourcePresenter : PresenterBase<CheckRssSourcePresenter.Sta
         public fun setUrl(value: String)
     }
 
+    @OptIn(FlowPreview::class)
     @Composable
     override fun body(): State {
         var url by remember { mutableStateOf("") }
         val isValid =
             remember {
                 snapshotFlow { url }
+                    .debounce(500)
                     .map {
                         runCatching {
                             RssService.fetch(it)

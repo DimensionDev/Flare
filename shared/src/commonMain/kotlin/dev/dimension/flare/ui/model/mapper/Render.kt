@@ -171,4 +171,5 @@ internal fun DbRssSources.render() =
         url = url,
         title = title,
         lastUpdate = Instant.fromEpochMilliseconds(lastUpdate).toUi(),
+        id = id,
     )

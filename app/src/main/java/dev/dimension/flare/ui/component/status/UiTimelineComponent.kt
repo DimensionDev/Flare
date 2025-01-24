@@ -112,7 +112,9 @@ private fun ItemContentComponent(
         is UiTimeline.ItemContent.Feed -> {
             FeedComponent(
                 data = item,
-                modifier = modifier,
+                modifier =
+                    modifier
+                        .padding(bottom = 8.dp),
             )
         }
     }

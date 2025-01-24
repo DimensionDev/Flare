@@ -5,7 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity
 internal data class DbRssSources(
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
+    val id: Int = 0,
     val url: String,
     val title: String?,
     val lastUpdate: Long,

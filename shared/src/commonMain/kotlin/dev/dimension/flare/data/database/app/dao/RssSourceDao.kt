@@ -8,12 +8,15 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 internal interface RssSourceDao {
-    @Insert
+    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
     suspend fun insert(data: DbRssSources)
 
     @Query("SELECT * FROM DbRssSources")
     fun getAll(): Flow<List<DbRssSources>>
 
-    @Query("DELETE FROM DbRssSources WHERE url = :url")
-    suspend fun delete(url: String)
+    @Query("DELETE FROM DbRssSources WHERE id = :id")
+    suspend fun delete(id: Int)
+
+    @Query("SELECT * FROM DbRssSources WHERE id = :id")
+    fun get(id: Int): Flow<DbRssSources>
 }

@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.rss
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -74,11 +75,13 @@ private fun RssSourceEditDialog(
                     state = state.title,
                     label = { Text(text = stringResource(id = R.string.rss_sources_title_label)) },
                     modifier = Modifier.fillMaxWidth(),
+                    lineLimits = TextFieldLineLimits.SingleLine,
                 )
                 OutlinedTextField2(
                     state = state.url,
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(text = stringResource(id = R.string.rss_sources_url_label)) },
+                    lineLimits = TextFieldLineLimits.SingleLine,
                     trailingIcon = {
                         state.isValid
                             .onSuccess {

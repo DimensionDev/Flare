@@ -216,6 +216,7 @@ fun ServiceSelectScreen(
                             }
                     },
                     enabled = !state.loading,
+                    lineLimits = TextFieldLineLimits.SingleLine,
                 )
                 AnimatedVisibility(state.canNext && state.detectedPlatformType.isSuccess) {
                     Column(

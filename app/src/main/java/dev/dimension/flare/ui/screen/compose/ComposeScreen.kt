@@ -107,7 +107,6 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
-import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.model.takeSuccessOr
@@ -277,18 +276,14 @@ private fun ComposeScreen(
         )
     val focusRequester = remember { FocusRequester() }
     val contentWarningFocusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(state.contentWarningState) {
-        state.contentWarningState
-            .onSuccess { contentWarningState ->
-                if (contentWarningState.enabled) {
-                    contentWarningFocusRequester.requestFocus()
-                } else {
-                    focusRequester.requestFocus()
-                }
-            }.onError {
+    state.contentWarningState.onSuccess {
+        LaunchedEffect(it.enabled) {
+            if (it.enabled) {
+                contentWarningFocusRequester.requestFocus()
+            } else {
                 focusRequester.requestFocus()
             }
+        }
     }
     Column(
         modifier =

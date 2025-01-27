@@ -531,4 +531,11 @@
   <string name="local_history_search_placeholder">البحث عن ذاكرة التخزين المؤقت المحلية</string>
   <string name="local_history_search_status_title">الحالة</string>
   <string name="local_history_search_user_title">المستخدم</string>
+  <string name="rss_sources_title">مصادر Rss</string>
+  <string name="add_rss_source">إضافة مصدر Rss</string>
+  <string name="edit_rss_source">تحرير مصدر Rss</string>
+  <string name="delete_rss_source">حذف مصدر Rss</string>
+  <string name="rss_sources_title_label">العنوان</string>
+  <string name="rss_sources_url_label">الرابط</string>
+  <string name="rss_title">راس</string>
 </resources>

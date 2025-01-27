@@ -536,4 +536,11 @@
   <string name="local_history_search_placeholder">ローカルキャッシュを検索</string>
   <string name="local_history_search_status_title">ステータス</string>
   <string name="local_history_search_user_title">ユーザー</string>
+  <string name="rss_sources_title">RSS ソース</string>
+  <string name="add_rss_source">RSS ソースを追加</string>
+  <string name="edit_rss_source">RSSソースの編集</string>
+  <string name="delete_rss_source">RSS ソースを削除</string>
+  <string name="rss_sources_title_label">タイトル</string>
+  <string name="rss_sources_url_label">URL</string>
+  <string name="rss_title">RSS</string>
 </resources>

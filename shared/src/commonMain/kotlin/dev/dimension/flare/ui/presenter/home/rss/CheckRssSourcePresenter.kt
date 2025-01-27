@@ -10,6 +10,8 @@ import dev.dimension.flare.data.network.rss.RssService
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.mapper.title
 import dev.dimension.flare.ui.presenter.PresenterBase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -20,6 +22,7 @@ import kotlinx.coroutines.flow.flow
 public class CheckRssSourcePresenter : PresenterBase<CheckRssSourcePresenter.State>() {
     public interface State {
         public val isValid: UiState<Boolean>
+        public val defaultTitle: UiState<String>
 
         public fun setUrl(value: String)
     }
@@ -28,7 +31,7 @@ public class CheckRssSourcePresenter : PresenterBase<CheckRssSourcePresenter.Sta
     @Composable
     override fun body(): State {
         var url by remember { mutableStateOf("") }
-        val isValid =
+        val feedData =
             remember {
                 snapshotFlow { url }
                     .debounce(500)
@@ -38,16 +41,31 @@ public class CheckRssSourcePresenter : PresenterBase<CheckRssSourcePresenter.Sta
                                 emit(UiState.Loading())
                                 RssService.fetch(it)
                             }.onSuccess {
-                                emit(UiState.Success(true))
+                                emit(UiState.Success(it))
                             }.onFailure {
-                                emit(UiState.Success(false))
+                                emit(UiState.Error(it))
                             }
                         }
                     }
             }.collectAsUiState().value.flatMap { it }
 
+        val isValid =
+            remember(feedData) {
+                feedData.map {
+                    true
+                }
+            }
+
+        val defaultTitle =
+            remember(feedData) {
+                feedData.map {
+                    it.title
+                }
+            }
+
         return object : State {
             override val isValid = isValid
+            override val defaultTitle = defaultTitle
 
             override fun setUrl(value: String) {
                 url = value

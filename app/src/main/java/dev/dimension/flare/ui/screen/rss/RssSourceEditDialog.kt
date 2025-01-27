@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -11,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -159,6 +161,22 @@ private fun presenter(id: Int?) =
                 }
                 urlText.edit {
                     append(it.url)
+                }
+            }
+        }
+        state.defaultTitle.onSuccess {
+            DisposableEffect(it) {
+                if (titleText.text.isEmpty()) {
+                    titleText.edit {
+                        append(it)
+                    }
+                }
+                onDispose {
+                    if (titleText.text == it) {
+                        titleText.edit {
+                            delete(0, it.length)
+                        }
+                    }
                 }
             }
         }

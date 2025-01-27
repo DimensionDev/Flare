@@ -13,6 +13,14 @@ internal fun Feed.render(): List<UiTimeline> =
         is Feed.RDF -> renderRdf()
     }
 
+internal val Feed.title: String
+    get() =
+        when (this) {
+            is Feed.Atom -> this.title.value
+            is Feed.Rss20 -> this.channel.title
+            is Feed.RDF -> this.channel.title
+        }
+
 private fun Feed.Atom.renderAtom(): List<UiTimeline> =
     this.entries.map {
         val descHtml =

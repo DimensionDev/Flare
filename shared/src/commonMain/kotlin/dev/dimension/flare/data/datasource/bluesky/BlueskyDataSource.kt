@@ -64,6 +64,7 @@ import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.MemCacheable
+import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
@@ -151,7 +152,20 @@ internal class BlueskyDataSource(
         BlueskyService(
             baseUrl = credential.baseUrl,
             accountKey = accountKey,
-            bearerToken = credential.accessToken,
+            accessToken = credential.accessToken,
+            refreshToken = credential.refreshToken,
+            onTokenRefreshed = { accessToken, refreshToken ->
+                coroutineScope.launch {
+                    appDatabase.accountDao().setCredential(
+                        accountKey,
+                        credential
+                            .copy(
+                                accessToken = accessToken,
+                                refreshToken = refreshToken,
+                            ).encodeJson(),
+                    )
+                }
+            },
         )
     }
 

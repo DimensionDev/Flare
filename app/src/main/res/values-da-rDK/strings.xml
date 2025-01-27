@@ -533,4 +533,11 @@
   <string name="local_history_search_placeholder">Søg i lokal cache</string>
   <string name="local_history_search_status_title">Status</string>
   <string name="local_history_search_user_title">Bruger</string>
+  <string name="rss_sources_title">Rss Kilder</string>
+  <string name="add_rss_source">Tilføj Rss Kilde</string>
+  <string name="edit_rss_source">Rediger Rss Kilde</string>
+  <string name="delete_rss_source">Slet Rss Kilde</string>
+  <string name="rss_sources_title_label">Titel</string>
+  <string name="rss_sources_url_label">URL</string>
+  <string name="rss_title">Rss</string>
 </resources>

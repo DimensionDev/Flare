@@ -531,4 +531,11 @@
   <string name="local_history_search_placeholder">Поиск локального кэша</string>
   <string name="local_history_search_status_title">Статус</string>
   <string name="local_history_search_user_title">Пользователь</string>
+  <string name="rss_sources_title">Rss Источники</string>
+  <string name="add_rss_source">Добавить Rss источник</string>
+  <string name="edit_rss_source">Изменить Rss источник</string>
+  <string name="delete_rss_source">Удалить Rss источник</string>
+  <string name="rss_sources_title_label">Заголовок</string>
+  <string name="rss_sources_url_label">Url</string>
+  <string name="rss_title">Rss</string>
 </resources>

@@ -533,4 +533,11 @@
   <string name="local_history_search_placeholder">Hledat místní keš</string>
   <string name="local_history_search_status_title">Stav</string>
   <string name="local_history_search_user_title">Uživatel</string>
+  <string name="rss_sources_title">Zdroje Rss</string>
+  <string name="add_rss_source">Přidat zdroj Rss</string>
+  <string name="edit_rss_source">Upravit Rss zdroj</string>
+  <string name="delete_rss_source">Odstranit Rss zdroj</string>
+  <string name="rss_sources_title_label">Hlava 1 – Celkem</string>
+  <string name="rss_sources_url_label">Adresa URL</string>
+  <string name="rss_title">RSS</string>
 </resources>

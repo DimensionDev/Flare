@@ -533,4 +533,11 @@
   <string name="local_history_search_placeholder">Caută cache local</string>
   <string name="local_history_search_status_title">Status</string>
   <string name="local_history_search_user_title">Utilizator</string>
+  <string name="rss_sources_title">Surse RSS</string>
+  <string name="add_rss_source">Adaugă Sursa RSS</string>
+  <string name="edit_rss_source">Editează Sursa RSS</string>
+  <string name="delete_rss_source">Șterge sursa RSS</string>
+  <string name="rss_sources_title_label">Titlu</string>
+  <string name="rss_sources_url_label">Url-ul</string>
+  <string name="rss_title">RSS</string>
 </resources>

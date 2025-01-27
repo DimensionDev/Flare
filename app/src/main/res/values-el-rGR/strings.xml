@@ -528,4 +528,11 @@
   <string name="local_history_search_placeholder">Αναζήτηση τοπικής προσωρινής μνήμης</string>
   <string name="local_history_search_status_title">Κατάσταση</string>
   <string name="local_history_search_user_title">Χρήστης</string>
+  <string name="rss_sources_title">Πηγές RSS</string>
+  <string name="add_rss_source">Προσθήκη Πηγής RSS</string>
+  <string name="edit_rss_source">Επεξεργασία Πηγής Rss</string>
+  <string name="delete_rss_source">Διαγραφή Πηγής RSS</string>
+  <string name="rss_sources_title_label">Τίτλος</string>
+  <string name="rss_sources_url_label">URL</string>
+  <string name="rss_title">RSS</string>
 </resources>

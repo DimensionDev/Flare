@@ -9,7 +9,7 @@ import nl.adaptivity.xmlutil.serialization.XmlValue
 @Serializable
 internal sealed interface Feed {
     @Serializable
-    @SerialName("feed")
+    @XmlSerialName("feed")
     data class Atom(
         @XmlSerialName("id")
         @XmlElement(true)
@@ -243,14 +243,14 @@ internal sealed interface Feed {
     }
 
     @Serializable
-    @SerialName("rss")
+    @XmlSerialName("rss")
     data class Rss20(
         val version: String,
         @XmlElement(true)
         val channel: Channel,
     ) : Feed {
         @Serializable
-        @SerialName("channel")
+        @XmlSerialName("channel")
         data class Channel(
             @XmlElement(true)
             val title: String,
@@ -371,7 +371,7 @@ internal sealed interface Feed {
         )
 
         @Serializable
-        @SerialName("guid")
+        @XmlSerialName("guid")
         data class Guid(
             @XmlElement(false)
             val isPermaLink: Boolean = false,
@@ -385,6 +385,42 @@ internal sealed interface Feed {
             val url: String,
             @XmlElement(true)
             val title: String? = null,
+        )
+    }
+
+    @Serializable
+    @XmlSerialName("RDF", namespace = "http://www.w3.org/1999/02/22-rdf-syntax-ns#", prefix = "rdf")
+    data class RDF(
+        @XmlElement(true)
+        val channel: Channel,
+        @XmlSerialName("item", namespace = "http://purl.org/rss/1.0/", prefix = "")
+        val items: List<Item> = emptyList(),
+    ) : Feed {
+        @Serializable
+        @XmlSerialName("channel", namespace = "http://purl.org/rss/1.0/", prefix = "")
+        data class Channel(
+            @XmlElement(true)
+            val title: String,
+            @XmlElement(true)
+            val link: String,
+            @XmlElement(true)
+            val description: String,
+            @XmlElement(true)
+            @XmlSerialName(value = "date", namespace = "http://purl.org/dc/elements/1.1/", prefix = "dc")
+            val date: String? = null,
+        )
+
+        @Serializable
+        data class Item(
+            @XmlElement(true)
+            val title: String,
+            @XmlElement(true)
+            val link: String,
+            @XmlElement(true)
+            val description: String,
+            @XmlElement(true)
+            @XmlSerialName(value = "date", namespace = "http://purl.org/dc/elements/1.1/", prefix = "dc")
+            val date: String? = null,
         )
     }
 }

@@ -127,6 +127,7 @@ ktorfit-converters-flow = { group = "de.jensklingenberg.ktorfit", name = "ktorfi
 
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-serialization-kotlinx-xml = { group = "io.ktor", name = "ktor-serialization-kotlinx-xml", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
 ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
@@ -177,7 +178,7 @@ compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "
 navigation = ["navigation-compose"]
 kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json", "kotlinx-coroutines-core"]
 koin = ["koin-core", "koin-android", "koin-compose", "koin-androidx-compose"]
-ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
+ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging", "ktor-serialization-kotlinx-xml"]
 coil3 = ["coil3-compose", "coil3-svg", "coil3-ktor3"]
 coil3-extensions = ["apng", "awebp", "vectordrawable-animated", "zoomable-image", "coil3-gif"]
 accompanist = ["accompanist-permissions", "accompanist-drawablepainter"]

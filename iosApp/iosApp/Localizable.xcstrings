@@ -88268,7 +88268,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "ラウンド"
+            "value": "円形"
           }
         },
         "ko": {
@@ -88454,7 +88454,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "正方形（正方形）"
+            "value": "四角"
           }
         },
         "ko": {
@@ -117098,7 +117098,7 @@
         "ja": {
           "stringUnit": {
             "state": "needs_review",
-            "value": "正方形（正方形）"
+            "value": "四角"
           }
         },
         "ko": {

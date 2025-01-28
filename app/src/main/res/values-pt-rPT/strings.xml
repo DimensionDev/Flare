@@ -540,4 +540,5 @@
   <string name="rss_sources_title_label">Título</string>
   <string name="rss_sources_url_label">URL</string>
   <string name="rss_title">RSS</string>
+  <string name="empty_rss_sources">Sem fontes de RSS</string>
 </resources>

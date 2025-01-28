@@ -253,6 +253,11 @@ internal fun <T : Any> UiState<PagingState<T>>.flatten(): PagingState<T> =
 internal fun <T : Any> Flow<List<T>>.collectPagingState(): State<PagingState<T>> =
     produceState<PagingState<T>>(initialValue = PagingState.Loading<T>()) {
         collect {
-            value = PagingState.Success.ImmutableSuccess(it.toImmutableList())
+            value =
+                if (it.isEmpty()) {
+                    PagingState.Empty { }
+                } else {
+                    PagingState.Success.ImmutableSuccess(it.toImmutableList())
+                }
         }
     }

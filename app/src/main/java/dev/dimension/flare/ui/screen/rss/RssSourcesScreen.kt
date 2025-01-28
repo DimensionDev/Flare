@@ -1,6 +1,10 @@
 package dev.dimension.flare.ui.screen.rss
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -14,11 +18,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
+import compose.icons.fontawesomeicons.solid.File
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
@@ -61,9 +68,31 @@ internal fun RssSourcesScreen(
         },
     ) { contentPadding ->
         LazyColumn(
+            modifier = Modifier.fillMaxSize(),
             contentPadding = contentPadding,
         ) {
-            items(state.sources) {
+            items(
+                state.sources,
+                emptyContent = {
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillParentMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        FAIcon(
+                            FontAwesomeIcons.Solid.File,
+                            contentDescription = stringResource(R.string.empty_rss_sources),
+                            modifier = Modifier.size(48.dp),
+                        )
+                        Text(
+                            text = stringResource(R.string.empty_rss_sources),
+                            style = MaterialTheme.typography.headlineMedium,
+                        )
+                    }
+                },
+            ) {
                 ListItem(
                     modifier =
                         Modifier

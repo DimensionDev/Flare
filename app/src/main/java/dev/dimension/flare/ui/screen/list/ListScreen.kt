@@ -287,7 +287,7 @@ internal fun LazyListScope.listItemComponent(
                 modifier = Modifier.fillParentMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                Column (
+                Column(
                     modifier = Modifier.fillParentMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp),

@@ -538,4 +538,5 @@
   <string name="rss_sources_title_label">العنوان</string>
   <string name="rss_sources_url_label">الرابط</string>
   <string name="rss_title">راس</string>
+  <string name="empty_rss_sources">لا توجد مصادر Rss</string>
 </resources>

@@ -8,4 +8,8 @@ internal actual object PlatformTypography {
     actual val caption: TextStyle
         @Composable
         get() = FluentTheme.typography.caption
+
+    actual val title: TextStyle
+        @Composable
+        get() = FluentTheme.typography.title
 }

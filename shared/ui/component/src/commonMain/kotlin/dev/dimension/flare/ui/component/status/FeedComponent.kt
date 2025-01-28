@@ -4,9 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -14,7 +11,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import androidx.window.core.layout.WindowWidthSizeClass
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @Composable
@@ -49,7 +48,7 @@ internal fun FeedComponent(
                     Modifier
                         .aspectRatio(16f / 9f)
                         .clip(
-                            MaterialTheme.shapes.medium,
+                            PlatformTheme.shapes.medium,
                         ),
             )
         }
@@ -64,16 +63,16 @@ internal fun FeedComponent(
                         }
                     },
         ) {
-            Text(
+            PlatformText(
                 text = data.title,
-                style = MaterialTheme.typography.titleMedium,
+                style = PlatformTheme.typography.title,
             )
             data.description?.let {
-                Text(
+                PlatformText(
                     text = it,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = PlatformTheme.typography.caption,
                     maxLines = 2,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = PlatformTheme.colorScheme.caption,
                 )
             }
         }

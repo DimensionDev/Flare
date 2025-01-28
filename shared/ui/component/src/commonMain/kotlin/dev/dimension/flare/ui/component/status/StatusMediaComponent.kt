@@ -20,6 +20,8 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -85,6 +87,7 @@ internal fun StatusMediaComponent(
 //                                    ),
 //                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                )
+                                .pointerHoverIcon(PointerIcon.Hand)
                                 .clickable {
                                     onMediaClick(media)
                                 },

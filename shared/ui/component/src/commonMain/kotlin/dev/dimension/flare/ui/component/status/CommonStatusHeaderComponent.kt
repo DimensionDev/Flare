@@ -13,6 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -35,6 +37,7 @@ public fun CommonStatusHeaderComponent(
                 data = data.avatar,
                 modifier =
                     Modifier
+                        .pointerHoverIcon(PointerIcon.Hand)
                         .clickable {
                             onUserClick(data.key)
                         },
@@ -45,6 +48,7 @@ public fun CommonStatusHeaderComponent(
                 text = data.name,
                 modifier =
                     Modifier
+                        .pointerHoverIcon(PointerIcon.Hand)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
@@ -60,6 +64,7 @@ public fun CommonStatusHeaderComponent(
                 style = PlatformTheme.typography.caption,
                 modifier =
                     Modifier
+                        .pointerHoverIcon(PointerIcon.Hand)
                         .alpha(MediumAlpha)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },

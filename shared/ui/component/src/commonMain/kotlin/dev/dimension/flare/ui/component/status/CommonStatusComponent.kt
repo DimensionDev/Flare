@@ -37,6 +37,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.intl.Locale
@@ -242,6 +244,7 @@ public fun CommonStatusComponent(
                     card = card,
                     modifier =
                         Modifier
+                            .pointerHoverIcon(PointerIcon.Hand)
                             .clickable {
                                 uriHandler.openUri(card.url)
                             }.fillMaxWidth(),

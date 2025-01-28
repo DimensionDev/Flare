@@ -287,15 +287,21 @@ internal fun LazyListScope.listItemComponent(
                 modifier = Modifier.fillParentMaxSize(),
                 contentAlignment = Alignment.Center,
             ) {
-                FAIcon(
-                    imageVector = FontAwesomeIcons.Solid.List,
-                    contentDescription = stringResource(id = R.string.list_empty),
-                    modifier = Modifier.size(48.dp),
-                )
-                Text(
-                    text = stringResource(id = R.string.list_empty),
-                    style = MaterialTheme.typography.headlineMedium,
-                )
+                Column(
+                    modifier = Modifier.fillParentMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.List,
+                        contentDescription = stringResource(id = R.string.list_empty),
+                        modifier = Modifier.size(48.dp),
+                    )
+                    Text(
+                        text = stringResource(id = R.string.list_empty),
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                }
             }
         },
         loadingContent = {

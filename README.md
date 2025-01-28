@@ -35,7 +35,7 @@ Here're some features we're planning to implement in the future.
    - Option to change data source
  - [ ] Auto thread
  - [x] Local history
- - [ ] RSS feed support
+ - [x] RSS feed support
 
 ## Building
 ### Android

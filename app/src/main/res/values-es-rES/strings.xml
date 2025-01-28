@@ -539,4 +539,5 @@
   <string name="rss_sources_title_label">Título</string>
   <string name="rss_sources_url_label">Url</string>
   <string name="rss_title">Bruto</string>
+  <string name="empty_rss_sources">Sin fuentes rast</string>
 </resources>

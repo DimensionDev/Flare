@@ -94,7 +94,7 @@ struct CommonTimelineStatusComponent: View {
                 }
                 Spacer()
                 // icon + time
-                VStack(alignment: .trailing, spacing: 1) { 
+                VStack(alignment: .trailing, spacing: 1) {
                     // 更多按钮
                     if !processActions().moreActions.isEmpty {
                         Menu {
@@ -338,7 +338,7 @@ struct CommonTimelineStatusComponent: View {
                                 StatusActionLabel(item: item)
                             })
                             .frame(maxWidth: .infinity)
-                            .padding(.horizontal, 12)  // 添加水平内边距
+                            .padding(.horizontal, 10) // 添加水平内边距
                         case let .group(group):
                             Menu {
                                 ForEach(0 ..< group.actions.count, id: \.self) { subActionIndex in
@@ -382,14 +382,14 @@ struct CommonTimelineStatusComponent: View {
                                 StatusActionLabel(item: group.displayItem)
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.horizontal, 12)  // 添加水平内边距
+                            .padding(.horizontal, 10) // 添加水平内边距
                         }
                     }
-                    
+
                     // 使用新的 ShareButton
                     ShareButton(content: data.content.raw, view: self)
                         .frame(maxWidth: .infinity)
-                        .padding(.horizontal, 0)  // 添加水平内边距
+                        .padding(.horizontal, 0) // 添加水平内边距
                 }
                 .labelStyle(CenteredLabelStyle())
                 .buttonStyle(.borderless)
@@ -556,7 +556,7 @@ struct CenteredLabelStyle: LabelStyle {
             configuration.icon
             configuration.title
                 .font(.system(size: 12))
-            Spacer() // 添加 Spacer 让内容靠左
+            // Spacer() // 添加 Spacer 让内容靠左
         }
         .frame(maxWidth: .infinity, alignment: .center)
     }
@@ -591,7 +591,7 @@ struct ShareButton: View {
     @Environment(\.colorScheme) var colorScheme
     let content: String
     let view: CommonTimelineStatusComponent
-    
+
     var body: some View {
         Menu {
             Button(action: {
@@ -599,7 +599,8 @@ struct ShareButton: View {
                 let activityVC = UIActivityViewController(activityItems: [content], applicationActivities: nil)
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                    let window = windowScene.windows.first,
-                   let rootVC = window.rootViewController {
+                   let rootVC = window.rootViewController
+                {
                     activityVC.popoverPresentationController?.sourceView = window
                     rootVC.present(activityVC, animated: true)
                 }
@@ -610,11 +611,12 @@ struct ShareButton: View {
                     Image(systemName: "square.and.arrow.up")
                 }
             }
-            
+
             Button(action: {
                 // 截图分享
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let window = windowScene.windows.first {
+                   let window = windowScene.windows.first
+                {
                     let renderer = ImageRenderer(content: view)
                     if let uiImage = renderer.uiImage {
                         let activityVC = UIActivityViewController(activityItems: [uiImage], applicationActivities: nil)
@@ -633,10 +635,10 @@ struct ShareButton: View {
             }
         } label: {
             HStack {
-                Spacer()  
+                Spacer()
                 Spacer()
                 Label {
-                    Text("")  // 空文本，保持与其他按钮一致的结构
+                    Text("") // 空文本，保持与其他按钮一致的结构
                 } icon: {
                     Image(systemName: "square.and.arrow.up")
                         .imageScale(.medium)

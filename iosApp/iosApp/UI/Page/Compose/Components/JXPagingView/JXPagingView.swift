@@ -237,7 +237,7 @@ open class JXPagingView: UIView {
         }
     }
 
-    // MARK: - Private
+    // - Private
 
     func refreshTableHeaderView() {
         guard let delegate else { return }
@@ -301,7 +301,7 @@ open class JXPagingView: UIView {
     }
 }
 
-// MARK: - UITableViewDataSource, UITableViewDelegate
+// - UITableViewDataSource, UITableViewDelegate
 
 extension JXPagingView: UITableViewDataSource, UITableViewDelegate {
     open func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {

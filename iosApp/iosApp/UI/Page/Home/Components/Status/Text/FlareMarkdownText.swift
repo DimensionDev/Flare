@@ -4,7 +4,7 @@ import TwitterText
 import UIKit
 
 public enum FlareMarkdownText {
-    // MARK: - Constants
+    // - Constants
 
     public static let lensIDRegex: NSRegularExpression? = {
         guard let regex = try? NSRegularExpression(
@@ -17,7 +17,7 @@ public enum FlareMarkdownText {
         return regex
     }()
 
-    // MARK: - Style Configuration
+    // - Style Configuration
 
     public struct Style {
         public let font: UIFont
@@ -71,7 +71,7 @@ public enum FlareMarkdownText {
         }
     }
 
-    // MARK: - Link Types
+    // - Link Types
 
     public enum LinkType {
         case url(URL)
@@ -198,7 +198,7 @@ public enum FlareMarkdownText {
         return (AttributedString(nsAttrString), previewLink, luckyDropLink)
     }
 
-    // MARK: - Private Methods
+    // - Private Methods
 
     private static func parseEntities(from text: String) -> [Entity] {
         var entities: [Entity] = []
@@ -280,7 +280,7 @@ public enum FlareMarkdownText {
     }
 }
 
-// MARK: - Supporting Types
+// - Supporting Types
 
 extension FlareMarkdownText {
     struct Entity {
@@ -289,7 +289,7 @@ extension FlareMarkdownText {
     }
 }
 
-// MARK: - String Extensions
+// - String Extensions
 
 private extension String {
     var isImageLink: Bool {

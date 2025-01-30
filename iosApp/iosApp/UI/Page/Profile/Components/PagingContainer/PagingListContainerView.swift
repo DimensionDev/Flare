@@ -56,7 +56,7 @@ class PagingListContainerViewController: UIViewController, JXPagingViewListViewD
         }
     }
 
-    // MARK: - JXPagingViewListViewDelegate
+    // - JXPagingViewListViewDelegate
 
     func listView() -> UIView {
         view
@@ -72,7 +72,7 @@ class PagingListContainerViewController: UIViewController, JXPagingViewListViewD
     }
 }
 
-// MARK: - UIScrollViewDelegate
+// - UIScrollViewDelegate
 
 extension PagingListContainerViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

@@ -157,7 +157,7 @@ import Kingfisher
 //
 // }
 //
-//// MARK: - PageboyViewControllerDataSource
+//// - PageboyViewControllerDataSource
 // extension MediaPreviewViewModel: PageboyViewControllerDataSource {
 //
 //    func numberOfViewControllers(in pageboyViewController: PageboyViewController) -> Int {

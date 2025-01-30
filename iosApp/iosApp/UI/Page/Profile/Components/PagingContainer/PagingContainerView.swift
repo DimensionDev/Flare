@@ -1,7 +1,7 @@
 import shared
 import SwiftUI
 
-// MARK: - SwiftUI Wrapper
+// - SwiftUI Wrapper
 
 struct PagingContainerView<Content: View>: View {
     let headerView: AnyView
@@ -28,7 +28,7 @@ struct PagingContainerView<Content: View>: View {
     }
 }
 
-// MARK: - UIKit Bridge
+// - UIKit Bridge
 
 private struct PagingViewRepresentable<Content: View>: UIViewControllerRepresentable {
     let headerView: AnyView
@@ -53,7 +53,7 @@ private struct PagingViewRepresentable<Content: View>: UIViewControllerRepresent
     }
 }
 
-// MARK: - UIKit Implementation
+// - UIKit Implementation
 
 private class PagingViewController<Content: View>: UIViewController, JXPagingViewDelegate {
     private var pagingView: JXPagingView!
@@ -151,7 +151,7 @@ private class PagingViewController<Content: View>: UIViewController, JXPagingVie
         pagingView.reloadData()
     }
 
-    // MARK: - JXPagingViewDelegate
+    // - JXPagingViewDelegate
 
     func tableHeaderViewHeight(in _: JXPagingView) -> Int {
         Int(headerVC.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height)

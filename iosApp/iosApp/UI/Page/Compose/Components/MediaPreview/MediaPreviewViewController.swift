@@ -202,7 +202,7 @@ import Kingfisher
 //
 // }
 //
-//// MARK: - PageboyViewControllerDelegate
+//// - PageboyViewControllerDelegate
 // extension MediaPreviewViewController: PageboyViewControllerDelegate {
 //    func pageboyViewController(
 //        _ pageboyViewController: PageboyViewController,
@@ -241,7 +241,7 @@ import Kingfisher
 //
 // }
 //
-//// MARK: - MediaPreviewingViewController
+//// - MediaPreviewingViewController
 // extension MediaPreviewViewController: MediaPreviewingViewController {
 //
 //    func isInteractiveDismissible() -> Bool {
@@ -273,7 +273,7 @@ import Kingfisher
 //
 // }
 //
-//// MARK: - MediaPreviewImageViewControllerDelegate
+//// - MediaPreviewImageViewControllerDelegate
 // extension MediaPreviewViewController: MediaPreviewImageViewControllerDelegate {
 //
 //    func mediaPreviewImageViewController(_ viewController: MediaPreviewImageViewController, tapGestureRecognizerDidTrigger tapGestureRecognizer: UITapGestureRecognizer) {
@@ -295,7 +295,7 @@ import Kingfisher
 //
 // }
 //
-//// MARK: - ShareActivityProvider
+//// - ShareActivityProvider
 // extension MediaPreviewViewController: ShareActivityProvider {
 //    var activities: [Any] {
 //        if let provider = pageViewController.currentViewController as? ShareActivityProvider {

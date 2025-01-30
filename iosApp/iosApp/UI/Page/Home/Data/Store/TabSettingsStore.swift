@@ -6,16 +6,86 @@ class TabSettingsStore: ObservableObject {
     @Published var primaryItems: [FLTabItem] = [] // 主要标签（不可更改状态）
     @Published var secondaryItems: [FLTabItem] = [] // 所有次要标签
     @Published var storeItems: [FLTabItem] = [] // UserDefaults 存储的已启用标签
-    @Published var availableTabs: [FLTabItem] = [] // 实际显示在 AppBar 上的标签
+    @Published var availableTabs: [FLTabItem] = []
+    @Published var selectedTabKey: String = ""
+    @Published var currentPresenter: TimelinePresenter?
     @Published var currentUser: UiUserV2?
 
     private var presenter = ActiveAccountPresenter()
     private var isInitializing = false
     private var timelineStore: TimelineStore
     private let settingsManager = FLTabSettingsManager()
+    private let accountType: AccountType
 
-    init(timelineStore: TimelineStore) {
+    // 缓存 presenter 避免重复创建
+    private var presenterCache: [String: TimelinePresenter] = [:]
+
+    // 获取分段标题
+    var segmentTitles: [String] {
+        availableTabs.map { tab in
+            switch tab.metaData.title {
+            case let .text(title): title
+            case let .localized(key): NSLocalizedString(key, comment: "")
+            }
+        }
+    }
+
+    // 获取选中索引
+    var selectedIndex: Int {
+        availableTabs.firstIndex { $0.key == selectedTabKey } ?? 0
+    }
+
+    // 获取或创建 Presenter
+    func getOrCreatePresenter(for tab: FLTabItem) -> TimelinePresenter? {
+        guard let timelineTab = tab as? FLTimelineTabItem else { return nil }
+
+        if let cached = presenterCache[tab.key] {
+            return cached
+        }
+        let presenter = timelineTab.createPresenter()
+        presenterCache[tab.key] = presenter
+        return presenter
+    }
+
+    // 清除缓存
+    func clearCache() {
+        presenterCache.removeAll()
+        currentPresenter = nil
+    }
+
+    // 更新选中标签
+    func updateSelectedTab(_ tab: FLTabItem) {
+        selectedTabKey = tab.key
+        if let presenter = getOrCreatePresenter(for: tab) {
+            currentPresenter = presenter
+        }
+    }
+
+    // 监听账号变化
+    func observeAccountChanges() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAccountChange),
+            name: NSNotification.Name("AccountChanged"),
+            object: nil
+        )
+    }
+
+    @objc private func handleAccountChange() {
+        clearCache()
+        if let user = currentUser {
+            initializeWithUser(user)
+        }
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+
+    init(timelineStore: TimelineStore, accountType: AccountType) {
         self.timelineStore = timelineStore
+        self.accountType = accountType
+        observeAccountChanges()
         observeUser()
     }
 
@@ -23,7 +93,8 @@ class TabSettingsStore: ObservableObject {
         Task { @MainActor in
             for await state in presenter.models {
                 if case let .success(data) = onEnum(of: state.user) {
-                    initializeWithUser(data.data)
+                    // 直接初始化，不需要额外的 MainActor.run
+                    self.initializeWithUser(data.data)
                 }
             }
         }
@@ -37,37 +108,29 @@ class TabSettingsStore: ObservableObject {
         isInitializing = true
         currentUser = user
 
-        // 1. 加载默认配置
-        primaryItems = FLTabSettings.defaultPrimary(user: user)
-        secondaryItems = FLTabSettings.defaultSecondary(user: user)
+        // 同步加载所有数据
+        let primary = FLTabSettings.defaultPrimary(user: user)
+        let secondary = FLTabSettings.defaultSecondary(user: user)
+        primaryItems = primary
+        secondaryItems = secondary
 
-        // 2. 加载存储的配置
-        loadStoredItems(user)
+        // 从 UserDefaults 加载存储的标签
+        storeItems = settingsManager.getEnabledItems(for: user) ?? secondary
 
-        // 3. 更新可用标签
-        updateAvailableTabs()
+        // 立即更新可用标签
+        if let homeItem = primary.first {
+            let enabledItems = storeItems.isEmpty ? secondary : storeItems
+            availableTabs = [homeItem] + enabledItems
+        }
 
-        // 4. 如果没有选中的标签，选中第一个
-        if timelineStore.selectedTabKey == nil {
+        // 选择第一个标签
+        if selectedTabKey.isEmpty {
             if let firstItem = availableTabs.first {
-                timelineStore.updateCurrentPresenter(for: firstItem)
+                updateSelectedTab(firstItem)
             }
         }
 
         isInitializing = false
-    }
-
-    private func loadStoredItems(_ user: UiUserV2) {
-        // 从 UserDefaults 加载存储的标签
-        storeItems = settingsManager.getEnabledItems(for: user) ?? []
-    }
-
-    private func updateAvailableTabs() {
-        if let homeItem = primaryItems.first {
-            // 如果 storeItems 为空，使用所有 secondaryItems
-            let enabledItems = storeItems.isEmpty ? [] : storeItems
-            availableTabs = [homeItem] + enabledItems
-        }
     }
 
     func saveTabs() {
@@ -76,12 +139,28 @@ class TabSettingsStore: ObservableObject {
         updateAvailableTabs()
     }
 
+    private func updateAvailableTabs() {
+        if let homeItem = primaryItems.first {
+            let enabledItems = storeItems.isEmpty ? secondaryItems : storeItems
+            availableTabs = [homeItem] + enabledItems
+        }
+    }
+
     func toggleTab(_ id: String) {
         guard let user = currentUser else { return }
+
+        let wasSelected = selectedTabKey == id
 
         if storeItems.contains(where: { $0.key == id }) {
             // 关闭标签：从 storeItems 中移除
             storeItems.removeAll { $0.key == id }
+
+            // 如果关闭的是当前选中的标签，切换到第一个标签（首页）
+            if wasSelected {
+                if let firstTab = primaryItems.first {
+                    updateSelectedTab(firstTab)
+                }
+            }
         } else {
             // 开启标签：添加到 storeItems
             if let item = secondaryItems.first(where: { $0.key == id }) {
@@ -89,7 +168,16 @@ class TabSettingsStore: ObservableObject {
             }
         }
 
+        // 保存并更新可用标签
         saveTabs()
+
+        // 确保 UI 更新
+        objectWillChange.send()
+
+        // 发送通知
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: NSNotification.Name("TabsDidUpdate"), object: nil)
+        }
     }
 
     func moveTab(from source: IndexSet, to destination: Int) {

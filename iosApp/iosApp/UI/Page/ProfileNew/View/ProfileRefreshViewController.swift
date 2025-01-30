@@ -11,7 +11,7 @@ import UIKit
 extension JXPagingListContainerView: JXSegmentedViewListContainer {}
 
 class ProfileNewRefreshViewController: UIViewController {
-    // MARK: - Properties
+    // - Properties
 
     private var userInfo: ProfileUserInfo?
     private var state: ProfileNewState?
@@ -554,7 +554,7 @@ class ProfileNewRefreshViewController: UIViewController {
     }
 }
 
-// MARK: - UIGestureRecognizerDelegate
+// - UIGestureRecognizerDelegate
 
 extension ProfileNewRefreshViewController: UIGestureRecognizerDelegate {
     func gestureRecognizer(_: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith _: UIGestureRecognizer) -> Bool {
@@ -562,7 +562,7 @@ extension ProfileNewRefreshViewController: UIGestureRecognizerDelegate {
     }
 }
 
-// MARK: - JXPagingViewDelegate
+// - JXPagingViewDelegate
 
 extension ProfileNewRefreshViewController: JXPagingViewDelegate {
     func tableHeaderViewHeight(in _: JXPagingView) -> Int {

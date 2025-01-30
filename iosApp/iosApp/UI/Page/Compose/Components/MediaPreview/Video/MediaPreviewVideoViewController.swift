@@ -144,7 +144,7 @@ extension MediaPreviewVideoViewController {
     }
 }
 
-// MARK: - ShareActivityProvider
+// - ShareActivityProvider
 
 extension MediaPreviewVideoViewController: ShareActivityProvider {
     var activities: [Any] {
@@ -163,7 +163,7 @@ extension MediaPreviewVideoViewController: ShareActivityProvider {
     }
 }
 
-// MARK: - MediaPreviewTransitionViewController
+// - MediaPreviewTransitionViewController
 
 // extension MediaPreviewVideoViewController: MediaPreviewTransitionViewController {
 //    var mediaPreviewTransitionContext: MediaPreviewTransitionContext? {
@@ -202,6 +202,6 @@ extension MediaPreviewVideoViewController: ShareActivityProvider {
 //    }
 // }
 
-// MARK: - AVPlayerViewControllerDelegate
+// - AVPlayerViewControllerDelegate
 
 extension MediaPreviewVideoViewController: AVPlayerViewControllerDelegate {}

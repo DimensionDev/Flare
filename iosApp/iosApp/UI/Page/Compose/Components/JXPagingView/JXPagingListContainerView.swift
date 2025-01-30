@@ -258,7 +258,7 @@ open class JXPagingListContainerView: UIView {
         }
     }
 
-    // MARK: - JXSegmentedViewListContainer
+    // - JXSegmentedViewListContainer
 
     public func contentScrollView() -> UIScrollView {
         scrollView
@@ -302,7 +302,7 @@ open class JXPagingListContainerView: UIView {
         listDidAppear(at: currentIndex)
     }
 
-    // MARK: - Private
+    // - Private
 
     func initListIfNeeded(at index: Int) {
         guard let dataSource else { return }

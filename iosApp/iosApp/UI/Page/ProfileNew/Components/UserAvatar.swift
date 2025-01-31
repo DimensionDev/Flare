@@ -1,5 +1,6 @@
 import Kingfisher
 import SwiftUI
+import Generated
 
 struct UserAvatar: View {
     @Environment(\.appSettings) private var appSettings
@@ -19,10 +20,10 @@ struct UserAvatar: View {
     }
 }
 
-func userAvatarPlaceholder(size: CGFloat = 48) -> some View {
-    UserAvatar(
-        data: "https://pbs.twimg.com/profile_images/1657513391131590656/mnAV7E7G_400x400.jpg",
-        size: size
-    )
-    .redacted(reason: .placeholder)
+func userAvatarPlaceholder(size: CGFloat = 28) -> some View {
+    Image(systemName: "person.circle")
+        .resizable()
+        .aspectRatio(contentMode: .fit)
+        .frame(width: size, height: size)
+        .foregroundColor(Color(Asset.Color.State.deactive.name))
 }

@@ -20,7 +20,7 @@ public typealias AssetImageTypeAlias = ImageAsset.Image
 
 // swiftlint:disable superfluous_disable_command file_length implicit_return
 
-// MARK: - Asset Catalogs
+// - Asset Catalogs
 
 // swiftlint:disable identifier_name line_length nesting type_body_length type_name
 public enum Asset {
@@ -402,7 +402,7 @@ public enum Asset {
 
 // swiftlint:enable identifier_name line_length nesting type_body_length type_name
 
-// MARK: - Implementation Details
+// - Implementation Details
 
 public final class ColorAsset {
     public fileprivate(set) var name: String

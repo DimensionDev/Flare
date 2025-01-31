@@ -84,7 +84,7 @@ class ProfileNewTimelineViewController: UIViewController {
         }
     }
 
-    // MARK: - Private Methods
+    // - Private Methods
 
     private func handleState(_ state: PagingState<UiTimeline>) {
         switch onEnum(of: state) {

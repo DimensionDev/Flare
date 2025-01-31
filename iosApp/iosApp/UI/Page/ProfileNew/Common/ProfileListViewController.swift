@@ -67,7 +67,7 @@ class ProfileNewListViewController: UIViewController {
     }
 }
 
-// MARK: - UITableViewDataSource, UITableViewDelegate
+// - UITableViewDataSource, UITableViewDelegate
 
 extension ProfileNewListViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
@@ -89,7 +89,7 @@ extension ProfileNewListViewController: UITableViewDataSource, UITableViewDelega
     }
 }
 
-// MARK: - JXPagingViewListViewDelegate
+// - JXPagingViewListViewDelegate
 
 extension ProfileNewListViewController: JXPagingViewListViewDelegate {
     func listView() -> UIView { view }

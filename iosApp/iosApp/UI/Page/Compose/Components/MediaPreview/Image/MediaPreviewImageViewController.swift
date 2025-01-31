@@ -148,7 +148,7 @@ import WebKit
 //
 // }
 //
-//// MARK: - ShareActivityProvider
+//// - ShareActivityProvider
 // extension MediaPreviewImageViewController: ShareActivityProvider {
 //    var activities: [Any] {
 //        return []
@@ -162,7 +162,7 @@ import WebKit
 //    }
 // }
 //
-//// MARK: - MediaPreviewTransitionViewController
+//// - MediaPreviewTransitionViewController
 // extension MediaPreviewImageViewController: MediaPreviewTransitionViewController {
 //    var mediaPreviewTransitionContext: MediaPreviewTransitionContext? {
 //        let transitionView = containerView
@@ -181,7 +181,7 @@ import WebKit
 //    }
 // }
 //
-//// MARK: - WKNavigationDelegate
+//// - WKNavigationDelegate
 // extension MediaPreviewImageViewController: WKNavigationDelegate {
 //    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
 //        webView.isOpaque = false

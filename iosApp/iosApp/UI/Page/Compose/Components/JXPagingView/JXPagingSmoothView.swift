@@ -193,7 +193,7 @@ open class JXPagingSmoothView: UIView {
         }
     }
 
-    // MARK: - KVO
+    // - KVO
 
     override open func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey: Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "contentOffset" {
@@ -216,7 +216,7 @@ open class JXPagingSmoothView: UIView {
         }
     }
 
-    // MARK: - Private
+    // - Private
 
     func listHeader(for listScrollView: UIScrollView) -> UIView? {
         for (index, list) in listDict {

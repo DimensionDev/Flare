@@ -17,7 +17,7 @@ public enum PlaybackState: Int {
     case failed = 6
 }
 
-// MARK: - CustomStringConvertible
+// - CustomStringConvertible
 
 extension PlaybackState: CustomStringConvertible {
     public var description: String {

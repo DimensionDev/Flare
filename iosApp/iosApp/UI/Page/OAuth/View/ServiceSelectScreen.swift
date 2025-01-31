@@ -127,7 +127,7 @@ struct ServiceSelectScreen: View {
         }
     }
 
-    // MARK: - Platform Login Views
+    // - Platform Login Views
 
     @ViewBuilder
     private func blueskyLoginView(state: ServiceSelectState) -> some View {

@@ -9,7 +9,7 @@
     import WebKit
 
     public struct WebView: WebViewRepresentable {
-        // MARK: - Initializers
+        // - Initializers
 
         public init(
             url: URL? = nil,
@@ -21,13 +21,13 @@
             self.webView = webView
         }
 
-        // MARK: - Properties
+        // - Properties
 
         private let url: URL?
         private let configuration: WKWebViewConfiguration?
         private let webView: (WKWebView) -> Void
 
-        // MARK: - Functions
+        // - Functions
 
         #if os(iOS)
             public func makeUIView(context _: Context) -> WKWebView {

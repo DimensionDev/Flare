@@ -134,7 +134,7 @@ import UIKit
 //
 // }
 //
-//// MARK: - UIScrollViewDelegate
+//// - UIScrollViewDelegate
 // extension MediaPreviewImageView: UIScrollViewDelegate {
 //
 //    func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {

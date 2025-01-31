@@ -177,7 +177,7 @@ class ProfileMediaViewController: UIViewController {
     }
 }
 
-// MARK: - UICollectionViewDataSource
+// - UICollectionViewDataSource
 
 extension ProfileMediaViewController: UICollectionViewDataSource {
     func collectionView(_: UICollectionView, numberOfItemsInSection _: Int) -> Int {

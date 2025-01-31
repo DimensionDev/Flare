@@ -14,6 +14,10 @@ class TimelineStore: ObservableObject {
     @Published private(set) var isRefreshing: Bool = false
     private var presenterCache: [String: TimelinePresenter] = [:]
 
+    // 保存滚动位置
+    private var scrollPositions: [String: CGFloat] = [:]
+    private var contentSizes: [String: CGSize] = [:]
+
     init(accountType: AccountType) {
         homeTimelinePresenter = HomeTimelinePresenter(accountType: accountType)
 
@@ -31,6 +35,7 @@ class TimelineStore: ObservableObject {
         selectedTabKey = nil
         currentPresenter = nil
         presenterCache.removeAll()
+        clearCache()
     }
 
     deinit {
@@ -72,21 +77,27 @@ class TimelineStore: ObservableObject {
         // }
     }
 
-    func refresh() async throws {
-        guard let presenter = currentPresenter else { return }
+    func refresh() async {
+        guard !isRefreshing else { return }
+        isRefreshing = true
+        defer { isRefreshing = false }
 
-        await MainActor.run {
-            isRefreshing = true
+        if let timelineState = currentPresenter?.models.value as? TimelineState {
+            try? await timelineState.refresh()
         }
+    }
 
-        defer {
-            Task { @MainActor in
-                isRefreshing = false
+    func loadMore() async {
+        if let timelineState = currentPresenter?.models.value as? TimelineState,
+           case let .success(data) = onEnum(of: timelineState.listState)
+        {
+            let appendState = data.appendState
+            if let notLoading = appendState as? Paging_commonLoadState.NotLoading,
+               !notLoading.endOfPaginationReached
+            {
+                data.retry()
             }
         }
-
-        let state = presenter.models.value
-        try await state.refresh()
     }
 
     func reset() {
@@ -103,6 +114,8 @@ class TimelineStore: ObservableObject {
         if let key = currentKey {
             presenterCache[key] = current
         }
+        scrollPositions.removeAll()
+        contentSizes.removeAll()
     }
 
     func handleMemoryWarning() {
@@ -110,6 +123,40 @@ class TimelineStore: ObservableObject {
     }
 
     func handleBackground() {
+        clearCache()
+    }
+
+    // 保存滚动位置
+    func saveScrollPosition(_ position: CGFloat, for key: String) {
+        scrollPositions[key] = position
+    }
+
+    // 获取滚动位置
+    func getScrollPosition(for key: String) -> CGFloat {
+        scrollPositions[key] ?? 0
+    }
+
+    // 保存内容大小
+    func saveContentSize(_ size: CGSize, for key: String) {
+        contentSizes[key] = size
+    }
+
+    // 获取内容大小
+    func getContentSize(for key: String) -> CGSize {
+        contentSizes[key] ?? .zero
+    }
+
+    // 监听账号变化
+    func observeAccountChanges() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAccountChange),
+            name: NSNotification.Name("AccountChanged"),
+            object: nil
+        )
+    }
+
+    @objc private func handleAccountChange() {
         clearCache()
     }
 }

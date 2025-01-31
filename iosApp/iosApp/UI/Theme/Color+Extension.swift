@@ -1,7 +1,7 @@
 import SwiftUI
 
 extension SwiftUI.Color {
-    // MARK: - Background Colors
+    // - Background Colors
 
     static var backgroundPrimary: SwiftUI.Color {
         Colors.Background.swiftUIPrimary
@@ -15,7 +15,7 @@ extension SwiftUI.Color {
         Colors.Background.swiftUITertiary
     }
 
-    // MARK: - Text Colors
+    // - Text Colors
 
     static var textPrimary: SwiftUI.Color {
         Colors.Text.swiftUIPrimary
@@ -29,7 +29,7 @@ extension SwiftUI.Color {
         Colors.Text.swiftUITertiary
     }
 
-    // MARK: - Interactive Colors
+    // - Interactive Colors
 
     static var interactiveActive: SwiftUI.Color {
         Colors.State.swiftUIActive
@@ -43,7 +43,7 @@ extension SwiftUI.Color {
         Colors.State.swiftUIDeactiveDarker
     }
 
-    // MARK: - Function Colors
+    // - Function Colors
 
     static var functionLink: SwiftUI.Color {
         Colors.Link.swiftUIHyperlink

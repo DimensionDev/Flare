@@ -78,38 +78,14 @@ struct HomeContent: View {
     @State var showLogin = false
     @State var showCompose = false
     @State private var selectedHomeTab = 0
-    @StateObject private var timelineStore: TimelineStore
-    @StateObject private var tabSettingsStore: TabSettingsStore
-
-    init(accountType: AccountType) {
-        self.accountType = accountType
-        let timelineStore = TimelineStore(accountType: accountType)
-        _timelineStore = StateObject(wrappedValue: timelineStore)
-        _tabSettingsStore = StateObject(wrappedValue: TabSettingsStore(timelineStore: timelineStore))
-
-        if accountType is AccountTypeGuest {
-            // 未登录
-            timelineStore.currentPresenter = HomeTimelinePresenter(accountType: accountType)
-        }
-    }
 
     var body: some View {
         FlareTheme {
             TabView(selection: $selectedTab) {
-                // 首页 Tab
+                // 首页 Tab - 使用 HomeNewScreen
                 Tab(value: .timeline) {
-                    TabItem { router in
-                        NavigationView {
-                            HomeTimelineView(
-                                router: router,
-                                accountType: accountType,
-                                showSettings: $showSettings,
-                                showLogin: $showLogin,
-                                selectedHomeTab: $selectedHomeTab,
-                                timelineStore: timelineStore,
-                                tabSettingsStore: tabSettingsStore
-                            )
-                        }
+                    TabItem { _ in
+                        HomeNewScreen(accountType: accountType)
                     }
                 } label: {
                     Label {
@@ -121,6 +97,7 @@ struct HomeContent: View {
                 }
                 .customizationID(HomeTabs.timeline.customizationID)
 
+                // 通知 Tab
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .notification) {
                         TabItem { _ in
@@ -137,6 +114,7 @@ struct HomeContent: View {
                     .customizationID(HomeTabs.notification.customizationID)
                 }
 
+                // 发布 Tab
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .compose) {
                         TabItem { router in
@@ -157,6 +135,7 @@ struct HomeContent: View {
                     .customizationID(HomeTabs.compose.customizationID)
                 }
 
+                // 发现 Tab
                 Tab(value: .discover) {
                     TabItem { router in
                         DiscoverScreen(
@@ -176,6 +155,7 @@ struct HomeContent: View {
                 }
                 .customizationID(HomeTabs.discover.customizationID)
 
+                // 个人资料 Tab
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .profile) {
                         TabItem { _ in

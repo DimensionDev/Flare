@@ -11,5 +11,5 @@ internal actual object PlatformTypography {
 
     actual val title: TextStyle
         @Composable
-        get() = FluentTheme.typography.title
+        get() = FluentTheme.typography.subtitle
 }

@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -43,6 +40,7 @@ import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.UserPlus
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
@@ -70,12 +68,10 @@ private val menus =
         ),
     )
 
-@OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
 @Composable
 internal fun FlareApp() {
     val state by producePresenter { presenter() }
-    val windowInfo = calculateWindowSizeClass()
-    val bigScreen = windowInfo.widthSizeClass >= WindowWidthSizeClass.Medium
+    val bigScreen = isBigScreen()
     val displayMode =
         if (bigScreen) {
             NavigationDisplayMode.Left
@@ -111,7 +107,8 @@ internal fun FlareApp() {
                 .onSuccess { user ->
                     item {
                         SubtleButton(
-                            onClick = {},
+                            onClick = {
+                            },
                         ) {
                             Row(
                                 modifier =
@@ -155,7 +152,9 @@ internal fun FlareApp() {
                 }.onError {
                     item {
                         Button(
-                            onClick = {},
+                            onClick = {
+                                navigate(Route.ServiceSelect)
+                            },
                             modifier =
                                 Modifier
                                     .padding(horizontal = 8.dp, vertical = 4.dp)

@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.route
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -9,6 +10,7 @@ import androidx.navigation.compose.rememberNavController
 import com.konyaco.fluent.component.Text
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.screen.home.HomeTimelineScreen
+import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import kotlinx.collections.immutable.persistentMapOf
 import kotlin.reflect.typeOf
 
@@ -17,6 +19,7 @@ private val typeMap =
         typeOf<MicroBlogKey>() to MicroblogKeyNavType,
     )
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun Router(
     startDestination: Route,
@@ -41,6 +44,15 @@ internal fun Router(
         composable<Route.Profile>(
             typeMap = typeMap,
         ) {
+        }
+        composable<Route.ServiceSelect> {
+            ServiceSelectScreen(
+                onBack = navController::navigateUp,
+                onVVO = {
+                },
+                onXQT = {
+                },
+            )
         }
     }
 }

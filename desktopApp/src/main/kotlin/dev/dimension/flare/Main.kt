@@ -25,7 +25,7 @@ import java.util.function.Consumer
 
 private val detector = OsThemeDetector.getDetector()
 
-fun main() {
+fun main(args: Array<String>) {
     startKoin {
         modules(KoinHelper.modules())
     }

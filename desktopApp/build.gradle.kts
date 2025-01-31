@@ -1,4 +1,3 @@
-import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -16,7 +15,6 @@ dependencies {
     implementation(compose.runtime)
     implementation(compose.foundation)
     implementation(compose.ui)
-    implementation(compose("org.jetbrains.compose.material3:material3-window-size-class"))
     implementation(compose.desktop.common)
     implementation(compose.components.resources)
     implementation(compose.components.uiToolingPreview)
@@ -31,7 +29,6 @@ dependencies {
     implementation(libs.jetbrains.navigation.compose)
     implementation(libs.bundles.coil3)
     implementation(libs.bundles.kotlinx)
-    implementation(libs.material.motion.compose)
     implementation(libs.ksoup)
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)

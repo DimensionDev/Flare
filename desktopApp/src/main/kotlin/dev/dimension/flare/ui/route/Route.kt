@@ -18,4 +18,7 @@ internal sealed interface Route {
     data class Profile(
         val key: MicroBlogKey,
     ) : Route
+
+    @Serializable
+    data object ServiceSelect : Route
 }

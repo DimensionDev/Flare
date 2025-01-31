@@ -211,7 +211,7 @@ extension HomeNewViewController: JXPagingViewDelegate {
     func viewForPinSectionHeader(in _: JXPagingView) -> UIView {
         // 创建一个容器视图，包含 segmentedView
         let containerView = UIView()
-        containerView.backgroundColor = .systemPink // 容器视图背景色
+        // containerView.backgroundColor = .systemPink // 容器视图背景色
         containerView.isUserInteractionEnabled = true
 
         // 设置容器视图的 frame，固定高度为44
@@ -226,40 +226,50 @@ extension HomeNewViewController: JXPagingViewDelegate {
                                      y: 0,
                                      width: view.bounds.width - avatarWidth - settingsWidth,
                                      height: 44)
-        segmentedView.backgroundColor = .systemYellow // segmentedView 背景色
+        // segmentedView.backgroundColor = .systemYellow // segmentedView 背景色
 
         // 创建左边的头像按钮容器
         let avatarContainer = UIView(frame: CGRect(x: 0, y: 0, width: avatarWidth, height: 44))
         avatarContainer.isUserInteractionEnabled = true
-        avatarContainer.backgroundColor = .systemGreen // 头像容器背景色
+        // avatarContainer.backgroundColor = .systemGreen // 头像容器背景色
 
-        // 创建头像按钮
-        let avatarButton = UIButton(frame: CGRect(x: 0, y: 0, width: avatarWidth, height: 44))
-        avatarButton.backgroundColor = .systemBlue // 头像按钮背景色
+        // 创建头像按钮，居中显示
+        let avatarButtonSize: CGFloat = 28  // 头像大小
+        let avatarButton = UIButton(frame: CGRect(
+            x: (avatarWidth - avatarButtonSize) / 2,  // 水平居中
+            y: (44 - avatarButtonSize) / 2,           // 垂直居中
+            width: avatarButtonSize,
+            height: avatarButtonSize
+        ))
+        avatarButton.backgroundColor = .clear
         if let user = tabStore.currentUser {
             // 设置用户头像
-            let hostingController = UIHostingController(rootView:
-                UserAvatar(data: user.avatar, size: 25)
+            let hostingController = UIHostingController(rootView: 
+                UserAvatar(data: user.avatar, size: avatarButtonSize)
                     .clipShape(Circle())
-                    .padding(.leading, 8)
             )
             hostingController.view.frame = avatarButton.bounds
             hostingController.view.backgroundColor = .clear
-            hostingController.view.isUserInteractionEnabled = false // 禁用 SwiftUI 视图的交互
+            hostingController.view.isUserInteractionEnabled = false  // 禁用 SwiftUI 视图的交互
             avatarButton.addSubview(hostingController.view)
         } else {
             // 设置默认头像
-            let hostingController = UIHostingController(rootView:
-                userAvatarPlaceholder(size: 32)
+            let hostingController = UIHostingController(rootView: 
+                userAvatarPlaceholder(size: avatarButtonSize)
                     .clipShape(Circle())
-                    .padding(.leading, 8)
             )
             hostingController.view.frame = avatarButton.bounds
             hostingController.view.backgroundColor = .clear
-            hostingController.view.isUserInteractionEnabled = false // 禁用 SwiftUI 视图的交互
+            hostingController.view.isUserInteractionEnabled = false  // 禁用 SwiftUI 视图的交互
             avatarButton.addSubview(hostingController.view)
         }
         avatarButton.addTarget(self, action: #selector(handleAvatarTap), for: .touchUpInside)
+
+        // 为了调试，添加点击区域可视化
+        // #if DEBUG
+        // avatarButton.layer.borderWidth = 1
+        // avatarButton.layer.borderColor = UIColor.red.cgColor
+        // #endif
 
         // 创建右边的设置按钮容器
         let settingsContainer = UIView(frame: CGRect(x: view.bounds.width - settingsWidth,
@@ -267,11 +277,11 @@ extension HomeNewViewController: JXPagingViewDelegate {
                                                      width: settingsWidth,
                                                      height: 44))
         settingsContainer.isUserInteractionEnabled = true
-        settingsContainer.backgroundColor = .systemOrange // 设置按钮容器背景色
+        // settingsContainer.backgroundColor = .systemOrange // 设置按钮容器背景色
 
         // 创建设置按钮
         let settingsButton = UIButton(frame: CGRect(x: 0, y: 0, width: settingsWidth, height: 44))
-        settingsButton.backgroundColor = .systemPurple // 设置按钮背景色
+        // settingsButton.backgroundColor = .systemPurple // 设置按钮背景色
         if !(accountType is AccountTypeGuest) {
             settingsButton.setImage(UIImage(systemName: "line.3.horizontal"), for: .normal)
             settingsButton.addTarget(self, action: #selector(handleSettingsTap), for: .touchUpInside)

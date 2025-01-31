@@ -24,7 +24,18 @@ struct HomeNewScreen: View {
 
         // 3. 游客模式特殊处理
         if accountType is AccountTypeGuest {
+            // 设置默认的 Home Timeline
             timelineStore.currentPresenter = HomeTimelinePresenter(accountType: accountType)
+            
+            // 只使用 Home 标签
+            let homeTab = FLHomeTimelineTabItem(
+                metaData: FLTabMetaData(
+                    title: .localized(.home),
+                    icon: .material(.home)
+                ), account: accountType
+            )
+            tabStore.availableTabs = [homeTab]
+            tabStore.updateSelectedTab(homeTab)
         }
     }
 

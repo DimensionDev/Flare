@@ -173,6 +173,12 @@ class HomeNewViewController: UIViewController {
         os_log("[📔][HomeNewViewController] titles: %{public}@", log: .default, type: .debug, titles)
         segmentedDataSource.titles = titles
         segmentedView.reloadData()
+        
+        // 如果是游客模式，隐藏分段控件
+        // if accountType is AccountTypeGuest {
+        //     segmentedView.isHidden = true
+        // }
+        
         os_log("[📔][HomeNewViewController] updateSegmentedTitles end", log: .default, type: .debug)
     }
 
@@ -265,7 +271,7 @@ extension HomeNewViewController: JXPagingViewDelegate {
         }
         avatarButton.addTarget(self, action: #selector(handleAvatarTap), for: .touchUpInside)
 
-        // 为了调试，添加点击区域可视化
+        //  调试 可视化
         // #if DEBUG
         // avatarButton.layer.borderWidth = 1
         // avatarButton.layer.borderColor = UIColor.red.cgColor

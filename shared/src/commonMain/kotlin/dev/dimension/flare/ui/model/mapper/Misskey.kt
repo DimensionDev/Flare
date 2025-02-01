@@ -334,7 +334,7 @@ internal fun Note.renderStatus(
         user = user,
         quote =
             listOfNotNull(
-                if (text != null || !files.isNullOrEmpty() || cw != null) {
+                if (text != null || !files.isNullOrEmpty() || cw != null || poll != null) {
                     renote?.renderStatus(accountKey, event)
                 } else {
                     null

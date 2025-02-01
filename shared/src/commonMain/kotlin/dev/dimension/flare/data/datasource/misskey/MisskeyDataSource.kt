@@ -946,4 +946,25 @@ internal class MisskeyDataSource(
             ),
             ProfileTab.Media,
         ).toPersistentList()
+
+    fun favouriteTimeline(
+        pageSize: Int = 20,
+        pagingKey: String = "favourite_$accountKey",
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiTimeline>> =
+        timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                FavouriteTimelineRemoteMediator(
+                    service = service,
+                    database = database,
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                ),
+        )
 }

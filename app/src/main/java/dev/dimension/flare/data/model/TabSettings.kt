@@ -407,6 +407,14 @@ sealed interface TimelineTabItem : TabItem {
 
         private fun defaultMisskeySecondaryItems(accountKey: MicroBlogKey) =
             persistentListOf(
+                Misskey.FavouriteTimelineTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Favourite),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Heart, accountKey),
+                        ),
+                ),
                 Misskey.LocalTimelineTabItem(
                     account = AccountType.Specific(accountKey),
                     metaData =
@@ -708,6 +716,20 @@ object Misskey {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.misskey
                 .MissKeyPublicTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Serializable
+    data class FavouriteTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "favourite_$account"
+
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.misskey
+                .MisskeyFavouriteTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }

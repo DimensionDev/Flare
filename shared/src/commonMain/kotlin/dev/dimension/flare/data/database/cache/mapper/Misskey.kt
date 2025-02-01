@@ -161,7 +161,7 @@ private fun List<Note>.toDbPagingTimeline(
             references =
                 listOfNotNull(
                     if (it.renote != null) {
-                        if (it.text.isNullOrEmpty() && it.files.isNullOrEmpty()) {
+                        if (it.text.isNullOrEmpty() && it.files.isNullOrEmpty() && it.poll == null) {
                             ReferenceType.Retweet to it.renote.toDbStatusWithUser(accountKey)
                         } else {
                             ReferenceType.Quote to it.renote.toDbStatusWithUser(accountKey)

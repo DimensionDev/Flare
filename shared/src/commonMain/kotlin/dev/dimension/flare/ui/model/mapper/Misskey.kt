@@ -290,7 +290,7 @@ internal fun Note.renderStatus(
         }
     val user = user.render(accountKey)
     val isFromMe = user.key == accountKey
-    val canReblog = visibility in listOf(Visibility.Public, Visibility.Home) || isFromMe
+    val canReblog = visibility in listOf(Visibility.Public, Visibility.Home) || (isFromMe && visibility != Visibility.Specified)
     val renderedVisibility =
         when (visibility) {
             Visibility.Public -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Public

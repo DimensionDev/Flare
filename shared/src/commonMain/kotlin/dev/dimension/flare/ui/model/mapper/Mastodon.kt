@@ -181,7 +181,7 @@ private fun Status.renderStatus(
     requireNotNull(account) { "actualStatus.account is null" }
     val actualUser = account.render(accountKey, host)
     val isFromMe = actualUser.key == accountKey
-    val canReblog = visibility in listOf(Visibility.Public, Visibility.Unlisted)
+    val canReblog = visibility in listOf(Visibility.Public, Visibility.Unlisted) || isFromMe
     val statusKey =
         MicroBlogKey(
             id = id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),

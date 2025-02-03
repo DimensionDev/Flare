@@ -25,10 +25,10 @@
 		641817752D12E7350046CEB0 /* OriginalImageMarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 641817732D12E7350046CEB0 /* OriginalImageMarkView.swift */; };
 		641817762D12E7350046CEB0 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 641817742D12E7350046CEB0 /* ToastView.swift */; };
 		642AA5402D1021500088B7E3 /* TimelineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642AA53F2D1021500088B7E3 /* TimelineStore.swift */; };
-		6448132A2D48017E00A40584 /* HomeNewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644813252D48017E00A40584 /* HomeNewScreen.swift */; };
-		6448132B2D48017E00A40584 /* HomeNewTimelineViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644813272D48017E00A40584 /* HomeNewTimelineViewController.swift */; };
-		6448132C2D48017E00A40584 /* HomeNewTimelineCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644813262D48017E00A40584 /* HomeNewTimelineCell.swift */; };
-		6448132D2D48017E00A40584 /* HomeNewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644813282D48017E00A40584 /* HomeNewViewController.swift */; };
+		644C848B2D523D8700E92D0D /* HomeNewTimelineViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84892D523D8700E92D0D /* HomeNewTimelineViewController.swift */; };
+		644C848C2D523D8700E92D0D /* HomeNewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C848A2D523D8700E92D0D /* HomeNewViewController.swift */; };
+		644C848D2D523D8700E92D0D /* HomeNewTimelineCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84882D523D8700E92D0D /* HomeNewTimelineCell.swift */; };
+		644C848E2D523D8700E92D0D /* HomeNewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84872D523D8700E92D0D /* HomeNewScreen.swift */; };
 		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
 		64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64782BD02CFD65F4008DE526 /* View+Injection.swift */; };
 		6488800B2D1AD43E00EFE72C /* JXSegmentedView in Frameworks */ = {isa = PBXBuildFile; productRef = 6488800A2D1AD43E00EFE72C /* JXSegmentedView */; };
@@ -171,10 +171,10 @@
 		641817732D12E7350046CEB0 /* OriginalImageMarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OriginalImageMarkView.swift; sourceTree = "<group>"; };
 		641817742D12E7350046CEB0 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		642AA53F2D1021500088B7E3 /* TimelineStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineStore.swift; sourceTree = "<group>"; };
-		644813252D48017E00A40584 /* HomeNewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewScreen.swift; sourceTree = "<group>"; };
-		644813262D48017E00A40584 /* HomeNewTimelineCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewTimelineCell.swift; sourceTree = "<group>"; };
-		644813272D48017E00A40584 /* HomeNewTimelineViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewTimelineViewController.swift; sourceTree = "<group>"; };
-		644813282D48017E00A40584 /* HomeNewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewViewController.swift; sourceTree = "<group>"; };
+		644C84872D523D8700E92D0D /* HomeNewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewScreen.swift; sourceTree = "<group>"; };
+		644C84882D523D8700E92D0D /* HomeNewTimelineCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewTimelineCell.swift; sourceTree = "<group>"; };
+		644C84892D523D8700E92D0D /* HomeNewTimelineViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewTimelineViewController.swift; sourceTree = "<group>"; };
+		644C848A2D523D8700E92D0D /* HomeNewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewViewController.swift; sourceTree = "<group>"; };
 		64655C2C2CFD6CA000255488 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		64782BD02CFD65F4008DE526 /* View+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+Injection.swift"; sourceTree = "<group>"; };
 		648CD6C42D3644C300262228 /* ProfileNewHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileNewHeaderView.swift; sourceTree = "<group>"; };
@@ -348,41 +348,6 @@
 				6406824E2D16C5D5009B6B1E /* Color+Extension.swift */,
 			);
 			path = Theme;
-			sourceTree = "<group>";
-		};
-		644813222D48017E00A40584 /* Components */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Components;
-			sourceTree = "<group>";
-		};
-		644813232D48017E00A40584 /* Protocol */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Protocol;
-			sourceTree = "<group>";
-		};
-		644813242D48017E00A40584 /* View */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = View;
-			sourceTree = "<group>";
-		};
-		644813292D48017E00A40584 /* New */ = {
-			isa = PBXGroup;
-			children = (
-				644813222D48017E00A40584 /* Components */,
-				644813232D48017E00A40584 /* Protocol */,
-				644813242D48017E00A40584 /* View */,
-				644813252D48017E00A40584 /* HomeNewScreen.swift */,
-				644813262D48017E00A40584 /* HomeNewTimelineCell.swift */,
-				644813272D48017E00A40584 /* HomeNewTimelineViewController.swift */,
-				644813282D48017E00A40584 /* HomeNewViewController.swift */,
-			);
-			path = New;
 			sourceTree = "<group>";
 		};
 		64782BD12CFD65F4008DE526 /* Extension */ = {
@@ -683,6 +648,10 @@
 		64E876F82D0430C7003559B9 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				644C84872D523D8700E92D0D /* HomeNewScreen.swift */,
+				644C84882D523D8700E92D0D /* HomeNewTimelineCell.swift */,
+				644C84892D523D8700E92D0D /* HomeNewTimelineViewController.swift */,
+				644C848A2D523D8700E92D0D /* HomeNewViewController.swift */,
 				64D8AD072D462DFA0045494F /* HomeScreen.swift */,
 				64E876EB2D0430C7003559B9 /* DiscoverScreen.swift */,
 				64E876EE2D0430C7003559B9 /* HomeAppBar.swift */,
@@ -699,7 +668,6 @@
 		64E876F92D0430C7003559B9 /* Home */ = {
 			isa = PBXGroup;
 			children = (
-				644813292D48017E00A40584 /* New */,
 				64E876E42D0430C7003559B9 /* Components */,
 				64E876E72D0430C7003559B9 /* Data */,
 				64E876E92D0430C7003559B9 /* Model */,
@@ -1182,6 +1150,10 @@
 				64E877412D0430C7003559B9 /* ComposeView.swift in Sources */,
 				64E877422D0430C7003559B9 /* FeedMediaPlayButton.swift in Sources */,
 				64E877432D0430C7003559B9 /* PhotoBrowserManager.swift in Sources */,
+				644C848B2D523D8700E92D0D /* HomeNewTimelineViewController.swift in Sources */,
+				644C848C2D523D8700E92D0D /* HomeNewViewController.swift in Sources */,
+				644C848D2D523D8700E92D0D /* HomeNewTimelineCell.swift in Sources */,
+				644C848E2D523D8700E92D0D /* HomeNewScreen.swift in Sources */,
 				64D8AD082D462DFA0045494F /* HomeScreen.swift in Sources */,
 				64E877442D0430C7003559B9 /* ComposeScreen.swift in Sources */,
 				64E877452D0430C7003559B9 /* CommonTimelineStatusComponent.swift in Sources */,
@@ -1249,10 +1221,6 @@
 				649E7A2B2D318F5100AC2F62 /* ProfileContentView.swift in Sources */,
 				649E7A2C2D318F5100AC2F62 /* CommonProfileHeader.swift in Sources */,
 				649E7A2D2D318F5100AC2F62 /* ProfileListViewController.swift in Sources */,
-				6448132A2D48017E00A40584 /* HomeNewScreen.swift in Sources */,
-				6448132B2D48017E00A40584 /* HomeNewTimelineViewController.swift in Sources */,
-				6448132C2D48017E00A40584 /* HomeNewTimelineCell.swift in Sources */,
-				6448132D2D48017E00A40584 /* HomeNewViewController.swift in Sources */,
 				649E7A2E2D318F5100AC2F62 /* ProfilePresenterWrapper.swift in Sources */,
 				649E7A2F2D318F5100AC2F62 /* ProfileWithUserNameScreen.swift in Sources */,
 				649E7A312D318F5100AC2F62 /* ProfileStretchRefreshControl.swift in Sources */,

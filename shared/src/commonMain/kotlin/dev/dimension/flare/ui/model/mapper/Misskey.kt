@@ -27,6 +27,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Instant
 import moe.tlaster.mfm.parser.MFMParser
 import moe.tlaster.mfm.parser.tree.BoldNode
@@ -412,6 +413,24 @@ internal fun Note.renderStatus(
                     displayItem = StatusAction.Item.More,
                     actions =
                         listOfNotNull(
+                            StatusAction.AsyncActionItem(
+                                flow =
+                                    event
+                                        .favouriteState(
+                                            statusKey = statusKey,
+                                        ).map {
+                                            StatusAction.Item.Like(
+                                                count = 0,
+                                                liked = it,
+                                                onClicked = {
+                                                    event.favourite(
+                                                        statusKey = statusKey,
+                                                        favourited = it,
+                                                    )
+                                                },
+                                            )
+                                        },
+                            ),
                             if (isFromMe) {
                                 StatusAction.Item.Delete(
                                     onClicked = {

@@ -548,6 +548,23 @@ private fun StatusActions(
                                                                 ),
                                                         )
                                                     },
+                                                    leadingIcon = {
+                                                        FAIcon(
+                                                            imageVector = FontAwesomeIcons.Solid.Ellipsis,
+                                                            contentDescription = "Loading",
+                                                            modifier =
+                                                                Modifier
+                                                                    .size(
+                                                                        with(LocalDensity.current) {
+                                                                            LocalTextStyle.current.fontSize.toDp() +
+                                                                                4.dp
+                                                                        },
+                                                                    ).placeholder(
+                                                                        true,
+                                                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                                                    ),
+                                                        )
+                                                    },
                                                     onClick = {
                                                     },
                                                 )

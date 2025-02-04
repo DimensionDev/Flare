@@ -72,6 +72,8 @@ struct CommonTimelineStatusComponent: View {
                     // 其他 group（比如转发组）保持原样
                     bottomMainActions.append(action)
                 }
+            case let .asyncActionItem(asyncItem):
+                break
             }
         }
 
@@ -325,6 +327,7 @@ struct CommonTimelineStatusComponent: View {
                     ForEach(0 ..< processedActions.mainActions.count, id: \.self) { actionIndex in
                         let action = processedActions.mainActions[actionIndex]
                         switch onEnum(of: action) {
+                        case let .asyncActionItem(asyncItem): EmptyView()
                         case let .item(item):
                             Button(action: {
                                 if let clickable = item as? StatusActionItemClickable {

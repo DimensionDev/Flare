@@ -102,7 +102,7 @@ internal fun StatusActionGroup(
     contentDescription: String? = null,
     enabled: Boolean = true,
     withTextMinWidth: Boolean = false,
-    subMenus: @Composable ColumnScope.(closeMenu: () -> Unit) -> Unit = {},
+    subMenus: @Composable ColumnScope.(closeMenu: () -> Unit, isMenuShown: Boolean) -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
     StatusActionButton(
@@ -121,9 +121,11 @@ internal fun StatusActionGroup(
                 expanded = showMenu,
                 onDismissRequest = { showMenu = false },
             ) {
-                subMenus.invoke(this) {
-                    showMenu = false
-                }
+                subMenus.invoke(
+                    this,
+                    { showMenu = false },
+                    showMenu,
+                )
             }
         },
     )

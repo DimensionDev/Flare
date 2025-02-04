@@ -693,4 +693,14 @@
     <string name="local_history_search_placeholder">Search local cache</string>
     <string name="local_history_search_status_title">Status</string>
     <string name="local_history_search_user_title">User</string>
+
+    <string name="rss_sources_title">Rss Sources</string>
+    <string name="add_rss_source">Add Rss Source</string>
+    <string name="edit_rss_source">Edit Rss Source</string>
+    <string name="delete_rss_source">Delete Rss Source</string>
+
+    <string name="rss_sources_title_label">Title</string>
+    <string name="rss_sources_url_label">Url</string>
+    <string name="rss_title">Rss</string>
+    <string name="empty_rss_sources">No rss sources</string>
 </resources>

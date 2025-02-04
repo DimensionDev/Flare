@@ -68,9 +68,9 @@ public class ComposePresenter(
             }
         val replyState =
             statusState?.map {
-                if (it.platformType == PlatformType.VVo) {
+                if (it.content is UiTimeline.ItemContent.Status && it.content.platformType == PlatformType.VVo) {
                     it.copy(
-                        content = (it.content as? UiTimeline.ItemContent.Status)?.quote?.firstOrNull() ?: it.content,
+                        content = it.content.quote.firstOrNull() ?: it.content,
                     )
                 } else {
                     it
@@ -80,7 +80,7 @@ public class ComposePresenter(
             statusState?.mapNotNull {
                 val content = it.content
                 if (content is UiTimeline.ItemContent.Status) {
-                    when (it.platformType) {
+                    when (content.platformType) {
                         PlatformType.VVo -> {
                             if (content.quote.any() && status is ComposeStatus.Quote) {
                                 InitialText(
@@ -108,9 +108,12 @@ public class ComposePresenter(
             accounts.flatMap { data ->
                 accountState
                     .flatMap { current ->
-                        statusState?.map {
-                            current to listOf(it.platformType)
-                        } ?: UiState.Success(current to PlatformType.entries.toList())
+                        statusState
+                            ?.mapNotNull {
+                                it.content as? UiTimeline.ItemContent.Status
+                            }?.map {
+                                current to listOf(it.platformType)
+                            } ?: UiState.Success(current to PlatformType.entries.toList())
                     }.map { (current, platforms) ->
                         data
                             .sortedBy {

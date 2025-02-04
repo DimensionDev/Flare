@@ -116,7 +116,6 @@ private fun toDbStatusWithUser(
                         id = tweet.restId,
                         host = user.userKey.host,
                     ),
-                platformType = PlatformType.xQt,
                 content = StatusContent.XQT(tweet),
                 userKey = user.userKey,
                 accountKey = accountKey,

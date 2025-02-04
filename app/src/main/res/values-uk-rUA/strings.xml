@@ -527,4 +527,12 @@
   <string name="fans_title">Підписник</string>
   <string name="local_history_search_status_title">Статус</string>
   <string name="local_history_search_user_title">Користувач</string>
+  <string name="rss_sources_title">Джерела RSS</string>
+  <string name="add_rss_source">Додати джерело Rss</string>
+  <string name="edit_rss_source">Редагувати джерело Rss</string>
+  <string name="delete_rss_source">Видалити джерело Rss</string>
+  <string name="rss_sources_title_label">Найменування</string>
+  <string name="rss_sources_url_label">URL-адреса</string>
+  <string name="rss_title">RSS</string>
+  <string name="empty_rss_sources">Відсутні вихідні коди для запитів</string>
 </resources>

@@ -219,8 +219,8 @@
   <string name="settings_appearance_enable_swipe_description">ステータス上でスワイプジェスチャーを有効にする</string>
   <string name="settings_appearance_avatar_shape">アバターの形状</string>
   <string name="settings_appearance_avatar_shape_description">アバターの形を変更する</string>
-  <string name="settings_appearance_avatar_shape_round">ラウンド</string>
-  <string name="settings_appearance_avatar_shape_square">正方形（正方形）</string>
+  <string name="settings_appearance_avatar_shape_round">円形</string>
+  <string name="settings_appearance_avatar_shape_square">四角</string>
   <string name="settings_appearance_swipe_left">左にスワイプ</string>
   <string name="settings_appearance_swipe_left_description">ステータスを左にスワイプしたときに実行するアクション</string>
   <string name="settings_appearance_swipe_right">右にスワイプ</string>
@@ -536,4 +536,12 @@
   <string name="local_history_search_placeholder">ローカルキャッシュを検索</string>
   <string name="local_history_search_status_title">ステータス</string>
   <string name="local_history_search_user_title">ユーザー</string>
+  <string name="rss_sources_title">RSSソース</string>
+  <string name="add_rss_source">RSSソースを追加</string>
+  <string name="edit_rss_source">RSSソースの編集</string>
+  <string name="delete_rss_source">RSSソースを削除</string>
+  <string name="rss_sources_title_label">タイトル</string>
+  <string name="rss_sources_url_label">URL</string>
+  <string name="rss_title">RSS</string>
+  <string name="empty_rss_sources">RSSソースがありません</string>
 </resources>

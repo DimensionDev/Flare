@@ -277,19 +277,20 @@ private fun ComposeScreen(
         )
     val focusRequester = remember { FocusRequester() }
     val contentWarningFocusRequester = remember { FocusRequester() }
-
-    LaunchedEffect(state.contentWarningState) {
-        state.contentWarningState
-            .onSuccess { contentWarningState ->
-                if (contentWarningState.enabled) {
+    state.contentWarningState
+        .onSuccess {
+            LaunchedEffect(it.enabled) {
+                if (it.enabled) {
                     contentWarningFocusRequester.requestFocus()
                 } else {
                     focusRequester.requestFocus()
                 }
-            }.onError {
+            }
+        }.onError {
+            LaunchedEffect(Unit) {
                 focusRequester.requestFocus()
             }
-    }
+        }
     Column(
         modifier =
             modifier

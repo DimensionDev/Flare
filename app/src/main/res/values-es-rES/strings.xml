@@ -532,4 +532,12 @@
   <string name="local_history_search_placeholder">Buscar caché local</string>
   <string name="local_history_search_status_title">Estado</string>
   <string name="local_history_search_user_title">Usuario</string>
+  <string name="rss_sources_title">Fuentes brillo</string>
+  <string name="add_rss_source">Añadir fuente bruta</string>
+  <string name="edit_rss_source">Editar fuente Rust</string>
+  <string name="delete_rss_source">Eliminar Fuente Bruta</string>
+  <string name="rss_sources_title_label">Título</string>
+  <string name="rss_sources_url_label">Url</string>
+  <string name="rss_title">Bruto</string>
+  <string name="empty_rss_sources">Sin fuentes rast</string>
 </resources>

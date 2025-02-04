@@ -52,6 +52,7 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -881,6 +882,47 @@ internal class MisskeyDataSource(
         }
     }
 
+    override fun favourite(
+        statusKey: MicroBlogKey,
+        favourited: Boolean,
+    ) {
+        coroutineScope.launch {
+            runCatching {
+                if (favourited) {
+                    service.notesFavoritesDelete(
+                        IPinRequest(
+                            noteId = statusKey.id,
+                        ),
+                    )
+                } else {
+                    service.notesFavoritesCreate(
+                        IPinRequest(
+                            noteId = statusKey.id,
+                        ),
+                    )
+                }
+            }
+        }
+    }
+
+    override fun favouriteState(statusKey: MicroBlogKey): Flow<Boolean> =
+        flow {
+            runCatching {
+                service.notesState(
+                    IPinRequest(
+                        noteId = statusKey.id,
+                    ),
+                )
+            }.fold(
+                onSuccess = {
+                    emit(it.body()?.isFavorited == true)
+                },
+                onFailure = {
+                    emit(false)
+                },
+            )
+        }
+
     override fun following(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
@@ -946,4 +988,25 @@ internal class MisskeyDataSource(
             ),
             ProfileTab.Media,
         ).toPersistentList()
+
+    fun favouriteTimeline(
+        pageSize: Int = 20,
+        pagingKey: String = "favourite_$accountKey",
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiTimeline>> =
+        timelinePager(
+            pageSize = pageSize,
+            pagingKey = pagingKey,
+            accountKey = accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                FavouriteTimelineRemoteMediator(
+                    service = service,
+                    database = database,
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                ),
+        )
 }

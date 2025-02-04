@@ -532,4 +532,12 @@
   <string name="local_history_search_placeholder">Søk lokal cache</string>
   <string name="local_history_search_status_title">Status:</string>
   <string name="local_history_search_user_title">Bruker</string>
+  <string name="rss_sources_title">Rss kilder</string>
+  <string name="add_rss_source">Legge til Rss kilde</string>
+  <string name="edit_rss_source">Rediger Rss kilde</string>
+  <string name="delete_rss_source">Slett Rss kilde</string>
+  <string name="rss_sources_title_label">Tittel</string>
+  <string name="rss_sources_url_label">URL</string>
+  <string name="rss_title">RSS</string>
+  <string name="empty_rss_sources">Ingen rss kilder</string>
 </resources>

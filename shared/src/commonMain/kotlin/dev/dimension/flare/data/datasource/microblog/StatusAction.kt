@@ -3,11 +3,16 @@ package dev.dimension.flare.data.datasource.microblog
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.ClickContext
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.coroutines.flow.Flow
 
 public sealed interface StatusAction {
     public data class Group internal constructor(
         val displayItem: Item,
         val actions: ImmutableList<StatusAction>,
+    ) : StatusAction
+
+    public data class AsyncActionItem internal constructor(
+        val flow: Flow<Item>,
     ) : StatusAction
 
     public sealed interface Item : StatusAction {

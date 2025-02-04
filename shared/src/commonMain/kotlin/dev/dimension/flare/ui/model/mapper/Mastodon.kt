@@ -119,7 +119,6 @@ internal fun Notification.render(
 
                 else -> status ?: UiTimeline.ItemContent.User(user)
             },
-        platformType = PlatformType.Mastodon,
     )
 }
 
@@ -171,7 +170,6 @@ internal fun Status.render(
     return UiTimeline(
         topMessage = topMessage,
         content = actualStatus.renderStatus(host, accountKey, event),
-        platformType = PlatformType.Mastodon,
     )
 }
 
@@ -183,7 +181,7 @@ private fun Status.renderStatus(
     requireNotNull(account) { "actualStatus.account is null" }
     val actualUser = account.render(accountKey, host)
     val isFromMe = actualUser.key == accountKey
-    val canReblog = visibility in listOf(Visibility.Public, Visibility.Unlisted)
+    val canReblog = visibility in listOf(Visibility.Public, Visibility.Unlisted) || (isFromMe && visibility != Visibility.Direct)
     val statusKey =
         MicroBlogKey(
             id = id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
@@ -354,6 +352,7 @@ private fun Status.renderStatus(
                 ),
             )
         },
+        platformType = PlatformType.Mastodon,
         onMediaClicked = { media, index ->
             launcher.launch(
                 AppDeepLink.StatusMedia(

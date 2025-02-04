@@ -536,4 +536,12 @@
   <string name="local_history_search_placeholder">搜索本地缓存</string>
   <string name="local_history_search_status_title">帖子</string>
   <string name="local_history_search_user_title">用户</string>
+  <string name="rss_sources_title">Rss 源</string>
+  <string name="add_rss_source">添加RSS源</string>
+  <string name="edit_rss_source">编辑 Rss 源</string>
+  <string name="delete_rss_source">删除 Rss 源</string>
+  <string name="rss_sources_title_label">标题</string>
+  <string name="rss_sources_url_label">网址</string>
+  <string name="rss_title">Rss</string>
+  <string name="empty_rss_sources">无 rss 源</string>
 </resources>

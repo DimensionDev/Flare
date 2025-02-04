@@ -89,6 +89,7 @@ import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.localizedFullTime
 import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.model.onError
@@ -522,40 +523,57 @@ private fun StatusActions(
                         text = action.displayItem.iconText,
                         color = statusActionItemColor(item = action.displayItem),
                         withTextMinWidth = index != items.lastIndex,
-                    ) { closeMenu ->
+                    ) { closeMenu, isMenuShown ->
                         action.actions.forEach { subActions ->
-                            if (subActions is StatusAction.Item) {
-                                val color = statusActionItemColor(subActions)
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        FAIcon(
-                                            imageVector = subActions.icon,
-                                            contentDescription = subActions.iconText,
-                                            tint = color,
-                                            modifier =
-                                                Modifier
-                                                    .size(with(LocalDensity.current) { LocalTextStyle.current.fontSize.toDp() + 4.dp }),
-                                        )
-                                    },
-                                    text = {
-                                        Text(
-                                            text = statusActionItemText(item = subActions),
-                                            color = color,
-                                        )
-                                    },
-                                    onClick = {
-                                        closeMenu.invoke()
-                                        if (subActions is StatusAction.Item.Clickable) {
-                                            subActions.onClicked.invoke(
-                                                ClickContext(
-                                                    launcher = {
-                                                        launcher.openUri(it)
+                            when (subActions) {
+                                is StatusAction.Item -> {
+                                    StatusActionItemMenu(subActions, closeMenu)
+                                }
+
+                                is StatusAction.AsyncActionItem -> {
+                                    if (isMenuShown) {
+                                        val state by subActions.flow.collectAsUiState()
+                                        state
+                                            .onSuccess {
+                                                StatusActionItemMenu(it, closeMenu)
+                                            }.onLoading {
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Text(
+                                                            text = "Loading",
+                                                            modifier =
+                                                                Modifier.placeholder(
+                                                                    true,
+                                                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                                                ),
+                                                        )
                                                     },
-                                                ),
-                                            )
-                                        }
-                                    },
-                                )
+                                                    leadingIcon = {
+                                                        FAIcon(
+                                                            imageVector = FontAwesomeIcons.Solid.Ellipsis,
+                                                            contentDescription = "Loading",
+                                                            modifier =
+                                                                Modifier
+                                                                    .size(
+                                                                        with(LocalDensity.current) {
+                                                                            LocalTextStyle.current.fontSize.toDp() +
+                                                                                4.dp
+                                                                        },
+                                                                    ).placeholder(
+                                                                        true,
+                                                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                                                    ),
+                                                        )
+                                                    },
+                                                    onClick = {
+                                                    },
+                                                )
+                                            }
+                                    }
+                                }
+
+                                // nested group is not supported
+                                is StatusAction.Group -> Unit
                             }
                         }
                     }
@@ -580,9 +598,51 @@ private fun StatusActions(
                         },
                     )
                 }
+
+                // async action item is only supported in group
+                is StatusAction.AsyncActionItem -> Unit
             }
         }
     }
+}
+
+@Composable
+private fun StatusActionItemMenu(
+    subActions: StatusAction.Item,
+    closeMenu: () -> Unit,
+) {
+    val launcher = LocalUriHandler.current
+    val color = statusActionItemColor(subActions)
+    DropdownMenuItem(
+        leadingIcon = {
+            FAIcon(
+                imageVector = subActions.icon,
+                contentDescription = subActions.iconText,
+                tint = color,
+                modifier =
+                    Modifier
+                        .size(with(LocalDensity.current) { LocalTextStyle.current.fontSize.toDp() + 4.dp }),
+            )
+        },
+        text = {
+            Text(
+                text = statusActionItemText(item = subActions),
+                color = color,
+            )
+        },
+        onClick = {
+            closeMenu.invoke()
+            if (subActions is StatusAction.Item.Clickable) {
+                subActions.onClicked.invoke(
+                    ClickContext(
+                        launcher = {
+                            launcher.openUri(it)
+                        },
+                    ),
+                )
+            }
+        },
+    )
 }
 
 private val StatusAction.Item.icon: ImageVector

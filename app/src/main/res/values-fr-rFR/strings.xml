@@ -533,4 +533,12 @@
   <string name="local_history_search_placeholder">Rechercher dans la cache locale</string>
   <string name="local_history_search_status_title">Statut</string>
   <string name="local_history_search_user_title">Utilisateur</string>
+  <string name="rss_sources_title">Sources Rss</string>
+  <string name="add_rss_source">Ajouter une source Rss</string>
+  <string name="edit_rss_source">Modifier la source Rss</string>
+  <string name="delete_rss_source">Supprimer la source Rss</string>
+  <string name="rss_sources_title_label">Titre de la page</string>
+  <string name="rss_sources_url_label">Url</string>
+  <string name="rss_title">Rss</string>
+  <string name="empty_rss_sources">Aucune source rss</string>
 </resources>

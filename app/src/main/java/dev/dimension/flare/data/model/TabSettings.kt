@@ -22,7 +22,7 @@ import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Message
 import compose.icons.fontawesomeicons.solid.RectangleList
-import compose.icons.fontawesomeicons.solid.Rss
+import compose.icons.fontawesomeicons.solid.SquareRss
 import compose.icons.fontawesomeicons.solid.Star
 import compose.icons.fontawesomeicons.solid.Users
 import dev.dimension.flare.R
@@ -96,7 +96,9 @@ sealed interface TitleType {
             Favourite,
             List,
             Feeds,
-            DirectMessage, ;
+            DirectMessage,
+            Rss,
+            ;
 
             fun toId(): Int =
                 when (this) {
@@ -113,6 +115,7 @@ sealed interface TitleType {
                     List -> R.string.home_tab_list_title
                     Feeds -> R.string.home_tab_feeds_title
                     DirectMessage -> R.string.dm_list_title
+                    Rss -> R.string.rss_title
                 }
         }
     }
@@ -148,6 +151,7 @@ sealed interface IconType {
             List,
             Feeds,
             Messages,
+            Rss,
             ;
 
             fun toIcon(): ImageVector =
@@ -167,8 +171,9 @@ sealed interface IconType {
                     Misskey -> FontAwesomeIcons.Brands.Misskey
                     Bluesky -> FontAwesomeIcons.Brands.Bluesky
                     List -> FontAwesomeIcons.Solid.List
-                    Feeds -> FontAwesomeIcons.Solid.Rss
+                    Feeds -> FontAwesomeIcons.Solid.SquareRss
                     Messages -> FontAwesomeIcons.Solid.Message
+                    Rss -> FontAwesomeIcons.Solid.SquareRss
                 }
         }
     }
@@ -213,6 +218,13 @@ sealed interface TimelineTabItem : TabItem {
                             icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
                         ),
                 ),
+                RssTabItem(
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Rss),
+                            icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+                        ),
+                ),
                 DiscoverTabItem(
                     account = AccountType.Active,
                     metaData =
@@ -239,6 +251,13 @@ sealed interface TimelineTabItem : TabItem {
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
                             icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                        ),
+                ),
+                RssTabItem(
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Rss),
+                            icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
                         ),
                 ),
                 DiscoverTabItem(
@@ -388,6 +407,14 @@ sealed interface TimelineTabItem : TabItem {
 
         private fun defaultMisskeySecondaryItems(accountKey: MicroBlogKey) =
             persistentListOf(
+                Misskey.FavouriteTimelineTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Favourite),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Heart, accountKey),
+                        ),
+                ),
                 Misskey.LocalTimelineTabItem(
                     account = AccountType.Specific(accountKey),
                     metaData =
@@ -692,6 +719,20 @@ object Misskey {
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }
+
+    @Serializable
+    data class FavouriteTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "favourite_$account"
+
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.misskey
+                .MisskeyFavouriteTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
 }
 
 object XQT {
@@ -807,6 +848,16 @@ data class DirectMessageTabItem(
     override val metaData: TabMetaData,
 ) : TabItem {
     override val key: String = "dm_$account"
+
+    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+}
+
+@Serializable
+data class RssTabItem(
+    override val metaData: TabMetaData,
+) : TabItem {
+    override val account: AccountType = AccountType.Guest
+    override val key: String = "rss"
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }

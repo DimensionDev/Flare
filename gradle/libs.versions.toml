@@ -4,17 +4,17 @@ lifecycleViewmodelCompose = "2.8.4"
 minSdk = "24"
 java = "21"
 agp = "8.8.0"
-kotlin = "2.1.0"
+kotlin = "2.1.10"
 core-ktx = "1.15.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.2.1"
 espresso-core = "3.6.1"
 lifecycle-runtime-ktx = "2.8.7"
 activity-compose = "1.10.0"
-compose-bom = "2025.01.00"
-ksp = "2.1.0-1.0.29"
+compose-bom = "2025.01.01"
+ksp = "2.1.10-1.0.29"
 paging = "3.3.5"
-navigation = "2.8.5"
+navigation = "2.8.6"
 kotlinx-datetime = "0.6.1"
 kotlinx-collections-immutable = "0.3.8"
 kotlinx-serialization = "1.8.0"
@@ -26,26 +26,26 @@ stately = "2.1.0"
 twitter-parser = "0.5.3"
 molecule = "2.0.0"
 accompanist = "0.37.0"
-compose-destinations = "2.1.0-beta15"
+compose-destinations = "2.1.0-beta16"
 compose-lint-checks = "1.4.2"
 ktlintPlugin = "12.1.2"
 apng-android = "3.0.2"
 ktlint = "1.3.1"
 okio = "3.10.2"
-skie = "0.10.0"
+skie = "0.10.1"
 ksoup = "0.2.0"
-versionUpdate = "0.51.0"
+versionUpdate = "0.52.0"
 bluesky = "0.3.0-SNAPSHOT"
 kotlinx-coroutines = "1.10.1"
-koin = "4.0.1"
+koin = "4.0.2"
 composeIcons = "1.3.0"
 media3 = "1.5.1"
 desugar_jdk_libs = "2.1.4"
 firebase-bom = "33.8.0"
 google-services = "4.4.2"
 firebase-crashlytics = "3.0.2"
-materialKolor = "2.0.0"
-room = "2.7.0-alpha12"
+materialKolor = "2.0.2"
+room = "2.7.0-alpha13"
 compose-multiplatform = "1.7.3"
 
 [libraries]
@@ -88,7 +88,7 @@ androidx-splash = { group = "androidx.core", name = "core-splashscreen", version
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
-sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version = "2.5.0-alpha12" }
+sqlite-bundled = { group = "androidx.sqlite", name = "sqlite-bundled", version = "2.5.0-alpha13" }
 nestedScrollView = { group = "com.github.Tlaster", name = "NestedScrollView", version = "1.0.3" }
 
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
@@ -127,6 +127,7 @@ ktorfit-converters-flow = { group = "de.jensklingenberg.ktorfit", name = "ktorfi
 
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktor" }
+ktor-serialization-kotlinx-xml = { group = "io.ktor", name = "ktor-serialization-kotlinx-xml", version.ref = "ktor" }
 ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version.ref = "ktor" }
 ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
@@ -170,12 +171,14 @@ precompose-molecule = { module = "moe.tlaster:precompose-molecule", version = "1
 
 compose-cupertino = { module = "io.github.alexzhirkevich:cupertino-core", version = "0.1.0-alpha04" }
 
+xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.90.3" }
+
 [bundles]
 compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3", "material3WindowSizeClass", "material3-adaptive-navigation-suite", "material3-adaptive", "material3-adaptive-navigation", "material3-adaptive-layout"]
 navigation = ["navigation-compose"]
 kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json", "kotlinx-coroutines-core"]
 koin = ["koin-core", "koin-android", "koin-compose", "koin-androidx-compose"]
-ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging"]
+ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging", "ktor-serialization-kotlinx-xml"]
 coil3 = ["coil3-compose", "coil3-svg", "coil3-ktor3"]
 coil3-extensions = ["apng", "awebp", "vectordrawable-animated", "zoomable-image", "coil3-gif"]
 accompanist = ["accompanist-permissions", "accompanist-drawablepainter"]

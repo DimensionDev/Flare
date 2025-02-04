@@ -24,6 +24,8 @@ internal class StatusDetailRemoteMediator(
     private val pagingKey: String,
     private val statusOnly: Boolean,
 ) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+    private var page = 1
+
     override suspend fun load(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
@@ -62,36 +64,40 @@ internal class StatusDetailRemoteMediator(
                 } else {
                     val current =
                         if (loadType == LoadType.REFRESH) {
+                            page = 0
                             service
                                 .notesShow(
                                     IPinRequest(noteId = statusKey.id),
                                 ).body()
                         } else {
+                            page++
                             null
                         }
                     val lastItem =
-                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return MediatorResult.Success(
-                                endOfPaginationReached = true,
-                            )
+                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)?.takeIf {
+                            it.timeline.statusKey != statusKey
+                        }
                     val children =
                         service
                             .notesChildren(
                                 NotesChildrenRequest(
                                     noteId = statusKey.id,
-                                    untilId = lastItem.timeline.statusKey.id,
+                                    untilId = lastItem?.timeline?.statusKey?.id,
                                     limit = state.config.pageSize,
                                 ),
                             ).body()
                             .orEmpty()
                     listOfNotNull(current?.reply, current) + children
-//                context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()
                 }.filterNotNull()
             Misskey.save(
                 database = database,
                 accountKey = accountKey,
                 pagingKey = pagingKey,
                 data = result,
+                sortIdProvider = {
+                    val index = result.indexOf(it)
+                    -(index + page * state.config.pageSize).toLong()
+                },
             )
             MediatorResult.Success(
                 endOfPaginationReached = true,

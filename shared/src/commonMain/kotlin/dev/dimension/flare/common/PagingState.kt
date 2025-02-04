@@ -1,12 +1,17 @@
 package dev.dimension.flare.common
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.produceState
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import dev.dimension.flare.ui.model.UiState
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.flow.Flow
 import kotlin.contracts.ExperimentalContracts
 import kotlin.contracts.contract
 
@@ -46,6 +51,28 @@ public sealed class PagingState<T> {
         public abstract fun itemKey(key: ((item: T) -> Any)? = null): (index: Int) -> Any
 
         public abstract fun itemContentType(contentType: ((item: T) -> Any?)? = null): (index: Int) -> Any?
+
+        @Immutable
+        internal data class ImmutableSuccess<T : Any>(
+            private val data: ImmutableList<T>,
+            override val itemCount: Int = data.size,
+            override val isRefreshing: Boolean = false,
+            override val appendState: LoadState = LoadState.NotLoading(endOfPaginationReached = true),
+        ) : Success<T>() {
+            override fun get(index: Int): T? = data.getOrNull(index)
+
+            override fun peek(index: Int): T? = data.getOrNull(index)
+
+            override suspend fun refreshSuspend() {
+            }
+
+            override fun retry() {
+            }
+
+            override fun itemContentType(contentType: ((item: T) -> Any?)?): (index: Int) -> Any? = { null }
+
+            override fun itemKey(key: ((item: T) -> Any)?): (index: Int) -> Any = { it }
+        }
 
         @Immutable
         internal data class SingleSuccess<T : Any>(
@@ -220,4 +247,17 @@ internal fun <T : Any> UiState<PagingState<T>>.flatten(): PagingState<T> =
         is UiState.Loading -> PagingState.Loading()
         is UiState.Error -> PagingState.Error(throwable)
         is UiState.Success -> data
+    }
+
+@Composable
+internal fun <T : Any> Flow<List<T>>.collectPagingState(): State<PagingState<T>> =
+    produceState<PagingState<T>>(initialValue = PagingState.Loading<T>()) {
+        collect {
+            value =
+                if (it.isEmpty()) {
+                    PagingState.Empty { }
+                } else {
+                    PagingState.Success.ImmutableSuccess(it.toImmutableList())
+                }
+        }
     }

@@ -140,7 +140,6 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
                 this.id,
                 accountKey.host,
             ),
-        platformType = PlatformType.Misskey,
         userKey = user?.userKey,
         content = StatusContent.MisskeyNotification(this),
         accountKey = accountKey,
@@ -162,7 +161,7 @@ private fun List<Note>.toDbPagingTimeline(
             references =
                 listOfNotNull(
                     if (it.renote != null) {
-                        if (it.text.isNullOrEmpty()) {
+                        if (it.text.isNullOrEmpty() && it.files.isNullOrEmpty() && it.poll == null) {
                             ReferenceType.Retweet to it.renote.toDbStatusWithUser(accountKey)
                         } else {
                             ReferenceType.Quote to it.renote.toDbStatusWithUser(accountKey)
@@ -188,7 +187,6 @@ private fun Note.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser 
                     id = id,
                     host = user.userKey.host,
                 ),
-            platformType = PlatformType.Misskey,
             content = StatusContent.Misskey(this),
             userKey = user.userKey,
             accountKey = accountKey,

@@ -456,11 +456,6 @@ public protocol FLTimelineTabItem: FLTabItem {
 public struct FLTabMetaData /* : Codable */ {
     public let title: FLTitleType
     public let icon: FLIconType
-
-//    enum CodingKeys: String, CodingKey {
-//        case title
-//        case icon
-//    }
 }
 
 // - Title Type
@@ -468,35 +463,6 @@ public enum FLTitleType /* : Codable */ {
     case text(String)
     case localized(String)
 
-//    enum CodingKeys: String, CodingKey {
-//        case text
-//        case localized
-//    }
-//
-//    public func encode(to encoder: Encoder) throws {
-//        var container = encoder.container(keyedBy: CodingKeys.self)
-//        switch self {
-//        case .text(let value):
-//            try container.encode(value, forKey: .text)
-//        case .localized(let value):
-//            try container.encode(value, forKey: .localized)
-//        }
-//    }
-//
-//    public init(from decoder: Decoder) throws {
-//        let container = try decoder.container(keyedBy: CodingKeys.self)
-//        if let value = try? container.decode(String.self, forKey: .text) {
-//            self = .text(value)
-//        } else if let value = try? container.decode(String.self, forKey: .localized) {
-//            self = .localized(value)
-//        } else {
-//            throw DecodingError.dataCorruptedError(
-//                forKey: .text,
-//                in: container,
-//                debugDescription: "Invalid title type"
-//            )
-//        }
-//    }
 }
 
 // - Icon Type
@@ -504,43 +470,6 @@ public enum FLIconType /* : Codable */ {
     case avatar(userKey: MicroBlogKey)
     case material(String)
     case mixed([String])
-
-//    enum CodingKeys: String, CodingKey {
-//        case avatar
-//        case material
-//        case mixed
-//    }
-//
-//    public func encode(to encoder: Encoder) throws {
-//        var container = encoder.container(keyedBy: CodingKeys.self)
-//        switch self {
-//        case .avatar(let userKey):
-//            try container.encode(true, forKey: .avatar)
-//            try container.encode(userKey, forKey: .material)
-//        case .material(let value):
-//            try container.encode(value, forKey: .material)
-//        case .mixed(let value):
-//            try container.encode(value, forKey: .mixed)
-//        }
-//    }
-//
-//    public init(from decoder: Decoder) throws {
-//        let container = try decoder.container(keyedBy: CodingKeys.self)
-//        if let _ = try? container.decode(Bool.self, forKey: .avatar) {
-//            let userKey = try container.decode(MicroBlogKey.self, forKey: .material)
-//            self = .avatar(userKey: userKey)
-//        } else if let value = try? container.decode(String.self, forKey: .material) {
-//            self = .material(value)
-//        } else if let value = try? container.decode([String].self, forKey: .mixed) {
-//            self = .mixed(value)
-//        } else {
-//            throw DecodingError.dataCorruptedError(
-//                forKey: .avatar,
-//                in: container,
-//                debugDescription: "Invalid icon type"
-//            )
-//        }
-//    }
 }
 
 // - IconType Extensions
@@ -923,81 +852,6 @@ public extension FLTabItem {
     }
 }
 
-// - Combine Support
-// #if canImport(Combine)
-// import Combine
-//
-// extension FLTabSettingsManager {
-//    public func settingsPublisher() -> AnyPublisher<FLTabSettings, Never> {
-//        NotificationCenter.default.publisher(for: UserDefaults.didChangeNotification)
-//            .map { [weak self] _ in
-//                self?.getSettings() ?? .default
-//            }
-//            .eraseToAnyPublisher()
-//    }
-// }
-// #endif
-
-// - SwiftUI Support
-// #if canImport(SwiftUI)
-// import SwiftUI
-//
-// extension FLTabSettings {
-//    @propertyWrapper
-//    public struct UserDefault<T: Codable> {
-//        private let key: String
-//        private let defaultValue: T
-//        private let storage: UserDefaults
-//
-//        public init(key: String, defaultValue: T, storage: UserDefaults = .standard) {
-//            self.key = key
-//            self.defaultValue = defaultValue
-//            self.storage = storage
-//        }
-//
-//        public var wrappedValue: T {
-//            get {
-//                guard let data = storage.data(forKey: key) else {
-//                    return defaultValue
-//                }
-//
-//                do {
-//                    return try JSONDecoder().decode(T.self, from: data)
-//                } catch {
-//                    return defaultValue
-//                }
-//            }
-//            set {
-//                do {
-//                    let data = try JSONEncoder().encode(newValue)
-//                    storage.set(data, forKey: key)
-//                } catch {
-//                    print("保存设置失败: \(error.localizedDescription)")
-//                }
-//            }
-//        }
-//    }
-// }
-
-// @available(iOS 13.0, *)
-// extension FLTabSettingsManager: ObservableObject {
-//    @Published public private(set) var currentSettings: FLTabSettings {
-//        didSet {
-//            updateSettings(currentSettings)
-//        }
-//    }
-//
-//    public convenience init() {
-//        self.init(storage: FLTabSettingsStorage())
-//        self.currentSettings = getSettings()
-//
-//        #if canImport(Combine)
-//        settingsPublisher()
-//            .assign(to: &$currentSettings)
-//        #endif
-//    }
-// }
-// #endif
 
 // - Timeline Tab Item Extensions
 public extension FLTimelineTabItem {
@@ -1068,60 +922,3 @@ public extension FLHomeTimelineTabItem {
     }
 }
 
-// - Tab Settings Serialization
-// public protocol FLTabSettingsSerializer {
-//    func serialize(_ settings: FLTabSettings) throws -> Data
-//    func deserialize(_ data: Data) throws -> FLTabSettings
-//    var defaultValue: FLTabSettings { get }
-// }
-//
-// public class FLDefaultTabSettingsSerializer: FLTabSettingsSerializer {
-//    public init() {}
-//
-//    public func serialize(_ settings: FLTabSettings) throws -> Data {
-//        try JSONEncoder().encode(settings)
-//    }
-//
-//    public func deserialize(_ data: Data) throws -> FLTabSettings {
-//        do {
-//            return try JSONDecoder().decode(FLTabSettings.self, from: data)
-//        } catch {
-//            throw FLTabSettingsError.corruptionError("无法解析数据: \(error.localizedDescription)")
-//        }
-//    }
-//
-//    public var defaultValue: FLTabSettings {
-//        FLTabSettings(items: [], secondaryItems: nil, homeTabs: [:])
-//    }
-// }
-
-// - Tab Settings Storage Extensions
-// extension FLTabSettingsStorage {
-//    private struct AssociatedKeys {
-//        static var serializer = UnsafeRawPointer(bitPattern: "fl_tab_settings_serializer".hashValue)!
-//    }
-//
-//    public convenience init(serializer: FLTabSettingsSerializer = FLDefaultTabSettingsSerializer()) {
-//        self.init()
-//        self.serializer = serializer
-//    }
-//
-//    private var serializer: FLTabSettingsSerializer {
-//        get {
-//            guard let value = objc_getAssociatedObject(self, AssociatedKeys.serializer) as? FLTabSettingsSerializer else {
-//                let defaultSerializer = FLDefaultTabSettingsSerializer()
-//                self.serializer = defaultSerializer
-//                return defaultSerializer
-//            }
-//            return value
-//        }
-//        set {
-//            objc_setAssociatedObject(
-//                self,
-//                AssociatedKeys.serializer,
-//                newValue,
-//                .OBJC_ASSOCIATION_RETAIN_NONATOMIC
-//            )
-//        }
-//    }
-// }

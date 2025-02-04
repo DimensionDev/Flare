@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.model.MicroBlogKey
+import kotlinx.coroutines.flow.Flow
 
 internal sealed interface StatusEvent {
     interface Mastodon : StatusEvent {
@@ -39,6 +40,13 @@ internal sealed interface StatusEvent {
             statusKey: MicroBlogKey,
             options: List<Int>,
         )
+
+        fun favourite(
+            statusKey: MicroBlogKey,
+            favourited: Boolean,
+        )
+
+        fun favouriteState(statusKey: MicroBlogKey): Flow<Boolean>
     }
 
     interface Bluesky : StatusEvent {

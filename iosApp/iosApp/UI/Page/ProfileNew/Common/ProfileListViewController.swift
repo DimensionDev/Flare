@@ -1,4 +1,5 @@
 import MJRefresh
+import JXPagingView
 import UIKit
 
 class ProfileNewListViewController: UIViewController {

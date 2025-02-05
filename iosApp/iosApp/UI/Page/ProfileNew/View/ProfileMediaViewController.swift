@@ -1,4 +1,5 @@
 import JXPhotoBrowser
+import JXPagingView
 import JXSegmentedView
 import Kingfisher
 import MJRefresh

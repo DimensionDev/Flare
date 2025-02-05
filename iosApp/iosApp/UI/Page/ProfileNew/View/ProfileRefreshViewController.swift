@@ -1,4 +1,5 @@
 import Generated
+import JXPagingView
 import JXSegmentedView
 import Kingfisher
 import MarkdownUI

@@ -90,6 +90,7 @@ import dev.dimension.flare.ui.component.more
 import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformCheckbox
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuItem
+import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuScope
 import dev.dimension.flare.ui.component.platform.PlatformFilledTonalButton
 import dev.dimension.flare.ui.component.platform.PlatformRadioButton
 import dev.dimension.flare.ui.component.platform.PlatformText
@@ -562,12 +563,12 @@ private fun StatusActions(
                                             }.onLoading {
                                                 PlatformDropdownMenuItem(
                                                     text = {
-                                                        Text(
+                                                        PlatformText(
                                                             text = "Loading",
                                                             modifier =
                                                                 Modifier.placeholder(
                                                                     true,
-                                                                    color = PlatformTheme.colorScheme.surfaceVariant,
+                                                                    color = PlatformTheme.colorScheme.cardAlt,
                                                                 ),
                                                         )
                                                     },
@@ -579,12 +580,12 @@ private fun StatusActions(
                                                                 Modifier
                                                                     .size(
                                                                         with(LocalDensity.current) {
-                                                                            LocalTextStyle.current.fontSize.toDp() +
+                                                                            PlatformTextStyle.current.fontSize.toDp() +
                                                                                 4.dp
                                                                         },
                                                                     ).placeholder(
                                                                         true,
-                                                                        color = PlatformTheme.colorScheme.surfaceVariant,
+                                                                        color = PlatformTheme.colorScheme.cardAlt,
                                                                     ),
                                                         )
                                                     },
@@ -630,7 +631,7 @@ private fun StatusActions(
 }
 
 @Composable
-private fun StatusActionItemMenu(
+private fun PlatformDropdownMenuScope.StatusActionItemMenu(
     subActions: StatusAction.Item,
     closeMenu: () -> Unit,
 ) {
@@ -644,11 +645,11 @@ private fun StatusActionItemMenu(
                 tint = color,
                 modifier =
                     Modifier
-                        .size(with(LocalDensity.current) { LocalTextStyle.current.fontSize.toDp() + 4.dp }),
+                        .size(with(LocalDensity.current) { PlatformTextStyle.current.fontSize.toDp() + 4.dp }),
             )
         },
         text = {
-            Text(
+            PlatformText(
                 text = statusActionItemText(item = subActions),
                 color = color,
             )

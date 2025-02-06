@@ -92,6 +92,7 @@
 		649E7A352D318F5100AC2F62 /* ProfileTabSettingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A152D318F5100AC2F62 /* ProfileTabSettingStore.swift */; };
 		64BA00252D1AD84D0053F205 /* JXPhotoBrowser in Frameworks */ = {isa = PBXBuildFile; productRef = 64BA00242D1AD84D0053F205 /* JXPhotoBrowser */; };
 		64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */ = {isa = PBXBuildFile; productRef = 64BBDA712CFDD8420052E599 /* SwiftDate */; };
+		64BFB16D2D549F50002793C0 /* SideMenu in Frameworks */ = {isa = PBXBuildFile; productRef = 64BFB16C2D549F50002793C0 /* SideMenu */; };
 		64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */; };
 		64CE87B82D23FAF200853E9A /* FLUserProfileSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64CE87B72D23FAF200853E9A /* FLUserProfileSettings.swift */; };
 		64D8AD082D462DFA0045494F /* HomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D8AD072D462DFA0045494F /* HomeScreen.swift */; };
@@ -101,7 +102,7 @@
 		64E2087A2CF84670001C64EF /* Generated in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208792CF84670001C64EF /* Generated */; };
 		64E2087E2CF846DE001C64EF /* KotlinByteArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E2087B2CF846DE001C64EF /* KotlinByteArray.swift */; };
 		64E2087F2CF846DE001C64EF /* ViewExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E2087C2CF846DE001C64EF /* ViewExt.swift */; };
-		64E877292D0430C7003559B9 /* HomeAppBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876EE2D0430C7003559B9 /* HomeAppBar.swift */; };
+		64E877292D0430C7003559B9 /* HomeAppBar.swift.bak in Sources */ = {isa = PBXBuildFile; fileRef = 64E876EE2D0430C7003559B9 /* HomeAppBar.swift.bak */; };
 		64E8772C2D0430C7003559B9 /* ServiceSelectScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876FD2D0430C7003559B9 /* ServiceSelectScreen.swift */; };
 		64E8772D2D0430C7003559B9 /* HomeContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876EF2D0430C7003559B9 /* HomeContent.swift */; };
 		64E8772E2D0430C7003559B9 /* MisskeyReactionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877262D0430C7003559B9 /* MisskeyReactionSheet.swift */; };
@@ -122,7 +123,7 @@
 		64E877512D0430C7003559B9 /* MediaComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D62D0430C7003559B9 /* MediaComponent.swift */; };
 		64E877542D0430C7003559B9 /* AccountsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877122D0430C7003559B9 /* AccountsScreen.swift */; };
 		64E877552D0430C7003559B9 /* FeedMediaGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D22D0430C7003559B9 /* FeedMediaGridView.swift */; };
-		64E877562D0430C7003559B9 /* HomeTimelineScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876F12D0430C7003559B9 /* HomeTimelineScreen.swift */; };
+		64E877562D0430C7003559B9 /* HomeTimelineScreen.swift.bak in Sources */ = {isa = PBXBuildFile; fileRef = 64E876F12D0430C7003559B9 /* HomeTimelineScreen.swift.bak */; };
 		64E877582D0430C7003559B9 /* AppearanceScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877132D0430C7003559B9 /* AppearanceScreen.swift */; };
 		64E877592D0430C7003559B9 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877142D0430C7003559B9 /* SettingsScreen.swift */; };
 		64E8775C2D0430C7003559B9 /* TabSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876E52D0430C7003559B9 /* TabSettingsStore.swift */; };
@@ -251,9 +252,9 @@
 		64E876E52D0430C7003559B9 /* TabSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSettingsStore.swift; sourceTree = "<group>"; };
 		64E876E82D0430C7003559B9 /* AppBarTabItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBarTabItem.swift; sourceTree = "<group>"; };
 		64E876EB2D0430C7003559B9 /* DiscoverScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverScreen.swift; sourceTree = "<group>"; };
-		64E876EE2D0430C7003559B9 /* HomeAppBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeAppBar.swift; sourceTree = "<group>"; };
+		64E876EE2D0430C7003559B9 /* HomeAppBar.swift.bak */ = {isa = PBXFileReference; lastKnownFileType = text; path = HomeAppBar.swift.bak; sourceTree = "<group>"; };
 		64E876EF2D0430C7003559B9 /* HomeContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeContent.swift; sourceTree = "<group>"; };
-		64E876F12D0430C7003559B9 /* HomeTimelineScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTimelineScreen.swift; sourceTree = "<group>"; };
+		64E876F12D0430C7003559B9 /* HomeTimelineScreen.swift.bak */ = {isa = PBXFileReference; lastKnownFileType = text; path = HomeTimelineScreen.swift.bak; sourceTree = "<group>"; };
 		64E876F32D0430C7003559B9 /* NotificationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScreen.swift; sourceTree = "<group>"; };
 		64E876F52D0430C7003559B9 /* SearchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchScreen.swift; sourceTree = "<group>"; };
 		64E876F62D0430C7003559B9 /* StatusMediaScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusMediaScreen.swift; sourceTree = "<group>"; };
@@ -299,6 +300,7 @@
 				066AD0492B3ACDC1006F28F4 /* OrderedCollections in Frameworks */,
 				06B8514D2B6B228600DFA075 /* FirebaseCrashlytics in Frameworks */,
 				6488800B2D1AD43E00EFE72C /* JXSegmentedView in Frameworks */,
+				64BFB16D2D549F50002793C0 /* SideMenu in Frameworks */,
 				64E8778C2D06CA4A003559B9 /* TwitterText in Frameworks */,
 				644C84F82D535D0B00E92D0D /* JXPagingView in Frameworks */,
 				06244DED2B75F21E00884683 /* AVKit.framework in Frameworks */,
@@ -541,6 +543,30 @@
 			path = ProfileNew;
 			sourceTree = "<group>";
 		};
+		64BFB16E2D54AB6B002793C0 /* Tabview */ = {
+			isa = PBXGroup;
+			children = (
+				64E876F52D0430C7003559B9 /* SearchScreen.swift */,
+				64E876EB2D0430C7003559B9 /* DiscoverScreen.swift */,
+				64E876F32D0430C7003559B9 /* NotificationScreen.swift */,
+				64D8AD072D462DFA0045494F /* HomeScreen.swift */,
+				64E876EF2D0430C7003559B9 /* HomeContent.swift */,
+			);
+			path = Tabview;
+			sourceTree = "<group>";
+		};
+		64BFB16F2D54ABAA002793C0 /* AppBar */ = {
+			isa = PBXGroup;
+			children = (
+				64E876F72D0430C7003559B9 /* HomeAppBarSettingsView.swift */,
+				644C84872D523D8700E92D0D /* HomeNewScreen.swift */,
+				644C84882D523D8700E92D0D /* HomeNewTimelineCell.swift */,
+				644C84892D523D8700E92D0D /* HomeNewTimelineViewController.swift */,
+				644C848A2D523D8700E92D0D /* HomeNewViewController.swift */,
+			);
+			path = AppBar;
+			sourceTree = "<group>";
+		};
 		64E2087D2CF846DE001C64EF /* Common */ = {
 			isa = PBXGroup;
 			children = (
@@ -616,18 +642,10 @@
 		64E876F82D0430C7003559B9 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				644C84872D523D8700E92D0D /* HomeNewScreen.swift */,
-				644C84882D523D8700E92D0D /* HomeNewTimelineCell.swift */,
-				644C84892D523D8700E92D0D /* HomeNewTimelineViewController.swift */,
-				644C848A2D523D8700E92D0D /* HomeNewViewController.swift */,
-				64D8AD072D462DFA0045494F /* HomeScreen.swift */,
-				64E876EB2D0430C7003559B9 /* DiscoverScreen.swift */,
-				64E876EE2D0430C7003559B9 /* HomeAppBar.swift */,
-				64E876F72D0430C7003559B9 /* HomeAppBarSettingsView.swift */,
-				64E876EF2D0430C7003559B9 /* HomeContent.swift */,
-				64E876F12D0430C7003559B9 /* HomeTimelineScreen.swift */,
-				64E876F32D0430C7003559B9 /* NotificationScreen.swift */,
-				64E876F52D0430C7003559B9 /* SearchScreen.swift */,
+				64BFB16F2D54ABAA002793C0 /* AppBar */,
+				64BFB16E2D54AB6B002793C0 /* Tabview */,
+				64E876EE2D0430C7003559B9 /* HomeAppBar.swift.bak */,
+				64E876F12D0430C7003559B9 /* HomeTimelineScreen.swift.bak */,
 				64E876F62D0430C7003559B9 /* StatusMediaScreen.swift */,
 			);
 			path = View;
@@ -901,6 +919,7 @@
 				64FF2E122D2BC4E80046A32B /* Generated */,
 				64E890732D2D28400001B93D /* MJRefresh */,
 				644C84F72D535D0B00E92D0D /* JXPagingView */,
+				64BFB16C2D549F50002793C0 /* SideMenu */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
@@ -949,6 +968,7 @@
 				64FF2E112D2BC4E80046A32B /* XCLocalSwiftPackageReference "Generated" */,
 				64E890722D2D28400001B93D /* XCRemoteSwiftPackageReference "MJRefresh" */,
 				644C84F62D535D0B00E92D0D /* XCRemoteSwiftPackageReference "JXPagingView" */,
+				64BFB16B2D549F50002793C0 /* XCRemoteSwiftPackageReference "SideMenu" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -1047,7 +1067,7 @@
 				06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */,
 				64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */,
 				B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */,
-				64E877292D0430C7003559B9 /* HomeAppBar.swift in Sources */,
+				64E877292D0430C7003559B9 /* HomeAppBar.swift.bak in Sources */,
 				64EB7DAB2D0C4C0400E41656 /* FLTabSettings.swift in Sources */,
 				64E8772C2D0430C7003559B9 /* ServiceSelectScreen.swift in Sources */,
 				64E8772D2D0430C7003559B9 /* HomeContent.swift in Sources */,
@@ -1074,7 +1094,7 @@
 				64E877512D0430C7003559B9 /* MediaComponent.swift in Sources */,
 				64E877542D0430C7003559B9 /* AccountsScreen.swift in Sources */,
 				64E877552D0430C7003559B9 /* FeedMediaGridView.swift in Sources */,
-				64E877562D0430C7003559B9 /* HomeTimelineScreen.swift in Sources */,
+				64E877562D0430C7003559B9 /* HomeTimelineScreen.swift.bak in Sources */,
 				64E877582D0430C7003559B9 /* AppearanceScreen.swift in Sources */,
 				64E877592D0430C7003559B9 /* SettingsScreen.swift in Sources */,
 				64E877C52D083DF6003559B9 /* FlareMarkdownText.swift in Sources */,
@@ -1492,6 +1512,14 @@
 				minimumVersion = 7.0.0;
 			};
 		};
+		64BFB16B2D549F50002793C0 /* XCRemoteSwiftPackageReference "SideMenu" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kukushi/SideMenu.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.1.1;
+			};
+		};
 		64E2086F2CF8458A001C64EF /* XCRemoteSwiftPackageReference "FLAnimatedImage" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Flipboard/FLAnimatedImage.git";
@@ -1597,6 +1625,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 64BBDA702CFDD8420052E599 /* XCRemoteSwiftPackageReference "SwiftDate" */;
 			productName = SwiftDate;
+		};
+		64BFB16C2D549F50002793C0 /* SideMenu */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64BFB16B2D549F50002793C0 /* XCRemoteSwiftPackageReference "SideMenu" */;
+			productName = SideMenu;
 		};
 		64E208702CF8458A001C64EF /* FLAnimatedImage */ = {
 			isa = XCSwiftPackageProductDependency;

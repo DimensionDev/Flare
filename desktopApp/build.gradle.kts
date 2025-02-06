@@ -40,9 +40,16 @@ compose.desktop {
         mainClass = "dev.dimension.flare.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Pkg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "dev.dimension.flare"
             packageVersion = "1.0.0"
+            macOS {
+                bundleID = "dev.dimension.flare"
+                infoPlist {
+                    extraKeysRawXml = macExtraPlistKeys
+                }
+//                iconFile.set(project.file("src/jvmMain/resources/icon/ic_launcher.icns"))
+            }
         }
         buildTypes {
             release {
@@ -67,3 +74,19 @@ ktlint {
         exclude { element -> element.file.path.contains("build", ignoreCase = true) }
     }
 }
+
+// register deeplinks
+val macExtraPlistKeys: String
+    get() = """
+      <key>CFBundleURLTypes</key>
+      <array>
+        <dict>
+          <key>CFBundleURLName</key>
+          <string>FlareScheme</string>
+          <key>CFBundleURLSchemes</key>
+          <array>
+            <string>flare</string>
+          </array>
+        </dict>
+      </array>
+    """

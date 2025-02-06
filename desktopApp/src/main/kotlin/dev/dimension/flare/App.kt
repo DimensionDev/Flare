@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -15,10 +16,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.konyaco.fluent.FluentTheme
@@ -69,7 +74,9 @@ private val menus =
     )
 
 @Composable
-internal fun FlareApp() {
+internal fun FlareApp(
+    navController: NavHostController = rememberNavController(),
+) {
     val state by producePresenter { presenter() }
     val bigScreen = isBigScreen()
     val displayMode =
@@ -79,9 +86,9 @@ internal fun FlareApp() {
             NavigationDisplayMode.LeftCompact
         }
     var selectedIndex by remember { mutableStateOf(0) }
-    val navController = rememberNavController()
     val currentEntry by navController.currentBackStackEntryAsState()
     val currentDestination = currentEntry?.destination
+    val uriHandler = LocalUriHandler.current
 
     fun navigate(route: Route) {
         navController.navigate(route) {
@@ -209,10 +216,16 @@ internal fun FlareApp() {
             )
         },
     ) {
-        Router(
-            startDestination = menus.first().route,
-            navController = navController,
-        )
+        CompositionLocalProvider(
+            LocalUriHandler provides remember {
+                ProxyUriHandler(navController, uriHandler)
+            },
+        ) {
+            Router(
+                startDestination = menus.first().route,
+                navController = navController,
+            )
+        }
     }
 }
 
@@ -221,3 +234,16 @@ private fun presenter() =
     run {
         remember { ActiveAccountPresenter() }.invoke()
     }
+
+private class ProxyUriHandler(
+    private val navController: NavController,
+    private val actualUriHandler: UriHandler,
+) : UriHandler {
+    override fun openUri(uri: String) {
+        if (uri.startsWith("flare://")) {
+            navController.navigate(uri)
+        } else {
+            actualUriHandler.openUri(uri)
+        }
+    }
+}

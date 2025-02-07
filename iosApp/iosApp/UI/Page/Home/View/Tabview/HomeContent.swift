@@ -23,51 +23,51 @@ enum HomeTabs: Int, Equatable, Hashable, Identifiable {
 }
 
 // 新建一个视图来处理首页的内容
-//struct HomeTimelineView: View {
-//    let router: Router
-//    let accountType: AccountType
-//    @Binding var showSettings: Bool
-//    @Binding var showLogin: Bool
-//    @Binding var selectedHomeTab: Int
-//    @ObservedObject var timelineStore: TimelineStore
-//    @ObservedObject var tabSettingsStore: TabSettingsStore
+// struct HomeTimelineView: View {
+//   let router: Router
+//   let accountType: AccountType
+//   @Binding var showSettings: Bool
+//   @Binding var showLogin: Bool
+//   @Binding var selectedHomeTab: Int
+//   @ObservedObject var timelineStore: TimelineStore
+//   @ObservedObject var tabSettingsStore: TabSettingsStore
 //
-//    init(router: Router,
-//         accountType: AccountType,
-//         showSettings: Binding<Bool>,
-//         showLogin: Binding<Bool>,
-//         selectedHomeTab: Binding<Int>,
-//         timelineStore: TimelineStore,
-//         tabSettingsStore: TabSettingsStore)
-//    {
-//        self.router = router
-//        self.accountType = accountType
-//        _showSettings = showSettings
-//        _showLogin = showLogin
-//        _selectedHomeTab = selectedHomeTab
-//        self.timelineStore = timelineStore
-//        self.tabSettingsStore = tabSettingsStore
-//    }
+//   init(router: Router,
+//        accountType: AccountType,
+//        showSettings: Binding<Bool>,
+//        showLogin: Binding<Bool>,
+//        selectedHomeTab: Binding<Int>,
+//        timelineStore: TimelineStore,
+//        tabSettingsStore: TabSettingsStore)
+//   {
+//       self.router = router
+//       self.accountType = accountType
+//       _showSettings = showSettings
+//       _showLogin = showLogin
+//       _selectedHomeTab = selectedHomeTab
+//       self.timelineStore = timelineStore
+//       self.tabSettingsStore = tabSettingsStore
+//   }
 //
-//    var body: some View {
-//        TimelineScreen(timelineStore: timelineStore)
-//            .navigationBarTitleDisplayMode(.inline)
-//            .toolbar {
-//                HomeAppBar(
-//                    router: router,
-//                    accountType: accountType,
-//                    showSettings: $showSettings,
-//                    showLogin: $showLogin,
-//                    selectedHomeTab: $selectedHomeTab,
-//                    timelineStore: timelineStore,
-//                    tabSettingsStore: tabSettingsStore
-//                )
-//            }
-//            // appbar 背景色
-//            .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)
-//            .toolbarBackground(.visible, for: .navigationBar)
-//    }
-//}
+//   var body: some View {
+//       TimelineScreen(timelineStore: timelineStore)
+//           .navigationBarTitleDisplayMode(.inline)
+//           .toolbar {
+//               HomeAppBar(
+//                   router: router,
+//                   accountType: accountType,
+//                   showSettings: $showSettings,
+//                   showLogin: $showLogin,
+//                   selectedHomeTab: $selectedHomeTab,
+//                   timelineStore: timelineStore,
+//                   tabSettingsStore: tabSettingsStore
+//               )
+//           }
+//           // appbar 背景色
+//           .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)
+//           .toolbarBackground(.visible, for: .navigationBar)
+//   }
+// }
 
 struct HomeContent: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass

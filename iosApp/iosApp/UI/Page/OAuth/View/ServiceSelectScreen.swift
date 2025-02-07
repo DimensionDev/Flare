@@ -296,23 +296,23 @@ struct ServiceSelectScreen: View {
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     // .background(
-                    //     Group {
-                    //         if instance.bannerUrl != nil {
-                    //             // 有背景图时使用渐变
-                    //             LinearGradient(
-                    //                 colors: [
-                    //                     Color(.systemBackground),
-                    //                     Color(.systemBackground).opacity(0.9),
-                    //                     Color(.systemBackground).opacity(0.7)
-                    //                 ],
-                    //                 startPoint: .leading,
-                    //                 endPoint: .trailing
-                    //             )
-                    //         } else {
-                    //             // 没有背景图时使用纯色
-                    //             // Color(.systemBackground)
-                    //         }
-                    //     }
+                    //    Group {
+                    //        if instance.bannerUrl != nil {
+                    //            // 有背景图时使用渐变
+                    //            LinearGradient(
+                    //                colors: [
+                    //                    Color(.systemBackground),
+                    //                    Color(.systemBackground).opacity(0.9),
+                    //                    Color(.systemBackground).opacity(0.7)
+                    //                ],
+                    //                startPoint: .leading,
+                    //                endPoint: .trailing
+                    //            )
+                    //        } else {
+                    //            // 没有背景图时使用纯色
+                    //            // Color(.systemBackground)
+                    //        }
+                    //    }
                     // )
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)

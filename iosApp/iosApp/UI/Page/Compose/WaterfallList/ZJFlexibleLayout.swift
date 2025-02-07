@@ -1,8 +1,8 @@
 //
-//  ZJFlexibleLayout.swift
+// ZJFlexibleLayout.swift
 //
 //
-//  Created by 张智杰 on 2016/12/9.
+// Created by 张智杰 on 2016/12/9.
 
 import UIKit
 

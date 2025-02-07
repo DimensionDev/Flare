@@ -1,9 +1,9 @@
 //
-//  MediaPreviewVideoViewController.swift
-//  TwidereX
+// MediaPreviewVideoViewController.swift
+// TwidereX
 //
-//  Created by MainasuK on 2021-12-8.
-//  Copyright 2021 Twidere. All rights reserved.
+// Created by MainasuK on 2021-12-8.
+// Copyright 2021 Twidere. All rights reserved.
 //
 
 import AVKit
@@ -166,40 +166,40 @@ extension MediaPreviewVideoViewController: ShareActivityProvider {
 // - MediaPreviewTransitionViewController
 
 // extension MediaPreviewVideoViewController: MediaPreviewTransitionViewController {
-//    var mediaPreviewTransitionContext: MediaPreviewTransitionContext? {
-//        guard let playerView = playerViewController.view else { return nil }
-//        let _currentFrame: UIImage? = {
-//            guard let player = playerViewController.player else { return nil }
-//            guard let asset = player.currentItem?.asset else { return nil }
-//            let assetImageGenerator = AVAssetImageGenerator(asset: asset)
-//            assetImageGenerator.appliesPreferredTrackTransform = true   // fix orientation
-//            do {
-//                let cgImage = try assetImageGenerator.copyCGImage(at: player.currentTime(), actualTime: nil)
-//                let image = UIImage(cgImage: cgImage)
-//                return image
-//            } catch {
-//                return previewImageView.image
-//            }
-//        }()
-//        let _snapshot: UIView? = {
-//            guard let currentFrame = _currentFrame ?? previewImageView.image else { return nil }
-//            let size = AVMakeRect(aspectRatio: currentFrame.size, insideRect: view.frame).size
-//            let imageView = UIImageView(frame: CGRect(origin: .zero, size: size))
-//            imageView.image = currentFrame
-//            return imageView
-//        }()
-//        guard let snapshot = _snapshot else {
-//            assertionFailure()
-//            return nil
-//        }
+//   var mediaPreviewTransitionContext: MediaPreviewTransitionContext? {
+//       guard let playerView = playerViewController.view else { return nil }
+//       let _currentFrame: UIImage? = {
+//           guard let player = playerViewController.player else { return nil }
+//           guard let asset = player.currentItem?.asset else { return nil }
+//           let assetImageGenerator = AVAssetImageGenerator(asset: asset)
+//           assetImageGenerator.appliesPreferredTrackTransform = true   // fix orientation
+//           do {
+//               let cgImage = try assetImageGenerator.copyCGImage(at: player.currentTime(), actualTime: nil)
+//               let image = UIImage(cgImage: cgImage)
+//               return image
+//           } catch {
+//               return previewImageView.image
+//           }
+//       }()
+//       let _snapshot: UIView? = {
+//           guard let currentFrame = _currentFrame ?? previewImageView.image else { return nil }
+//           let size = AVMakeRect(aspectRatio: currentFrame.size, insideRect: view.frame).size
+//           let imageView = UIImageView(frame: CGRect(origin: .zero, size: size))
+//           imageView.image = currentFrame
+//           return imageView
+//       }()
+//       guard let snapshot = _snapshot else {
+//           assertionFailure()
+//           return nil
+//       }
 //
-//        return MediaPreviewTransitionContext(
-//            transitionView: playerView,
-//            supplementaryViews: [],
-//            snapshot: snapshot,
-//            snapshotTransitioning: snapshot
-//        )
-//    }
+//       return MediaPreviewTransitionContext(
+//           transitionView: playerView,
+//           supplementaryViews: [],
+//           snapshot: snapshot,
+//           snapshotTransitioning: snapshot
+//       )
+//   }
 // }
 
 // - AVPlayerViewControllerDelegate

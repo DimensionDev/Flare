@@ -22,6 +22,19 @@
 		06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B851502B6B22DD00DFA075 /* AppDelegate.swift */; };
 		06B851552B6B926D00DFA075 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 06B851542B6B926D00DFA075 /* Localizable.xcstrings */; };
 		640682502D16C5D5009B6B1E /* Color+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6406824E2D16C5D5009B6B1E /* Color+Extension.swift */; };
+		642A0D7C2D56235C0009C16D /* FLNewSideMenuConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D732D56235C0009C16D /* FLNewSideMenuConfiguration.swift */; };
+		642A0D7D2D56235C0009C16D /* FLNewGestureCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D6C2D56235C0009C16D /* FLNewGestureCoordinator.swift */; };
+		642A0D7E2D56235C0009C16D /* FLNewAppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D6B2D56235C0009C16D /* FLNewAppState.swift */; };
+		642A0D7F2D56235C0009C16D /* FLNewGestureState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D6E2D56235C0009C16D /* FLNewGestureState.swift */; };
+		642A0D802D56235C0009C16D /* View+NewSideMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D772D56235C0009C16D /* View+NewSideMenu.swift */; };
+		642A0D812D56235C0009C16D /* FLNewMenuGestureModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D6F2D56235C0009C16D /* FLNewMenuGestureModifier.swift */; };
+		642A0D822D56235C0009C16D /* FLNewPerformanceMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D712D56235C0009C16D /* FLNewPerformanceMonitor.swift */; };
+		642A0D832D56235C0009C16D /* FLNewSideMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D722D56235C0009C16D /* FLNewSideMenu.swift */; };
+		642A0D842D56235C0009C16D /* FLNewMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D702D56235C0009C16D /* FLNewMenuView.swift */; };
+		642A0D852D56235C0009C16D /* UIView+NewGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D762D56235C0009C16D /* UIView+NewGesture.swift */; };
+		642A0D862D56235C0009C16D /* FLNewStateStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D742D56235C0009C16D /* FLNewStateStorage.swift */; };
+		642A0D872D56235C0009C16D /* FLNewGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D6D2D56235C0009C16D /* FLNewGestureRecognizer.swift */; };
+		642A0D882D56235C0009C16D /* FLNewSideMenuDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D792D56235C0009C16D /* FLNewSideMenuDelegate.swift */; };
 		642AA5402D1021500088B7E3 /* TimelineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642AA53F2D1021500088B7E3 /* TimelineStore.swift */; };
 		644C848B2D523D8700E92D0D /* HomeNewTimelineViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84892D523D8700E92D0D /* HomeNewTimelineViewController.swift */; };
 		644C848C2D523D8700E92D0D /* HomeNewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C848A2D523D8700E92D0D /* HomeNewViewController.swift */; };
@@ -164,6 +177,19 @@
 		06B851542B6B926D00DFA075 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		06BE4D632B3181B0000C6D7D /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
 		6406824E2D16C5D5009B6B1E /* Color+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Extension.swift"; sourceTree = "<group>"; };
+		642A0D6B2D56235C0009C16D /* FLNewAppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLNewAppState.swift; sourceTree = "<group>"; };
+		642A0D6C2D56235C0009C16D /* FLNewGestureCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLNewGestureCoordinator.swift; sourceTree = "<group>"; };
+		642A0D6D2D56235C0009C16D /* FLNewGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLNewGestureRecognizer.swift; sourceTree = "<group>"; };
+		642A0D6E2D56235C0009C16D /* FLNewGestureState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLNewGestureState.swift; sourceTree = "<group>"; };
+		642A0D6F2D56235C0009C16D /* FLNewMenuGestureModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLNewMenuGestureModifier.swift; sourceTree = "<group>"; };
+		642A0D702D56235C0009C16D /* FLNewMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLNewMenuView.swift; sourceTree = "<group>"; };
+		642A0D712D56235C0009C16D /* FLNewPerformanceMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLNewPerformanceMonitor.swift; sourceTree = "<group>"; };
+		642A0D722D56235C0009C16D /* FLNewSideMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLNewSideMenu.swift; sourceTree = "<group>"; };
+		642A0D732D56235C0009C16D /* FLNewSideMenuConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLNewSideMenuConfiguration.swift; sourceTree = "<group>"; };
+		642A0D742D56235C0009C16D /* FLNewStateStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLNewStateStorage.swift; sourceTree = "<group>"; };
+		642A0D762D56235C0009C16D /* UIView+NewGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+NewGesture.swift"; sourceTree = "<group>"; };
+		642A0D772D56235C0009C16D /* View+NewSideMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+NewSideMenu.swift"; sourceTree = "<group>"; };
+		642A0D792D56235C0009C16D /* FLNewSideMenuDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLNewSideMenuDelegate.swift; sourceTree = "<group>"; };
 		642AA53F2D1021500088B7E3 /* TimelineStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineStore.swift; sourceTree = "<group>"; };
 		644C84872D523D8700E92D0D /* HomeNewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewScreen.swift; sourceTree = "<group>"; };
 		644C84882D523D8700E92D0D /* HomeNewTimelineCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewTimelineCell.swift; sourceTree = "<group>"; };
@@ -340,6 +366,81 @@
 				6406824E2D16C5D5009B6B1E /* Color+Extension.swift */,
 			);
 			path = Theme;
+			sourceTree = "<group>";
+		};
+		642A0D0F2D561FD20009C16D /* Gesture */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Gesture;
+			sourceTree = "<group>";
+		};
+		642A0D102D561FD20009C16D /* State */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = State;
+			sourceTree = "<group>";
+		};
+		642A0D112D561FD20009C16D /* View */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		642A0D122D561FD20009C16D /* NewMenu */ = {
+			isa = PBXGroup;
+			children = (
+				642A0D0F2D561FD20009C16D /* Gesture */,
+				642A0D102D561FD20009C16D /* State */,
+				642A0D112D561FD20009C16D /* View */,
+			);
+			path = NewMenu;
+			sourceTree = "<group>";
+		};
+		642A0D752D56235C0009C16D /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				642A0D6B2D56235C0009C16D /* FLNewAppState.swift */,
+				642A0D6C2D56235C0009C16D /* FLNewGestureCoordinator.swift */,
+				642A0D6D2D56235C0009C16D /* FLNewGestureRecognizer.swift */,
+				642A0D6E2D56235C0009C16D /* FLNewGestureState.swift */,
+				642A0D6F2D56235C0009C16D /* FLNewMenuGestureModifier.swift */,
+				642A0D702D56235C0009C16D /* FLNewMenuView.swift */,
+				642A0D712D56235C0009C16D /* FLNewPerformanceMonitor.swift */,
+				642A0D722D56235C0009C16D /* FLNewSideMenu.swift */,
+				642A0D732D56235C0009C16D /* FLNewSideMenuConfiguration.swift */,
+				642A0D742D56235C0009C16D /* FLNewStateStorage.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		642A0D782D56235C0009C16D /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				642A0D762D56235C0009C16D /* UIView+NewGesture.swift */,
+				642A0D772D56235C0009C16D /* View+NewSideMenu.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		642A0D7A2D56235C0009C16D /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				642A0D792D56235C0009C16D /* FLNewSideMenuDelegate.swift */,
+			);
+			path = Protocols;
+			sourceTree = "<group>";
+		};
+		642A0D7B2D56235C0009C16D /* NewMenu */ = {
+			isa = PBXGroup;
+			children = (
+				642A0D752D56235C0009C16D /* Core */,
+				642A0D782D56235C0009C16D /* Extensions */,
+				642A0D7A2D56235C0009C16D /* Protocols */,
+			);
+			path = NewMenu;
 			sourceTree = "<group>";
 		};
 		644C84932D535C6D00E92D0D /* Compact */ = {
@@ -654,6 +755,7 @@
 		64E876F92D0430C7003559B9 /* Home */ = {
 			isa = PBXGroup;
 			children = (
+				642A0D122D561FD20009C16D /* NewMenu */,
 				64E876E42D0430C7003559B9 /* Components */,
 				64E876E72D0430C7003559B9 /* Data */,
 				64E876E92D0430C7003559B9 /* Model */,
@@ -739,6 +841,7 @@
 		64E877202D0430C7003559B9 /* Page */ = {
 			isa = PBXGroup;
 			children = (
+				642A0D7B2D56235C0009C16D /* NewMenu */,
 				644C84C72D535C6D00E92D0D /* Compose */,
 				649E7A212D318F5100AC2F62 /* ProfileNew */,
 				64E876F92D0430C7003559B9 /* Home */,
@@ -1128,6 +1231,19 @@
 				644C84E22D535C6D00E92D0D /* ColPosition.swift in Sources */,
 				644C84E32D535C6D00E92D0D /* MediaSaver.swift in Sources */,
 				644C84E42D535C6D00E92D0D /* TranslationViewModel.swift in Sources */,
+				642A0D7C2D56235C0009C16D /* FLNewSideMenuConfiguration.swift in Sources */,
+				642A0D7D2D56235C0009C16D /* FLNewGestureCoordinator.swift in Sources */,
+				642A0D7E2D56235C0009C16D /* FLNewAppState.swift in Sources */,
+				642A0D7F2D56235C0009C16D /* FLNewGestureState.swift in Sources */,
+				642A0D802D56235C0009C16D /* View+NewSideMenu.swift in Sources */,
+				642A0D812D56235C0009C16D /* FLNewMenuGestureModifier.swift in Sources */,
+				642A0D822D56235C0009C16D /* FLNewPerformanceMonitor.swift in Sources */,
+				642A0D832D56235C0009C16D /* FLNewSideMenu.swift in Sources */,
+				642A0D842D56235C0009C16D /* FLNewMenuView.swift in Sources */,
+				642A0D852D56235C0009C16D /* UIView+NewGesture.swift in Sources */,
+				642A0D862D56235C0009C16D /* FLNewStateStorage.swift in Sources */,
+				642A0D872D56235C0009C16D /* FLNewGestureRecognizer.swift in Sources */,
+				642A0D882D56235C0009C16D /* FLNewSideMenuDelegate.swift in Sources */,
 				644C84E62D535C6D00E92D0D /* ObservePresenter.swift in Sources */,
 				644C84E72D535C6D00E92D0D /* MediaPreviewImageView.swift in Sources */,
 				644C84E82D535C6D00E92D0D /* ShareActivityProvider.swift in Sources */,

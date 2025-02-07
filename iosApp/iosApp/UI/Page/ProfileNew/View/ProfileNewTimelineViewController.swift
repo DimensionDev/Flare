@@ -1,12 +1,12 @@
-import JXSegmentedView
 import JXPagingView
+import JXSegmentedView
 import MJRefresh
 import shared
 import SwiftUI
 import UIKit
 
 class ProfileNewTimelineViewController: UIViewController {
-    //  - Properties
+    // - Properties
     var presenter: TimelinePresenter?
     private var scrollCallback: ((UIScrollView) -> Void)?
 
@@ -22,7 +22,7 @@ class ProfileNewTimelineViewController: UIViewController {
         return table
     }()
 
-    //  - Lifecycle
+    // - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -34,7 +34,7 @@ class ProfileNewTimelineViewController: UIViewController {
         scrollCallback = nil
     }
 
-    //   - Setup
+    //  - Setup
     private func setupUI() {
         view.addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -50,29 +50,29 @@ class ProfileNewTimelineViewController: UIViewController {
         // 下拉刷新
         tableView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
             Task {
-//                if let timelineState = self?.presenter?.models.value as? TimelineState {
-//                    try? await timelineState.refresh()
-//                    await MainActor.run {
+//               if let timelineState = self?.presenter?.models.value as? TimelineState {
+//                   try? await timelineState.refresh()
+//                   await MainActor.run {
                 self?.tableView.mj_header?.endRefreshing()
-//                    }
-//                }
+//                   }
+//               }
             }
         })
 
         // 上拉加载更多
         tableView.mj_footer = MJRefreshAutoNormalFooter(refreshingBlock: { [weak self] in
             Task {
-//                if let timelineState = self?.presenter?.models.value as? TimelineState {
-//                    try? await timelineState.refresh()
-//                    await MainActor.run {
+//               if let timelineState = self?.presenter?.models.value as? TimelineState {
+//                   try? await timelineState.refresh()
+//                   await MainActor.run {
                 self?.tableView.mj_footer?.endRefreshing()
-//                    }
-//                }
+//                   }
+//               }
             }
         })
     }
 
-    //   - Public Methods
+    //  - Public Methods
     func updatePresenter(_ presenter: TimelinePresenter) {
         self.presenter = presenter
         // 监听数据变化
@@ -111,7 +111,7 @@ class ProfileNewTimelineViewController: UIViewController {
     }
 }
 
-//  - UITableViewDataSource & UITableViewDelegate
+// - UITableViewDataSource & UITableViewDelegate
 extension ProfileNewTimelineViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         if let timelineState = presenter?.models.value as? TimelineState,
@@ -138,7 +138,7 @@ extension ProfileNewTimelineViewController: UITableViewDataSource, UITableViewDe
     }
 }
 
-//  - JXPagingViewListViewDelegate
+// - JXPagingViewListViewDelegate
 extension ProfileNewTimelineViewController: JXPagingViewListViewDelegate {
     func listView() -> UIView {
         view

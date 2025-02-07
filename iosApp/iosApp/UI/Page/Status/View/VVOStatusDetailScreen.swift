@@ -50,18 +50,18 @@ struct VVOStatusDetailScreen: View {
             .navigationTitle("status_detail")
             #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
-//            #else
-//            .toolbar {
-//                ToolbarItem(placement: .confirmationAction) {
-//                    Button(action: {
-//                        Task {
-//                            try? await state.refresh()
-//                        }
-//                    }, label: {
-//                        Image(systemName: "arrow.clockwise.circle")
-//                    })
-//                }
-//            }
+//           #else
+//           .toolbar {
+//               ToolbarItem(placement: .confirmationAction) {
+//                   Button(action: {
+//                       Task {
+//                           try? await state.refresh()
+//                       }
+//                   }, label: {
+//                       Image(systemName: "arrow.clockwise.circle")
+//                   })
+//               }
+//           }
             #endif
                 .toolbar {
                     if horizontalSizeClass != .compact {

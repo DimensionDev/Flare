@@ -1,9 +1,9 @@
 //
-//  MediaPreviewVideoViewModel.swift
-//  TwidereX
+// MediaPreviewVideoViewModel.swift
+// TwidereX
 //
-//  Created by MainasuK on 2021-12-8.
-//  Copyright 2021 Twidere. All rights reserved.
+// Created by MainasuK on 2021-12-8.
+// Copyright 2021 Twidere. All rights reserved.
 //
 
 import AVKit
@@ -73,7 +73,7 @@ final class MediaPreviewVideoViewModel {
                 case .gif: return
                 default: break
                 }
-//                self.logger.log(level: .debug, "\((#file as NSString).lastPathComponent, privacy: .public)[\(#line, privacy: .public)], \(#function, privacy: .public): player state: \(status.description)")
+//               self.logger.log(level: .debug, "\((#file as NSString).lastPathComponent, privacy: .public)[\(#line, privacy: .public)], \(#function, privacy: .public): player state: \(status.description)")
 
                 switch status {
                 case .unknown, .buffering, .readyToPlay:

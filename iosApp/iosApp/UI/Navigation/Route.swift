@@ -26,7 +26,7 @@ final class Router: ObservableObject {
             navPath.append(route)
         case .dialog:
             break
-//            dialog = route
+//           dialog = route
         case .sheet:
             sheet = route
         case .fullScreen:

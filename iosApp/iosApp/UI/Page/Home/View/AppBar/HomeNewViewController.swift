@@ -1,5 +1,5 @@
-import JXSegmentedView
 import JXPagingView
+import JXSegmentedView
 import MJRefresh
 import os
 import shared
@@ -174,12 +174,12 @@ class HomeNewViewController: UIViewController {
         os_log("[📔][HomeNewViewController] titles: %{public}@", log: .default, type: .debug, titles)
         segmentedDataSource.titles = titles
         segmentedView.reloadData()
-        
+
         // 如果是游客模式，隐藏分段控件
         // if accountType is AccountTypeGuest {
-        //     segmentedView.isHidden = true
+        //    segmentedView.isHidden = true
         // }
-        
+
         os_log("[📔][HomeNewViewController] updateSegmentedTitles end", log: .default, type: .debug)
     }
 
@@ -241,38 +241,38 @@ extension HomeNewViewController: JXPagingViewDelegate {
         // avatarContainer.backgroundColor = .systemGreen // 头像容器背景色
 
         // 创建头像按钮，居中显示
-        let avatarButtonSize: CGFloat = 28  // 头像大小
+        let avatarButtonSize: CGFloat = 28 // 头像大小
         let avatarButton = UIButton(frame: CGRect(
-            x: (avatarWidth - avatarButtonSize) / 2,  // 水平居中
-            y: (44 - avatarButtonSize) / 2,           // 垂直居中
+            x: (avatarWidth - avatarButtonSize) / 2, // 水平居中
+            y: (44 - avatarButtonSize) / 2, // 垂直居中
             width: avatarButtonSize,
             height: avatarButtonSize
         ))
         avatarButton.backgroundColor = .clear
         if let user = tabStore.currentUser {
             // 设置用户头像
-            let hostingController = UIHostingController(rootView: 
+            let hostingController = UIHostingController(rootView:
                 UserAvatar(data: user.avatar, size: avatarButtonSize)
                     .clipShape(Circle())
             )
             hostingController.view.frame = avatarButton.bounds
             hostingController.view.backgroundColor = .clear
-            hostingController.view.isUserInteractionEnabled = false  // 禁用 SwiftUI 视图的交互
+            hostingController.view.isUserInteractionEnabled = false // 禁用 SwiftUI 视图的交互
             avatarButton.addSubview(hostingController.view)
         } else {
             // 设置默认头像
-            let hostingController = UIHostingController(rootView: 
+            let hostingController = UIHostingController(rootView:
                 userAvatarPlaceholder(size: avatarButtonSize)
                     .clipShape(Circle())
             )
             hostingController.view.frame = avatarButton.bounds
             hostingController.view.backgroundColor = .clear
-            hostingController.view.isUserInteractionEnabled = false  // 禁用 SwiftUI 视图的交互
+            hostingController.view.isUserInteractionEnabled = false // 禁用 SwiftUI 视图的交互
             avatarButton.addSubview(hostingController.view)
         }
-        avatarButton.addTarget(self, action: #selector(handleAvatarTap), for: .touchUpInside)
+        avatarButton.addTarget(self, action: #selector(avatarButtonTapped), for: .touchUpInside)
 
-        //  调试 可视化
+        // 调试 可视化
         // #if DEBUG
         // avatarButton.layer.borderWidth = 1
         // avatarButton.layer.borderColor = UIColor.red.cgColor
@@ -293,8 +293,8 @@ extension HomeNewViewController: JXPagingViewDelegate {
             settingsButton.setImage(UIImage(systemName: "line.3.horizontal"), for: .normal)
             settingsButton.addTarget(self, action: #selector(handleSettingsTap), for: .touchUpInside)
         } else {
-//            settingsButton.setTitle("Login", for: .normal)
-//            settingsButton.addTarget(self, action: #selector(handleLoginTap), for: .touchUpInside)
+//           settingsButton.setTitle("Login", for: .normal)
+//           settingsButton.addTarget(self, action: #selector(handleLoginTap), for: .touchUpInside)
         }
         settingsButton.tintColor = .label
 
@@ -308,14 +308,9 @@ extension HomeNewViewController: JXPagingViewDelegate {
         return containerView
     }
 
-    @objc private func handleAvatarTap() {
-        if accountType is AccountTypeGuest {
-            // 未登录用户，显示登录界面
-            NotificationCenter.default.post(name: NSNotification.Name("ShowLogin"), object: nil)
-        } else {
-            // 已登录用户，显示设置界面
-            NotificationCenter.default.post(name: NSNotification.Name("ShowSettings"), object: nil)
-        }
+    @objc private func avatarButtonTapped() {
+        // 发送打开新菜单的通知
+        NotificationCenter.default.post(name: .flShowNewMenu, object: nil)
     }
 
     @objc private func handleSettingsTap() {

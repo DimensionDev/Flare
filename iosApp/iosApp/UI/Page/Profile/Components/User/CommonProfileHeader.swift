@@ -137,76 +137,76 @@ struct CommonProfileHeader: View {
                 }
 
                 // user follows -  user fans
-//                MatrixView(followCount: userInfo.profile.matrices.followsCountHumanized, fansCount: userInfo.profile.matrices.fansCountHumanized)
+//               MatrixView(followCount: userInfo.profile.matrices.followsCountHumanized, fansCount: userInfo.profile.matrices.fansCountHumanized)
 
                 // user Location  user url
-//                 if let bottomContent = userInfo.profile.bottomContent {
-//                     switch onEnum(of: bottomContent) {
-//                     case .fields(let data):
-//                         // pawoo  的 一些个人 table Info List
-//                         UserInfoFieldsView(fields: data.fields)
-//                     case .iconify(let data):
-//                         HStack(spacing: 8) {
-//                             if let locationValue = data.items[.location] {
-//                                     Label(
-//                                     title: {
-//                                         Markdown(locationValue.markdown)
-//                                             .font(.caption2)
-//                                             .markdownInlineImageProvider(.emoji)
-//                                     },
-//                                         icon: {
-//                                             Image(uiImage: Asset.Image.Attributes.location.image
-//                                                 .withRenderingMode(.alwaysTemplate))
-//                                             .imageScale(.small)
-//                                         }
-//                                     )
-//                                     .labelStyle(CompactLabelStyle())
-//                                 .padding(.horizontal, 8)
-//                                 .padding(.vertical, 4)
-//                                 .background(Color(.systemGray6))
-//                                 .cornerRadius(6)
-//                                         }
+//                if let bottomContent = userInfo.profile.bottomContent {
+//                    switch onEnum(of: bottomContent) {
+//                    case .fields(let data):
+//                        // pawoo  的 一些个人 table Info List
+//                        UserInfoFieldsView(fields: data.fields)
+//                    case .iconify(let data):
+//                        HStack(spacing: 8) {
+//                            if let locationValue = data.items[.location] {
+//                                    Label(
+//                                    title: {
+//                                        Markdown(locationValue.markdown)
+//                                            .font(.caption2)
+//                                            .markdownInlineImageProvider(.emoji)
+//                                    },
+//                                        icon: {
+//                                            Image(uiImage: Asset.Image.Attributes.location.image
+//                                                .withRenderingMode(.alwaysTemplate))
+//                                            .imageScale(.small)
+//                                        }
+//                                    )
+//                                    .labelStyle(CompactLabelStyle())
+//                                .padding(.horizontal, 8)
+//                                .padding(.vertical, 4)
+//                                .background(Color(.systemGray6))
+//                                .cornerRadius(6)
+//                                        }
 
-//                             if let urlValue = data.items[.url] {
-//                                     Label(
-//                                     title: {
-//                                         Markdown(urlValue.markdown)
-//                                             .font(.caption2)
-//                                             .markdownInlineImageProvider(.emoji)
-//                                     },
-//                                         icon: {
-//                                             Image(uiImage: Asset.Image.Attributes.globe.image
-//                                                 .withRenderingMode(.alwaysTemplate))
-//                                             .imageScale(.small)
-//                                         }
-//                                     )
-//                                     .labelStyle(CompactLabelStyle())
-//                                 .padding(.horizontal, 8)
-//                                 .padding(.vertical, 4)
-//                                 .background(Color(.systemGray6))
-//                                 .cornerRadius(6)
-//                             }
+//                            if let urlValue = data.items[.url] {
+//                                    Label(
+//                                    title: {
+//                                        Markdown(urlValue.markdown)
+//                                            .font(.caption2)
+//                                            .markdownInlineImageProvider(.emoji)
+//                                    },
+//                                        icon: {
+//                                            Image(uiImage: Asset.Image.Attributes.globe.image
+//                                                .withRenderingMode(.alwaysTemplate))
+//                                            .imageScale(.small)
+//                                        }
+//                                    )
+//                                    .labelStyle(CompactLabelStyle())
+//                                .padding(.horizontal, 8)
+//                                .padding(.vertical, 4)
+//                                .background(Color(.systemGray6))
+//                                .cornerRadius(6)
+//                            }
 
-                // //                            if let verifyValue = data.items[.verify] {
-                // //                                Label(
-                // //                                    title: {
-                // //                                        Markdown(verifyValue.markdown)
-                // //                                            .font(.footnote)
-                // //                                            .markdownInlineImageProvider(.emoji)
-                // //                                    },
-                // //                                    icon: {
-                // //                                        Image("attributes/calendar").renderingMode(.template)
-                // //                                    }
-                // //                                )
-                // //                                .labelStyle(CompactLabelStyle())
-                // //                                .padding(.horizontal, 8)
-                // //                                .padding(.vertical, 4)
-                // //                                .background(Color(.systemGray6))
-                // //                                .cornerRadius(6)
-                // //                            }
-//                         }
-//                     }
-//                 }
+                // //                           if let verifyValue = data.items[.verify] {
+                // //                               Label(
+                // //                                   title: {
+                // //                                       Markdown(verifyValue.markdown)
+                // //                                           .font(.footnote)
+                // //                                           .markdownInlineImageProvider(.emoji)
+                // //                                   },
+                // //                                   icon: {
+                // //                                       Image("attributes/calendar").renderingMode(.template)
+                // //                                   }
+                // //                               )
+                // //                               .labelStyle(CompactLabelStyle())
+                // //                               .padding(.horizontal, 8)
+                // //                               .padding(.vertical, 4)
+                // //                               .background(Color(.systemGray6))
+                // //                               .cornerRadius(6)
+                // //                           }
+//                        }
+//                    }
+//                }
             }
             .padding([.horizontal])
         }

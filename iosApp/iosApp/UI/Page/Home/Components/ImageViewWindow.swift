@@ -12,7 +12,7 @@
                     .resizable()
                     .scaledToFit()
                 // NetworkImage(url: URL(string: url)) { image in
-                //     image.resizable().scaledToFit()
+                //    image.resizable().scaledToFit()
                 // }
             }
         }

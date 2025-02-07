@@ -6,14 +6,14 @@ import OrderedCollections
 import shared
 import SwiftUI
 
-//  - ProfileMediaGridItem
+// - ProfileMediaGridItem
 struct ProfileMediaGridItem: Identifiable {
     let id: Int
     let media: UiMedia
     let mediaState: UiTimeline
 }
 
-//  - ProfileMediaState Extension
+// - ProfileMediaState Extension
 extension ProfileMediaState {
     var allMediaItems: [UiMedia] {
         var items: [UiMedia] = []
@@ -31,7 +31,7 @@ extension ProfileMediaState {
     }
 }
 
-//  - ProfileMediaListScreen
+// - ProfileMediaListScreen
 struct ProfileMediaListScreen: View {
     @ObservedObject var tabStore: ProfileTabSettingStore
     @State private var refreshing = false
@@ -156,7 +156,7 @@ struct ProfileMediaListScreen: View {
     }
 }
 
-//  - WaterfallCollectionView
+// - WaterfallCollectionView
 struct WaterfallCollectionView: UIViewRepresentable {
     let state: ProfileMediaState
     let content: (ProfileMediaGridItem) -> AnyView
@@ -212,7 +212,7 @@ struct WaterfallCollectionView: UIViewRepresentable {
             }
         }
 
-        //  - UICollectionViewDataSource
+        // - UICollectionViewDataSource
         func collectionView(_: UICollectionView, numberOfItemsInSection _: Int) -> Int {
             print("numberOfItemsInSection: \(items.count)")
             return items.count
@@ -226,7 +226,7 @@ struct WaterfallCollectionView: UIViewRepresentable {
             return cell
         }
 
-        //  - ZJFlexibleDataSource
+        // - ZJFlexibleDataSource
         func numberOfCols(at _: Int) -> Int {
             2
         }
@@ -279,7 +279,7 @@ struct WaterfallCollectionView: UIViewRepresentable {
     }
 }
 
-//  - HostingCell
+// - HostingCell
 class HostingCell: UICollectionViewCell {
     private var hostingController: UIHostingController<AnyView>?
 
@@ -332,15 +332,15 @@ struct ProfileMediaItemView: View {
                         .font(.largeTitle)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.gray.opacity(0.2))
-//                        .blur(radius: media.url.sensitive ? 20 : 0)
+//                       .blur(radius: media.url.sensitive ? 20 : 0)
 
-//                    if media.sensitive {
-//                        Text("Sensitive Content")
-//                            .foregroundColor(.white)
-//                            .padding(8)
-//                            .background(.ultraThinMaterial)
-//                            .cornerRadius(8)
-//                    }
+//                   if media.sensitive {
+//                       Text("Sensitive Content")
+//                           .foregroundColor(.white)
+//                           .padding(8)
+//                           .background(.ultraThinMaterial)
+//                           .cornerRadius(8)
+//                   }
                 }
             case let .gif(gif):
                 ZStack {
@@ -387,7 +387,7 @@ struct ProfileMediaItemView: View {
                         }
                         .resizable()
                         .scaledToFit()
-//                        .fade(duration: 0.25)
+//                       .fade(duration: 0.25)
                         .if(!appSetting.appearanceSettings.showSensitiveContent && image.sensitive && hideSensitive) { view in
                             view.blur(radius: 32)
                         }
@@ -414,21 +414,21 @@ struct ProfileMediaItemView: View {
                         }
                         .resizable()
                         .scaledToFit()
-//                        .fade(duration: 0.25)
-//                        .blur(radius: video.sensitive ? 20 : 0)
+//                       .fade(duration: 0.25)
+//                       .blur(radius: video.sensitive ? 20 : 0)
 
                     Image(systemName: "play.circle.fill")
                         .font(.largeTitle)
                         .foregroundColor(.white)
                         .shadow(radius: 2)
 //
-//                    if video.sensitive {
-//                        Text("Sensitive Content")
-//                            .foregroundColor(.white)
-//                            .padding(8)
-//                            .background(.ultraThinMaterial)
-//                            .cornerRadius(8)
-//                    }
+//                   if video.sensitive {
+//                       Text("Sensitive Content")
+//                           .foregroundColor(.white)
+//                           .padding(8)
+//                           .background(.ultraThinMaterial)
+//                           .cornerRadius(8)
+//                   }
                 }
             }
         }
@@ -439,7 +439,7 @@ struct ProfileMediaItemView: View {
     }
 }
 
-//  - VideoCell
+// - VideoCell
 class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
     weak var photoBrowser: JXPhotoBrowser?
     private var videoViewController: MediaPreviewVideoViewController?
@@ -605,7 +605,7 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
     }
 }
 
-//  - JXPhotoBrowserCell
+// - JXPhotoBrowserCell
 extension MediaBrowserVideoCell: JXPhotoBrowserCell {
     static func generate(with browser: JXPhotoBrowser) -> Self {
         let instance = Self(frame: .zero)

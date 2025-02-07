@@ -65,15 +65,15 @@ class TimelineStore: ObservableObject {
             }
         }
 
-        //    if let presenter = getOrCreatePresenter(for: tab) {
-        //     // 先设置为 nil，触发 UI 更新
-        //     currentPresenter = nil
-        //     // 使用 MainActor 确保在主线程更新 UI
-        //     Task { @MainActor in
-        //         // 短暂延迟，确保 nil 状态被处理
-        //         try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 秒
-        //         currentPresenter = presenter
-        //     }
+        //   if let presenter = getOrCreatePresenter(for: tab) {
+        //    // 先设置为 nil，触发 UI 更新
+        //    currentPresenter = nil
+        //    // 使用 MainActor 确保在主线程更新 UI
+        //    Task { @MainActor in
+        //        // 短暂延迟，确保 nil 状态被处理
+        //        try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 秒
+        //        currentPresenter = presenter
+        //    }
         // }
     }
 

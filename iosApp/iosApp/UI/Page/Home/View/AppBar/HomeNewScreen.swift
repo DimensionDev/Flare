@@ -48,7 +48,11 @@ struct HomeNewScreen: View {
         if accountType is AccountTypeGuest || tabStore.currentUser != nil {
             FLNewSideMenu(
                 isOpen: $appState.isMenuOpen,
-                menu: FLNewMenuView(isOpen: $appState.isMenuOpen),
+                menu: FLNewMenuView(
+                    isOpen: $appState.isMenuOpen,
+                    accountType: accountType,
+                    user: tabStore.currentUser
+                ),
                 content: HomeNewViewControllerRepresentable(
                     tabStore: tabStore,
                     timelineStore: timelineStore,

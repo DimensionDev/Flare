@@ -97,7 +97,7 @@ struct StatusItemView: View {
                         UserAvatar(data: user.avatar, size: 48)
                     }
                 }
-            case .feed(_): EmptyView()
+            case .feed: EmptyView()
             }
         }
     }

@@ -193,7 +193,6 @@ public struct FLProfileMastodonTimelineTabItem: FLTimelineTabItem {
     }
 }
 
-
 // Misskey
 public struct FLProfileMisskeyTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
@@ -211,7 +210,6 @@ public struct FLProfileMisskeyTimelineTabItem: FLTimelineTabItem {
     }
 }
 
-
 // XQT
 public struct FLProfileXQTTimelineTabItem: FLTimelineTabItem {
     public let metaData: FLTabMetaData
@@ -228,7 +226,6 @@ public struct FLProfileXQTTimelineTabItem: FLTimelineTabItem {
         FLProfileXQTTimelineTabItem(metaData: metaData, account: account, userKey: userKey, type: type)
     }
 }
-
 
 //  - Profile Tab Items
 public struct FLProfileMediaTabItem: FLTabItem {

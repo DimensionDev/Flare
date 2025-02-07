@@ -368,37 +368,6 @@
 			path = Theme;
 			sourceTree = "<group>";
 		};
-		642A0D0F2D561FD20009C16D /* Gesture */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Gesture;
-			sourceTree = "<group>";
-		};
-		642A0D102D561FD20009C16D /* State */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = State;
-			sourceTree = "<group>";
-		};
-		642A0D112D561FD20009C16D /* View */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = View;
-			sourceTree = "<group>";
-		};
-		642A0D122D561FD20009C16D /* NewMenu */ = {
-			isa = PBXGroup;
-			children = (
-				642A0D0F2D561FD20009C16D /* Gesture */,
-				642A0D102D561FD20009C16D /* State */,
-				642A0D112D561FD20009C16D /* View */,
-			);
-			path = NewMenu;
-			sourceTree = "<group>";
-		};
 		642A0D752D56235C0009C16D /* Core */ = {
 			isa = PBXGroup;
 			children = (
@@ -755,7 +724,6 @@
 		64E876F92D0430C7003559B9 /* Home */ = {
 			isa = PBXGroup;
 			children = (
-				642A0D122D561FD20009C16D /* NewMenu */,
 				64E876E42D0430C7003559B9 /* Components */,
 				64E876E72D0430C7003559B9 /* Data */,
 				64E876E92D0430C7003559B9 /* Model */,

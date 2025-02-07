@@ -74,9 +74,7 @@ private val menus =
     )
 
 @Composable
-internal fun FlareApp(
-    navController: NavHostController = rememberNavController(),
-) {
+internal fun FlareApp(navController: NavHostController = rememberNavController()) {
     val state by producePresenter { presenter() }
     val bigScreen = isBigScreen()
     val displayMode =
@@ -217,9 +215,10 @@ internal fun FlareApp(
         },
     ) {
         CompositionLocalProvider(
-            LocalUriHandler provides remember {
-                ProxyUriHandler(navController, uriHandler)
-            },
+            LocalUriHandler provides
+                remember {
+                    ProxyUriHandler(navController, uriHandler)
+                },
         ) {
             Router(
                 startDestination = menus.first().route,

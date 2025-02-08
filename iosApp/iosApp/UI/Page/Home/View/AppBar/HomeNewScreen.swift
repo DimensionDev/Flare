@@ -5,11 +5,11 @@ struct HomeNewScreen: View {
     let accountType: AccountType
     @StateObject private var timelineStore: TimelineStore
     @StateObject private var tabStore: TabSettingsStore
-    @StateObject private var appState: FLNewAppState
     @State private var isShowAppBar: Bool? = true
     @State private var showSettings = false
     @State private var showTabSettings = false
     @State private var showLogin = false
+    @State private var selectedTab = 0
 
     init(accountType: AccountType) {
         self.accountType = accountType
@@ -22,11 +22,7 @@ struct HomeNewScreen: View {
         let tabStore = TabSettingsStore(timelineStore: timelineStore, accountType: accountType)
         _tabStore = StateObject(wrappedValue: tabStore)
 
-        // 3. 初始化 AppState
-        let appState = FLNewAppState(tabStore: tabStore)
-        _appState = StateObject(wrappedValue: appState)
-
-        // 4. 游客模式特殊处理
+        // 3. 游客模式特殊处理
         if accountType is AccountTypeGuest {
             // 设置默认的 Home Timeline
             timelineStore.currentPresenter = HomeTimelinePresenter(accountType: accountType)
@@ -46,34 +42,15 @@ struct HomeNewScreen: View {
     var body: some View {
         // 游客模式或者用户数据已加载时显示内容
         if accountType is AccountTypeGuest || tabStore.currentUser != nil {
-            FLNewSideMenu(
-                isOpen: $appState.isMenuOpen,
-                menu: FLNewMenuView(
-                    isOpen: $appState.isMenuOpen,
-                    accountType: accountType,
-                    user: tabStore.currentUser
-                ),
-                content: HomeNewViewControllerRepresentable(
-                    tabStore: tabStore,
-                    timelineStore: timelineStore,
-                    accountType: accountType,
-                    selectedTab: $appState.currentTab,
-                    isShowAppBar: $isShowAppBar
-                )
-                .newMenuGesture(appState: appState)
+            HomeNewViewControllerRepresentable(
+                tabStore: tabStore,
+                timelineStore: timelineStore,
+                accountType: accountType,
+                selectedTab: $selectedTab,
+                isShowAppBar: $isShowAppBar
             )
             .onAppear {
                 // 添加通知监听
-                NotificationCenter.default.addObserver(
-                    forName: .flShowNewMenu,
-                    object: nil,
-                    queue: .main
-                ) { [appState] _ in
-                    withAnimation {
-                        appState.isMenuOpen = true
-                    }
-                }
-
                 NotificationCenter.default.addObserver(
                     forName: NSNotification.Name("ShowSettings"),
                     object: nil,

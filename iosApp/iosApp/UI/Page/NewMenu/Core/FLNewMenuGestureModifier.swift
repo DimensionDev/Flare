@@ -3,6 +3,7 @@ import SwiftUI
 
 struct FLNewMenuGestureModifier: ViewModifier {
     @ObservedObject var appState: FLNewAppState
+    @State private var currentAppBarIndex: Int = 0
 
     init(appState: FLNewAppState) {
         self.appState = appState
@@ -12,18 +13,27 @@ struct FLNewMenuGestureModifier: ViewModifier {
         content.simultaneousGesture(
             DragGesture(minimumDistance: 10, coordinateSpace: .local)
                 .onChanged { value in
-                    // 只在第一个tab时处理手势
-                    guard appState.tabStore?.selectedIndex == 0 else {
-                        os_log("[🖐️][GestureModifier] Drag ignored - not on first tab",
-                               log: .default, type: .debug)
-                        return
-                    }
-
                     // 检查是否是从左边缘开始的手势
                     guard value.startLocation.x < 20 else {
                         os_log("[🖐️][GestureModifier] Drag ignored - not from left edge",
                                log: .default, type: .debug)
                         return
+                    }
+
+                    // 获取当前的 tabbar index 和 appbar item index
+                    let isHomeTab = appState.tabStore?.selectedIndex == 0
+
+                    // 在 Home tab 时，只有第一个 appbar item 才处理菜单手势
+                    if isHomeTab && currentAppBarIndex > 0 {
+                        os_log("[🖐️][GestureModifier] Drag ignored - not first appbar item in Home tab",
+                               log: .default, type: .debug)
+                        return
+                    }
+
+                    // 非 Home tab 时，允许菜单手势
+                    if !isHomeTab {
+                        os_log("[🖐️][GestureModifier] Processing drag - not in Home tab",
+                               log: .default, type: .debug)
                     }
 
                     os_log("[🖐️][GestureModifier] Drag changed - Translation: (%{public}f, %{public}f), Predicted End: (%{public}f, %{public}f)",
@@ -34,8 +44,13 @@ struct FLNewMenuGestureModifier: ViewModifier {
                     handleDragChange(value)
                 }
                 .onEnded { value in
-                    // 只在第一个tab时处理手势
-                    guard appState.tabStore?.selectedIndex == 0 else { return }
+                    // 获取当前的 tabbar index 和 appbar item index
+                    let isHomeTab = appState.tabStore?.selectedIndex == 0
+
+                    // 在 Home tab 时，只有第一个 appbar item 才处理菜单手势
+                    if isHomeTab && currentAppBarIndex > 0 {
+                        return
+                    }
 
                     os_log("[🖐️][GestureModifier] Drag ended - Translation: (%{public}f, %{public}f)",
                            log: .default, type: .debug,
@@ -44,6 +59,13 @@ struct FLNewMenuGestureModifier: ViewModifier {
                     handleDragEnd(value)
                 }
         )
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AppBarIndexDidChange"))) { notification in
+            if let index = notification.object as? Int {
+                currentAppBarIndex = index
+                os_log("[🖐️][GestureModifier] AppBar index updated: %{public}d",
+                       log: .default, type: .debug, index)
+            }
+        }
     }
 
     private func handleDragChange(_ value: DragGesture.Value) {

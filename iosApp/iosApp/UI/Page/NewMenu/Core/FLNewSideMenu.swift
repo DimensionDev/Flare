@@ -17,61 +17,62 @@ struct FLNewSideMenu<Menu: View, Content: View>: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
-            ZStack(alignment: .leading) {
-                content
-                    .frame(width: geometry.size.width, height: geometry.size.height)
-                    .offset(x: isOpen ? menuWidth : 0)
-                    .animation(
-                        .spring(
-                            response: animationDuration,
-                            dampingFraction: springDampingRatio,
-                            blendDuration: springVelocity
-                        ),
-                        value: isOpen
-                    )
+        ZStack(alignment: .leading) {
+            content
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .offset(x: isOpen ? menuWidth : 0)
+                .animation(
+                    .spring(
+                        response: animationDuration,
+                        dampingFraction: springDampingRatio,
+                        blendDuration: springVelocity
+                    ),
+                    value: isOpen
+                )
 
-                if isOpen {
-                    Color.black
-                        .opacity(0.3)
-                        .ignoresSafeArea()
-                        .onTapGesture {
-                            withAnimation(
-                                .spring(
-                                    response: animationDuration,
-                                    dampingFraction: springDampingRatio,
-                                    blendDuration: springVelocity
-                                )
-                            ) {
-                                isOpen = false
-                            }
+            if isOpen {
+                Color.black
+                    .opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(
+                            .spring(
+                                response: animationDuration,
+                                dampingFraction: springDampingRatio,
+                                blendDuration: springVelocity
+                            )
+                        ) {
+                            isOpen = false
                         }
-                        .transition(.opacity)
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                }
-
-                menu
-                    .frame(width: menuWidth, height: geometry.size.height)
-                    .offset(x: isOpen ? 0 : -menuWidth)
-                    .animation(
-                        .spring(
-                            response: animationDuration,
-                            dampingFraction: springDampingRatio,
-                            blendDuration: springVelocity
-                        ),
-                        value: isOpen
-                    )
-                    .clipped()
-                    .shadow(
-                        color: Color.black.opacity(isOpen ? 0.2 : 0),
-                        radius: 10,
-                        x: 5,
-                        y: 0
-                    )
+                    }
+                    .transition(.opacity)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .zIndex(1)
             }
-            .frame(width: geometry.size.width, height: geometry.size.height)
-            .background(Color(UIColor.systemBackground))
+
+            menu
+                .frame(width: menuWidth)
+                .frame(maxHeight: .infinity)
+                .offset(x: isOpen ? 0 : -menuWidth)
+                .animation(
+                    .spring(
+                        response: animationDuration,
+                        dampingFraction: springDampingRatio,
+                        blendDuration: springVelocity
+                    ),
+                    value: isOpen
+                )
+                .clipped()
+                .shadow(
+                    color: Color.black.opacity(isOpen ? 0.2 : 0),
+                    radius: 10,
+                    x: 5,
+                    y: 0
+                )
+                .zIndex(2)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(UIColor.systemBackground))
         .ignoresSafeArea()
     }
 }

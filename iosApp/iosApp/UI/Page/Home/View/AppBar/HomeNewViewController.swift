@@ -310,7 +310,8 @@ extension HomeNewViewController: JXPagingViewDelegate {
 
     @objc private func avatarButtonTapped() {
         // 发送打开新菜单的通知
-        NotificationCenter.default.post(name: .flShowNewMenu, object: nil)
+        NotificationCenter.default.post(name: NSNotification.Name("flShowNewMenu"), object: nil)
+        os_log("[📔][HomeNewViewController] avatarButtonTapped - 发送菜单通知", log: .default, type: .debug)
     }
 
     @objc private func handleSettingsTap() {
@@ -348,6 +349,10 @@ extension HomeNewViewController: JXPagingViewDelegate {
 extension HomeNewViewController: JXSegmentedViewDelegate {
     func segmentedView(_: JXSegmentedView, didSelectedItemAt index: Int) {
         os_log("[📔][HomeNewViewController]选择标签页: index=%{public}d", log: .default, type: .debug, index)
+
+        // 发送通知更新 appbar index
+        // tood: 这个等select Index 解决后要删掉，冗杂的
+        NotificationCenter.default.post(name: NSNotification.Name("AppBarIndexDidChange"), object: index)
 
         // 更新当前选中的标签页的presenter
         if index < tabStore.availableTabs.count {

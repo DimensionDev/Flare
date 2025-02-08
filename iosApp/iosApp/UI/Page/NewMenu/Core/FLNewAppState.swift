@@ -146,8 +146,4 @@ class FLNewAppState: ObservableObject {
     }
 }
 
-// - Notification Names
-extension Notification.Name {
-    static let flMenuStateDidChange = Notification.Name("FLMenuStateDidChange")
-    static let flShowNewMenu = Notification.Name("FLShowNewMenu")
-}
+ 

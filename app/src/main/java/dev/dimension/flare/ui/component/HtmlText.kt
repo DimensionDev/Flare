@@ -213,7 +213,14 @@ private fun AnnotatedString.Builder.renderElement(
             appendLine()
         }
 
-        "span", "p" -> {
+        "p" -> {
+            appendLine()
+            element.childNodes().forEach {
+                renderNode(node = it, styleData = styleData)
+            }
+        }
+
+        "span" -> {
             element.childNodes().forEach {
                 renderNode(node = it, styleData = styleData)
             }

@@ -24,6 +24,7 @@ allprojects {
             freeCompilerArgs.set(listOf(
                 "-Xexpect-actual-classes",
                 "-Xconsistent-data-class-copy-visibility",
+                "-Xmulti-dollar-interpolation",
             ))
         }
     }

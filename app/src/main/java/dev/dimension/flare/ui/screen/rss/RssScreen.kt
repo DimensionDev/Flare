@@ -32,11 +32,6 @@ internal fun RssRoute(navigator: DestinationsNavigator) {
 private fun RssScreen(navigator: DestinationsNavigator) {
     val scaffoldNavigator =
         rememberListDetailPaneScaffoldNavigator<RssPaneNavArgs>()
-    BackHandler(
-        scaffoldNavigator.canNavigateBack(),
-    ) {
-        scaffoldNavigator.navigateBack()
-    }
     ListDetailPaneScaffold(
         directive = scaffoldNavigator.scaffoldDirective,
         value = scaffoldNavigator.scaffoldValue,
@@ -61,7 +56,7 @@ private fun RssScreen(navigator: DestinationsNavigator) {
         detailPane = {
             AnimatedPane {
                 scaffoldNavigator.currentDestination?.content?.let { args ->
-                    RssTimelineScreen(
+                    RssTimelineDetailScreen(
                         id = args.id,
                         onBack = {
                             scaffoldNavigator.navigateBack()
@@ -71,6 +66,11 @@ private fun RssScreen(navigator: DestinationsNavigator) {
             }
         },
     )
+    BackHandler(
+        scaffoldNavigator.canNavigateBack(),
+    ) {
+        scaffoldNavigator.navigateBack()
+    }
 }
 
 @Parcelize

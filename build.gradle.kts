@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 
 plugins {
     alias(libs.plugins.android.application) apply false
@@ -20,6 +21,10 @@ allprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_21)
+        }
+    }
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>> {
+        compilerOptions {
             allWarningsAsErrors.set(true)
             freeCompilerArgs.set(listOf(
                 "-Xexpect-actual-classes",

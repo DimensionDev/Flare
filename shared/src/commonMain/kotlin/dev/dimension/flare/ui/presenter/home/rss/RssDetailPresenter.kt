@@ -15,6 +15,7 @@ public class RssDetailPresenter(
 ) : PresenterBase<RssDetailPresenter.State>(),
     KoinComponent {
     private val readability: Readability by inject()
+
     public interface State {
         public val data: UiState<DocumentData>
     }
@@ -22,12 +23,13 @@ public class RssDetailPresenter(
     @Composable
     override fun body(): State {
         val data by produceState(UiState.Loading()) {
-            value = runCatching {
-                readability.parse(url)
-            }.fold(
-                onSuccess = { UiState.Success(it) },
-                onFailure = { UiState.Error(it) }
-            )
+            value =
+                runCatching {
+                    readability.parse(url)
+                }.fold(
+                    onSuccess = { UiState.Success(it) },
+                    onFailure = { UiState.Error(it) },
+                )
         }
         return object : State {
             override val data = data

@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.network.rss
 
-internal val ReadabilityJS = $$"""
+internal val ReadabilityJS =
+    $$"""
 /*
  * Copyright (c) 2010 Arc90 Inc
  *
@@ -2790,4 +2791,4 @@ if (typeof module === "object") {
 (function() {
     return new Readability(document).parse();
 })();
-""".trimMargin()
+    """.trimMargin()

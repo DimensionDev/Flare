@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 
 plugins {
     alias(libs.plugins.android.application) apply false
@@ -23,14 +22,16 @@ allprojects {
             jvmTarget.set(JvmTarget.JVM_21)
         }
     }
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>> {
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
         compilerOptions {
             allWarningsAsErrors.set(true)
-            freeCompilerArgs.set(listOf(
-                "-Xexpect-actual-classes",
-                "-Xconsistent-data-class-copy-visibility",
-                "-Xmulti-dollar-interpolation",
-            ))
+            freeCompilerArgs.set(
+                listOf(
+                    "-Xexpect-actual-classes",
+                    "-Xconsistent-data-class-copy-visibility",
+                    "-Xmulti-dollar-interpolation",
+                )
+            )
         }
     }
 }

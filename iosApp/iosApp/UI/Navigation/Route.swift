@@ -24,8 +24,8 @@ struct RouterView: View {
         let accountType = AccountTypeGuest()
         let timelineStore = TimelineStore(accountType: accountType)
         let tabStore = TabSettingsStore(timelineStore: timelineStore, accountType: accountType)
-        _menuState = StateObject(wrappedValue: FLNewAppState(tabStore: tabStore))
-        _gestureState = StateObject(wrappedValue: FLNewGestureState(tabStore: tabStore))
+        _menuState = StateObject(wrappedValue: FLNewAppState(tabProvider: tabStore))
+        _gestureState = StateObject(wrappedValue: FLNewGestureState(tabProvider: tabStore))
     }
     
     var body: some View {
@@ -193,7 +193,7 @@ struct TabItem<Content: View>: View {
             ProfileMediaListScreen(
                 accountType: data.accountType,
                 userKey: data.userKey,
-                tabStore: ProfileTabSettingStore(timelineStore: TimelineStore(accountType: data.accountType), userKey: data.accountType as! MicroBlogKey)
+                tabStore: ProfileTabSettingStore(timelineStore: TimelineStore(accountType: data.accountType), userKey: data.userKey)
             )
         case let .profileWithNameAndHost(data):
             EmptyView()

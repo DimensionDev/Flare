@@ -15,6 +15,8 @@ struct ProfileNewScreen: View {
     @StateObject private var presenterWrapper: ProfilePresenterWrapper
     @StateObject private var mediaPresenterWrapper: ProfileMediaPresenterWrapper
     @StateObject private var tabStore: ProfileTabSettingStore
+    @StateObject private var menuState: FLNewAppState
+    @StateObject private var gestureState: FLNewGestureState
     @State private var selectedTab: Int = 0
     @State private var userInfo: ProfileUserInfo?
 
@@ -35,6 +37,10 @@ struct ProfileNewScreen: View {
         // 初始化 tabStore
         let tabStore = ProfileTabSettingStore(timelineStore: timelineStore, userKey: userKey)
         _tabStore = StateObject(wrappedValue: tabStore)
+        
+        // 初始化手势和菜单状态
+        _menuState = StateObject(wrappedValue: FLNewAppState(tabProvider: tabStore))
+        _gestureState = StateObject(wrappedValue: FLNewGestureState(tabProvider: tabStore))
 
         os_log("[📔][ProfileNewScreen - init]初始化: accountType=%{public}@, userKey=%{public}@", log: .default, type: .debug, String(describing: accountType), userKey?.description ?? "nil")
     }
@@ -64,6 +70,7 @@ struct ProfileNewScreen: View {
                 mediaPresenterWrapper: mediaPresenterWrapper
             )
             .ignoresSafeArea(edges: .top)
+             .modifier(FLNewMenuGestureModifier(appState: menuState))
         }
     }
 }

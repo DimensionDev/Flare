@@ -18,23 +18,23 @@ class ProfileTabSettingStore: ObservableObject {
     private var mediaPresenterCache: [String: ProfileMediaPresenter] = [:] // 媒体presenter缓存
 
     // - Initialization
-    init(timelineStore: TimelineStore) {
+    init(timelineStore: TimelineStore, userKey: MicroBlogKey? = nil) {
         self.timelineStore = timelineStore
-        observeUser()
+        observeUser(userKey: userKey)
     }
 
-    private func observeUser() {
+    private func observeUser(userKey: MicroBlogKey?) {
         Task { @MainActor in
             for await state in presenter.models {
                 if case let .success(data) = onEnum(of: state.user) {
-                    initializeWithUser(data.data)
+                    initializeWithUser(data.data, userKey: userKey)
                 }
             }
         }
     }
 
     // - Public Methods
-    func initializeWithUser(_ user: UiUserV2) {
+    func initializeWithUser(_ user: UiUserV2, userKey: MicroBlogKey?) {
         if isInitializing || currentUser?.key == user.key {
             return
         }
@@ -43,7 +43,7 @@ class ProfileTabSettingStore: ObservableObject {
         currentUser = user
 
         // 更新可用标签
-        updateTabs(user: user)
+        updateTabs(user: user, userKey: userKey)
 
         // 如果没有选中的标签，选中第一个
         if selectedTabKey == nil {
@@ -104,7 +104,7 @@ class ProfileTabSettingStore: ObservableObject {
     }
 
     // - Private Methods
-    private func updateTabs(user: UiUserV2) {
+    private func updateTabs(user: UiUserV2, userKey: MicroBlogKey?) {
         // 根据平台类型获取对应的标签
         var tabs = FLTabSettings.defaultThree(user: user)
 

@@ -4,6 +4,20 @@ import SwiftUI
 struct FLNewMenuGestureModifier: ViewModifier {
     @ObservedObject var appState: FLNewAppState
     @State private var currentAppBarIndex: Int = 0
+    
+    // 添加判断向右滑动的方法
+    private func isValidRightSwipe(_ value: DragGesture.Value) -> Bool {
+        let translation = value.translation
+        let distance = sqrt(pow(translation.width, 2) + pow(translation.height, 2))
+        guard distance > 0 else { return false }
+        
+        // 计算方向向量，判断是否向右滑动（允许一定角度的偏差）
+        let directionVector = (
+            x: translation.width / distance,
+            y: translation.height / distance
+        )
+        return directionVector.x > 0.7  // cos 45° ≈ 0.7
+    }
 
     init(appState: FLNewAppState) {
         self.appState = appState
@@ -13,48 +27,34 @@ struct FLNewMenuGestureModifier: ViewModifier {
         content.simultaneousGesture(
             DragGesture(minimumDistance: 10, coordinateSpace: .local)
                 .onChanged { value in
-                    // 检查是否是从左边缘开始的手势
-                    guard value.startLocation.x < 20 else {
-                        os_log("[🖐️][GestureModifier] Drag ignored - not from left edge",
+                    // 检查是否是向右滑动
+                    guard isValidRightSwipe(value) else {
+                        os_log("[🖐️][GestureModifier] Drag ignored - not right direction",
                                log: .default, type: .debug)
                         return
                     }
 
-                    // 获取当前的 tabbar index 和 appbar item index
-                    let isHomeTab = appState.tabStore?.selectedIndex == 0
-
-                    // 在 Home tab 时，只有第一个 appbar item 才处理菜单手势
-                    if isHomeTab && currentAppBarIndex > 0 {
-                        os_log("[🖐️][GestureModifier] Drag ignored - not first appbar item in Home tab",
+                    // 在第一个 tab 时才处理菜单手势
+                    if currentAppBarIndex > 0 {
+                        os_log("[🖐️][GestureModifier] Drag ignored - not first appbar item",
                                log: .default, type: .debug)
                         return
                     }
-
-                    // 非 Home tab 时，允许菜单手势
-                    if !isHomeTab {
-                        os_log("[🖐️][GestureModifier] Processing drag - not in Home tab",
-                               log: .default, type: .debug)
-                    }
-
-                    os_log("[🖐️][GestureModifier] Drag changed - Translation: (%{public}f, %{public}f), Predicted End: (%{public}f, %{public}f)",
-                           log: .default, type: .debug,
-                           value.translation.width, value.translation.height,
-                           value.predictedEndTranslation.width, value.predictedEndTranslation.height)
 
                     handleDragChange(value)
                 }
                 .onEnded { value in
-                    // 获取当前的 tabbar index 和 appbar item index
-                    let isHomeTab = appState.tabStore?.selectedIndex == 0
-
-                    // 在 Home tab 时，只有第一个 appbar item 才处理菜单手势
-                    if isHomeTab && currentAppBarIndex > 0 {
+                    // 检查是否是向右滑动
+                    guard isValidRightSwipe(value) else {
+                        os_log("[🖐️][GestureModifier] Drag end ignored - not right direction",
+                               log: .default, type: .debug)
                         return
                     }
-
-                    os_log("[🖐️][GestureModifier] Drag ended - Translation: (%{public}f, %{public}f)",
-                           log: .default, type: .debug,
-                           value.translation.width, value.translation.height)
+                    
+                    // 在第一个 tab 时才处理菜单手势
+                    if currentAppBarIndex > 0 {
+                        return
+                    }
 
                     handleDragEnd(value)
                 }
@@ -74,14 +74,14 @@ struct FLNewMenuGestureModifier: ViewModifier {
             return
         }
 
-        let translation = value.translation.width
+        let translation = value.translation
         let velocity = value.predictedEndTranslation.width - value.translation.width
 
         os_log("[🖐️][GestureModifier] Processing drag - Translation: %{public}f, Velocity: %{public}f",
                log: .default, type: .debug,
-               translation, velocity)
+               translation.width, velocity)
 
-        if translation > 0 {
+        if translation.width > 0 {
             withAnimation(.spring()) {
                 appState.isMenuOpen = true
             }

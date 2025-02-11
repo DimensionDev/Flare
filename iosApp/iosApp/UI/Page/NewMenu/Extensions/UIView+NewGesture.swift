@@ -28,13 +28,13 @@ extension UIView {
     func addNewMenuGesture(
         gestureState: FLNewGestureState,
         menuState: Binding<Bool>,
-        tabStore: TabSettingsStore? = nil
+        tabProvider: TabStateProvider? = nil
     ) {
         // 创建手势协调器
         let coordinator = FLNewGestureCoordinator(
             gestureState: gestureState,
             menuState: menuState,
-            tabStore: tabStore
+            tabProvider: tabProvider
         )
 
         // 保存协调器引用

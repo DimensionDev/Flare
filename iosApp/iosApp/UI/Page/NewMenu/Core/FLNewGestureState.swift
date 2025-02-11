@@ -5,7 +5,7 @@ import SwiftUI
 class FLNewGestureState: ObservableObject {
     @Published var isGestureEnabled: Bool = true
     @Published var isGestureActive: Bool = false
-    private let tabStore: TabSettingsStore?
+    private weak var tabProvider: TabStateProvider?
 
     private var lastGestureTime: TimeInterval = 0
     private let minimumGestureInterval: TimeInterval = 0.5
@@ -25,16 +25,16 @@ class FLNewGestureState: ObservableObject {
 
     let configuration: Configuration
 
-    init(configuration: Configuration = .default, tabStore: TabSettingsStore? = nil) {
+    init(configuration: Configuration = .default, tabProvider: TabStateProvider? = nil) {
         self.configuration = configuration
-        self.tabStore = tabStore
+        self.tabProvider = tabProvider
     }
 
     // 检查手势是否满足条件
     func shouldRecognizeGesture(velocity: CGPoint, translation: CGPoint) -> Bool {
         // 首先检查是否在第一个tab
-        if let tabStore {
-            let isFirstTab = tabStore.selectedIndex == 0
+        if let tabProvider {
+            let isFirstTab = tabProvider.selectedIndex == 0
             os_log("[🖐️][GestureState] Tab check - isFirstTab: %{public}@",
                    log: .default, type: .debug,
                    String(isFirstTab))
@@ -70,7 +70,7 @@ class FLNewGestureState: ObservableObject {
     // 开始处理手势
     func beginGesture() {
         // 如果不在第一个tab，直接返回
-        if let tabStore, tabStore.selectedIndex > 0 {
+        if let tabProvider, tabProvider.selectedIndex > 0 {
             os_log("[🖐️][GestureState] Begin gesture rejected - not on first tab",
                    log: .default, type: .debug)
             return

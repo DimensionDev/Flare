@@ -3,7 +3,7 @@ import os.log
 import shared
 import SwiftUI
 
-class ProfileTabSettingStore: ObservableObject {
+class ProfileTabSettingStore: ObservableObject, TabStateProvider {
     // - Published Properties
     @Published var availableTabs: [FLTabItem] = [] // 当前显示的所有标签
     @Published var selectedTabKey: String? // 当前选中的标签
@@ -17,6 +17,18 @@ class ProfileTabSettingStore: ObservableObject {
     private var presenter = ActiveAccountPresenter()
     private var presenterCache: [String: TimelinePresenter] = [:] // 添加缓存
     private var mediaPresenterCache: [String: ProfileMediaPresenter] = [:] // 媒体presenter缓存
+
+    // TabStateProvider 协议实现
+    var onTabChange: ((Int) -> Void)?
+    
+    var tabCount: Int {
+        availableTabs.count
+    }
+    
+    var selectedIndex: Int {
+        guard let selectedTabKey = selectedTabKey else { return 0 }
+        return availableTabs.firstIndex { $0.key == selectedTabKey } ?? 0
+    }
 
     // - Initialization
     init(timelineStore: TimelineStore, userKey: MicroBlogKey?) {
@@ -61,6 +73,7 @@ class ProfileTabSettingStore: ObservableObject {
         if let selectedItem = availableTabs.first(where: { $0.key == key }) {
             updateCurrentPresenter(for: selectedItem)
         }
+        notifyTabChange()
     }
 
     func updateCurrentPresenter(for tab: FLTabItem) {
@@ -136,5 +149,9 @@ class ProfileTabSettingStore: ObservableObject {
         if selectedTabKey == nil, let firstTab = availableTabs.first {
             selectTab(firstTab.key)
         }
+    }
+
+    func notifyTabChange() {
+        onTabChange?(selectedIndex)
     }
 }

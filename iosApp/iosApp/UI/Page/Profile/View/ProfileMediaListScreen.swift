@@ -40,8 +40,14 @@ struct ProfileMediaListScreen: View {
     @Environment(\.appSettings) private var appSettings
     @Environment(\.dismiss) private var dismiss
 
-    init(accountType _: AccountType, userKey _: MicroBlogKey?, tabStore: ProfileTabSettingStore) {
-        self.tabStore = tabStore
+    init(accountType: AccountType, userKey: MicroBlogKey?, tabStore: ProfileTabSettingStore? = nil) {
+        let timelineStore = TimelineStore(accountType: accountType)
+        if let existingTabStore = tabStore {
+            self.tabStore = existingTabStore
+        } else {
+            let newTabStore = ProfileTabSettingStore(timelineStore: timelineStore, userKey: userKey)
+            self.tabStore = newTabStore
+        }
     }
 
     var body: some View {

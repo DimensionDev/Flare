@@ -8,7 +8,7 @@ class FLNewAppState: ObservableObject {
 
     // - Public Properties
     let gestureState: FLNewGestureState
-    let tabStore: TabSettingsStore?
+    private weak var tabProvider: TabStateProvider?
 
     // - Private Properties
     private var cancellables = Set<AnyCancellable>()
@@ -18,13 +18,13 @@ class FLNewAppState: ObservableObject {
     private let performanceMonitor = FLNewPerformanceMonitor.shared
 
     // - Initialization
-    init(tabStore: TabSettingsStore? = nil, gestureState: FLNewGestureState? = nil) {
+    init(tabProvider: TabStateProvider? = nil, gestureState: FLNewGestureState? = nil) {
         // 从存储加载初始状态
         isMenuOpen = FLNewStateStorage.loadMenuState()
         currentTab = FLNewStateStorage.loadLastTab()
 
-        self.tabStore = tabStore
-        self.gestureState = gestureState ?? FLNewGestureState(tabStore: tabStore)
+        self.tabProvider = tabProvider
+        self.gestureState = gestureState ?? FLNewGestureState(tabProvider: tabProvider)
 
         setupBindings()
         setupMemoryWarningObserver()
@@ -50,12 +50,8 @@ class FLNewAppState: ObservableObject {
             .store(in: &cancellables)
 
         // 监听标签页变化
-        if let tabStore {
-            tabStore.objectWillChange
-                .sink { [weak self] _ in
-                    self?.handleTabStoreChange()
-                }
-                .store(in: &cancellables)
+        tabProvider?.onTabChange = { [weak self] index in
+            self?.handleTabProviderChange(index)
         }
     }
 
@@ -107,12 +103,10 @@ class FLNewAppState: ObservableObject {
         }
     }
 
-    private func handleTabStoreChange() {
+    private func handleTabProviderChange(_ index: Int) {
         performanceMonitor.track("标签页变化") {
-            guard let tabStore else { return }
-
             // 更新当前标签页
-            currentTab = tabStore.selectedIndex
+            currentTab = index
 
             // 根据标签页位置启用/禁用手势
             if currentTab > 0 {

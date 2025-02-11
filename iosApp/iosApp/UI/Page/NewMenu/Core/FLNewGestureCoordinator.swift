@@ -5,15 +5,15 @@ import UIKit
 class FLNewGestureCoordinator: NSObject {
     private let gestureState: FLNewGestureState
     private let menuState: Binding<Bool>
-    private let tabStore: TabSettingsStore?
+    private weak var tabProvider: TabStateProvider?
 
     init(gestureState: FLNewGestureState,
          menuState: Binding<Bool>,
-         tabStore: TabSettingsStore? = nil)
+         tabProvider: TabStateProvider? = nil)
     {
         self.gestureState = gestureState
         self.menuState = menuState
-        self.tabStore = tabStore
+        self.tabProvider = tabProvider
 
         super.init()
 
@@ -35,9 +35,9 @@ class FLNewGestureCoordinator: NSObject {
     }
 
     private func handleGestureBegan(_: UIPanGestureRecognizer) {
-        // 如果在Home页面且不是第一个tab，不处理菜单手势
-        if let tabStore,
-           tabStore.selectedIndex > 0
+        // 如果不在第一个tab，不处理菜单手势
+        if let tabProvider,
+           tabProvider.selectedIndex > 0
         {
             os_log("[🖐️][GestureCoordinator] Gesture ignored - not on first tab", log: .default, type: .debug)
             return

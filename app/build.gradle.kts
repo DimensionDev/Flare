@@ -146,6 +146,7 @@ dependencies {
     implementation(libs.nestedScrollView)
     implementation(libs.precompose.molecule)
     implementation(libs.compose.placeholder.material3)
+    implementation(libs.webkit)
 
     if (project.file("google-services.json").exists()) {
         implementation(platform(libs.firebase.bom))

@@ -29,6 +29,9 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
+import com.materialkolor.ktx.toHex
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Globe
@@ -43,6 +46,7 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.rss.RssDetailPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.theme.isLight
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
 import moe.tlaster.precompose.molecule.producePresenter
@@ -57,6 +61,7 @@ internal fun RssDetailScreen(
     val state by producePresenter(url) { presenter(url) }
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
+    val isLightMode = MaterialTheme.colorScheme.isLight()
     FlareScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
@@ -133,26 +138,32 @@ internal fun RssDetailScreen(
             HorizontalDivider()
             state.data
                 .onSuccess { data ->
+                    val contentColor = LocalContentColor.current
                     AndroidView(
                         factory = {
                             WebView(it).apply {
-                                // transparent background
+                                isVerticalScrollBarEnabled = false
                                 setBackgroundColor(Color.TRANSPARENT)
+                                val html =
+                                    getHtmlData(
+                                        bodyHTML = data.content,
+                                        textColor = contentColor.toHex(),
+                                    )
+                                loadData(
+                                    html,
+                                    "text/html",
+                                    "UTF-8",
+                                )
                             }
                         },
                         update = {
-                            it.loadData(
-                                getHtmlData(data.content),
-                                "text/html",
-                                "UTF-8",
-                            )
+                            if (!isLightMode) {
+                                if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
+                                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(it.settings, true)
+                                }
+                            }
                         },
                     )
-//                    SelectionContainer {
-//                        HtmlText(
-//                            element = it.richTextContent.data,
-//                        )
-//                    }
                 }.onLoading {
                     Text(
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam elementum eget dui a bibendum. Fusce eget porttitor est, et rhoncus massa. Etiam cursus urna at odio vulputate semper. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque tincidunt rhoncus massa sed volutpat. Nulla porta orci et finibus accumsan. Duis maximus diam quis congue suscipit. Suspendisse velit enim, mollis non tellus eu, auctor vulputate diam. Sed ut purus eleifend, tempor lectus ac, imperdiet tellus. Proin eleifend lorem ut risus gravida, id bibendum metus posuere. Cras pretium tortor mi. Quisque ac congue urna. Morbi posuere ac orci vestibulum euismod. Maecenas venenatis, justo at aliquet venenatis, arcu mauris sodales ligula, a iaculis nulla eros at turpis. Quisque varius lobortis porttitor.",
@@ -163,10 +174,29 @@ internal fun RssDetailScreen(
     }
 }
 
-private fun getHtmlData(bodyHTML: String): String {
-    val head = "<head><style>img{max-width: 100%; width:auto; height: auto;}</style></head>"
-    return "<html>$head<body>$bodyHTML</body></html>"
-}
+private fun getHtmlData(
+    bodyHTML: String,
+    textColor: String,
+): String =
+    """
+<!DOCTYPE html>
+<html>
+<head>
+  <style type="text/css">
+    img {
+        max-width: 100%;
+        width: auto;
+        height: auto;
+    }
+  </style>
+</head>
+<body>
+    <div class="content">
+        $bodyHTML
+    </div>
+</body>
+</html>
+    """.trimIndent()
 
 @Composable
 private fun presenter(url: String) =

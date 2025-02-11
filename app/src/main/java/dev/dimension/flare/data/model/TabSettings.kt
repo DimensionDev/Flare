@@ -254,6 +254,7 @@ sealed interface TimelineTabItem : TabItem {
                         ),
                 ),
                 RssTabItem(
+                    account = AccountType.Guest,
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Rss),
@@ -855,8 +856,8 @@ data class DirectMessageTabItem(
 @Serializable
 data class RssTabItem(
     override val metaData: TabMetaData,
+    override val account: AccountType = AccountType.Active,
 ) : TabItem {
-    override val account: AccountType = AccountType.Guest
     override val key: String = "rss"
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)

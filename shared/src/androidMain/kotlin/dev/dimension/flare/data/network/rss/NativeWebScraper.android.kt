@@ -14,7 +14,6 @@ internal actual class NativeWebScraper(
         WebView(context).apply {
             with(settings) {
                 javaScriptEnabled = true
-                domStorageEnabled = true
             }
             webViewClient =
                 object : android.webkit.WebViewClient() {

@@ -2,6 +2,9 @@ package dev.dimension.flare.ui.theme
 
 import android.app.Activity
 import android.os.Build
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
@@ -16,10 +19,15 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import androidx.navigation.NavBackStackEntry
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.materialkolor.rememberDynamicColorScheme
+import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationStyle
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
+import soup.compose.material.motion.animation.materialSharedAxisXIn
+import soup.compose.material.motion.animation.materialSharedAxisXOut
+import soup.compose.material.motion.animation.rememberSlideDistance
 
 private object MoreColors {
     val Gray50 = Color(0xFFFAFAFA)
@@ -175,3 +183,24 @@ private fun isDarkTheme(): Boolean =
 
 @Composable
 fun ColorScheme.isLight() = this.background.luminance() > 0.5
+
+@Composable
+internal fun rememberNavAnimX(): NavHostAnimatedDestinationStyle {
+    val slideDistance = rememberSlideDistance()
+    return remember(slideDistance) {
+        object : NavHostAnimatedDestinationStyle() {
+            override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+                materialSharedAxisXIn(true, slideDistance)
+            }
+            override val exitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
+                materialSharedAxisXOut(true, slideDistance)
+            }
+            override val popEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
+                materialSharedAxisXIn(false, slideDistance)
+            }
+            override val popExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
+                materialSharedAxisXOut(false, slideDistance)
+            }
+        }
+    }
+}

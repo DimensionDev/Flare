@@ -2,9 +2,6 @@ package dev.dimension.flare.ui.screen.home
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -55,7 +52,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -63,7 +59,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.ramcosta.composedestinations.DestinationsNavHost
-import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationStyle
 import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.generated.destinations.BlueskyFeedsRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDestination
@@ -131,6 +126,7 @@ import dev.dimension.flare.ui.screen.settings.TabTitle
 import dev.dimension.flare.ui.screen.splash.SplashScreen
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.MediumAlpha
+import dev.dimension.flare.ui.theme.rememberNavAnimX
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -138,8 +134,6 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
-import soup.compose.material.motion.animation.materialSharedAxisXIn
-import soup.compose.material.motion.animation.materialSharedAxisXOut
 import soup.compose.material.motion.animation.materialSharedAxisYIn
 import soup.compose.material.motion.animation.materialSharedAxisYOut
 import soup.compose.material.motion.animation.rememberSlideDistance
@@ -689,27 +683,6 @@ internal fun Router(
                 start = direction,
                 dependenciesContainerBuilder = dependenciesContainerBuilder,
             )
-        }
-    }
-}
-
-@Composable
-private fun rememberNavAnimX(): NavHostAnimatedDestinationStyle {
-    val slideDistance = rememberSlideDistance()
-    return remember(slideDistance) {
-        object : NavHostAnimatedDestinationStyle() {
-            override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
-                materialSharedAxisXIn(true, slideDistance)
-            }
-            override val exitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
-                materialSharedAxisXOut(true, slideDistance)
-            }
-            override val popEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
-                materialSharedAxisXIn(false, slideDistance)
-            }
-            override val popExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
-                materialSharedAxisXOut(false, slideDistance)
-            }
         }
     }
 }

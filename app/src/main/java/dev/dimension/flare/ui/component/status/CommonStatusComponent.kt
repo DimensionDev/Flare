@@ -256,7 +256,6 @@ fun CommonStatusComponent(
                 ) {
                     StatusActions(item.actions)
                 }
-                Spacer(modifier = Modifier.height(4.dp))
             } else {
                 CompositionLocalProvider(
                     LocalContentColor provides MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = MediumAlpha),
@@ -265,9 +264,6 @@ fun CommonStatusComponent(
                     StatusActions(item.actions)
                 }
             }
-            Spacer(modifier = Modifier.height(4.dp))
-        } else {
-            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }

@@ -3,18 +3,20 @@ package dev.dimension.flare.ui.component.status
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Card
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowWidthSizeClass
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.At
@@ -40,30 +42,42 @@ internal fun UiTimelineComponent(
     detailStatusKey: MicroBlogKey? = null,
     horizontalPadding: Dp = screenHorizontalPadding,
 ) {
+    val windowInfo = currentWindowAdaptiveInfo()
+    val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT
     Column(
         modifier = modifier,
     ) {
         item.topMessage?.let {
-            Spacer(modifier = Modifier.height(8.dp))
             TopMessageComponent(
                 data = it,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
+                modifier =
+                    Modifier
+                        .padding(horizontal = horizontalPadding)
+                        .padding(top = 8.dp)
+                        .fillMaxWidth(),
             )
         }
         item.content?.let {
+            val padding =
+                if (item.topMessage == null) {
+                    PaddingValues(
+                        start = horizontalPadding,
+                        end = horizontalPadding,
+                        bottom = 8.dp,
+                        top = if (bigScreen) 16.dp else 8.dp,
+                    )
+                } else {
+                    PaddingValues(
+                        start = horizontalPadding,
+                        end = horizontalPadding,
+                        bottom = 8.dp,
+                        top = 8.dp,
+                    )
+                }
             ItemContentComponent(
                 item = it,
                 detailStatusKey = detailStatusKey,
-                modifier =
-                    Modifier
-                        .let {
-                            if (item.topMessage == null) {
-                                it.padding(top = 4.dp)
-                            } else {
-                                it
-                            }
-                        }.padding(top = 4.dp)
-                        .padding(horizontal = horizontalPadding),
+                paddingValues = padding,
             )
         }
     }
@@ -73,6 +87,7 @@ internal fun UiTimelineComponent(
 private fun ItemContentComponent(
     item: UiTimeline.ItemContent,
     detailStatusKey: MicroBlogKey?,
+    paddingValues: PaddingValues,
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -81,7 +96,9 @@ private fun ItemContentComponent(
             StatusContent(
                 data = item,
                 detailStatusKey = detailStatusKey,
-                modifier = modifier,
+                modifier =
+                    modifier
+                        .padding(paddingValues),
             )
 
         is UiTimeline.ItemContent.User ->
@@ -98,7 +115,7 @@ private fun ItemContentComponent(
                 },
                 modifier =
                     modifier
-                        .padding(bottom = 8.dp),
+                        .padding(paddingValues),
             )
 
         is UiTimeline.ItemContent.UserList ->
@@ -106,15 +123,13 @@ private fun ItemContentComponent(
                 data = item,
                 modifier =
                     modifier
-                        .padding(bottom = 8.dp),
+                        .padding(paddingValues),
             )
 
         is UiTimeline.ItemContent.Feed -> {
             FeedComponent(
                 data = item,
-                modifier =
-                    modifier
-                        .padding(bottom = 8.dp),
+                modifier = modifier,
             )
         }
     }
@@ -366,7 +381,7 @@ private fun TopMessageComponent(
             user = data.user,
             text = text,
             modifier =
-                modifier
+                Modifier
                     .clickable {
                         data.onClicked.invoke(
                             ClickContext(
@@ -375,7 +390,7 @@ private fun TopMessageComponent(
                                 },
                             ),
                         )
-                    },
+                    }.then(modifier),
         )
     }
 }

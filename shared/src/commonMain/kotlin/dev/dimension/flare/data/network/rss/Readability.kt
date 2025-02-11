@@ -1,12 +1,16 @@
 package dev.dimension.flare.data.network.rss
 
 import androidx.compose.runtime.Immutable
+import co.touchlab.kermit.Logger
 import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 internal class Readability(
@@ -14,13 +18,22 @@ internal class Readability(
 ) {
     suspend fun parse(url: String): DocumentData =
         suspendCoroutine { continuation ->
-            scraper.parse(
-                url = url,
-                scriptToInject = ReadabilityJS,
-                callback = {
-                    continuation.resume(it.decodeJson<DocumentData>())
-                },
-            )
+            try {
+                scraper.parse(
+                    url = url,
+                    scriptToInject = ReadabilityJS,
+                    callback = {
+                        try {
+                            println(it)
+                            continuation.resume(it.decodeJson<DocumentData>())
+                        } catch (e: Throwable) {
+                            continuation.resumeWithException(e)
+                        }
+                    },
+                )
+            } catch (e: Throwable) {
+                continuation.resumeWithException(e)
+            }
         }
 }
 
@@ -38,7 +51,7 @@ public data class DocumentData(
     val lang: String?,
     val publishedTime: String?,
 ) {
-    val richTextContent: UiRichText by lazy {
-        parseHtml(content).toUi()
+    val publishDateTime: UiDateTime? by lazy {
+        publishedTime?.let { Instant.parse(it).toUi() }
     }
 }

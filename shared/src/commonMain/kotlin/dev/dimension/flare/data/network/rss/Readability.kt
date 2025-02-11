@@ -1,11 +1,8 @@
 package dev.dimension.flare.data.network.rss
 
 import androidx.compose.runtime.Immutable
-import co.touchlab.kermit.Logger
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.ui.render.UiDateTime
-import dev.dimension.flare.ui.render.UiRichText
-import dev.dimension.flare.ui.render.parseHtml
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable

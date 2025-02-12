@@ -213,7 +213,18 @@ private fun AnnotatedString.Builder.renderElement(
             appendLine()
         }
 
-        "span", "p" -> {
+        "p" -> {
+            element.childNodes().forEach {
+                renderNode(node = it, styleData = styleData)
+            }
+            val parent = element.parent()
+            if (parent != null && parent.lastElementChild() == element) {
+            } else {
+                appendLine()
+            }
+        }
+
+        "span" -> {
             element.childNodes().forEach {
                 renderNode(node = it, styleData = styleData)
             }
@@ -284,6 +295,13 @@ private fun AnnotatedString.Builder.renderElement(
                 renderNode(node = it, styleData = styleData)
             }
             pop()
+        }
+
+        "li" -> {
+            renderText(text = "• ", styleData.textStyle)
+            element.childNodes().forEach {
+                renderNode(node = it, styleData = styleData)
+            }
         }
 
         else -> {

@@ -20,11 +20,18 @@ allprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_21)
+        }
+    }
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
+        compilerOptions {
             allWarningsAsErrors.set(true)
-            freeCompilerArgs.set(listOf(
-                "-Xexpect-actual-classes",
-                "-Xconsistent-data-class-copy-visibility",
-            ))
+            freeCompilerArgs.set(
+                listOf(
+                    "-Xexpect-actual-classes",
+                    "-Xconsistent-data-class-copy-visibility",
+                    "-Xmulti-dollar-interpolation",
+                )
+            )
         }
     }
 }

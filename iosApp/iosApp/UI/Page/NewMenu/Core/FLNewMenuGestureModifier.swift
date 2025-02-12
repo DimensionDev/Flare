@@ -27,6 +27,14 @@ struct FLNewMenuGestureModifier: ViewModifier {
         content.simultaneousGesture(
             DragGesture(minimumDistance: 10, coordinateSpace: .local)
                 .onChanged { value in
+                    
+                    // 在第一个 tab 时才处理菜单手势
+                    if currentAppBarIndex > 0 {
+//                        os_log("[🖐️][GestureModifier] Drag ignored - not first appbar item",
+//                               log: .default, type: .debug)
+                        return
+                    }
+                    
                     // 检查是否是向右滑动
                     guard isValidRightSwipe(value) else {
                         os_log("[🖐️][GestureModifier] Drag ignored - not right direction",
@@ -34,16 +42,17 @@ struct FLNewMenuGestureModifier: ViewModifier {
                         return
                     }
 
-                    // 在第一个 tab 时才处理菜单手势
-                    if currentAppBarIndex > 0 {
-                        os_log("[🖐️][GestureModifier] Drag ignored - not first appbar item",
-                               log: .default, type: .debug)
-                        return
-                    }
+                  
 
                     handleDragChange(value)
                 }
                 .onEnded { value in
+                    
+                    // 在第一个 tab 时才处理菜单手势
+                    if currentAppBarIndex > 0 {
+                        return
+                    }
+                    
                     // 检查是否是向右滑动
                     guard isValidRightSwipe(value) else {
                         os_log("[🖐️][GestureModifier] Drag end ignored - not right direction",
@@ -51,10 +60,7 @@ struct FLNewMenuGestureModifier: ViewModifier {
                         return
                     }
                     
-                    // 在第一个 tab 时才处理菜单手势
-                    if currentAppBarIndex > 0 {
-                        return
-                    }
+                  
 
                     handleDragEnd(value)
                 }

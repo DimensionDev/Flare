@@ -19,9 +19,11 @@ class FLNewAppState: ObservableObject {
 
     // - Initialization
     init(tabProvider: TabStateProvider? = nil, gestureState: FLNewGestureState? = nil) {
-        // 从存储加载初始状态
-        isMenuOpen = FLNewStateStorage.loadMenuState()
-        currentTab = FLNewStateStorage.loadLastTab()
+        // 从存储加载初始状态，如果没有存储值则默认为关闭状态
+//        isMenuOpen = FLNewStateStorage.loadMenuState()  默认为false
+        isMenuOpen = false
+        currentTab = 0
+//        FLNewStateStorage.loadLastTab() // 默认为0
 
         self.tabProvider = tabProvider
         self.gestureState = gestureState ?? FLNewGestureState(tabProvider: tabProvider)
@@ -99,7 +101,7 @@ class FLNewAppState: ObservableObject {
             gestureState.isGestureEnabled = !isOpen
 
             // 保存状态
-            FLNewStateStorage.saveMenuState(isOpen)
+//            FLNewStateStorage.saveMenuState(isOpen)
         }
     }
 
@@ -116,7 +118,7 @@ class FLNewAppState: ObservableObject {
             }
 
             // 保存状态
-            FLNewStateStorage.saveLastTab(currentTab)
+//            FLNewStateStorage.saveLastTab(currentTab)
         }
     }
 
@@ -125,7 +127,7 @@ class FLNewAppState: ObservableObject {
         performanceMonitor.track("重置状态") {
             isMenuOpen = false
             currentTab = 0
-            FLNewStateStorage.clearAll()
+//            FLNewStateStorage.clearAll()
             cleanup()
         }
     }

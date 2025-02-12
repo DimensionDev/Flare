@@ -62,7 +62,7 @@ struct StorageScreen: View {
                             VStack(alignment: .leading) {
                                 Text(String(format: NSLocalizedString("settings_storage_clear_image_cache_description", comment: ""), String(imageCacheSize)))
                                 // Text("Current size: \(imageCacheSize)")
-                                //     .font(.caption)
+                                //    .font(.caption)
                             }
                             if isCleaningCache {
                                 Spacer()

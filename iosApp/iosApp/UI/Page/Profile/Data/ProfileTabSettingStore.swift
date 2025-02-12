@@ -3,38 +3,38 @@ import shared
 import SwiftUI
 
 class ProfileTabSettingStore: ObservableObject {
-    //  - Published Properties
+    // - Published Properties
     @Published var availableTabs: [FLTabItem] = [] // 当前显示的所有标签
     @Published var selectedTabKey: String? // 当前选中的标签
     @Published var currentUser: UiUserV2?
     @Published var currentPresenter: TimelinePresenter?
     @Published var currentMediaPresenter: ProfileMediaPresenter?
 
-    //  - Private Properties
+    // - Private Properties
     private var timelineStore: TimelineStore
     private var isInitializing = false
     private var presenter = ActiveAccountPresenter()
     private var presenterCache: [String: TimelinePresenter] = [:] // 添加缓存
     private var mediaPresenterCache: [String: ProfileMediaPresenter] = [:] // 媒体presenter缓存
 
-    //  - Initialization
-    init(timelineStore: TimelineStore) {
+    // - Initialization
+    init(timelineStore: TimelineStore, userKey: MicroBlogKey? = nil) {
         self.timelineStore = timelineStore
-        observeUser()
+        observeUser(userKey: userKey)
     }
 
-    private func observeUser() {
+    private func observeUser(userKey: MicroBlogKey?) {
         Task { @MainActor in
             for await state in presenter.models {
                 if case let .success(data) = onEnum(of: state.user) {
-                    initializeWithUser(data.data)
+                    initializeWithUser(data.data, userKey: userKey)
                 }
             }
         }
     }
 
-    //  - Public Methods
-    func initializeWithUser(_ user: UiUserV2) {
+    // - Public Methods
+    func initializeWithUser(_ user: UiUserV2, userKey: MicroBlogKey?) {
         if isInitializing || currentUser?.key == user.key {
             return
         }
@@ -43,7 +43,7 @@ class ProfileTabSettingStore: ObservableObject {
         currentUser = user
 
         // 更新可用标签
-        updateTabs(user: user)
+        updateTabs(user: user, userKey: userKey)
 
         // 如果没有选中的标签，选中第一个
         if selectedTabKey == nil {
@@ -103,8 +103,8 @@ class ProfileTabSettingStore: ObservableObject {
         currentMediaPresenter = nil
     }
 
-    //  - Private Methods
-    private func updateTabs(user: UiUserV2) {
+    // - Private Methods
+    private func updateTabs(user: UiUserV2, userKey: MicroBlogKey?) {
         // 根据平台类型获取对应的标签
         var tabs = FLTabSettings.defaultThree(user: user)
 

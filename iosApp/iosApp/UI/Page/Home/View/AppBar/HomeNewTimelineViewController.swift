@@ -1,5 +1,5 @@
-import JXSegmentedView
 import JXPagingView
+import JXSegmentedView
 import MJRefresh
 import os
 import shared

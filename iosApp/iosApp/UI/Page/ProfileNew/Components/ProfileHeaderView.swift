@@ -4,17 +4,17 @@ import SwiftUI
 
 //
 // struct ProfileHeaderView: View {
-//    let userInfo: ProfileUserInfo
-//    let state: ProfileState
-//    let onFollowClick: (UiRelation) -> Void
+//   let userInfo: ProfileUserInfo
+//   let state: ProfileState
+//   let onFollowClick: (UiRelation) -> Void
 //
-//    var body: some View {
-//        CommonProfileHeader(
-//            userInfo: userInfo,
-//            state: state,
-//            onFollowClick: onFollowClick
-//        )
-//    }
+//   var body: some View {
+//       CommonProfileHeader(
+//           userInfo: userInfo,
+//           state: state,
+//           onFollowClick: onFollowClick
+//       )
+//   }
 // }
 
 struct UserFollowsFansCount: View {

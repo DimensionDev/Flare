@@ -1,9 +1,9 @@
 //
-//  ProfileNewHeaderView.swift
-//  iosApp
+// ProfileNewHeaderView.swift
+// iosApp
 //
-//  Created by abujj on 1/14/25.
-//  Copyright © 2025 orgName. All rights reserved.
+// Created by abujj on 1/14/25.
+// Copyright © 2025 orgName. All rights reserved.
 //
 import Generated
 import JXSegmentedView

@@ -5,11 +5,11 @@ struct HomeNewScreen: View {
     let accountType: AccountType
     @StateObject private var timelineStore: TimelineStore
     @StateObject private var tabStore: TabSettingsStore
-    @State private var selectedTab: Int = 0
     @State private var isShowAppBar: Bool? = true
     @State private var showSettings = false
     @State private var showTabSettings = false
     @State private var showLogin = false
+    @State private var selectedTab = 0
 
     init(accountType: AccountType) {
         self.accountType = accountType
@@ -26,7 +26,7 @@ struct HomeNewScreen: View {
         if accountType is AccountTypeGuest {
             // 设置默认的 Home Timeline
             timelineStore.currentPresenter = HomeTimelinePresenter(accountType: accountType)
-            
+
             // 只使用 Home 标签
             let homeTab = FLHomeTimelineTabItem(
                 metaData: FLTabMetaData(

@@ -1,9 +1,9 @@
 //
-//  ProgressBarView.swift
-//  TwidereX
+// ProgressBarView.swift
+// TwidereX
 //
-//  Created by Cirno MainasuK on 2020-11-24.
-//  Copyright © 2020 Twidere. All rights reserved.
+// Created by Cirno MainasuK on 2020-11-24.
+// Copyright © 2020 Twidere. All rights reserved.
 //
 
 import Combine

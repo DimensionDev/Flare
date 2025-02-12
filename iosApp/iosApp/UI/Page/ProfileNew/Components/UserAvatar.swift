@@ -1,6 +1,6 @@
+import Generated
 import Kingfisher
 import SwiftUI
-import Generated
 
 struct UserAvatar: View {
     @Environment(\.appSettings) private var appSettings

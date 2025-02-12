@@ -5,12 +5,12 @@ import SwiftUI
 
 // 这个地方缓存ProfilePresenter 没用的。
 class ProfilePresenterWrapper: ObservableObject {
-    //  - Properties
+    // - Properties
     let presenter: ProfileNewPresenter
     @Published var isShowAppBar: Bool? = nil // nil: 初始状态, true: 显示, false: 隐藏
     @Published var isShowsegmentedBackButton: Bool = false
 
-    //  - Init
+    // - Init
     init(accountType: AccountType, userKey: MicroBlogKey?) {
         os_log("[📔][ProfilePresenterWrapper - init]初始化: accountType=%{public}@, userKey=%{public}@", log: .default, type: .debug, String(describing: accountType), userKey?.description ?? "nil")
 
@@ -35,7 +35,7 @@ class ProfilePresenterWrapper: ObservableObject {
         }
     }
 
-    //  - Memory Management
+    // - Memory Management
     func handleMemoryWarning() {
         os_log("[📔][ProfilePresenterWrapper]处理内存警告", log: .default, type: .debug)
     }
@@ -45,26 +45,26 @@ class ProfilePresenterWrapper: ObservableObject {
     }
 }
 
-//  - Presenter Extensions
+// - Presenter Extensions
 extension ProfilePresenter {
-//    var tabs: [ProfileStateTab] {
-//        if case .success(let tabs) = onEnum(of: models.value.tabs) {
-//            var result: [ProfileStateTab] = []
-//            for i in 0..<tabs.data.size {
-//                result.append(tabs.data.get(index: i))
-//            }
-//            os_log("[📔][ProfilePresenter]获取标签页: count=%{public}d", log: .default, type: .debug, result.count)
-//            return result
-//        }
-//        os_log("[📔][ProfilePresenter]获取标签页: 空", log: .default, type: .debug)
-//        return []
-//    }
+    //   var tabs: [ProfileStateTab] {
+//       if case .success(let tabs) = onEnum(of: models.value.tabs) {
+//           var result: [ProfileStateTab] = []
+//           for i in 0..<tabs.data.size {
+//               result.append(tabs.data.get(index: i))
+//           }
+//           os_log("[📔][ProfilePresenter]获取标签页: count=%{public}d", log: .default, type: .debug, result.count)
+//           return result
+//       }
+//       os_log("[📔][ProfilePresenter]获取标签页: 空", log: .default, type: .debug)
+//       return []
+    //   }
 
-//    var mediaState: PagingState<ProfileMedia> {
-//        let state = models.value.mediaState
-//        os_log("[📔][ProfilePresenter]获取媒体状态: %{public}@", log: .default, type: .debug, String(describing: state))
-//        return state
-//    }
+    //   var mediaState: PagingState<ProfileMedia> {
+//       let state = models.value.mediaState
+//       os_log("[📔][ProfilePresenter]获取媒体状态: %{public}@", log: .default, type: .debug, String(describing: state))
+//       return state
+    //   }
 //
     var userState: UiState<UiProfile> {
         let state = models.value.userState
@@ -104,16 +104,16 @@ extension ProfilePresenter {
 }
 
 class ProfileMediaPresenterWrapper: ObservableObject {
-    //  - Properties
+    // - Properties
     let presenter: ProfileMediaPresenter
 
-    //  - Init
+    // - Init
     init(accountType: AccountType, userKey: MicroBlogKey?) {
         os_log("[📔][ProfileMediaPresenterWrapper - init]初始化: accountType=%{public}@, userKey=%{public}@", log: .default, type: .debug, String(describing: accountType), userKey?.description ?? "nil")
         presenter = .init(accountType: accountType, userKey: userKey)
     }
 
-    //  - Memory Management
+    // - Memory Management
     func handleMemoryWarning() {
         os_log("[📔][ProfileMediaPresenterWrapper]处理内存警告", log: .default, type: .debug)
     }

@@ -234,17 +234,17 @@ struct CommonTimelineStatusComponent: View {
                     sensitive: data.sensitive
                 )
                 // } else {
-                //     Button {
-                //         withAnimation {
-                //             showMedia = true
-                //         }
-                //     } label: {
-                //         Label(
-                //             title: { Text("status_display_media") },
-                //             icon: { Image(systemName: "photo") }
-                //         )
-                //     }
-                //     .buttonStyle(.borderless)
+                //    Button {
+                //        withAnimation {
+                //            showMedia = true
+                //        }
+                //    } label: {
+                //        Label(
+                //            title: { Text("status_display_media") },
+                //            icon: { Image(systemName: "photo") }
+                //        )
+                //    }
+                //    .buttonStyle(.borderless)
                 // }
             }
             // link preview
@@ -272,11 +272,11 @@ struct CommonTimelineStatusComponent: View {
                         .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                 )
                 .cornerRadius(8)
-//                #if os(iOS)
-//                 .background(Color(UIColor.secondarySystemBackground))
-//                #else
-//                .background(Color(NSColor.windowBackgroundColor))
-//                #endif
+//               #if os(iOS)
+//                .background(Color(UIColor.secondarySystemBackground))
+//               #else
+//               .background(Color(NSColor.windowBackgroundColor))
+//               #endif
             }
             //
             if let bottomContent = data.bottomContent {

@@ -2,7 +2,7 @@ import Foundation
 import shared
 import SwiftUI
 
-class TabSettingsStore: ObservableObject {
+class TabSettingsStore: ObservableObject, TabStateProvider {
     @Published var primaryItems: [FLTabItem] = [] // 主要标签（不可更改状态）
     @Published var secondaryItems: [FLTabItem] = [] // 所有次要标签
     @Published var storeItems: [FLTabItem] = [] // UserDefaults 存储的已启用标签
@@ -19,6 +19,13 @@ class TabSettingsStore: ObservableObject {
 
     // 缓存 presenter 避免重复创建
     private var presenterCache: [String: TimelinePresenter] = [:]
+
+    // TabStateProvider 协议实现
+    var onTabChange: ((Int) -> Void)?
+    
+    var tabCount: Int {
+        availableTabs.count
+    }
 
     // 获取分段标题
     var segmentTitles: [String] {
@@ -59,6 +66,7 @@ class TabSettingsStore: ObservableObject {
         if let presenter = getOrCreatePresenter(for: tab) {
             currentPresenter = presenter
         }
+        notifyTabChange()
     }
 
     // 监听账号变化
@@ -183,5 +191,9 @@ class TabSettingsStore: ObservableObject {
     func moveTab(from source: IndexSet, to destination: Int) {
         storeItems.move(fromOffsets: source, toOffset: destination)
         saveTabs()
+    }
+
+    func notifyTabChange() {
+        onTabChange?(selectedIndex)
     }
 }

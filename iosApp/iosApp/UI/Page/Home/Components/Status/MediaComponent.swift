@@ -77,23 +77,23 @@ struct MediaItemComponent: View {
 }
 
 // struct MutedVideoPlayer: View {
-//    let player: AVPlayer
-//    let autoPlay: Bool
-//    init(url: String, autoPlay: Bool = true) {
-//        self.player = AVPlayer(url: URL(string: url)!)
-//        self.player.isMuted = true
-//        self.autoPlay = autoPlay
-//    }
-//    var body: some View {
-//        VideoPlayer(player: player)
-//            .if(autoPlay) { view in
-//                view
-//                    .onAppear {
-//                        player.play()
-//                    }
-//                    .onDisappear {
-//                        player.pause()
-//                    }
-//            }
-//    }
+//   let player: AVPlayer
+//   let autoPlay: Bool
+//   init(url: String, autoPlay: Bool = true) {
+//       self.player = AVPlayer(url: URL(string: url)!)
+//       self.player.isMuted = true
+//       self.autoPlay = autoPlay
+//   }
+//   var body: some View {
+//       VideoPlayer(player: player)
+//           .if(autoPlay) { view in
+//               view
+//                   .onAppear {
+//                       player.play()
+//                   }
+//                   .onDisappear {
+//                       player.pause()
+//                   }
+//           }
+//   }
 // }

@@ -1,9 +1,9 @@
 //
-//  ZJFlexibleDataSource.swift
-//  ZJFlexibleLayoutDemo
+// ZJFlexibleDataSource.swift
+// ZJFlexibleLayoutDemo
 //
-//  Created by ZhuFaner on 2017/10/24.
-//  Copyright © 2017年 ZhijieZhang. All rights reserved.
+// Created by ZhuFaner on 2017/10/24.
+// Copyright © 2017年 ZhijieZhang. All rights reserved.
 //
 
 import UIKit

@@ -462,7 +462,6 @@ public struct FLTabMetaData /* : Codable */ {
 public enum FLTitleType /* : Codable */ {
     case text(String)
     case localized(String)
-
 }
 
 // - Icon Type
@@ -852,7 +851,6 @@ public extension FLTabItem {
     }
 }
 
-
 // - Timeline Tab Item Extensions
 public extension FLTimelineTabItem {
     static var `default`: [FLTabItem] {
@@ -921,4 +919,3 @@ public extension FLHomeTimelineTabItem {
         )
     }
 }
-

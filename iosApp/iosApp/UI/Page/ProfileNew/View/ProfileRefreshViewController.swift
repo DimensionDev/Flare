@@ -670,6 +670,10 @@ extension ProfileNewRefreshViewController: JXSegmentedViewDelegate {
         // 更新选中状态
         selectedTab?.wrappedValue = index
 
+        // 发送通知更新 appbar index
+        // tood: 这个等select Index 解决后要删掉，冗杂的
+         NotificationCenter.default.post(name: NSNotification.Name("AppBarIndexDidChange"), object: index)
+        
         // 更新当前选中的标签页的presenter
         if let tabStore, index < tabStore.availableTabs.count {
             let selectedTab = tabStore.availableTabs[index]

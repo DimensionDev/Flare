@@ -1,5 +1,5 @@
-import JXPhotoBrowser
 import JXPagingView
+import JXPhotoBrowser
 import JXSegmentedView
 import Kingfisher
 import MJRefresh
@@ -8,7 +8,7 @@ import SwiftUI
 import UIKit
 
 class ProfileMediaViewController: UIViewController {
-    //  - Properties
+    // - Properties
     private var presenterWrapper: ProfileMediaPresenterWrapper?
     private var scrollCallback: ((UIScrollView) -> Void)?
     private var appSettings: AppSettings?
@@ -37,7 +37,7 @@ class ProfileMediaViewController: UIViewController {
         scrollCallback = nil
     }
 
-    //  - Setup
+    // - Setup
     private func setupUI() {
         view.addSubview(collectionView)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
@@ -53,41 +53,41 @@ class ProfileMediaViewController: UIViewController {
         // 下拉刷新
         collectionView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
             Task {
-//                if let mediaPresenterWrapper = self?.presenterWrapper,
-//                   case .success(let data) = onEnum(of: mediaPresenterWrapper.presenter.models.value.mediaState) {
-//                    data.retry()
-//                    await MainActor.run {
+//               if let mediaPresenterWrapper = self?.presenterWrapper,
+//                  case .success(let data) = onEnum(of: mediaPresenterWrapper.presenter.models.value.mediaState) {
+//                   data.retry()
+//                   await MainActor.run {
                 self?.collectionView.mj_header?.endRefreshing()
-//                    }
-//                }
+//                   }
+//               }
             }
         })
 
         // 上拉加载更多
         collectionView.mj_footer = MJRefreshAutoNormalFooter(refreshingBlock: { [weak self] in
             Task {
-//                if let mediaPresenterWrapper = self?.presenterWrapper,
-//                   case .success(let data) = onEnum(of: mediaPresenterWrapper.presenter.models.value.mediaState) {
-//                    // 检查是否还有更多数据
-//                    let appendState = data.appendState
-//                    if let notLoading = appendState as? Paging_commonLoadState.NotLoading,
-//                       !notLoading.endOfPaginationReached {
-//                        data.retry()
-//                    }
-//                    await MainActor.run {
-//                        if let notLoading = appendState as? Paging_commonLoadState.NotLoading,
-//                           notLoading.endOfPaginationReached {
-//                            self?.collectionView.mj_footer?.endRefreshingWithNoMoreData()
-//                        } else {
+//               if let mediaPresenterWrapper = self?.presenterWrapper,
+//                  case .success(let data) = onEnum(of: mediaPresenterWrapper.presenter.models.value.mediaState) {
+//                   // 检查是否还有更多数据
+//                   let appendState = data.appendState
+//                   if let notLoading = appendState as? Paging_commonLoadState.NotLoading,
+//                      !notLoading.endOfPaginationReached {
+//                       data.retry()
+//                   }
+//                   await MainActor.run {
+//                       if let notLoading = appendState as? Paging_commonLoadState.NotLoading,
+//                          notLoading.endOfPaginationReached {
+//                           self?.collectionView.mj_footer?.endRefreshingWithNoMoreData()
+//                       } else {
                 self?.collectionView.mj_footer?.endRefreshing()
-//                        }
-//                    }
-//                }
+//                       }
+//                   }
+//               }
             }
         })
     }
 
-    //  - Public Methods
+    // - Public Methods
     func updateMediaPresenter(presenterWrapper: ProfileMediaPresenterWrapper) {
         self.presenterWrapper = presenterWrapper
         // 监听数据变化
@@ -103,7 +103,7 @@ class ProfileMediaViewController: UIViewController {
         self.appSettings = appSettings
     }
 
-    //  - Private Methods
+    // - Private Methods
     private func handleState(_ state: PagingState<ProfileMedia>) {
         if case let .success(data) = onEnum(of: state) {
             items = (0 ..< data.itemCount).compactMap { index -> ProfileMediaGridItem? in
@@ -201,14 +201,14 @@ extension ProfileMediaViewController: UICollectionViewDataSource {
     }
 }
 
-//   - UICollectionViewDelegate
+//  - UICollectionViewDelegate
 extension ProfileMediaViewController: UICollectionViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         scrollCallback?(scrollView)
     }
 }
 
-//  - ZJFlexibleDataSource
+// - ZJFlexibleDataSource
 extension ProfileMediaViewController: ZJFlexibleDataSource {
     func numberOfCols(at _: Int) -> Int {
         2

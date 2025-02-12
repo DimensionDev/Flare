@@ -3,7 +3,7 @@ import SwiftUI
 import UIKit
 
 class ProfileNewTimelineCell: UITableViewCell {
-    //   Properties
+    //  Properties
     private var hostingController: UIHostingController<StatusItemView>?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -29,7 +29,7 @@ class ProfileNewTimelineCell: UITableViewCell {
         contentView.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
     }
 
-    //  - Configuration
+    // - Configuration
     func configure(with item: UiTimeline) {
         // 移除旧的视图
         hostingController?.view.removeFromSuperview()

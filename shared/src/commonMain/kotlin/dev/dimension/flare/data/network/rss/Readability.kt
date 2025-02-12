@@ -4,17 +4,17 @@ import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.toUi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
-import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
-import kotlin.coroutines.suspendCoroutine
 
 internal class Readability(
     private val scraper: NativeWebScraper,
 ) {
-    suspend fun parse(url: String): DocumentData =
-        suspendCoroutine { continuation ->
+    fun parse(url: String): Flow<Result<DocumentData>> =
+        callbackFlow {
             try {
                 scraper.parse(
                     url = url,
@@ -22,15 +22,16 @@ internal class Readability(
                     callback = {
                         try {
                             println(it)
-                            continuation.resume(it.decodeJson<DocumentData>())
+                            trySend(Result.success(it.decodeJson()))
                         } catch (e: Throwable) {
-                            continuation.resumeWithException(e)
+                            trySend(Result.failure(e))
                         }
                     },
                 )
             } catch (e: Throwable) {
-                continuation.resumeWithException(e)
+                trySend(Result.failure(e))
             }
+            awaitClose { }
         }
 }
 

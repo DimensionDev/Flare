@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
-import com.materialkolor.ktx.toHex
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Globe
@@ -147,7 +146,6 @@ internal fun RssDetailScreen(
                                 val html =
                                     getHtmlData(
                                         bodyHTML = data.content,
-                                        textColor = contentColor.toHex(),
                                     )
                                 loadData(
                                     html,
@@ -174,10 +172,7 @@ internal fun RssDetailScreen(
     }
 }
 
-private fun getHtmlData(
-    bodyHTML: String,
-    textColor: String,
-): String =
+private fun getHtmlData(bodyHTML: String): String =
     """
 <!DOCTYPE html>
 <html>

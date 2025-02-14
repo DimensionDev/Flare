@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowWidthSizeClass
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.At
@@ -212,6 +211,7 @@ import dev.dimension.flare.ui.component.misskey_notification_item_reposted_your_
 import dev.dimension.flare.ui.component.misskey_notification_item_requested_follow
 import dev.dimension.flare.ui.component.misskey_notification_unknwon
 import dev.dimension.flare.ui.component.platform.PlatformCard
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.vvo_notification_like
 import dev.dimension.flare.ui.component.xqt_item_mention_status
 import dev.dimension.flare.ui.component.xqt_item_reblogged_status

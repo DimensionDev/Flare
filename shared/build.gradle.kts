@@ -103,6 +103,8 @@ kotlin {
             dependsOn(androidJvmMain)
             dependencies {
                 implementation(libs.commons.lang3)
+                // TODO: workaround for https://issuetracker.google.com/issues/396148592
+                implementation("androidx.sqlite:sqlite-jvm:2.5.0-beta01")
             }
         }
         val appleMain by getting {

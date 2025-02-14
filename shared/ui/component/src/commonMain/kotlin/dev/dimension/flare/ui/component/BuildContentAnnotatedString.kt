@@ -77,7 +77,17 @@ private fun AnnotatedString.Builder.renderElement(
             appendLine()
         }
 
-        "span", "p" -> {
+        "p" -> {
+            element.childNodes().forEach {
+                renderNode(node = it, styleData = styleData, imageId = imageId)
+            }
+            val parent = element.parent()
+            if (parent != null && parent.lastElementChild() != element) {
+                appendLine()
+            }
+        }
+
+        "span" -> {
             element.childNodes().forEach {
                 renderNode(node = it, styleData = styleData, imageId = imageId)
             }

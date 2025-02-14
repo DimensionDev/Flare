@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.LayoutDirection
 
-operator fun PaddingValues.plus(contentPadding: PaddingValues): PaddingValues =
+public operator fun PaddingValues.plus(contentPadding: PaddingValues): PaddingValues =
     AdditionalPaddingValues(
         this,
         contentPadding,

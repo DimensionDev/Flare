@@ -9,9 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowWidthSizeClass
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.platform.PlatformText
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -21,8 +21,7 @@ internal fun FeedComponent(
     data: UiTimeline.ItemContent.Feed,
     modifier: Modifier = Modifier,
 ) {
-    val windowInfo = currentWindowAdaptiveInfo()
-    val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT
+    val bigScreen = isBigScreen()
     val uriHandler = LocalUriHandler.current
     Column(
         modifier =

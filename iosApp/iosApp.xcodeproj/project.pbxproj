@@ -542,20 +542,10 @@
 			path = Common;
 			sourceTree = "<group>";
 		};
-		649E7A0A2D318F5100AC2F62 /* User */ = {
-			isa = PBXGroup;
-			children = (
-				649E7A092D318F5100AC2F62 /* CommonProfileHeader.swift */,
-			);
-			path = User;
-			sourceTree = "<group>";
-		};
 		649E7A132D318F5100AC2F62 /* Components */ = {
 			isa = PBXGroup;
 			children = (
 				648CD6C42D3644C300262228 /* ProfileNewHeaderView.swift */,
-				649E7A0A2D318F5100AC2F62 /* User */,
-				649E7A0C2D318F5100AC2F62 /* ProfileContentView.swift */,
 				649E7A0D2D318F5100AC2F62 /* ProfileHeaderView.swift */,
 				649E7A112D318F5100AC2F62 /* ProfileTabBarView.swift */,
 				649E7A122D318F5100AC2F62 /* UserAvatar.swift */,
@@ -588,7 +578,6 @@
 				649E7A1D2D318F5100AC2F62 /* ProfileRefreshViewController.swift */,
 				649E7A0E2D318F5100AC2F62 /* ProfileMediaViewController.swift */,
 				649E7A1E2D318F5100AC2F62 /* ProfileStretchRefreshControl.swift */,
-				649E7A1F2D318F5100AC2F62 /* ProfileWithUserNameScreen.swift */,
 				649E7A192D318F5100AC2F62 /* ProfileMediaListScreen.swift */,
 			);
 			path = View;
@@ -597,6 +586,7 @@
 		649E7A212D318F5100AC2F62 /* ProfileNew */ = {
 			isa = PBXGroup;
 			children = (
+				64EA48DD2D633EA300D0F609 /* SwiftUIView */,
 				649E7A082D318F5100AC2F62 /* Common */,
 				649E7A132D318F5100AC2F62 /* Components */,
 				649E7A162D318F5100AC2F62 /* Data */,
@@ -712,6 +702,7 @@
 		64E876F92D0430C7003559B9 /* Home */ = {
 			isa = PBXGroup;
 			children = (
+				64EA48DE2D633EEA00D0F609 /* SwiftUIView */,
 				64E876E42D0430C7003559B9 /* Components */,
 				64E876E72D0430C7003559B9 /* Data */,
 				64E876E92D0430C7003559B9 /* Model */,
@@ -851,6 +842,23 @@
 				64E877BD2D08131D003559B9 /* Colors.swift */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		64EA48DD2D633EA300D0F609 /* SwiftUIView */ = {
+			isa = PBXGroup;
+			children = (
+				649E7A092D318F5100AC2F62 /* CommonProfileHeader.swift */,
+				649E7A0C2D318F5100AC2F62 /* ProfileContentView.swift */,
+				649E7A1F2D318F5100AC2F62 /* ProfileWithUserNameScreen.swift */,
+			);
+			path = SwiftUIView;
+			sourceTree = "<group>";
+		};
+		64EA48DE2D633EEA00D0F609 /* SwiftUIView */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = SwiftUIView;
 			sourceTree = "<group>";
 		};
 		64EB7DAA2D0C4C0400E41656 /* Data */ = {

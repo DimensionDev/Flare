@@ -1,10 +1,6 @@
 package dev.dimension.flare.data.model
 
-import android.content.Context
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.datastore.core.DataStore
-import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
-import androidx.datastore.dataStore
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Solid
@@ -24,26 +20,41 @@ import compose.icons.fontawesomeicons.solid.RectangleList
 import compose.icons.fontawesomeicons.solid.SquareRss
 import compose.icons.fontawesomeicons.solid.Star
 import compose.icons.fontawesomeicons.solid.Users
-import dev.dimension.flare.R
+import dev.dimension.flare.Res
+import dev.dimension.flare.dm_list_title
+import dev.dimension.flare.home_tab_bookmarks_title
+import dev.dimension.flare.home_tab_discover_title
+import dev.dimension.flare.home_tab_favorite_title
+import dev.dimension.flare.home_tab_featured_title
+import dev.dimension.flare.home_tab_feeds_title
+import dev.dimension.flare.home_tab_home_title
+import dev.dimension.flare.home_tab_list_title
+import dev.dimension.flare.home_tab_me_title
+import dev.dimension.flare.home_tab_notifications_title
+import dev.dimension.flare.mastodon_tab_local_title
+import dev.dimension.flare.mastodon_tab_public_title
+import dev.dimension.flare.rss_title
+import dev.dimension.flare.settings_title
 import dev.dimension.flare.ui.icons.Misskey
+import org.jetbrains.compose.resources.StringResource
 
-internal val TitleType.Localized.resId: Int
+internal val TitleType.Localized.res: StringResource
     get() =
         when (key) {
-            TitleType.Localized.LocalizedKey.Home -> R.string.home_tab_home_title
-            TitleType.Localized.LocalizedKey.Notifications -> R.string.home_tab_notifications_title
-            TitleType.Localized.LocalizedKey.Discover -> R.string.home_tab_discover_title
-            TitleType.Localized.LocalizedKey.Me -> R.string.home_tab_me_title
-            TitleType.Localized.LocalizedKey.Settings -> R.string.settings_title
-            TitleType.Localized.LocalizedKey.MastodonLocal -> R.string.mastodon_tab_local_title
-            TitleType.Localized.LocalizedKey.MastodonPublic -> R.string.mastodon_tab_public_title
-            TitleType.Localized.LocalizedKey.Featured -> R.string.home_tab_featured_title
-            TitleType.Localized.LocalizedKey.Bookmark -> R.string.home_tab_bookmarks_title
-            TitleType.Localized.LocalizedKey.Favourite -> R.string.home_tab_favorite_title
-            TitleType.Localized.LocalizedKey.List -> R.string.home_tab_list_title
-            TitleType.Localized.LocalizedKey.Feeds -> R.string.home_tab_feeds_title
-            TitleType.Localized.LocalizedKey.DirectMessage -> R.string.dm_list_title
-            TitleType.Localized.LocalizedKey.Rss -> R.string.rss_title
+            TitleType.Localized.LocalizedKey.Home -> Res.string.home_tab_home_title
+            TitleType.Localized.LocalizedKey.Notifications -> Res.string.home_tab_notifications_title
+            TitleType.Localized.LocalizedKey.Discover -> Res.string.home_tab_discover_title
+            TitleType.Localized.LocalizedKey.Me -> Res.string.home_tab_me_title
+            TitleType.Localized.LocalizedKey.Settings -> Res.string.settings_title
+            TitleType.Localized.LocalizedKey.MastodonLocal -> Res.string.mastodon_tab_local_title
+            TitleType.Localized.LocalizedKey.MastodonPublic -> Res.string.mastodon_tab_public_title
+            TitleType.Localized.LocalizedKey.Featured -> Res.string.home_tab_featured_title
+            TitleType.Localized.LocalizedKey.Bookmark -> Res.string.home_tab_bookmarks_title
+            TitleType.Localized.LocalizedKey.Favourite -> Res.string.home_tab_favorite_title
+            TitleType.Localized.LocalizedKey.List -> Res.string.home_tab_list_title
+            TitleType.Localized.LocalizedKey.Feeds -> Res.string.home_tab_feeds_title
+            TitleType.Localized.LocalizedKey.DirectMessage -> Res.string.dm_list_title
+            TitleType.Localized.LocalizedKey.Rss -> Res.string.rss_title
         }
 
 internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =
@@ -67,12 +78,3 @@ internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =
         IconType.Material.MaterialIcon.Messages -> FontAwesomeIcons.Solid.Message
         IconType.Material.MaterialIcon.Rss -> FontAwesomeIcons.Solid.SquareRss
     }
-
-internal val Context.tabSettings: DataStore<TabSettings> by dataStore(
-    fileName = "tab_settings.pb",
-    serializer = TabSettingsSerializer,
-    corruptionHandler =
-        ReplaceFileCorruptionHandler {
-            TabSettingsSerializer.defaultValue
-        },
-)

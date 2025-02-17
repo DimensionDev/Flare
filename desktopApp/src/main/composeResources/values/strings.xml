@@ -5,8 +5,21 @@
     <string name="home_login">Login</string>
     <string name="home_settings">Settings</string>
 
-    <string name="home_timeline">Home</string>
-    <string name="home_discover">Discover</string>
+    <string name="home_tab_home_title">Home</string>
+    <string name="home_tab_notifications_title">Notifications</string>
+    <string name="home_tab_me_title">Me</string>
+    <string name="home_tab_discover_title">Discover</string>
+    <string name="settings_title">Settings</string>
+    <string name="mastodon_tab_local_title">Local</string>
+    <string name="mastodon_tab_public_title">Public</string>
+    <string name="home_tab_featured_title">Featured</string>
+    <string name="home_tab_bookmarks_title">Bookmarks</string>
+    <string name="home_tab_favorite_title">Favorite</string>
+    <string name="home_tab_list_title">List</string>
+    <string name="home_tab_feeds_title">Feeds</string>
+    <string name="dm_list_title">Direct Messages</string>
+    <string name="rss_title">Rss</string>
+    <string name="home_timeline_new_toots">New toots</string>
 
     <string name="navigate_back">Back</string>
     <string name="service_select_instance_input_placeholder">Instance URL</string>

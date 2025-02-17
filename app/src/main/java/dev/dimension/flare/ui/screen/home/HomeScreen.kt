@@ -35,7 +35,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -105,16 +104,11 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.component.RichText
-import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.isSuccess
-import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.HomeTabsPresenter
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
-import dev.dimension.flare.ui.presenter.home.DirectMessageBadgePresenter
-import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
@@ -128,9 +122,6 @@ import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.rememberNavAnimX
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
@@ -712,99 +703,9 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
                 NavigationState()
             }
         val tabs =
-            account.user
-                .flatMap(
-                    onError = {
-                        UiState.Success(
-                            HomeTabState(
-                                primary =
-                                    TimelineTabItem.guest
-                                        .map {
-                                            HomeTabItem(it)
-                                        }.toImmutableList(),
-                                secondary = persistentListOf(),
-                                extraProfileRoute = null,
-                                secondaryIconOnly = true,
-                            ),
-                        )
-                    },
-                ) { user ->
-                    settingsRepository.tabSettings.collectAsUiState().value.flatMap(
-                        onError = {
-                            UiState.Success(
-                                HomeTabState(
-                                    primary =
-                                        TimelineTabItem
-                                            .defaultPrimary(user)
-                                            .map {
-                                                HomeTabItem(it)
-                                            }.toImmutableList(),
-                                    secondary =
-                                        TimelineTabItem
-                                            .defaultSecondary(user)
-                                            .map {
-                                                HomeTabItem(it)
-                                            }.toImmutableList(),
-                                    extraProfileRoute =
-                                        HomeTabItem(
-                                            tabItem =
-                                                ProfileTabItem(
-                                                    accountKey = user.key,
-                                                    userKey = user.key,
-                                                ),
-                                        ),
-                                    secondaryIconOnly = true,
-                                ),
-                            )
-                        },
-                    ) { tabSettings ->
-                        val secondary =
-                            tabSettings.secondaryItems ?: TimelineTabItem.defaultSecondary(user)
-                        UiState.Success(
-                            HomeTabState(
-                                primary =
-                                    tabSettings.items
-                                        .map {
-                                            HomeTabItem(it)
-                                        }.toImmutableList(),
-                                secondary =
-                                    secondary
-                                        .filter {
-                                            tabSettings.items.none { item -> item.key == it.key }
-                                        }.map {
-                                            HomeTabItem(it)
-                                        }.toImmutableList(),
-                                extraProfileRoute =
-                                    HomeTabItem(
-                                        tabItem =
-                                            ProfileTabItem(
-                                                accountKey = user.key,
-                                                userKey = user.key,
-                                            ),
-                                    ),
-                                secondaryIconOnly = tabSettings.secondaryItems == null,
-                            ),
-                        )
-                    }
-                }.map {
-                    it.copy(
-                        primary =
-                            it.primary
-                                .map {
-                                    when (it.tabItem) {
-                                        is NotificationTabItem ->
-                                            it.copy(
-                                                badgeCountState = notificationBadgePresenter(it.tabItem.account),
-                                            )
-                                        is DirectMessageTabItem ->
-                                            it.copy(
-                                                badgeCountState = directMessageBadgePresenter(it.tabItem.account),
-                                            )
-                                        else -> it
-                                    }
-                                }.toImmutableList(),
-                    )
-                }
+            remember {
+                HomeTabsPresenter(settingsRepository.tabSettings)
+            }.invoke()
         var showAccountSelection by remember {
             mutableStateOf(false)
         }
@@ -813,7 +714,7 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
                 AccountsPresenter()
             }.invoke()
         object {
-            val tabs = tabs
+            val tabs = tabs.tabs
             val navigationState = navigationState
             val showAccountSelection = showAccountSelection
             val accountSelectionState = accountSelectionState
@@ -825,66 +726,10 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
     }
 
 @Composable
-private fun notificationBadgePresenter(accountType: AccountType): UiState<Int> {
-    val presenter =
-        remember(accountType) {
-            NotificationBadgePresenter(accountType)
-        }.invoke()
-    return presenter.count
-}
-
-@Composable
-private fun directMessageBadgePresenter(accountType: AccountType): UiState<Int> {
-    val presenter =
-        remember(accountType) {
-            DirectMessageBadgePresenter(accountType)
-        }.invoke()
-    return presenter.count
-}
-
-@Composable
 private fun accountTypePresenter(accountType: AccountType) =
     run {
         remember(accountType) { UserPresenter(accountType, null) }.invoke()
     }
-
-@Immutable
-private data class HomeTabItem(
-    val tabItem: TabItem,
-    val tabState: TabState = TabState(),
-    val badgeCountState: UiState<Int> = UiState.Success(0),
-)
-
-@Immutable
-private data class HomeTabState(
-    val primary: ImmutableList<HomeTabItem>,
-    val secondary: ImmutableList<HomeTabItem>,
-    val extraProfileRoute: HomeTabItem?,
-    val secondaryIconOnly: Boolean = false,
-) {
-    val all: ImmutableList<HomeTabItem>
-        get() =
-            (primary + secondary + extraProfileRoute)
-                .filterNotNull()
-                .distinctBy { it.tabItem.key }
-                .toImmutableList()
-}
-
-private class TabState {
-    private val callbacks = mutableListOf<() -> Unit>()
-
-    fun registerCallback(callback: () -> Unit) {
-        callbacks.add(callback)
-    }
-
-    fun unregisterCallback(callback: () -> Unit) {
-        callbacks.remove(callback)
-    }
-
-    fun onClick() {
-        callbacks.lastOrNull()?.invoke()
-    }
-}
 
 internal class NavigationState {
     private val state = mutableStateOf<NavigationSuiteType?>(null)
@@ -935,7 +780,7 @@ internal class NavigationState {
 }
 
 private val LocalTabState =
-    androidx.compose.runtime.staticCompositionLocalOf<TabState?> {
+    androidx.compose.runtime.staticCompositionLocalOf<HomeTabsPresenter.State.HomeTabState.HomeTabItem.TabState?> {
         null
     }
 

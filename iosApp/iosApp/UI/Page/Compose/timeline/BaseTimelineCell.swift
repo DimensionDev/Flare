@@ -2,7 +2,7 @@ import shared
 import SwiftUI
 import UIKit
 
-class HomeNewTimelineCell: UITableViewCell {
+class BaseTimelineCell: UITableViewCell {
     private var hostingController: UIHostingController<StatusItemView>?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -59,17 +59,4 @@ class HomeNewTimelineCell: UITableViewCell {
         // 保持禁用状态
         selectionStyle = .none
     }
-}
-
-extension UIView {
-    var parentViewController: UIViewController? {
-        var parentResponder: UIResponder? = self
-        while parentResponder != nil {
-            parentResponder = parentResponder?.next
-            if let viewController = parentResponder as? UIViewController {
-                return viewController
-            }
-        }
-        return nil
-    }
-}
+} 

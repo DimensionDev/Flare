@@ -10,7 +10,6 @@ class HomeNewViewController: UIViewController {
     // - Properties
 
     private let tabStore: TabSettingsStore
-    private let timelineStore: TimelineStore
     private let accountType: AccountType
     private var listViewControllers: [Int: JXPagingViewListViewDelegate] = [:]
 
@@ -21,9 +20,8 @@ class HomeNewViewController: UIViewController {
 
     // - Initialization
 
-    init(tabStore: TabSettingsStore, timelineStore: TimelineStore, accountType: AccountType) {
+    init(tabStore: TabSettingsStore, accountType: AccountType) {
         self.tabStore = tabStore
-        self.timelineStore = timelineStore
         self.accountType = accountType
         super.init(nibName: nil, bundle: nil)
     }
@@ -69,7 +67,7 @@ class HomeNewViewController: UIViewController {
             let selectedTab = tabStore.availableTabs[index]
             tabStore.updateSelectedTab(selectedTab)
 
-            if let currentList = pagingView.validListDict[index] as? HomeNewTimelineViewController,
+            if let currentList = pagingView.validListDict[index] as? NewTimelineViewController,
                let presenter = tabStore.currentPresenter
             {
                 currentList.updatePresenter(presenter)
@@ -331,12 +329,11 @@ extension HomeNewViewController: JXPagingViewDelegate {
             return existingVC
         }
 
-        let timelineVC = HomeNewTimelineViewController()
+        let timelineVC = NewTimelineViewController()
         if index < tabStore.availableTabs.count {
             let tab = tabStore.availableTabs[index]
             if let presenter = tabStore.getOrCreatePresenter(for: tab) {
                 timelineVC.updatePresenter(presenter)
-                timelineVC.configure(with: timelineStore, key: tab.key)
             }
         }
         listViewControllers[index] = timelineVC
@@ -362,7 +359,7 @@ extension HomeNewViewController: JXSegmentedViewDelegate {
             tabStore.updateSelectedTab(selectedTab)
 
             // 获取当前的列表视图并更新其 presenter
-            if let currentList = pagingView.validListDict[index] as? HomeNewTimelineViewController,
+            if let currentList = pagingView.validListDict[index] as? NewTimelineViewController,
                let presenter = tabStore.currentPresenter
             {
                 // 更新 timeline presenter
@@ -373,7 +370,7 @@ extension HomeNewViewController: JXSegmentedViewDelegate {
 
     func segmentedView(_: JXSegmentedView, didClickSelectedItemAt index: Int) {
         // 如果点击已选中的标签，可以触发刷新
-        if let currentList = pagingView.validListDict[index] as? HomeNewTimelineViewController {
+        if let currentList = pagingView.validListDict[index] as? NewTimelineViewController {
             Task { @MainActor in
                 currentList.refresh()
             }

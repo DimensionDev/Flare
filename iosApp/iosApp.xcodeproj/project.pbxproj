@@ -36,9 +36,7 @@
 		642A0D872D56235C0009C16D /* FLNewGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D6D2D56235C0009C16D /* FLNewGestureRecognizer.swift */; };
 		642A0D882D56235C0009C16D /* FLNewSideMenuDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D792D56235C0009C16D /* FLNewSideMenuDelegate.swift */; };
 		642AA5402D1021500088B7E3 /* TimelineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642AA53F2D1021500088B7E3 /* TimelineStore.swift */; };
-		644C848B2D523D8700E92D0D /* HomeNewTimelineViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84892D523D8700E92D0D /* HomeNewTimelineViewController.swift */; };
 		644C848C2D523D8700E92D0D /* HomeNewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C848A2D523D8700E92D0D /* HomeNewViewController.swift */; };
-		644C848D2D523D8700E92D0D /* HomeNewTimelineCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84882D523D8700E92D0D /* HomeNewTimelineCell.swift */; };
 		644C848E2D523D8700E92D0D /* HomeNewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84872D523D8700E92D0D /* HomeNewScreen.swift */; };
 		644C84C82D535C6D00E92D0D /* MediaPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84A62D535C6D00E92D0D /* MediaPreviewViewController.swift */; };
 		644C84C92D535C6D00E92D0D /* TranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84B12D535C6D00E92D0D /* TranslationService.swift */; };
@@ -86,9 +84,7 @@
 		6488800B2D1AD43E00EFE72C /* JXSegmentedView in Frameworks */ = {isa = PBXBuildFile; productRef = 6488800A2D1AD43E00EFE72C /* JXSegmentedView */; };
 		648CD6C52D3644C500262228 /* ProfileNewHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 648CD6C42D3644C300262228 /* ProfileNewHeaderView.swift */; };
 		649E7A222D318F5100AC2F62 /* ProfileMediaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A0E2D318F5100AC2F62 /* ProfileMediaViewController.swift */; };
-		649E7A232D318F5100AC2F62 /* ProfileNewTimelineViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A1C2D318F5100AC2F62 /* ProfileNewTimelineViewController.swift */; };
 		649E7A242D318F5100AC2F62 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A0D2D318F5100AC2F62 /* ProfileHeaderView.swift */; };
-		649E7A252D318F5100AC2F62 /* ProfileNewTimelineCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A1B2D318F5100AC2F62 /* ProfileNewTimelineCell.swift */; };
 		649E7A262D318F5100AC2F62 /* ProfileRefreshViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A1D2D318F5100AC2F62 /* ProfileRefreshViewController.swift */; };
 		649E7A272D318F5100AC2F62 /* ProfileNewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A1A2D318F5100AC2F62 /* ProfileNewScreen.swift */; };
 		649E7A282D318F5100AC2F62 /* UserAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A122D318F5100AC2F62 /* UserAvatar.swift */; };
@@ -115,7 +111,6 @@
 		64E2087A2CF84670001C64EF /* Generated in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208792CF84670001C64EF /* Generated */; };
 		64E2087E2CF846DE001C64EF /* KotlinByteArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E2087B2CF846DE001C64EF /* KotlinByteArray.swift */; };
 		64E2087F2CF846DE001C64EF /* ViewExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E2087C2CF846DE001C64EF /* ViewExt.swift */; };
-		64E877292D0430C7003559B9 /* HomeAppBar.swift.bak in Sources */ = {isa = PBXBuildFile; fileRef = 64E876EE2D0430C7003559B9 /* HomeAppBar.swift.bak */; };
 		64E8772C2D0430C7003559B9 /* ServiceSelectScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876FD2D0430C7003559B9 /* ServiceSelectScreen.swift */; };
 		64E8772D2D0430C7003559B9 /* HomeContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876EF2D0430C7003559B9 /* HomeContent.swift */; };
 		64E8772E2D0430C7003559B9 /* MisskeyReactionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877262D0430C7003559B9 /* MisskeyReactionSheet.swift */; };
@@ -136,7 +131,6 @@
 		64E877512D0430C7003559B9 /* MediaComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D62D0430C7003559B9 /* MediaComponent.swift */; };
 		64E877542D0430C7003559B9 /* AccountsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877122D0430C7003559B9 /* AccountsScreen.swift */; };
 		64E877552D0430C7003559B9 /* FeedMediaGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D22D0430C7003559B9 /* FeedMediaGridView.swift */; };
-		64E877562D0430C7003559B9 /* HomeTimelineScreen.swift.bak in Sources */ = {isa = PBXBuildFile; fileRef = 64E876F12D0430C7003559B9 /* HomeTimelineScreen.swift.bak */; };
 		64E877582D0430C7003559B9 /* AppearanceScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877132D0430C7003559B9 /* AppearanceScreen.swift */; };
 		64E877592D0430C7003559B9 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877142D0430C7003559B9 /* SettingsScreen.swift */; };
 		64E8775C2D0430C7003559B9 /* TabSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876E52D0430C7003559B9 /* TabSettingsStore.swift */; };
@@ -162,6 +156,8 @@
 		64E877C92D0842AA003559B9 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877C82D0842AA003559B9 /* SwiftSoup */; };
 		64E877CC2D0842C5003559B9 /* Fuzi in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877CB2D0842C5003559B9 /* Fuzi */; };
 		64E890742D2D28400001B93D /* MJRefresh in Frameworks */ = {isa = PBXBuildFile; productRef = 64E890732D2D28400001B93D /* MJRefresh */; };
+		64EA48D92D63199D00D0F609 /* BaseTimelineCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64EA48D82D63199D00D0F609 /* BaseTimelineCell.swift */; };
+		64EA48DB2D632E8500D0F609 /* NewTimelineViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64EA48DA2D632E8500D0F609 /* NewTimelineViewController.swift */; };
 		64EB7DAB2D0C4C0400E41656 /* FLTabSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */; };
 		64FF2E132D2BC4E80046A32B /* Generated in Frameworks */ = {isa = PBXBuildFile; productRef = 64FF2E122D2BC4E80046A32B /* Generated */; };
 		B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */; };
@@ -192,8 +188,6 @@
 		642A0D792D56235C0009C16D /* FLNewSideMenuDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLNewSideMenuDelegate.swift; sourceTree = "<group>"; };
 		642AA53F2D1021500088B7E3 /* TimelineStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineStore.swift; sourceTree = "<group>"; };
 		644C84872D523D8700E92D0D /* HomeNewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewScreen.swift; sourceTree = "<group>"; };
-		644C84882D523D8700E92D0D /* HomeNewTimelineCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewTimelineCell.swift; sourceTree = "<group>"; };
-		644C84892D523D8700E92D0D /* HomeNewTimelineViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewTimelineViewController.swift; sourceTree = "<group>"; };
 		644C848A2D523D8700E92D0D /* HomeNewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewViewController.swift; sourceTree = "<group>"; };
 		644C848F2D535C6D00E92D0D /* SensitiveContentButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensitiveContentButton.swift; sourceTree = "<group>"; };
 		644C84912D535C6D00E92D0D /* UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
@@ -251,8 +245,6 @@
 		649E7A172D318F5100AC2F62 /* ProfileUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUserInfo.swift; sourceTree = "<group>"; };
 		649E7A192D318F5100AC2F62 /* ProfileMediaListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMediaListScreen.swift; sourceTree = "<group>"; };
 		649E7A1A2D318F5100AC2F62 /* ProfileNewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileNewScreen.swift; sourceTree = "<group>"; };
-		649E7A1B2D318F5100AC2F62 /* ProfileNewTimelineCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileNewTimelineCell.swift; sourceTree = "<group>"; };
-		649E7A1C2D318F5100AC2F62 /* ProfileNewTimelineViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileNewTimelineViewController.swift; sourceTree = "<group>"; };
 		649E7A1D2D318F5100AC2F62 /* ProfileRefreshViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRefreshViewController.swift; sourceTree = "<group>"; };
 		649E7A1E2D318F5100AC2F62 /* ProfileStretchRefreshControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileStretchRefreshControl.swift; sourceTree = "<group>"; };
 		649E7A1F2D318F5100AC2F62 /* ProfileWithUserNameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileWithUserNameScreen.swift; sourceTree = "<group>"; };
@@ -278,9 +270,7 @@
 		64E876E52D0430C7003559B9 /* TabSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSettingsStore.swift; sourceTree = "<group>"; };
 		64E876E82D0430C7003559B9 /* AppBarTabItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBarTabItem.swift; sourceTree = "<group>"; };
 		64E876EB2D0430C7003559B9 /* DiscoverScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverScreen.swift; sourceTree = "<group>"; };
-		64E876EE2D0430C7003559B9 /* HomeAppBar.swift.bak */ = {isa = PBXFileReference; lastKnownFileType = text; path = HomeAppBar.swift.bak; sourceTree = "<group>"; };
 		64E876EF2D0430C7003559B9 /* HomeContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeContent.swift; sourceTree = "<group>"; };
-		64E876F12D0430C7003559B9 /* HomeTimelineScreen.swift.bak */ = {isa = PBXFileReference; lastKnownFileType = text; path = HomeTimelineScreen.swift.bak; sourceTree = "<group>"; };
 		64E876F32D0430C7003559B9 /* NotificationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScreen.swift; sourceTree = "<group>"; };
 		64E876F52D0430C7003559B9 /* SearchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchScreen.swift; sourceTree = "<group>"; };
 		64E876F62D0430C7003559B9 /* StatusMediaScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusMediaScreen.swift; sourceTree = "<group>"; };
@@ -304,6 +294,8 @@
 		64E877BD2D08131D003559B9 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		64E877C32D083DF6003559B9 /* FlareMarkdownText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareMarkdownText.swift; sourceTree = "<group>"; };
 		64E877C42D083DF6003559B9 /* TwitterTextProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TwitterTextProvider.swift; sourceTree = "<group>"; };
+		64EA48D82D63199D00D0F609 /* BaseTimelineCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseTimelineCell.swift; sourceTree = "<group>"; };
+		64EA48DA2D632E8500D0F609 /* NewTimelineViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewTimelineViewController.swift; sourceTree = "<group>"; };
 		64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLTabSettings.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* Flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -527,6 +519,9 @@
 		644C84FA2D535FC100E92D0D /* timeline */ = {
 			isa = PBXGroup;
 			children = (
+				64E876DA2D0430C7003559B9 /* StatusTimelineBuilder.swift */,
+				64EA48DA2D632E8500D0F609 /* NewTimelineViewController.swift */,
+				64EA48D82D63199D00D0F609 /* BaseTimelineCell.swift */,
 			);
 			path = timeline;
 			sourceTree = "<group>";
@@ -564,7 +559,6 @@
 				649E7A0D2D318F5100AC2F62 /* ProfileHeaderView.swift */,
 				649E7A112D318F5100AC2F62 /* ProfileTabBarView.swift */,
 				649E7A122D318F5100AC2F62 /* UserAvatar.swift */,
-				649E7A1B2D318F5100AC2F62 /* ProfileNewTimelineCell.swift */,
 				649E7A0B2D318F5100AC2F62 /* MediaCollectionViewCell.swift */,
 			);
 			path = Components;
@@ -592,7 +586,6 @@
 			children = (
 				649E7A1A2D318F5100AC2F62 /* ProfileNewScreen.swift */,
 				649E7A1D2D318F5100AC2F62 /* ProfileRefreshViewController.swift */,
-				649E7A1C2D318F5100AC2F62 /* ProfileNewTimelineViewController.swift */,
 				649E7A0E2D318F5100AC2F62 /* ProfileMediaViewController.swift */,
 				649E7A1E2D318F5100AC2F62 /* ProfileStretchRefreshControl.swift */,
 				649E7A1F2D318F5100AC2F62 /* ProfileWithUserNameScreen.swift */,
@@ -630,8 +623,6 @@
 			children = (
 				64E876F72D0430C7003559B9 /* HomeAppBarSettingsView.swift */,
 				644C84872D523D8700E92D0D /* HomeNewScreen.swift */,
-				644C84882D523D8700E92D0D /* HomeNewTimelineCell.swift */,
-				644C84892D523D8700E92D0D /* HomeNewTimelineViewController.swift */,
 				644C848A2D523D8700E92D0D /* HomeNewViewController.swift */,
 			);
 			path = AppBar;
@@ -667,7 +658,6 @@
 				64E876D72D0430C7003559B9 /* MediaViewModel.swift */,
 				64E876D82D0430C7003559B9 /* QuotedStatus.swift */,
 				64E876D92D0430C7003559B9 /* StatusRetweetHeaderComponent.swift */,
-				64E876DA2D0430C7003559B9 /* StatusTimelineBuilder.swift */,
 				64E876DB2D0430C7003559B9 /* UserComponent.swift */,
 			);
 			path = Status;
@@ -714,8 +704,6 @@
 			children = (
 				64BFB16F2D54ABAA002793C0 /* AppBar */,
 				64BFB16E2D54AB6B002793C0 /* Tabview */,
-				64E876EE2D0430C7003559B9 /* HomeAppBar.swift.bak */,
-				64E876F12D0430C7003559B9 /* HomeTimelineScreen.swift.bak */,
 				64E876F62D0430C7003559B9 /* StatusMediaScreen.swift */,
 			);
 			path = View;
@@ -1138,7 +1126,6 @@
 				06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */,
 				64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */,
 				B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */,
-				64E877292D0430C7003559B9 /* HomeAppBar.swift.bak in Sources */,
 				64EB7DAB2D0C4C0400E41656 /* FLTabSettings.swift in Sources */,
 				64E8772C2D0430C7003559B9 /* ServiceSelectScreen.swift in Sources */,
 				64E8772D2D0430C7003559B9 /* HomeContent.swift in Sources */,
@@ -1153,19 +1140,17 @@
 				64E8773E2D0430C7003559B9 /* StatusMediaScreen.swift in Sources */,
 				64E877422D0430C7003559B9 /* FeedMediaPlayButton.swift in Sources */,
 				64E877432D0430C7003559B9 /* PhotoBrowserManager.swift in Sources */,
-				644C848B2D523D8700E92D0D /* HomeNewTimelineViewController.swift in Sources */,
 				644C848C2D523D8700E92D0D /* HomeNewViewController.swift in Sources */,
-				644C848D2D523D8700E92D0D /* HomeNewTimelineCell.swift in Sources */,
 				644C848E2D523D8700E92D0D /* HomeNewScreen.swift in Sources */,
 				64D8AD082D462DFA0045494F /* HomeScreen.swift in Sources */,
 				64E877452D0430C7003559B9 /* CommonTimelineStatusComponent.swift in Sources */,
 				64E877492D0430C7003559B9 /* VVOLoginScreen.swift in Sources */,
 				64E8774A2D0430C7003559B9 /* ImageViewWindow.swift in Sources */,
+				64EA48DB2D632E8500D0F609 /* NewTimelineViewController.swift in Sources */,
 				64E8774D2D0430C7003559B9 /* StatusTimelineBuilder.swift in Sources */,
 				64E877512D0430C7003559B9 /* MediaComponent.swift in Sources */,
 				64E877542D0430C7003559B9 /* AccountsScreen.swift in Sources */,
 				64E877552D0430C7003559B9 /* FeedMediaGridView.swift in Sources */,
-				64E877562D0430C7003559B9 /* HomeTimelineScreen.swift.bak in Sources */,
 				64E877582D0430C7003559B9 /* AppearanceScreen.swift in Sources */,
 				64E877592D0430C7003559B9 /* SettingsScreen.swift in Sources */,
 				64E877C52D083DF6003559B9 /* FlareMarkdownText.swift in Sources */,
@@ -1202,6 +1187,7 @@
 				644C84E42D535C6D00E92D0D /* TranslationViewModel.swift in Sources */,
 				642A0D7C2D56235C0009C16D /* FLNewSideMenuConfiguration.swift in Sources */,
 				642A0D7D2D56235C0009C16D /* FLNewGestureCoordinator.swift in Sources */,
+				64EA48D92D63199D00D0F609 /* BaseTimelineCell.swift in Sources */,
 				642A0D7E2D56235C0009C16D /* FLNewAppState.swift in Sources */,
 				642A0D7F2D56235C0009C16D /* FLNewGestureState.swift in Sources */,
 				642A0D802D56235C0009C16D /* View+NewSideMenu.swift in Sources */,
@@ -1240,9 +1226,7 @@
 				64E877712D0430C7003559B9 /* VVOStatusDetailScreen.swift in Sources */,
 				648CD6C52D3644C500262228 /* ProfileNewHeaderView.swift in Sources */,
 				649E7A222D318F5100AC2F62 /* ProfileMediaViewController.swift in Sources */,
-				649E7A232D318F5100AC2F62 /* ProfileNewTimelineViewController.swift in Sources */,
 				649E7A242D318F5100AC2F62 /* ProfileHeaderView.swift in Sources */,
-				649E7A252D318F5100AC2F62 /* ProfileNewTimelineCell.swift in Sources */,
 				649E7A262D318F5100AC2F62 /* ProfileRefreshViewController.swift in Sources */,
 				649E7A272D318F5100AC2F62 /* ProfileNewScreen.swift in Sources */,
 				649E7A282D318F5100AC2F62 /* UserAvatar.swift in Sources */,

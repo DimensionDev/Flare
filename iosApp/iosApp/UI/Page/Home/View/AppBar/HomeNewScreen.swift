@@ -44,7 +44,6 @@ struct HomeNewScreen: View {
         if accountType is AccountTypeGuest || tabStore.currentUser != nil {
             HomeNewViewControllerRepresentable(
                 tabStore: tabStore,
-                timelineStore: timelineStore,
                 accountType: accountType,
                 selectedTab: $selectedTab,
                 isShowAppBar: $isShowAppBar
@@ -98,7 +97,6 @@ struct HomeNewScreen: View {
 
 struct HomeNewViewControllerRepresentable: UIViewControllerRepresentable {
     let tabStore: TabSettingsStore
-    let timelineStore: TimelineStore
     let accountType: AccountType
     @Binding var selectedTab: Int
     @Binding var isShowAppBar: Bool?
@@ -106,7 +104,6 @@ struct HomeNewViewControllerRepresentable: UIViewControllerRepresentable {
     func makeUIViewController(context _: Context) -> HomeNewViewController {
         let controller = HomeNewViewController(
             tabStore: tabStore,
-            timelineStore: timelineStore,
             accountType: accountType
         )
         return controller

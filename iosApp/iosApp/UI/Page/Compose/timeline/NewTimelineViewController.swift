@@ -6,56 +6,42 @@ import shared
 import SwiftUI
 import UIKit
 
-class HomeNewTimelineViewController: UIViewController {
+class NewTimelineViewController: UIViewController {
     var tableView: UITableView!
     var presenter: TimelinePresenter?
     private var scrollCallback: ((UIScrollView) -> Void)?
-    private var timelineStore: TimelineStore?
-    private var currentKey: String = ""
+    
+    // 是否显示加载更多
+    var shouldShowLoadMore: Bool = true
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        os_log("[📔][HomeNewTimelineViewController] viewDidLoad", log: .default, type: .debug)
+        os_log("[📔][NewTimelineViewController] viewDidLoad", log: .default, type: .debug)
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        os_log("[📔][HomeNewTimelineViewController] viewWillAppear", log: .default, type: .debug)
+        os_log("[📔][NewTimelineViewController] viewWillAppear", log: .default, type: .debug)
     }
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        os_log("[📔][HomeNewTimelineViewController] viewDidAppear", log: .default, type: .debug)
-        // 恢复滚动位置
-        if let store = timelineStore {
-            let position = store.getScrollPosition(for: currentKey)
-            tableView.setContentOffset(CGPoint(x: 0, y: position), animated: false)
-        }
-    }
-
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        // 保存滚动位置
-        if let store = timelineStore {
-            store.saveScrollPosition(tableView.contentOffset.y, for: currentKey)
-            store.saveContentSize(tableView.contentSize, for: currentKey)
-        }
+        os_log("[📔][NewTimelineViewController] viewDidAppear", log: .default, type: .debug)
     }
 
     deinit {
         presenter = nil
         scrollCallback = nil
-        timelineStore = nil
     }
 
     private func setupUI() {
-        os_log("[📔][HomeNewTimelineViewController] setupUI start", log: .default, type: .debug)
+        os_log("[📔][NewTimelineViewController] setupUI start", log: .default, type: .debug)
         // 配置 tableView
         tableView = UITableView()
         tableView.backgroundColor = .clear
         tableView.separatorStyle = .none
-        tableView.register(HomeNewTimelineCell.self, forCellReuseIdentifier: "TimelineCell")
+        tableView.register(BaseTimelineCell.self, forCellReuseIdentifier: "TimelineCell")
         view.addSubview(tableView)
 
         // 设置约束
@@ -73,73 +59,75 @@ class HomeNewTimelineViewController: UIViewController {
 
         // 配置刷新控件
         setupRefreshControl()
-        os_log("[📔][HomeNewTimelineViewController] setupUI end", log: .default, type: .debug)
+        os_log("[📔][NewTimelineViewController] setupUI end", log: .default, type: .debug)
     }
 
     private func setupRefreshControl() {
+        os_log("[📔][NewTimelineViewController] setupRefreshControl start", log: .default, type: .debug)
         // 下拉刷新
         tableView.mj_header = MJRefreshNormalHeader(refreshingBlock: { [weak self] in
             Task {
-                if let timelineState = self?.presenter?.models.value as? TimelineState {
-                    try? await timelineState.refresh()
+//                if let timelineState = self?.presenter?.models.value as? TimelineState {
+//                    try? await timelineState.refresh()
                     await MainActor.run {
                         self?.tableView.mj_header?.endRefreshing()
                     }
-                }
+//                }
             }
         })
-    }
 
-    func configure(with store: TimelineStore, key: String) {
-        timelineStore = store
-        currentKey = key
+        // 上拉加载更多
+        if shouldShowLoadMore {
+            os_log("[📔][NewTimelineViewController] 配置上拉加载更多", log: .default, type: .debug)
+            tableView.mj_footer = MJRefreshAutoNormalFooter(refreshingBlock: { [weak self] in
+                Task {
+//                    if let timelineState = self?.presenter?.models.value as? TimelineState {
+//                        try? await timelineState.loadMore()
+                        await MainActor.run {
+                            self?.tableView.mj_footer?.endRefreshing()
+                        }
+//                    }
+                }
+            })
+        }
+        os_log("[📔][NewTimelineViewController] setupRefreshControl end", log: .default, type: .debug)
     }
 
     func updatePresenter(_ presenter: TimelinePresenter) {
-        os_log("[📔][HomeNewTimelineViewController] updatePresenter start", log: .default, type: .debug)
+        os_log("[📔][NewTimelineViewController] updatePresenter start", log: .default, type: .debug)
         self.presenter = presenter
         Task { @MainActor in
             for await state in presenter.models {
                 if let timelineState = state as? TimelineState {
-                    os_log("[📔][HomeNewTimelineViewController] received new state", log: .default, type: .debug)
+                    os_log("[📔][NewTimelineViewController] received new state", log: .default, type: .debug)
                     self.handleState(timelineState.listState)
                 }
             }
         }
-        os_log("[📔][HomeNewTimelineViewController] updatePresenter end", log: .default, type: .debug)
+        os_log("[📔][NewTimelineViewController] updatePresenter end", log: .default, type: .debug)
     }
 
     private func handleState(_ state: PagingState<UiTimeline>) {
-        os_log("[📔][HomeNewTimelineViewController] handleState start", log: .default, type: .debug)
+        os_log("[📔][NewTimelineViewController] handleState start", log: .default, type: .debug)
         switch onEnum(of: state) {
         case .loading:
-            os_log("[📔][HomeNewTimelineViewController] state: loading", log: .default, type: .debug)
-        // 显示加载状态
+            os_log("[📔][NewTimelineViewController] state: loading", log: .default, type: .debug)
         case let .success(data):
-            os_log("[📔][HomeNewTimelineViewController] state: success, itemCount: %{public}d", log: .default, type: .debug, data.itemCount)
-            // 更新数据
+            os_log("[📔][NewTimelineViewController] state: success, itemCount: %{public}d", log: .default, type: .debug, data.itemCount)
             tableView.reloadData()
             tableView.mj_header?.endRefreshing()
-
-            // 恢复滚动位置
-            if let store = timelineStore {
-                let contentSize = store.getContentSize(for: currentKey)
-                if tableView.contentSize != contentSize {
-                    let position = store.getScrollPosition(for: currentKey)
-                    tableView.setContentOffset(CGPoint(x: 0, y: position), animated: false)
-                }
-            }
+            tableView.mj_footer?.endRefreshing()
         case let .error(error):
-            os_log("[📔][HomeNewTimelineViewController] state: error", log: .default, type: .debug)
-            // 显示错误状态
+            os_log("[📔][NewTimelineViewController] state: error", log: .default, type: .debug)
             tableView.mj_header?.endRefreshing()
+            tableView.mj_footer?.endRefreshing()
         case .empty:
-            os_log("[📔][HomeNewTimelineViewController] state: empty", log: .default, type: .debug)
-            // 显示空状态
+            os_log("[📔][NewTimelineViewController] state: empty", log: .default, type: .debug)
             tableView.reloadData()
             tableView.mj_header?.endRefreshing()
+            tableView.mj_footer?.endRefreshing()
         }
-        os_log("[📔][HomeNewTimelineViewController] handleState end", log: .default, type: .debug)
+        os_log("[📔][NewTimelineViewController] handleState end", log: .default, type: .debug)
     }
 
     func refresh() {
@@ -148,8 +136,7 @@ class HomeNewTimelineViewController: UIViewController {
 }
 
 // - UITableViewDataSource
-
-extension HomeNewTimelineViewController: UITableViewDataSource {
+extension NewTimelineViewController: UITableViewDataSource {
     func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         if let timelineState = presenter?.models.value as? TimelineState,
            case let .success(data) = onEnum(of: timelineState.listState)
@@ -160,7 +147,7 @@ extension HomeNewTimelineViewController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "TimelineCell", for: indexPath) as! HomeNewTimelineCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "TimelineCell", for: indexPath) as! BaseTimelineCell
         if let timelineState = presenter?.models.value as? TimelineState,
            case let .success(data) = onEnum(of: timelineState.listState),
            data.itemCount > 0,
@@ -173,22 +160,14 @@ extension HomeNewTimelineViewController: UITableViewDataSource {
 }
 
 // - UITableViewDelegate
-
-extension HomeNewTimelineViewController: UITableViewDelegate {
+extension NewTimelineViewController: UITableViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         scrollCallback?(scrollView)
-
-        // 保存滚动位置
-        if let timelineStore {
-            timelineStore.saveScrollPosition(scrollView.contentOffset.y, for: currentKey)
-            timelineStore.saveContentSize(scrollView.contentSize, for: currentKey)
-        }
     }
 }
 
 // - JXPagingViewListViewDelegate
-
-extension HomeNewTimelineViewController: JXPagingViewListViewDelegate {
+extension NewTimelineViewController: JXPagingViewListViewDelegate {
     func listView() -> UIView {
         view
     }
@@ -200,4 +179,4 @@ extension HomeNewTimelineViewController: JXPagingViewListViewDelegate {
     func listViewDidScrollCallback(callback: @escaping (UIScrollView) -> Void) {
         scrollCallback = callback
     }
-}
+} 

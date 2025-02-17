@@ -122,59 +122,14 @@ class ProfileMediaViewController: UIViewController {
         }
     }
 
-    private func showPhotoBrowser(media _: UiMedia, images: [UiMedia], initialIndex: Int) {
-        let browser = JXPhotoBrowser()
-        browser.scrollDirection = .horizontal
-        browser.numberOfItems = { images.count }
-        browser.pageIndex = initialIndex
-
-        // 设置淡入淡出动画
-        browser.transitionAnimator = JXPhotoBrowserFadeAnimator()
-
-        // 根据媒体类型返回对应的 Cell
-        browser.cellClassAtIndex = { index in
-            let media = images[index]
-            switch onEnum(of: media) {
-            case .video, .gif:
-                return MediaBrowserVideoCell.self
-            default:
-                return JXPhotoBrowserImageCell.self
-            }
+    private func showPhotoBrowser(media: UiMedia, images: [UiMedia], initialIndex: Int) {
+        Task { @MainActor in
+            PhotoBrowserManager.shared.showPhotoBrowser(
+                media: media,
+                images: images,
+                initialIndex: initialIndex
+            )
         }
-
-        // 加载媒体内容
-        browser.reloadCellAtIndex = { context in
-            guard context.index >= 0, context.index < images.count else { return }
-            let media = images[context.index]
-
-            switch onEnum(of: media) {
-            case let .video(data):
-                if let url = URL(string: data.url),
-                   let cell = context.cell as? MediaBrowserVideoCell
-                {
-                    cell.load(url: url, previewUrl: URL(string: data.thumbnailUrl), isGIF: false)
-                }
-            case let .gif(data):
-                if let url = URL(string: data.url),
-                   let cell = context.cell as? MediaBrowserVideoCell
-                {
-                    cell.load(url: url, previewUrl: URL(string: data.previewUrl), isGIF: true)
-                }
-            case let .image(data):
-                if let url = URL(string: data.url),
-                   let cell = context.cell as? JXPhotoBrowserImageCell
-                {
-                    cell.imageView.kf.setImage(with: url, options: [
-                        .transition(.fade(0.25)),
-                        .processor(DownsamplingImageProcessor(size: UIScreen.main.bounds.size)),
-                    ])
-                }
-            default:
-                break
-            }
-        }
-
-        browser.show()
     }
 }
 

@@ -8,4 +8,3 @@ internal actual class NativeWebScraper {
     ) {
     }
 }
-

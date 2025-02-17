@@ -4,7 +4,8 @@ internal actual class NativeWebScraper {
     actual fun parse(
         url: String,
         scriptToInject: String,
-        callback: (String) -> Unit
+        callback: (String) -> Unit,
     ) {
     }
 }
+

@@ -507,6 +507,11 @@ internal fun DbEmoji.toUi(): List<UiEmoji> =
                 UiEmoji(
                     shortcode = it.shortcode.orEmpty(),
                     url = it.url.orEmpty(),
+                    category = it.category.orEmpty(),
+                    searchKeywords =
+                        listOfNotNull(
+                            it.shortcode,
+                        ),
                 )
             }
         }
@@ -516,6 +521,8 @@ internal fun DbEmoji.toUi(): List<UiEmoji> =
                 UiEmoji(
                     shortcode = it.name,
                     url = it.url,
+                    category = it.category.orEmpty(),
+                    searchKeywords = it.aliases + it.name,
                 )
             }
         }

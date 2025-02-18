@@ -35,6 +35,7 @@ import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -185,8 +186,6 @@ public class ComposePresenter(
                     it.emoji
                 }.flatMap {
                     it.emoji.collectAsState().toUi()
-                }.map {
-                    it.toImmutableListWrapper()
                 }
 
         val visibilityState =
@@ -298,7 +297,7 @@ public abstract class ComposeState(
     public val visibilityState: UiState<VisibilityState>,
     public val replyState: UiState<UiTimeline>?,
     public val initialTextState: UiState<InitialText>?,
-    public val emojiState: UiState<ImmutableListWrapper<UiEmoji>>,
+    public val emojiState: UiState<ImmutableMap<String, ImmutableList<UiEmoji>>>,
     public val composeConfig: UiState<ComposeConfig>,
     public val enableCrossPost: UiState<Boolean>,
     public val selectedAccounts: ImmutableList<UiAccount>,

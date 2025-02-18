@@ -646,6 +646,8 @@ internal fun EmojiSimple.toUi(): UiEmoji =
     UiEmoji(
         shortcode = name,
         url = url,
+        category = category.orEmpty(),
+        searchKeywords = aliases + name,
     )
 
 internal fun resolveMisskeyEmoji(

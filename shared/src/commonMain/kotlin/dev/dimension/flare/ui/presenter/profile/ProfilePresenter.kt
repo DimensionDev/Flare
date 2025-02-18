@@ -5,10 +5,12 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
+import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.flatten
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
@@ -33,8 +35,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.UserState
-import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
-import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import dev.dimension.flare.ui.presenter.status.LogUserHistoryPresenter
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.flow

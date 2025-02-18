@@ -259,17 +259,20 @@ struct ComposeScreen: View {
                                     if case let .success(emojis) = onEnum(of: viewModel.model.emojiState) {
                                         ScrollView {
                                             LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
-                                                ForEach(1 ... emojis.data.size, id: \.self) { index in
-                                                    let item = emojis.data.get(index: index - 1)
-                                                    Button(action: {
-                                                        viewModel.addEmoji(emoji: item)
-                                                    }, label: {
-                                                        KFImage(URL(string: item.url))
-                                                            .resizable()
-                                                            .scaledToFit()
+                                                ForEach(0 ..< emojis.data.size, id: \.self) { index in
+                                                    let items = emojis.data.getValue(index: index)
+                                                    ForEach(0 ..< items.count, id: \.self) { iIndex in
+                                                        let item = items[iIndex]
+                                                        Button(action: {
+                                                            viewModel.addEmoji(emoji: item)
+                                                        }, label: {
+                                                            KFImage(URL(string: item.url))
+                                                                .resizable()
+                                                                .scaledToFit()
 
-                                                    })
-                                                    .buttonStyle(.plain)
+                                                        })
+                                                        .buttonStyle(.plain)
+                                                    }
                                                 }
                                             }
                                             .if(horizontalSizeClass == .compact, transform: { view in

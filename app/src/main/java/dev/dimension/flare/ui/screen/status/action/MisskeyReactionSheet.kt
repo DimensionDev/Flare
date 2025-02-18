@@ -63,7 +63,7 @@ private fun MisskeyReactionSheet(
     }
     state.emojis.onSuccess {
         EmojiPicker(
-            data = it,
+            data = it.data,
             onEmojiSelected = {
                 state.select(it)
                 onBack()

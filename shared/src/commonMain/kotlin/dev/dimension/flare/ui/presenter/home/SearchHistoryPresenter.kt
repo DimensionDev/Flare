@@ -4,12 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.data.repository.SearchHistoryRepository
 import dev.dimension.flare.ui.model.UiSearchHistory
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 

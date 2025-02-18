@@ -8,7 +8,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.common.collectAsState
+import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
@@ -19,8 +21,8 @@ import dev.dimension.flare.data.repository.allAccountsPresenter
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.EmojiData
 import dev.dimension.flare.ui.model.UiAccount
-import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
@@ -31,11 +33,8 @@ import dev.dimension.flare.ui.model.merge
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
-import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -186,6 +185,10 @@ public class ComposePresenter(
                     it.emoji
                 }.flatMap {
                     it.emoji.collectAsState().toUi()
+                }.map {
+                    remember(it) {
+                        EmojiData(it)
+                    }
                 }
 
         val visibilityState =
@@ -297,7 +300,7 @@ public abstract class ComposeState(
     public val visibilityState: UiState<VisibilityState>,
     public val replyState: UiState<UiTimeline>?,
     public val initialTextState: UiState<InitialText>?,
-    public val emojiState: UiState<ImmutableMap<String, ImmutableList<UiEmoji>>>,
+    public val emojiState: UiState<EmojiData>,
     public val composeConfig: UiState<ComposeConfig>,
     public val enableCrossPost: UiState<Boolean>,
     public val selectedAccounts: ImmutableList<UiAccount>,

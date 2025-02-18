@@ -799,7 +799,7 @@ private fun ComposeScreen(
                                             ),
                                     ) {
                                         EmojiPicker(
-                                            data = emojis,
+                                            data = emojis.data,
                                             onEmojiSelected = state::selectEmoji,
                                             modifier =
                                                 Modifier

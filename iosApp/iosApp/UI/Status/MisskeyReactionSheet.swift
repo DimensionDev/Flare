@@ -18,16 +18,19 @@ struct MisskeyReactionSheet: View {
                 if case let .success(data) = onEnum(of: state.emojis) {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
                         ForEach(0 ..< data.data.size, id: \.self) { index in
-                            let item = data.data.get(index: index)
-                            Button(action: {
-                                state.select(emoji: item)
-                                onBack()
-                            }, label: {
-                                KFImage(URL(string: item.url))
-                                    .resizable()
-                                    .scaledToFit()
-                            })
-                            .buttonStyle(.plain)
+                            let items = data.data.getValue(index: index)
+                            ForEach(0 ..< items.count, id: \.self) { iIndex in
+                                let item = items[iIndex]
+                                Button(action: {
+                                    state.select(emoji: item)
+                                    onBack()
+                                }, label: {
+                                    KFImage(URL(string: item.url))
+                                        .resizable()
+                                        .scaledToFit()
+                                })
+                                .buttonStyle(.plain)
+                            }
                         }
                     }
                     .if(horizontalSizeClass == .compact, transform: { view in

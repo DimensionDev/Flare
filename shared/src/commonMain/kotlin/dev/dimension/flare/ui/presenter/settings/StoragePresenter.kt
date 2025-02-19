@@ -40,6 +40,7 @@ public class StoragePresenter :
                     cacheDatabase.statusDao().clear()
                     cacheDatabase.userDao().clear()
                     cacheDatabase.emojiDao().clear()
+                    cacheDatabase.emojiDao().clearHistory()
                 }
             }
         }

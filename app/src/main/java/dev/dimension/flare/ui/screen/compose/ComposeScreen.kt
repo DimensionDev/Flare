@@ -768,6 +768,15 @@ private fun ComposeScreen(
                                 contentDescription = null,
                             )
                             if (state.showEmojiMenu) {
+                                val actualAccountType =
+                                    remember(
+                                        state.state.selectedAccounts,
+                                    ) {
+                                        state.state.selectedAccounts
+                                            .firstOrNull()
+                                            ?.accountKey
+                                            ?.let(AccountType::Specific)
+                                    }
                                 Popup(
                                     onDismissRequest = {
                                         state.setShowEmojiMenu(false)
@@ -801,6 +810,7 @@ private fun ComposeScreen(
                                         EmojiPicker(
                                             data = emojis.data,
                                             onEmojiSelected = state::selectEmoji,
+                                            accountType = actualAccountType ?: accountType,
                                             modifier =
                                                 Modifier
                                                     .padding(8.dp),

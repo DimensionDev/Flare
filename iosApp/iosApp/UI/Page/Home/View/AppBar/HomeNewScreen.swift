@@ -3,8 +3,8 @@ import SwiftUI
 
 struct HomeNewScreen: View {
     let accountType: AccountType
-    @StateObject private var timelineStore: TimelineStore
-    @StateObject private var tabStore: TabSettingsStore
+//    @StateObject private var timelineStore: AppBarTabSettingStore
+    @StateObject private var tabStore: AppBarTabSettingStore
     @State private var isShowAppBar: Bool? = true
     @State private var showSettings = false
     @State private var showTabSettings = false
@@ -15,17 +15,17 @@ struct HomeNewScreen: View {
         self.accountType = accountType
 
         // 1. 先初始化 TimelineStore
-        let timelineStore = TimelineStore(accountType: accountType)
-        _timelineStore = StateObject(wrappedValue: timelineStore)
+//        let timelineStore = AppBarTabSettingStore(accountType: accountType)
+//        _timelineStore = StateObject(wrappedValue: timelineStore)
 
-        // 2. 初始化 TabSettingsStore
-        let tabStore = TabSettingsStore(timelineStore: timelineStore, accountType: accountType)
+        // 2. 初始化 TabSettingsStore timelineStore: timelineStore,
+        let tabStore = AppBarTabSettingStore(accountType: accountType)
         _tabStore = StateObject(wrappedValue: tabStore)
 
         // 3. 游客模式特殊处理
         if accountType is AccountTypeGuest {
             // 设置默认的 Home Timeline
-            timelineStore.currentPresenter = HomeTimelinePresenter(accountType: accountType)
+            tabStore.currentPresenter = HomeTimelinePresenter(accountType: accountType)
 
             // 只使用 Home 标签
             let homeTab = FLHomeTimelineTabItem(
@@ -34,7 +34,7 @@ struct HomeNewScreen: View {
                     icon: .material(.home)
                 ), account: accountType
             )
-            tabStore.availableTabs = [homeTab]
+            tabStore.availableAppBarTabsItems = [homeTab]
             tabStore.updateSelectedTab(homeTab)
         }
     }
@@ -96,7 +96,7 @@ struct HomeNewScreen: View {
 // - HomeNewViewControllerRepresentable
 
 struct HomeNewViewControllerRepresentable: UIViewControllerRepresentable {
-    let tabStore: TabSettingsStore
+    let tabStore: AppBarTabSettingStore
     let accountType: AccountType
     @Binding var selectedTab: Int
     @Binding var isShowAppBar: Bool?

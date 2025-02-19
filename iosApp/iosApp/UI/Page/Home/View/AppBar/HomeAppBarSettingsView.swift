@@ -3,13 +3,13 @@ import SwiftUI
 
 struct HomeAppBarSettingsView: View {
     @Environment(\.dismiss) var dismiss
-    @ObservedObject var store: TabSettingsStore
+    @ObservedObject var store: AppBarTabSettingStore
 
     var body: some View {
         NavigationView {
             List {
                 // 主要标签（只显示第一个）
-                if let primaryTab = store.primaryItems.first {
+                if let primaryTab = store.primaryHomeItems.first {
                     Section(header: Text("main tab")) {
                         TabItemRow(tab: primaryTab, store: store, isPrimary: true)
                     }
@@ -17,8 +17,10 @@ struct HomeAppBarSettingsView: View {
 
                 // 次要标签（可更改状态）
                 Section(header: Text("used tabs")) {
-                    ForEach(store.storeItems, id: \.key) { tab in
-                        TabItemRow(tab: tab, store: store, isPrimary: false)
+                    ForEach(store.availableAppBarTabsItems, id: \.key) { tab in
+                        if let primaryTab = store.primaryHomeItems.first, tab.key != primaryTab.key {
+                            TabItemRow(tab: tab, store: store, isPrimary: false)
+                        }
                     }
                     .onMove { source, destination in
                         store.moveTab(from: source, to: destination)
@@ -27,7 +29,7 @@ struct HomeAppBarSettingsView: View {
 
                 // 未启用的标签
                 let unusedTabs = store.secondaryItems.filter { tab in
-                    !store.storeItems.contains { $0.key == tab.key }
+                    !store.availableAppBarTabsItems.contains { $0.key == tab.key }
                 }
                 if !unusedTabs.isEmpty {
                     Section(header: Text("unused tabs")) {
@@ -50,7 +52,7 @@ struct HomeAppBarSettingsView: View {
 
 struct TabItemRow: View {
     let tab: FLTabItem
-    let store: TabSettingsStore
+    let store: AppBarTabSettingStore
     let isPrimary: Bool
 
     var body: some View {
@@ -94,7 +96,7 @@ struct TabItemRow: View {
             // 次要标签显示开关
             if !isPrimary {
                 Toggle("", isOn: Binding(
-                    get: { store.storeItems.contains(where: { $0.key == tab.key }) },
+                    get: { store.availableAppBarTabsItems.contains(where: { $0.key == tab.key }) },
                     set: { _ in store.toggleTab(tab.key) }
                 ))
                 .tint(Color.interactiveActive)

@@ -4,19 +4,19 @@ import SwiftUI
 struct FLNewMenuGestureModifier: ViewModifier {
     @ObservedObject var appState: FLNewAppState
     @State private var currentAppBarIndex: Int = 0
-    
+
     // 添加判断向右滑动的方法
     private func isValidRightSwipe(_ value: DragGesture.Value) -> Bool {
         let translation = value.translation
         let distance = sqrt(pow(translation.width, 2) + pow(translation.height, 2))
         guard distance > 0 else { return false }
-        
+
         // 计算方向向量，判断是否向右滑动（允许一定角度的偏差）
         let directionVector = (
             x: translation.width / distance,
             y: translation.height / distance
         )
-        return directionVector.x > 0.7  // cos 45° ≈ 0.7
+        return directionVector.x > 0.7 // cos 45° ≈ 0.7
     }
 
     init(appState: FLNewAppState) {
@@ -27,14 +27,14 @@ struct FLNewMenuGestureModifier: ViewModifier {
         content.simultaneousGesture(
             DragGesture(minimumDistance: 10, coordinateSpace: .local)
                 .onChanged { value in
-                    
+
                     // 在第一个 tab 时才处理菜单手势
                     if currentAppBarIndex > 0 {
 //                        os_log("[🖐️][GestureModifier] Drag ignored - not first appbar item",
 //                               log: .default, type: .debug)
                         return
                     }
-                    
+
                     // 检查是否是向右滑动
                     guard isValidRightSwipe(value) else {
                         os_log("[🖐️][GestureModifier] Drag ignored - not right direction",
@@ -42,25 +42,21 @@ struct FLNewMenuGestureModifier: ViewModifier {
                         return
                     }
 
-                  
-
                     handleDragChange(value)
                 }
                 .onEnded { value in
-                    
+
                     // 在第一个 tab 时才处理菜单手势
                     if currentAppBarIndex > 0 {
                         return
                     }
-                    
+
                     // 检查是否是向右滑动
                     guard isValidRightSwipe(value) else {
                         os_log("[🖐️][GestureModifier] Drag end ignored - not right direction",
                                log: .default, type: .debug)
                         return
                     }
-                    
-                  
 
                     handleDragEnd(value)
                 }

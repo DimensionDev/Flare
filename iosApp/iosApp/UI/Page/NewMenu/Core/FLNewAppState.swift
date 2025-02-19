@@ -141,5 +141,3 @@ class FLNewAppState: ObservableObject {
         performanceMonitor.logGesturePerformance(name, operation: operation)
     }
 }
-
- 

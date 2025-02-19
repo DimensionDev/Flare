@@ -78,8 +78,7 @@
 		644C84F42D535C6D00E92D0D /* MediaPreviewVideoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84A02D535C6D00E92D0D /* MediaPreviewVideoViewModel.swift */; };
 		644C84F52D535C6D00E92D0D /* ComposeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84B42D535C6D00E92D0D /* ComposeScreen.swift */; };
 		644C84F82D535D0B00E92D0D /* JXPagingView in Frameworks */ = {isa = PBXBuildFile; productRef = 644C84F72D535D0B00E92D0D /* JXPagingView */; };
-		64578CD12D64961A008CC23F /* TimelineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64578CD02D64961A008CC23F /* TimelineStore.swift */; };
-		64578CD22D64961A008CC23F /* TabSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64578CCF2D64961A008CC23F /* TabSettingsStore.swift */; };
+		64578CD22D64961A008CC23F /* AppBarTabSettingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64578CCF2D64961A008CC23F /* AppBarTabSettingStore.swift */; };
 		64578CD82D649BB9008CC23F /* ProfilePresenterWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64578CD72D649BB9008CC23F /* ProfilePresenterWrapper.swift */; };
 		64578CDC2D64A60E008CC23F /* ProfileMediaPresenterWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64578CDB2D64A60B008CC23F /* ProfileMediaPresenterWrapper.swift */; };
 		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
@@ -229,8 +228,7 @@
 		644C84C42D535C6D00E92D0D /* VGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VGrid.swift; sourceTree = "<group>"; };
 		644C84C52D535C6D00E92D0D /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		644C84C62D535C6D00E92D0D /* Zoomable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zoomable.swift; sourceTree = "<group>"; };
-		64578CCF2D64961A008CC23F /* TabSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabSettingsStore.swift; sourceTree = "<group>"; };
-		64578CD02D64961A008CC23F /* TimelineStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimelineStore.swift; sourceTree = "<group>"; };
+		64578CCF2D64961A008CC23F /* AppBarTabSettingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBarTabSettingStore.swift; sourceTree = "<group>"; };
 		64578CD72D649BB9008CC23F /* ProfilePresenterWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePresenterWrapper.swift; sourceTree = "<group>"; };
 		64578CDB2D64A60B008CC23F /* ProfileMediaPresenterWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMediaPresenterWrapper.swift; sourceTree = "<group>"; };
 		64655C2C2CFD6CA000255488 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
@@ -669,8 +667,7 @@
 		64E876E72D0430C7003559B9 /* Data */ = {
 			isa = PBXGroup;
 			children = (
-				64578CCF2D64961A008CC23F /* TabSettingsStore.swift */,
-				64578CD02D64961A008CC23F /* TimelineStore.swift */,
+				64578CCF2D64961A008CC23F /* AppBarTabSettingStore.swift */,
 			);
 			path = Data;
 			sourceTree = "<group>";
@@ -1245,8 +1242,7 @@
 				649E7A352D318F5100AC2F62 /* ProfileTabSettingStore.swift in Sources */,
 				64E877732D0430C7003559B9 /* StorageScreen.swift in Sources */,
 				64E877752D0430C7003559B9 /* AppBarTabItem.swift in Sources */,
-				64578CD12D64961A008CC23F /* TimelineStore.swift in Sources */,
-				64578CD22D64961A008CC23F /* TabSettingsStore.swift in Sources */,
+				64578CD22D64961A008CC23F /* AppBarTabSettingStore.swift in Sources */,
 				64E877782D0430C7003559B9 /* QuotedStatus.swift in Sources */,
 				64E877792D0430C7003559B9 /* LinkPreview.swift in Sources */,
 				64E2087E2CF846DE001C64EF /* KotlinByteArray.swift in Sources */,

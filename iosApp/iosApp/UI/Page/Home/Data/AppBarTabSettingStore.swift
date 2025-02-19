@@ -2,34 +2,42 @@ import Foundation
 import shared
 import SwiftUI
 
-class TabSettingsStore: ObservableObject, TabStateProvider {
-    @Published var primaryItems: [FLTabItem] = [] // 主要标签（不可更改状态）
+// 在文件顶部添加通知名称定义
+extension Notification.Name {
+    static let accountChanged = Notification.Name("accountChanged")
+}
+
+class AppBarTabSettingStore: ObservableObject, TabStateProvider {
+    @Published var primaryHomeItems: [FLTabItem] = [] // 主要标签（不可更改状态）Appbar 第一个Home 标签
     @Published var secondaryItems: [FLTabItem] = [] // 所有次要标签
-    @Published var storeItems: [FLTabItem] = [] // UserDefaults 存储的已启用标签
-    @Published var availableTabs: [FLTabItem] = []
-    @Published var selectedTabKey: String = ""
+    @Published var availableAppBarTabsItems: [FLTabItem] = [] // UserDefaults 存储的已启用标签
+
+    @Published var selectedAppBarTabKey: String = "" // 选中的 tab key
     @Published var currentPresenter: TimelinePresenter?
     @Published var currentUser: UiUserV2?
 
     private var presenter = ActiveAccountPresenter()
     private var isInitializing = false
-    private var timelineStore: TimelineStore
     private let settingsManager = FLTabSettingsManager()
     private let accountType: AccountType
-
     // 缓存 presenter 避免重复创建
     private var presenterCache: [String: TimelinePresenter] = [:]
-
     // TabStateProvider 协议实现
     var onTabChange: ((Int) -> Void)?
-    
+
+    init(accountType: AccountType) {
+        self.accountType = accountType
+        observeAccountChanges()
+        observeUser()
+    }
+
     var tabCount: Int {
-        availableTabs.count
+        availableAppBarTabsItems.count
     }
 
     // 获取分段标题
     var segmentTitles: [String] {
-        availableTabs.map { tab in
+        availableAppBarTabsItems.map { tab in
             switch tab.metaData.title {
             case let .text(title): title
             case let .localized(key): NSLocalizedString(key, comment: "")
@@ -39,7 +47,7 @@ class TabSettingsStore: ObservableObject, TabStateProvider {
 
     // 获取选中索引
     var selectedIndex: Int {
-        availableTabs.firstIndex { $0.key == selectedTabKey } ?? 0
+        availableAppBarTabsItems.firstIndex { $0.key == selectedAppBarTabKey } ?? 0
     }
 
     // 获取或创建 Presenter
@@ -57,15 +65,22 @@ class TabSettingsStore: ObservableObject, TabStateProvider {
     // 清除缓存
     func clearCache() {
         presenterCache.removeAll()
-        currentPresenter = nil
+//        currentPresenter = nil
+        // 保留当前 presenter，清理其他缓存
+        // 这个地方估计有问题 todo://
+//        let current = currentPresenter
+//
+//         if let key = currentKey {
+//            presenterCache[key] = current
+//        }
     }
 
     // 更新选中标签
     func updateSelectedTab(_ tab: FLTabItem) {
-        selectedTabKey = tab.key
-        if let presenter = getOrCreatePresenter(for: tab) {
-            currentPresenter = presenter
-        }
+        selectedAppBarTabKey = tab.key
+//        if let presenter = getOrCreatePresenter(for: tab) {
+//            currentPresenter = presenter
+//        }
         notifyTabChange()
     }
 
@@ -90,13 +105,6 @@ class TabSettingsStore: ObservableObject, TabStateProvider {
         NotificationCenter.default.removeObserver(self)
     }
 
-    init(timelineStore: TimelineStore, accountType: AccountType) {
-        self.timelineStore = timelineStore
-        self.accountType = accountType
-        observeAccountChanges()
-        observeUser()
-    }
-
     private func observeUser() {
         Task { @MainActor in
             for await state in presenter.models {
@@ -116,24 +124,21 @@ class TabSettingsStore: ObservableObject, TabStateProvider {
         isInitializing = true
         currentUser = user
 
-        // 同步加载所有数据
-        let primary = FLTabSettings.defaultPrimary(user: user)
-        let secondary = FLTabSettings.defaultSecondary(user: user)
-        primaryItems = primary
-        secondaryItems = secondary
+        primaryHomeItems = FLTabSettings.defaultPrimary(user: user)
+        secondaryItems = FLTabSettings.defaultSecondary(user: user)
 
         // 从 UserDefaults 加载存储的标签
-        storeItems = settingsManager.getEnabledItems(for: user) ?? secondary
+        availableAppBarTabsItems = settingsManager.getEnabledItems(for: user) ?? secondaryItems
 
         // 立即更新可用标签
-        if let homeItem = primary.first {
-            let enabledItems = storeItems.isEmpty ? secondary : storeItems
-            availableTabs = [homeItem] + enabledItems
+        if let homeItem = primaryHomeItems.first {
+            let enabledItems = availableAppBarTabsItems.isEmpty ? [homeItem] + secondaryItems : availableAppBarTabsItems
+            availableAppBarTabsItems = enabledItems
         }
 
         // 选择第一个标签
-        if selectedTabKey.isEmpty {
-            if let firstItem = availableTabs.first {
+        if selectedAppBarTabKey.isEmpty {
+            if let firstItem = availableAppBarTabsItems.first {
                 updateSelectedTab(firstItem)
             }
         }
@@ -143,36 +148,28 @@ class TabSettingsStore: ObservableObject, TabStateProvider {
 
     func saveTabs() {
         guard let user = currentUser else { return }
-        settingsManager.saveEnabledItems(storeItems, for: user)
-        updateAvailableTabs()
-    }
-
-    private func updateAvailableTabs() {
-        if let homeItem = primaryItems.first {
-            let enabledItems = storeItems.isEmpty ? secondaryItems : storeItems
-            availableTabs = [homeItem] + enabledItems
-        }
+        settingsManager.saveEnabledItems(availableAppBarTabsItems, for: user)
     }
 
     func toggleTab(_ id: String) {
         guard let user = currentUser else { return }
 
-        let wasSelected = selectedTabKey == id
+        let wasSelected = selectedAppBarTabKey == id
 
-        if storeItems.contains(where: { $0.key == id }) {
+        if availableAppBarTabsItems.contains(where: { $0.key == id }) {
             // 关闭标签：从 storeItems 中移除
-            storeItems.removeAll { $0.key == id }
+            availableAppBarTabsItems.removeAll { $0.key == id }
 
             // 如果关闭的是当前选中的标签，切换到第一个标签（首页）
             if wasSelected {
-                if let firstTab = primaryItems.first {
+                if let firstTab = primaryHomeItems.first {
                     updateSelectedTab(firstTab)
                 }
             }
         } else {
             // 开启标签：添加到 storeItems
             if let item = secondaryItems.first(where: { $0.key == id }) {
-                storeItems.append(item)
+                availableAppBarTabsItems.append(item)
             }
         }
 
@@ -189,7 +186,7 @@ class TabSettingsStore: ObservableObject, TabStateProvider {
     }
 
     func moveTab(from source: IndexSet, to destination: Int) {
-        storeItems.move(fromOffsets: source, toOffset: destination)
+        availableAppBarTabsItems.move(fromOffsets: source, toOffset: destination)
         saveTabs()
     }
 

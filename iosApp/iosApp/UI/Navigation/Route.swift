@@ -1,7 +1,7 @@
+import Combine
 import Foundation
 import shared
 import SwiftUI
-import Combine
 
 extension Notification.Name {
     static let flShowNewMenu = Notification.Name("flShowNewMenu")
@@ -9,8 +9,6 @@ extension Notification.Name {
     static let showTabSettings = Notification.Name("ShowTabSettings")
     static let showLogin = Notification.Name("ShowLogin")
     static let flMenuStateDidChange = Notification.Name("FLMenuStateDidChange")
- 
-
 }
 
 struct RouterView: View {
@@ -19,15 +17,15 @@ struct RouterView: View {
     @StateObject private var menuState: FLNewAppState
     @State private var selectedTab = 0
     @StateObject private var gestureState: FLNewGestureState
-    
+
     init() {
         let accountType = AccountTypeGuest()
-        let timelineStore = TimelineStore(accountType: accountType)
-        let tabStore = TabSettingsStore(timelineStore: timelineStore, accountType: accountType)
+//        let timelineStore = AppBarTabSettingStore(accountType: accountType)
+        let tabStore = AppBarTabSettingStore(accountType: accountType)
         _menuState = StateObject(wrappedValue: FLNewAppState(tabProvider: tabStore))
         _gestureState = StateObject(wrappedValue: FLNewGestureState(tabProvider: tabStore))
     }
-    
+
     var body: some View {
         ObservePresenter<UserState, ActiveAccountPresenter, AnyView>(presenter: presenter) { userState in
             AnyView(
@@ -42,13 +40,13 @@ struct RouterView: View {
                         #endif
                     case .error: AccountTypeGuest()
                     }
-                    
-                    if let accountType = accountType {
+
+                    if let accountType {
                         let userData = switch onEnum(of: userState.user) {
                         case let .success(data): data.data
                         default: nil as UiUserV2?
                         }
-                        
+
                         FLNewSideMenu(
                             isOpen: $menuState.isMenuOpen,
                             menu: FLNewMenuView(
@@ -59,14 +57,14 @@ struct RouterView: View {
                             content: HomeContent(accountType: accountType)
                                 .environment(\.appSettings, appSettings)
                         )
-                        .modifier(FLNewMenuGestureModifier(appState: menuState))// 加上手势
+                        .modifier(FLNewMenuGestureModifier(appState: menuState)) // 加上手势
                         .onReceive(NotificationCenter.default.publisher(for: .flShowNewMenu)) { _ in
                             withAnimation {
                                 menuState.isMenuOpen = true
                             }
                         }
                         #if os(macOS)
-                            .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
+                        .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
                         #endif
                     } else {
                         ProgressView()
@@ -193,7 +191,7 @@ struct TabItem<Content: View>: View {
             ProfileMediaListScreen(
                 accountType: data.accountType,
                 userKey: data.userKey,
-                tabStore: ProfileTabSettingStore(timelineStore: TimelineStore(accountType: data.accountType), userKey: data.userKey)
+                tabStore: ProfileTabSettingStore(userKey: data.userKey)
             )
         case let .profileWithNameAndHost(data):
             EmptyView()

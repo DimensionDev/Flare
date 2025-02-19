@@ -12,7 +12,7 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
     @Published var currentMediaPresenter: ProfileMediaPresenter?
 
     // - Private Properties
-    private var timelineStore: TimelineStore
+//    private var timelineStore: TimelineStore
     private var isInitializing = false
     private var presenter = ActiveAccountPresenter()
     private var presenterCache: [String: TimelinePresenter] = [:] // 添加缓存
@@ -20,19 +20,19 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
 
     // TabStateProvider 协议实现
     var onTabChange: ((Int) -> Void)?
-    
+
     var tabCount: Int {
         availableTabs.count
     }
-    
+
     var selectedIndex: Int {
-        guard let selectedTabKey = selectedTabKey else { return 0 }
+        guard let selectedTabKey else { return 0 }
         return availableTabs.firstIndex { $0.key == selectedTabKey } ?? 0
     }
 
     // - Initialization
-    init(timelineStore: TimelineStore, userKey: MicroBlogKey?) {
-        self.timelineStore = timelineStore
+    init(userKey: MicroBlogKey?) { // timelineStore: TimelineStore,
+//        self.timelineStore = timelineStore
         observeUser(userKey: userKey)
     }
 
@@ -59,11 +59,9 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
         updateTabs(user: user, userKey: userKey)
 
         // 如果没有选中的标签，选中第一个
-//       if selectedTabKey == nil {
         if let firstItem = availableTabs.first {
             selectTab(firstItem.key)
         }
-//       }
 
         isInitializing = false
     }

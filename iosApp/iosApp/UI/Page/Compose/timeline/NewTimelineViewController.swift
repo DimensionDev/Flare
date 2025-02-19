@@ -10,7 +10,7 @@ class NewTimelineViewController: UIViewController {
     var tableView: UITableView!
     var presenter: TimelinePresenter?
     private var scrollCallback: ((UIScrollView) -> Void)?
-    
+
     // 是否显示加载更多
     var shouldShowLoadMore: Bool = true
 
@@ -69,9 +69,9 @@ class NewTimelineViewController: UIViewController {
             Task {
 //                if let timelineState = self?.presenter?.models.value as? TimelineState {
 //                    try? await timelineState.refresh()
-                    await MainActor.run {
-                        self?.tableView.mj_header?.endRefreshing()
-                    }
+                await MainActor.run {
+                    self?.tableView.mj_header?.endRefreshing()
+                }
 //                }
             }
         })
@@ -83,9 +83,9 @@ class NewTimelineViewController: UIViewController {
                 Task {
 //                    if let timelineState = self?.presenter?.models.value as? TimelineState {
 //                        try? await timelineState.loadMore()
-                        await MainActor.run {
-                            self?.tableView.mj_footer?.endRefreshing()
-                        }
+                    await MainActor.run {
+                        self?.tableView.mj_footer?.endRefreshing()
+                    }
 //                    }
                 }
             })
@@ -179,4 +179,4 @@ extension NewTimelineViewController: JXPagingViewListViewDelegate {
     func listViewDidScrollCallback(callback: @escaping (UIScrollView) -> Void) {
         scrollCallback = callback
     }
-} 
+}

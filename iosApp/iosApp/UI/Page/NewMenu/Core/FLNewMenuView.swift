@@ -1,13 +1,14 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 // MARK: - Menu View
+
 struct FLNewMenuView: View {
     @Binding var isOpen: Bool
     @State private var showLogin = false
     let accountType: AccountType
     let user: UiUserV2?
-    
+
     init(isOpen: Binding<Bool>, accountType: AccountType, user: UiUserV2? = nil) {
         _isOpen = isOpen
         self.accountType = accountType
@@ -20,13 +21,13 @@ struct FLNewMenuView: View {
             userAreaView
                 .padding(.top, 60)
                 .padding(.horizontal, 20)
-            
+
             // 中间列表区域
             List {
                 // 预留空列表
             }
             .listStyle(PlainListStyle())
-            
+
             // 底部设置按钮
             settingsButton
                 .padding(.horizontal, 20)
@@ -40,24 +41,25 @@ struct FLNewMenuView: View {
             })
         }
     }
-    
+
     // MARK: - User Area View
+
     private var userAreaView: some View {
         VStack(alignment: .leading, spacing: 12) {
             // 头像和用户名区域
             HStack(spacing: 12) {
                 // 头像
-                if let user = user {
+                if let user {
                     UserAvatar(data: user.avatar, size: 60)
                         .clipShape(Circle())
                 } else {
                     userAvatarPlaceholder(size: 60)
                         .clipShape(Circle())
                 }
-                
+
                 // 用户信息
                 VStack(alignment: .leading, spacing: 4) {
-                    if let user = user {
+                    if let user {
                         Text(user.name.raw)
                             .font(.headline)
                         Text("\(user.handle)")
@@ -74,7 +76,7 @@ struct FLNewMenuView: View {
                     }
                 }
             }
-            
+
             // 关注/粉丝数
             if let profile = user as? UiProfile {
                 HStack(spacing: 20) {
@@ -85,7 +87,7 @@ struct FLNewMenuView: View {
                             .font(.subheadline)
                             .foregroundColor(.gray)
                     }
-                    
+
                     HStack(spacing: 4) {
                         Text("\(profile.matrices.fansCount)")
                             .font(.headline)
@@ -98,8 +100,9 @@ struct FLNewMenuView: View {
             }
         }
     }
-    
+
     // MARK: - Settings Button
+
     private var settingsButton: some View {
         Button(action: {
             NotificationCenter.default.post(name: NSNotification.Name("ShowSettings"), object: nil)
@@ -116,4 +119,3 @@ struct FLNewMenuView: View {
         }
     }
 }
- 

@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
@@ -17,7 +18,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.R
 import dev.dimension.flare.ui.model.UiEmoji
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
@@ -40,20 +43,23 @@ internal fun EmojiPicker(
     val gridListState = rememberLazyGridState()
     Column(
         modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         OutlinedTextField2(
             state = searchTextState,
-            label = { Text("Search") },
+            label = { Text(stringResource(R.string.edit_list_member_search)) },
             modifier = Modifier.fillMaxWidth(),
         )
         LazyVerticalGrid(
             columns = GridCells.Adaptive(48.dp),
             state = gridListState,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             actualData.forEach { (category, emojis) ->
                 if (emojis.any()) {
                     // TODO: after compose 1.8.0, we can use `stickyHeader` to make the header sticky
-                    if (category.isNotEmpty()) {
+                    if (category.isNotEmpty() && category.isNotBlank()) {
                         item(
                             span = {
                                 GridItemSpan(maxLineSpan)
@@ -71,6 +77,7 @@ internal fun EmojiPicker(
                             )
                         }
                     }
+
                     items(
                         emojis.size,
                         key = { index -> emojis[index].shortcode },

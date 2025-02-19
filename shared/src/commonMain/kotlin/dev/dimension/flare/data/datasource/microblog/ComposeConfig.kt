@@ -3,6 +3,7 @@ package dev.dimension.flare.data.datasource.microblog
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.ui.model.UiEmoji
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 
 public data class ComposeConfig internal constructor(
     val text: Text? = null,
@@ -42,7 +43,7 @@ public data class ComposeConfig internal constructor(
     }
 
     public data class Emoji internal constructor(
-        internal val emoji: CacheData<ImmutableList<UiEmoji>>,
+        internal val emoji: CacheData<ImmutableMap<String, ImmutableList<UiEmoji>>>,
         val mergeTag: String,
     ) {
         internal fun merge(other: Emoji): Emoji? =

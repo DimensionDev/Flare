@@ -6,6 +6,7 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.model.MicroBlogKey
 
 @Entity
 internal data class DbEmoji(
@@ -23,3 +24,12 @@ internal class EmojiContentConverter {
     @TypeConverter
     fun toEmojiContent(data: String): EmojiContent = data.decodeJson()
 }
+
+@Entity
+internal data class DbEmojiHistory(
+    val accountKey: MicroBlogKey,
+    val shortCode: String,
+    val lastUse: Long,
+    @PrimaryKey
+    val _id: String = "$accountKey-$shortCode",
+)

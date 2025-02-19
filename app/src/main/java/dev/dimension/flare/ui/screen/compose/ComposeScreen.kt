@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -62,7 +60,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -94,6 +91,7 @@ import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
@@ -770,6 +768,15 @@ private fun ComposeScreen(
                                 contentDescription = null,
                             )
                             if (state.showEmojiMenu) {
+                                val actualAccountType =
+                                    remember(
+                                        state.state.selectedAccounts,
+                                    ) {
+                                        state.state.selectedAccounts
+                                            .firstOrNull()
+                                            ?.accountKey
+                                            ?.let(AccountType::Specific)
+                                    }
                                 Popup(
                                     onDismissRequest = {
                                         state.setShowEmojiMenu(false)
@@ -782,40 +789,32 @@ private fun ComposeScreen(
                                                     48.dp.roundToPx()
                                                 },
                                         ),
-                                    properties = PopupProperties(usePlatformDefaultWidth = true),
+                                    properties =
+                                        PopupProperties(
+                                            usePlatformDefaultWidth = true,
+                                            focusable = true,
+                                        ),
                                 ) {
                                     Card(
                                         modifier =
-                                            Modifier.sizeIn(
-                                                maxHeight = 256.dp,
-                                                maxWidth = 384.dp,
-                                            ),
+                                            Modifier
+                                                .sizeIn(
+                                                    maxHeight = 256.dp,
+                                                    maxWidth = 384.dp,
+                                                ),
                                         elevation =
                                             CardDefaults.elevatedCardElevation(
                                                 defaultElevation = 3.dp,
                                             ),
                                     ) {
-                                        LazyVerticalGrid(
-                                            columns = GridCells.Adaptive(36.dp),
-                                            contentPadding = PaddingValues(8.dp),
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                                        ) {
-                                            items(emojis.size) { index ->
-                                                val emoji = emojis[index]
-                                                NetworkImage(
-                                                    model = emoji.url,
-                                                    contentDescription = emoji.shortcode,
-                                                    contentScale = ContentScale.Fit,
-                                                    modifier =
-                                                        Modifier
-                                                            .size(36.dp)
-                                                            .clickable {
-                                                                state.selectEmoji(emoji)
-                                                            },
-                                                )
-                                            }
-                                        }
+                                        EmojiPicker(
+                                            data = emojis.data,
+                                            onEmojiSelected = state::selectEmoji,
+                                            accountType = actualAccountType ?: accountType,
+                                            modifier =
+                                                Modifier
+                                                    .padding(8.dp),
+                                        )
                                     }
                                 }
                             }

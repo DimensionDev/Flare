@@ -44,6 +44,7 @@ import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
@@ -56,8 +57,10 @@ import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -379,7 +382,7 @@ internal class MastodonDataSource(
         )
     }
 
-    fun emoji() =
+    fun emoji(): Cacheable<ImmutableMap<String, ImmutableList<UiEmoji>>> =
         Cacheable(
             fetchSource = {
                 val emojis = service.emojis()
@@ -390,7 +393,14 @@ internal class MastodonDataSource(
                     .emojiDao()
                     .get(accountKey.host)
                     .distinctUntilChanged()
-                    .mapNotNull { it?.toUi()?.toImmutableList() }
+                    .mapNotNull {
+                        it
+                            ?.toUi()
+                            ?.groupBy { it.category }
+                            ?.map { it.key to it.value.toImmutableList() }
+                            ?.toMap()
+                            ?.toImmutableMap()
+                    }
             },
         )
 

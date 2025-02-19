@@ -1,9 +1,9 @@
 package dev.dimension.flare.data.repository
 
+import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbSearchHistory
 import dev.dimension.flare.ui.model.UiSearchHistory
-import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map

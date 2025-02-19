@@ -9,6 +9,7 @@ import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.model.EmojiData
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
@@ -17,8 +18,6 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
-import dev.dimension.flare.ui.presenter.settings.ImmutableListWrapper
-import dev.dimension.flare.ui.presenter.settings.toImmutableListWrapper
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -41,13 +40,16 @@ public class MisskeyReactionPresenter(
                 service as MisskeyDataSource
             }
         val data =
-            service.flatMap {
-                remember(it) {
-                    it.emoji()
-                }.collectAsState().toUi().map {
-                    it.toImmutableListWrapper()
+            service
+                .flatMap {
+                    remember(it) {
+                        it.emoji()
+                    }.collectAsState().toUi()
+                }.map {
+                    remember(it) {
+                        EmojiData(it)
+                    }
                 }
-            }
 
         val status =
             remember(statusKey, accountType) {
@@ -82,7 +84,7 @@ public class MisskeyReactionPresenter(
 
 @Immutable
 public interface MisskeyReactionState {
-    public val emojis: UiState<ImmutableListWrapper<UiEmoji>>
+    public val emojis: UiState<EmojiData>
 
     public fun select(emoji: UiEmoji)
 }

@@ -48,6 +48,7 @@ import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -336,7 +337,14 @@ internal class MisskeyDataSource(
                     .emojiDao()
                     .get(accountKey.host)
                     .distinctUntilChanged()
-                    .mapNotNull { it?.toUi()?.toImmutableList() }
+                    .mapNotNull {
+                        it
+                            ?.toUi()
+                            ?.groupBy { it.category }
+                            ?.map { it.key to it.value.toImmutableList() }
+                            ?.toMap()
+                            ?.toImmutableMap()
+                    }
             },
         )
 

@@ -706,4 +706,7 @@
 
     <string name="rss_detail_open_in_browser">Open in browser</string>
     <string name="rss_detail_share">Share</string>
+
+    <string name="emoji_picker_recent">Recent</string>
+    <string name="emoji_picker_search">Search</string>
 </resources>

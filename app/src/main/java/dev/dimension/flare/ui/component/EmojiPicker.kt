@@ -53,7 +53,9 @@ internal fun EmojiPicker(
         remember(data, searchTextState.text) {
             data.mapValues { (_, emojis) ->
                 emojis.filter { emoji ->
-                    emoji.shortcode.contains(searchTextState.text, ignoreCase = true)
+                    emoji.searchKeywords.any { keyword ->
+                        keyword.contains(searchTextState.text, ignoreCase = true)
+                    }
                 }
             }
         }

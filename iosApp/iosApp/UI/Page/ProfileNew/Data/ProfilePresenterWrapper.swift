@@ -3,7 +3,6 @@ import os.log
 import shared
 import SwiftUI
 
-// 这个地方缓存ProfilePresenter 没用的。
 class ProfilePresenterWrapper: ObservableObject {
     // - Properties
     let presenter: ProfileNewPresenter
@@ -34,26 +33,7 @@ class ProfilePresenterWrapper: ObservableObject {
             isShowsegmentedBackButton = false
         }
     }
-
-    // - Memory Management
-    func handleMemoryWarning() {
-        os_log("[📔][ProfilePresenterWrapper]处理内存警告", log: .default, type: .debug)
-    }
-
-    func handleBackground() {
-        os_log("[📔][ProfilePresenterWrapper]处理后台", log: .default, type: .debug)
-    }
+ 
 }
  
 
-class ProfileMediaPresenterWrapper: ObservableObject {
-    // - Properties
-    let presenter: ProfileMediaPresenter
-
-    // - Init
-    init(accountType: AccountType, userKey: MicroBlogKey?) {
-        os_log("[📔][ProfileMediaPresenterWrapper - init]初始化: accountType=%{public}@, userKey=%{public}@", log: .default, type: .debug, String(describing: accountType), userKey?.description ?? "nil")
-        presenter = .init(accountType: accountType, userKey: userKey)
-    }
-
-}

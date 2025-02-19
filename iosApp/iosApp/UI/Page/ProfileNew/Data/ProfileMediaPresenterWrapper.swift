@@ -12,5 +12,4 @@ class ProfileMediaPresenterWrapper: ObservableObject {
         os_log("[📔][ProfileMediaPresenterWrapper - init]初始化: accountType=%{public}@, userKey=%{public}@", log: .default, type: .debug, String(describing: accountType), userKey?.description ?? "nil")
         presenter = .init(accountType: accountType, userKey: userKey)
     }
-
 }

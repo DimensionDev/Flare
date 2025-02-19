@@ -30,14 +30,14 @@ struct ProfileNewScreen: View {
         self.userKey = userKey
         self.showBackButton = showBackButton
 
-        let timelineStore = TimelineStore(accountType: accountType)
+//        let timelineStore = TimelineStore(accountType: accountType)
         _presenterWrapper = StateObject(wrappedValue: ProfilePresenterWrapper(accountType: accountType, userKey: userKey))
         _mediaPresenterWrapper = StateObject(wrappedValue: ProfileMediaPresenterWrapper(accountType: accountType, userKey: userKey))
 
         // 初始化 tabStore
-        let tabStore = ProfileTabSettingStore(timelineStore: timelineStore, userKey: userKey)
+        let tabStore = ProfileTabSettingStore(userKey: userKey)
         _tabStore = StateObject(wrappedValue: tabStore)
-        
+
         // 初始化手势和菜单状态
         _menuState = StateObject(wrappedValue: FLNewAppState(tabProvider: tabStore))
         _gestureState = StateObject(wrappedValue: FLNewGestureState(tabProvider: tabStore))
@@ -70,7 +70,7 @@ struct ProfileNewScreen: View {
                 mediaPresenterWrapper: mediaPresenterWrapper
             )
             .ignoresSafeArea(edges: .top)
-             .modifier(FLNewMenuGestureModifier(appState: menuState))
+            .modifier(FLNewMenuGestureModifier(appState: menuState))
         }
     }
 }

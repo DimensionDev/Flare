@@ -9,7 +9,7 @@ import UIKit
 class HomeNewViewController: UIViewController {
     // - Properties
 
-    private let tabStore: TabSettingsStore
+    private let tabStore: AppBarTabSettingStore
     private let accountType: AccountType
     private var listViewControllers: [Int: JXPagingViewListViewDelegate] = [:]
 
@@ -20,7 +20,7 @@ class HomeNewViewController: UIViewController {
 
     // - Initialization
 
-    init(tabStore: TabSettingsStore, accountType: AccountType) {
+    init(tabStore: AppBarTabSettingStore, accountType: AccountType) {
         self.tabStore = tabStore
         self.accountType = accountType
         super.init(nibName: nil, bundle: nil)
@@ -62,9 +62,9 @@ class HomeNewViewController: UIViewController {
         setupPagingView()
 
         // 初始化第一个标签页
-        if tabStore.availableTabs.count > 0 {
+        if tabStore.availableAppBarTabsItems.count > 0 {
             let index = 0
-            let selectedTab = tabStore.availableTabs[index]
+            let selectedTab = tabStore.availableAppBarTabsItems[index]
             tabStore.updateSelectedTab(selectedTab)
 
             if let currentList = pagingView.validListDict[index] as? NewTimelineViewController,
@@ -122,7 +122,7 @@ class HomeNewViewController: UIViewController {
         updateSegmentedTitles()
 
         // 设置默认选中项
-        if tabStore.availableTabs.count > 0 {
+        if tabStore.availableAppBarTabsItems.count > 0 {
             segmentedView.defaultSelectedIndex = 0
         }
 
@@ -161,7 +161,7 @@ class HomeNewViewController: UIViewController {
 
     private func updateSegmentedTitles() {
         os_log("[📔][HomeNewViewController] updateSegmentedTitles start", log: .default, type: .debug)
-        let titles = tabStore.availableTabs.map { tab in
+        let titles = tabStore.availableAppBarTabsItems.map { tab in
             switch tab.metaData.title {
             case let .text(title):
                 title
@@ -321,7 +321,7 @@ extension HomeNewViewController: JXPagingViewDelegate {
     }
 
     func numberOfLists(in _: JXPagingView) -> Int {
-        tabStore.availableTabs.count
+        tabStore.availableAppBarTabsItems.count
     }
 
     func pagingView(_: JXPagingView, initListAtIndex index: Int) -> JXPagingViewListViewDelegate {
@@ -330,8 +330,8 @@ extension HomeNewViewController: JXPagingViewDelegate {
         }
 
         let timelineVC = NewTimelineViewController()
-        if index < tabStore.availableTabs.count {
-            let tab = tabStore.availableTabs[index]
+        if index < tabStore.availableAppBarTabsItems.count {
+            let tab = tabStore.availableAppBarTabsItems[index]
             if let presenter = tabStore.getOrCreatePresenter(for: tab) {
                 timelineVC.updatePresenter(presenter)
             }
@@ -352,8 +352,8 @@ extension HomeNewViewController: JXSegmentedViewDelegate {
         NotificationCenter.default.post(name: NSNotification.Name("AppBarIndexDidChange"), object: index)
 
         // 更新当前选中的标签页的presenter
-        if index < tabStore.availableTabs.count {
-            let selectedTab = tabStore.availableTabs[index]
+        if index < tabStore.availableAppBarTabsItems.count {
+            let selectedTab = tabStore.availableAppBarTabsItems[index]
 
             // 更新 TabSettingsStore
             tabStore.updateSelectedTab(selectedTab)

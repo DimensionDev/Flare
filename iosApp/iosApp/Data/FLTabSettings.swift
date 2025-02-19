@@ -590,7 +590,6 @@ public struct FLTabSettings {
             FLProfileXQTTimelineTabItem(metaData: metaData, account: account, userKey: userKey, type: type)
         }
     }
- 
 }
 
 extension FLTabSettings.FLProfileTabType.TimelineType {
@@ -1058,8 +1057,12 @@ public class FLTabSettingsManager {
 
         // 从默认配置中找到对应的items
         let defaultItems = FLTabSettings.defaultSecondary(user: user)
+        let mainItems = FLTabSettings.defaultPrimary(user: user)
+
+        let allItems = defaultItems + mainItems
+
         return enabledKeys.compactMap { key in
-            defaultItems.first { $0.key == key }
+            allItems.first { $0.key == key }
         }
     }
 
@@ -1153,8 +1156,6 @@ public extension FLHomeTimelineTabItem {
     }
 }
 
-
- 
 //  - Profile  Media Tab Items
 public struct FLProfileMediaTabItem: FLTabItem {
     public let metaData: FLTabMetaData
@@ -1172,4 +1173,3 @@ public struct FLProfileMediaTabItem: FLTabItem {
         FLProfileMediaTabItem(metaData: metaData, account: account as! AccountTypeSpecific, userKey: userKey)
     }
 }
-

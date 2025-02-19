@@ -59,4 +59,4 @@ class BaseTimelineCell: UITableViewCell {
         // 保持禁用状态
         selectionStyle = .none
     }
-} 
+}

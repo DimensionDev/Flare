@@ -58,45 +58,20 @@ public sealed class PagingState<T> {
             override val itemCount: Int = data.size,
             override val isRefreshing: Boolean = false,
             override val appendState: LoadState = LoadState.NotLoading(endOfPaginationReached = true),
+            private val onRefresh: suspend () -> Unit = {},
+            private val onRetry: () -> Unit = {},
         ) : Success<T>() {
             override fun get(index: Int): T? = data.getOrNull(index)
 
             override fun peek(index: Int): T? = data.getOrNull(index)
 
             override suspend fun refreshSuspend() {
+                onRefresh.invoke()
             }
 
             override fun retry() {
+                onRetry.invoke()
             }
-
-            override fun itemContentType(contentType: ((item: T) -> Any?)?): (index: Int) -> Any? = { null }
-
-            override fun itemKey(key: ((item: T) -> Any)?): (index: Int) -> Any = { it }
-        }
-
-        @Immutable
-        internal data class SingleSuccess<T : Any>(
-            private val data: CacheableState<ImmutableList<T>>,
-        ) : Success<T>() {
-            override val itemCount: Int
-                get() = data.data?.size ?: 0
-            override val isRefreshing: Boolean
-                get() = data.refreshState is LoadState.Loading
-
-            override fun get(index: Int): T? = data.data?.getOrNull(index)
-
-            override fun peek(index: Int): T? = data.data?.getOrNull(index)
-
-            override suspend fun refreshSuspend() {
-                data.refresh()
-            }
-
-            override fun retry() {
-                data.refresh()
-            }
-
-            override val appendState: LoadState
-                get() = LoadState.NotLoading(true)
 
             override fun itemContentType(contentType: ((item: T) -> Any?)?): (index: Int) -> Any? = { null }
 

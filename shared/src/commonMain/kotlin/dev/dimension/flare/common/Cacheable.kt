@@ -167,7 +167,11 @@ private fun <T : Any> CacheableState<ImmutableList<T>>.toPagingState(): PagingSt
     val data = data
     return if (data != null) {
         if (data.isNotEmpty()) {
-            PagingState.Success.SingleSuccess(this)
+            PagingState.Success.ImmutableSuccess(
+                data = data,
+                onRefresh = this::refresh,
+                onRetry = this::refresh,
+            )
         } else {
             PagingState.Empty(this::refresh)
         }

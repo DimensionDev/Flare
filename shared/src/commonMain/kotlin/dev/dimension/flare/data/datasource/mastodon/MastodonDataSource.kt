@@ -972,15 +972,17 @@ internal class MastodonDataSource(
             service.createList(PostList(title = title))
         }.onSuccess { response ->
             if (response.id != null) {
-                MemCacheable.updateWith<List<UiList>>(
+                MemCacheable.updateWith<ImmutableList<UiList>>(
                     key = listKey,
                 ) {
-                    it +
-                        UiList(
-                            id = response.id,
-                            title = title,
-                            platformType = PlatformType.Mastodon,
-                        )
+                    it
+                        .plus(
+                            UiList(
+                                id = response.id,
+                                title = title,
+                                platformType = PlatformType.Mastodon,
+                            ),
+                        ).toImmutableList()
                 }
             }
         }
@@ -990,10 +992,12 @@ internal class MastodonDataSource(
         runCatching {
             service.deleteList(listId)
         }.onSuccess {
-            MemCacheable.updateWith<List<UiList>>(
+            MemCacheable.updateWith<ImmutableList<UiList>>(
                 key = listKey,
             ) {
-                it.filter { list -> list.id != listId }
+                it
+                    .filter { list -> list.id != listId }
+                    .toImmutableList()
             }
         }
     }
@@ -1005,16 +1009,17 @@ internal class MastodonDataSource(
         runCatching {
             service.updateList(listId, PostList(title = title))
         }.onSuccess {
-            MemCacheable.updateWith<List<UiList>>(
+            MemCacheable.updateWith<ImmutableList<UiList>>(
                 key = listKey,
             ) {
-                it.map { list ->
-                    if (list.id == listId) {
-                        list.copy(title = title)
-                    } else {
-                        list
-                    }
-                }
+                it
+                    .map { list ->
+                        if (list.id == listId) {
+                            list.copy(title = title)
+                        } else {
+                            list
+                        }
+                    }.toImmutableList()
             }
         }
     }
@@ -1112,10 +1117,12 @@ internal class MastodonDataSource(
             }
             val list = service.getList(listId)
             if (list.id != null) {
-                MemCacheable.updateWith<List<UiList>>(
+                MemCacheable.updateWith<ImmutableList<UiList>>(
                     key = userListsKey(userKey),
                 ) {
-                    it + list.render()
+                    it
+                        .plus(list.render())
+                        .toImmutableList()
                 }
             }
         }
@@ -1137,11 +1144,12 @@ internal class MastodonDataSource(
                     .filter { user -> user.key.id != userKey.id }
                     .toImmutableList()
             }
-            MemCacheable.updateWith<List<UiList>>(
+            MemCacheable.updateWith<ImmutableList<UiList>>(
                 key = userListsKey(userKey),
             ) {
                 it
                     .filter { list -> list.id != listId }
+                    .toImmutableList()
             }
         }
     }

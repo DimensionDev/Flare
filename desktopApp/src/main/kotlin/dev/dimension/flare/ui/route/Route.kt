@@ -30,7 +30,8 @@ internal sealed interface Route {
 
     @Serializable
     data class Profile(
-        val key: MicroBlogKey,
+        val accountType: AccountType,
+        val userKey: MicroBlogKey,
     ) : Route
 
     @Serializable

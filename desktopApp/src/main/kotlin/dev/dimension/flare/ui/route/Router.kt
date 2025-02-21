@@ -19,11 +19,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.konyaco.fluent.component.Text
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.screen.home.DiscoverScreen
 import dev.dimension.flare.ui.screen.home.NotificationScreen
+import dev.dimension.flare.ui.screen.home.ProfileScreen
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import kotlinx.collections.immutable.persistentMapOf
@@ -62,7 +64,27 @@ internal fun Router(
         screen<Route.Rss> {
             Text("Rss")
         }
-        screen<Route.Profile> {
+        screen<Route.Profile> { (_, args) ->
+            ProfileScreen(
+                accountType = args.accountType,
+                userKey = args.userKey,
+            )
+        }
+        composable(
+            AppDeepLink.Profile.ROUTE,
+        ) {
+            val userKey = it.arguments?.getString("userKey")?.let(MicroBlogKey::valueOf)
+            val accountKey =
+                it.arguments
+                    ?.getString("accountKey")
+                    ?.let(MicroBlogKey::valueOf)
+                    ?.let(AccountType::Specific)
+            if (userKey != null && accountKey != null) {
+                ProfileScreen(
+                    accountType = accountKey,
+                    userKey = userKey,
+                )
+            }
         }
         screen<Route.MeRoute> {
         }

@@ -52,27 +52,32 @@ struct FLNewMenuView: View {
                 if let user {
                     UserAvatar(data: user.avatar, size: 60)
                         .clipShape(Circle())
-                } else {
-                    userAvatarPlaceholder(size: 60)
-                        .clipShape(Circle())
-                }
+                        .offset(x: -30)
 
-                // 用户信息
-                VStack(alignment: .leading, spacing: 4) {
-                    if let user {
+                    // 用户信息
+                    VStack(alignment: .leading, spacing: 4) {
                         Text(user.name.raw)
                             .font(.headline)
                         Text("\(user.handle)")
                             .font(.subheadline)
                             .foregroundColor(.gray)
-                    } else {
-                        Text("未登录")
-                            .font(.headline)
-                        Button("点击登录") {
-                            showLogin = true
+                    }
+                } else {
+                    Button(action: {
+                        showLogin = true
+                    }) {
+                        HStack(spacing: 12) {
+                            userAvatarPlaceholder(size: 60)
+                                .clipShape(Circle())
+                                .offset(x: -30)
+
+                            // 用户信息
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("未登录")
+                                    .font(.headline)
+                                    .foregroundColor(.gray)
+                            }
                         }
-                        .font(.subheadline)
-                        .foregroundColor(.blue)
                     }
                 }
             }

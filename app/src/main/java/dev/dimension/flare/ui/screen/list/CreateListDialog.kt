@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -147,7 +148,7 @@ private fun CreateListDialog(
                                                 .background(
                                                     color = MaterialTheme.colorScheme.primaryContainer,
                                                     shape = MaterialTheme.shapes.medium,
-                                                ),
+                                                ).padding(8.dp),
                                     )
                                 }
                             }

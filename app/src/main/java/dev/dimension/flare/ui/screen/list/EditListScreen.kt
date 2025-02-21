@@ -202,7 +202,7 @@ private fun EditListScreen(
                                                                 .background(
                                                                     color = MaterialTheme.colorScheme.primaryContainer,
                                                                     shape = MaterialTheme.shapes.medium,
-                                                                ),
+                                                                ).padding(8.dp),
                                                     )
                                                 }
                                             }.onLoading {
@@ -349,6 +349,9 @@ private fun presenter(
         LaunchedEffect(Unit) {
             text.edit {
                 append(it.title)
+            }
+            description.edit {
+                append(it.description)
             }
         }
     }

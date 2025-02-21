@@ -90,7 +90,6 @@ import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.bluesky.BlueskyService
-import dev.dimension.flare.data.network.bluesky.UnspeccedBlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
@@ -1126,8 +1125,8 @@ internal class BlueskyDataSource(
 
                 override suspend fun load(params: LoadParams<String>): LoadResult<String, UiList> {
                     val result =
-                        UnspeccedBlueskyService
-                            .getPopularFeedGenerators(
+                        service
+                            .getPopularFeedGeneratorsUnspecced(
                                 GetPopularFeedGeneratorsQueryParams(
                                     limit = params.loadSize.toLong(),
                                     cursor = params.key,
@@ -1356,7 +1355,6 @@ internal class BlueskyDataSource(
         MemCacheable(
             key = myListKey,
         ) {
-
             service
                 .getLists(
                     params = GetListsQueryParams(actor = Did(did = accountKey.id)),
@@ -1436,7 +1434,26 @@ internal class BlueskyDataSource(
                         record = record.bskyJson(),
                     ),
             )
-            myList.refresh()
+        }.onFailure {
+            it.printStackTrace()
+        }.onSuccess {
+            val uri = it.requireResponse().uri
+            service
+                .getList(
+                    params =
+                        GetListQueryParams(
+                            list = uri,
+                        ),
+                ).requireResponse()
+                .list
+                .render(accountKey)
+                .let { list ->
+                    MemCacheable.updateWith<ImmutableList<UiList>>(
+                        key = myListKey,
+                    ) {
+                        (listOf(list) + it).toImmutableList()
+                    }
+                }
         }
     }
 
@@ -1459,7 +1476,14 @@ internal class BlueskyDataSource(
                             ),
                     ),
             )
-            myList.refresh()
+        }.onFailure {
+            it.printStackTrace()
+        }.onSuccess {
+            MemCacheable.updateWith<ImmutableList<UiList>>(
+                key = myListKey,
+            ) {
+                it.filterNot { item -> item.id == listId }.toImmutableList()
+            }
         }
     }
 
@@ -1480,6 +1504,7 @@ internal class BlueskyDataSource(
                                 rkey = uri.substringAfterLast('/'),
                             ),
                     ).requireResponse()
+                    .value
                     .bskyJson()
 
             val iconInfo =
@@ -1509,7 +1534,24 @@ internal class BlueskyDataSource(
                         record = newRecord.bskyJson(),
                     ),
             )
-            myList.refresh()
+        }.onFailure {
+            it.printStackTrace()
+        }.onSuccess {
+            MemCacheable.updateWith<ImmutableList<UiList>>(
+                key = myListKey,
+            ) {
+                it
+                    .map { item ->
+                        if (item.id == uri) {
+                            item.copy(
+                                title = title,
+                                description = description,
+                            )
+                        } else {
+                            item
+                        }
+                    }.toImmutableList()
+            }
         }
     }
 

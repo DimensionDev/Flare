@@ -317,9 +317,10 @@ internal fun LazyListScope.listItemComponent(
             }
         },
         errorContent = {
-            Box(
+            Column(
                 modifier = Modifier.fillParentMaxSize(),
-                contentAlignment = Alignment.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
             ) {
                 FAIcon(
                     imageVector = FontAwesomeIcons.Solid.CircleExclamation,

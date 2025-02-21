@@ -108,13 +108,24 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
     }
 
     private func observeUser() {
-        Task { @MainActor in
-            for await state in presenter.models {
-                if case let .success(data) = onEnum(of: state.user) {
-                    // 直接初始化，不需要额外的 MainActor.run
-                    self.initializeWithUser(data.data)
-                }
-            }
+        // 先检查UserManager中是否有用户
+        if let user = UserManager.shared.getCurrentUser() {
+            initializeWithUser(user)
+            return
+        }
+
+        // 如果没有，则等待用户更新通知
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleUserUpdate),
+            name: .userDidUpdate,
+            object: nil
+        )
+    }
+
+    @objc private func handleUserUpdate(_ notification: Notification) {
+        if let user = notification.object as? UiUserV2 {
+            initializeWithUser(user)
         }
     }
 
@@ -145,8 +156,6 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
                     availableAppBarTabsItems = availableAppBarTabsItems
                 } else {
                     // 没有home标签，添加到开头
-//                    var newItems = [homeItem]
-//                    newItems.append(contentsOf: availableAppBarTabsItems)
                     availableAppBarTabsItems = [homeItem] + availableAppBarTabsItems
                 }
             }

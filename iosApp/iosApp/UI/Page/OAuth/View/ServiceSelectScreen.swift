@@ -248,46 +248,40 @@ struct ServiceSelectScreen: View {
             ZStack {
                 // 背景层
                 if let bannerUrl = instance.bannerUrl {
-                    KFImage(URL(string: bannerUrl))
-                        .placeholder { // 添加占位符
-                            Rectangle()
-                                .foregroundColor(.gray.opacity(0.2))
-                        }
-                        .setProcessor(DownsamplingImageProcessor(size: CGSize(width: 300, height: 80)))
-                        .fade(duration: 0.25)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 80)
-                        .blur(radius: 3)
-                        .overlay(
-                            Rectangle()
-                                .fill(Color.black.opacity(0.2))
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    GeometryReader { geometry in
+                        KFImage(URL(string: bannerUrl))
+                            .placeholder { // 添加占位符
+                                ServiceIconBackground(url: instance.iconUrl ?? "", domain: instance.domain)
+                            }
+                            .setProcessor(DownsamplingImageProcessor(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 160)))
+                            .fade(duration: 0.25)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geometry.size.width)
+                            .frame(height: 80, alignment: .center)
+                            .clipped()
+                            .blur(radius: 3)
+                            .overlay(
+                                Rectangle()
+                                    .fill(Color.black.opacity(0.2))
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .frame(height: 80)
+                } else {
+                    // 如果没有banner，使用icon作为背景
+                    ServiceIconBackground(url: instance.iconUrl ?? "", domain: instance.domain)
                 }
 
                 HStack(spacing: 12) {
                     // 头像或占位符
                     Group {
-                        if let iconUrl = instance.iconUrl, !iconUrl.isEmpty, URL(string: iconUrl) != nil {
-                            KFImage(URL(string: iconUrl))
-                                .placeholder {
-                                    Circle()
-                                        .foregroundColor(.gray.opacity(0.2))
-                                }
-                                .setProcessor(DownsamplingImageProcessor(size: CGSize(width: 48, height: 48)))
-                                .fade(duration: 0.25)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 48, height: 48)
-                                .clipShape(Circle())
-                        } else {
-                            Circle()
-                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                .frame(width: 48, height: 48)
-                                .background(Circle().fill(Color.gray.opacity(0.1)))
-                        }
+                        ServiceIcon(
+                            url: instance.iconUrl ?? "",
+                            domain: instance.domain,
+                            size: 48,
+                            clipShape: AnyShape(Circle())
+                        )
                     }
                     .allowsHitTesting(false)
 
@@ -299,6 +293,20 @@ struct ServiceSelectScreen: View {
                             .padding(.vertical, 4)
                             .background(Color(.systemBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 6))
+
+
+                              // 添加调试信息
+                        Group {
+                            if instance.domain.contains( "mstdn.jp") {
+                                let _ = print("[Debug] Found mstdn.jp instance:")
+                                let _ = print("Domain: \(instance.domain)")
+                                let _ = print("Banner URL: \(instance.bannerUrl ?? "nil")")
+                                let _ = print("Icon URL: \(instance.iconUrl ?? "nil")")
+                                let _ = print("Name: \(instance.name)")
+                                let _ = print("Description: \(instance.description_ ?? "nil")")
+                            }
+                        }
+                        
                         Text(instance.domain)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
@@ -330,6 +338,8 @@ struct ServiceSelectScreen: View {
         .padding(.vertical, 8)
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 6))
+        .frame(maxWidth: min(UIScreen.main.bounds.width - 32, 600))
+        .frame(maxWidth: .infinity)
     }
 
     private func parseHTML(_ html: String) -> String {

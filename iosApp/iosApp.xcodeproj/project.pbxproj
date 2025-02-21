@@ -78,12 +78,16 @@
 		644C84F42D535C6D00E92D0D /* MediaPreviewVideoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84A02D535C6D00E92D0D /* MediaPreviewVideoViewModel.swift */; };
 		644C84F52D535C6D00E92D0D /* ComposeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84B42D535C6D00E92D0D /* ComposeScreen.swift */; };
 		644C84F82D535D0B00E92D0D /* JXPagingView in Frameworks */ = {isa = PBXBuildFile; productRef = 644C84F72D535D0B00E92D0D /* JXPagingView */; };
+		645086262D68883A00DBAF2A /* UserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645086252D68883A00DBAF2A /* UserManager.swift */; };
+		645086282D689D2400DBAF2A /* NumberUitls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645086272D689D1E00DBAF2A /* NumberUitls.swift */; };
+		645086312D68C50B00DBAF2A /* ServiceIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 645086302D68C50B00DBAF2A /* ServiceIcon.swift */; };
 		64578CD22D64961A008CC23F /* AppBarTabSettingStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64578CCF2D64961A008CC23F /* AppBarTabSettingStore.swift */; };
 		64578CD82D649BB9008CC23F /* ProfilePresenterWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64578CD72D649BB9008CC23F /* ProfilePresenterWrapper.swift */; };
 		64578CDC2D64A60E008CC23F /* ProfileMediaPresenterWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64578CDB2D64A60B008CC23F /* ProfileMediaPresenterWrapper.swift */; };
 		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
 		64782BD22CFD65F4008DE526 /* View+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64782BD02CFD65F4008DE526 /* View+Injection.swift */; };
 		6488800B2D1AD43E00EFE72C /* JXSegmentedView in Frameworks */ = {isa = PBXBuildFile; productRef = 6488800A2D1AD43E00EFE72C /* JXSegmentedView */; };
+		6489B3312D68D50800D8AEBB /* SVGView in Frameworks */ = {isa = PBXBuildFile; productRef = 6489B3302D68D50800D8AEBB /* SVGView */; };
 		648CD6C52D3644C500262228 /* ProfileNewHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 648CD6C42D3644C300262228 /* ProfileNewHeaderView.swift */; };
 		649E7A222D318F5100AC2F62 /* ProfileMediaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A0E2D318F5100AC2F62 /* ProfileMediaViewController.swift */; };
 		649E7A242D318F5100AC2F62 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A0D2D318F5100AC2F62 /* ProfileHeaderView.swift */; };
@@ -228,6 +232,9 @@
 		644C84C42D535C6D00E92D0D /* VGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VGrid.swift; sourceTree = "<group>"; };
 		644C84C52D535C6D00E92D0D /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		644C84C62D535C6D00E92D0D /* Zoomable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zoomable.swift; sourceTree = "<group>"; };
+		645086252D68883A00DBAF2A /* UserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
+		645086272D689D1E00DBAF2A /* NumberUitls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NumberUitls.swift; sourceTree = "<group>"; };
+		645086302D68C50B00DBAF2A /* ServiceIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceIcon.swift; sourceTree = "<group>"; };
 		64578CCF2D64961A008CC23F /* AppBarTabSettingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBarTabSettingStore.swift; sourceTree = "<group>"; };
 		64578CD72D649BB9008CC23F /* ProfilePresenterWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfilePresenterWrapper.swift; sourceTree = "<group>"; };
 		64578CDB2D64A60B008CC23F /* ProfileMediaPresenterWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMediaPresenterWrapper.swift; sourceTree = "<group>"; };
@@ -325,6 +332,7 @@
 				64BA00252D1AD84D0053F205 /* JXPhotoBrowser in Frameworks */,
 				06B8514B2B6B228600DFA075 /* FirebaseAnalytics in Frameworks */,
 				64E890742D2D28400001B93D /* MJRefresh in Frameworks */,
+				6489B3312D68D50800D8AEBB /* SVGView in Frameworks */,
 				64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */,
 				64EA48E32D6344A900D0F609 /* Hero in Frameworks */,
 				64E877C92D0842AA003559B9 /* SwiftSoup in Frameworks */,
@@ -621,6 +629,7 @@
 		64E2087D2CF846DE001C64EF /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				645086272D689D1E00DBAF2A /* NumberUitls.swift */,
 				64E2087B2CF846DE001C64EF /* KotlinByteArray.swift */,
 				64E2087C2CF846DE001C64EF /* ViewExt.swift */,
 			);
@@ -705,6 +714,7 @@
 		64E877002D0430C7003559B9 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				645086302D68C50B00DBAF2A /* ServiceIcon.swift */,
 				64E876FD2D0430C7003559B9 /* ServiceSelectScreen.swift */,
 				64E876FE2D0430C7003559B9 /* VVOLoginScreen.swift */,
 				64E876FF2D0430C7003559B9 /* XQTLoginScreen.swift */,
@@ -856,6 +866,7 @@
 		64EB7DAA2D0C4C0400E41656 /* Data */ = {
 			isa = PBXGroup;
 			children = (
+				645086252D68883A00DBAF2A /* UserManager.swift */,
 				64EB7DA82D0C4C0400E41656 /* FLTabSettings.swift */,
 			);
 			path = Data;
@@ -979,6 +990,7 @@
 				644C84F72D535D0B00E92D0D /* JXPagingView */,
 				64BFB16C2D549F50002793C0 /* SideMenu */,
 				64EA48E22D6344A900D0F609 /* Hero */,
+				6489B3302D68D50800D8AEBB /* SVGView */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
@@ -1029,6 +1041,7 @@
 				644C84F62D535D0B00E92D0D /* XCRemoteSwiftPackageReference "JXPagingView" */,
 				64BFB16B2D549F50002793C0 /* XCRemoteSwiftPackageReference "SideMenu" */,
 				64EA48E12D6344A900D0F609 /* XCRemoteSwiftPackageReference "Hero" */,
+				6489B32F2D68D50800D8AEBB /* XCRemoteSwiftPackageReference "SVGView" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -1136,6 +1149,7 @@
 				64E877342D0430C7003559B9 /* UserComponent.swift in Sources */,
 				64E877362D0430C7003559B9 /* XQTLoginScreen.swift in Sources */,
 				64E877382D0430C7003559B9 /* StatusDetailScreen.swift in Sources */,
+				645086282D689D2400DBAF2A /* NumberUitls.swift in Sources */,
 				64E877392D0430C7003559B9 /* DiscoverTabScreen.swift in Sources */,
 				64E8773D2D0430C7003559B9 /* StatusRetweetHeaderComponent.swift in Sources */,
 				64E8773E2D0430C7003559B9 /* StatusMediaScreen.swift in Sources */,
@@ -1191,9 +1205,11 @@
 				642A0D7E2D56235C0009C16D /* FLNewAppState.swift in Sources */,
 				642A0D7F2D56235C0009C16D /* FLNewGestureState.swift in Sources */,
 				642A0D802D56235C0009C16D /* View+NewSideMenu.swift in Sources */,
+				645086312D68C50B00DBAF2A /* ServiceIcon.swift in Sources */,
 				642A0D812D56235C0009C16D /* FLNewMenuGestureModifier.swift in Sources */,
 				642A0D822D56235C0009C16D /* FLNewPerformanceMonitor.swift in Sources */,
 				642A0D832D56235C0009C16D /* FLNewSideMenu.swift in Sources */,
+				645086262D68883A00DBAF2A /* UserManager.swift in Sources */,
 				642A0D842D56235C0009C16D /* FLNewMenuView.swift in Sources */,
 				642A0D852D56235C0009C16D /* UIView+NewGesture.swift in Sources */,
 				642A0D872D56235C0009C16D /* FLNewGestureRecognizer.swift in Sources */,
@@ -1564,6 +1580,14 @@
 				minimumVersion = 1.4.1;
 			};
 		};
+		6489B32F2D68D50800D8AEBB /* XCRemoteSwiftPackageReference "SVGView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/exyte/SVGView.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.6;
+			};
+		};
 		64BA00232D1AD84D0053F205 /* XCRemoteSwiftPackageReference "PhotoBrowser" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/JiongXing/PhotoBrowser";
@@ -1691,6 +1715,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 648880092D1AD43E00EFE72C /* XCRemoteSwiftPackageReference "JXSegmentedView" */;
 			productName = JXSegmentedView;
+		};
+		6489B3302D68D50800D8AEBB /* SVGView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 6489B32F2D68D50800D8AEBB /* XCRemoteSwiftPackageReference "SVGView" */;
+			productName = SVGView;
 		};
 		64BA00242D1AD84D0053F205 /* JXPhotoBrowser */ = {
 			isa = XCSwiftPackageProductDependency;

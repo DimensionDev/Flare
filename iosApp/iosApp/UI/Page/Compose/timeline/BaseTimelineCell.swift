@@ -45,7 +45,7 @@ class BaseTimelineCell: UITableViewCell {
         let statusView = StatusItemView(data: item, detailKey: nil, enableTranslation: false)
         let hostingController = UIHostingController(rootView: statusView)
         self.hostingController = hostingController
-        
+
         // 设置hostingController的背景色
         hostingController.view.backgroundColor = .clear
 

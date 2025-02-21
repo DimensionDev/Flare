@@ -10,6 +10,7 @@ struct FlareApp: SwiftUI.App {
     #endif
     init() {
         KoinHelper.shared.start(inAppNotification: SwitUIInAppNotification())
+        UserManager.shared.initialize()
     }
 
     var body: some Scene {

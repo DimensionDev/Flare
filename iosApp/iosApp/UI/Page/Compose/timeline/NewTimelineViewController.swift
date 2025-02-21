@@ -39,7 +39,7 @@ class NewTimelineViewController: UIViewController {
         os_log("[📔][NewTimelineViewController] setupUI start", log: .default, type: .debug)
         // 设置主view的背景色
         view.backgroundColor = .systemBackground
-        
+
         // 配置 tableView
         tableView = UITableView()
         tableView.backgroundColor = .clear

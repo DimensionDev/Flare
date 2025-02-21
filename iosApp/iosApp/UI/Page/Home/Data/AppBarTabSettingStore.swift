@@ -132,10 +132,24 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
         // 从 UserDefaults 加载存储的标签
         availableAppBarTabsItems = settingsManager.getEnabledItems(for: user) ?? secondaryItems
 
-        // 立即更新可用标签
-        if let homeItem = primaryHomeItems.first {
-            let enabledItems = availableAppBarTabsItems.isEmpty ? [homeItem] + secondaryItems : availableAppBarTabsItems
-            availableAppBarTabsItems = enabledItems
+        if availableAppBarTabsItems.isEmpty {
+            // 立即更新可用标签
+            if let homeItem = primaryHomeItems.first {
+                availableAppBarTabsItems = [homeItem] + secondaryItems
+            }
+        } else {
+            // 立即更新可用标签
+            if let homeItem = primaryHomeItems.first {
+                if availableAppBarTabsItems.first?.key.contains("home_") == true {
+                    // 已经有home标签，保持现状
+                    availableAppBarTabsItems = availableAppBarTabsItems
+                } else {
+                    // 没有home标签，添加到开头
+//                    var newItems = [homeItem]
+//                    newItems.append(contentsOf: availableAppBarTabsItems)
+                    availableAppBarTabsItems = [homeItem] + availableAppBarTabsItems
+                }
+            }
         }
 
         // 选择第一个标签

@@ -603,7 +603,7 @@ extension FLTabSettings.FLProfileTabType.TimelineType {
 }
 
 // - Material Icon Type
-public enum FLMaterialIcon: String, Codable {
+public enum FLMaterialIcon: String {
     case home = "Home"
     case notification = "Notification"
     case search = "Search"
@@ -667,7 +667,7 @@ public enum FLMaterialIcon: String, Codable {
 }
 
 // - Tab Item Protocol
-// : Codable
+
 public protocol FLTabItem {
     var metaData: FLTabMetaData { get }
     var account: AccountType { get }
@@ -682,19 +682,19 @@ public protocol FLTimelineTabItem: FLTabItem {
 }
 
 // - Tab Meta Data
-public struct FLTabMetaData /* : Codable */ {
+public struct FLTabMetaData {
     public let title: FLTitleType
     public let icon: FLIconType
 }
 
 // - Title Type
-public enum FLTitleType /* : Codable */ {
+public enum FLTitleType {
     case text(String)
     case localized(String)
 }
 
 // - Icon Type
-public enum FLIconType /* : Codable */ {
+public enum FLIconType {
     case avatar(userKey: MicroBlogKey)
     case material(String)
     case mixed([String])

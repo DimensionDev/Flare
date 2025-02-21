@@ -276,10 +276,7 @@ internal fun FlareApp(navController: NavHostController = rememberNavController()
                 LocalTabState provides currentTab?.tabState,
             ) {
                 Router(
-                    startDestination =
-                        remember(tabs) {
-                            getRoute(tabs.primary.first().tabItem)
-                        },
+                    startDestination = getRoute(tabs.primary.first().tabItem),
                     navController = navController,
                 )
             }

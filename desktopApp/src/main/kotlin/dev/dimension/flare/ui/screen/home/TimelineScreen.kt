@@ -39,6 +39,7 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.home_timeline_new_toots
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiTimeline
@@ -69,7 +70,16 @@ internal fun TimelineScreen(tabItem: TimelineTabItem) {
                 .fillMaxSize(),
     ) {
         LazyStatusVerticalStaggeredGrid(
-            contentPadding = PaddingValues(16.dp),
+            contentPadding =
+                PaddingValues(
+                    horizontal =
+                        if (isBigScreen()) {
+                            0.dp
+                        } else {
+                            8.dp
+                        },
+                    vertical = 8.dp,
+                ),
             state = listState,
         ) {
             status(state.listState)
@@ -129,16 +139,15 @@ private fun presenter(tabItem: TimelineTabItem) =
 
 @Composable
 internal fun timelineItemPresenter(timelineTabItem: TimelineTabItem): TimelineItemState {
-    val timelinePresenter =
+    val state =
         remember(timelineTabItem) {
             timelineTabItem.createPresenter()
-        }
+        }.invoke()
     val badge =
         remember(timelineTabItem) {
             NotificationBadgePresenter(timelineTabItem.account)
         }.invoke()
     val scope = rememberCoroutineScope()
-    val state = timelinePresenter()
     var showNewToots by remember { mutableStateOf(false) }
     state.listState.onSuccess {
         LaunchedEffect(Unit) {

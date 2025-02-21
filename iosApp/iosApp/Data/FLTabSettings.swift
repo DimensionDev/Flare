@@ -3,8 +3,6 @@ import ObjectiveC
 import shared
 import SwiftUI
 
-
-
 typealias FLMicroBlogKey = MicroBlogKey
 public typealias AccountType = shared.AccountType
 public typealias MicroBlogKey = shared.MicroBlogKey
@@ -161,7 +159,7 @@ public struct FLTabSettings {
                 ),
                 account: AccountTypeSpecific(accountKey: accountKey),
                 userKey: AccountTypeSpecific(accountKey: accountKey)
-            )
+            ),
         ]
     }
 

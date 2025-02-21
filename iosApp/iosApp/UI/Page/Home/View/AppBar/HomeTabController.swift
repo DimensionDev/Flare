@@ -219,7 +219,7 @@ extension HomeTabController: JXPagingViewDelegate {
         containerView.isUserInteractionEnabled = true
         containerView.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 44)
 
-        let avatarWidth: CGFloat = 44  // 增加宽度，给头像更多空间
+        let avatarWidth: CGFloat = 44 // 增加宽度，给头像更多空间
         let settingsWidth: CGFloat = 44 // 保持对称
         let padding: CGFloat = 8 // 添加内边距
 
@@ -238,13 +238,13 @@ extension HomeTabController: JXPagingViewDelegate {
         // 创建头像按钮，居中显示
         let avatarButtonSize: CGFloat = 32 // 稍微增加头像大小
         let avatarButton = UIButton(frame: CGRect(
-            x: padding + avatarButtonSize/4, // 在padding基础上右移1/4头像尺寸
-            y: (44 - avatarButtonSize) / 2 + avatarButtonSize/4, // 在垂直居中基础上下移1/4头像尺寸
+            x: padding + avatarButtonSize / 4, // 在padding基础上右移1/4头像尺寸
+            y: (44 - avatarButtonSize) / 2 + avatarButtonSize / 4, // 在垂直居中基础上下移1/4头像尺寸
             width: avatarButtonSize,
             height: avatarButtonSize
         ))
         avatarButton.backgroundColor = .clear
-        
+
         if let user = tabStore.currentUser {
             // 设置用户头像
             let hostingController = UIHostingController(rootView:
@@ -284,7 +284,7 @@ extension HomeTabController: JXPagingViewDelegate {
             width: 24,
             height: 24
         ))
-        
+
         if !(accountType is AccountTypeGuest) {
             settingsButton.setImage(UIImage(systemName: "line.3.horizontal"), for: .normal)
             settingsButton.addTarget(self, action: #selector(handleSettingsTap), for: .touchUpInside)

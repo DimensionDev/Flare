@@ -14,7 +14,6 @@ struct HomeTabScreen: View {
     init(accountType: AccountType) {
         self.accountType = accountType
 
-
         // 2. 初始化 TabSettingsStore timelineStore: timelineStore,
         let tabStore = AppBarTabSettingStore(accountType: accountType)
         _tabStore = StateObject(wrappedValue: tabStore)

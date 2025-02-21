@@ -23,4 +23,3 @@ struct HomeScreen: View {
         }
     }
 }
- 

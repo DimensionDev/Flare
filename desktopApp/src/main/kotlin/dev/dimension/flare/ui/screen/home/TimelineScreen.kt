@@ -39,7 +39,6 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.home_timeline_new_toots
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiTimeline
@@ -72,12 +71,6 @@ internal fun TimelineScreen(tabItem: TimelineTabItem) {
         LazyStatusVerticalStaggeredGrid(
             contentPadding =
                 PaddingValues(
-                    horizontal =
-                        if (isBigScreen()) {
-                            0.dp
-                        } else {
-                            8.dp
-                        },
                     vertical = 8.dp,
                 ),
             state = listState,

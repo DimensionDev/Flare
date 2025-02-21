@@ -20,7 +20,6 @@ import com.konyaco.fluent.component.Text
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.onSuccess
@@ -48,12 +47,6 @@ internal fun NotificationScreen(accountType: AccountType) {
         LazyStatusVerticalStaggeredGrid(
             contentPadding =
                 PaddingValues(
-                    horizontal =
-                        if (isBigScreen()) {
-                            0.dp
-                        } else {
-                            8.dp
-                        },
                     vertical = 8.dp,
                 ),
             state = listState,

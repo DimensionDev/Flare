@@ -22,6 +22,7 @@ import com.konyaco.fluent.component.Text
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.screen.home.DiscoverScreen
 import dev.dimension.flare.ui.screen.home.NotificationScreen
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
@@ -52,8 +53,8 @@ internal fun Router(
         screen<Route.Timeline> { (_, args) ->
             TimelineScreen(args.tabItem)
         }
-        screen<Route.Discover> {
-            Text("Discover")
+        screen<Route.Discover> { (_, args) ->
+            DiscoverScreen(args.accountType)
         }
         screen<Route.Settings> {
             Text("Settings")
@@ -80,7 +81,6 @@ internal fun Router(
         }
         screen<Route.DirectMessage> {
         }
-
         screen<Route.Notification> { (_, args) ->
             NotificationScreen(args.accountType)
         }

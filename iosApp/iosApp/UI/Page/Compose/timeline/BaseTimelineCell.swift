@@ -19,6 +19,7 @@ class BaseTimelineCell: UITableViewCell {
         // 禁用 cell 选中效果
         selectionStyle = .none
         backgroundColor = .clear
+        contentView.backgroundColor = .clear
         // 添加内边距容器视图
         contentView.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
 
@@ -44,6 +45,9 @@ class BaseTimelineCell: UITableViewCell {
         let statusView = StatusItemView(data: item, detailKey: nil, enableTranslation: false)
         let hostingController = UIHostingController(rootView: statusView)
         self.hostingController = hostingController
+        
+        // 设置hostingController的背景色
+        hostingController.view.backgroundColor = .clear
 
         // 添加到 contentView
         contentView.addSubview(hostingController.view)

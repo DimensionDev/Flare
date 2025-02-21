@@ -52,14 +52,14 @@ struct FLNewMenuView: View {
                 if let user {
                     UserAvatar(data: user.avatar, size: 60)
                         .clipShape(Circle())
-                        .offset(x: -30)
+                        .offset(x: -10)
 
                     // 用户信息
                     VStack(alignment: .leading, spacing: 4) {
                         Text(user.name.raw)
                             .font(.headline)
                         Text("\(user.handle)")
-                            .font(.subheadline)
+                            .font(.caption)
                             .foregroundColor(.gray)
                     }
                 } else {
@@ -88,7 +88,7 @@ struct FLNewMenuView: View {
                     HStack(spacing: 4) {
                         Text("\(profile.matrices.followsCount)")
                             .font(.headline)
-                        Text("关注")
+                        Text("fans_title")
                             .font(.subheadline)
                             .foregroundColor(.gray)
                     }
@@ -96,7 +96,7 @@ struct FLNewMenuView: View {
                     HStack(spacing: 4) {
                         Text("\(profile.matrices.fansCount)")
                             .font(.headline)
-                        Text("粉丝")
+                        Text("following_title")
                             .font(.subheadline)
                             .foregroundColor(.gray)
                     }
@@ -114,7 +114,7 @@ struct FLNewMenuView: View {
         }) {
             HStack {
                 Image(systemName: "gearshape.fill")
-                Text("设置")
+                Text("settings_title")
                 Spacer()
             }
             .foregroundColor(.primary)

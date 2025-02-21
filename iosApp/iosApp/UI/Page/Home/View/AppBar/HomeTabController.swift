@@ -236,10 +236,10 @@ extension HomeTabController: JXPagingViewDelegate {
         avatarContainer.isUserInteractionEnabled = true
 
         // 创建头像按钮，居中显示
-        let avatarButtonSize: CGFloat = 32 // 稍微增加头像大小
+        let avatarButtonSize: CGFloat = 29 // 稍微增加头像大小
         let avatarButton = UIButton(frame: CGRect(
             x: padding + avatarButtonSize / 4, // 在padding基础上右移1/4头像尺寸
-            y: (44 - avatarButtonSize) / 2 + avatarButtonSize / 4, // 在垂直居中基础上下移1/4头像尺寸
+            y: (44 - avatarButtonSize) / 2 + avatarButtonSize / 4 - 5, // 在垂直居中基础上下移1/4头像尺寸，再往上移5点
             width: avatarButtonSize,
             height: avatarButtonSize
         ))

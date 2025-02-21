@@ -21,7 +21,7 @@ class BaseTimelineCell: UITableViewCell {
         backgroundColor = .clear
         // 添加内边距容器视图
         contentView.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
-        
+
         // 添加分隔线
         let separator = UIView()
         separator.backgroundColor = .separator
@@ -31,7 +31,7 @@ class BaseTimelineCell: UITableViewCell {
             separator.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             separator.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             separator.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            separator.heightAnchor.constraint(equalToConstant: 0.5)
+            separator.heightAnchor.constraint(equalToConstant: 0.5),
         ])
     }
 

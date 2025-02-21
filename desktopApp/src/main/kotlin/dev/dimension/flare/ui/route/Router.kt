@@ -31,8 +31,8 @@ import kotlin.reflect.typeOf
 private val typeMaps =
     persistentMapOf(
         typeOf<MicroBlogKey>() to MicroblogKeyNavType,
-        typeOf<AccountType>() to AccountTypeNavType,
-        typeOf<TimelineTabItem>() to TimelineTabItemNavType,
+        typeOf<AccountType>() to JsonSerializableNavType(AccountType.serializer()),
+        typeOf<TimelineTabItem>() to JsonSerializableNavType(TimelineTabItem.serializer()),
     )
 
 @OptIn(ExperimentalComposeUiApi::class)

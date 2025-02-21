@@ -4,9 +4,9 @@ import androidx.core.bundle.Bundle
 import androidx.navigation.NavType
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import io.ktor.http.encodeURLPathPart
+import kotlinx.serialization.KSerializer
 
 internal val MicroblogKeyNavType =
     object : NavType<MicroBlogKey>(isNullableAllowed = true) {
@@ -26,38 +26,23 @@ internal val MicroblogKeyNavType =
         }
     }
 
-internal val AccountTypeNavType =
-    object : NavType<AccountType>(isNullableAllowed = true) {
-        override fun get(
-            bundle: Bundle,
-            key: String,
-        ): AccountType? = bundle.getString(key)?.decodeJson(AccountType.serializer())
-
-        override fun parseValue(value: String): AccountType = value.decodeJson(AccountType.serializer())
-
-        override fun put(
-            bundle: Bundle,
-            key: String,
-            value: AccountType,
-        ) {
-            bundle.putString(key, value.encodeJson(AccountType.serializer()))
-        }
+internal data class JsonSerializableNavType<T : Any>(
+    private val serializer: KSerializer<T>,
+) : NavType<T>(isNullableAllowed = false) {
+    override fun put(
+        bundle: Bundle,
+        key: String,
+        value: T,
+    ) {
+        bundle.putString(key, value.encodeJson(serializer))
     }
 
-internal val TimelineTabItemNavType =
-    object : NavType<TimelineTabItem>(isNullableAllowed = true) {
-        override fun get(
-            bundle: Bundle,
-            key: String,
-        ): TimelineTabItem? = bundle.getString(key)?.decodeJson(TimelineTabItem.serializer())
+    override fun get(
+        bundle: Bundle,
+        key: String,
+    ): T = parseValue(bundle.getString(key)!!)
 
-        override fun parseValue(value: String): TimelineTabItem = value.decodeJson(TimelineTabItem.serializer())
+    override fun serializeAsValue(value: T): String = value.encodeJson(serializer).encodeURLPathPart()
 
-        override fun put(
-            bundle: Bundle,
-            key: String,
-            value: TimelineTabItem,
-        ) {
-            bundle.putString(key, value.encodeJson(TimelineTabItem.serializer()))
-        }
-    }
+    override fun parseValue(value: String): T = value.decodeJson(serializer)
+}

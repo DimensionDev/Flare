@@ -259,7 +259,10 @@ internal fun FlareApp(navController: NavHostController = rememberNavController()
                     },
             ) {
                 Router(
-                    startDestination = getRoute(tabs.primary.first().tabItem),
+                    startDestination =
+                        remember(tabs) {
+                            getRoute(tabs.primary.first().tabItem)
+                        },
                     navController = navController,
                 )
             }
@@ -269,29 +272,14 @@ internal fun FlareApp(navController: NavHostController = rememberNavController()
 
 private fun getRoute(tab: TabItem): Route =
     when (tab) {
-        is DiscoverTabItem -> {
-            Route.Discover(tab.account)
-        }
-
-        is ProfileTabItem -> {
-            Route.MeRoute(tab.account)
-        }
-
-        is TimelineTabItem -> {
-            Route.Timeline(tab)
-        }
-
-        is NotificationTabItem -> {
-            TODO()
-        }
-
-        SettingsTabItem -> {
-            Route.Settings
-        }
-
-        is AllListTabItem -> TODO()
-        is Bluesky.FeedsTabItem -> TODO()
-        is DirectMessageTabItem -> TODO()
+        is DiscoverTabItem -> Route.Discover(tab.account)
+        is ProfileTabItem -> Route.MeRoute(tab.account)
+        is TimelineTabItem -> Route.Timeline(tab)
+        is NotificationTabItem -> Route.Notification(tab.account)
+        SettingsTabItem -> Route.Settings
+        is AllListTabItem -> Route.AllLists(tab.account)
+        is Bluesky.FeedsTabItem -> Route.BlueskyFeeds(tab.account)
+        is DirectMessageTabItem -> Route.DirectMessage(tab.account)
         is RssTabItem -> Route.Rss
     }
 

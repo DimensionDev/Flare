@@ -18,6 +18,11 @@ internal sealed interface Route {
     ) : Route
 
     @Serializable
+    data class Notification(
+        val accountType: AccountType,
+    ) : Route
+
+    @Serializable
     data object Settings : Route
 
     @Serializable
@@ -35,4 +40,19 @@ internal sealed interface Route {
 
     @Serializable
     data object ServiceSelect : Route
+
+    @Serializable
+    data class AllLists(
+        val accountType: AccountType,
+    ) : Route
+
+    @Serializable
+    data class BlueskyFeeds(
+        val accountType: AccountType,
+    ) : Route
+
+    @Serializable
+    data class DirectMessage(
+        val accountType: AccountType,
+    ) : Route
 }

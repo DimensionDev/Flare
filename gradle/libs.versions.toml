@@ -35,7 +35,7 @@ okio = "3.10.2"
 skie = "0.10.1"
 ksoup = "0.2.0"
 versionUpdate = "0.52.0"
-bluesky = "0.3.0-SNAPSHOT"
+bluesky = "0.3.1"
 kotlinx-coroutines = "1.10.1"
 koin = "4.0.2"
 composeIcons = "1.3.0"
@@ -49,7 +49,7 @@ room = "2.7.0-alpha13"
 compose-multiplatform = "1.7.3"
 
 [libraries]
-bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }
+bluesky = { module = "sh.christian.ozone:bluesky", version.ref = "bluesky" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }

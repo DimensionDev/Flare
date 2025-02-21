@@ -25,8 +25,6 @@ import sh.christian.ozone.BlueskyApi
 import sh.christian.ozone.XrpcBlueskyApi
 import sh.christian.ozone.api.response.AtpErrorDescription
 import sh.christian.ozone.api.response.StatusCode
-import sh.christian.ozone.unspecced.UnspeccedBlueskyApi
-import sh.christian.ozone.unspecced.XrpcUnspeccedBlueskyApi
 
 internal data class BlueskyService(
     private val baseUrl: String,
@@ -35,9 +33,7 @@ internal data class BlueskyService(
     private val refreshToken: String? = null,
     private val onTokenRefreshed: ((accessToken: String, refreshToken: String) -> Unit)? = null,
 ) : BlueskyApi by XrpcBlueskyApi(
-        ktorClient(
-//            authorization = bearerToken?.let { BearerAuthorization(it) },
-        ) {
+        ktorClient {
             install(DefaultRequest) {
                 val hostUrl = Url(baseUrl)
                 url.protocol = hostUrl.protocol
@@ -56,7 +52,7 @@ internal data class BlueskyService(
         },
     )
 
-internal data object UnspeccedBlueskyService : UnspeccedBlueskyApi by XrpcUnspeccedBlueskyApi()
+// internal data object UnspeccedBlueskyService : UnspeccedBlueskyApi by XrpcUnspeccedBlueskyApi()
 
 private class AtprotoProxyPlugin {
     companion object : HttpClientPlugin<Unit, AtprotoProxyPlugin> {

@@ -103,6 +103,10 @@ struct FLNewMenuView: View {
                 }
                 .padding(.top, 8)
             }
+            
+            // 添加分隔线
+            Divider()
+                .padding(.top, 8)
         }
     }
 

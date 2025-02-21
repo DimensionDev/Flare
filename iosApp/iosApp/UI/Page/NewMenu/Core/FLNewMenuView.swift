@@ -1,11 +1,10 @@
 import shared
 import SwiftUI
 
-// MARK: - Menu View
-
 struct FLNewMenuView: View {
     @Binding var isOpen: Bool
     @State private var showLogin = false
+    @State private var showAccounts = false
     let accountType: AccountType
     let user: UiUserV2?
 
@@ -40,68 +39,87 @@ struct FLNewMenuView: View {
                 showLogin = false
             })
         }
+        .sheet(isPresented: $showAccounts) {
+            NavigationView {
+                AccountsScreen()
+            }
+        }
     }
-
-    // MARK: - User Area View
 
     private var userAreaView: some View {
         VStack(alignment: .leading, spacing: 12) {
             // 头像和用户名区域
-            HStack(spacing: 12) {
-                // 头像
-                if let user {
-                    UserAvatar(data: user.avatar, size: 60)
-                        .clipShape(Circle())
+            Button(action: {
+                if user != nil {
+                    showAccounts = true
                 } else {
-                    userAvatarPlaceholder(size: 60)
-                        .clipShape(Circle())
+                    showLogin = true
                 }
-
-                // 用户信息
-                VStack(alignment: .leading, spacing: 4) {
+            }) {
+                HStack(spacing: 12) {
+                    // 头像
                     if let user {
-                        Text(user.name.raw)
-                            .font(.headline)
-                        Text("\(user.handle)")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                    } else {
-                        Text("未登录")
-                            .font(.headline)
-                        Button("点击登录") {
-                            showLogin = true
+                        HStack(spacing: 12) {
+                            UserAvatar(data: user.avatar, size: 60)
+                                .clipShape(Circle())
+                                .offset(x: 0)
+
+                            // 用户信息
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(user.name.raw)
+                                    .font(.headline)
+                                Text("\(user.handle)")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                            }
                         }
-                        .font(.subheadline)
-                        .foregroundColor(.blue)
+                    } else {
+                        HStack(spacing: 12) {
+                            userAvatarPlaceholder(size: 60)
+                                .clipShape(Circle())
+                                .offset(x: 0)
+
+                            // 用户信息
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("未登录")
+                                    .font(.headline)
+                                    .foregroundColor(.gray)
+                                    .offset(x: 10)
+                            }
+                        }
                     }
                 }
             }
+            .buttonStyle(PlainButtonStyle())
 
             // 关注/粉丝数
             if let profile = user as? UiProfile {
                 HStack(spacing: 20) {
                     HStack(spacing: 4) {
-                        Text("\(profile.matrices.followsCount)")
-                            .font(.headline)
-                        Text("关注")
+                        Text(formatCount(profile.matrices.followsCount))
+                            .font(.subheadline)
+                        Text("fans_title")
                             .font(.subheadline)
                             .foregroundColor(.gray)
                     }
 
                     HStack(spacing: 4) {
-                        Text("\(profile.matrices.fansCount)")
-                            .font(.headline)
-                        Text("粉丝")
+                        Text(formatCount(profile.matrices.fansCount))
+                            .font(.subheadline)
+                        Text("following_title")
                             .font(.subheadline)
                             .foregroundColor(.gray)
                     }
                 }
                 .padding(.top, 8)
+                .padding(.leading, 15)
             }
+
+            // 添加分隔线
+            Divider()
+                .padding(.top, 8)
         }
     }
-
-    // MARK: - Settings Button
 
     private var settingsButton: some View {
         Button(action: {
@@ -109,7 +127,7 @@ struct FLNewMenuView: View {
         }) {
             HStack {
                 Image(systemName: "gearshape.fill")
-                Text("设置")
+                Text("settings_title")
                 Spacer()
             }
             .foregroundColor(.primary)

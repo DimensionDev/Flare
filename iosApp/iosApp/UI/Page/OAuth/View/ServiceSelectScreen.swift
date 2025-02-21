@@ -9,6 +9,7 @@ struct ServiceSelectScreen: View {
     @State private var showXQT: Bool = false
     @State private var showVVo: Bool = false
     @State private var instanceURL = ""
+    @State private var selectedInstance: UiInstance? = nil
     @State private var blueskyInputViewModel = BlueskyInputViewModel()
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     let toHome: () -> Void
@@ -36,7 +37,7 @@ struct ServiceSelectScreen: View {
                         .foregroundColor(.gray)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity, alignment: .center)
-                    // .fixedSize(horizontal: false, vertical: true)
+
                     HStack {
                         TextField("service_select_instance_input_placeholder", text: $instanceURL)
                             .disableAutocorrection(true)
@@ -79,20 +80,27 @@ struct ServiceSelectScreen: View {
                             case .vvo:
                                 vvoLoginView(state: state)
                             }
+
+                            // 显示选中的实例卡片
+                            if let instance = selectedInstance {
+                                instanceCardView(instance: instance)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 24)
+                            }
                         } else if case let .success(success) = onEnum(of: state.instances) {
                             ForEach(0 ..< success.itemCount, id: \.self) { index in
                                 let item = success.peek(index: index)
                                 if let instance = item {
-                                    Button(action: {
-                                        instanceURL = instance.domain
-                                        state.setFilter(value: instance.domain)
-                                    }, label: {
-                                        instanceCardView(instance: instance)
-                                    })
-                                    .buttonStyle(.plain)
-                                    .clipShape(RoundedRectangle(cornerRadius: 12))
-                                    .shadow(radius: 2)
-                                    .padding(.vertical, 4)
+                                    instanceCardView(instance: instance)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            selectedInstance = instance
+                                            instanceURL = instance.domain
+                                            state.setFilter(value: instance.domain)
+                                        }
+                                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        .shadow(radius: 2)
+                                        .padding(.vertical, 4)
                                 } else {
                                     InstancePlaceHolder()
                                 }
@@ -240,42 +248,42 @@ struct ServiceSelectScreen: View {
             ZStack {
                 // 背景层
                 if let bannerUrl = instance.bannerUrl {
-                    KFImage(URL(string: bannerUrl))
-                        .placeholder { // 添加占位符
-                            Rectangle()
-                                .foregroundColor(.gray.opacity(0.2))
-                        }
-                        .setProcessor(DownsamplingImageProcessor(size: CGSize(width: 300, height: 80)))
-                        .fade(duration: 0.25)
-                        .resizable()
-                        .scaledToFill()
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 80)
-                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    GeometryReader { geometry in
+                        KFImage(URL(string: bannerUrl))
+                            .placeholder { // 添加占位符
+                                ServiceIconBackground(url: instance.iconUrl ?? "", domain: instance.domain)
+                            }
+                            .setProcessor(DownsamplingImageProcessor(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 160)))
+                            .fade(duration: 0.25)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geometry.size.width)
+                            .frame(height: 80, alignment: .center)
+                            .clipped()
+                            .blur(radius: 3)
+                            .overlay(
+                                Rectangle()
+                                    .fill(Color.black.opacity(0.2))
+                            )
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .frame(height: 80)
+                } else {
+                    // 如果没有banner，使用icon作为背景
+                    ServiceIconBackground(url: instance.iconUrl ?? "", domain: instance.domain)
                 }
 
                 HStack(spacing: 12) {
                     // 头像或占位符
                     Group {
-                        if let iconUrl = instance.iconUrl, !iconUrl.isEmpty, URL(string: iconUrl) != nil {
-                            KFImage(URL(string: iconUrl))
-                                .placeholder { // 添加占位符
-                                    Circle()
-                                        .foregroundColor(.gray.opacity(0.2))
-                                }
-                                .setProcessor(DownsamplingImageProcessor(size: CGSize(width: 48, height: 48)))
-                                .fade(duration: 0.25)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 48, height: 48)
-                                .clipShape(Circle())
-                        } else {
-                            Circle()
-                                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
-                                .frame(width: 48, height: 48)
-                                .background(Circle().fill(Color.gray.opacity(0.1)))
-                        }
+                        ServiceIcon(
+                            url: instance.iconUrl ?? "",
+                            domain: instance.domain,
+                            size: 48,
+                            clipShape: AnyShape(Circle())
+                        )
                     }
+                    .allowsHitTesting(false)
 
                     // 名字和网址
                     VStack(alignment: .leading, spacing: 4) {
@@ -285,6 +293,20 @@ struct ServiceSelectScreen: View {
                             .padding(.vertical, 4)
                             .background(Color(.systemBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 6))
+
+
+                              // 添加调试信息
+                        Group {
+                            if instance.domain.contains( "mstdn.jp") {
+                                let _ = print("[Debug] Found mstdn.jp instance:")
+                                let _ = print("Domain: \(instance.domain)")
+                                let _ = print("Banner URL: \(instance.bannerUrl ?? "nil")")
+                                let _ = print("Icon URL: \(instance.iconUrl ?? "nil")")
+                                let _ = print("Name: \(instance.name)")
+                                let _ = print("Description: \(instance.description_ ?? "nil")")
+                            }
+                        }
+                        
                         Text(instance.domain)
                             .font(.subheadline)
                             .foregroundColor(.secondary)
@@ -293,27 +315,9 @@ struct ServiceSelectScreen: View {
                             .background(Color(.systemBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
+                    .allowsHitTesting(false)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    // .background(
-                    //    Group {
-                    //        if instance.bannerUrl != nil {
-                    //            // 有背景图时使用渐变
-                    //            LinearGradient(
-                    //                colors: [
-                    //                    Color(.systemBackground),
-                    //                    Color(.systemBackground).opacity(0.9),
-                    //                    Color(.systemBackground).opacity(0.7)
-                    //                ],
-                    //                startPoint: .leading,
-                    //                endPoint: .trailing
-                    //            )
-                    //        } else {
-                    //            // 没有背景图时使用纯色
-                    //            // Color(.systemBackground)
-                    //        }
-                    //    }
-                    // )
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()
@@ -327,12 +331,15 @@ struct ServiceSelectScreen: View {
                     .lineLimit(3)
                     .padding(12)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .allowsHitTesting(false)
             }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 8)
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 6))
+        .frame(maxWidth: min(UIScreen.main.bounds.width - 32, 600))
+        .frame(maxWidth: .infinity)
     }
 
     private func parseHTML(_ html: String) -> String {

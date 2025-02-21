@@ -14,7 +14,7 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
     // - Private Properties
 //    private var timelineStore: TimelineStore
     private var isInitializing = false
-    private var presenter = ActiveAccountPresenter()
+//    private var presenter = ActiveAccountPresenter()
     private var presenterCache: [String: TimelinePresenter] = [:] // 添加缓存
     private var mediaPresenterCache: [String: ProfileMediaPresenter] = [:] // 媒体presenter缓存
 
@@ -37,12 +37,26 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
     }
 
     private func observeUser(userKey: MicroBlogKey?) {
-        Task { @MainActor in
-            for await state in presenter.models {
-                if case let .success(data) = onEnum(of: state.user) {
-                    initializeWithUser(data.data, userKey: userKey)
-                }
-            }
+        // 先检查UserManager中是否有用户
+        if let user = UserManager.shared.getCurrentUser() {
+            initializeWithUser(user, userKey: userKey)
+            return
+        }
+
+        // 如果没有，则等待用户更新通知
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleUserUpdate),
+            name: .userDidUpdate,
+            object: nil
+        )
+    }
+
+    @objc private func handleUserUpdate(_ notification: Notification) {
+        if let user = notification.object as? UiUserV2,
+           let userKey = user.key as? MicroBlogKey
+        {
+            initializeWithUser(user, userKey: userKey)
         }
     }
 
@@ -151,5 +165,9 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
 
     func notifyTabChange() {
         onTabChange?(selectedIndex)
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }

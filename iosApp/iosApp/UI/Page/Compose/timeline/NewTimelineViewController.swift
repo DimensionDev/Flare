@@ -37,6 +37,9 @@ class NewTimelineViewController: UIViewController {
 
     private func setupUI() {
         os_log("[📔][NewTimelineViewController] setupUI start", log: .default, type: .debug)
+        // 设置主view的背景色
+        view.backgroundColor = .systemBackground
+
         // 配置 tableView
         tableView = UITableView()
         tableView.backgroundColor = .clear
@@ -81,12 +84,9 @@ class NewTimelineViewController: UIViewController {
             os_log("[📔][NewTimelineViewController] 配置上拉加载更多", log: .default, type: .debug)
             tableView.mj_footer = MJRefreshAutoNormalFooter(refreshingBlock: { [weak self] in
                 Task {
-//                    if let timelineState = self?.presenter?.models.value as? TimelineState {
-//                        try? await timelineState.loadMore()
                     await MainActor.run {
                         self?.tableView.mj_footer?.endRefreshing()
                     }
-//                    }
                 }
             })
         }

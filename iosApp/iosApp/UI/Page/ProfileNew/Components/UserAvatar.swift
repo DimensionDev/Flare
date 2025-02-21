@@ -21,7 +21,7 @@ struct UserAvatar: View {
 }
 
 func userAvatarPlaceholder(size: CGFloat = 28) -> some View {
-    Image(systemName: "person.circle")
+    Image(systemName: "person.circle.fill")
         .resizable()
         .aspectRatio(contentMode: .fit)
         .frame(width: size, height: size)

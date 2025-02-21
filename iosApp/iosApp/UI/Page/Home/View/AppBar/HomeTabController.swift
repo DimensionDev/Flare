@@ -6,7 +6,7 @@ import shared
 import SwiftUI
 import UIKit
 
-class HomeNewViewController: UIViewController {
+class HomeTabController: UIViewController {
     // - Properties
 
     private let tabStore: AppBarTabSettingStore
@@ -67,11 +67,11 @@ class HomeNewViewController: UIViewController {
             let selectedTab = tabStore.availableAppBarTabsItems[index]
             tabStore.updateSelectedTab(selectedTab)
 
-            if let currentList = pagingView.validListDict[index] as? NewTimelineViewController,
-               let presenter = tabStore.currentPresenter
-            {
-                currentList.updatePresenter(presenter)
-            }
+//            if let currentList = pagingView.validListDict[index] as? NewTimelineViewController,
+//               let presenter = tabStore.currentPresenter
+//            {
+//                currentList.updatePresenter(presenter)
+//            }
         }
 
         // 添加通知监听
@@ -195,7 +195,7 @@ class HomeNewViewController: UIViewController {
 
 // - JXPagingViewDelegate
 
-extension HomeNewViewController: JXPagingViewDelegate {
+extension HomeTabController: JXPagingViewDelegate {
     func tableHeaderViewHeight(in _: JXPagingView) -> Int {
         0
     }
@@ -216,37 +216,35 @@ extension HomeNewViewController: JXPagingViewDelegate {
     func viewForPinSectionHeader(in _: JXPagingView) -> UIView {
         // 创建一个容器视图，包含 segmentedView
         let containerView = UIView()
-        // containerView.backgroundColor = .systemPink // 容器视图背景色
         containerView.isUserInteractionEnabled = true
-
-        // 设置容器视图的 frame，固定高度为44
         containerView.frame = CGRect(x: 0, y: 0, width: view.bounds.width, height: 44)
 
-        let avatarWidth: CGFloat = 40
-        let settingsWidth: CGFloat = 40
+        let avatarWidth: CGFloat = 44 // 增加宽度，给头像更多空间
+        let settingsWidth: CGFloat = 44 // 保持对称
+        let padding: CGFloat = 8 // 添加内边距
 
         // 调整 segmentedView 的位置和高度
-        // x 从头像宽度开始，宽度 = 总宽度 - 头像宽度 - 设置按钮宽度
-        segmentedView.frame = CGRect(x: avatarWidth,
-                                     y: 0,
-                                     width: view.bounds.width - avatarWidth - settingsWidth,
-                                     height: 44)
-        // segmentedView.backgroundColor = .systemYellow // segmentedView 背景色
+        segmentedView.frame = CGRect(
+            x: avatarWidth,
+            y: 0,
+            width: view.bounds.width - avatarWidth - settingsWidth,
+            height: 44
+        )
 
         // 创建左边的头像按钮容器
         let avatarContainer = UIView(frame: CGRect(x: 0, y: 0, width: avatarWidth, height: 44))
         avatarContainer.isUserInteractionEnabled = true
-        // avatarContainer.backgroundColor = .systemGreen // 头像容器背景色
 
         // 创建头像按钮，居中显示
-        let avatarButtonSize: CGFloat = 28 // 头像大小
+        let avatarButtonSize: CGFloat = 29 // 稍微增加头像大小
         let avatarButton = UIButton(frame: CGRect(
-            x: (avatarWidth - avatarButtonSize) / 2, // 水平居中
-            y: (44 - avatarButtonSize) / 2, // 垂直居中
+            x: padding + avatarButtonSize / 4, // 在padding基础上右移1/4头像尺寸
+            y: (44 - avatarButtonSize) / 2 + avatarButtonSize / 4 - 5, // 在垂直居中基础上下移1/4头像尺寸，再往上移5点
             width: avatarButtonSize,
             height: avatarButtonSize
         ))
         avatarButton.backgroundColor = .clear
+
         if let user = tabStore.currentUser {
             // 设置用户头像
             let hostingController = UIHostingController(rootView:
@@ -255,7 +253,7 @@ extension HomeNewViewController: JXPagingViewDelegate {
             )
             hostingController.view.frame = avatarButton.bounds
             hostingController.view.backgroundColor = .clear
-            hostingController.view.isUserInteractionEnabled = false // 禁用 SwiftUI 视图的交互
+            hostingController.view.isUserInteractionEnabled = false
             avatarButton.addSubview(hostingController.view)
         } else {
             // 设置默认头像
@@ -265,34 +263,31 @@ extension HomeNewViewController: JXPagingViewDelegate {
             )
             hostingController.view.frame = avatarButton.bounds
             hostingController.view.backgroundColor = .clear
-            hostingController.view.isUserInteractionEnabled = false // 禁用 SwiftUI 视图的交互
+            hostingController.view.isUserInteractionEnabled = false
             avatarButton.addSubview(hostingController.view)
         }
         avatarButton.addTarget(self, action: #selector(avatarButtonTapped), for: .touchUpInside)
 
-        // 调试 可视化
-        // #if DEBUG
-        // avatarButton.layer.borderWidth = 1
-        // avatarButton.layer.borderColor = UIColor.red.cgColor
-        // #endif
-
         // 创建右边的设置按钮容器
-        let settingsContainer = UIView(frame: CGRect(x: view.bounds.width - settingsWidth,
-                                                     y: 0,
-                                                     width: settingsWidth,
-                                                     height: 44))
+        let settingsContainer = UIView(frame: CGRect(
+            x: view.bounds.width - settingsWidth,
+            y: 0,
+            width: settingsWidth,
+            height: 44
+        ))
         settingsContainer.isUserInteractionEnabled = true
-        // settingsContainer.backgroundColor = .systemOrange // 设置按钮容器背景色
 
         // 创建设置按钮
-        let settingsButton = UIButton(frame: CGRect(x: 0, y: 0, width: settingsWidth, height: 44))
-        // settingsButton.backgroundColor = .systemPurple // 设置按钮背景色
+        let settingsButton = UIButton(frame: CGRect(
+            x: (settingsWidth - 24) / 2, // 图标宽度居中
+            y: (44 - 24) / 2, // 图标高度居中
+            width: 24,
+            height: 24
+        ))
+
         if !(accountType is AccountTypeGuest) {
             settingsButton.setImage(UIImage(systemName: "line.3.horizontal"), for: .normal)
             settingsButton.addTarget(self, action: #selector(handleSettingsTap), for: .touchUpInside)
-        } else {
-//           settingsButton.setTitle("Login", for: .normal)
-//           settingsButton.addTarget(self, action: #selector(handleLoginTap), for: .touchUpInside)
         }
         settingsButton.tintColor = .label
 
@@ -333,6 +328,8 @@ extension HomeNewViewController: JXPagingViewDelegate {
         if index < tabStore.availableAppBarTabsItems.count {
             let tab = tabStore.availableAppBarTabsItems[index]
             if let presenter = tabStore.getOrCreatePresenter(for: tab) {
+                os_log("[📔][HomeNewViewController] updatePresenter start", log: .default, type: .debug)
+
                 timelineVC.updatePresenter(presenter)
             }
         }
@@ -343,7 +340,7 @@ extension HomeNewViewController: JXPagingViewDelegate {
 
 // - JXSegmentedViewDelegate
 
-extension HomeNewViewController: JXSegmentedViewDelegate {
+extension HomeTabController: JXSegmentedViewDelegate {
     func segmentedView(_: JXSegmentedView, didSelectedItemAt index: Int) {
         os_log("[📔][HomeNewViewController]选择标签页: index=%{public}d", log: .default, type: .debug, index)
 
@@ -362,6 +359,8 @@ extension HomeNewViewController: JXSegmentedViewDelegate {
             if let currentList = pagingView.validListDict[index] as? NewTimelineViewController,
                let presenter = tabStore.currentPresenter
             {
+                os_log("[📔][HomeNewViewController] updatePresenter start", log: .default, type: .debug)
+
                 // 更新 timeline presenter
                 currentList.updatePresenter(presenter)
             }

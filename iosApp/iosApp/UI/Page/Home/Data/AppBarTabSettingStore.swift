@@ -20,8 +20,10 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
     private var isInitializing = false
     private let settingsManager = FLTabSettingsManager()
     private let accountType: AccountType
+
     // 缓存 presenter 避免重复创建
     private var presenterCache: [String: TimelinePresenter] = [:]
+
     // TabStateProvider 协议实现
     var onTabChange: ((Int) -> Void)?
 
@@ -106,13 +108,24 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
     }
 
     private func observeUser() {
-        Task { @MainActor in
-            for await state in presenter.models {
-                if case let .success(data) = onEnum(of: state.user) {
-                    // 直接初始化，不需要额外的 MainActor.run
-                    self.initializeWithUser(data.data)
-                }
-            }
+        // 先检查UserManager中是否有用户
+        if let user = UserManager.shared.getCurrentUser() {
+            initializeWithUser(user)
+            return
+        }
+
+        // 如果没有，则等待用户更新通知
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleUserUpdate),
+            name: .userDidUpdate,
+            object: nil
+        )
+    }
+
+    @objc private func handleUserUpdate(_ notification: Notification) {
+        if let user = notification.object as? UiUserV2 {
+            initializeWithUser(user)
         }
     }
 
@@ -130,10 +143,22 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
         // 从 UserDefaults 加载存储的标签
         availableAppBarTabsItems = settingsManager.getEnabledItems(for: user) ?? secondaryItems
 
-        // 立即更新可用标签
-        if let homeItem = primaryHomeItems.first {
-            let enabledItems = availableAppBarTabsItems.isEmpty ? [homeItem] + secondaryItems : availableAppBarTabsItems
-            availableAppBarTabsItems = enabledItems
+        if availableAppBarTabsItems.isEmpty {
+            // 立即更新可用标签
+            if let homeItem = primaryHomeItems.first {
+                availableAppBarTabsItems = [homeItem] + secondaryItems
+            }
+        } else {
+            // 立即更新可用标签
+            if let homeItem = primaryHomeItems.first {
+                if availableAppBarTabsItems.first?.key.contains("home_") == true {
+                    // 已经有home标签，保持现状
+                    availableAppBarTabsItems = availableAppBarTabsItems
+                } else {
+                    // 没有home标签，添加到开头
+                    availableAppBarTabsItems = [homeItem] + availableAppBarTabsItems
+                }
+            }
         }
 
         // 选择第一个标签

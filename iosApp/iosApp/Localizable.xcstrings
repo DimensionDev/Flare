@@ -374,9 +374,6 @@
     "%@" : {
 
     },
-    "%lld" : {
-
-    },
     "%lld users, %lld statuses will be deleted" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -133756,9 +133753,6 @@
         }
       }
     },
-    "关注" : {
-
-    },
     "关注者" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -134687,12 +134681,6 @@
         }
       }
     },
-    "点击登录" : {
-
-    },
-    "粉丝" : {
-
-    },
     "精选页面" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -135432,9 +135420,6 @@
           }
         }
       }
-    },
-    "设置" : {
-
     }
   },
   "version" : "1.0"

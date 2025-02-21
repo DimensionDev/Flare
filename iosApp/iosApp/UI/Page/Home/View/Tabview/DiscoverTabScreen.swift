@@ -2,7 +2,7 @@ import Combine
 import shared
 import SwiftUI
 
-struct DiscoverScreen: View {
+struct DiscoverTabScreen: View {
     private let onUserClicked: (UiUserV2) -> Void
     @State private var searchPresenter: SearchPresenter
     @State private var presenter: DiscoverPresenter

@@ -264,8 +264,8 @@ class ProfileNewHeaderView: UIView {
         }
 
         // 设置关注/粉丝数
-        followsCountLabel.text = "\(userInfo.followCount) Following"
-        fansCountLabel.text = "\(userInfo.fansCount) Fans"
+        followsCountLabel.text = "\(formatCount(Int64(userInfo.followCount) ?? 0)) \(NSLocalizedString("following_title", comment: ""))"
+        fansCountLabel.text = "\(formatCount(Int64(userInfo.fansCount) ?? 0)) \(NSLocalizedString("fans_title", comment: ""))"
 
         // 更新关注按钮状态
         updateFollowButton(with: userInfo)

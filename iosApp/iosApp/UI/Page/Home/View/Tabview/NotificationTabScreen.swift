@@ -1,7 +1,7 @@
 import shared
 import SwiftUI
 
-struct NotificationScreen: View {
+struct NotificationTabScreen: View {
     @State private var presenter: NotificationPresenter
     @State private var notificationType: NotificationFilter = .all
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass

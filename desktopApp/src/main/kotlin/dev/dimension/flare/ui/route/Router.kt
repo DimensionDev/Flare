@@ -73,6 +73,15 @@ internal fun Router(
                 },
             )
         }
+        screen<Route.AllLists> {
+        }
+        screen<Route.BlueskyFeeds> {
+        }
+        screen<Route.DirectMessage> {
+        }
+
+        screen<Route.Notification> {
+        }
     }
 }
 

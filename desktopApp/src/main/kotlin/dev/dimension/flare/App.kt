@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -131,7 +132,9 @@ internal fun FlareApp(navController: NavHostController = rememberNavController()
                                 ) {
                                     AvatarComponent(
                                         data = user.avatar,
-                                        modifier = Modifier.size(36.dp),
+                                        modifier =
+                                            Modifier
+                                                .aspectRatio(1f),
                                     )
                                     if (navigationState.expanded) {
                                         Column {
@@ -192,9 +195,18 @@ internal fun FlareApp(navController: NavHostController = rememberNavController()
                 ) {
                     menuItem(
                         selected = currentDestination?.hierarchy?.any { it.hasRoute(getRoute(tab.tabItem)::class) } == true,
-                        onClick = { selectedIndex = index },
+                        onClick = {
+                            if (selectedIndex == index) {
+                                tab.tabState.onClick()
+                            } else {
+                                selectedIndex = index
+                            }
+                        },
                         icon = {
-                            TabIcon(tab.tabItem)
+                            TabIcon(
+                                tab.tabItem,
+                                iconOnly = tabs.secondaryIconOnly,
+                            )
                         },
                         text = {
                             TabTitle(tab.tabItem.metaData.title)
@@ -252,11 +264,16 @@ internal fun FlareApp(navController: NavHostController = rememberNavController()
                 )
             },
         ) {
+            val currentTab =
+                remember(tabs, selectedIndex) {
+                    tabs.all.getOrNull(selectedIndex)
+                }
             CompositionLocalProvider(
                 LocalUriHandler provides
                     remember {
                         ProxyUriHandler(navController, uriHandler)
                     },
+                LocalTabState provides currentTab?.tabState,
             ) {
                 Router(
                     startDestination =
@@ -326,7 +343,7 @@ internal fun RegisterTabCallback(
                         onRefreshState()
                     } else {
                         scope.launch {
-                            if (lazyListState.firstVisibleItemIndex > 20) {
+                            if (lazyListState.firstVisibleItemIndex > 40) {
                                 lazyListState.scrollToItem(0)
                             } else {
                                 lazyListState.animateScrollToItem(0)

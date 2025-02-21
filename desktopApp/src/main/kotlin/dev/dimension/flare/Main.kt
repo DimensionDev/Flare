@@ -19,6 +19,7 @@ import coil3.compose.setSingletonImageLoaderFactory
 import coil3.request.crossfade
 import com.jthemedetecor.OsThemeDetector
 import dev.dimension.flare.di.KoinHelper
+import dev.dimension.flare.di.desktopModule
 import dev.dimension.flare.ui.theme.FlareTheme
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.painterResource
@@ -31,7 +32,7 @@ private val detector = OsThemeDetector.getDetector()
 
 fun main(args: Array<String>) {
     startKoin {
-        modules(KoinHelper.modules())
+        modules(desktopModule + KoinHelper.modules())
     }
     application {
         setSingletonImageLoaderFactory { context ->

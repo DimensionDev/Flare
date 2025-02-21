@@ -81,12 +81,9 @@ class NewTimelineViewController: UIViewController {
             os_log("[📔][NewTimelineViewController] 配置上拉加载更多", log: .default, type: .debug)
             tableView.mj_footer = MJRefreshAutoNormalFooter(refreshingBlock: { [weak self] in
                 Task {
-//                    if let timelineState = self?.presenter?.models.value as? TimelineState {
-//                        try? await timelineState.loadMore()
                     await MainActor.run {
                         self?.tableView.mj_footer?.endRefreshing()
                     }
-//                    }
                 }
             })
         }

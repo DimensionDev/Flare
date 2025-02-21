@@ -35,8 +35,8 @@
 		642A0D852D56235C0009C16D /* UIView+NewGesture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D762D56235C0009C16D /* UIView+NewGesture.swift */; };
 		642A0D872D56235C0009C16D /* FLNewGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D6D2D56235C0009C16D /* FLNewGestureRecognizer.swift */; };
 		642A0D882D56235C0009C16D /* FLNewSideMenuDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 642A0D792D56235C0009C16D /* FLNewSideMenuDelegate.swift */; };
-		644C848C2D523D8700E92D0D /* HomeNewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C848A2D523D8700E92D0D /* HomeNewViewController.swift */; };
-		644C848E2D523D8700E92D0D /* HomeNewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84872D523D8700E92D0D /* HomeNewScreen.swift */; };
+		644C848C2D523D8700E92D0D /* HomeTabController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C848A2D523D8700E92D0D /* HomeTabController.swift */; };
+		644C848E2D523D8700E92D0D /* HomeTabScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84872D523D8700E92D0D /* HomeTabScreen.swift */; };
 		644C84C82D535C6D00E92D0D /* MediaPreviewViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84A62D535C6D00E92D0D /* MediaPreviewViewController.swift */; };
 		644C84C92D535C6D00E92D0D /* TranslationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84B12D535C6D00E92D0D /* TranslationService.swift */; };
 		644C84CA2D535C6D00E92D0D /* ZJFlexibleDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 644C84B92D535C6D00E92D0D /* ZJFlexibleDataSource.swift */; };
@@ -88,7 +88,7 @@
 		649E7A222D318F5100AC2F62 /* ProfileMediaViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A0E2D318F5100AC2F62 /* ProfileMediaViewController.swift */; };
 		649E7A242D318F5100AC2F62 /* ProfileHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A0D2D318F5100AC2F62 /* ProfileHeaderView.swift */; };
 		649E7A262D318F5100AC2F62 /* ProfileRefreshViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A1D2D318F5100AC2F62 /* ProfileRefreshViewController.swift */; };
-		649E7A272D318F5100AC2F62 /* ProfileNewScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A1A2D318F5100AC2F62 /* ProfileNewScreen.swift */; };
+		649E7A272D318F5100AC2F62 /* ProfileTabScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A1A2D318F5100AC2F62 /* ProfileTabScreen.swift */; };
 		649E7A282D318F5100AC2F62 /* UserAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A122D318F5100AC2F62 /* UserAvatar.swift */; };
 		649E7A292D318F5100AC2F62 /* ProfileMediaListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A192D318F5100AC2F62 /* ProfileMediaListScreen.swift */; };
 		649E7A2A2D318F5100AC2F62 /* ProfileUserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 649E7A172D318F5100AC2F62 /* ProfileUserInfo.swift */; };
@@ -115,11 +115,11 @@
 		64E8772D2D0430C7003559B9 /* HomeContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876EF2D0430C7003559B9 /* HomeContent.swift */; };
 		64E8772E2D0430C7003559B9 /* MisskeyReactionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877262D0430C7003559B9 /* MisskeyReactionSheet.swift */; };
 		64E877322D0430C7003559B9 /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877212D0430C7003559B9 /* Route.swift */; };
-		64E877332D0430C7003559B9 /* NotificationScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876F32D0430C7003559B9 /* NotificationScreen.swift */; };
+		64E877332D0430C7003559B9 /* NotificationTabScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876F32D0430C7003559B9 /* NotificationTabScreen.swift */; };
 		64E877342D0430C7003559B9 /* UserComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876DB2D0430C7003559B9 /* UserComponent.swift */; };
 		64E877362D0430C7003559B9 /* XQTLoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876FF2D0430C7003559B9 /* XQTLoginScreen.swift */; };
 		64E877382D0430C7003559B9 /* StatusDetailScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E8771B2D0430C7003559B9 /* StatusDetailScreen.swift */; };
-		64E877392D0430C7003559B9 /* DiscoverScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876EB2D0430C7003559B9 /* DiscoverScreen.swift */; };
+		64E877392D0430C7003559B9 /* DiscoverTabScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876EB2D0430C7003559B9 /* DiscoverTabScreen.swift */; };
 		64E8773D2D0430C7003559B9 /* StatusRetweetHeaderComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D92D0430C7003559B9 /* StatusRetweetHeaderComponent.swift */; };
 		64E8773E2D0430C7003559B9 /* StatusMediaScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876F62D0430C7003559B9 /* StatusMediaScreen.swift */; };
 		64E877422D0430C7003559B9 /* FeedMediaPlayButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876D32D0430C7003559B9 /* FeedMediaPlayButton.swift */; };
@@ -186,8 +186,8 @@
 		642A0D762D56235C0009C16D /* UIView+NewGesture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+NewGesture.swift"; sourceTree = "<group>"; };
 		642A0D772D56235C0009C16D /* View+NewSideMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+NewSideMenu.swift"; sourceTree = "<group>"; };
 		642A0D792D56235C0009C16D /* FLNewSideMenuDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FLNewSideMenuDelegate.swift; sourceTree = "<group>"; };
-		644C84872D523D8700E92D0D /* HomeNewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewScreen.swift; sourceTree = "<group>"; };
-		644C848A2D523D8700E92D0D /* HomeNewViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeNewViewController.swift; sourceTree = "<group>"; };
+		644C84872D523D8700E92D0D /* HomeTabScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTabScreen.swift; sourceTree = "<group>"; };
+		644C848A2D523D8700E92D0D /* HomeTabController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTabController.swift; sourceTree = "<group>"; };
 		644C848F2D535C6D00E92D0D /* SensitiveContentButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensitiveContentButton.swift; sourceTree = "<group>"; };
 		644C84912D535C6D00E92D0D /* UIImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		644C84922D535C6D00E92D0D /* UserInterfaceSizeClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInterfaceSizeClass.swift; sourceTree = "<group>"; };
@@ -245,7 +245,7 @@
 		649E7A152D318F5100AC2F62 /* ProfileTabSettingStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabSettingStore.swift; sourceTree = "<group>"; };
 		649E7A172D318F5100AC2F62 /* ProfileUserInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileUserInfo.swift; sourceTree = "<group>"; };
 		649E7A192D318F5100AC2F62 /* ProfileMediaListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileMediaListScreen.swift; sourceTree = "<group>"; };
-		649E7A1A2D318F5100AC2F62 /* ProfileNewScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileNewScreen.swift; sourceTree = "<group>"; };
+		649E7A1A2D318F5100AC2F62 /* ProfileTabScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileTabScreen.swift; sourceTree = "<group>"; };
 		649E7A1D2D318F5100AC2F62 /* ProfileRefreshViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileRefreshViewController.swift; sourceTree = "<group>"; };
 		649E7A1E2D318F5100AC2F62 /* ProfileStretchRefreshControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileStretchRefreshControl.swift; sourceTree = "<group>"; };
 		649E7A1F2D318F5100AC2F62 /* ProfileWithUserNameScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileWithUserNameScreen.swift; sourceTree = "<group>"; };
@@ -268,9 +268,9 @@
 		64E876E22D0430C7003559B9 /* FullScreenImageViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FullScreenImageViewer.swift; sourceTree = "<group>"; };
 		64E876E32D0430C7003559B9 /* ImageViewWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageViewWindow.swift; sourceTree = "<group>"; };
 		64E876E82D0430C7003559B9 /* AppBarTabItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppBarTabItem.swift; sourceTree = "<group>"; };
-		64E876EB2D0430C7003559B9 /* DiscoverScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverScreen.swift; sourceTree = "<group>"; };
+		64E876EB2D0430C7003559B9 /* DiscoverTabScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverTabScreen.swift; sourceTree = "<group>"; };
 		64E876EF2D0430C7003559B9 /* HomeContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeContent.swift; sourceTree = "<group>"; };
-		64E876F32D0430C7003559B9 /* NotificationScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScreen.swift; sourceTree = "<group>"; };
+		64E876F32D0430C7003559B9 /* NotificationTabScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationTabScreen.swift; sourceTree = "<group>"; };
 		64E876F52D0430C7003559B9 /* SearchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchScreen.swift; sourceTree = "<group>"; };
 		64E876F62D0430C7003559B9 /* StatusMediaScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusMediaScreen.swift; sourceTree = "<group>"; };
 		64E876F72D0430C7003559B9 /* HomeAppBarSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeAppBarSettingsView.swift; sourceTree = "<group>"; };
@@ -575,7 +575,7 @@
 		649E7A202D318F5100AC2F62 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				649E7A1A2D318F5100AC2F62 /* ProfileNewScreen.swift */,
+				649E7A1A2D318F5100AC2F62 /* ProfileTabScreen.swift */,
 				649E7A1D2D318F5100AC2F62 /* ProfileRefreshViewController.swift */,
 				649E7A0E2D318F5100AC2F62 /* ProfileMediaViewController.swift */,
 				649E7A1E2D318F5100AC2F62 /* ProfileStretchRefreshControl.swift */,
@@ -600,8 +600,8 @@
 			isa = PBXGroup;
 			children = (
 				64E876F52D0430C7003559B9 /* SearchScreen.swift */,
-				64E876EB2D0430C7003559B9 /* DiscoverScreen.swift */,
-				64E876F32D0430C7003559B9 /* NotificationScreen.swift */,
+				64E876EB2D0430C7003559B9 /* DiscoverTabScreen.swift */,
+				64E876F32D0430C7003559B9 /* NotificationTabScreen.swift */,
 				64D8AD072D462DFA0045494F /* HomeScreen.swift */,
 				64E876EF2D0430C7003559B9 /* HomeContent.swift */,
 			);
@@ -612,8 +612,8 @@
 			isa = PBXGroup;
 			children = (
 				64E876F72D0430C7003559B9 /* HomeAppBarSettingsView.swift */,
-				644C84872D523D8700E92D0D /* HomeNewScreen.swift */,
-				644C848A2D523D8700E92D0D /* HomeNewViewController.swift */,
+				644C84872D523D8700E92D0D /* HomeTabScreen.swift */,
+				644C848A2D523D8700E92D0D /* HomeTabController.swift */,
 			);
 			path = AppBar;
 			sourceTree = "<group>";
@@ -1132,17 +1132,17 @@
 				64E8772D2D0430C7003559B9 /* HomeContent.swift in Sources */,
 				64E8772E2D0430C7003559B9 /* MisskeyReactionSheet.swift in Sources */,
 				64E877322D0430C7003559B9 /* Route.swift in Sources */,
-				64E877332D0430C7003559B9 /* NotificationScreen.swift in Sources */,
+				64E877332D0430C7003559B9 /* NotificationTabScreen.swift in Sources */,
 				64E877342D0430C7003559B9 /* UserComponent.swift in Sources */,
 				64E877362D0430C7003559B9 /* XQTLoginScreen.swift in Sources */,
 				64E877382D0430C7003559B9 /* StatusDetailScreen.swift in Sources */,
-				64E877392D0430C7003559B9 /* DiscoverScreen.swift in Sources */,
+				64E877392D0430C7003559B9 /* DiscoverTabScreen.swift in Sources */,
 				64E8773D2D0430C7003559B9 /* StatusRetweetHeaderComponent.swift in Sources */,
 				64E8773E2D0430C7003559B9 /* StatusMediaScreen.swift in Sources */,
 				64E877422D0430C7003559B9 /* FeedMediaPlayButton.swift in Sources */,
 				64E877432D0430C7003559B9 /* PhotoBrowserManager.swift in Sources */,
-				644C848C2D523D8700E92D0D /* HomeNewViewController.swift in Sources */,
-				644C848E2D523D8700E92D0D /* HomeNewScreen.swift in Sources */,
+				644C848C2D523D8700E92D0D /* HomeTabController.swift in Sources */,
+				644C848E2D523D8700E92D0D /* HomeTabScreen.swift in Sources */,
 				64D8AD082D462DFA0045494F /* HomeScreen.swift in Sources */,
 				64E877452D0430C7003559B9 /* CommonTimelineStatusComponent.swift in Sources */,
 				64E877492D0430C7003559B9 /* VVOLoginScreen.swift in Sources */,
@@ -1228,7 +1228,7 @@
 				649E7A222D318F5100AC2F62 /* ProfileMediaViewController.swift in Sources */,
 				649E7A242D318F5100AC2F62 /* ProfileHeaderView.swift in Sources */,
 				649E7A262D318F5100AC2F62 /* ProfileRefreshViewController.swift in Sources */,
-				649E7A272D318F5100AC2F62 /* ProfileNewScreen.swift in Sources */,
+				649E7A272D318F5100AC2F62 /* ProfileTabScreen.swift in Sources */,
 				649E7A282D318F5100AC2F62 /* UserAvatar.swift in Sources */,
 				649E7A292D318F5100AC2F62 /* ProfileMediaListScreen.swift in Sources */,
 				649E7A2A2D318F5100AC2F62 /* ProfileUserInfo.swift in Sources */,

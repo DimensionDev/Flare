@@ -20,8 +20,10 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
     private var isInitializing = false
     private let settingsManager = FLTabSettingsManager()
     private let accountType: AccountType
+
     // 缓存 presenter 避免重复创建
     private var presenterCache: [String: TimelinePresenter] = [:]
+
     // TabStateProvider 协议实现
     var onTabChange: ((Int) -> Void)?
 

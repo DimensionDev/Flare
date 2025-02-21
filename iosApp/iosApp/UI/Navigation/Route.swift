@@ -179,7 +179,7 @@ struct TabItem<Content: View>: View {
             case let .reportStatus(data): EmptyView()
             }
         case let .profile(data):
-            ProfileNewScreen(
+            ProfileTabScreen(
                 accountType: data.accountType,
                 userKey: data.userKey,
                 toProfileMedia: { _ in

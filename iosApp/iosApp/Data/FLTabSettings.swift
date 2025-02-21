@@ -3,8 +3,8 @@ import ObjectiveC
 import shared
 import SwiftUI
 
-// 类型别名定义
-// typealias FLUser = UiUserV2
+
+
 typealias FLMicroBlogKey = MicroBlogKey
 public typealias AccountType = shared.AccountType
 public typealias MicroBlogKey = shared.MicroBlogKey
@@ -14,7 +14,6 @@ public typealias ProfileTab = shared.ProfileTab
 public typealias AccountTypeSpecific = shared.AccountTypeSpecific
 
 // - Tab Settings
-// : Codable
 public struct FLTabSettings {
     public let items: [FLTabItem]
     public let secondaryItems: [FLTabItem]?
@@ -162,7 +161,7 @@ public struct FLTabSettings {
                 ),
                 account: AccountTypeSpecific(accountKey: accountKey),
                 userKey: AccountTypeSpecific(accountKey: accountKey)
-            ),
+            )
         ]
     }
 
@@ -196,13 +195,13 @@ public struct FLTabSettings {
                 ),
                 account: AccountTypeSpecific(accountKey: accountKey)
             ),
-            FLAllListTabItem(
-                metaData: FLTabMetaData(
-                    title: .localized("List"),
-                    icon: .mixed(.list, userKey: accountKey)
-                ),
-                account: AccountTypeSpecific(accountKey: accountKey)
-            ),
+//            FLAllListTabItem(
+//                metaData: FLTabMetaData(
+//                    title: .localized("List"),
+//                    icon: .mixed(.list, userKey: accountKey)
+//                ),
+//                account: AccountTypeSpecific(accountKey: accountKey)
+//            ),
         ]
     }
 

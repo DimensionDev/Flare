@@ -4,7 +4,7 @@ import os.log
 import shared
 import SwiftUI
 
-struct ProfileNewScreen: View {
+struct ProfileTabScreen: View {
     // MicroBlogKey host+id
     let toProfileMedia: (MicroBlogKey) -> Void
     let accountType: AccountType

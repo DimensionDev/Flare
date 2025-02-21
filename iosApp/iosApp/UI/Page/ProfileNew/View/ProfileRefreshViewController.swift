@@ -654,6 +654,8 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
             let timelineVC = NewTimelineViewController()
             timelineVC.shouldShowLoadMore = true
             if let presenter = tabStore.currentPresenter {
+                os_log("[📔][ProfileNewRefreshViewController] updatePresenter start", log: .default, type: .debug)
+
                 timelineVC.updatePresenter(presenter)
             }
             // 保存到字典中
@@ -687,11 +689,15 @@ extension ProfileNewRefreshViewController: JXSegmentedViewDelegate {
                 if let timelineVC = currentList as? NewTimelineViewController,
                    let presenter = tabStore.currentPresenter
                 {
+                    os_log("[📔][ProfileNewRefreshViewController] updatePresenter start", log: .default, type: .debug)
+
                     // 更新 timeline presenter
                     timelineVC.updatePresenter(presenter)
                 } else if let mediaVC = currentList as? ProfileMediaViewController,
                           let mediaPresenterWrapper
                 {
+                    os_log("[📔][ProfileNewRefreshViewController] setupUI end", log: .default, type: .debug)
+
                     // 更新 media presenter
                     mediaVC.updateMediaPresenter(presenterWrapper: mediaPresenterWrapper)
                 }

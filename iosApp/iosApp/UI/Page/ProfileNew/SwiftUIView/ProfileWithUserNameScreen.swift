@@ -49,7 +49,7 @@ struct ProfileWithUserNameScreen: View {
                         os_log("[📔][ProfileWithUserNameScreen]正在加载用户信息...", log: .default, type: .debug)
                     }
                 case let .success(data):
-                    ProfileNewScreen(
+                    ProfileTabScreen(
                         accountType: accountType,
                         userKey: data.data.key,
                         toProfileMedia: toProfileMedia

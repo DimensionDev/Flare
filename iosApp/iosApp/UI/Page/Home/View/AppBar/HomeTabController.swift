@@ -6,7 +6,7 @@ import shared
 import SwiftUI
 import UIKit
 
-class HomeNewViewController: UIViewController {
+class HomeTabController: UIViewController {
     // - Properties
 
     private let tabStore: AppBarTabSettingStore
@@ -67,11 +67,11 @@ class HomeNewViewController: UIViewController {
             let selectedTab = tabStore.availableAppBarTabsItems[index]
             tabStore.updateSelectedTab(selectedTab)
 
-            if let currentList = pagingView.validListDict[index] as? NewTimelineViewController,
-               let presenter = tabStore.currentPresenter
-            {
-                currentList.updatePresenter(presenter)
-            }
+//            if let currentList = pagingView.validListDict[index] as? NewTimelineViewController,
+//               let presenter = tabStore.currentPresenter
+//            {
+//                currentList.updatePresenter(presenter)
+//            }
         }
 
         // 添加通知监听
@@ -195,7 +195,7 @@ class HomeNewViewController: UIViewController {
 
 // - JXPagingViewDelegate
 
-extension HomeNewViewController: JXPagingViewDelegate {
+extension HomeTabController: JXPagingViewDelegate {
     func tableHeaderViewHeight(in _: JXPagingView) -> Int {
         0
     }
@@ -333,6 +333,8 @@ extension HomeNewViewController: JXPagingViewDelegate {
         if index < tabStore.availableAppBarTabsItems.count {
             let tab = tabStore.availableAppBarTabsItems[index]
             if let presenter = tabStore.getOrCreatePresenter(for: tab) {
+                os_log("[📔][HomeNewViewController] updatePresenter start", log: .default, type: .debug)
+
                 timelineVC.updatePresenter(presenter)
             }
         }
@@ -343,7 +345,7 @@ extension HomeNewViewController: JXPagingViewDelegate {
 
 // - JXSegmentedViewDelegate
 
-extension HomeNewViewController: JXSegmentedViewDelegate {
+extension HomeTabController: JXSegmentedViewDelegate {
     func segmentedView(_: JXSegmentedView, didSelectedItemAt index: Int) {
         os_log("[📔][HomeNewViewController]选择标签页: index=%{public}d", log: .default, type: .debug, index)
 
@@ -362,6 +364,8 @@ extension HomeNewViewController: JXSegmentedViewDelegate {
             if let currentList = pagingView.validListDict[index] as? NewTimelineViewController,
                let presenter = tabStore.currentPresenter
             {
+                os_log("[📔][HomeNewViewController] updatePresenter start", log: .default, type: .debug)
+
                 // 更新 timeline presenter
                 currentList.updatePresenter(presenter)
             }

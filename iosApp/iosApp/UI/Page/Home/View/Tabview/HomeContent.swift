@@ -22,53 +22,6 @@ enum HomeTabs: Int, Equatable, Hashable, Identifiable {
     }
 }
 
-// 新建一个视图来处理首页的内容
-// struct HomeTimelineView: View {
-//   let router: Router
-//   let accountType: AccountType
-//   @Binding var showSettings: Bool
-//   @Binding var showLogin: Bool
-//   @Binding var selectedHomeTab: Int
-//   @ObservedObject var timelineStore: TimelineStore
-//   @ObservedObject var tabSettingsStore: TabSettingsStore
-//
-//   init(router: Router,
-//        accountType: AccountType,
-//        showSettings: Binding<Bool>,
-//        showLogin: Binding<Bool>,
-//        selectedHomeTab: Binding<Int>,
-//        timelineStore: TimelineStore,
-//        tabSettingsStore: TabSettingsStore)
-//   {
-//       self.router = router
-//       self.accountType = accountType
-//       _showSettings = showSettings
-//       _showLogin = showLogin
-//       _selectedHomeTab = selectedHomeTab
-//       self.timelineStore = timelineStore
-//       self.tabSettingsStore = tabSettingsStore
-//   }
-//
-//   var body: some View {
-//       TimelineScreen(timelineStore: timelineStore)
-//           .navigationBarTitleDisplayMode(.inline)
-//           .toolbar {
-//               HomeAppBar(
-//                   router: router,
-//                   accountType: accountType,
-//                   showSettings: $showSettings,
-//                   showLogin: $showLogin,
-//                   selectedHomeTab: $selectedHomeTab,
-//                   timelineStore: timelineStore,
-//                   tabSettingsStore: tabSettingsStore
-//               )
-//           }
-//           // appbar 背景色
-//           .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)
-//           .toolbarBackground(.visible, for: .navigationBar)
-//   }
-// }
-
 struct HomeContent: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @AppStorage("homeSidebarCustomizations") var tabViewCustomization: TabViewCustomization
@@ -85,7 +38,7 @@ struct HomeContent: View {
                 // 首页 Tab - 使用 HomeNewScreen
                 Tab(value: .timeline) {
                     TabItem { _ in
-                        HomeNewScreen(accountType: accountType)
+                        HomeTabScreen(accountType: accountType)
                     }
                 } label: {
                     Label {
@@ -101,7 +54,7 @@ struct HomeContent: View {
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .notification) {
                         TabItem { _ in
-                            NotificationScreen(accountType: accountType)
+                            NotificationTabScreen(accountType: accountType)
                         }
                     } label: {
                         Label {
@@ -138,7 +91,7 @@ struct HomeContent: View {
                 // 发现 Tab
                 Tab(value: .discover) {
                     TabItem { router in
-                        DiscoverScreen(
+                        DiscoverTabScreen(
                             accountType: accountType,
                             onUserClicked: { user in
                                 router.navigate(to: AppleRoute.Profile(accountType: accountType, userKey: user.key))
@@ -159,7 +112,7 @@ struct HomeContent: View {
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .profile) {
                         TabItem { _ in
-                            ProfileNewScreen(
+                            ProfileTabScreen(
                                 accountType: accountType,
                                 userKey: nil,
                                 toProfileMedia: { _ in

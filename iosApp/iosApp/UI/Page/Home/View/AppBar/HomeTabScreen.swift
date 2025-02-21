@@ -1,7 +1,7 @@
 import shared
 import SwiftUI
 
-struct HomeNewScreen: View {
+struct HomeTabScreen: View {
     let accountType: AccountType
 //    @StateObject private var timelineStore: AppBarTabSettingStore
     @StateObject private var tabStore: AppBarTabSettingStore
@@ -14,9 +14,6 @@ struct HomeNewScreen: View {
     init(accountType: AccountType) {
         self.accountType = accountType
 
-        // 1. 先初始化 TimelineStore
-//        let timelineStore = AppBarTabSettingStore(accountType: accountType)
-//        _timelineStore = StateObject(wrappedValue: timelineStore)
 
         // 2. 初始化 TabSettingsStore timelineStore: timelineStore,
         let tabStore = AppBarTabSettingStore(accountType: accountType)
@@ -94,22 +91,21 @@ struct HomeNewScreen: View {
 }
 
 // - HomeNewViewControllerRepresentable
-
 struct HomeNewViewControllerRepresentable: UIViewControllerRepresentable {
     let tabStore: AppBarTabSettingStore
     let accountType: AccountType
     @Binding var selectedTab: Int
     @Binding var isShowAppBar: Bool?
 
-    func makeUIViewController(context _: Context) -> HomeNewViewController {
-        let controller = HomeNewViewController(
+    func makeUIViewController(context _: Context) -> HomeTabController {
+        let controller = HomeTabController(
             tabStore: tabStore,
             accountType: accountType
         )
         return controller
     }
 
-    func updateUIViewController(_ uiViewController: HomeNewViewController, context _: Context) {
+    func updateUIViewController(_ uiViewController: HomeTabController, context _: Context) {
         // 更新选中的标签页
         uiViewController.updateSelectedTab(selectedTab)
         // 更新 AppBar 的可见性

@@ -23,9 +23,4 @@ struct HomeScreen: View {
         }
     }
 }
-
-struct MediaClickData {
-    let statusKey: MicroBlogKey
-    let index: Int
-    let preview: String?
-}
+ 

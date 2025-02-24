@@ -1,7 +1,7 @@
 import Kingfisher
-import SwiftUI
 import os.log
 import SVGView
+import SwiftUI
 
 struct ServiceIcon: View {
     let url: String
@@ -12,7 +12,7 @@ struct ServiceIcon: View {
     var onSuccessURL: ((String) -> Void)? = nil
     @State private var currentURL: String
     @State private var urlIndex: Int = 0
-    
+
     init(url: String, domain: String? = nil, size: CGFloat = 48, contentMode: SwiftUI.ContentMode = .fill, clipShape: AnyShape? = nil, onSuccessURL: ((String) -> Void)? = nil) {
         self.url = url
         self.domain = domain
@@ -20,9 +20,9 @@ struct ServiceIcon: View {
         self.contentMode = contentMode
         self.clipShape = clipShape
         self.onSuccessURL = onSuccessURL
-        self._currentURL = State(initialValue: url)
+        _currentURL = State(initialValue: url)
     }
-    
+
     private var fallbackURLs: [String] {
         var urls: [String] = []
         // 如果初始 url 不为空，添加到列表
@@ -30,20 +30,20 @@ struct ServiceIcon: View {
             urls.append(url)
         }
         // 无论初始 url 是否为空，都尝试 domain 相关的 URLs
-        if let domain = domain {
+        if let domain {
             urls.append(contentsOf: [
                 "https://\(domain)/logo.svg",
                 "https://\(domain)/apple-touch-icon.png",
-                "https://\(domain)/favicon.ico"
+                "https://\(domain)/favicon.ico",
             ])
         }
         return urls
     }
-    
+
     private var isSVG: Bool {
         currentURL.lowercased().hasSuffix(".svg")
     }
-    
+
     var body: some View {
         ZStack {
             if isSVG {
@@ -76,12 +76,12 @@ struct ServiceIcon: View {
             }
         }
     }
-    
+
     private func handleSuccess() {
         os_log("[ServiceIcon] Successfully loaded URL: %{public}@", log: .default, type: .debug, currentURL)
         onSuccessURL?(currentURL)
     }
-    
+
     private func handleFailure() {
         os_log("[ServiceIcon] Failed to load URL: %{public}@", log: .default, type: .debug, currentURL)
         urlIndex += 1
@@ -101,7 +101,7 @@ struct SVGIconView: View {
     let onSuccess: () -> Void
     let onFailure: () -> Void
     @State private var svgData: Data? = nil
-    
+
     var body: some View {
         Group {
             if let data = svgData {
@@ -121,17 +121,17 @@ struct SVGIconView: View {
             loadSVG()
         }
     }
-    
+
     private func loadSVG() {
         guard let url = URL(string: url) else {
             onFailure()
             return
         }
-        
-        URLSession.shared.dataTask(with: url) { data, response, error in
+
+        URLSession.shared.dataTask(with: url) { data, _, error in
             DispatchQueue.main.async {
-                if let data = data {
-                    self.svgData = data
+                if let data {
+                    svgData = data
                     onSuccess()
                 } else {
                     os_log("[SVGIconView] Failed to load SVG data: %{public}@", log: .default, type: .error, error?.localizedDescription ?? "Unknown error")
@@ -144,7 +144,7 @@ struct SVGIconView: View {
 
 private extension View {
     @ViewBuilder
-    func modifyIf<Transform: View>(_ condition: Bool, transform: (Self) -> Transform) -> some View {
+    func modifyIf(_ condition: Bool, transform: (Self) -> some View) -> some View {
         if condition {
             transform(self)
         } else {
@@ -160,16 +160,16 @@ struct ServiceIconBackground: View {
     var height: CGFloat = 80
     var blur: CGFloat = 3
     @State private var successURL: String?
-    
+
     private var isSVG: Bool {
         (successURL ?? url).lowercased().hasSuffix(".svg")
     }
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 LazyHStack(spacing: 0) {
-                    ForEach(0..<3) { _ in
+                    ForEach(0 ..< 3) { _ in
                         if isSVG {
                             SVGIconView(
                                 url: successURL ?? url,
@@ -198,32 +198,32 @@ struct ServiceIconBackground: View {
                 .frame(maxWidth: .infinity)
                 .frame(height: height)
                 .blur(radius: blur)
-                
+
                 // 渐变遮罩层
                 ZStack {
                     LinearGradient(
                         gradient: Gradient(colors: [
                             Color.black.opacity(0.3),
                             Color.black.opacity(0.5),
-                            Color.black.opacity(0.3)
+                            Color.black.opacity(0.3),
                         ]),
                         startPoint: .leading,
                         endPoint: .trailing
                     )
-                    
+
                     LinearGradient(
                         gradient: Gradient(colors: [
                             Color.black.opacity(0.2),
-                            Color.black.opacity(0.6)
+                            Color.black.opacity(0.6),
                         ]),
                         startPoint: .top,
                         endPoint: .bottom
                     )
-                    
+
                     RadialGradient(
                         gradient: Gradient(colors: [
                             Color.black.opacity(0.0),
-                            Color.black.opacity(0.3)
+                            Color.black.opacity(0.3),
                         ]),
                         center: .center,
                         startRadius: 0,
@@ -242,4 +242,4 @@ struct ServiceIconBackground: View {
         }
         .frame(height: height)
     }
-} 
+}

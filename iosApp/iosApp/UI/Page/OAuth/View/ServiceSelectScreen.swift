@@ -294,19 +294,6 @@ struct ServiceSelectScreen: View {
                             .background(Color(.systemBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 6))
 
-
-                              // 添加调试信息
-                        Group {
-                            if instance.domain.contains( "mstdn.jp") {
-                                let _ = print("[Debug] Found mstdn.jp instance:")
-                                let _ = print("Domain: \(instance.domain)")
-                                let _ = print("Banner URL: \(instance.bannerUrl ?? "nil")")
-                                let _ = print("Icon URL: \(instance.iconUrl ?? "nil")")
-                                let _ = print("Name: \(instance.name)")
-                                let _ = print("Description: \(instance.description_ ?? "nil")")
-                            }
-                        }
-                        
                         Text(instance.domain)
                             .font(.subheadline)
                             .foregroundColor(.secondary)

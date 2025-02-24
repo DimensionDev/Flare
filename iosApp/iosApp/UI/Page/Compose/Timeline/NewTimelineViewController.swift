@@ -10,31 +10,31 @@ import UIKit
 //     var tableView: UITableView!
 //     var presenter: TimelinePresenter?
 //     private var scrollCallback: ((UIScrollView) -> Void)?
-    
+
 //     // 预加载的行数
 //     private let preloadDistance: Int = 10
 //     // 是否显示加载更多
 //     var shouldShowLoadMore: Bool = true
-    
+
 //     // 记录正在加载的行
 //     private var loadingRows: Set<Int> = []
-    
+
 //     // 检查并触发预加载
 //     private func checkAndTriggerPreload(currentRow: Int) {
 //         guard let timelineState = presenter?.models.value as? TimelineState,
 //               case let .success(data) = onEnum(of: timelineState.listState) else {
 //             return
 //         }
-        
+
 //         // 计算需要预加载的范围
 //         let startRow = currentRow
 //         let endRow = min(currentRow + preloadDistance, Int(data.itemCount) - 1) // 减1避免越界
-        
+
 //         // 确保索引有效
 //         guard startRow >= 0, endRow >= startRow, endRow < Int(data.itemCount) else {
 //             return
 //         }
-        
+
 //         // 触发预加载
 //         for row in startRow...endRow where !loadingRows.contains(row) {
 //             if data.peek(index: Int32(row)) == nil {
@@ -123,7 +123,7 @@ import UIKit
 //                         os_log("[📔][NewTimelineViewController] cell显示触发get: lastVisibleRow = %{public}d", log: .default, type: .debug, lastVisibleRow)
 
 //                         _ = data.get(index: Int32(lastVisibleRow))
-                        
+
 //                         // 等待直到加载状态改变或超时
 //                         let startTime = Date()
 //                         while Date().timeIntervalSince(startTime) < 1.0 { // 最多等待1秒
@@ -133,7 +133,7 @@ import UIKit
 //                             }
 //                             break
 //                         }
-                        
+
 //                         await MainActor.run {
 //                             // 根据appendState决定是否显示无更多数据
 //                             switch onEnum(of: data.appendState) {
@@ -184,7 +184,7 @@ import UIKit
 //             loadingRows.removeAll()
 //             tableView.reloadData()
 //             tableView.mj_header?.endRefreshing()
-            
+
 //             // 根据appendState控制footer状态
 //             switch onEnum(of: data.appendState) {
 //             case .loading:
@@ -221,7 +221,7 @@ import UIKit
 // // - UITableViewDataSource & UITableViewDelegate
 // extension NewTimelineViewController: UITableViewDataSource, UITableViewDelegate {
 //     // MARK: - UITableViewDataSource
-    
+
 //     func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
 //         if let timelineState = presenter?.models.value as? TimelineState,
 //            case let .success(data) = onEnum(of: timelineState.listState)
@@ -259,7 +259,7 @@ import UIKit
 //                     }
 //                 }
 //             }
-            
+
 //             // 检查预加载
 //             checkAndTriggerPreload(currentRow: indexPath.row)
 //         } else {
@@ -268,12 +268,12 @@ import UIKit
 //         }
 //         return cell
 //     }
-    
+
 //     // MARK: - UITableViewDelegate
-    
+
 //     func scrollViewDidScroll(_ scrollView: UIScrollView) {
 //         scrollCallback?(scrollView)
-        
+
 //         // 获取可见cell的范围
 //         if let lastVisibleRow = tableView.indexPathsForVisibleRows?.last?.row {
 //             checkAndTriggerPreload(currentRow: lastVisibleRow)

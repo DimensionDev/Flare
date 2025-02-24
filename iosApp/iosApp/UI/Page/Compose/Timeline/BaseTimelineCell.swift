@@ -21,10 +21,10 @@ class BaseTimelineCell: UITableViewCell {
         selectionStyle = .none
         backgroundColor = .clear
         contentView.backgroundColor = .clear
-        
+
         // 创建loading indicator
         loadingIndicator = UIActivityIndicatorView(style: .medium)
-        if let loadingIndicator = loadingIndicator {
+        if let loadingIndicator {
             contentView.addSubview(loadingIndicator)
             loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
@@ -32,7 +32,7 @@ class BaseTimelineCell: UITableViewCell {
                 loadingIndicator.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
             ])
         }
-        
+
         // 添加内边距容器视图
         contentView.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
 
@@ -52,7 +52,7 @@ class BaseTimelineCell: UITableViewCell {
     func configure(with item: UiTimeline) {
         // 隐藏loading indicator
         loadingIndicator?.stopAnimating()
-        
+
         // 移除旧的视图
         hostingController?.view.removeFromSuperview()
         hostingController = nil

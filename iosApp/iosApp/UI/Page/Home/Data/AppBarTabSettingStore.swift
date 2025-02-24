@@ -70,19 +70,16 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 //        currentPresenter = nil
         // 保留当前 presenter，清理其他缓存
         // 这个地方估计有问题 todo://
-//        let current = currentPresenter
-//
-//         if let key = currentKey {
-//            presenterCache[key] = current
-//        }
+        //        let current = currentPresenter
+        //
+        //         if let key = currentKey {
+        //            presenterCache[key] = current
+        //        }
     }
 
     // 更新选中标签
     func updateSelectedTab(_ tab: FLTabItem) {
         selectedAppBarTabKey = tab.key
-//        if let presenter = getOrCreatePresenter(for: tab) {
-//            currentPresenter = presenter
-//        }
         notifyTabChange()
     }
 
@@ -144,18 +141,14 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
         availableAppBarTabsItems = settingsManager.getEnabledItems(for: user) ?? secondaryItems
 
         if availableAppBarTabsItems.isEmpty {
-            // 立即更新可用标签
             if let homeItem = primaryHomeItems.first {
                 availableAppBarTabsItems = [homeItem] + secondaryItems
             }
         } else {
-            // 立即更新可用标签
             if let homeItem = primaryHomeItems.first {
                 if availableAppBarTabsItems.first?.key.contains("home_") == true {
-                    // 已经有home标签，保持现状
                     availableAppBarTabsItems = availableAppBarTabsItems
                 } else {
-                    // 没有home标签，添加到开头
                     availableAppBarTabsItems = [homeItem] + availableAppBarTabsItems
                 }
             }

@@ -30,4 +30,8 @@
     <string name="service_select_welcome_message">Flare is a social network client for %1$s.\nTo get started, please select a service to connect to.</string>
     <string name="mastodon_login_verify_message">Please wait while we verify your credentials.</string>
 
+    <string name="profile_tab_timeline">Posts</string>
+    <string name="profile_tab_timeline_with_reply">Posts and replies</string>
+    <string name="profile_tab_likes">Likes</string>
+    <string name="profile_tab_media">Media</string>
 </resources>

@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import com.konyaco.fluent.component.ProgressBar
 import com.konyaco.fluent.component.SegmentedButton
 import com.konyaco.fluent.component.SegmentedControl
+import com.konyaco.fluent.component.SegmentedItemPosition
 import com.konyaco.fluent.component.Text
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.isRefreshing
@@ -57,12 +58,18 @@ internal fun NotificationScreen(accountType: AccountType) {
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
                         SegmentedControl {
-                            types.forEach { type ->
+                            types.forEachIndexed { index, type ->
                                 SegmentedButton(
                                     checked = state.state.notificationType == type,
                                     onCheckedChanged = {
                                         state.state.onNotificationTypeChanged(type)
                                     },
+                                    position =
+                                        when (index) {
+                                            0 -> SegmentedItemPosition.Start
+                                            types.size - 1 -> SegmentedItemPosition.End
+                                            else -> SegmentedItemPosition.Center
+                                        },
                                 ) {
                                     Text(text = type.name)
                                 }

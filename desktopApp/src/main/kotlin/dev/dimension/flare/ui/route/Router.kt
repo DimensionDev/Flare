@@ -86,7 +86,11 @@ internal fun Router(
                 )
             }
         }
-        screen<Route.MeRoute> {
+        screen<Route.MeRoute> { (_, args) ->
+            ProfileScreen(
+                accountType = args.accountType,
+                userKey = null,
+            )
         }
         screen<Route.ServiceSelect> {
             ServiceSelectScreen(

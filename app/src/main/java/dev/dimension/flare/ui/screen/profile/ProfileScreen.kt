@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
@@ -27,16 +26,10 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SecondaryScrollableTabRow
@@ -45,7 +38,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowSize
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -55,7 +47,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
@@ -63,7 +54,6 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.window.core.layout.WindowWidthSizeClass
@@ -79,50 +69,29 @@ import com.ramcosta.composedestinations.generated.destinations.ProfileMediaRoute
 import com.ramcosta.composedestinations.generated.destinations.SearchRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Cat
-import compose.icons.fontawesomeicons.solid.CircleCheck
-import compose.icons.fontawesomeicons.solid.CircleExclamation
-import compose.icons.fontawesomeicons.solid.EllipsisVertical
-import compose.icons.fontawesomeicons.solid.Globe
-import compose.icons.fontawesomeicons.solid.List
-import compose.icons.fontawesomeicons.solid.LocationDot
-import compose.icons.fontawesomeicons.solid.Lock
-import compose.icons.fontawesomeicons.solid.Message
-import compose.icons.fontawesomeicons.solid.Robot
-import compose.icons.fontawesomeicons.solid.UserSlash
-import compose.icons.fontawesomeicons.solid.VolumeXmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.common.plus
-import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.BackButton
-import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.MatricesDisplay
-import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.ProfileHeader
+import dev.dimension.flare.ui.component.ProfileHeaderLoading
+import dev.dimension.flare.ui.component.ProfileMenu
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.component.UserFields
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiMedia
-import dev.dimension.flare.ui.model.UiProfile
-import dev.dimension.flare.ui.model.UiRelation
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
@@ -134,13 +103,9 @@ import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
-import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.screen.home.RegisterTabCallback
-import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import moe.tlaster.nestedscrollview.VerticalNestedScrollView
@@ -562,10 +527,7 @@ private fun ProfileScreen(
                 ) {
                     Card {
                         ProfileHeader(
-                            state.state.userState,
-                            state.state.relationState,
-                            onFollowClick = state.state::follow,
-                            isMe = state.state.isMe,
+                            state = state.state,
                             menu = {
                                 ProfileMenu(
                                     profileState = state.state,
@@ -577,7 +539,6 @@ private fun ProfileScreen(
                                     toStartMessage = toStartMessage,
                                 )
                             },
-                            expandMatrices = true,
                             onAvatarClick = {
                                 state.state.userState.onSuccess {
 //                                    onMediaClick(it.avatar)
@@ -588,7 +549,7 @@ private fun ProfileScreen(
 //                                    it.banner?.let { it1 -> onMediaClick(it1) }
                                 }
                             },
-                            isBigScreen = bigScreen,
+                            isBigScreen = true,
                             onFollowListClick = onFollowListClick,
                             onFansListClick = onFansListClick,
                         )
@@ -694,14 +655,10 @@ private fun ProfileScreen(
                             header = {
                                 Column {
                                     ProfileHeader(
-                                        state.state.userState,
-                                        state.state.relationState,
-                                        onFollowClick = state.state::follow,
-                                        isMe = state.state.isMe,
+                                        state = state.state,
                                         menu = {
                                             Spacer(modifier = Modifier.width(screenHorizontalPadding))
                                         },
-                                        expandMatrices = false,
                                         onAvatarClick = {
                                             state.state.userState.onSuccess {
 //                                                    onMediaClick(it.avatar)
@@ -712,7 +669,7 @@ private fun ProfileScreen(
 //                                                    it.banner?.let { it1 -> onMediaClick(it1) }
                                             }
                                         },
-                                        isBigScreen = bigScreen,
+                                        isBigScreen = false,
                                         onFollowListClick = onFollowListClick,
                                         onFansListClick = onFansListClick,
                                     )
@@ -782,768 +739,6 @@ private fun ProfileMediaTab(
                     Box(modifier = Modifier.size(120.dp).placeholder(true))
                 }
             }
-    }
-}
-
-@Composable
-private fun ProfileMenu(
-    profileState: ProfileState,
-    accountsState: UiState<Map<PlatformType, ImmutableList<UiState<UiProfile>>>>,
-    setShowMoreMenus: (Boolean) -> Unit,
-    showMoreMenus: Boolean,
-    toEditAccountList: () -> Unit,
-    toSearchUserUsingAccount: (String, MicroBlogKey) -> Unit,
-    toStartMessage: (MicroBlogKey) -> Unit,
-) {
-    profileState.isMe.onSuccess { isMe ->
-        if (!isMe) {
-            profileState.userState.onSuccess { user ->
-                IconButton(onClick = {
-                    setShowMoreMenus(true)
-                }) {
-                    FAIcon(
-                        imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
-                        contentDescription = stringResource(R.string.more),
-                    )
-                }
-                DropdownMenu(
-                    expanded = showMoreMenus,
-                    onDismissRequest = { setShowMoreMenus(false) },
-                ) {
-                    profileState.relationState.onSuccess { relation ->
-                        if (!profileState.isGuestMode && relation.following) {
-                            profileState.isListDataSource.onSuccess { isListDataSource ->
-                                if (isListDataSource) {
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                text =
-                                                    stringResource(
-                                                        id = R.string.user_follow_edit_list,
-                                                    ),
-                                            )
-                                        },
-                                        onClick = {
-                                            setShowMoreMenus(false)
-                                            toEditAccountList.invoke()
-                                        },
-                                        leadingIcon = {
-                                            FAIcon(
-                                                imageVector = FontAwesomeIcons.Solid.List,
-                                                contentDescription =
-                                                    stringResource(
-                                                        id = R.string.user_follow_edit_list,
-                                                    ),
-                                            )
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                        profileState.canSendMessage.onSuccess {
-                            if (it) {
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = stringResource(id = R.string.user_send_message),
-                                        )
-                                    },
-                                    onClick = {
-                                        setShowMoreMenus(false)
-                                        toStartMessage.invoke(user.key)
-                                    },
-                                    leadingIcon = {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.Message,
-                                            contentDescription =
-                                                stringResource(
-                                                    id = R.string.user_send_message,
-                                                ),
-                                        )
-                                    },
-                                )
-                            }
-                        }
-                        accountsState.onSuccess { accounts ->
-                            profileState.myAccountKey.onSuccess { myKey ->
-                                if (accounts.size > 1) {
-                                    accounts.forEach { (_, value) ->
-                                        value.forEach { account ->
-                                            account.onSuccess { accountData ->
-                                                if (accountData.key != user.key &&
-                                                    accountData.key != myKey &&
-                                                    accountData.platformType != user.platformType
-                                                ) {
-                                                    DropdownMenuItem(
-                                                        text = {
-                                                            Text(
-                                                                text =
-                                                                    if (value.size == 1) {
-                                                                        stringResource(
-                                                                            id = R.string.profile_search_user_using_account_compat,
-                                                                            accountData.platformType.name,
-                                                                        )
-                                                                    } else {
-                                                                        stringResource(
-                                                                            id = R.string.profile_search_user_using_account,
-                                                                            user.handleWithoutAtAndHost,
-                                                                            accountData.platformType.name,
-                                                                            accountData.handleWithoutAt,
-                                                                        )
-                                                                    },
-                                                            )
-                                                        },
-                                                        onClick = {
-                                                            setShowMoreMenus(false)
-                                                            val actualHandle =
-                                                                if (accountData.platformType == PlatformType.Bluesky) {
-                                                                    user.handleWithoutAtAndHost
-                                                                        .replace("_", "")
-                                                                } else {
-                                                                    user.handleWithoutAtAndHost
-                                                                }
-                                                            toSearchUserUsingAccount(
-                                                                actualHandle,
-                                                                accountData.key,
-                                                            )
-                                                        },
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                    HorizontalDivider()
-                                }
-                            }
-                        }
-                        profileState.actions.onSuccess { actions ->
-                            for (i in 0..<actions.size) {
-                                val action = actions[i]
-                                DropdownMenuItem(
-                                    leadingIcon = {
-                                        FAIcon(
-                                            imageVector =
-                                                when (action) {
-                                                    is ProfileAction.Block ->
-                                                        FontAwesomeIcons.Solid.UserSlash
-
-                                                    is ProfileAction.Mute ->
-                                                        FontAwesomeIcons.Solid.VolumeXmark
-                                                },
-                                            contentDescription = null,
-                                        )
-                                    },
-                                    text = {
-                                        val text =
-                                            when (action) {
-                                                is ProfileAction.Block ->
-                                                    if (action.relationState(relation)) {
-                                                        stringResource(
-                                                            id = R.string.user_unblock,
-                                                            user.handle,
-                                                        )
-                                                    } else {
-                                                        stringResource(
-                                                            id = R.string.user_block,
-                                                            user.handle,
-                                                        )
-                                                    }
-
-                                                is ProfileAction.Mute ->
-                                                    if (action.relationState(relation)) {
-                                                        stringResource(
-                                                            id = R.string.user_unmute,
-                                                            user.handle,
-                                                        )
-                                                    } else {
-                                                        stringResource(
-                                                            id = R.string.user_mute,
-                                                            user.handle,
-                                                        )
-                                                    }
-                                            }
-                                        Text(text = text)
-                                    },
-                                    onClick = {
-                                        setShowMoreMenus(false)
-                                        profileState.onProfileActionClick(
-                                            userKey = user.key,
-                                            relation = relation,
-                                            action = action,
-                                        )
-                                    },
-                                )
-                            }
-                        }
-                    }
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text =
-                                    stringResource(
-                                        id = R.string.user_report,
-                                        user.handle,
-                                    ),
-                                color = MaterialTheme.colorScheme.error,
-                            )
-                        },
-                        leadingIcon = {
-                            FAIcon(
-                                imageVector = FontAwesomeIcons.Solid.CircleExclamation,
-                                contentDescription =
-                                    stringResource(
-                                        id = R.string.user_report,
-                                        user.handle,
-                                    ),
-                                tint = MaterialTheme.colorScheme.error,
-                            )
-                        },
-                        onClick = {
-                            setShowMoreMenus(false)
-                            profileState.report(user.key)
-                        },
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProfileHeader(
-    userState: UiState<UiProfile>,
-    relationState: UiState<UiRelation>,
-    onFollowClick: (userKey: MicroBlogKey, UiRelation) -> Unit,
-    onAvatarClick: () -> Unit,
-    onBannerClick: () -> Unit,
-    isMe: UiState<Boolean>,
-    menu: @Composable RowScope.() -> Unit,
-    expandMatrices: Boolean,
-    isBigScreen: Boolean,
-    onFollowListClick: (userKey: MicroBlogKey) -> Unit,
-    onFansListClick: (userKey: MicroBlogKey) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    when (userState) {
-        is UiState.Loading -> {
-            ProfileHeaderLoading(modifier = modifier, withStatusBarHeight = true)
-        }
-
-        is UiState.Error -> {
-            ProfileHeaderError()
-        }
-
-        is UiState.Success -> {
-            ProfileHeaderSuccess(
-                modifier = modifier,
-                user = userState.data,
-                relationState = relationState,
-                onFollowClick = onFollowClick,
-                isMe = isMe,
-                menu = menu,
-                expandMatrices = expandMatrices,
-                onAvatarClick = onAvatarClick,
-                onBannerClick = onBannerClick,
-                isBigScreen = isBigScreen,
-                onFollowListClick = onFollowListClick,
-                onFansListClick = onFansListClick,
-            )
-        }
-    }
-}
-
-@Composable
-private fun ProfileHeaderSuccess(
-    user: UiProfile,
-    relationState: UiState<UiRelation>,
-    onFollowClick: (userKey: MicroBlogKey, UiRelation) -> Unit,
-    onAvatarClick: () -> Unit,
-    onBannerClick: () -> Unit,
-    isMe: UiState<Boolean>,
-    menu: @Composable RowScope.() -> Unit,
-    isBigScreen: Boolean,
-    onFollowListClick: (userKey: MicroBlogKey) -> Unit,
-    onFansListClick: (userKey: MicroBlogKey) -> Unit,
-    modifier: Modifier = Modifier,
-    expandMatrices: Boolean = false,
-) {
-    CommonProfileHeader(
-        modifier = modifier,
-        bannerUrl = user.banner,
-        avatarUrl = user.avatar,
-        displayName = user.name,
-        userKey = user.key,
-        handle = user.handle,
-        isBigScreen = isBigScreen,
-        headerTrailing = {
-            isMe.onSuccess {
-                if (!it) {
-                    when (relationState) {
-                        is UiState.Error -> Unit
-                        is UiState.Loading -> {
-                            FilledTonalButton(
-                                onClick = {
-                                    // No-op
-                                },
-                                modifier =
-                                    Modifier.placeholder(
-                                        true,
-                                        shape = ButtonDefaults.filledTonalShape,
-                                    ),
-                            ) {
-                                Text(text = stringResource(R.string.profile_header_button_follow))
-                            }
-                        }
-
-                        is UiState.Success -> {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
-                                FilledTonalButton(onClick = {
-                                    onFollowClick.invoke(user.key, relationState.data)
-                                }) {
-                                    Text(
-                                        text =
-                                            stringResource(
-                                                id =
-                                                    when {
-                                                        relationState.data.blocking ->
-                                                            R.string.profile_header_button_blocked
-
-                                                        relationState.data.following ->
-                                                            R.string.profile_header_button_following
-
-                                                        relationState.data.hasPendingFollowRequestFromYou ->
-                                                            R.string.profile_header_button_requested
-
-                                                        else ->
-                                                            R.string.profile_header_button_follow
-                                                    },
-                                            ),
-                                    )
-                                }
-                                if (relationState.data.isFans) {
-                                    Text(
-                                        text = stringResource(R.string.profile_header_button_is_fans),
-                                        textAlign = TextAlign.Center,
-                                        style = MaterialTheme.typography.labelSmall,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            menu.invoke(this)
-        },
-        onAvatarClick = onAvatarClick,
-        onBannerClick = onBannerClick,
-        handleTrailing = {
-            user.mark.forEach {
-                when (it) {
-                    UiProfile.Mark.Verified ->
-                        FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.CircleCheck,
-                            contentDescription = null,
-                            modifier =
-                                Modifier
-                                    .size(12.dp)
-                                    .alpha(MediumAlpha),
-                            tint = Color.Blue,
-                        )
-
-                    UiProfile.Mark.Cat ->
-                        FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.Cat,
-                            contentDescription = null,
-                            modifier =
-                                Modifier
-                                    .size(12.dp)
-                                    .alpha(MediumAlpha),
-                        )
-
-                    UiProfile.Mark.Bot ->
-                        FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.Robot,
-                            contentDescription = null,
-                            modifier =
-                                Modifier
-                                    .size(12.dp)
-                                    .alpha(MediumAlpha),
-                        )
-
-                    UiProfile.Mark.Locked ->
-                        FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.Lock,
-                            contentDescription = null,
-                            modifier =
-                                Modifier
-                                    .size(12.dp)
-                                    .alpha(MediumAlpha),
-                        )
-                }
-            }
-        },
-        content = {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = screenHorizontalPadding),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                user.description?.let {
-                    RichText(
-                        text = it,
-                    )
-                }
-                when (val content = user.bottomContent) {
-                    is UiProfile.BottomContent.Fields ->
-                        UserFields(
-                            fields = content.fields,
-                        )
-
-                    is UiProfile.BottomContent.Iconify -> {
-                        content.items.forEach { (key, value) ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                val icon =
-                                    when (key) {
-                                        UiProfile.BottomContent.Iconify.Icon.Location -> FontAwesomeIcons.Solid.LocationDot
-                                        UiProfile.BottomContent.Iconify.Icon.Url -> FontAwesomeIcons.Solid.Globe
-                                        UiProfile.BottomContent.Iconify.Icon.Verify -> FontAwesomeIcons.Solid.CircleCheck
-                                    }
-                                FAIcon(icon, contentDescription = null)
-                                RichText(text = value)
-                            }
-                        }
-                    }
-
-                    null -> Unit
-                }
-                MatricesDisplay(
-                    matrices =
-                        remember(user.matrices) {
-                            persistentMapOf(
-                                R.string.profile_misskey_header_status_count to user.matrices.statusesCountHumanized,
-                                R.string.profile_header_following_count to user.matrices.followsCountHumanized,
-                                R.string.profile_header_fans_count to user.matrices.fansCountHumanized,
-                            )
-                        },
-                    expanded = expandMatrices,
-                    onClicked = {
-                        when (it) {
-                            1 -> onFollowListClick.invoke(user.key)
-                            2 -> onFansListClick.invoke(user.key)
-                        }
-                    },
-                )
-            }
-        },
-    )
-}
-
-@Composable
-internal fun CommonProfileHeader(
-    bannerUrl: String?,
-    avatarUrl: String?,
-    displayName: UiRichText,
-    userKey: MicroBlogKey,
-    handle: String,
-    isBigScreen: Boolean,
-    modifier: Modifier = Modifier,
-    onAvatarClick: (() -> Unit)? = null,
-    onBannerClick: (() -> Unit)? = null,
-    headerTrailing: @Composable RowScope.() -> Unit = {},
-    handleTrailing: @Composable RowScope.() -> Unit = {},
-    content: @Composable () -> Unit = {},
-) {
-    val statusBarHeight =
-        with(LocalDensity.current) {
-            WindowInsets.statusBars.getTop(this).toDp()
-        }
-    val actualBannerHeight =
-        remember(statusBarHeight) {
-            ProfileHeaderConstants.BANNER_HEIGHT.dp + statusBarHeight
-        }
-    Box(
-        modifier =
-            modifier
-//                .sharedBounds(
-//                    rememberSharedContentState(key = "header-$userKey"),
-//                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-//                    renderInOverlayDuringTransition = false,
-//                    enter = EnterTransition.None,
-//                    exit = ExitTransition.None,
-//                    resizeMode =
-//                        SharedTransitionScope.ResizeMode.ScaleToBounds(
-//                            contentScale = ContentScale.FillWidth,
-//                            alignment = Alignment.TopStart,
-//                        ),
-//                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
-//                )
-//                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-                .padding(bottom = 8.dp),
-    ) {
-        bannerUrl?.let {
-            NetworkImage(
-                model = it,
-                contentDescription = null,
-                modifier =
-                    Modifier
-//                        .sharedElement(
-//                            rememberSharedContentState(key = "profile-banner-$userKey"),
-//                            animatedVisibilityScope = this@AnimatedVisibilityScope,
-//                        )
-                        .clipToBounds()
-                        .fillMaxWidth()
-                        .height(actualBannerHeight)
-                        .let {
-                            if (onBannerClick != null) {
-                                it.clickable {
-                                    onBannerClick.invoke()
-                                }
-                            } else {
-                                it
-                            }
-                        },
-            )
-        } ?: Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(actualBannerHeight)
-                    .background(MaterialTheme.colorScheme.surfaceColorAtElevation(6.dp)),
-        )
-        // avatar
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(start = screenHorizontalPadding),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .padding(
-                                top = (actualBannerHeight - ProfileHeaderConstants.AVATAR_SIZE.dp / 2),
-                            ),
-                ) {
-                    AvatarComponent(
-                        data = avatarUrl,
-                        size = ProfileHeaderConstants.AVATAR_SIZE.dp,
-//                        beforeModifier =
-//                            Modifier
-//                                .sharedElement(
-//                                    rememberSharedContentState(key = "profile-avatar-$userKey"),
-//                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-//                                ),
-                        modifier =
-                            Modifier
-                                .let {
-                                    if (onAvatarClick != null) {
-                                        it.clickable {
-                                            onAvatarClick.invoke()
-                                        }
-                                    } else {
-                                        it
-                                    }
-                                },
-                    )
-                }
-                if (!isBigScreen) {
-                    Column(
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .padding(top = actualBannerHeight),
-                    ) {
-                        RichText(
-                            text = displayName,
-                            textStyle = MaterialTheme.typography.titleMedium,
-//                        modifier =
-//                            Modifier
-//                                .sharedElement(
-//                                    rememberSharedContentState(key = "profile-display-name-$userKey"),
-//                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-//                                ),
-                        )
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = handle,
-                                style = MaterialTheme.typography.bodySmall,
-//                            modifier =
-//                                Modifier
-//                                    .sharedElement(
-//                                        rememberSharedContentState(key = "profile-handle-$userKey"),
-//                                        animatedVisibilityScope = this@AnimatedVisibilityScope,
-//                                    ),
-                            )
-                            handleTrailing.invoke(this)
-                        }
-                    }
-                } else {
-                    Spacer(
-                        modifier =
-                            Modifier
-                                .weight(1f),
-                    )
-                }
-                Row(
-                    modifier =
-                        Modifier
-                            .padding(top = actualBannerHeight),
-                ) {
-                    headerTrailing()
-                }
-            }
-            if (isBigScreen) {
-                Column(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = screenHorizontalPadding),
-                ) {
-                    RichText(
-                        text = displayName,
-                        textStyle = MaterialTheme.typography.titleMedium,
-//                        modifier =
-//                            Modifier
-//                                .sharedElement(
-//                                    rememberSharedContentState(key = "profile-display-name-$userKey"),
-//                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-//                                ),
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = handle,
-                            style = MaterialTheme.typography.bodySmall,
-//                            modifier =
-//                                Modifier
-//                                    .sharedElement(
-//                                        rememberSharedContentState(key = "profile-handle-$userKey"),
-//                                        animatedVisibilityScope = this@AnimatedVisibilityScope,
-//                                    ),
-                        )
-                        handleTrailing.invoke(this)
-                    }
-                }
-            }
-            // content
-            Box {
-                content()
-            }
-        }
-    }
-}
-
-private object ProfileHeaderConstants {
-    const val BANNER_HEIGHT = 150
-    const val AVATAR_SIZE = 96
-}
-
-@Composable
-private fun ProfileHeaderError() {
-}
-
-@Composable
-internal fun ProfileHeaderLoading(
-    withStatusBarHeight: Boolean,
-    modifier: Modifier = Modifier,
-) {
-    val statusBarHeight =
-        with(LocalDensity.current) {
-            WindowInsets.statusBars.getTop(this).toDp()
-        }
-    val actualBannerHeight =
-        remember(
-            statusBarHeight,
-            withStatusBarHeight,
-        ) {
-            ProfileHeaderConstants.BANNER_HEIGHT.dp + if (withStatusBarHeight) statusBarHeight else 0.dp
-        }
-    Box(
-        modifier =
-            modifier
-//                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-                .padding(bottom = 8.dp),
-    ) {
-        Box(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(actualBannerHeight)
-                    .placeholder(true),
-        )
-        // avatar
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = screenHorizontalPadding),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .padding(
-                                top = (actualBannerHeight - ProfileHeaderConstants.AVATAR_SIZE.dp / 2),
-                            ),
-                ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .size(ProfileHeaderConstants.AVATAR_SIZE.dp)
-                                .clip(CircleShape)
-                                .placeholder(true),
-                    )
-                }
-                Column(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .padding(top = actualBannerHeight),
-                ) {
-                    Text(
-                        text = "Loading user",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.placeholder(true),
-                    )
-                    Text(
-                        text = "Loading",
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.placeholder(true),
-                    )
-                }
-            }
-            Text(
-                text = "Lorem Ipsum is simply dummy text",
-                modifier =
-                    Modifier
-                        .placeholder(true)
-                        .padding(horizontal = screenHorizontalPadding),
-            )
-        }
     }
 }
 

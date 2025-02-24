@@ -10,7 +10,7 @@ internal actual object PlatformColorScheme {
         get() = FluentTheme.colors.fillAccent.default
     actual val error: Color
         @Composable
-        get() = FluentTheme.colors.system.criticalBackground
+        get() = FluentTheme.colors.system.critical
     public actual val caption: Color
         @Composable
         get() = FluentTheme.colors.text.text.tertiary

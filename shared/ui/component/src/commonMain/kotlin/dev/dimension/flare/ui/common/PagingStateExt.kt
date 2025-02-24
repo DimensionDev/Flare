@@ -11,7 +11,7 @@ import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 
-fun <T : Any> LazyListScope.items(
+public fun <T : Any> LazyListScope.items(
     state: PagingState<T>,
     emptyContent: @Composable LazyItemScope.() -> Unit = {},
     errorContent: @Composable LazyItemScope.(Throwable) -> Unit = {},
@@ -55,7 +55,7 @@ fun <T : Any> LazyListScope.items(
         }
 }
 
-fun <T : Any> LazyStaggeredGridScope.items(
+public fun <T : Any> LazyStaggeredGridScope.items(
     state: PagingState<T>,
     emptyContent: @Composable LazyStaggeredGridItemScope.() -> Unit = {},
     errorContent: @Composable LazyStaggeredGridItemScope.(Throwable) -> Unit = {},

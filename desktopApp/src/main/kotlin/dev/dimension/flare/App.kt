@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -37,6 +37,7 @@ import com.konyaco.fluent.component.BadgeStatus
 import com.konyaco.fluent.component.Button
 import com.konyaco.fluent.component.Icon
 import com.konyaco.fluent.component.MenuItemSeparator
+import com.konyaco.fluent.component.NavigationDefaults
 import com.konyaco.fluent.component.NavigationDisplayMode
 import com.konyaco.fluent.component.NavigationView
 import com.konyaco.fluent.component.SubtleButton
@@ -74,6 +75,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
@@ -95,13 +97,18 @@ internal fun FlareApp(navController: NavHostController = rememberNavController()
 
     fun navigate(route: Route) {
         navController.navigate(route) {
-            popUpTo(navController.graph.findStartDestination().id) {
-                saveState = true
-            }
+//            popUpTo(navController.graph.findStartDestination().id) {
+//                saveState = true
+//            }
             launchSingleTop = true
-            restoreState = true
+//            restoreState = true
         }
     }
+    val canNavigateUp by remember(navController) {
+        navController.currentBackStack.map {
+            it.size > 1
+        }
+    }.collectAsState(false)
     state.tabs.onSuccess { tabs ->
         LaunchedEffect(selectedIndex) {
             val tab = tabs.all[selectedIndex]
@@ -114,6 +121,14 @@ internal fun FlareApp(navController: NavHostController = rememberNavController()
         NavigationView(
             state = navigationState,
             displayMode = displayMode,
+            backButton = {
+                NavigationDefaults.BackButton(
+                    onClick = {
+                        navController.navigateUp()
+                    },
+                    disabled = !canNavigateUp,
+                )
+            },
             menuItems = {
                 state.user
                     .onSuccess { user ->

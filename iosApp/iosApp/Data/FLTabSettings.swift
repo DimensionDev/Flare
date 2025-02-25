@@ -287,18 +287,18 @@ public struct FLTabSettings {
                     icon: .mixed(.list, userKey: accountKey)
                 ), account: AccountTypeSpecific(accountKey: accountKey)
             ),
-            FLBlueskyFeedsTabItem(
-                metaData: FLTabMetaData(
-                    title: .localized(.feeds),
-                    icon: .mixed(.feeds, userKey: accountKey)
-                ), account: AccountTypeActive.shared
-            ),
-            FLDirectMessageTabItem(
-                metaData: FLTabMetaData(
-                    title: .localized(.directMessage),
-                    icon: .mixed(.messages, userKey: accountKey)
-                ), account: AccountTypeSpecific(accountKey: accountKey)
-            ),
+//            FLBlueskyFeedsTabItem(
+//                metaData: FLTabMetaData(
+//                    title: .localized(.feeds),
+//                    icon: .mixed(.feeds, userKey: accountKey)
+//                ), account: AccountTypeActive.shared
+//            ),
+//            FLDirectMessageTabItem(
+//                metaData: FLTabMetaData(
+//                    title: .localized(.directMessage),
+//                    icon: .mixed(.messages, userKey: accountKey)
+//                ), account: AccountTypeSpecific(accountKey: accountKey)
+//            ),
         ]
     }
 

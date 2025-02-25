@@ -19,7 +19,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
     private var presenter = ActiveAccountPresenter()
     private var isInitializing = false
     private let settingsManager = FLTabSettingsManager()
-    private let accountType: AccountType
+    private var accountType: AccountType // 改为变量，允许更新
 
     // 缓存 presenter 避免重复创建
     private var presenterCache: [String: TimelinePresenter] = [:]
@@ -70,20 +70,49 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 //        currentPresenter = nil
         // 保留当前 presenter，清理其他缓存
         // 这个地方估计有问题 todo://
-//        let current = currentPresenter
-//
-//         if let key = currentKey {
-//            presenterCache[key] = current
-//        }
+        //        let current = currentPresenter
+        //
+        //         if let key = currentKey {
+        //            presenterCache[key] = current
+        //        }
     }
 
     // 更新选中标签
     func updateSelectedTab(_ tab: FLTabItem) {
         selectedAppBarTabKey = tab.key
-//        if let presenter = getOrCreatePresenter(for: tab) {
-//            currentPresenter = presenter
-//        }
         notifyTabChange()
+    }
+
+    // 清除所有状态
+    func clearAllState() {
+        presenterCache.removeAll()
+        currentPresenter = nil
+        selectedAppBarTabKey = ""
+        primaryHomeItems = []
+        secondaryItems = []
+        availableAppBarTabsItems = []
+        objectWillChange.send()
+    }
+
+    // 更新账户类型
+    func updateAccountType(_ newAccountType: AccountType) {
+        accountType = newAccountType
+        clearAllState()
+
+        // 如果是游客模式，设置默认的 Home Timeline
+        if newAccountType is AccountTypeGuest {
+            currentPresenter = HomeTimelinePresenter(accountType: newAccountType)
+
+            // 只使用 Home 标签
+            let homeTab = FLHomeTimelineTabItem(
+                metaData: FLTabMetaData(
+                    title: .localized(.home),
+                    icon: .material(.home)
+                ), account: newAccountType
+            )
+            availableAppBarTabsItems = [homeTab]
+            updateSelectedTab(homeTab)
+        }
     }
 
     // 监听账号变化
@@ -97,8 +126,13 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
     }
 
     @objc private func handleAccountChange() {
-        clearCache()
-        if let user = currentUser {
+        // 获取新的账户类型
+        if let newAccountType = UserManager.shared.getCurrentAccount() {
+            updateAccountType(newAccountType)
+        }
+
+        // 获取新的用户信息
+        if let user = UserManager.shared.getCurrentUser() {
             initializeWithUser(user)
         }
     }
@@ -144,18 +178,14 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
         availableAppBarTabsItems = settingsManager.getEnabledItems(for: user) ?? secondaryItems
 
         if availableAppBarTabsItems.isEmpty {
-            // 立即更新可用标签
             if let homeItem = primaryHomeItems.first {
                 availableAppBarTabsItems = [homeItem] + secondaryItems
             }
         } else {
-            // 立即更新可用标签
             if let homeItem = primaryHomeItems.first {
                 if availableAppBarTabsItems.first?.key.contains("home_") == true {
-                    // 已经有home标签，保持现状
                     availableAppBarTabsItems = availableAppBarTabsItems
                 } else {
-                    // 没有home标签，添加到开头
                     availableAppBarTabsItems = [homeItem] + availableAppBarTabsItems
                 }
             }

@@ -324,7 +324,7 @@ extension HomeTabController: JXPagingViewDelegate {
             return existingVC
         }
 
-        let timelineVC = NewTimelineViewController()
+        let timelineVC = TimelineViewController()
         if index < tabStore.availableAppBarTabsItems.count {
             let tab = tabStore.availableAppBarTabsItems[index]
             if let presenter = tabStore.getOrCreatePresenter(for: tab) {
@@ -356,7 +356,7 @@ extension HomeTabController: JXSegmentedViewDelegate {
             tabStore.updateSelectedTab(selectedTab)
 
             // 获取当前的列表视图并更新其 presenter
-            if let currentList = pagingView.validListDict[index] as? NewTimelineViewController,
+            if let currentList = pagingView.validListDict[index] as? TimelineViewController,
                let presenter = tabStore.currentPresenter
             {
                 os_log("[📔][HomeNewViewController] updatePresenter start", log: .default, type: .debug)
@@ -369,7 +369,7 @@ extension HomeTabController: JXSegmentedViewDelegate {
 
     func segmentedView(_: JXSegmentedView, didClickSelectedItemAt index: Int) {
         // 如果点击已选中的标签，可以触发刷新
-        if let currentList = pagingView.validListDict[index] as? NewTimelineViewController {
+        if let currentList = pagingView.validListDict[index] as? TimelineViewController {
             Task { @MainActor in
                 currentList.refresh()
             }

@@ -4,6 +4,7 @@ import UIKit
 
 class BaseTimelineCell: UITableViewCell {
     private var hostingController: UIHostingController<StatusItemView>?
+    private var loadingIndicator: UIActivityIndicatorView?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -20,6 +21,18 @@ class BaseTimelineCell: UITableViewCell {
         selectionStyle = .none
         backgroundColor = .clear
         contentView.backgroundColor = .clear
+
+        // 创建loading indicator
+        loadingIndicator = UIActivityIndicatorView(style: .medium)
+        if let loadingIndicator {
+            contentView.addSubview(loadingIndicator)
+            loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                loadingIndicator.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+                loadingIndicator.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+            ])
+        }
+
         // 添加内边距容器视图
         contentView.layoutMargins = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
 
@@ -37,6 +50,9 @@ class BaseTimelineCell: UITableViewCell {
     }
 
     func configure(with item: UiTimeline) {
+        // 隐藏loading indicator
+        loadingIndicator?.stopAnimating()
+
         // 移除旧的视图
         hostingController?.view.removeFromSuperview()
         hostingController = nil
@@ -64,10 +80,18 @@ class BaseTimelineCell: UITableViewCell {
         selectionStyle = .none
     }
 
+    func showLoading() {
+        // 显示loading indicator
+        hostingController?.view.removeFromSuperview()
+        hostingController = nil
+        loadingIndicator?.startAnimating()
+    }
+
     override func prepareForReuse() {
         super.prepareForReuse()
         hostingController?.view.removeFromSuperview()
         hostingController = nil
+        loadingIndicator?.stopAnimating()
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

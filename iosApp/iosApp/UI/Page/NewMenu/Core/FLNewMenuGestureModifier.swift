@@ -37,8 +37,8 @@ struct FLNewMenuGestureModifier: ViewModifier {
 
                     // 检查是否是向右滑动
                     guard isValidRightSwipe(value) else {
-                        os_log("[🖐️][GestureModifier] Drag ignored - not right direction",
-                               log: .default, type: .debug)
+//                        os_log("[🖐️][GestureModifier] Drag ignored - not right direction",
+//                               log: .default, type: .debug)
                         return
                     }
 
@@ -53,8 +53,8 @@ struct FLNewMenuGestureModifier: ViewModifier {
 
                     // 检查是否是向右滑动
                     guard isValidRightSwipe(value) else {
-                        os_log("[🖐️][GestureModifier] Drag end ignored - not right direction",
-                               log: .default, type: .debug)
+//                        os_log("[🖐️][GestureModifier] Drag end ignored - not right direction",
+//                               log: .default, type: .debug)
                         return
                     }
 

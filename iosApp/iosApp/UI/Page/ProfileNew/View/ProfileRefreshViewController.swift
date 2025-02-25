@@ -329,7 +329,7 @@ class ProfileNewRefreshViewController: UIViewController {
             Task {
                 // 获取当前选中的列表视图
                 if let currentList = self.pagingView.validListDict[self.segmentedView.selectedIndex] {
-                    if let timelineVC = currentList as? NewTimelineViewController,
+                    if let timelineVC = currentList as? TimelineViewController,
                        let timelineState = timelineVC.presenter?.models.value as? TimelineState
                     {
                         // 触发时间线刷新
@@ -651,8 +651,8 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
             listViewControllers[index] = mediaVC
             return mediaVC
         } else {
-            let timelineVC = NewTimelineViewController()
-            timelineVC.shouldShowLoadMore = true
+            let timelineVC = TimelineViewController()
+//            timelineVC.shouldShowLoadMore = true
             if let presenter = tabStore.currentPresenter {
                 os_log("[📔][ProfileNewRefreshViewController] updatePresenter start", log: .default, type: .debug)
 
@@ -686,7 +686,7 @@ extension ProfileNewRefreshViewController: JXSegmentedViewDelegate {
 
             // 获取当前的列表视图并更新其 presenter
             if let currentList = pagingView.validListDict[index] {
-                if let timelineVC = currentList as? NewTimelineViewController,
+                if let timelineVC = currentList as? TimelineViewController,
                    let presenter = tabStore.currentPresenter
                 {
                     os_log("[📔][ProfileNewRefreshViewController] updatePresenter start", log: .default, type: .debug)

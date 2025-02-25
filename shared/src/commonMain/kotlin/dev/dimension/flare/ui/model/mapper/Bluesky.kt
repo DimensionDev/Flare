@@ -21,7 +21,6 @@ import com.fleeksoft.ksoup.nodes.TextNode
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
-import dev.dimension.flare.data.datasource.bluesky.bskyJson
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
@@ -73,9 +72,9 @@ internal fun parseBlueskyJson(
     accountKey: MicroBlogKey,
 ): UiRichText {
     try {
-        return parseBluesky(post = json.bskyJson(), accountKey = accountKey)
+        return parseBluesky(post = json.decodeAs(), accountKey = accountKey)
     } catch (e: Exception) {
-        val jobj = json.bskyJson<JsonContent, JsonObject>()
+        val jobj = json.decodeAs<JsonObject>()
         val text = jobj["text"]?.jsonPrimitive?.contentOrNull
         return Element("p")
             .apply {

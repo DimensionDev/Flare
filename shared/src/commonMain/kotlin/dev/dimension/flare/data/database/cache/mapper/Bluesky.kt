@@ -24,7 +24,6 @@ import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
-import dev.dimension.flare.data.datasource.bluesky.bskyJson
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
@@ -32,7 +31,6 @@ import dev.dimension.flare.ui.model.mapper.parseBlueskyJson
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.coroutines.flow.firstOrNull
 import sh.christian.ozone.api.AtUri
-import sh.christian.ozone.api.model.JsonContent
 
 internal object Bluesky {
     suspend fun saveDM(
@@ -212,8 +210,8 @@ internal fun List<ListNotificationsNotification>.toDb(
                         .record
                         .let {
                             when (reason) {
-                                ListNotificationsReason.Repost -> it.bskyJson<JsonContent, app.bsky.feed.Repost>().subject
-                                ListNotificationsReason.Like -> it.bskyJson<JsonContent, app.bsky.feed.Like>().subject
+                                ListNotificationsReason.Repost -> it.decodeAs<app.bsky.feed.Repost>().subject
+                                ListNotificationsReason.Like -> it.decodeAs<app.bsky.feed.Like>().subject
                                 else -> null
                             }
                         }?.uri

@@ -16,7 +16,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.datetime.Clock
-import sh.christian.ozone.api.model.JsonContent
 
 @OptIn(ExperimentalPagingApi::class)
 internal class NotificationRemoteMediator(
@@ -74,11 +73,11 @@ internal class NotificationRemoteMediator(
                             is ListNotificationsReason.Unknown -> null
                             ListNotificationsReason.Like ->
                                 it.record
-                                    .bskyJson<JsonContent, app.bsky.feed.Like>()
+                                    .decodeAs<app.bsky.feed.Like>()
                                     .subject.uri
                             ListNotificationsReason.Repost ->
                                 it.record
-                                    .bskyJson<JsonContent, app.bsky.feed.Repost>()
+                                    .decodeAs<app.bsky.feed.Repost>()
                                     .subject.uri
                             ListNotificationsReason.Follow -> null
                             ListNotificationsReason.Mention -> it.uri

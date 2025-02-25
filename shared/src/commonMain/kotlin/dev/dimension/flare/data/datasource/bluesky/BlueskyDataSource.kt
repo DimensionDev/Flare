@@ -122,8 +122,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.encodeToJsonElement
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import sh.christian.ozone.api.AtUri
@@ -132,6 +130,8 @@ import sh.christian.ozone.api.Did
 import sh.christian.ozone.api.Handle
 import sh.christian.ozone.api.Nsid
 import sh.christian.ozone.api.RKey
+import sh.christian.ozone.api.model.JsonContent
+import sh.christian.ozone.api.model.JsonContent.Companion.encodeAsJsonContent
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
@@ -173,13 +173,13 @@ internal class BlueskyDataSource(
 
     private suspend fun pdsService(): BlueskyService {
         if (cachedEndpoint == null) {
-            val didDoc: DidDoc =
+            val didDoc: DidDoc? =
                 service
                     .getSession()
                     .requireResponse()
                     .didDoc
-                    .bskyJson()
-            val entryPoint = didDoc.service?.firstOrNull()?.serviceEndpoint
+                    ?.decodeAs()
+            val entryPoint = didDoc?.service?.firstOrNull()?.serviceEndpoint
             cachedEndpoint = entryPoint
         }
         return cachedEndpoint?.let {
@@ -450,7 +450,7 @@ internal class BlueskyDataSource(
                                 ?.posts
                                 ?.firstOrNull()
                         }?.let { item ->
-                            val post: Post = item.record.bskyJson()
+                            val post: Post = item.record.decodeAs()
                             val root =
                                 post.reply?.root?.let { root ->
                                     StrongRef(
@@ -1506,7 +1506,7 @@ internal class BlueskyDataSource(
                             ),
                     ).requireResponse()
                     .value
-                    .bskyJson()
+                    .decodeAs()
 
             val iconInfo =
                 if (icon != null) {
@@ -1708,7 +1708,7 @@ internal class BlueskyDataSource(
                 record =
                     response.records
                         .firstOrNull {
-                            val item: app.bsky.graph.Listitem = it.value.bskyJson()
+                            val item: app.bsky.graph.Listitem = it.value.decodeAs()
                             item.list.atUri == listId && item.subject.did == userKey.id
                         }
             }
@@ -1791,10 +1791,10 @@ internal class BlueskyDataSource(
                 lists.addAll(
                     response.records
                         .filter {
-                            val item: Listitem = it.value.bskyJson()
+                            val item: Listitem = it.value.decodeAs()
                             item.subject.did == userKey.id
                         }.mapNotNull {
-                            val item: Listitem = it.value.bskyJson()
+                            val item: Listitem = it.value.decodeAs()
                             allLists.firstOrNull { it.id == item.list.atUri }
                         },
                 )
@@ -2256,4 +2256,16 @@ internal class BlueskyDataSource(
         ).toPersistentList()
 }
 
-internal inline fun <reified T, reified R> T.bskyJson(): R = bskyJson.decodeFromJsonElement(bskyJson.encodeToJsonElement(this))
+// internal inline fun <reified T: Any, reified R: Any> T.bskyJson(): R {
+//    // if T is JsonContent
+//    return when (T::class) {
+//        JsonContent::class -> {
+//            (this as JsonContent).decodeAs<R>()
+//        }
+//        else -> {
+//            bskyJson.encodeAsJsonContent(this) as R
+//        }
+//    }
+// }
+
+internal inline fun <reified T : Any> T.bskyJson(): JsonContent = bskyJson.encodeAsJsonContent(this)

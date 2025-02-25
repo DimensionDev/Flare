@@ -2256,16 +2256,4 @@ internal class BlueskyDataSource(
         ).toPersistentList()
 }
 
-// internal inline fun <reified T: Any, reified R: Any> T.bskyJson(): R {
-//    // if T is JsonContent
-//    return when (T::class) {
-//        JsonContent::class -> {
-//            (this as JsonContent).decodeAs<R>()
-//        }
-//        else -> {
-//            bskyJson.encodeAsJsonContent(this) as R
-//        }
-//    }
-// }
-
 internal inline fun <reified T : Any> T.bskyJson(): JsonContent = bskyJson.encodeAsJsonContent(this)

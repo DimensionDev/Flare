@@ -3,10 +3,12 @@ package dev.dimension.flare.data.network.misskey.api
 import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
+import dev.dimension.flare.data.network.misskey.api.model.ListMembership
 import dev.dimension.flare.data.network.misskey.api.model.UserList
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsDeleteRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsListRequest
+import dev.dimension.flare.data.network.misskey.api.model.UsersListsMembershipRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsPullRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsShowRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsUpdateRequest
@@ -138,4 +140,9 @@ internal interface ListsApi {
     suspend fun usersListsUpdate(
         @Body usersListsUpdateRequest: UsersListsUpdateRequest,
     ): Response<UserList>
+
+    @POST("users/lists/get-memberships")
+    suspend fun usersListsGetMemberships(
+        @Body usersListsMembershipRequest: UsersListsMembershipRequest,
+    ): Response<kotlin.collections.List<ListMembership>>
 }

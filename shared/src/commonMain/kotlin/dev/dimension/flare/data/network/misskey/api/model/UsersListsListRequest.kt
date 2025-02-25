@@ -25,3 +25,12 @@ import kotlinx.serialization.Serializable
 internal data class UsersListsListRequest(
     @SerialName(value = "userId") val userId: kotlin.String? = null,
 )
+
+@Serializable
+internal data class UsersListsMembershipRequest(
+    @SerialName(value = "listId") val listId: kotlin.String,
+    @SerialName(value = "forPublic") val forPublic: kotlin.Boolean = false,
+    @SerialName(value = "limit") val limit: kotlin.Int = 10,
+    @SerialName(value = "sinceId") val sinceId: kotlin.String? = null,
+    @SerialName(value = "untilId") val untilId: kotlin.String? = null,
+)

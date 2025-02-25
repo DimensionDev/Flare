@@ -29,7 +29,12 @@ internal class SearchUserPagingSource(
                     return LoadResult.Page(
                         data = it.map { it.render(accountKey) },
                         prevKey = null,
-                        nextKey = (params.key ?: 0) + params.loadSize,
+                        nextKey =
+                            if (it.isEmpty()) {
+                                null
+                            } else {
+                                (params.key ?: 0) + params.loadSize
+                            },
                     )
                 } ?: run {
                 return LoadResult.Error(Exception("No data"))

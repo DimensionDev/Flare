@@ -18,6 +18,13 @@ class UserManager {
         return currentUser
     }
 
+    func getCurrentAccount() -> AccountType? {
+        if let user = getCurrentUser() {
+            return AccountTypeSpecific(accountKey: user.key)
+        }
+        return AccountTypeGuest()
+    }
+
     func initialize() {
         guard !isInitialized else { return }
 

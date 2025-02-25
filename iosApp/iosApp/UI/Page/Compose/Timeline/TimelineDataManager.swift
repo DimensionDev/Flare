@@ -84,12 +84,15 @@ class TimelineDataManager {
         switch onEnum(of: state) {
         case .loading:
             os_log("[📔][TimelineDataManager] state: loading", log: .default, type: .debug)
+            // 不清除现有数据，保持当前显示状态
+
         case let .success(data):
             os_log("[📔][TimelineDataManager] state: success, itemCount: %{public}d", log: .default, type: .debug, data.itemCount)
             loadingState.clearLoadingRows()
             tableView?.reloadData()
             tableView?.mj_header?.endRefreshing()
             handleLoadMoreState(data: state)
+
         case let .error(error):
             os_log("[📔][TimelineDataManager] state: error, error: %{public}@", log: .default, type: .error, String(describing: error))
             if let throwable = error.error as? KotlinThrowable {
@@ -98,6 +101,8 @@ class TimelineDataManager {
             loadingState.clearLoadingRows()
             tableView?.mj_header?.endRefreshing()
             tableView?.mj_footer?.endRefreshing()
+            // 错误状态下不清除现有数据，只显示错误提示
+
         case .empty:
             os_log("[📔][TimelineDataManager] state: empty", log: .default, type: .debug)
             loadingState.clearLoadingRows()

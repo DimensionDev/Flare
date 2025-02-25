@@ -19,7 +19,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
     private var presenter = ActiveAccountPresenter()
     private var isInitializing = false
     private let settingsManager = FLTabSettingsManager()
-    private let accountType: AccountType
+    private var accountType: AccountType // 改为变量，允许更新
 
     // 缓存 presenter 避免重复创建
     private var presenterCache: [String: TimelinePresenter] = [:]
@@ -83,6 +83,38 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
         notifyTabChange()
     }
 
+    // 清除所有状态
+    func clearAllState() {
+        presenterCache.removeAll()
+        currentPresenter = nil
+        selectedAppBarTabKey = ""
+        primaryHomeItems = []
+        secondaryItems = []
+        availableAppBarTabsItems = []
+        objectWillChange.send()
+    }
+
+    // 更新账户类型
+    func updateAccountType(_ newAccountType: AccountType) {
+        accountType = newAccountType
+        clearAllState()
+
+        // 如果是游客模式，设置默认的 Home Timeline
+        if newAccountType is AccountTypeGuest {
+            currentPresenter = HomeTimelinePresenter(accountType: newAccountType)
+
+            // 只使用 Home 标签
+            let homeTab = FLHomeTimelineTabItem(
+                metaData: FLTabMetaData(
+                    title: .localized(.home),
+                    icon: .material(.home)
+                ), account: newAccountType
+            )
+            availableAppBarTabsItems = [homeTab]
+            updateSelectedTab(homeTab)
+        }
+    }
+
     // 监听账号变化
     func observeAccountChanges() {
         NotificationCenter.default.addObserver(
@@ -94,8 +126,13 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
     }
 
     @objc private func handleAccountChange() {
-        clearCache()
-        if let user = currentUser {
+        // 获取新的账户类型
+        if let newAccountType = UserManager.shared.getCurrentAccount() {
+            updateAccountType(newAccountType)
+        }
+
+        // 获取新的用户信息
+        if let user = UserManager.shared.getCurrentUser() {
             initializeWithUser(user)
         }
     }

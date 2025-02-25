@@ -131,6 +131,7 @@ import sh.christian.ozone.api.Cid
 import sh.christian.ozone.api.Did
 import sh.christian.ozone.api.Handle
 import sh.christian.ozone.api.Nsid
+import sh.christian.ozone.api.RKey
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
@@ -559,7 +560,7 @@ internal class BlueskyDataSource(
                         DeleteRecordRequest(
                             repo = Did(did = accountKey.id),
                             collection = Nsid("app.bsky.feed.repost"),
-                            rkey = repostUri.substringAfterLast('/'),
+                            rkey = RKey(repostUri.substringAfterLast('/')),
                         ),
                     )
                 } else {
@@ -748,7 +749,7 @@ internal class BlueskyDataSource(
             DeleteRecordRequest(
                 repo = Did(did = accountKey.id),
                 collection = Nsid("app.bsky.feed.like"),
-                rkey = likedUri.substringAfterLast('/'),
+                rkey = RKey(likedUri.substringAfterLast('/')),
             ),
         )
 
@@ -758,7 +759,7 @@ internal class BlueskyDataSource(
                 DeleteRecordRequest(
                     repo = Did(did = accountKey.id),
                     collection = Nsid("app.bsky.feed.post"),
-                    rkey = statusKey.id.substringAfterLast('/'),
+                    rkey = RKey(statusKey.id.substringAfterLast('/')),
                 ),
             )
             // delete status from cache
@@ -794,7 +795,7 @@ internal class BlueskyDataSource(
                     DeleteRecordRequest(
                         repo = Did(did = accountKey.id),
                         collection = Nsid("app.bsky.graph.follow"),
-                        rkey = followRepo.substringAfterLast('/'),
+                        rkey = RKey(followRepo.substringAfterLast('/')),
                     ),
                 )
             }
@@ -896,7 +897,7 @@ internal class BlueskyDataSource(
                     DeleteRecordRequest(
                         repo = Did(did = accountKey.id),
                         collection = Nsid("app.bsky.graph.block"),
-                        rkey = blockRepo.substringAfterLast('/'),
+                        rkey = RKey(blockRepo.substringAfterLast('/')),
                     ),
                 )
             }
@@ -1470,7 +1471,7 @@ internal class BlueskyDataSource(
                                     value =
                                         ApplyWritesDelete(
                                             collection = Nsid("app.bsky.graph.list"),
-                                            rkey = id,
+                                            rkey = RKey(id),
                                         ),
                                 ),
                             ),
@@ -1501,7 +1502,7 @@ internal class BlueskyDataSource(
                             com.atproto.repo.GetRecordQueryParams(
                                 collection = Nsid("app.bsky.graph.list"),
                                 repo = Did(did = accountKey.id),
-                                rkey = uri.substringAfterLast('/'),
+                                rkey = RKey(uri.substringAfterLast('/')),
                             ),
                     ).requireResponse()
                     .value
@@ -1530,7 +1531,7 @@ internal class BlueskyDataSource(
                     PutRecordRequest(
                         repo = Did(did = accountKey.id),
                         collection = Nsid("app.bsky.graph.list"),
-                        rkey = uri.substringAfterLast('/'),
+                        rkey = RKey(uri.substringAfterLast('/')),
                         record = newRecord.bskyJson(),
                     ),
             )
@@ -1716,7 +1717,7 @@ internal class BlueskyDataSource(
                     DeleteRecordRequest(
                         repo = Did(did = accountKey.id),
                         collection = Nsid("app.bsky.graph.listitem"),
-                        rkey = record.uri.atUri.substringAfterLast('/'),
+                        rkey = RKey(record.uri.atUri.substringAfterLast('/')),
                     ),
                 )
             }
@@ -2047,12 +2048,10 @@ internal class BlueskyDataSource(
                         is LogDeleteMessageMessageUnion.Unknown -> Unit
                     }
                 }
-                is GetLogResponseLogUnion.BeginConvo -> {
-                }
-                is GetLogResponseLogUnion.LeaveConvo -> {
-                }
-
+                is GetLogResponseLogUnion.BeginConvo -> Unit
+                is GetLogResponseLogUnion.LeaveConvo -> Unit
                 is GetLogResponseLogUnion.Unknown -> Unit
+                is GetLogResponseLogUnion.AcceptConvo -> Unit
             }
         }
     }

@@ -26,7 +26,6 @@ import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-
 @Composable
 internal fun CommonProfileHeader(
     bannerUrl: String?,
@@ -52,7 +51,7 @@ internal fun CommonProfileHeader(
         }
     Box(
         modifier =
-        modifier
+            modifier
 //                .sharedBounds(
 //                    rememberSharedContentState(key = "header-$userKey"),
 //                    animatedVisibilityScope = this@AnimatedVisibilityScope,
@@ -67,58 +66,58 @@ internal fun CommonProfileHeader(
 //                    placeHolderSize = SharedTransitionScope.PlaceHolderSize.animatedSize,
 //                )
 //                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-            .padding(bottom = 8.dp),
+                .padding(bottom = 8.dp),
     ) {
         bannerUrl?.let {
             NetworkImage(
                 model = it,
                 contentDescription = null,
                 modifier =
-                Modifier
+                    Modifier
 //                        .sharedElement(
 //                            rememberSharedContentState(key = "profile-banner-$userKey"),
 //                            animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                        )
-                    .clipToBounds()
-                    .fillMaxWidth()
-                    .height(actualBannerHeight)
-                    .let {
-                        if (onBannerClick != null) {
-                            it.clickable {
-                                onBannerClick.invoke()
+                        .clipToBounds()
+                        .fillMaxWidth()
+                        .height(actualBannerHeight)
+                        .let {
+                            if (onBannerClick != null) {
+                                it.clickable {
+                                    onBannerClick.invoke()
+                                }
+                            } else {
+                                it
                             }
-                        } else {
-                            it
-                        }
-                    },
+                        },
             )
         } ?: Box(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(actualBannerHeight)
-                .background(PlatformTheme.colorScheme.card),
+                Modifier
+                    .fillMaxWidth()
+                    .height(actualBannerHeight)
+                    .background(PlatformTheme.colorScheme.card),
         )
         // avatar
         Column(
             modifier =
-            Modifier
-                .fillMaxWidth(),
+                Modifier
+                    .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(start = screenHorizontalPadding),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(start = screenHorizontalPadding),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box(
                     modifier =
-                    Modifier
-                        .padding(
-                            top = (actualBannerHeight - ProfileHeaderConstants.AVATAR_SIZE.dp / 2),
-                        ),
+                        Modifier
+                            .padding(
+                                top = (actualBannerHeight - ProfileHeaderConstants.AVATAR_SIZE.dp / 2),
+                            ),
                 ) {
                     AvatarComponent(
                         data = avatarUrl,
@@ -130,24 +129,24 @@ internal fun CommonProfileHeader(
 //                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                ),
                         modifier =
-                        Modifier
-                            .let {
-                                if (onAvatarClick != null) {
-                                    it.clickable {
-                                        onAvatarClick.invoke()
+                            Modifier
+                                .let {
+                                    if (onAvatarClick != null) {
+                                        it.clickable {
+                                            onAvatarClick.invoke()
+                                        }
+                                    } else {
+                                        it
                                     }
-                                } else {
-                                    it
-                                }
-                            },
+                                },
                     )
                 }
                 if (!isBigScreen) {
                     Column(
                         modifier =
-                        Modifier
-                            .weight(1f)
-                            .padding(top = actualBannerHeight),
+                            Modifier
+                                .weight(1f)
+                                .padding(top = actualBannerHeight),
                     ) {
                         RichText(
                             text = displayName,
@@ -179,14 +178,14 @@ internal fun CommonProfileHeader(
                 } else {
                     Spacer(
                         modifier =
-                        Modifier
-                            .weight(1f),
+                            Modifier
+                                .weight(1f),
                     )
                 }
                 Row(
                     modifier =
-                    Modifier
-                        .padding(top = actualBannerHeight),
+                        Modifier
+                            .padding(top = actualBannerHeight),
                 ) {
                     headerTrailing()
                 }
@@ -194,8 +193,8 @@ internal fun CommonProfileHeader(
             if (isBigScreen) {
                 Column(
                     modifier =
-                    Modifier
-                        .padding(horizontal = screenHorizontalPadding),
+                        Modifier
+                            .padding(horizontal = screenHorizontalPadding),
                 ) {
                     RichText(
                         text = displayName,

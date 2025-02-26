@@ -120,10 +120,10 @@ private fun ProfileHeaderSuccess(
                                     // No-op
                                 },
                                 modifier =
-                                Modifier.placeholder(
-                                    true,
+                                    Modifier.placeholder(
+                                        true,
 //                                    shape = ButtonDefaults.filledTonalShape,
-                                ),
+                                    ),
                             ) {
                                 PlatformText(text = stringResource(Res.string.profile_header_button_follow))
                             }
@@ -138,21 +138,21 @@ private fun ProfileHeaderSuccess(
                                 }) {
                                     PlatformText(
                                         text =
-                                        stringResource(
-                                            when {
-                                                relationState.data.blocking ->
-                                                    Res.string.profile_header_button_blocked
+                                            stringResource(
+                                                when {
+                                                    relationState.data.blocking ->
+                                                        Res.string.profile_header_button_blocked
 
-                                                relationState.data.following ->
-                                                    Res.string.profile_header_button_following
+                                                    relationState.data.following ->
+                                                        Res.string.profile_header_button_following
 
-                                                relationState.data.hasPendingFollowRequestFromYou ->
-                                                    Res.string.profile_header_button_requested
+                                                    relationState.data.hasPendingFollowRequestFromYou ->
+                                                        Res.string.profile_header_button_requested
 
-                                                else ->
-                                                    Res.string.profile_header_button_follow
-                                            },
-                                        ),
+                                                    else ->
+                                                        Res.string.profile_header_button_follow
+                                                },
+                                            ),
                                     )
                                 }
                                 if (relationState.data.isFans) {
@@ -179,9 +179,9 @@ private fun ProfileHeaderSuccess(
                             imageVector = FontAwesomeIcons.Solid.CircleCheck,
                             contentDescription = null,
                             modifier =
-                            Modifier
-                                .size(12.dp)
-                                .alpha(MediumAlpha),
+                                Modifier
+                                    .size(12.dp)
+                                    .alpha(MediumAlpha),
                             tint = Color.Blue,
                         )
 
@@ -190,9 +190,9 @@ private fun ProfileHeaderSuccess(
                             imageVector = FontAwesomeIcons.Solid.Cat,
                             contentDescription = null,
                             modifier =
-                            Modifier
-                                .size(12.dp)
-                                .alpha(MediumAlpha),
+                                Modifier
+                                    .size(12.dp)
+                                    .alpha(MediumAlpha),
                         )
 
                     UiProfile.Mark.Bot ->
@@ -200,9 +200,9 @@ private fun ProfileHeaderSuccess(
                             imageVector = FontAwesomeIcons.Solid.Robot,
                             contentDescription = null,
                             modifier =
-                            Modifier
-                                .size(12.dp)
-                                .alpha(MediumAlpha),
+                                Modifier
+                                    .size(12.dp)
+                                    .alpha(MediumAlpha),
                         )
 
                     UiProfile.Mark.Locked ->
@@ -210,9 +210,9 @@ private fun ProfileHeaderSuccess(
                             imageVector = FontAwesomeIcons.Solid.Lock,
                             contentDescription = null,
                             modifier =
-                            Modifier
-                                .size(12.dp)
-                                .alpha(MediumAlpha),
+                                Modifier
+                                    .size(12.dp)
+                                    .alpha(MediumAlpha),
                         )
                 }
             }
@@ -220,9 +220,9 @@ private fun ProfileHeaderSuccess(
         content = {
             Column(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = screenHorizontalPadding),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = screenHorizontalPadding),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 user.description?.let {
@@ -271,7 +271,6 @@ private fun ProfileHeaderSuccess(
     )
 }
 
-
 @Composable
 private fun ProfileHeaderError() {
 }
@@ -294,51 +293,51 @@ public fun ProfileHeaderLoading(
         }
     Box(
         modifier =
-        modifier
+            modifier
 //                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp))
-            .padding(bottom = 8.dp),
+                .padding(bottom = 8.dp),
     ) {
         Box(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .height(actualBannerHeight)
-                .placeholder(true),
+                Modifier
+                    .fillMaxWidth()
+                    .height(actualBannerHeight)
+                    .placeholder(true),
         )
         // avatar
         Column(
             modifier =
-            Modifier
-                .fillMaxWidth(),
+                Modifier
+                    .fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = screenHorizontalPadding),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = screenHorizontalPadding),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box(
                     modifier =
-                    Modifier
-                        .padding(
-                            top = (actualBannerHeight - ProfileHeaderConstants.AVATAR_SIZE.dp / 2),
-                        ),
+                        Modifier
+                            .padding(
+                                top = (actualBannerHeight - ProfileHeaderConstants.AVATAR_SIZE.dp / 2),
+                            ),
                 ) {
                     Box(
                         modifier =
-                        Modifier
-                            .size(ProfileHeaderConstants.AVATAR_SIZE.dp)
-                            .clip(CircleShape)
-                            .placeholder(true),
+                            Modifier
+                                .size(ProfileHeaderConstants.AVATAR_SIZE.dp)
+                                .clip(CircleShape)
+                                .placeholder(true),
                     )
                 }
                 Column(
                     modifier =
-                    Modifier
-                        .weight(1f)
-                        .padding(top = actualBannerHeight),
+                        Modifier
+                            .weight(1f)
+                            .padding(top = actualBannerHeight),
                 ) {
                     PlatformText(
                         text = "Loading user",
@@ -355,9 +354,9 @@ public fun ProfileHeaderLoading(
             PlatformText(
                 text = "Lorem Ipsum is simply dummy text",
                 modifier =
-                Modifier
-                    .placeholder(true)
-                    .padding(horizontal = screenHorizontalPadding),
+                    Modifier
+                        .placeholder(true)
+                        .padding(horizontal = screenHorizontalPadding),
             )
         }
     }

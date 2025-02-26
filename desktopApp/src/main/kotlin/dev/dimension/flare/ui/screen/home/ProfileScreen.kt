@@ -55,6 +55,7 @@ import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -177,17 +178,7 @@ internal fun ProfileScreen(
                                             },
                                     ) {
                                         Text(
-                                            stringResource(
-                                                when (tab) {
-                                                    is ProfileState.Tab.Media -> Res.string.profile_tab_media
-                                                    is ProfileState.Tab.Timeline ->
-                                                        when (tab.type) {
-                                                            ProfileTab.Timeline.Type.Status -> Res.string.profile_tab_timeline
-                                                            ProfileTab.Timeline.Type.StatusWithReplies -> Res.string.profile_tab_timeline_with_reply
-                                                            ProfileTab.Timeline.Type.Likes -> Res.string.profile_tab_media
-                                                        }
-                                                },
-                                            ),
+                                            stringResource(tab.title),
                                         )
                                     }
                                 }
@@ -243,6 +234,18 @@ internal fun ProfileScreen(
         }
     }
 }
+
+private val ProfileState.Tab.title: StringResource
+    get() =
+        when (this) {
+            is ProfileState.Tab.Media -> Res.string.profile_tab_media
+            is ProfileState.Tab.Timeline ->
+                when (type) {
+                    ProfileTab.Timeline.Type.Status -> Res.string.profile_tab_timeline
+                    ProfileTab.Timeline.Type.StatusWithReplies -> Res.string.profile_tab_timeline_with_reply
+                    ProfileTab.Timeline.Type.Likes -> Res.string.profile_tab_media
+                }
+        }
 
 @Composable
 private fun presenter(

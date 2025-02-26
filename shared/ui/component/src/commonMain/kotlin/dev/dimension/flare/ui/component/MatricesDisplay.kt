@@ -20,7 +20,6 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.collections.component1
 import kotlin.collections.component2
 
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun MatricesDisplay(
@@ -29,13 +28,14 @@ internal fun MatricesDisplay(
     modifier: Modifier = Modifier,
     expanded: Boolean = false,
 ) {
-    val data = remember(data) {
-        persistentMapOf(
-            Res.string.profile_misskey_header_status_count to data.statusesCountHumanized,
-            Res.string.profile_header_following_count to data.followsCountHumanized,
-            Res.string.profile_header_fans_count to data.fansCountHumanized,
-        )
-    }
+    val data =
+        remember(data) {
+            persistentMapOf(
+                Res.string.profile_misskey_header_status_count to data.statusesCountHumanized,
+                Res.string.profile_header_following_count to data.followsCountHumanized,
+                Res.string.profile_header_fans_count to data.fansCountHumanized,
+            )
+        }
     if (expanded) {
         Row(
             modifier = modifier.wrapContentHeight(),
@@ -44,11 +44,11 @@ internal fun MatricesDisplay(
             data.onEachIndexed { index, (resId, text) ->
                 Column(
                     modifier =
-                    Modifier
-                        .weight(1f)
-                        .clickable {
-                            onClicked.invoke(index)
-                        },
+                        Modifier
+                            .weight(1f)
+                            .clickable {
+                                onClicked.invoke(index)
+                            },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     PlatformText(
@@ -76,9 +76,9 @@ internal fun MatricesDisplay(
                     text = stringResource(resId, text),
                     style = PlatformTheme.typography.caption,
                     modifier =
-                    Modifier.clickable {
-                        onClicked.invoke(index)
-                    },
+                        Modifier.clickable {
+                            onClicked.invoke(index)
+                        },
                 )
             }
         }

@@ -26,7 +26,6 @@ import org.jetbrains.compose.resources.stringResource
 import kotlin.collections.component1
 import kotlin.collections.component2
 
-
 @Composable
 public fun ProfileMenu(
     profileState: ProfileState,
@@ -60,9 +59,9 @@ public fun ProfileMenu(
                                         text = {
                                             PlatformText(
                                                 text =
-                                                stringResource(
-                                                    Res.string.user_follow_edit_list,
-                                                ),
+                                                    stringResource(
+                                                        Res.string.user_follow_edit_list,
+                                                    ),
                                             )
                                         },
                                         onClick = {
@@ -73,9 +72,9 @@ public fun ProfileMenu(
                                             FAIcon(
                                                 imageVector = FontAwesomeIcons.Solid.List,
                                                 contentDescription =
-                                                stringResource(
-                                                    Res.string.user_follow_edit_list,
-                                                ),
+                                                    stringResource(
+                                                        Res.string.user_follow_edit_list,
+                                                    ),
                                             )
                                         },
                                     )
@@ -98,9 +97,9 @@ public fun ProfileMenu(
                                         FAIcon(
                                             imageVector = FontAwesomeIcons.Solid.Message,
                                             contentDescription =
-                                            stringResource(
-                                                Res.string.user_send_message,
-                                            ),
+                                                stringResource(
+                                                    Res.string.user_send_message,
+                                                ),
                                         )
                                     },
                                 )
@@ -120,19 +119,19 @@ public fun ProfileMenu(
                                                         text = {
                                                             PlatformText(
                                                                 text =
-                                                                if (value.size == 1) {
-                                                                    stringResource(
-                                                                        Res.string.profile_search_user_using_account_compat,
-                                                                        accountData.platformType.name,
-                                                                    )
-                                                                } else {
-                                                                    stringResource(
-                                                                        Res.string.profile_search_user_using_account,
-                                                                        user.handleWithoutAtAndHost,
-                                                                        accountData.platformType.name,
-                                                                        accountData.handleWithoutAt,
-                                                                    )
-                                                                },
+                                                                    if (value.size == 1) {
+                                                                        stringResource(
+                                                                            Res.string.profile_search_user_using_account_compat,
+                                                                            accountData.platformType.name,
+                                                                        )
+                                                                    } else {
+                                                                        stringResource(
+                                                                            Res.string.profile_search_user_using_account,
+                                                                            user.handleWithoutAtAndHost,
+                                                                            accountData.platformType.name,
+                                                                            accountData.handleWithoutAt,
+                                                                        )
+                                                                    },
                                                             )
                                                         },
                                                         onClick = {
@@ -165,13 +164,13 @@ public fun ProfileMenu(
                                     leadingIcon = {
                                         FAIcon(
                                             imageVector =
-                                            when (action) {
-                                                is ProfileAction.Block ->
-                                                    FontAwesomeIcons.Solid.UserSlash
+                                                when (action) {
+                                                    is ProfileAction.Block ->
+                                                        FontAwesomeIcons.Solid.UserSlash
 
-                                                is ProfileAction.Mute ->
-                                                    FontAwesomeIcons.Solid.VolumeXmark
-                                            },
+                                                    is ProfileAction.Mute ->
+                                                        FontAwesomeIcons.Solid.VolumeXmark
+                                                },
                                             contentDescription = null,
                                         )
                                     },
@@ -222,10 +221,10 @@ public fun ProfileMenu(
                         text = {
                             PlatformText(
                                 text =
-                                stringResource(
-                                    Res.string.user_report,
-                                    user.handle,
-                                ),
+                                    stringResource(
+                                        Res.string.user_report,
+                                        user.handle,
+                                    ),
                                 color = PlatformTheme.colorScheme.error,
                             )
                         },
@@ -233,10 +232,10 @@ public fun ProfileMenu(
                             FAIcon(
                                 imageVector = FontAwesomeIcons.Solid.CircleExclamation,
                                 contentDescription =
-                                stringResource(
-                                    Res.string.user_report,
-                                    user.handle,
-                                ),
+                                    stringResource(
+                                        Res.string.user_report,
+                                        user.handle,
+                                    ),
                                 tint = PlatformTheme.colorScheme.error,
                             )
                         },

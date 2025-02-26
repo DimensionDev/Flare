@@ -3,6 +3,7 @@ package dev.dimension.flare.data.network.xqt.api
 import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Query
+import dev.dimension.flare.data.network.xqt.model.ListsMembershipsResponse
 import dev.dimension.flare.data.network.xqt.model.UserRecommendationsItem
 
 internal interface V11GetApi {
@@ -99,4 +100,32 @@ internal interface V11GetApi {
             "ext",
         ) ext: String = "mediaStats,highlightedLabel,hasNftAvatar,voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo,editControl",
     ): List<UserRecommendationsItem>
+
+    @GET("1.1/lists/memberships.json")
+    suspend fun getListsMemberships(
+        @Query("include_profile_interstitial_type") includeProfileInterstitialType: Int = 1,
+        @Query("include_blocking") includeBlocking: Int = 1,
+        @Query("include_blocked_by") includeBlockedBy: Int = 1,
+        @Query("include_followed_by") includeFollowedBy: Int = 1,
+        @Query("include_want_retweets") includeWantRetweets: Int = 1,
+        @Query("include_mute_edge") includeMuteEdge: Int = 1,
+        @Query("include_can_dm") includeCanDm: Int = 1,
+        @Query("include_can_media_tag") includeCanMediaTag: Int = 1,
+        @Query("include_ext_is_blue_verified") includeExtIsBlueVerified: Int = 1,
+        @Query("include_ext_verified_type") includeExtVerifiedType: Int = 1,
+        @Query("include_ext_profile_image_shape") includeExtProfileImageShape: Int = 1,
+        @Query("skip_status") skipStatus: Int = 1,
+        @Query("cards_platform") cardsPlatform: String = "Web-12",
+        @Query("include_cards") includeCards: Int = 1,
+        @Query("include_ext_alt_text") includeExtAltText: Boolean = true,
+        @Query("include_ext_limited_action_results") includeExtLimitedActionResults: Boolean = true,
+        @Query("include_quote_count") includeQuoteCount: Boolean = true,
+        @Query("include_reply_count") includeReplyCount: Int = 1,
+        @Query("tweet_mode") tweetMode: String = "extended",
+        @Query("include_ext_views") includeExtViews: Boolean = true,
+        @Query("cursor") cursor: Int = -1,
+        @Query("user_id") userId: String,
+        @Query("count") count: Int = 1000,
+        @Query("filter_to_owned_lists") filterToOwnedLists: Boolean = true,
+    ): Response<ListsMembershipsResponse>
 }

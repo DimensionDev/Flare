@@ -1,7 +1,6 @@
 package dev.dimension.flare.common
 
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -11,6 +10,7 @@ private val json =
         ignoreUnknownKeys = true
         isLenient = true
         coerceInputValues = true
+        encodeDefaults = true
     }
 
 internal val JSON get() = json

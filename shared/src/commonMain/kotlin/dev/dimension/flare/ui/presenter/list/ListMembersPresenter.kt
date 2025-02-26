@@ -31,7 +31,7 @@ public class ListMembersPresenter(
         val memberInfo =
             serviceState
                 .map {
-                    remember(it) {
+                    remember(it, listId) {
                         require(it is ListDataSource)
                         it.listMembers(listId, scope = scope)
                     }.collectAsLazyPagingItems()

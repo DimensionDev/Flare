@@ -5,6 +5,7 @@ import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.xqt.api.DefaultApi
 import dev.dimension.flare.data.network.xqt.api.GuestApi
+import dev.dimension.flare.data.network.xqt.api.ListsApi
 import dev.dimension.flare.data.network.xqt.api.MediaApi
 import dev.dimension.flare.data.network.xqt.api.OtherApi
 import dev.dimension.flare.data.network.xqt.api.PostApi
@@ -17,6 +18,7 @@ import dev.dimension.flare.data.network.xqt.api.V11PostApi
 import dev.dimension.flare.data.network.xqt.api.V20GetApi
 import dev.dimension.flare.data.network.xqt.api.createDefaultApi
 import dev.dimension.flare.data.network.xqt.api.createGuestApi
+import dev.dimension.flare.data.network.xqt.api.createListsApi
 import dev.dimension.flare.data.network.xqt.api.createMediaApi
 import dev.dimension.flare.data.network.xqt.api.createOtherApi
 import dev.dimension.flare.data.network.xqt.api.createPostApi
@@ -95,7 +97,10 @@ internal class XQTService(
     MediaApi by config(
         url = uploadUrl,
         chocolate = chocolate,
-    ).createMediaApi() {
+    ).createMediaApi(),
+    ListsApi by config(
+        chocolate = chocolate,
+    ).createListsApi() {
     companion object {
         fun checkChocolate(value: String) =
 //            value.contains("gt=") &&

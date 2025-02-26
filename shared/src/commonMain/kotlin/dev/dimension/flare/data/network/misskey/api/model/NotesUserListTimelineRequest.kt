@@ -35,4 +35,6 @@ internal data class NotesUserListTimelineRequest(
     @SerialName(value = "includeLocalRenotes") val includeLocalRenotes: kotlin.Boolean? = true,
     // Only show notes that have attached files.
     @SerialName(value = "withFiles") val withFiles: kotlin.Boolean? = false,
+    @SerialName(value = "withRenotes") val withRenotes: kotlin.Boolean? = false,
+    @SerialName(value = "allowPartial") val allowPartial: kotlin.Boolean? = false,
 )

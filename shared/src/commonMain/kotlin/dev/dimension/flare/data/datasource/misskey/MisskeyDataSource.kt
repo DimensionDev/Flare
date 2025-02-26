@@ -1,9 +1,13 @@
 package dev.dimension.flare.data.datasource.misskey
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadType
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.PagingState
+import androidx.paging.RemoteMediator
+import androidx.paging.RemoteMediator.MediatorResult
 import androidx.paging.cachedIn
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
@@ -18,10 +22,15 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.ListDataSource
+import dev.dimension.flare.data.datasource.microblog.ListMetaData
+import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
+import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
@@ -31,12 +40,20 @@ import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesCreateRequestPoll
 import dev.dimension.flare.data.network.misskey.api.model.NotesPollsVoteRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesReactionsCreateRequest
+import dev.dimension.flare.data.network.misskey.api.model.UsersListsCreateRequest
+import dev.dimension.flare.data.network.misskey.api.model.UsersListsDeleteRequest
+import dev.dimension.flare.data.network.misskey.api.model.UsersListsListRequest
+import dev.dimension.flare.data.network.misskey.api.model.UsersListsMembershipRequest
+import dev.dimension.flare.data.network.misskey.api.model.UsersListsPullRequest
+import dev.dimension.flare.data.network.misskey.api.model.UsersListsShowRequest
+import dev.dimension.flare.data.network.misskey.api.model.UsersListsUpdateRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiHashtag
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -47,6 +64,7 @@ import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
@@ -58,6 +76,8 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.collections.mapNotNull
+import kotlin.collections.orEmpty
 
 @OptIn(ExperimentalPagingApi::class)
 internal class MisskeyDataSource(
@@ -65,7 +85,8 @@ internal class MisskeyDataSource(
     val credential: UiAccount.Misskey.Credential,
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
-    StatusEvent.Misskey {
+    StatusEvent.Misskey,
+    ListDataSource {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
@@ -1017,4 +1038,293 @@ internal class MisskeyDataSource(
                     pagingKey = pagingKey,
                 ),
         )
+
+    private val listKey: String
+        get() = "allLists_$accountKey"
+
+    override val myList: CacheData<ImmutableList<UiList>> =
+        MemCacheable(
+            key = listKey,
+            fetchSource = {
+                service
+                    .usersListsList(
+                        UsersListsListRequest(),
+                    ).body()
+                    .orEmpty()
+                    .map {
+                        it.render()
+                    }.toImmutableList()
+            },
+        )
+
+    override suspend fun createList(metaData: ListMetaData) {
+        runCatching {
+            service
+                .usersListsCreate(
+                    UsersListsCreateRequest(
+                        name = metaData.title,
+                    ),
+                ).body()
+        }.onSuccess { response ->
+            if (response?.id != null) {
+                MemCacheable.updateWith<ImmutableList<UiList>>(
+                    key = listKey,
+                ) {
+                    it
+                        .plus(
+                            UiList(
+                                id = response.id,
+                                title = metaData.title,
+                                platformType = PlatformType.Mastodon,
+                            ),
+                        ).toImmutableList()
+                }
+            }
+        }
+    }
+
+    override suspend fun deleteList(listId: String) {
+        runCatching {
+            service.usersListsDelete(
+                UsersListsDeleteRequest(listId = listId),
+            )
+        }.onSuccess {
+            MemCacheable.updateWith<ImmutableList<UiList>>(
+                key = listKey,
+            ) {
+                it
+                    .filter { list -> list.id != listId }
+                    .toImmutableList()
+            }
+        }
+    }
+
+    override suspend fun updateList(
+        listId: String,
+        metaData: ListMetaData,
+    ) {
+        runCatching {
+            service.usersListsUpdate(
+                UsersListsUpdateRequest(
+                    listId = listId,
+                    name = metaData.title,
+                ),
+            )
+        }.onSuccess {
+            MemCacheable.updateWith<ImmutableList<UiList>>(
+                key = listKey,
+            ) {
+                it
+                    .map { list ->
+                        if (list.id == listId) {
+                            list.copy(title = metaData.title)
+                        } else {
+                            list
+                        }
+                    }.toImmutableList()
+            }
+        }
+    }
+
+    override fun listInfo(listId: String): CacheData<UiList> =
+        MemCacheable(
+            key = "listInfo_$listId",
+            fetchSource = {
+                service
+                    .usersListsShow(
+                        UsersListsShowRequest(
+                            listId = listId,
+                        ),
+                    ).body()
+                    ?.render() ?: throw Exception("List not found")
+            },
+        )
+
+    override fun listMembers(
+        listId: String,
+        scope: CoroutineScope,
+        pageSize: Int,
+    ): Flow<PagingData<UiUserV2>> =
+        memoryPager(
+            pageSize = pageSize,
+            pagingKey = listMemberKey(listId),
+            scope = scope,
+            mediator =
+                object : RemoteMediator<Int, UiUserV2>() {
+                    override suspend fun load(
+                        loadType: LoadType,
+                        state: PagingState<Int, UiUserV2>,
+                    ): MediatorResult {
+                        try {
+                            if (loadType == LoadType.PREPEND) {
+                                return MediatorResult.Success(endOfPaginationReached = true)
+                            }
+                            val key =
+                                if (loadType == LoadType.REFRESH) {
+                                    null
+                                } else {
+                                    MemoryPagingSource
+                                        .get<UiUserV2>(key = listMemberKey(listId))
+                                        ?.lastOrNull()
+                                        ?.key
+                                        ?.id
+                                }
+                            val result =
+                                service
+                                    .usersListsGetMemberships(
+                                        UsersListsMembershipRequest(
+                                            listId = listId,
+                                            untilId = key,
+                                            limit = state.config.pageSize,
+                                        ),
+                                    ).body()
+                                    .orEmpty()
+                                    .map {
+                                        it.user.render(accountKey)
+                                    }
+
+                            if (loadType == LoadType.REFRESH) {
+                                MemoryPagingSource.update(
+                                    key = listMemberKey(listId),
+                                    value = result.toImmutableList(),
+                                )
+                            } else if (loadType == LoadType.APPEND) {
+                                MemoryPagingSource.append(
+                                    key = listMemberKey(listId),
+                                    value = result.toImmutableList(),
+                                )
+                            }
+
+                            return MediatorResult.Success(
+                                endOfPaginationReached = result.isEmpty(),
+                            )
+                        } catch (e: Exception) {
+                            return MediatorResult.Error(e)
+                        }
+                    }
+                },
+        )
+
+    private fun listMemberKey(listId: String) = "listMembers_$listId"
+
+    private fun userListsKey(userKey: MicroBlogKey) = "userLists_${userKey.id}"
+
+    override suspend fun addMember(
+        listId: String,
+        userKey: MicroBlogKey,
+    ) {
+        runCatching {
+            service.usersListsPush(
+                UsersListsPullRequest(
+                    listId = listId,
+                    userId = userKey.id,
+                ),
+            )
+            val user =
+                service
+                    .usersShow(
+                        UsersShowRequest(
+                            userId = userKey.id,
+                        ),
+                    ).body()
+                    ?.toDbUser(accountKey.host)
+                    ?.render(accountKey)
+            MemoryPagingSource.updateWith(
+                key = listMemberKey(listId),
+            ) {
+                (listOfNotNull(user) + it)
+                    .distinctBy {
+                        it.key
+                    }.toImmutableList()
+            }
+            val list =
+                service
+                    .usersListsShow(
+                        UsersListsShowRequest(
+                            listId = listId,
+                        ),
+                    ).body()
+            if (list?.id != null) {
+                MemCacheable.updateWith<ImmutableList<UiList>>(
+                    key = userListsKey(userKey),
+                ) {
+                    it
+                        .plus(list.render())
+                        .toImmutableList()
+                }
+            }
+        }
+    }
+
+    override suspend fun removeMember(
+        listId: String,
+        userKey: MicroBlogKey,
+    ) {
+        runCatching {
+            service.usersListsPull(
+                UsersListsPullRequest(
+                    listId = listId,
+                    userId = userKey.id,
+                ),
+            )
+            MemoryPagingSource.updateWith<UiUserV2>(
+                key = listMemberKey(listId),
+            ) {
+                it
+                    .filter { user -> user.key.id != userKey.id }
+                    .toImmutableList()
+            }
+            MemCacheable.updateWith<ImmutableList<UiList>>(
+                key = userListsKey(userKey),
+            ) {
+                it
+                    .filter { list -> list.id != listId }
+                    .toImmutableList()
+            }
+        }
+    }
+
+    override fun listTimeline(
+        listId: String,
+        scope: CoroutineScope,
+        pageSize: Int,
+    ): Flow<PagingData<UiTimeline>> =
+        timelinePager(
+            pageSize = pageSize,
+            pagingKey = "list_${accountKey}_$listId",
+            accountKey = accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                ListTimelineRemoteMediator(
+                    listId,
+                    service,
+                    database,
+                    accountKey,
+                    "list_${accountKey}_$listId",
+                ),
+        )
+
+    override fun listMemberCache(listId: String): Flow<ImmutableList<UiUserV2>> =
+        MemoryPagingSource.getFlow<UiUserV2>(listMemberKey(listId))
+
+    override fun userLists(userKey: MicroBlogKey): MemCacheable<ImmutableList<UiList>> =
+        MemCacheable(
+            key = userListsKey(userKey),
+        ) {
+            service
+                .usersListsList(
+                    UsersListsListRequest(),
+                ).body()
+                .orEmpty()
+                .filter {
+                    it.userIds?.contains(userKey.id) == true
+                }.map {
+                    it.render()
+                }.toImmutableList()
+        }
+
+    override val supportedMetaData: ImmutableList<ListMetaDataType>
+        get() = persistentListOf(ListMetaDataType.TITLE)
 }

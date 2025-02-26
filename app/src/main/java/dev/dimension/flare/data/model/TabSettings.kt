@@ -416,6 +416,14 @@ sealed interface TimelineTabItem : TabItem {
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Heart, accountKey),
                         ),
                 ),
+                AllListTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.List, accountKey),
+                        ),
+                ),
                 Misskey.LocalTimelineTabItem(
                     account = AccountType.Specific(accountKey),
                     metaData =

@@ -3,18 +3,18 @@ compileSdk = "35"
 lifecycleViewmodelCompose = "2.8.4"
 minSdk = "24"
 java = "21"
-agp = "8.8.1"
+agp = "8.8.2"
 kotlin = "2.1.10"
 core-ktx = "1.15.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.2.1"
 espresso-core = "3.6.1"
 lifecycle-runtime-ktx = "2.8.7"
-activity-compose = "1.10.0"
+activity-compose = "1.10.1"
 compose-bom = "2025.02.00"
 ksp = "2.1.10-1.0.30"
 paging = "3.3.6"
-navigation = "2.8.7"
+navigation = "2.8.8"
 kotlinx-datetime = "0.6.2"
 kotlinx-collections-immutable = "0.3.8"
 kotlinx-serialization = "1.8.0"
@@ -40,13 +40,13 @@ kotlinx-coroutines = "1.10.1"
 koin = "4.0.2"
 composeIcons = "1.3.0"
 media3 = "1.5.1"
-desugar_jdk_libs = "2.1.4"
+desugar_jdk_libs = "2.1.5"
 firebase-bom = "33.9.0"
 google-services = "4.4.2"
 firebase-crashlytics = "3.0.3"
 materialKolor = "2.0.2"
 room = "2.7.0-beta01"
-sqlite = "2.5.0-beta01"
+sqlite = "2.5.0-rc01"
 compose-multiplatform = "1.7.3"
 
 [libraries]
@@ -82,10 +82,10 @@ paging-common = { group = "androidx.paging", name = "paging-common", version.ref
 paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 composeIcons-fontAwesome = { module = "moe.tlaster.compose.icons:font-awesome", version.ref = "composeIcons" }
-datastore = { group = "androidx.datastore", name = "datastore", version = "1.1.2" }
+datastore = { group = "androidx.datastore", name = "datastore", version = "1.1.3" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 androidx-window = { group = "androidx.window", name = "window-core", version = "1.3.0" }
-androidx-splash = { group = "androidx.core", name = "core-splashscreen", version = "1.2.0-alpha02" }
+androidx-splash = { group = "androidx.core", name = "core-splashscreen", version = "1.2.0-beta01" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }

@@ -8,10 +8,15 @@ import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
+import dev.dimension.flare.data.network.xqt.model.InstructionUnion
 import dev.dimension.flare.data.network.xqt.model.Media
+import dev.dimension.flare.data.network.xqt.model.TimelineAddEntries
+import dev.dimension.flare.data.network.xqt.model.TimelineTimelineModule
+import dev.dimension.flare.data.network.xqt.model.TimelineTwitterList
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetCardLegacy
 import dev.dimension.flare.data.network.xqt.model.TweetCardLegacyBindingValueData
+import dev.dimension.flare.data.network.xqt.model.TwitterList
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserResultCore
 import dev.dimension.flare.data.network.xqt.model.UserResults
@@ -22,6 +27,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiCard
+import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
@@ -694,4 +700,51 @@ private fun parseCustomDateTime(dateTimeStr: String): Instant? {
     } catch (e: Exception) {
         return null
     }
+}
+
+internal fun List<InstructionUnion>.list(accountKey: MicroBlogKey): List<UiList> =
+    flatMap {
+        when (it) {
+            is TimelineAddEntries ->
+                it.propertyEntries.flatMap {
+                    when (it.content) {
+                        is TimelineTimelineModule ->
+                            it.content.items.orEmpty().mapNotNull {
+                                when (it.item.itemContent) {
+                                    is TimelineTwitterList -> it.item.itemContent.list
+                                    else -> null
+                                }
+                            }
+                        else -> emptyList()
+                    }
+                }
+            else -> emptyList()
+        }
+    }.filter {
+        val user =
+            when (val user = it.userResults?.result) {
+                is User -> user.render(accountKey = accountKey)
+                else -> null
+            }
+        user != null && user.key == accountKey
+    }.map {
+        it.render(accountKey = accountKey)
+    }
+
+internal fun TwitterList.render(accountKey: MicroBlogKey): UiList {
+    val user =
+        userResults?.result?.let {
+            when (it) {
+                is User -> it.render(accountKey = accountKey)
+                else -> null
+            }
+        }
+    return UiList(
+        id = idStr.orEmpty(),
+        title = name.orEmpty(),
+        description = description.orEmpty(),
+        platformType = PlatformType.xQt,
+        creator = user,
+        avatar = customBannerMedia?.mediaInfo?.originalImgURL,
+    )
 }

@@ -486,6 +486,14 @@ public sealed interface TimelineTabItem : TabItem {
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.Bookmark, accountKey),
                         ),
                 ),
+                AllListTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.List, accountKey),
+                        ),
+                ),
             )
 
         private fun vvo(accountKey: MicroBlogKey) =

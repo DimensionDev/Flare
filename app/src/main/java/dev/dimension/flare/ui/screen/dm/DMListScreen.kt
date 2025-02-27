@@ -52,8 +52,8 @@ import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.HtmlText
 import dev.dimension.flare.ui.component.RefreshContainer
+import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.ListComponent
 import dev.dimension.flare.ui.model.localizedShortTime
@@ -263,8 +263,8 @@ private fun DMListScreen(
                                                     verticalAlignment = Alignment.CenterVertically,
                                                     modifier = Modifier.weight(1f),
                                                 ) {
-                                                    HtmlText(
-                                                        element = user.name.data,
+                                                    RichText(
+                                                        text = user.name,
                                                         maxLines = 1,
                                                         overflow = TextOverflow.Ellipsis,
                                                     )

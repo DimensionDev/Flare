@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name" translatable="false">Flare</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
 
     <string name="home_compose">Compose</string>
     <string name="home_login">Login</string>
@@ -34,4 +37,45 @@
     <string name="profile_tab_timeline_with_reply">Posts and replies</string>
     <string name="profile_tab_likes">Likes</string>
     <string name="profile_tab_media">Media</string>
+
+    <string name="report_title">Report</string>
+    <string name="report_description">What\'s the issue with this post?</string>
+
+    <string name="report_reason_spam_title">Spam</string>
+    <string name="report_reason_violation_title">Illegal and Urgent</string>
+    <string name="report_reason_misleading_title">Misleading</string>
+    <string name="report_reason_sexual_title">Unwanted Sexual Content</string>
+    <string name="report_reason_rude_title">Anti-Social Behavior</string>
+    <string name="report_reason_other_title">Other</string>
+
+    <string name="report_reason_spam_description">Excessive mentions or replies</string>
+    <string name="report_reason_violation_description">Glaring violations of law or terms of service</string>
+    <string name="report_reason_misleading_description">This post is misleading</string>
+    <string name="report_reason_sexual_description">Nudity or pornography not labeled as such</string>
+    <string name="report_reason_rude_description">Harassment, trolling, or intolerance</string>
+    <string name="report_reason_other_description">An issue not included in these options</string>
+
+    <string name="delete_status_title">Delete</string>
+    <string name="delete_status_message">Are you sure you want to delete this?</string>
+
+    <string name="mastodon_report_title">Report</string>
+    <string name="mastodon_report_description">Are you sure you want to report this?</string>
+
+    <string name="bookmark_remove">Remove bookmark</string>
+    <string name="bookmark_add">Add bookmark</string>
+    <string name="like">Like</string>
+    <string name="unlike">Unlike</string>
+    <string name="more">More</string>
+    <string name="quote">Quote</string>
+    <string name="reaction_add">Add reaction</string>
+    <string name="reaction_remove">Remove reaction</string>
+    <string name="reply">Reply</string>
+    <string name="report">Report</string>
+    <string name="retweet">Retweet</string>
+    <string name="retweet_remove">Remove retweet</string>
+    <string name="status_loadmore_error_retry">Retry</string>
+    <string name="status_detail_comment">Comment</string>
+    <string name="status_detail_repost">Repost</string>
+    <string name="emoji_picker_recent">Recent</string>
+    <string name="emoji_picker_search">Search</string>
 </resources>

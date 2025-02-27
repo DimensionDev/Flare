@@ -16,6 +16,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.konyaco.fluent.component.Text
@@ -28,6 +29,14 @@ import dev.dimension.flare.ui.screen.home.NotificationScreen
 import dev.dimension.flare.ui.screen.home.ProfileScreen
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
+import dev.dimension.flare.ui.screen.status.StatusScreen
+import dev.dimension.flare.ui.screen.status.VVOCommentScreen
+import dev.dimension.flare.ui.screen.status.VVOStatusScreen
+import dev.dimension.flare.ui.screen.status.action.BlueskyReportStatusDialog
+import dev.dimension.flare.ui.screen.status.action.DeleteStatusConfirmDialog
+import dev.dimension.flare.ui.screen.status.action.MastodonReportDialog
+import dev.dimension.flare.ui.screen.status.action.MisskeyReactionSheet
+import dev.dimension.flare.ui.screen.status.action.MisskeyReportDialog
 import kotlinx.collections.immutable.persistentMapOf
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
@@ -109,6 +118,160 @@ internal fun Router(
         }
         screen<Route.Notification> { (_, args) ->
             NotificationScreen(args.accountType)
+        }
+        dialog(AppDeepLink.Bluesky.ReportStatus.ROUTE) {
+            val accountType =
+                it.arguments
+                    ?.getString("accountKey")
+                    ?.let(MicroBlogKey::valueOf)
+                    ?.let(AccountType::Specific)
+            val statusKey =
+                it.arguments
+                    ?.getString("statusKey")
+                    ?.let(MicroBlogKey::valueOf)
+            if (accountType != null && statusKey != null) {
+                BlueskyReportStatusDialog(
+                    accountType = accountType,
+                    statusKey = statusKey,
+                    onBack = navController::navigateUp,
+                )
+            }
+        }
+        dialog(AppDeepLink.DeleteStatus.ROUTE) {
+            val accountType =
+                it.arguments
+                    ?.getString("accountKey")
+                    ?.let(MicroBlogKey::valueOf)
+                    ?.let(AccountType::Specific)
+            val statusKey =
+                it.arguments
+                    ?.getString("statusKey")
+                    ?.let(MicroBlogKey::valueOf)
+            if (accountType != null && statusKey != null) {
+                DeleteStatusConfirmDialog(
+                    accountType = accountType,
+                    statusKey = statusKey,
+                    onBack = navController::navigateUp,
+                )
+            }
+        }
+        dialog(AppDeepLink.Mastodon.ReportStatus.ROUTE) {
+            val accountType =
+                it.arguments
+                    ?.getString("accountKey")
+                    ?.let(MicroBlogKey::valueOf)
+                    ?.let(AccountType::Specific)
+            val statusKey =
+                it.arguments
+                    ?.getString("statusKey")
+                    ?.let(MicroBlogKey::valueOf)
+            val userKey =
+                it.arguments
+                    ?.getString("userKey")
+                    ?.let(MicroBlogKey::valueOf)
+            if (accountType != null && statusKey != null && userKey != null) {
+                MastodonReportDialog(
+                    accountType = accountType,
+                    statusKey = statusKey,
+                    userKey = userKey,
+                    onBack = navController::navigateUp,
+                )
+            }
+        }
+        dialog(AppDeepLink.Misskey.ReportStatus.ROUTE) {
+            val accountType =
+                it.arguments
+                    ?.getString("accountKey")
+                    ?.let(MicroBlogKey::valueOf)
+                    ?.let(AccountType::Specific)
+            val statusKey =
+                it.arguments
+                    ?.getString("statusKey")
+                    ?.let(MicroBlogKey::valueOf)
+            val userKey =
+                it.arguments
+                    ?.getString("userKey")
+                    ?.let(MicroBlogKey::valueOf)
+            if (accountType != null && statusKey != null && userKey != null) {
+                MisskeyReportDialog(
+                    accountType = accountType,
+                    statusKey = statusKey,
+                    userKey = userKey,
+                    onBack = navController::navigateUp,
+                )
+            }
+        }
+        composable(AppDeepLink.StatusDetail.ROUTE) {
+            val statusKey =
+                it.arguments
+                    ?.getString("statusKey")
+                    ?.let(MicroBlogKey::valueOf)
+            val accountKey =
+                it.arguments
+                    ?.getString("accountKey")
+                    ?.let(MicroBlogKey::valueOf)
+                    ?.let(AccountType::Specific)
+            if (statusKey != null && accountKey != null) {
+                StatusScreen(
+                    statusKey = statusKey,
+                    onBack = navController::navigateUp,
+                    accountType = accountKey,
+                )
+            }
+        }
+        composable(AppDeepLink.VVO.CommentDetail.ROUTE) {
+            val statusKey =
+                it.arguments
+                    ?.getString("statusKey")
+                    ?.let(MicroBlogKey::valueOf)
+            val accountKey =
+                it.arguments
+                    ?.getString("accountKey")
+                    ?.let(MicroBlogKey::valueOf)
+                    ?.let(AccountType::Specific)
+            if (statusKey != null && accountKey != null) {
+                VVOCommentScreen(
+                    commentKey = statusKey,
+                    onBack = navController::navigateUp,
+                    accountType = accountKey,
+                )
+            }
+        }
+        composable(AppDeepLink.VVO.StatusDetail.ROUTE) {
+            val statusKey =
+                it.arguments
+                    ?.getString("statusKey")
+                    ?.let(MicroBlogKey::valueOf)
+            val accountKey =
+                it.arguments
+                    ?.getString("accountKey")
+                    ?.let(MicroBlogKey::valueOf)
+                    ?.let(AccountType::Specific)
+            if (statusKey != null && accountKey != null) {
+                VVOStatusScreen(
+                    statusKey = statusKey,
+                    onBack = navController::navigateUp,
+                    accountType = accountKey,
+                )
+            }
+        }
+        composable(AppDeepLink.Misskey.AddReaction.ROUTE) {
+            val statusKey =
+                it.arguments
+                    ?.getString("statusKey")
+                    ?.let(MicroBlogKey::valueOf)
+            val accountKey =
+                it.arguments
+                    ?.getString("accountKey")
+                    ?.let(MicroBlogKey::valueOf)
+                    ?.let(AccountType::Specific)
+            if (statusKey != null && accountKey != null) {
+                MisskeyReactionSheet(
+                    statusKey = statusKey,
+                    accountType = accountKey,
+                    onBack = navController::navigateUp,
+                )
+            }
         }
     }
 }

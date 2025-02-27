@@ -34,6 +34,7 @@ import dev.dimension.flare.Res
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.profile_tab_likes
 import dev.dimension.flare.profile_tab_media
 import dev.dimension.flare.profile_tab_timeline
 import dev.dimension.flare.profile_tab_timeline_with_reply
@@ -243,7 +244,7 @@ private val ProfileState.Tab.title: StringResource
                 when (type) {
                     ProfileTab.Timeline.Type.Status -> Res.string.profile_tab_timeline
                     ProfileTab.Timeline.Type.StatusWithReplies -> Res.string.profile_tab_timeline_with_reply
-                    ProfileTab.Timeline.Type.Likes -> Res.string.profile_tab_media
+                    ProfileTab.Timeline.Type.Likes -> Res.string.profile_tab_likes
                 }
         }
 

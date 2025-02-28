@@ -39,7 +39,7 @@
     <string name="profile_tab_media">Media</string>
 
     <string name="report_title">Report</string>
-    <string name="report_description">What\'s the issue with this post?</string>
+    <string name="report_description">What's the issue with this post?</string>
 
     <string name="report_reason_spam_title">Spam</string>
     <string name="report_reason_violation_title">Illegal and Urgent</string>
@@ -78,4 +78,9 @@
     <string name="status_detail_repost">Repost</string>
     <string name="emoji_picker_recent">Recent</string>
     <string name="emoji_picker_search">Search</string>
+
+    <string name="media_show_thumbnail_list">Show thumbnail list</string>
+    <string name="media_hide_thumbnail_list">Hide thumbnail list</string>
+    <string name="media_save">Save</string>
+    <string name="media_fullscreen">Fullscreen</string>
 </resources>

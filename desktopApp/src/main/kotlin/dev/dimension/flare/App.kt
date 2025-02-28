@@ -60,6 +60,8 @@ import dev.dimension.flare.data.model.SettingsTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TimelineTabItem
+import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TabIcon
@@ -74,6 +76,7 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Router
+import io.ktor.http.Url
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -81,7 +84,11 @@ import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun FlareApp(navController: NavHostController = rememberNavController()) {
+internal fun FlareApp(
+    onRawImage: (String) -> Unit,
+    onStatusMedia: (AccountType, MicroBlogKey, Int) -> Unit,
+    navController: NavHostController = rememberNavController(),
+) {
     val state by producePresenter { presenter() }
     val bigScreen = isBigScreen()
     val displayMode =
@@ -286,7 +293,12 @@ internal fun FlareApp(navController: NavHostController = rememberNavController()
             CompositionLocalProvider(
                 LocalUriHandler provides
                     remember {
-                        ProxyUriHandler(navController, uriHandler)
+                        ProxyUriHandler(
+                            navController = navController,
+                            actualUriHandler = uriHandler,
+                            onRawImage = onRawImage,
+                            onStatusMedia = onStatusMedia,
+                        )
                     },
                 LocalTabState provides currentTab?.tabState,
             ) {
@@ -324,10 +336,30 @@ private fun presenter() =
 private class ProxyUriHandler(
     private val navController: NavController,
     private val actualUriHandler: UriHandler,
+    private val onRawImage: (String) -> Unit,
+    private val onStatusMedia: (AccountType, MicroBlogKey, Int) -> Unit,
 ) : UriHandler {
     override fun openUri(uri: String) {
         if (uri.startsWith("flare://")) {
-            navController.navigate(uri)
+            val data = Url(uri)
+            when (data.host) {
+                "RawImage" -> {
+                    val rawImage = data.segments.getOrNull(0)
+                    if (rawImage != null) {
+                        onRawImage(rawImage)
+                    }
+                }
+                "StatusMedia" -> {
+                    val accountKey = data.parameters["accountKey"]?.let(MicroBlogKey::valueOf)
+                    val statusKey = data.segments.getOrNull(0)?.let(MicroBlogKey::valueOf)
+                    val index = data.segments.getOrNull(1)?.toIntOrNull()
+                    val accountType = accountKey?.let(AccountType::Specific) ?: AccountType.Guest
+                    if (statusKey != null && index != null) {
+                        onStatusMedia(accountType, statusKey, index)
+                    }
+                }
+                else -> navController.navigate(uri)
+            }
         } else {
             actualUriHandler.openUri(uri)
         }

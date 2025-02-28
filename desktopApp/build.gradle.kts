@@ -33,6 +33,7 @@ dependencies {
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
     implementation(libs.commons.lang3)
+    implementation(libs.zoomable)
 }
 
 compose.desktop {

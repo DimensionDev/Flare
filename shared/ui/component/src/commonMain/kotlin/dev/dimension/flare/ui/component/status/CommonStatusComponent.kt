@@ -41,6 +41,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -551,7 +552,7 @@ private fun StatusActions(
                         action.actions.forEach { subActions ->
                             when (subActions) {
                                 is StatusAction.Item -> {
-                                    StatusActionItemMenu(subActions, closeMenu)
+                                    StatusActionItemMenu(subActions, closeMenu, launcher)
                                 }
 
                                 is StatusAction.AsyncActionItem -> {
@@ -559,7 +560,7 @@ private fun StatusActions(
                                         val state by subActions.flow.collectAsUiState()
                                         state
                                             .onSuccess {
-                                                StatusActionItemMenu(it, closeMenu)
+                                                StatusActionItemMenu(it, closeMenu, launcher)
                                             }.onLoading {
                                                 PlatformDropdownMenuItem(
                                                     text = {
@@ -634,8 +635,8 @@ private fun StatusActions(
 private fun PlatformDropdownMenuScope.StatusActionItemMenu(
     subActions: StatusAction.Item,
     closeMenu: () -> Unit,
+    launcher: UriHandler,
 ) {
-    val launcher = LocalUriHandler.current
     val color = statusActionItemColor(subActions)
     PlatformDropdownMenuItem(
         leadingIcon = {

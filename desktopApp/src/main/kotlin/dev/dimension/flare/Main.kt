@@ -3,6 +3,7 @@ package dev.dimension.flare
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -20,6 +21,9 @@ import coil3.request.crossfade
 import com.jthemedetecor.OsThemeDetector
 import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.di.desktopModule
+import dev.dimension.flare.ui.route.FloatingWindowState
+import dev.dimension.flare.ui.route.WindowRoute
+import dev.dimension.flare.ui.route.WindowRouter
 import dev.dimension.flare.ui.theme.FlareTheme
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.painterResource
@@ -41,11 +45,21 @@ fun main(args: Array<String>) {
                 .crossfade(true)
                 .build()
         }
-        val state =
-            rememberWindowState(
-                position = WindowPosition(Alignment.Center),
-                size = DpSize(1280.dp, 720.dp),
-            )
+        val extraWindowRoutes = remember { mutableStateMapOf<String, FloatingWindowState>() }
+
+        fun openWindow(
+            key: String,
+            route: WindowRoute,
+        ) {
+            if (extraWindowRoutes.containsKey(key)) {
+                extraWindowRoutes[key]?.bringToFront?.invoke()
+            } else {
+                extraWindowRoutes.put(
+                    key,
+                    FloatingWindowState(route),
+                )
+            }
+        }
         var isDarkTheme by remember {
             mutableStateOf(detector.isDark)
         }
@@ -73,15 +87,60 @@ fun main(args: Array<String>) {
             onCloseRequest = ::exitApplication,
             title = stringResource(Res.string.app_name),
             icon = painterResource(Res.drawable.flare_logo),
-            state = state,
+            state =
+                rememberWindowState(
+                    position = WindowPosition(Alignment.Center),
+                    size = DpSize(1280.dp, 720.dp),
+                ),
         ) {
             FlareTheme(
                 isDarkTheme = isDarkTheme,
             ) {
                 FlareApp(
                     navController = navController,
+                    onRawImage = { url ->
+                        openWindow(
+                            url,
+                            WindowRoute.RawImage(url),
+                        )
+                    },
+                    onStatusMedia = { accountType, statusKey, index ->
+                        openWindow(
+                            "$accountType/$statusKey",
+                            WindowRoute.StatusMedia(
+                                accountType = accountType,
+                                statusKey = statusKey,
+                                index = index,
+                            ),
+                        )
+                    },
                 )
             }
+        }
+
+        extraWindowRoutes.forEach { (key, value) ->
+            Window(
+                title = stringResource(Res.string.app_name),
+                icon = painterResource(Res.drawable.flare_logo),
+                onCloseRequest = {
+                    extraWindowRoutes.remove(key)
+                },
+                content = {
+                    LaunchedEffect(key) {
+                        value.bringToFront = {
+                            window.toFront()
+                        }
+                    }
+                    FlareTheme(isDarkTheme = isDarkTheme) {
+                        WindowRouter(
+                            route = value.route,
+                            onBack = {
+                                extraWindowRoutes.remove(key)
+                            },
+                        )
+                    }
+                },
+            )
         }
     }
 }

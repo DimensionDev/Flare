@@ -54,6 +54,7 @@ import compose.icons.fontawesomeicons.solid.CircleQuestion
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
@@ -91,6 +92,9 @@ import moe.tlaster.precompose.molecule.producePresenter
     deepLinks = [
         DeepLink(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+        ),
+        DeepLink(
+            uriPattern = AppDeepLink.LOGIN,
         ),
     ],
 )

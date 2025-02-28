@@ -61,7 +61,7 @@ private class IOSIndication(
     override fun create(interactionSource: InteractionSource): DelegatableNode =
         DefaultDebugIndicationInstance(interactionSource, color = color)
 
-    override fun hashCode(): Int = -1
+    override fun hashCode(): Int = color.hashCode()
 
     override fun equals(other: Any?) = other === this
 

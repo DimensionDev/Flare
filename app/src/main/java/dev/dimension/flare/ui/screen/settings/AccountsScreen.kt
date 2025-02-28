@@ -44,7 +44,7 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
@@ -180,7 +180,7 @@ fun <T : UiUserV2> AccountItem(
     modifier: Modifier = Modifier,
     trailingContent: @Composable (UiUserV2) -> Unit = { },
     headlineContent: @Composable (UiUserV2) -> Unit = {
-        HtmlText(element = it.name.data, maxLines = 1)
+        RichText(text = it.name, maxLines = 1)
     },
     supportingContent: @Composable (UiUserV2) -> Unit = {
         Text(text = it.handle, maxLines = 1)

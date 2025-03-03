@@ -115,9 +115,10 @@ extension FLNewGestureRecognizer: UIGestureRecognizerDelegate {
         _: UIGestureRecognizer,
         shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer
     ) -> Bool {
-        // 不允许与滚动视图手势同时识别
+        // 不允许与滚动视图手势或导航手势同时识别
         if otherGestureRecognizer is UIPanGestureRecognizer ||
-            otherGestureRecognizer.view is UIScrollView
+            otherGestureRecognizer.view is UIScrollView ||
+            otherGestureRecognizer is UIScreenEdgePanGestureRecognizer
         {
             return false
         }
@@ -132,10 +133,40 @@ extension FLNewGestureRecognizer: UIGestureRecognizerDelegate {
         if otherGestureRecognizer is UIScreenEdgePanGestureRecognizer {
             return true
         }
+        
+        // 判断是否是导航返回手势
+        if let view = otherGestureRecognizer.view {
+            // 检查手势是否属于导航控制器
+            var current: UIResponder? = view
+            while let responder = current {
+                if responder is UINavigationController {
+                    os_log("[🖐️][Gesture] Navigation controller found in responder chain, giving priority to system gesture",
+                           log: .default, type: .debug)
+                    return true
+                }
+                current = responder.next
+            }
+            
+            // 检查手势类型
+            if String(describing: type(of: otherGestureRecognizer)).contains("NavigationTransition") ||
+               String(describing: type(of: otherGestureRecognizer)).contains("BackGesture") {
+                os_log("[🖐️][Gesture] Navigation gesture detected, giving it priority",
+                       log: .default, type: .debug)
+                return true
+            }
+        }
+        
         return false
     }
 
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        // 获取AppState中的状态
+        if !gestureState.isGestureEnabled {
+            os_log("[🖐️][Gesture] Gesture disabled in AppState, rejecting",
+                   log: .default, type: .debug)
+            return false
+        }
+        
         // 额外的开始条件检查
         guard let panGesture = gestureRecognizer as? UIPanGestureRecognizer else {
             return true

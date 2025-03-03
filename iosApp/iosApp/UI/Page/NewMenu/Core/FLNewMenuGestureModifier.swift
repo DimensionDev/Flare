@@ -1,9 +1,22 @@
 import os
 import SwiftUI
 
+// 自定义环境key用于检测导航层级
+struct NavigationLevelKey: EnvironmentKey {
+    static let defaultValue: Int = 0
+}
+
+extension EnvironmentValues {
+    var navigationLevel: Int {
+        get { self[NavigationLevelKey.self] }
+        set { self[NavigationLevelKey.self] = newValue }
+    }
+}
+
 struct FLNewMenuGestureModifier: ViewModifier {
     @ObservedObject var appState: FLNewAppState
     @State private var currentAppBarIndex: Int = 0
+    @Environment(\.navigationLevel) private var navigationLevel
 
     // 添加判断向右滑动的方法
     private func isValidRightSwipe(_ value: DragGesture.Value) -> Bool {
@@ -27,11 +40,10 @@ struct FLNewMenuGestureModifier: ViewModifier {
         content.simultaneousGesture(
             DragGesture(minimumDistance: 10, coordinateSpace: .local)
                 .onChanged { value in
-
-                    // 在第一个 tab 时才处理菜单手势
-                    if currentAppBarIndex > 0 {
-//                        os_log("[🖐️][GestureModifier] Drag ignored - not first appbar item",
-//                               log: .default, type: .debug)
+                    // 如果在导航详情页或者不是第一个tab，不处理手势
+                    if currentAppBarIndex > 0 || navigationLevel > 0 || appState.isInNavigationDetail {
+                        os_log("[🖐️][GestureModifier] Drag ignored - not first tab, in navigation stack, or in detail page",
+                               log: .default, type: .debug)
                         return
                     }
 
@@ -45,9 +57,8 @@ struct FLNewMenuGestureModifier: ViewModifier {
                     handleDragChange(value)
                 }
                 .onEnded { value in
-
-                    // 在第一个 tab 时才处理菜单手势
-                    if currentAppBarIndex > 0 {
+                    // 如果在导航详情页或者不是第一个tab，不处理手势
+                    if currentAppBarIndex > 0 || navigationLevel > 0 || appState.isInNavigationDetail {
                         return
                     }
 
@@ -75,6 +86,12 @@ struct FLNewMenuGestureModifier: ViewModifier {
             os_log("[🖐️][GestureModifier] Gesture not enabled", log: .default, type: .debug)
             return
         }
+        
+        // 在导航栈中不处理手势
+        if navigationLevel > 0 {
+            os_log("[🖐️][GestureModifier] Gesture ignored - in navigation stack", log: .default, type: .debug)
+            return
+        }
 
         let translation = value.translation
         let velocity = value.predictedEndTranslation.width - value.translation.width
@@ -91,6 +108,12 @@ struct FLNewMenuGestureModifier: ViewModifier {
     }
 
     private func handleDragEnd(_ value: DragGesture.Value) {
+        // 在导航栈中不处理手势
+        if navigationLevel > 0 {
+            os_log("[🖐️][GestureModifier] Gesture end ignored - in navigation stack", log: .default, type: .debug)
+            return
+        }
+        
         let translation = value.translation.width
         let velocity = value.predictedEndTranslation.width - value.translation.width
 

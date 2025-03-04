@@ -470,6 +470,7 @@ class ProfileNewHeaderView: UIView {
                     Markdown(text)
                         .font(.caption2)
                         .markdownInlineImageProvider(.emoji)
+                        .lineLimit(1)
                 },
                 icon: {
                     Image(uiImage: icon.withRenderingMode(.alwaysTemplate))
@@ -481,6 +482,47 @@ class ProfileNewHeaderView: UIView {
             .padding(.vertical, 4)
             .background(Color(.systemGray6))
             .cornerRadius(6)
+            .onLongPressGesture {
+                // 复制文本到剪贴板
+                UIPasteboard.general.string = text
+                
+                // 显示复制成功提示
+                let generator = UINotificationFeedbackGenerator()
+                generator.notificationOccurred(.success)
+                
+                // 显示提示消息
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let window = windowScene.windows.first {
+                    let toast = UILabel()
+                    toast.text = "copy to clipboard"
+                    toast.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+                    toast.textColor = .white
+                    toast.textAlignment = .center
+                    toast.font = UIFont.systemFont(ofSize: 14)
+                    toast.layer.cornerRadius = 10
+                    toast.clipsToBounds = true
+                    toast.alpha = 0
+                    
+                    window.addSubview(toast)
+                    toast.translatesAutoresizingMaskIntoConstraints = false
+                    NSLayoutConstraint.activate([
+                        toast.centerXAnchor.constraint(equalTo: window.centerXAnchor),
+                        toast.bottomAnchor.constraint(equalTo: window.safeAreaLayoutGuide.bottomAnchor, constant: -50),
+                        toast.widthAnchor.constraint(greaterThanOrEqualToConstant: 150),
+                        toast.heightAnchor.constraint(equalToConstant: 40)
+                    ])
+                    
+                    UIView.animate(withDuration: 0.3, animations: {
+                        toast.alpha = 1
+                    }, completion: { _ in
+                        UIView.animate(withDuration: 0.3, delay: 1.5, options: [], animations: {
+                            toast.alpha = 0
+                        }, completion: { _ in
+                            toast.removeFromSuperview()
+                        })
+                    })
+                }
+            }
         )
         hostingController.view.sizeToFit()
         return hostingController.view

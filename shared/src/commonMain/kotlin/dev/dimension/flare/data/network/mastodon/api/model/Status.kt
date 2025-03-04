@@ -43,4 +43,10 @@ internal data class Status(
     val card: Card? = null,
     val poll: Poll? = null,
     val pinned: Boolean? = null,
+    // compatibility layer for Pleroma/Akkoma
+    @SerialName("emoji_reactions")
+    val emojiReactions: List<EmojiReaction>? = null,
+    // compatibility layer for Pleroma/Akkoma
+    @SerialName("quotes_count")
+    val quotesCount: Long? = null,
 )

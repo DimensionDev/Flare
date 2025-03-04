@@ -27,6 +27,14 @@ internal sealed interface StatusEvent {
         )
     }
 
+    interface Pleroma : Mastodon {
+        fun react(
+            statusKey: MicroBlogKey,
+            hasReacted: Boolean,
+            reaction: String,
+        )
+    }
+
     interface Misskey : StatusEvent {
         fun react(
             statusKey: MicroBlogKey,

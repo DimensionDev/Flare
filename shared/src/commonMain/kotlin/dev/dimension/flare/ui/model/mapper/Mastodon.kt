@@ -182,6 +182,8 @@ private fun Status.renderStatus(
     val actualUser = account.render(accountKey, host)
     val isFromMe = actualUser.key == accountKey
     val canReblog = visibility in listOf(Visibility.Public, Visibility.Unlisted) || (isFromMe && visibility != Visibility.Direct)
+    val canQuote = canReblog && dataSource is StatusEvent.Pleroma
+    val canReact = dataSource is StatusEvent.Pleroma
     val statusKey =
         MicroBlogKey(
             id = id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
@@ -193,7 +195,31 @@ private fun Status.renderStatus(
             Visibility.Unlisted -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home
             Visibility.Private -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers
             Visibility.Direct -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified
+            Visibility.List -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers
+            Visibility.Local -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home
             null -> null
+        }
+    val bottomContent =
+        if (!emojiReactions.isNullOrEmpty()) {
+            UiTimeline.ItemContent.Status.BottomContent.Reaction(
+                emojiReactions
+                    .map {
+                        UiTimeline.ItemContent.Status.BottomContent.Reaction.EmojiReaction(
+                            name = it.name.orEmpty(),
+                            count = it.count ?: 0,
+                            me = it.me ?: false,
+                            url = it.url.orEmpty(),
+                            isUnicode = it.url.isNullOrEmpty(),
+                            onClicked = {
+                                if (dataSource is StatusEvent.Pleroma) {
+                                    dataSource.react(statusKey, true, it.name.orEmpty())
+                                }
+                            },
+                        )
+                    }.toImmutableList(),
+            )
+        } else {
+            null
         }
     return UiTimeline.ItemContent.Status(
         images =
@@ -244,6 +270,21 @@ private fun Status.renderStatus(
                             )
                         },
                     ),
+                    if (canQuote) {
+                        StatusAction.Item.Quote(
+                            count = quotesCount ?: 0,
+                            onClicked = {
+                                launcher.launch(
+                                    AppDeepLink.Compose.Quote(
+                                        accountKey = accountKey,
+                                        statusKey = statusKey,
+                                    ),
+                                )
+                            },
+                        )
+                    } else {
+                        null
+                    },
                     if (canReblog) {
                         StatusAction.Item.Retweet(
                             count = reblogsCount ?: 0,
@@ -262,6 +303,21 @@ private fun Status.renderStatus(
                             dataSource.like(statusKey, favourited ?: false)
                         },
                     ),
+                    if (canReact) {
+                        StatusAction.Item.Reaction(
+                            reacted = false,
+                            onClicked = {
+                                launcher.launch(
+                                    AppDeepLink.AddReaction(
+                                        accountKey = accountKey,
+                                        statusKey = statusKey,
+                                    ),
+                                )
+                            },
+                        )
+                    } else {
+                        null
+                    },
                     StatusAction.Group(
                         displayItem = StatusAction.Item.More,
                         actions =
@@ -369,6 +425,7 @@ private fun Status.renderStatus(
                 ),
             )
         },
+        bottomContent = bottomContent,
     )
 }
 
@@ -518,12 +575,7 @@ internal fun DbEmoji.toUi(): List<UiEmoji> =
 
         is EmojiContent.Misskey -> {
             content.data.map {
-                UiEmoji(
-                    shortcode = it.name,
-                    url = it.url,
-                    category = it.category.orEmpty(),
-                    searchKeywords = it.aliases + it.name,
-                )
+                it.toUi()
             }
         }
     }

@@ -30,12 +30,18 @@ internal data object NodeInfoService {
             "http://nodeinfo.diaspora.software/ns/schema/2.1",
         )
 
+    internal val pleromaNodeInfoName =
+        listOf(
+            "pleroma",
+            "akkoma",
+        )
+
     private val mastodonNodeInfoName =
         listOf(
             "mastodon",
             "kmyblue",
             "fedibird",
-        )
+        ) + pleromaNodeInfoName
 
     private val misskeyNodeInfoName =
         listOf(

@@ -19,7 +19,7 @@ import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.status.action.MisskeyReactionPresenter
+import dev.dimension.flare.ui.presenter.status.action.AddReactionPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -30,18 +30,18 @@ import moe.tlaster.precompose.molecule.producePresenter
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
         DeepLink(
-            uriPattern = AppDeepLink.Misskey.AddReaction.ROUTE,
+            uriPattern = AppDeepLink.AddReaction.ROUTE,
         ),
     ],
     wrappers = [ThemeWrapper::class],
 )
 @Composable
-internal fun MisskeyReactionRoute(
+internal fun AddReactionRoute(
     statusKey: MicroBlogKey,
     accountKey: MicroBlogKey,
     navigator: DestinationsNavigator,
 ) {
-    MisskeyReactionSheet(
+    AddReactionSheet(
         statusKey = statusKey,
         onBack = navigator::navigateUp,
         accountType = AccountType.Specific(accountKey),
@@ -49,14 +49,14 @@ internal fun MisskeyReactionRoute(
 }
 
 @Composable
-private fun MisskeyReactionSheet(
+private fun AddReactionSheet(
     statusKey: MicroBlogKey,
     accountType: AccountType,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val state by producePresenter("MisskeyReactionSheet_${accountType}_$statusKey") {
-        misskeyReactionPresenter(
+    val state by producePresenter("AddReactionSheet_${accountType}_$statusKey") {
+        presenter(
             statusKey = statusKey,
             accountType = accountType,
         )
@@ -80,12 +80,12 @@ private fun MisskeyReactionSheet(
 }
 
 @Composable
-private fun misskeyReactionPresenter(
+private fun presenter(
     statusKey: MicroBlogKey,
     accountType: AccountType,
 ) = run {
     remember(statusKey, accountType) {
-        MisskeyReactionPresenter(
+        AddReactionPresenter(
             accountType = accountType,
             statusKey = statusKey,
         )

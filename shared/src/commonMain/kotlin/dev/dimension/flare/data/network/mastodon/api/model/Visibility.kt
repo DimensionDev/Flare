@@ -16,4 +16,12 @@ internal enum class Visibility {
 
     @SerialName("direct")
     Direct,
+
+    // compatibility layer for Pleroma/Akkoma
+    @SerialName("list")
+    List,
+
+    // compatibility layer for Pleroma/Akkoma
+    @SerialName("local")
+    Local,
 }

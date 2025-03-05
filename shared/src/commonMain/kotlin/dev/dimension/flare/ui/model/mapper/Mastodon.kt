@@ -35,7 +35,6 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Instant
-import kotlin.collections.orEmpty
 
 internal fun Notification.render(
     accountKey: MicroBlogKey,
@@ -183,7 +182,9 @@ private fun Status.renderStatus(
     val isFromMe = actualUser.key == accountKey
     val canReblog = visibility in listOf(Visibility.Public, Visibility.Unlisted) || (isFromMe && visibility != Visibility.Direct)
     val canQuote = canReblog && dataSource is StatusEvent.Pleroma
-    val canReact = dataSource is StatusEvent.Pleroma
+//    val canReact = dataSource is StatusEvent.Pleroma
+    // TODO: there are too many actions for Pleroma, disable for now
+    val canReact = false
     val statusKey =
         MicroBlogKey(
             id = id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
@@ -221,6 +222,7 @@ private fun Status.renderStatus(
         } else {
             null
         }
+    val quoteStatus = quote?.renderStatus(host, accountKey, dataSource)
     return UiTimeline.ItemContent.Status(
         images =
             mediaAttachments
@@ -235,7 +237,7 @@ private fun Status.renderStatus(
                     }.toUi()
             },
         user = actualUser,
-        quote = persistentListOf(),
+        quote = listOfNotNull(quoteStatus).toImmutableList(),
         content = parseMastodonContent(this, accountKey, host).toUi(),
         card =
             card?.url?.let { url ->

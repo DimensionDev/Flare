@@ -49,4 +49,7 @@ internal data class Status(
     // compatibility layer for Pleroma/Akkoma
     @SerialName("quotes_count")
     val quotesCount: Long? = null,
+    // compatibility layer for Pleroma/Akkoma
+    @SerialName("quote")
+    val quote: Status? = null,
 )

@@ -415,6 +415,13 @@ internal open class MastodonDataSource(
                     it as? ComposeStatus.Reply
                 }?.statusKey
                 ?.id
+        val quoteID =
+            data.referenceStatus
+                ?.composeStatus
+                ?.let {
+                    it as? ComposeStatus.Quote
+                }?.statusKey
+                ?.id
         val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias
@@ -452,6 +459,7 @@ internal open class MastodonDataSource(
                             multiple = poll.multiple,
                         )
                     },
+                quoteID = quoteID,
             ),
         )
         progress(ComposeProgress(maxProgress, maxProgress))

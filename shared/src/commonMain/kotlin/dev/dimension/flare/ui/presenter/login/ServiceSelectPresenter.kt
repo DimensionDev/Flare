@@ -134,7 +134,7 @@ public class ServiceSelectPresenter(
             }
 
             override fun resume(url: String) {
-                code = url.substringAfter("code=")
+                code = url.substringAfter("code=").substringBeforeLast('&')
             }
         }
     }

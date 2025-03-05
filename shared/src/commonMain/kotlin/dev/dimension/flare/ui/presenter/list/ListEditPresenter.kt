@@ -20,6 +20,9 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+/**
+ * Presenter for editing lists.
+ */
 public class ListEditPresenter(
     private val accountType: AccountType,
     private val listId: String,

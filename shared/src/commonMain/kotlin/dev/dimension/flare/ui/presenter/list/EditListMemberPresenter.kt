@@ -26,6 +26,10 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+/**
+ * Presenter for editing list members.
+ * This presenter should be used for managing list members.
+ */
 public class EditListMemberPresenter(
     private val accountType: AccountType,
     private val listId: String,
@@ -89,8 +93,16 @@ public class EditListMemberPresenter(
 
 @Immutable
 public interface EditListMemberState {
+    /**
+     * Users that can be added to the list.
+     * This is a combination of search results and the current list members.
+     * pair.first is the user, pair.second is true if the user is already a member of the list.
+     */
     public val users: PagingState<Pair<UiUserV2, Boolean>>
 
+    /**
+     * Set the filter for searching users.
+     */
     public fun setFilter(value: String)
 
     public fun addMember(userKey: MicroBlogKey)

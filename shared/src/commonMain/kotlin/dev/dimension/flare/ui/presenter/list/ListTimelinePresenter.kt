@@ -16,6 +16,9 @@ import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+/**
+ * Presenter for retrieving list timeline.
+ */
 public class ListTimelinePresenter(
     private val accountType: AccountType,
     private val listId: String,

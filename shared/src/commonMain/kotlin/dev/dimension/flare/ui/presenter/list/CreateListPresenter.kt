@@ -16,6 +16,9 @@ import kotlinx.collections.immutable.ImmutableList
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+/**
+ * Presenter for creating lists.
+ */
 public class CreateListPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<CreateListState>(),

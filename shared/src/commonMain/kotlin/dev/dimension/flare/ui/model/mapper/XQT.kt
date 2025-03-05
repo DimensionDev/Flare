@@ -721,12 +721,7 @@ internal fun List<InstructionUnion>.list(accountKey: MicroBlogKey): List<UiList>
             else -> emptyList()
         }
     }.filter {
-        val user =
-            when (val user = it.userResults?.result) {
-                is User -> user.render(accountKey = accountKey)
-                else -> null
-            }
-        user != null && user.key == accountKey
+        it.following == true
     }.map {
         it.render(accountKey = accountKey)
     }
@@ -745,6 +740,7 @@ internal fun TwitterList.render(accountKey: MicroBlogKey): UiList {
         description = description.orEmpty(),
         platformType = PlatformType.xQt,
         creator = user,
-        avatar = customBannerMedia?.mediaInfo?.originalImgURL,
+        avatar = customBannerMedia?.mediaInfo?.originalImgURL ?: defaultBannerMedia?.mediaInfo?.originalImgURL,
+        readonly = user?.key != accountKey,
     )
 }

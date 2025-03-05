@@ -485,14 +485,15 @@ class ProfileNewHeaderView: UIView {
             .onLongPressGesture {
                 // 复制文本到剪贴板
                 UIPasteboard.general.string = text
-                
+
                 // 显示复制成功提示
                 let generator = UINotificationFeedbackGenerator()
                 generator.notificationOccurred(.success)
-                
+
                 // 显示提示消息
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let window = windowScene.windows.first {
+                   let window = windowScene.windows.first
+                {
                     let toast = UILabel()
                     toast.text = "copy to clipboard"
                     toast.backgroundColor = UIColor.black.withAlphaComponent(0.7)
@@ -502,16 +503,16 @@ class ProfileNewHeaderView: UIView {
                     toast.layer.cornerRadius = 10
                     toast.clipsToBounds = true
                     toast.alpha = 0
-                    
+
                     window.addSubview(toast)
                     toast.translatesAutoresizingMaskIntoConstraints = false
                     NSLayoutConstraint.activate([
                         toast.centerXAnchor.constraint(equalTo: window.centerXAnchor),
                         toast.bottomAnchor.constraint(equalTo: window.safeAreaLayoutGuide.bottomAnchor, constant: -50),
                         toast.widthAnchor.constraint(greaterThanOrEqualToConstant: 150),
-                        toast.heightAnchor.constraint(equalToConstant: 40)
+                        toast.heightAnchor.constraint(equalToConstant: 40),
                     ])
-                    
+
                     UIView.animate(withDuration: 0.3, animations: {
                         toast.alpha = 1
                     }, completion: { _ in

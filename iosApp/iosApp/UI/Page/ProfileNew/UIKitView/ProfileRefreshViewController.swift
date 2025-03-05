@@ -173,7 +173,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 配置头部视图 - 只设置宽度，让高度自适应
         userHeaderView = ProfileNewHeaderView(frame: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 0))
- 
+
         // 新的配置代码
         if let userInfo {
             userHeaderView?.configure(with: userInfo, state: state)

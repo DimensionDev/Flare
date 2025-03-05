@@ -133,7 +133,7 @@ extension FLNewGestureRecognizer: UIGestureRecognizerDelegate {
         if otherGestureRecognizer is UIScreenEdgePanGestureRecognizer {
             return true
         }
-        
+
         // 判断是否是导航返回手势
         if let view = otherGestureRecognizer.view {
             // 检查手势是否属于导航控制器
@@ -146,16 +146,17 @@ extension FLNewGestureRecognizer: UIGestureRecognizerDelegate {
                 }
                 current = responder.next
             }
-            
+
             // 检查手势类型
             if String(describing: type(of: otherGestureRecognizer)).contains("NavigationTransition") ||
-               String(describing: type(of: otherGestureRecognizer)).contains("BackGesture") {
+                String(describing: type(of: otherGestureRecognizer)).contains("BackGesture")
+            {
                 os_log("[🖐️][Gesture] Navigation gesture detected, giving it priority",
                        log: .default, type: .debug)
                 return true
             }
         }
-        
+
         return false
     }
 
@@ -166,7 +167,7 @@ extension FLNewGestureRecognizer: UIGestureRecognizerDelegate {
                    log: .default, type: .debug)
             return false
         }
-        
+
         // 额外的开始条件检查
         guard let panGesture = gestureRecognizer as? UIPanGestureRecognizer else {
             return true

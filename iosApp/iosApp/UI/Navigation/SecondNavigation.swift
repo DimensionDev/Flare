@@ -1,5 +1,5 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 /// 二级导航页面修饰符
 /// 用于处理二级页面的导航手势和菜单手势冲突
@@ -7,7 +7,7 @@ struct SecondNavigation: ViewModifier {
     @EnvironmentObject private var menuState: FLNewAppState
     @Environment(\.dismiss) private var dismiss
     @GestureState private var dragOffset: CGFloat = 0
-    
+
     func body(content: Content) -> some View {
         content
             // 设置导航层级
@@ -44,10 +44,11 @@ struct SecondNavigation: ViewModifier {
 }
 
 // MARK: - 视图扩展
+
 extension View {
     /// 将视图标记为二级导航页面
     /// 自动处理手势冲突和返回手势
     func secondNavigation() -> some View {
         modifier(SecondNavigation())
     }
-} 
+}

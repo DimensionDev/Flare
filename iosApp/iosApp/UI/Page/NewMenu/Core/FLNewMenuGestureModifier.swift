@@ -86,7 +86,7 @@ struct FLNewMenuGestureModifier: ViewModifier {
             os_log("[🖐️][GestureModifier] Gesture not enabled", log: .default, type: .debug)
             return
         }
-        
+
         // 在导航栈中不处理手势
         if navigationLevel > 0 {
             os_log("[🖐️][GestureModifier] Gesture ignored - in navigation stack", log: .default, type: .debug)
@@ -113,7 +113,7 @@ struct FLNewMenuGestureModifier: ViewModifier {
             os_log("[🖐️][GestureModifier] Gesture end ignored - in navigation stack", log: .default, type: .debug)
             return
         }
-        
+
         let translation = value.translation.width
         let velocity = value.predictedEndTranslation.width - value.translation.width
 

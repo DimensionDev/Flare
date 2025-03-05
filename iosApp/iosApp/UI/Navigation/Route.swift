@@ -65,7 +65,7 @@ struct RouterView: View {
                         }
                         .environmentObject(menuState) // 将menuState作为环境对象传递给子视图
                         #if os(macOS)
-                        .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
+                            .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
                         #endif
                     } else {
                         ProgressView()
@@ -114,7 +114,7 @@ struct TabItem<Content: View>: View {
     @State var router = Router()
     let content: (Router) -> Content
     @EnvironmentObject private var menuState: FLNewAppState
-    
+
     var body: some View {
         NavigationStack(path: $router.navPath) {
             content(router)
@@ -204,7 +204,7 @@ struct TabItem<Content: View>: View {
                 tabStore: ProfileTabSettingStore(userKey: data.userKey)
             )
         case let .profileWithNameAndHost(data):
-           
+
             ProfileWithUserNameScreen(
                 accountType: data.accountType,
                 userName: data.userName,

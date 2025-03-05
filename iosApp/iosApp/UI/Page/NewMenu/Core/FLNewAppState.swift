@@ -5,7 +5,7 @@ class FLNewAppState: ObservableObject {
     // - Published Properties
     @Published var isMenuOpen: Bool
     @Published var currentTab: Int
-    
+
     // 添加一个新属性用于标记当前是否在导航页面
     @Published var isInNavigationDetail: Bool = false
 
@@ -150,7 +150,7 @@ class FLNewAppState: ObservableObject {
         // 禁用手势
         gestureState.isGestureEnabled = false
     }
-    
+
     // 添加新方法：离开导航详情页
     func leaveNavigationDetail() {
         isInNavigationDetail = false

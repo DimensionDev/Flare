@@ -60,6 +60,5 @@ struct ProfileWithUserNameScreen: View {
                 }
             }
         }
-       
     }
 }

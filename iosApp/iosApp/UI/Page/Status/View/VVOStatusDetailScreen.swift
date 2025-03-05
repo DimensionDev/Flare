@@ -6,7 +6,7 @@ struct VVOStatusDetailScreen: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @State private var type: DetailStatusType = .comment
     private let statusKey: MicroBlogKey
-    
+
     // 获取全局的AppState
     @EnvironmentObject private var menuState: FLNewAppState
 

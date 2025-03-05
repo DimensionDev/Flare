@@ -28,3 +28,6 @@ shared/shared.podspec
 .history
 .lh
 iosApp/K_D/
+*.sh
+*.*
+

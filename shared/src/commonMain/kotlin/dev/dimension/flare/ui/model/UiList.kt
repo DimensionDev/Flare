@@ -15,6 +15,7 @@ public data class UiList internal constructor(
     val liked: Boolean = false,
     val platformType: PlatformType,
     val type: Type = Type.List,
+    val readonly: Boolean = false,
 ) {
     val likedCountHumanized: String by lazy {
         likedCount.humanize()

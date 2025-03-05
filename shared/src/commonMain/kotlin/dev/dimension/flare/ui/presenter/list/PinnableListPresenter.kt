@@ -21,6 +21,11 @@ import kotlinx.collections.immutable.toImmutableList
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+/**
+ * Presenter for pinnable lists.
+ * Different from [AllListPresenter] in that it also includes Bluesky feeds.
+ * This presenter should be used for managing pinnable tabs.
+ */
 public class PinnableListPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<PinnableListState>(),

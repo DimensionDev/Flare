@@ -20,6 +20,10 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+/**
+ * Retrieving lists.
+ * This presenter should be used for displaying lists.
+ */
 public class AllListPresenter(
     private val accountType: AccountType,
 ) : PresenterBase<AllListState>(),

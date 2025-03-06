@@ -99,6 +99,12 @@ public object AppDeepLinkHelper {
                 AppleRoute.DeleteStatus(AccountType.Specific(accountKey), statusKey)
             }
 
+            "AddReaction" -> {
+                val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
+                val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
+                AppleRoute.AddReaction(AccountType.Specific(accountKey), statusKey)
+            }
+
             "Bluesky" ->
                 when (data.segments.getOrNull(0)) {
                     "ReportStatus" -> {
@@ -127,11 +133,6 @@ public object AppDeepLinkHelper {
                         val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
                         val userKey = MicroBlogKey.valueOf(data.segments.getOrNull(3) ?: return null)
                         AppleRoute.Misskey.ReportStatus(AccountType.Specific(accountKey), statusKey, userKey)
-                    }
-                    "AddReaction" -> {
-                        val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                        val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                        AppleRoute.Misskey.AddReaction(AccountType.Specific(accountKey), statusKey)
                     }
                     else -> null
                 }
@@ -271,6 +272,14 @@ public sealed class AppleRoute {
             get() = RouteType.Dialog
     }
 
+    public data class AddReaction(
+        val accountType: AccountType,
+        val statusKey: MicroBlogKey,
+    ) : AppleRoute() {
+        override val routeType: RouteType
+            get() = RouteType.Sheet
+    }
+
     public sealed class Bluesky : AppleRoute() {
         public data class ReportStatus(
             val accountType: AccountType,
@@ -300,14 +309,6 @@ public sealed class AppleRoute {
         ) : Misskey() {
             override val routeType: RouteType
                 get() = RouteType.Dialog
-        }
-
-        public data class AddReaction(
-            val accountType: AccountType,
-            val statusKey: MicroBlogKey,
-        ) : Misskey() {
-            override val routeType: RouteType
-                get() = RouteType.Sheet
         }
     }
 

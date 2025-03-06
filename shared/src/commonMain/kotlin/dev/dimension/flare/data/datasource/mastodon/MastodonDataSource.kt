@@ -43,7 +43,6 @@ import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiList
@@ -72,10 +71,11 @@ import org.koin.core.component.inject
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
-internal class MastodonDataSource(
+internal open class MastodonDataSource(
 //    override val account: UiAccount.Mastodon,
     override val accountKey: MicroBlogKey,
-    val credential: UiAccount.Mastodon.Credential,
+    val instance: String,
+    val accessToken: String,
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.Mastodon,
@@ -85,8 +85,8 @@ internal class MastodonDataSource(
     private val coroutineScope: CoroutineScope by inject()
     private val service by lazy {
         MastodonService(
-            baseUrl = "https://${credential.instance}/",
-            accessToken = credential.accessToken,
+            baseUrl = "https://$instance/",
+            accessToken = accessToken,
         )
     }
 
@@ -415,6 +415,13 @@ internal class MastodonDataSource(
                     it as? ComposeStatus.Reply
                 }?.statusKey
                 ?.id
+        val quoteID =
+            data.referenceStatus
+                ?.composeStatus
+                ?.let {
+                    it as? ComposeStatus.Quote
+                }?.statusKey
+                ?.id
         val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias
@@ -452,6 +459,7 @@ internal class MastodonDataSource(
                             multiple = poll.multiple,
                         )
                     },
+                quoteID = quoteID,
             ),
         )
         progress(ComposeProgress(maxProgress, maxProgress))

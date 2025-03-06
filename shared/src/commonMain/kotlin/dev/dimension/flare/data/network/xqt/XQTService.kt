@@ -1,5 +1,6 @@
 package dev.dimension.flare.data.network.xqt
 
+import dev.dimension.flare.common.JSON_WITH_ENCODE_DEFAULT
 import dev.dimension.flare.data.network.authorization.BearerAuthorization
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.ktorfit
@@ -52,7 +53,7 @@ private val token =
 private fun config(
     url: String = baseUrl,
     chocolate: String? = null,
-) = ktorfit(url, BearerAuthorization(token)) {
+) = ktorfit(url, BearerAuthorization(token), json = JSON_WITH_ENCODE_DEFAULT) {
     install(XQTHeaderPlugin) {
         this.chocolate = chocolate
     }

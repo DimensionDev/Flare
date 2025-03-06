@@ -11,6 +11,7 @@
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		060D00C22AC407DF0087427A /* FlareApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 060D00C12AC407DF0087427A /* FlareApp.swift */; };
 		06244DED2B75F21E00884683 /* AVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 06244DEC2B75F21E00884683 /* AVKit.framework */; };
+		062BD6012D795F1200D06975 /* AddReactionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 062BD6002D795F1200D06975 /* AddReactionSheet.swift */; };
 		066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0442B3ACDC1006F28F4 /* Collections */; };
 		066AD0472B3ACDC1006F28F4 /* DequeModule in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0462B3ACDC1006F28F4 /* DequeModule */; };
 		066AD0492B3ACDC1006F28F4 /* OrderedCollections in Frameworks */ = {isa = PBXBuildFile; productRef = 066AD0482B3ACDC1006F28F4 /* OrderedCollections */; };
@@ -120,7 +121,6 @@
 		64E2087F2CF846DE001C64EF /* ViewExt.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E2087C2CF846DE001C64EF /* ViewExt.swift */; };
 		64E8772C2D0430C7003559B9 /* ServiceSelectScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876FD2D0430C7003559B9 /* ServiceSelectScreen.swift */; };
 		64E8772D2D0430C7003559B9 /* HomeContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876EF2D0430C7003559B9 /* HomeContent.swift */; };
-		64E8772E2D0430C7003559B9 /* MisskeyReactionSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877262D0430C7003559B9 /* MisskeyReactionSheet.swift */; };
 		64E877322D0430C7003559B9 /* Route.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E877212D0430C7003559B9 /* Route.swift */; };
 		64E877332D0430C7003559B9 /* NotificationTabScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876F32D0430C7003559B9 /* NotificationTabScreen.swift */; };
 		64E877342D0430C7003559B9 /* UserComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64E876DB2D0430C7003559B9 /* UserComponent.swift */; };
@@ -175,6 +175,7 @@
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		060D00C12AC407DF0087427A /* FlareApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareApp.swift; sourceTree = "<group>"; };
 		06244DEC2B75F21E00884683 /* AVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVKit.framework; path = System/Library/Frameworks/AVKit.framework; sourceTree = SDKROOT; };
+		062BD6002D795F1200D06975 /* AddReactionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddReactionSheet.swift; sourceTree = "<group>"; };
 		06B8514E2B6B22A500DFA075 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		06B851502B6B22DD00DFA075 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		06B851542B6B926D00DFA075 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -301,7 +302,6 @@
 		64E8771C2D0430C7003559B9 /* VVOCommentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VVOCommentScreen.swift; sourceTree = "<group>"; };
 		64E8771D2D0430C7003559B9 /* VVOStatusDetailScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VVOStatusDetailScreen.swift; sourceTree = "<group>"; };
 		64E877212D0430C7003559B9 /* Route.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Route.swift; sourceTree = "<group>"; };
-		64E877262D0430C7003559B9 /* MisskeyReactionSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MisskeyReactionSheet.swift; sourceTree = "<group>"; };
 		64E877B62D080DFB003559B9 /* FlareText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareText.swift; sourceTree = "<group>"; };
 		64E877BD2D08131D003559B9 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		64E877C32D083DF6003559B9 /* FlareMarkdownText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlareMarkdownText.swift; sourceTree = "<group>"; };
@@ -820,7 +820,7 @@
 		64E877272D0430C7003559B9 /* Status */ = {
 			isa = PBXGroup;
 			children = (
-				64E877262D0430C7003559B9 /* MisskeyReactionSheet.swift */,
+				062BD6002D795F1200D06975 /* AddReactionSheet.swift */,
 			);
 			path = Status;
 			sourceTree = "<group>";
@@ -1152,7 +1152,6 @@
 				64EB7DAB2D0C4C0400E41656 /* FLTabSettings.swift in Sources */,
 				64E8772C2D0430C7003559B9 /* ServiceSelectScreen.swift in Sources */,
 				64E8772D2D0430C7003559B9 /* HomeContent.swift in Sources */,
-				64E8772E2D0430C7003559B9 /* MisskeyReactionSheet.swift in Sources */,
 				64E877322D0430C7003559B9 /* Route.swift in Sources */,
 				64E877332D0430C7003559B9 /* NotificationTabScreen.swift in Sources */,
 				64E877342D0430C7003559B9 /* UserComponent.swift in Sources */,
@@ -1200,6 +1199,7 @@
 				644C84DA2D535C6D00E92D0D /* CGImage+Extension.swift in Sources */,
 				64578CD82D649BB9008CC23F /* ProfilePresenterWrapper.swift in Sources */,
 				644C84DB2D535C6D00E92D0D /* ProgressBarView.swift in Sources */,
+				062BD6012D795F1200D06975 /* AddReactionSheet.swift in Sources */,
 				644C84DC2D535C6D00E92D0D /* MarkdownTheme.swift in Sources */,
 				644C84DD2D535C6D00E92D0D /* AppleTranslationService.swift in Sources */,
 				644C84DF2D535C6D00E92D0D /* MediaPreviewImageViewModel.swift in Sources */,

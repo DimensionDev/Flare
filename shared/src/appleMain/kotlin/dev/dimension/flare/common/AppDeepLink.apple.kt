@@ -275,7 +275,7 @@ public sealed class AppleRoute {
     public data class AddReaction(
         val accountType: AccountType,
         val statusKey: MicroBlogKey,
-    ) : Misskey() {
+    ) : AppleRoute() {
         override val routeType: RouteType
             get() = RouteType.Sheet
     }

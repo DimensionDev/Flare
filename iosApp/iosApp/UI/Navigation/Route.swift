@@ -169,13 +169,13 @@ struct TabItem<Content: View>: View {
             }
         case .deleteStatus:
             EmptyView()
+        case let .addReaction(data): AddReactionSheet(accountType: data.accountType, statusKey: data.statusKey, onBack: { router.hideSheet() })
         case let .mastodon(data):
             switch onEnum(of: data) {
             case let .reportStatus(data): EmptyView()
             }
         case let .misskey(data):
             switch onEnum(of: data) {
-            case let .addReaction(data): MisskeyReactionSheet(accountType: data.accountType, statusKey: data.statusKey, onBack: { router.hideSheet() })
             case let .reportStatus(data): EmptyView()
             }
         case let .profile(data):

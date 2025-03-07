@@ -7,7 +7,6 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.paging.RemoteMediator.MediatorResult
 import androidx.paging.cachedIn
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
@@ -94,8 +93,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.collections.mapNotNull
-import kotlin.collections.orEmpty
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.seconds
@@ -1189,22 +1186,74 @@ internal class XQTDataSource(
     private val listKey: String
         get() = "allLists_$accountKey"
 
-    override val myList: CacheData<ImmutableList<UiList>> =
-        MemCacheable(
-            key = listKey,
-            fetchSource = {
-                service
-                    .getListsManagementPageTimeline()
-                    .body()
-                    ?.data
-                    ?.viewer
-                    ?.listManagementTimeline
-                    ?.timeline
-                    ?.instructions
-                    ?.list(accountKey = accountKey)
-                    .orEmpty()
-                    .toImmutableList()
-            },
+    override fun myList(scope: CoroutineScope): Flow<PagingData<UiList>> =
+        memoryPager(
+            pageSize = 20,
+            pagingKey = listKey,
+            scope = scope,
+            mediator =
+                object : RemoteMediator<Int, UiList>() {
+                    var cursor: String? = null
+
+                    override suspend fun load(
+                        loadType: LoadType,
+                        state: PagingState<Int, UiList>,
+                    ): MediatorResult {
+                        try {
+                            if (loadType == LoadType.PREPEND) {
+                                return MediatorResult.Success(endOfPaginationReached = true)
+                            }
+                            if (loadType == LoadType.REFRESH) {
+                                cursor = null
+                            }
+                            val response =
+                                service
+                                    .getListsManagementPageTimeline(
+                                        variables =
+                                            buildString {
+                                                append("{\"count\":20")
+                                                if (cursor != null) {
+                                                    append(",\"cursor\":\"${cursor}\"")
+                                                }
+                                                append("}")
+                                            },
+                                    ).body()
+                                    ?.data
+                                    ?.viewer
+                                    ?.listManagementTimeline
+                                    ?.timeline
+                                    ?.instructions
+
+                            cursor = response?.cursor()
+
+                            val result =
+                                response
+                                    ?.list(accountKey = accountKey)
+                                    .orEmpty()
+                                    .toImmutableList()
+
+                            if (loadType == LoadType.REFRESH) {
+                                MemoryPagingSource.update<UiList>(
+                                    key = listKey,
+                                    value = result,
+                                )
+                            } else if (loadType == LoadType.APPEND) {
+                                MemoryPagingSource.append<UiList>(
+                                    key = listKey,
+                                    value = result,
+                                )
+                            }
+
+                            println("result: $result")
+
+                            return MediatorResult.Success(
+                                endOfPaginationReached = result.isEmpty(),
+                            )
+                        } catch (e: Exception) {
+                            return MediatorResult.Error(e)
+                        }
+                    }
+                },
         )
 
     override suspend fun createList(metaData: ListMetaData) {
@@ -1223,7 +1272,7 @@ internal class XQTDataSource(
         }.onSuccess { response ->
             val data = response.body()?.data?.list
             if (data?.idStr != null) {
-                MemCacheable.updateWith<ImmutableList<UiList>>(
+                MemoryPagingSource.updateWith<UiList>(
                     key = listKey,
                 ) {
                     it
@@ -1252,7 +1301,7 @@ internal class XQTDataSource(
                     ),
             )
         }.onSuccess {
-            MemCacheable.updateWith<ImmutableList<UiList>>(
+            MemoryPagingSource.updateWith<UiList>(
                 key = listKey,
             ) {
                 it
@@ -1280,7 +1329,7 @@ internal class XQTDataSource(
                     ),
             )
         }.onSuccess {
-            MemCacheable.updateWith<ImmutableList<UiList>>(
+            MemoryPagingSource.updateWith<UiList>(
                 key = listKey,
             ) {
                 it

@@ -1046,19 +1046,44 @@ internal class MisskeyDataSource(
     private val listKey: String
         get() = "allLists_$accountKey"
 
-    override val myList: CacheData<ImmutableList<UiList>> =
-        MemCacheable(
-            key = listKey,
-            fetchSource = {
-                service
-                    .usersListsList(
-                        UsersListsListRequest(),
-                    ).body()
-                    .orEmpty()
-                    .map {
-                        it.render()
-                    }.toImmutableList()
-            },
+    override fun myList(scope: CoroutineScope): Flow<PagingData<UiList>> =
+        memoryPager(
+            pageSize = 20,
+            pagingKey = listKey,
+            scope = scope,
+            mediator =
+                object : RemoteMediator<Int, UiList>() {
+                    override suspend fun load(
+                        loadType: LoadType,
+                        state: PagingState<Int, UiList>,
+                    ): MediatorResult {
+                        try {
+                            if (loadType == LoadType.PREPEND) {
+                                return MediatorResult.Success(endOfPaginationReached = true)
+                            }
+                            val result =
+                                service
+                                    .usersListsList(
+                                        UsersListsListRequest(),
+                                    ).body()
+                                    .orEmpty()
+                                    .map {
+                                        it.render()
+                                    }.toImmutableList()
+
+                            MemoryPagingSource.update<UiList>(
+                                key = listKey,
+                                value = result.toImmutableList(),
+                            )
+
+                            return MediatorResult.Success(
+                                endOfPaginationReached = true,
+                            )
+                        } catch (e: Exception) {
+                            return MediatorResult.Error(e)
+                        }
+                    }
+                },
         )
 
     override suspend fun createList(metaData: ListMetaData) {
@@ -1071,7 +1096,7 @@ internal class MisskeyDataSource(
                 ).body()
         }.onSuccess { response ->
             if (response?.id != null) {
-                MemCacheable.updateWith<ImmutableList<UiList>>(
+                MemoryPagingSource.updateWith<UiList>(
                     key = listKey,
                 ) {
                     it
@@ -1093,7 +1118,7 @@ internal class MisskeyDataSource(
                 UsersListsDeleteRequest(listId = listId),
             )
         }.onSuccess {
-            MemCacheable.updateWith<ImmutableList<UiList>>(
+            MemoryPagingSource.updateWith<UiList>(
                 key = listKey,
             ) {
                 it
@@ -1115,7 +1140,7 @@ internal class MisskeyDataSource(
                 ),
             )
         }.onSuccess {
-            MemCacheable.updateWith<ImmutableList<UiList>>(
+            MemoryPagingSource.updateWith<UiList>(
                 key = listKey,
             ) {
                 it

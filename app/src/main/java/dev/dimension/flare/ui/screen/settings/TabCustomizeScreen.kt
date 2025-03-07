@@ -52,6 +52,7 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Bars
+import compose.icons.fontawesomeicons.solid.Minus
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
@@ -66,14 +67,15 @@ import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -83,13 +85,11 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.list.PinnableListPresenter
+import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -214,68 +214,47 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                 state.setAddTab(false)
             },
         ) {
+            @Composable
+            fun TabItem(tabItem: TabItem) {
+                ListTabItem(
+                    data = tabItem,
+                    isAdded = state.tabs.any { tab -> tabItem.key == tab.key },
+                    modifier =
+                        Modifier.clickable {
+                            if (state.tabs.any { tab -> tabItem.key == tab.key }) {
+                                state.deleteTab(tabItem.key)
+                            } else {
+                                state.addTab(tabItem)
+                            }
+                            state.setAddTab(false)
+                        },
+                )
+            }
             LazyColumn {
                 items(state.allTabs.defaultTabs) {
-                    ListItem(
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                        headlineContent = {
-                            TabTitle(it.metaData.title)
-                        },
-                        leadingContent = {
-                            TabIcon(it.account, it.metaData.icon, it.metaData.title)
-                        },
-                        modifier =
-                            Modifier
-                                .clickable {
-                                    state.addTab(it)
-                                    state.setAddTab(false)
-                                },
-                        trailingContent = {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.Plus,
-                                contentDescription = stringResource(id = R.string.tab_settings_add),
-                            )
-                        },
-                    )
+                    TabItem(it)
                 }
-
-                state.allTabs.accountTabs.onSuccess {
-                    it.forEach { (userState, tabState) ->
-                        stickyHeader {
-                            AccountItem(
-                                userState = userState,
-                                onClick = {},
-                                toLogin = {},
-                                colors =
-                                    ListItemDefaults.colors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                                    ),
-                            )
-                        }
-                        tabState.onSuccess {
-                            items(it) { tab ->
-                                ListItem(
-                                    colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                                    headlineContent = {
-                                        TabTitle(tab.metaData.title)
-                                    },
-                                    leadingContent = {
-                                        TabIcon(tab.account, tab.metaData.icon, tab.metaData.title)
-                                    },
-                                    modifier =
-                                        Modifier
-                                            .padding(start = AvatarComponentDefaults.size + 16.dp)
-                                            .clickable {
-                                                state.addTab(tab)
-                                                state.setAddTab(false)
-                                            },
-                                    trailingContent = {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.Plus,
-                                            contentDescription = stringResource(id = R.string.tab_settings_add),
-                                        )
-                                    },
+                state.allTabs.accountTabs.onSuccess { tabs ->
+                    tabs.forEach { tabState ->
+                        tabState.onSuccess { tabs ->
+                            stickyHeader {
+                                AccountItem(
+                                    userState = UiState.Success(tabs.profile),
+                                    onClick = {},
+                                    toLogin = {},
+                                    colors =
+                                        ListItemDefaults.colors(
+                                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                                        ),
                                 )
+                            }
+                            items(tabs.tabs) { tab ->
+                                TabItem(tab)
+                            }
+                            tabs.extraTabs.forEach { tab ->
+                                items(tab.data) { item ->
+                                    TabItem(remember(item) { item.toTabItem(accountKey = tabs.profile.key) })
+                                }
                             }
                         }
                     }
@@ -283,6 +262,68 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
             }
         }
     }
+}
+
+internal fun UiList.toTabItem(accountKey: MicroBlogKey) =
+    if (type == UiList.Type.Feed) {
+        Bluesky.FeedTabItem(
+            account = AccountType.Specific(accountKey),
+            uri = id,
+            metaData =
+                TabMetaData(
+                    title = TitleType.Text(title),
+                    icon =
+                        IconType.Mixed(
+                            icon = IconType.Material.MaterialIcon.List,
+                            userKey = accountKey,
+                        ),
+                ),
+        )
+    } else {
+        ListTimelineTabItem(
+            account = AccountType.Specific(accountKey),
+            listId = id,
+            metaData =
+                TabMetaData(
+                    title = TitleType.Text(title),
+                    icon =
+                        IconType.Mixed(
+                            icon = IconType.Material.MaterialIcon.List,
+                            userKey = accountKey,
+                        ),
+                ),
+        )
+    }
+
+@Composable
+internal fun ListTabItem(
+    data: TabItem,
+    isAdded: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    ListItem(
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        headlineContent = {
+            TabTitle(data.metaData.title)
+        },
+        leadingContent = {
+            TabIcon(data.account, data.metaData.icon, data.metaData.title)
+        },
+        modifier = modifier,
+        trailingContent = {
+            if (isAdded) {
+                FAIcon(
+                    FontAwesomeIcons.Solid.Minus,
+                    contentDescription = stringResource(id = R.string.tab_settings_remove),
+                )
+            } else {
+                FAIcon(
+                    FontAwesomeIcons.Solid.Plus,
+                    contentDescription = stringResource(id = R.string.tab_settings_add),
+                )
+            }
+        },
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -553,7 +594,7 @@ private fun presenter(
 //    val except = remember(cacheTabs) {
 //        cacheTabs.map { it.key }.toImmutableList()
 //    }
-    val allTabs = allTabsPresenter(except = cacheTabs.map { it.key }.toImmutableList())
+    val allTabs = allTabsPresenter()
 
     object {
         val tabs = cacheTabs
@@ -603,6 +644,10 @@ private fun presenter(
             cacheTabs.removeIf { it.key == tab.key }
         }
 
+        fun deleteTab(key: String) {
+            cacheTabs.removeIf { it.key == key }
+        }
+
         fun addTab(tab: TabItem) {
             cacheTabs.add(ActualTabItem(tab))
         }
@@ -644,95 +689,55 @@ private data class ActualTabItem(
 }
 
 @Composable
-private fun allTabsPresenter(except: ImmutableList<String>) =
+private fun allTabsPresenter() =
     run {
         val accountState = remember { AccountsPresenter() }.invoke()
         val accountTabs =
             accountState.accounts.map {
                 it
                     .toImmutableList()
-                    .associate { (_, userState) ->
-                        userState to
-                            userState
-                                .map { user ->
+                    .map { (_, userState) ->
+                        userState.flatMap { user ->
+                            val tabs =
+                                remember(user.key) {
                                     TimelineTabItem.defaultPrimary(user) +
                                         TimelineTabItem.defaultSecondary(
                                             user,
                                         )
-                                }.map { items ->
-                                    items
-                                        .filter {
-                                            it.key !in except
-                                        }.toImmutableList()
-                                }.flatMap { items ->
-                                    userState.flatMap { user ->
-                                        dynamicTabPresenter(accountKey = user.key)
-                                            .map { dynTabs ->
-                                                items + dynTabs
-                                            }.map {
-                                                it.toImmutableList()
-                                            }
-                                    }
                                 }
-                    }.toImmutableMap()
+                            userState
+                                .flatMap { user ->
+                                    listTabPresenter(accountKey = user.key).tabs.map {
+                                        it.toImmutableList()
+                                    }
+                                }.map { extraTabs ->
+                                    AccountTabs(
+                                        profile = user,
+                                        tabs = tabs.toImmutableList(),
+                                        extraTabs = extraTabs,
+                                    )
+                                }
+                        }
+                    }.toImmutableList()
             }
 
         object {
-            val defaultTabs = TimelineTabItem.default.filter { it.key !in except }.toImmutableList()
-            val accountTabs = accountTabs
+            val defaultTabs = TimelineTabItem.default.toImmutableList()
+            val accountTabs: UiState<ImmutableList<UiState<AccountTabs>>> = accountTabs
         }
     }
 
+@Immutable
+internal data class AccountTabs(
+    val profile: UiProfile,
+    val tabs: ImmutableList<TabItem>,
+    val extraTabs: ImmutableList<PinnableTimelineTabPresenter.State.Tab>,
+)
+
 @Composable
-internal fun dynamicTabPresenter(accountKey: MicroBlogKey) =
+private fun listTabPresenter(accountKey: MicroBlogKey) =
     run {
-        val state =
-            remember(accountKey) {
-                PinnableListPresenter(accountType = AccountType.Specific(accountKey))
-            }.invoke()
-        remember(state.items) {
-            state.items
-                .map {
-                    it.map {
-                        // TODO: get feed out of list
-                        if (it.type == UiList.Type.Feed) {
-                            Bluesky.FeedTabItem(
-                                account = AccountType.Specific(accountKey),
-                                uri = it.id,
-                                metaData =
-                                    TabMetaData(
-                                        title = TitleType.Text(it.title),
-                                        icon =
-                                            IconType.Mixed(
-                                                icon = IconType.Material.MaterialIcon.List,
-                                                userKey = accountKey,
-                                            ),
-                                    ),
-                            )
-                        } else {
-                            ListTimelineTabItem(
-                                account = AccountType.Specific(accountKey),
-                                listId = it.id,
-                                metaData =
-                                    TabMetaData(
-                                        title = TitleType.Text(it.title),
-                                        icon =
-                                            IconType.Mixed(
-                                                icon = IconType.Material.MaterialIcon.List,
-                                                userKey = accountKey,
-                                            ),
-                                    ),
-                            )
-                        }
-                    }
-                }.flatMap(
-                    onError = {
-                        UiState.Success(persistentListOf())
-                    },
-                ) {
-                    UiState.Success(it)
-                }.map {
-                    it.toImmutableList()
-                }
-        }
+        remember(accountKey) {
+            PinnableTimelineTabPresenter(accountType = AccountType.Specific(accountKey))
+        }.invoke()
     }

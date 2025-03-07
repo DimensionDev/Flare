@@ -13,7 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 internal interface ListDataSource {
-    val myList: CacheData<ImmutableList<UiList>>
+    fun myList(scope: CoroutineScope): Flow<PagingData<UiList>>
 
     fun listInfo(listId: String): CacheData<UiList>
 

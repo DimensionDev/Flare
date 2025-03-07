@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
@@ -36,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -54,6 +52,7 @@ import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -65,8 +64,10 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
+import dev.dimension.flare.ui.screen.settings.ListTabItem
 import dev.dimension.flare.ui.screen.settings.TabTitle
-import dev.dimension.flare.ui.screen.settings.dynamicTabPresenter
+import dev.dimension.flare.ui.screen.settings.toTabItem
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -236,33 +237,41 @@ private fun TabSettingScreen(
         }
     }
 
-    state.remainTabs.onSuccess { remainTabs ->
-        if (state.showAddTab) {
-            ModalBottomSheet(
-                onDismissRequest = {
-                    state.setAddTab(false)
-                },
-            ) {
-                LazyColumn {
-                    items(remainTabs) {
-                        ListItem(
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                            headlineContent = {
-                                TabTitle(it.metaData.title)
-                            },
-                            modifier =
-                                Modifier
-                                    .clickable {
-                                        state.addTab(it)
-                                        state.setAddTab(false)
-                                    },
-                            trailingContent = {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.Plus,
-                                    contentDescription = stringResource(id = R.string.tab_settings_add),
-                                )
-                            },
-                        )
+    if (state.showAddTab) {
+        ModalBottomSheet(
+            onDismissRequest = {
+                state.setAddTab(false)
+            },
+        ) {
+            @Composable
+            fun TabItem(tabItem: TimelineTabItem) {
+                ListTabItem(
+                    data = tabItem,
+                    isAdded = state.currentTabs.any { tab -> tabItem.key == tab.key },
+                    modifier =
+                        Modifier.clickable {
+                            if (state.currentTabs.any { tab -> tabItem.key == tab.key }) {
+                                state.deleteTab(tabItem.key)
+                            } else {
+                                state.addTab(tabItem)
+                            }
+                            state.setAddTab(false)
+                        },
+                )
+            }
+            LazyColumn {
+                state.tabs.onSuccess { tabs ->
+                    items(tabs) {
+                        TabItem(it)
+                    }
+                }
+                state.extraTabs.onSuccess { extraTabs ->
+                    state.accountState.user.onSuccess { user ->
+                        extraTabs.forEach { tab ->
+                            items(tab.data) { item ->
+                                TabItem(remember(item) { item.toTabItem(accountKey = user.key) })
+                            }
+                        }
                     }
                 }
             }
@@ -303,34 +312,33 @@ private fun presenter(
                 cacheTabs.addAll(it)
             }
         }
-    val remainTabs =
+    val tabs =
         accountState
             .user
             .map { user ->
-                TimelineTabItem.defaultPrimary(user) +
-                    TimelineTabItem.defaultSecondary(
-                        user,
-                    )
-            }.flatMap { items ->
-                accountState.user.flatMap { user ->
-                    dynamicTabPresenter(accountKey = user.key)
-                        .map { dynTabs ->
-                            items + dynTabs
-                        }.map {
-                            it.toImmutableList()
-                        }
+                remember(user.key) {
+                    TimelineTabItem
+                        .defaultPrimary(user)
+                        .plus(
+                            TimelineTabItem.defaultSecondary(
+                                user,
+                            ),
+                        ).filterIsInstance<TimelineTabItem>()
+                        .toImmutableList()
                 }
-            }.map {
-                it
-                    .filterIsInstance<TimelineTabItem>()
-                    .filter { tab ->
-                        cacheTabs.none { it.key == tab.key }
-                    }.toImmutableList()
             }
+    val extraTabs =
+        remember(accountType) {
+            PinnableTimelineTabPresenter(accountType = accountType)
+        }.invoke().tabs.map {
+            it.toImmutableList()
+        }
     var showAddTab by remember { mutableStateOf(false) }
     object {
+        val accountState = accountState
         val currentTabs = cacheTabs.toImmutableList()
-        val remainTabs = remainTabs
+        val tabs = tabs
+        val extraTabs = extraTabs
         val canSwipeToDelete = cacheTabs.size > 1
         val showAddTab = showAddTab
 
@@ -357,6 +365,10 @@ private fun presenter(
 
         fun deleteTab(tab: TimelineTabItem) {
             cacheTabs.removeIf { it.key == tab.key }
+        }
+
+        fun deleteTab(key: String) {
+            cacheTabs.removeIf { it.key == key }
         }
 
         fun addTab(tab: TimelineTabItem) {

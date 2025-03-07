@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.toPagingState
@@ -44,8 +45,8 @@ public class EditAccountListPresenter(
                 .map { service ->
                     require(service is ListDataSource)
                     remember(service) {
-                        service.myList
-                    }
+                        service.myList(scope = scope)
+                    }.collectAsLazyPagingItems()
                 }.toPagingState()
         val userLists =
             serviceState.flatMap { service ->

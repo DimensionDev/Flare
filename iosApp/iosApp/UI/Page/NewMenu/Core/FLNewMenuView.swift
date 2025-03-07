@@ -35,7 +35,7 @@ struct FLNewMenuView: View {
                     HStack {
                         Image(systemName: "list.bullet")
                             .frame(width: 28, height: 28)
-                        Text("列表")
+                        Text("List")
                             .font(.body)
                         Spacer()
                     }

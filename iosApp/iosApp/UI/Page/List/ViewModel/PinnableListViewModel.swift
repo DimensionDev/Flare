@@ -4,6 +4,7 @@ import shared
 
 class PinnableListViewModel: BaseListViewModel {
     private let presenter: PinnableListPresenter
+    let accountType: AccountType
 
     @Published var listsState: ViewState<[UiList]> = .loading
     @Published var isRefreshing: Bool = false
@@ -11,6 +12,7 @@ class PinnableListViewModel: BaseListViewModel {
 
     init(accountType: AccountType) {
         presenter = PinnableListPresenter(accountType: accountType)
+        self.accountType = accountType
         super.init()
 
         // 初始化时获取数据

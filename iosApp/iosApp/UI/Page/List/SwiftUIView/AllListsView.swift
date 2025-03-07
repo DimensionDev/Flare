@@ -1,103 +1,55 @@
-import Combine
+import Generated
+import Kingfisher
 import shared
 import SwiftUI
 
 struct AllListsView: View {
-    @StateObject var allListsViewModel: AllListsViewModel
-    @StateObject var pinnableListsViewModel: PinnableListViewModel
+    @State private var presenter: PinnableListPresenter
+    @EnvironmentObject private var router: Router
+    @Environment(\.appSettings) private var appSettings
+    private let accountType: AccountType
 
     init(accountType: AccountType) {
-        _allListsViewModel = StateObject(wrappedValue: AllListsViewModel(accountType: accountType))
-        _pinnableListsViewModel = StateObject(wrappedValue: PinnableListViewModel(accountType: accountType))
+        presenter = .init(accountType: accountType)
+        self.accountType = accountType
     }
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                // 常规列表区域
-                VStack(alignment: .leading) {
-                    Text("我的列表")
-                        .font(.headline)
-                        .padding(.horizontal)
-
-                    switch allListsViewModel.listsState {
+        ObservePresenter(presenter: presenter) { state in
+            List {
+                switch onEnum(of: state.b)
+                     switch onEnum(of: state.items) {
                     case .loading:
-                        RegularListLoadingView()
-                    case let .loaded(lists):
-                        RegularListContentView(lists: lists)
-                    case .empty:
-                        EmptyStateView(
-                            icon: "list.bullet",
-                            title: "暂无列表",
-                            message: "您当前没有创建或关注的列表",
-                            actionTitle: "刷新",
-                            action: { allListsViewModel.refresh() }
-                        )
-                    case let .error(error):
+                        loadingListsView
+                    case let .success(successData):
+                        // 直接使用列表内容视图的逻辑
+                        VStack(spacing: 0) {
+                            ForEach(0 ..< successData.itemCount, id: \.self) { index in
+                                if let list = successData.peek(index: Int32(index)) {
+                                    EnhancedListRowView(list: list, accountType: accountType)
+                                        .onAppear {
+                                            // 获取数据并触发加载
+                                            successData.get(index: Int32(index))
+                                        }
+                                }
+                            }
+                        }
+                    case let .error(errorState):
+
                         ErrorView(error: error) {
-                            allListsViewModel.refresh()
+                            state.refresh()
                         }
                     }
-                }
-
-                Divider()
-                    .padding(.vertical, 8)
-
-                // 可固定列表区域
-                VStack(alignment: .leading) {
-                    Text("可固定列表")
-                        .font(.headline)
-                        .padding(.horizontal)
-
-                    switch pinnableListsViewModel.listsState {
-                    case .loading:
-                        PinnableListLoadingView()
-                    case let .loaded(lists):
-                        PinnableListContentView(lists: lists)
-                    case .empty:
-                        EmptyStateView(
-                            icon: "pin.fill",
-                            title: "暂无可固定列表",
-                            message: "当前没有可固定的列表",
-                            actionTitle: "刷新",
-                            action: { pinnableListsViewModel.refresh() }
-                        )
-                    case let .error(error):
-                        ErrorView(error: error) {
-                            pinnableListsViewModel.refresh()
-                        }
-                    }
-                }
+               
             }
-            .padding(.vertical)
+            .navigationTitle("列表")
         }
-        .navigationTitle("列表")
-        .refreshable {
-            await refreshAsync()
-        }
-        .overlay(Group {
-            if allListsViewModel.isRefreshing || pinnableListsViewModel.isRefreshing {
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-                    .background(Color.black.opacity(0.1))
-            }
-        })
-        .errorAlert(error: $allListsViewModel.error)
     }
 
-    func refreshAsync() async {
-        allListsViewModel.refresh()
-        pinnableListsViewModel.refresh()
-        // 等待一段时间以确保刷新显示
-        try? await Task.sleep(nanoseconds: 1_500_000_000)
-    }
-}
-
-// 常规列表加载视图
-private struct RegularListLoadingView: View {
-    var body: some View {
+    // 加载状态视图
+    private var loadingListsView: some View {
         VStack {
-            ForEach(0 ..< 3, id: \.self) { _ in
+            ForEach(0 ..< 5, id: \.self) { _ in
                 ListRowSkeletonView()
                     .padding(.horizontal)
             }
@@ -105,54 +57,104 @@ private struct RegularListLoadingView: View {
     }
 }
 
-// 可固定列表加载视图
-private struct PinnableListLoadingView: View {
+private struct EnhancedListRowView: View {
+    let list: UiList
+    @State private var isPinned: Bool
+    @EnvironmentObject private var router: Router
+    let accountType: AccountType
+
+    init(list: UiList, accountType: AccountType) {
+        self.list = list
+        self.accountType = accountType
+        _isPinned = State(initialValue: list.liked)
+    }
+
     var body: some View {
-        VStack {
-            ForEach(0 ..< 2, id: \.self) { _ in
-                ListRowSkeletonView()
-                    .padding(.horizontal)
+        HStack(spacing: 12) {
+            ListAvatarView(list: list)
+                .frame(width: 50, height: 50)
+
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 4) {
+                    Text(list.title)
+                        .font(.headline)
+                        .lineLimit(1)
+
+                    // 如果有成员数，显示成员数量
+                    if Int(list.likedCount) > 0 {
+                        Text("·\(list.likedCount) members")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .lineLimit(1)
+                    }
+                }
+
+                // 创建者信息
+                if let creator = list.creator {
+                    HStack(spacing: 4) {
+                        let avatarUrl = creator.avatar
+                        if avatarUrl != nil, let url = URL(string: avatarUrl ?? "") {
+                            KFImage(url)
+                                .placeholder {
+                                    Circle()
+                                        .fill(Color.gray.opacity(0.2))
+                                }
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(width: 16, height: 16)
+                                .clipShape(Circle())
+                        } else {
+                            Image(systemName: "person.circle.fill")
+                                .resizable()
+                                .frame(width: 16, height: 16)
+                                .foregroundColor(.gray)
+                        }
+
+                        Text(creator.name.raw)
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                            .lineLimit(1)
+                    }
+                }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+
+            Button(action: {
+                isPinned.toggle()
+            }) {
+                Image(systemName: isPinned ? "pin.fill" : "pin")
+                    .foregroundColor(.blue)
+                    .font(.system(size: 14))
+            }
+            .buttonStyle(BorderlessButtonStyle())
         }
+        .padding(.vertical, 8)
     }
 }
 
-
-private struct RegularListContentView: View {
-    let lists: [UiList]
-
-    var body: some View {
-        VStack(spacing: 0) {
-            ForEach(lists, id: \.id) { list in
-                NavigationLink(destination: ListDetailView(list: list)) {
-                    ListRowView(list: list)
-                        .padding(.horizontal)
-                }
-                .buttonStyle(PlainButtonStyle())
-
-                Divider()
-                    .padding(.leading)
-            }
-        }
-    }
-}
-
-
-private struct PinnableListContentView: View {
-    let lists: [UiList]
+private struct ListAvatarView: View {
+    let list: UiList
 
     var body: some View {
-        VStack(spacing: 0) {
-            ForEach(lists, id: \.id) { list in
-                NavigationLink(destination: ListDetailView(list: list)) {
-                    ListRowView(list: list)
-                        .padding(.horizontal)
+        if let avatarUrl = list.avatar, let url = URL(string: avatarUrl) {
+            KFImage(url)
+                .placeholder {
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(Color.gray.opacity(0.2))
                 }
-                .buttonStyle(PlainButtonStyle())
-
-                Divider()
-                    .padding(.leading)
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 50, height: 50)
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+        } else {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(Color.blue.opacity(0.7))
+                Image(systemName: "list.bullet")
+                    .foregroundColor(.white)
+                    .font(.system(size: 24))
             }
+            .frame(width: 50, height: 50)
         }
     }
 }

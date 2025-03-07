@@ -4,29 +4,79 @@ import shared
 import SwiftUI
 
 struct ListMembersView: View {
-    @StateObject var viewModel: ListMembersViewModel
+    @State private var presenter: ListMembersPresenter
     @EnvironmentObject private var router: Router
     @Environment(\.appSettings) private var appSettings
+    @State private var lastKnownItemCount: Int = 0
+    private let title: String
+    private let accountType: AccountType
 
-    init(accountType: AccountType, listId: String) {
-        _viewModel = StateObject(wrappedValue:
-            ListMembersViewModel(accountType: accountType, listId: listId))
+    init(accountType: AccountType, listId: String, title: String = "列表成员") {
+        presenter = .init( accountType: accountType, listId: listId)
+        self.title = title
+        self.accountType = accountType
     }
 
     var body: some View {
-        ZStack {
-            switch viewModel.membersState {
-            case .loading:
-                loadingView
-            case let .loaded(members):
-                loadedView(members: members)
-            case .empty:
-                emptyStateView
-            case let .error(error):
-                errorView(error: error)
+        ObservePresenter(presenter: presenter) { state in
+            VStack(spacing: 0) {
+                switch onEnum(of: state.memberInfo) {
+                case .loading:
+                    loadingView
+                case let .success(successData):
+
+                    VStack {
+                        // 状态信息区域
+//                         statusInfoView(itemCount: Int(successData.itemCount))
+ 
+                            List {
+                                // 成员列表
+                                ForEach(0 ..< Int(successData.itemCount), id: \.self) { index in
+                                    if(successData.itemCount > index){
+                                         
+                                   
+                                    if let member = successData.peek(index: Int32(index)) {
+                                        memberRow(index: index, member: member)
+                                            .onAppear {
+                                                // 打印调试信息
+                                                print("🟢 调试信息: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
+                                                
+                                                successData.get(index: Int32(index))
+                                                // 更新计数
+                                                lastKnownItemCount = Int(successData.itemCount)
+                                                
+                                                // 打印更新后的计数
+                                                print("🟡 更新后: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
+                                            }
+                                    }
+                                    }
+                                }
+
+                             }
+                            .listStyle(PlainListStyle())
+                     }
+                case .empty:
+                    emptyStateView
+                case let .error(errorData):
+                    let detailedError = NSError(
+                        domain: "ListMembers",
+                        code: -1,
+                        userInfo: [NSLocalizedDescriptionKey: errorData.error.message ?? "加载错误"]
+                    )
+                    errorView(error: detailedError)
+                default:
+                    emptyStateView
+                }
+            }
+            .navigationTitle(title)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Text("总数: \(lastKnownItemCount)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
         }
-        .errorAlert(error: $viewModel.error)
     }
 
     private var loadingView: some View {
@@ -58,74 +108,42 @@ struct ListMembersView: View {
         }
     }
 
-    private func loadedView(members: [UiUserV2]) -> some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                if members.isEmpty {
-                    Text("没有成员")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
-                        .padding()
-                } else {
-                    memberRows(members: members)
-                }
-            }
-        }
-    }
-
-    // 成员行视图
-    private func memberRows(members: [UiUserV2]) -> some View {
-        VStack(spacing: 0) {
-            // 手动列出最多前10个成员，避免嵌套循环
-            if members.count > 0 {
-                memberRow(member: members[0])
-            }
-            if members.count > 1 {
-                memberRow(member: members[1])
-            }
-            if members.count > 2 {
-                memberRow(member: members[2])
-            }
-            if members.count > 3 {
-                memberRow(member: members[3])
-            }
-            if members.count > 4 {
-                memberRow(member: members[4])
-            }
-            if members.count > 5 {
-                memberRow(member: members[5])
-            }
-            if members.count > 6 {
-                memberRow(member: members[6])
-            }
-            if members.count > 7 {
-                memberRow(member: members[7])
-            }
-            if members.count > 8 {
-                memberRow(member: members[8])
-            }
-            if members.count > 9 {
-                memberRow(member: members[9])
-            }
-            if members.count > 10 {
-                Text("更多 \(members.count - 10) 名成员...")
+    private func statusInfoView(itemCount: Int ) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("已加载成员: \(itemCount)")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                    .padding()
-            }
+                Text("服务端总数: \(itemCount)")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+             }
+            Spacer()
         }
+        .padding()
+        .background(Color.gray.opacity(0.1))
+        .cornerRadius(8)
+        .padding(.horizontal)
+        .padding(.top)
     }
 
+   
     // 单个成员行
-    private func memberRow(member: UiUserV2) -> some View {
+    private func memberRow(index: Int, member: UiUserV2) -> some View {
         Button(action: {
-            // 导航到用户个人资料
-            if let key = member.key as? MicroBlogKey {
-                router.navigate(to: AppleRoute.Profile(accountType: viewModel.accountType, userKey: key))
-            }
+            // 导航到用户个人资料 - 暂时注释掉依赖 router 的代码
+            // if let key = member.key as? MicroBlogKey {
+            //     router.navigate(to: AppleRoute.Profile(accountType: accountType, userKey: key))
+            // }
         }) {
             HStack {
-                // 用户头像
+                // 显示序号
+                Text("#\(index + 1)")
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundColor(.secondary)
+                    .frame(width: 40, alignment: .leading)
+
+                //
                 UserAvatar(data: member.avatar, size: 48)
 
                 // 用户信息
@@ -141,7 +159,6 @@ struct ListMembersView: View {
                 Spacer()
             }
             .padding(.vertical, 8)
-            .padding(.horizontal, 16)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -162,18 +179,6 @@ struct ListMembersView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
-
-            Button(action: {
-                viewModel.refresh()
-            }) {
-                Text("刷新")
-                    .fontWeight(.semibold)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(Color.accentColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
         }
         .padding()
     }
@@ -194,18 +199,6 @@ struct ListMembersView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)
-
-            Button(action: {
-                viewModel.refresh()
-            }) {
-                Text("重试")
-                    .fontWeight(.semibold)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 12)
-                    .background(Color.accentColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
-            }
         }
         .padding()
     }

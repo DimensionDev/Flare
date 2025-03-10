@@ -8,6 +8,7 @@ struct ListDetailView: View {
     let accountType: AccountType
     @State private var showMembers: Bool = false
     @State private var presenter: ListTimelinePresenter
+    @State private var showNavigationTitle: Bool = false
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject private var router: Router
     private let randomGradient: [Color]
@@ -28,42 +29,26 @@ struct ListDetailView: View {
 
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
-            // 使用 ZStack 将头部内容覆盖在列表顶部
-            ZStack(alignment: .top) {
-                // 主要内容：时间线
-                VStack(spacing: 0) {
-                    // 标题
-                    // Text("列表动态")
-                    //     .font(.headline)
-                    //     .padding(.horizontal)
-                    //     .padding(.vertical, 8)
-                    //     .frame(maxWidth: .infinity, alignment: .leading)
-                    //     .background(Color(UIColor.systemBackground))
-                    //     .padding(.top, 280) // 为头部留出空间
-                    
-                    // 使用List作为时间线容器
-                    List {
-                        StatusTimelineComponent(
-                            data: state.listState,
-                            detailKey: nil
-                        )
-                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                        .listRowSeparator(.hidden)
-                    }
-                    .listStyle(PlainListStyle())
-                }
-                
-                // 头部信息（固定在顶部）
-                VStack(alignment: .leading, spacing: 0) {
-
+            // 使用单一列表，让头部随滚动消失
+            List {
+                // 头部信息组（随滚动消失）
+                Group {
+                    // 头部背景
                     headerBackgroundView
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                        .onAppear {
+                            showNavigationTitle = false
+                        }
+                        .onDisappear {
+                            showNavigationTitle = true
+                        }
                     
-
+                    // 列表基本信息
                     VStack(alignment: .leading, spacing: 0) {
                         Text(listInfo.title)
                             .font(.title)
                             .bold()
-                            .padding(.horizontal)
                             .padding(.top, 16)
 
                         HStack(alignment: .center, spacing: 12) {
@@ -77,43 +62,57 @@ struct ListDetailView: View {
 
                             memberCountsView
                         }
-                        .padding(.horizontal)
                         .padding(.vertical, 12)
+                    }
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                    .listRowSeparator(.hidden)
 
-
-                        if let description = listInfo.description_, !description.isEmpty {
-                            Text(description)
-                                .font(.body)
-                                .padding()
-                        }
-
-                        Divider()
-                            .padding(.top, 8)
-
-
-                        Button(action: {
-                            showMembers = true
-                        }) {
-                            HStack {
-                                Image(systemName: "person.2")
-                                    .foregroundColor(.blue)
-                                Text("Show Members")
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.gray)
-                                    .font(.caption)
-                            }
-                            .padding()
+                    // 描述（如果有）
+                    if let description = listInfo.description_, !description.isEmpty {
+                        Text(description)
+                            .font(.body)
+                            .padding(.vertical, 8)
+                            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                            .listRowSeparator(.hidden)
+                    }
+                    
+                    // 成员按钮
+                    Button(action: {
+                        showMembers = true
+                    }) {
+                        HStack {
+                            Image(systemName: "person.2")
+                                .foregroundColor(.blue)
+                            Text("查看成员")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundColor(.gray)
+                                .font(.caption)
                         }
                     }
-                    .background(Color(UIColor.systemBackground))
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
+                    
+                    // 时间线标题
+                    Text("列表动态")
+                        .font(.headline)
+                        .padding(.top, 16)
+                        .padding(.bottom, 8)
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                        .listRowSeparator(.hidden)
                 }
-                .frame(height: 280)
-                .zIndex(1)
+                
+                // 时间线内容
+                StatusTimelineComponent(
+                    data: state.listState,
+                    detailKey: nil
+                )
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                .listRowSeparator(.hidden)
             }
+            .listStyle(PlainListStyle())
             .edgesIgnoringSafeArea(.top)
-            .navigationBarTitle("", displayMode: .inline)
+            .navigationBarTitle(showNavigationTitle ? listInfo.title : "", displayMode: .inline)
             .navigationBarBackButtonHidden(true)
             .navigationBarItems(leading: Button(action: {
                 presentationMode.wrappedValue.dismiss()

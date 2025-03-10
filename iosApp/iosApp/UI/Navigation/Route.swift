@@ -63,8 +63,9 @@ struct RouterView: View {
                                 menuState.isMenuOpen = true
                             }
                         }
+                        .environmentObject(menuState) // 将menuState作为环境对象传递给子视图
                         #if os(macOS)
-                        .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
+                            .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
                         #endif
                     } else {
                         ProgressView()
@@ -112,16 +113,23 @@ extension AppleRoute: Identifiable {}
 struct TabItem<Content: View>: View {
     @State var router = Router()
     let content: (Router) -> Content
+    @EnvironmentObject private var menuState: FLNewAppState
+
     var body: some View {
         NavigationStack(path: $router.navPath) {
             content(router)
+                .environment(\.navigationLevel, 0)
                 .navigationDestination(for: AppleRoute.self) { route in
                     getView(route: route, onBack: {}, onNavigate: { route in router.navigate(to: route) })
+                        .environment(\.navigationLevel, 1)
+                        .environmentObject(menuState)
                 }
         }
         .sheet(item: $router.sheet) { route in
             NavigationStack {
                 getView(route: route, onBack: { router.hideSheet() }, onNavigate: { route in router.navigate(to: route) })
+                    .environment(\.navigationLevel, 1)
+                    .environmentObject(menuState)
                 #if os(macOS)
                     .frame(minWidth: 500, minHeight: 400)
                 #endif
@@ -131,6 +139,8 @@ struct TabItem<Content: View>: View {
         .fullScreenCover(item: $router.fullScreenCover) { route in
             NavigationStack {
                 getView(route: route, onBack: { router.hideFullScreenCover() }, onNavigate: { route in router.navigate(to: route) })
+                    .environment(\.navigationLevel, 1)
+                    .environmentObject(menuState)
             }
             .modifier(SwipeToDismissModifier(onDismiss: {
                 router.hideFullScreenCover()
@@ -194,7 +204,7 @@ struct TabItem<Content: View>: View {
                 tabStore: ProfileTabSettingStore(userKey: data.userKey)
             )
         case let .profileWithNameAndHost(data):
-            EmptyView()
+
             ProfileWithUserNameScreen(
                 accountType: data.accountType,
                 userName: data.userName,

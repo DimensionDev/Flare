@@ -326,6 +326,9 @@
     <string name="tab_settings_drag">Drag</string>
     <string name="tab_settings_edit">Edit</string>
     <string name="tab_settings_remove">Remove</string>
+    <string name="tab_settings_default">Default</string>
+    <string name="tab_settings_list">List</string>
+    <string name="tab_settings_feed">Feeds</string>
 
     <string name="local_filter_add">Add Filter</string>
     <string name="local_filter_no_expiration">No expiration</string>

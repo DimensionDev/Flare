@@ -4,7 +4,7 @@ import shared
 import SwiftUI
 
 struct ListDetailView: View {
-    let list: UiList
+    let listInfo: UiList
     let accountType: AccountType
     @State private var showMembers: Bool = false
     @State private var presenter: ListTimelinePresenter
@@ -13,7 +13,7 @@ struct ListDetailView: View {
     private let randomGradient: [Color]
 
     init(list: UiList, accountType: AccountType) {
-        self.list = list
+        self.listInfo = list
         self.accountType = accountType
         _presenter = State(initialValue: ListTimelinePresenter(accountType: accountType, listId: list.id))
         let gradients: [[Color]] = [
@@ -28,75 +28,89 @@ struct ListDetailView: View {
 
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    ZStack(alignment: .center) {
-                        headerBackgroundView
-                    }
-
-                    Text(list.title)
-                        .font(.title)
-                        .bold()
-                        .padding(.horizontal)
-                        .padding(.top, 16)
-
-                    HStack(alignment: .center, spacing: 12) {
-                        if let creator = list.creator {
-                            creatorProfileView(creator: creator)
-                        } else {
-                            unknownCreatorView
-                        }
-
-                        Spacer()
-
-                        memberCountsView
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 12)
-
-                    // 描述（如果有）
-                    if let description = list.description_, !description.isEmpty {
-                        Text(description)
-                            .font(.body)
-                            .padding()
-                    }
-
-                    Divider()
-                        .padding(.top, 8)
-
-                    // 查看成员按钮
-                    Button(action: {
-                        showMembers = true
-                    }) {
-                        HStack {
-                            Image(systemName: "person.2")
-                                .foregroundColor(.blue)
-                            Text("查看成员")
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.gray)
-                                .font(.caption)
-                        }
-                        .padding()
-                    }
+            // 使用 ZStack 将头部内容覆盖在列表顶部
+            ZStack(alignment: .top) {
+                // 主要内容：时间线
+                VStack(spacing: 0) {
+                    // 标题
+                    // Text("列表动态")
+                    //     .font(.headline)
+                    //     .padding(.horizontal)
+                    //     .padding(.vertical, 8)
+                    //     .frame(maxWidth: .infinity, alignment: .leading)
+                    //     .background(Color(UIColor.systemBackground))
+                    //     .padding(.top, 280) // 为头部留出空间
                     
-                    // 时间线内容
-                    VStack(alignment: .leading) {
-                        Text("列表动态")
-                            .font(.headline)
-                            .padding(.horizontal)
-                            .padding(.top)
-                        
-                        // 使用 StatusTimelineBuilder 模式
+                    // 使用List作为时间线容器
+                    List {
                         StatusTimelineComponent(
                             data: state.listState,
                             detailKey: nil
                         )
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                        .listRowSeparator(.hidden)
                     }
-
-                    Spacer()
+                    .listStyle(PlainListStyle())
                 }
+                
+                // 头部信息（固定在顶部）
+                VStack(alignment: .leading, spacing: 0) {
+
+                    headerBackgroundView
+                    
+
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text(listInfo.title)
+                            .font(.title)
+                            .bold()
+                            .padding(.horizontal)
+                            .padding(.top, 16)
+
+                        HStack(alignment: .center, spacing: 12) {
+                            if let creator = listInfo.creator {
+                                creatorProfileView(creator: creator)
+                            } else {
+                                unknownCreatorView
+                            }
+
+                            Spacer()
+
+                            memberCountsView
+                        }
+                        .padding(.horizontal)
+                        .padding(.vertical, 12)
+
+
+                        if let description = listInfo.description_, !description.isEmpty {
+                            Text(description)
+                                .font(.body)
+                                .padding()
+                        }
+
+                        Divider()
+                            .padding(.top, 8)
+
+
+                        Button(action: {
+                            showMembers = true
+                        }) {
+                            HStack {
+                                Image(systemName: "person.2")
+                                    .foregroundColor(.blue)
+                                Text("Show Members")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.gray)
+                                    .font(.caption)
+                            }
+                            .padding()
+                        }
+                    }
+                    .background(Color(UIColor.systemBackground))
+                }
+                .frame(height: 280)
+                .zIndex(1)
             }
             .edgesIgnoringSafeArea(.top)
             .navigationBarTitle("", displayMode: .inline)
@@ -115,8 +129,8 @@ struct ListDetailView: View {
                     destination:
                     ListMembersView(
                         accountType: accountType,
-                        listId: list.id,
-                        title: list.title
+                        listId: listInfo.id,
+                        title: listInfo.title
                     ),
                     isActive: $showMembers
                 ) {
@@ -129,7 +143,7 @@ struct ListDetailView: View {
     // 头部 banner
     private var headerBackgroundView: some View {
         ZStack {
-            if let avatarString = list.avatar,
+            if let avatarString = listInfo.avatar,
                let url = URL(string: avatarString)
             {
                 KFImage(url)
@@ -222,7 +236,7 @@ struct ListDetailView: View {
     private var memberCountsView: some View {
         HStack(spacing: 16) {
             VStack(alignment: .center, spacing: 2) {
-                Text("\(Int(list.likedCount))")
+                Text("\(Int(listInfo.likedCount))")
                     .font(.headline)
                     .bold()
                 Text("members")

@@ -12,49 +12,38 @@ struct ListMembersView: View {
     private let accountType: AccountType
 
     init(accountType: AccountType, listId: String, title: String = "列表成员") {
-        presenter = .init( accountType: accountType, listId: listId)
+        presenter = .init(accountType: accountType, listId: listId)
         self.title = title
         self.accountType = accountType
     }
 
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
-            VStack(spacing: 0) {
+            List {
                 switch onEnum(of: state.memberInfo) {
                 case .loading:
                     loadingView
                 case let .success(successData):
 
-                    VStack {
-                        // 状态信息区域
-//                         statusInfoView(itemCount: Int(successData.itemCount))
- 
-                            List {
-                                // 成员列表
-                                ForEach(0 ..< Int(successData.itemCount), id: \.self) { index in
-                                    if(successData.itemCount > index){
-                                         
-                                   
-                                    if let member = successData.peek(index: Int32(index)) {
-                                        memberRow(index: index, member: member)
-                                            .onAppear {
-                                                // 打印调试信息
-                                                print("🟢 调试信息: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
-                                                
-                                                successData.get(index: Int32(index))
-                                                // 更新计数
-                                                lastKnownItemCount = Int(successData.itemCount)
-                                                
-                                                // 打印更新后的计数
-                                                print("🟡 更新后: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
-                                            }
-                                    }
-                                    }
-                                }
+                    // 成员列表
+                    ForEach(0 ..< Int(successData.itemCount), id: \.self) { index in
+                        if successData.itemCount > index {
+                            if let member = successData.peek(index: Int32(index)) {
+                                memberRow(index: index, member: member)
+                                    .onAppear {
+                                        // 打印调试信息
+                                        print("🟢 调试信息: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
 
-                             }
-                            .listStyle(PlainListStyle())
-                     }
+                                        successData.get(index: Int32(index))
+                                        // 更新计数
+                                        lastKnownItemCount = Int(successData.itemCount)
+
+                                        // 打印更新后的计数
+                                        print("🟡 更新后: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
+                                    }
+                            }
+                        }
+                    }
                 case .empty:
                     emptyStateView
                 case let .error(errorData):
@@ -108,7 +97,7 @@ struct ListMembersView: View {
         }
     }
 
-    private func statusInfoView(itemCount: Int ) -> some View {
+    private func statusInfoView(itemCount: Int) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text("已加载成员: \(itemCount)")
@@ -117,7 +106,7 @@ struct ListMembersView: View {
                 Text("服务端总数: \(itemCount)")
                     .font(.caption)
                     .foregroundColor(.secondary)
-             }
+            }
             Spacer()
         }
         .padding()
@@ -127,7 +116,6 @@ struct ListMembersView: View {
         .padding(.top)
     }
 
-   
     // 单个成员行
     private func memberRow(index: Int, member: UiUserV2) -> some View {
         Button(action: {

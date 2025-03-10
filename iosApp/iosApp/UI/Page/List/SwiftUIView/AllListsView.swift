@@ -4,7 +4,7 @@ import shared
 import SwiftUI
 
 struct AllListsView: View {
-    @State private var presenter: PinnableListPresenter
+    @State private var presenter: AllListPresenter
     @EnvironmentObject private var router: Router
     @Environment(\.appSettings) private var appSettings
     private let accountType: AccountType
@@ -17,8 +17,8 @@ struct AllListsView: View {
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
             List {
-                switch onEnum(of: state.b)
-                     switch onEnum(of: state.items) {
+//                switch onEnum(of: state.b)
+                switch onEnum(of: state.items) {
                     case .loading:
                         loadingListsView
                     case let .success(successData):
@@ -34,8 +34,21 @@ struct AllListsView: View {
                                 }
                             }
                         }
+                    case let .empty(emptyState):
+                        VStack(spacing: 16) {
+                            Text("暂无列表")
+                                .font(.headline)
+                            
+                            Button("刷新") {
+                                emptyState.refresh()
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .padding()
                     case let .error(errorState):
-
+                        let errorMessage = (errorState.error as? KotlinThrowable)?.message ?? "未知错误"
+                        let error = NSError(domain: "AllListsView", code: 0, userInfo: [NSLocalizedDescriptionKey: errorMessage])
                         ErrorView(error: error) {
                             state.refresh()
                         }

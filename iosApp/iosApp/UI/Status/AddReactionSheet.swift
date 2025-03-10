@@ -2,8 +2,8 @@ import Kingfisher
 import shared
 import SwiftUI
 
-struct MisskeyReactionSheet: View {
-    @State private var presenter: MisskeyReactionPresenter
+struct AddReactionSheet: View {
+    @State private var presenter: AddReactionPresenter
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     private let onBack: () -> Void
 

@@ -19,4 +19,6 @@ internal data class PostStatus(
     val scheduledAt: String? = null,
     @SerialName("language")
     val language: String? = null,
+    @SerialName("quote_id")
+    val quoteID: String? = null,
 )

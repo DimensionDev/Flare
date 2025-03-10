@@ -11,6 +11,7 @@ import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Re
 import dev.dimension.flare.data.network.xqt.model.InstructionUnion
 import dev.dimension.flare.data.network.xqt.model.Media
 import dev.dimension.flare.data.network.xqt.model.TimelineAddEntries
+import dev.dimension.flare.data.network.xqt.model.TimelineAddToModule
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineModule
 import dev.dimension.flare.data.network.xqt.model.TimelineTwitterList
 import dev.dimension.flare.data.network.xqt.model.Tweet
@@ -715,6 +716,13 @@ internal fun List<InstructionUnion>.list(accountKey: MicroBlogKey): List<UiList>
                                     else -> null
                                 }
                             }
+                        else -> emptyList()
+                    }
+                }
+            is TimelineAddToModule ->
+                it.moduleItems.flatMap {
+                    when (it.item.itemContent) {
+                        is TimelineTwitterList -> listOfNotNull(it.item.itemContent.list)
                         else -> emptyList()
                     }
                 }

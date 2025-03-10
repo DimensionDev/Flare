@@ -98,7 +98,6 @@ public data class UiTimeline internal constructor(
             public sealed interface BottomContent {
                 public data class Reaction internal constructor(
                     val emojiReactions: ImmutableList<EmojiReaction>,
-                    val myReaction: String?,
                 ) : BottomContent {
                     public data class EmojiReaction internal constructor(
                         val name: String,
@@ -107,6 +106,7 @@ public data class UiTimeline internal constructor(
                         val onClicked: () -> Unit,
                         // TODO: make EmojiReaction a sealed interface
                         val isUnicode: Boolean,
+                        val me: Boolean,
                     ) {
                         val humanizedCount: String by lazy {
                             count.humanize()

@@ -317,10 +317,11 @@ internal fun Note.renderStatus(
                     onClicked = {
                         event.react(
                             statusKey = statusKey,
-                            hasReacted = myReaction != null,
+                            hasReacted = myReaction == emoji.key,
                             reaction = emoji.key,
                         )
                     },
+                    me = myReaction == emoji.key,
                 )
             }.sortedByDescending { it.count }
             .toPersistentList()
@@ -397,7 +398,7 @@ internal fun Note.renderStatus(
                     onClicked = {
                         if (myReaction == null) {
                             launcher.launch(
-                                AppDeepLink.Misskey.AddReaction(
+                                AppDeepLink.AddReaction(
                                     accountKey = accountKey,
                                     statusKey = statusKey,
                                 ),
@@ -499,7 +500,7 @@ internal fun Note.renderStatus(
                 .Visibility(renderedVisibility),
         bottomContent =
             UiTimeline.ItemContent.Status.BottomContent
-                .Reaction(reaction, myReaction),
+                .Reaction(reaction),
         sensitive = files?.any { it.isSensitive } ?: false,
         onClicked = {
             launcher.launch(
@@ -646,7 +647,7 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
 
 internal fun EmojiSimple.toUi(): UiEmoji =
     UiEmoji(
-        shortcode = name,
+        shortcode = ":$name:",
         url = url,
         category = category.orEmpty(),
         searchKeywords = aliases + name,

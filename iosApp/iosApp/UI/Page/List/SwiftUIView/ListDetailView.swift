@@ -14,7 +14,7 @@ struct ListDetailView: View {
     private let randomGradient: [Color]
 
     init(list: UiList, accountType: AccountType) {
-        self.listInfo = list
+        listInfo = list
         self.accountType = accountType
         _presenter = State(initialValue: ListTimelinePresenter(accountType: accountType, listId: list.id))
         let gradients: [[Color]] = [
@@ -29,11 +29,8 @@ struct ListDetailView: View {
 
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
-            // 使用单一列表，让头部随滚动消失
             List {
-                // 头部信息组（随滚动消失）
                 Group {
-                    // 头部背景
                     headerBackgroundView
                         .listRowInsets(EdgeInsets())
                         .listRowSeparator(.hidden)
@@ -43,8 +40,7 @@ struct ListDetailView: View {
                         .onDisappear {
                             showNavigationTitle = true
                         }
-                    
-                    // 列表基本信息
+
                     VStack(alignment: .leading, spacing: 0) {
                         Text(listInfo.title)
                             .font(.title)
@@ -67,7 +63,6 @@ struct ListDetailView: View {
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                     .listRowSeparator(.hidden)
 
-                    // 描述（如果有）
                     if let description = listInfo.description_, !description.isEmpty {
                         Text(description)
                             .font(.body)
@@ -75,15 +70,14 @@ struct ListDetailView: View {
                             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                             .listRowSeparator(.hidden)
                     }
-                    
-                    // 成员按钮
+
                     Button(action: {
                         showMembers = true
                     }) {
                         HStack {
                             Image(systemName: "person.2")
                                 .foregroundColor(.blue)
-                            Text("查看成员")
+                            Text("Show Members")
                                 .foregroundColor(.primary)
                             Spacer()
                             Image(systemName: "chevron.right")
@@ -92,17 +86,15 @@ struct ListDetailView: View {
                         }
                     }
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
-                    
-                    // 时间线标题
-                    Text("列表动态")
+
+                    Text("List Timeline")
                         .font(.headline)
                         .padding(.top, 16)
                         .padding(.bottom, 8)
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                         .listRowSeparator(.hidden)
                 }
-                
-                // 时间线内容
+
                 StatusTimelineComponent(
                     data: state.listState,
                     detailKey: nil
@@ -139,22 +131,18 @@ struct ListDetailView: View {
         }
     }
 
-    // 头部 banner
     private var headerBackgroundView: some View {
         ZStack {
             if let avatarString = listInfo.avatar,
                let url = URL(string: avatarString)
             {
                 KFImage(url)
-//                    .placeholder { gradientBackground }
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .clipped()
-//                    .blur(radius: 3)
                     .overlay(Color.black.opacity(0.2))
             } else {
-                // 显示渐变背景
                 gradientBackground
             }
         }

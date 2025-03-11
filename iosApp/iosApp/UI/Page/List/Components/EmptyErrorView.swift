@@ -1,8 +1,6 @@
 import shared
 import SwiftUI
 
-// MARK: - 空状态视图
-
 struct EmptyStateView: View {
     let icon: String
     let title: String
@@ -56,8 +54,6 @@ struct EmptyStateView: View {
     }
 }
 
-// MARK: - 错误视图
-
 struct ErrorView: View {
     let error: Error
     let retryAction: () -> Void
@@ -68,7 +64,7 @@ struct ErrorView: View {
                 .font(.system(size: 50))
                 .foregroundColor(.orange)
 
-            Text("加载失败")
+            Text("Error")
                 .font(.title3)
                 .fontWeight(.bold)
 
@@ -79,7 +75,7 @@ struct ErrorView: View {
                 .padding(.horizontal, 32)
 
             Button(action: retryAction) {
-                Text("重试")
+                Text("Retry")
                     .fontWeight(.semibold)
                     .padding(.horizontal, 24)
                     .padding(.vertical, 12)
@@ -89,66 +85,5 @@ struct ErrorView: View {
             }
         }
         .padding()
-    }
-}
-
-// MARK: - 用户头像视图
-
-struct UserAvatarView: View {
-    let imageUrl: String
-    let size: CGFloat
-
-    init(imageUrl: String, size: CGFloat = 40) {
-        self.imageUrl = imageUrl
-        self.size = size
-    }
-
-    var body: some View {
-        AsyncImage(url: URL(string: imageUrl)) { phase in
-            switch phase {
-            case .empty:
-                ProgressView()
-                    .frame(width: size, height: size)
-            case let .success(image):
-                image.resizable()
-                    .aspectRatio(contentMode: .fill)
-            case .failure:
-                Image(systemName: "person.circle.fill")
-                    .resizable()
-                    .foregroundColor(.gray.opacity(0.3))
-            @unknown default:
-                EmptyView()
-            }
-        }
-        .frame(width: size, height: size)
-        .clipShape(Circle())
-    }
-}
-
-// MARK: - 列表项骨架屏
-
-struct ListRowSkeletonView: View {
-    var body: some View {
-        HStack(spacing: 16) {
-            Circle()
-                .fill(Color.gray.opacity(0.2))
-                .frame(width: 50, height: 50)
-
-            VStack(alignment: .leading, spacing: 8) {
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(height: 14)
-                    .frame(width: 150)
-
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color.gray.opacity(0.2))
-                    .frame(height: 12)
-                    .frame(width: 200)
-            }
-
-            Spacer()
-        }
-        .padding(.vertical, 8)
-        .shimmering()
     }
 }

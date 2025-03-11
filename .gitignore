@@ -29,5 +29,5 @@ shared/shared.podspec
 .lh
 iosApp/K_D/
 *.sh
-*.*
+.*
 

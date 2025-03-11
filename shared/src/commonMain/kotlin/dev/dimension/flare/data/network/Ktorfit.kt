@@ -16,17 +16,19 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 
 internal fun ktorfit(
     baseUrl: String,
     authorization: Authorization? = null,
+    json: Json = JSON,
     config: HttpClientConfig<*>.() -> Unit = {},
 ) = de.jensklingenberg.ktorfit.ktorfit {
     baseUrl(baseUrl)
     httpClient(
         ktorClient(authorization) {
             install(ContentNegotiation) {
-                json(JSON)
+                json(json)
             }
             config.invoke(this)
         },

@@ -11,6 +11,9 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+/**
+ * Presenter for deleting lists.
+ */
 public class DeleteListPresenter(
     private val accountType: AccountType,
     private val listId: String,

@@ -7,6 +7,7 @@ import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
+import dev.dimension.flare.data.datasource.pleroma.PleromaDataSource
 import dev.dimension.flare.data.datasource.vvo.VVODataSource
 import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.model.MicroBlogKey
@@ -39,10 +40,29 @@ public sealed class UiAccount {
         data class Credential(
             val instance: String,
             val accessToken: String,
-        ) : UiAccount.Credential
+            val forkType: ForkType = ForkType.Mastodon,
+        ) : UiAccount.Credential {
+            enum class ForkType {
+                Mastodon,
+                Pleroma,
+            }
+        }
 
         override val dataSource by lazy {
-            MastodonDataSource(accountKey = accountKey, credential = credential)
+            when (credential.forkType) {
+                Credential.ForkType.Mastodon ->
+                    MastodonDataSource(
+                        accountKey = accountKey,
+                        instance = credential.instance,
+                        accessToken = credential.accessToken,
+                    )
+                Credential.ForkType.Pleroma ->
+                    PleromaDataSource(
+                        accountKey = accountKey,
+                        instance = credential.instance,
+                        accessToken = credential.accessToken,
+                    )
+            }
         }
     }
 

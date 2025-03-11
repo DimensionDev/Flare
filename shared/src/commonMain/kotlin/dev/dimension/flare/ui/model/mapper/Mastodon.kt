@@ -35,7 +35,6 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.datetime.Instant
-import kotlin.collections.orEmpty
 
 internal fun Notification.render(
     accountKey: MicroBlogKey,
@@ -182,6 +181,10 @@ private fun Status.renderStatus(
     val actualUser = account.render(accountKey, host)
     val isFromMe = actualUser.key == accountKey
     val canReblog = visibility in listOf(Visibility.Public, Visibility.Unlisted) || (isFromMe && visibility != Visibility.Direct)
+    val canQuote = canReblog && dataSource is StatusEvent.Pleroma
+//    val canReact = dataSource is StatusEvent.Pleroma
+    // TODO: there are too many actions for Pleroma, disable for now
+    val canReact = false
     val statusKey =
         MicroBlogKey(
             id = id ?: throw IllegalArgumentException("mastodon Status.id should not be null"),
@@ -193,8 +196,33 @@ private fun Status.renderStatus(
             Visibility.Unlisted -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home
             Visibility.Private -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers
             Visibility.Direct -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Specified
+            Visibility.List -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Followers
+            Visibility.Local -> UiTimeline.ItemContent.Status.TopEndContent.Visibility.Type.Home
             null -> null
         }
+    val bottomContent =
+        if (!emojiReactions.isNullOrEmpty()) {
+            UiTimeline.ItemContent.Status.BottomContent.Reaction(
+                emojiReactions
+                    .map {
+                        UiTimeline.ItemContent.Status.BottomContent.Reaction.EmojiReaction(
+                            name = it.name.orEmpty(),
+                            count = it.count ?: 0,
+                            me = it.me ?: false,
+                            url = it.url.orEmpty(),
+                            isUnicode = it.url.isNullOrEmpty(),
+                            onClicked = {
+                                if (dataSource is StatusEvent.Pleroma) {
+                                    dataSource.react(statusKey, true, it.name.orEmpty())
+                                }
+                            },
+                        )
+                    }.toImmutableList(),
+            )
+        } else {
+            null
+        }
+    val quoteStatus = quote?.renderStatus(host, accountKey, dataSource)
     return UiTimeline.ItemContent.Status(
         images =
             mediaAttachments
@@ -209,7 +237,7 @@ private fun Status.renderStatus(
                     }.toUi()
             },
         user = actualUser,
-        quote = persistentListOf(),
+        quote = listOfNotNull(quoteStatus).toImmutableList(),
         content = parseMastodonContent(this, accountKey, host).toUi(),
         card =
             card?.url?.let { url ->
@@ -244,6 +272,21 @@ private fun Status.renderStatus(
                             )
                         },
                     ),
+                    if (canQuote) {
+                        StatusAction.Item.Quote(
+                            count = quotesCount ?: 0,
+                            onClicked = {
+                                launcher.launch(
+                                    AppDeepLink.Compose.Quote(
+                                        accountKey = accountKey,
+                                        statusKey = statusKey,
+                                    ),
+                                )
+                            },
+                        )
+                    } else {
+                        null
+                    },
                     if (canReblog) {
                         StatusAction.Item.Retweet(
                             count = reblogsCount ?: 0,
@@ -262,6 +305,21 @@ private fun Status.renderStatus(
                             dataSource.like(statusKey, favourited ?: false)
                         },
                     ),
+                    if (canReact) {
+                        StatusAction.Item.Reaction(
+                            reacted = false,
+                            onClicked = {
+                                launcher.launch(
+                                    AppDeepLink.AddReaction(
+                                        accountKey = accountKey,
+                                        statusKey = statusKey,
+                                    ),
+                                )
+                            },
+                        )
+                    } else {
+                        null
+                    },
                     StatusAction.Group(
                         displayItem = StatusAction.Item.More,
                         actions =
@@ -369,6 +427,7 @@ private fun Status.renderStatus(
                 ),
             )
         },
+        bottomContent = bottomContent,
     )
 }
 
@@ -518,12 +577,7 @@ internal fun DbEmoji.toUi(): List<UiEmoji> =
 
         is EmojiContent.Misskey -> {
             content.data.map {
-                UiEmoji(
-                    shortcode = it.name,
-                    url = it.url,
-                    category = it.category.orEmpty(),
-                    searchKeywords = it.aliases + it.name,
-                )
+                it.toUi()
             }
         }
     }

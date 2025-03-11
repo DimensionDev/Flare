@@ -56,7 +56,7 @@ struct ProfileWithUserNameScreen: View {
                     )
                     .onAppear {
                         os_log("[📔][ProfileWithUserNameScreen]成功加载用户信息: userKey=%{public}@", log: .default, type: .debug, data.data.key.description)
-                    }
+                    }.secondNavigation()
                 }
             }
         }

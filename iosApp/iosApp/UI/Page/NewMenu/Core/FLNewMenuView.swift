@@ -5,8 +5,10 @@ struct FLNewMenuView: View {
     @Binding var isOpen: Bool
     @State private var showLogin = false
     @State private var showAccounts = false
+    @State private var showLists = false
     let accountType: AccountType
     let user: UiUserV2?
+    @EnvironmentObject private var router: Router
 
     init(isOpen: Binding<Bool>, accountType: AccountType, user: UiUserV2? = nil) {
         _isOpen = isOpen
@@ -23,7 +25,23 @@ struct FLNewMenuView: View {
 
             // 中间列表区域
             List {
-                // 预留空列表
+                // 列表入口
+                Button(action: {
+                    // 关闭菜单
+                    isOpen = false
+                    // 使用showLists展示列表
+                    showLists = true
+                }) {
+                    HStack {
+                        Image(systemName: "list.bullet")
+                            .frame(width: 28, height: 28)
+                        Text("List")
+                            .font(.body)
+                        Spacer()
+                    }
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(PlainButtonStyle())
             }
             .listStyle(PlainListStyle())
 
@@ -42,6 +60,11 @@ struct FLNewMenuView: View {
         .sheet(isPresented: $showAccounts) {
             NavigationView {
                 AccountsScreen()
+            }
+        }
+        .sheet(isPresented: $showLists) {
+            NavigationView {
+                AllListsView(accountType: accountType)
             }
         }
     }

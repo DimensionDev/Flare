@@ -29,6 +29,7 @@ import dev.dimension.flare.data.datasource.microblog.MemoryPagingSource
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
+import dev.dimension.flare.data.datasource.microblog.ReactionDataSource
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
@@ -52,6 +53,7 @@ import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
@@ -64,6 +66,7 @@ import dev.dimension.flare.ui.model.mapper.toUi
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
@@ -86,7 +89,8 @@ internal class MisskeyDataSource(
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.Misskey,
-    ListDataSource {
+    ListDataSource,
+    ReactionDataSource {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
@@ -339,7 +343,7 @@ internal class MisskeyDataSource(
         )
     }
 
-    fun emoji() =
+    override fun emoji(): Cacheable<ImmutableMap<String, ImmutableList<UiEmoji>>> =
         Cacheable(
             fetchSource = {
                 val emojis =
@@ -1042,19 +1046,44 @@ internal class MisskeyDataSource(
     private val listKey: String
         get() = "allLists_$accountKey"
 
-    override val myList: CacheData<ImmutableList<UiList>> =
-        MemCacheable(
-            key = listKey,
-            fetchSource = {
-                service
-                    .usersListsList(
-                        UsersListsListRequest(),
-                    ).body()
-                    .orEmpty()
-                    .map {
-                        it.render()
-                    }.toImmutableList()
-            },
+    override fun myList(scope: CoroutineScope): Flow<PagingData<UiList>> =
+        memoryPager(
+            pageSize = 20,
+            pagingKey = listKey,
+            scope = scope,
+            mediator =
+                object : RemoteMediator<Int, UiList>() {
+                    override suspend fun load(
+                        loadType: LoadType,
+                        state: PagingState<Int, UiList>,
+                    ): MediatorResult {
+                        try {
+                            if (loadType == LoadType.PREPEND) {
+                                return MediatorResult.Success(endOfPaginationReached = true)
+                            }
+                            val result =
+                                service
+                                    .usersListsList(
+                                        UsersListsListRequest(),
+                                    ).body()
+                                    .orEmpty()
+                                    .map {
+                                        it.render()
+                                    }.toImmutableList()
+
+                            MemoryPagingSource.update<UiList>(
+                                key = listKey,
+                                value = result.toImmutableList(),
+                            )
+
+                            return MediatorResult.Success(
+                                endOfPaginationReached = true,
+                            )
+                        } catch (e: Exception) {
+                            return MediatorResult.Error(e)
+                        }
+                    }
+                },
         )
 
     override suspend fun createList(metaData: ListMetaData) {
@@ -1067,7 +1096,7 @@ internal class MisskeyDataSource(
                 ).body()
         }.onSuccess { response ->
             if (response?.id != null) {
-                MemCacheable.updateWith<ImmutableList<UiList>>(
+                MemoryPagingSource.updateWith<UiList>(
                     key = listKey,
                 ) {
                     it
@@ -1089,7 +1118,7 @@ internal class MisskeyDataSource(
                 UsersListsDeleteRequest(listId = listId),
             )
         }.onSuccess {
-            MemCacheable.updateWith<ImmutableList<UiList>>(
+            MemoryPagingSource.updateWith<UiList>(
                 key = listKey,
             ) {
                 it
@@ -1111,7 +1140,7 @@ internal class MisskeyDataSource(
                 ),
             )
         }.onSuccess {
-            MemCacheable.updateWith<ImmutableList<UiList>>(
+            MemoryPagingSource.updateWith<UiList>(
                 key = listKey,
             ) {
                 it

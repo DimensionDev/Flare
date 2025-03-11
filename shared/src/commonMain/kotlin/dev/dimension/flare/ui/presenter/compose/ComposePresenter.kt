@@ -92,11 +92,15 @@ public class ComposePresenter(
                             }
                         }
                         PlatformType.Mastodon -> {
-                            val text = "${content.user?.handle} "
-                            InitialText(
-                                text = text,
-                                cursorPosition = text.length,
-                            )
+                            if (status is ComposeStatus.Reply) {
+                                val text = "${content.user?.handle} "
+                                InitialText(
+                                    text = text,
+                                    cursorPosition = text.length,
+                                )
+                            } else {
+                                null
+                            }
                         }
                         else -> null
                     }

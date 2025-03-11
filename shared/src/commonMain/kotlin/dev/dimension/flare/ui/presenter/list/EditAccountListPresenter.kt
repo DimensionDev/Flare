@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.toPagingState
@@ -24,6 +25,10 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
+/**
+ * Presenter for editing lists for a user.
+ * This presenter should be used for managing lists for a user.
+ */
 public class EditAccountListPresenter(
     private val accountType: AccountType,
     private val userKey: MicroBlogKey,
@@ -40,8 +45,8 @@ public class EditAccountListPresenter(
                 .map { service ->
                     require(service is ListDataSource)
                     remember(service) {
-                        service.myList
-                    }
+                        service.myList(scope = scope)
+                    }.collectAsLazyPagingItems()
                 }.toPagingState()
         val userLists =
             serviceState.flatMap { service ->
@@ -78,7 +83,14 @@ public class EditAccountListPresenter(
 
 @Immutable
 public interface EditAccountListState {
+    /**
+     * All lists.
+     */
     public val lists: PagingState<UiList>
+
+    /**
+     * Lists that the user is a member of.
+     */
     public val userLists: UiState<ImmutableList<UiList>>
 
     public fun addList(list: UiList)

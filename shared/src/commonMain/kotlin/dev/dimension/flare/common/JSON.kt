@@ -10,10 +10,15 @@ private val json =
         ignoreUnknownKeys = true
         isLenient = true
         coerceInputValues = true
+    }
+
+private val jsonWithEncodeDefault =
+    Json(json) {
         encodeDefaults = true
     }
 
 internal val JSON get() = json
+internal val JSON_WITH_ENCODE_DEFAULT get() = jsonWithEncodeDefault
 
 internal inline fun <reified T> T.encodeJson(): String = JSON.encodeToString(this)
 

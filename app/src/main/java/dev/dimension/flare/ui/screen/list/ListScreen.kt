@@ -217,54 +217,56 @@ private fun ListScreen(
                         state.items,
                         toList,
                         trailingContent = { item ->
-                            var showDropdown by remember {
-                                mutableStateOf(false)
-                            }
-                            IconButton(onClick = { showDropdown = true }) {
-                                FAIcon(
-                                    imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
-                                    contentDescription = stringResource(id = R.string.more),
-                                )
-                                DropdownMenu(
-                                    expanded = showDropdown,
-                                    onDismissRequest = { showDropdown = false },
-                                ) {
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                text = stringResource(id = R.string.list_edit),
-                                            )
-                                        },
-                                        onClick = {
-                                            editList(item)
-                                            showDropdown = false
-                                        },
-                                        leadingIcon = {
-                                            FAIcon(
-                                                imageVector = FontAwesomeIcons.Solid.Pen,
-                                                contentDescription = stringResource(id = R.string.list_edit),
-                                            )
-                                        },
+                            if (!item.readonly) {
+                                var showDropdown by remember {
+                                    mutableStateOf(false)
+                                }
+                                IconButton(onClick = { showDropdown = true }) {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
+                                        contentDescription = stringResource(id = R.string.more),
                                     )
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                text = stringResource(id = R.string.list_delete),
-                                                color = MaterialTheme.colorScheme.error,
-                                            )
-                                        },
-                                        onClick = {
-                                            deleteList(item)
-                                            showDropdown = false
-                                        },
-                                        leadingIcon = {
-                                            FAIcon(
-                                                imageVector = FontAwesomeIcons.Solid.Trash,
-                                                contentDescription = stringResource(id = R.string.list_delete),
-                                                tint = MaterialTheme.colorScheme.error,
-                                            )
-                                        },
-                                    )
+                                    DropdownMenu(
+                                        expanded = showDropdown,
+                                        onDismissRequest = { showDropdown = false },
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = stringResource(id = R.string.list_edit),
+                                                )
+                                            },
+                                            onClick = {
+                                                editList(item)
+                                                showDropdown = false
+                                            },
+                                            leadingIcon = {
+                                                FAIcon(
+                                                    imageVector = FontAwesomeIcons.Solid.Pen,
+                                                    contentDescription = stringResource(id = R.string.list_edit),
+                                                )
+                                            },
+                                        )
+                                        DropdownMenuItem(
+                                            text = {
+                                                Text(
+                                                    text = stringResource(id = R.string.list_delete),
+                                                    color = MaterialTheme.colorScheme.error,
+                                                )
+                                            },
+                                            onClick = {
+                                                deleteList(item)
+                                                showDropdown = false
+                                            },
+                                            leadingIcon = {
+                                                FAIcon(
+                                                    imageVector = FontAwesomeIcons.Solid.Trash,
+                                                    contentDescription = stringResource(id = R.string.list_delete),
+                                                    tint = MaterialTheme.colorScheme.error,
+                                                )
+                                            },
+                                        )
+                                    }
                                 }
                             }
                         },

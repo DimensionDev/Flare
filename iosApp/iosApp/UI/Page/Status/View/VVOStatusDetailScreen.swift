@@ -7,6 +7,9 @@ struct VVOStatusDetailScreen: View {
     @State private var type: DetailStatusType = .comment
     private let statusKey: MicroBlogKey
 
+    // 获取全局的AppState
+    @EnvironmentObject private var menuState: FLNewAppState
+
     init(accountType: AccountType, statusKey: MicroBlogKey) {
         presenter = .init(accountType: accountType, statusKey: statusKey)
         self.statusKey = statusKey
@@ -77,6 +80,8 @@ struct VVOStatusDetailScreen: View {
                     }
                 }
         }
+        // 使用封装的二级导航修饰符
+        .secondNavigation()
     }
 }
 

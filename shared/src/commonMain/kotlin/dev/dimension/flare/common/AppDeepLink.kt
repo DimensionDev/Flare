@@ -134,6 +134,15 @@ public object AppDeepLink {
         ): String = "$APPSCHEMA://DeleteStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
     }
 
+    public object AddReaction {
+        public const val ROUTE: String = "$APPSCHEMA://AddReaction/{accountKey}/{statusKey}"
+
+        public operator fun invoke(
+            accountKey: MicroBlogKey,
+            statusKey: MicroBlogKey,
+        ): String = "$APPSCHEMA://AddReaction/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
+    }
+
     public object Bluesky {
         public object ReportStatus {
             public const val ROUTE: String = "$APPSCHEMA://Bluesky/ReportStatus/{accountKey}/{statusKey}"
@@ -169,16 +178,6 @@ public object AppDeepLink {
                 userKey: MicroBlogKey,
             ): String =
                 "$APPSCHEMA://Misskey/ReportStatus/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}/${userKey.toString().encodeURLPathPart()}"
-        }
-
-        public object AddReaction {
-            public const val ROUTE: String = "$APPSCHEMA://Misskey/AddReaction/{accountKey}/{statusKey}"
-
-            public operator fun invoke(
-                accountKey: MicroBlogKey,
-                statusKey: MicroBlogKey,
-            ): String =
-                "$APPSCHEMA://Misskey/AddReaction/${accountKey.toString().encodeURLPathPart()}/${statusKey.toString().encodeURLPathPart()}"
         }
     }
 

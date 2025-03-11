@@ -11,6 +11,7 @@ import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Re
 import dev.dimension.flare.data.network.xqt.model.InstructionUnion
 import dev.dimension.flare.data.network.xqt.model.Media
 import dev.dimension.flare.data.network.xqt.model.TimelineAddEntries
+import dev.dimension.flare.data.network.xqt.model.TimelineAddToModule
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineModule
 import dev.dimension.flare.data.network.xqt.model.TimelineTwitterList
 import dev.dimension.flare.data.network.xqt.model.Tweet
@@ -718,15 +719,17 @@ internal fun List<InstructionUnion>.list(accountKey: MicroBlogKey): List<UiList>
                         else -> emptyList()
                     }
                 }
+            is TimelineAddToModule ->
+                it.moduleItems.flatMap {
+                    when (it.item.itemContent) {
+                        is TimelineTwitterList -> listOfNotNull(it.item.itemContent.list)
+                        else -> emptyList()
+                    }
+                }
             else -> emptyList()
         }
     }.filter {
-        val user =
-            when (val user = it.userResults?.result) {
-                is User -> user.render(accountKey = accountKey)
-                else -> null
-            }
-        user != null && user.key == accountKey
+        it.following == true
     }.map {
         it.render(accountKey = accountKey)
     }
@@ -745,6 +748,7 @@ internal fun TwitterList.render(accountKey: MicroBlogKey): UiList {
         description = description.orEmpty(),
         platformType = PlatformType.xQt,
         creator = user,
-        avatar = customBannerMedia?.mediaInfo?.originalImgURL,
+        avatar = customBannerMedia?.mediaInfo?.originalImgURL ?: defaultBannerMedia?.mediaInfo?.originalImgURL,
+        readonly = user?.key != accountKey,
     )
 }

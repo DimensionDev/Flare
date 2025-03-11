@@ -6,6 +6,9 @@ class FLNewAppState: ObservableObject {
     @Published var isMenuOpen: Bool
     @Published var currentTab: Int
 
+    // 添加一个新属性用于标记当前是否在导航页面
+    @Published var isInNavigationDetail: Bool = false
+
     // - Public Properties
     let gestureState: FLNewGestureState
     private weak var tabProvider: TabStateProvider?
@@ -139,5 +142,19 @@ class FLNewAppState: ObservableObject {
 
     func logPerformance(_ name: String, operation: () -> Void) {
         performanceMonitor.logGesturePerformance(name, operation: operation)
+    }
+
+    // 添加新方法：进入导航详情页
+    func enterNavigationDetail() {
+        isInNavigationDetail = true
+        // 禁用手势
+        gestureState.isGestureEnabled = false
+    }
+
+    // 添加新方法：离开导航详情页
+    func leaveNavigationDetail() {
+        isInNavigationDetail = false
+        // 如果菜单没有打开，启用手势
+        gestureState.isGestureEnabled = !isMenuOpen
     }
 }

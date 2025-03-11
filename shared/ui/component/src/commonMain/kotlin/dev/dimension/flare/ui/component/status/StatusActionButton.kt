@@ -72,7 +72,7 @@ public fun StatusActionButton(
                             rippleIndication(
                                 bounded = false,
                                 radius = 20.dp,
-                                color = color,
+                                color = Color.Unspecified,
                             ),
                     ),
             tint = color,

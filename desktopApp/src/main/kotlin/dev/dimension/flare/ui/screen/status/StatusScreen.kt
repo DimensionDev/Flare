@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
@@ -42,8 +43,10 @@ internal fun StatusScreen(
         modifier =
             Modifier
                 .fillMaxSize(),
+        contentAlignment = Alignment.TopCenter,
     ) {
         LazyStatusVerticalStaggeredGrid(
+            modifier = Modifier.widthIn(max = 480.dp),
             columns = StaggeredGridCells.Fixed(1),
             contentPadding =
                 PaddingValues(

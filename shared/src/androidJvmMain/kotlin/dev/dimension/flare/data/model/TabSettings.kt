@@ -415,7 +415,7 @@ public sealed interface TimelineTabItem : TabItem {
                         ),
                 ),
                 Bluesky.FeedsTabItem(
-                    account = AccountType.Active,
+                    account = AccountType.Specific(accountKey),
                     metaData =
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Feeds),

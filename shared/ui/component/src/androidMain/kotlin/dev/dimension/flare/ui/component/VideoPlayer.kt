@@ -1,3 +1,5 @@
+@file:kotlin.OptIn(ExperimentalFoundationApi::class)
+
 package dev.dimension.flare.ui.component
 
 import android.content.Context
@@ -6,6 +8,8 @@ import androidx.annotation.OptIn
 import androidx.collection.lruCache
 import androidx.compose.foundation.AndroidEmbeddedExternalSurface
 import androidx.compose.foundation.AndroidExternalSurfaceScope
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
@@ -37,7 +41,7 @@ import org.koin.compose.koinInject
 import kotlin.concurrent.timer
 import kotlin.time.Duration.Companion.minutes
 
-@OptIn(UnstableApi::class)
+@OptIn(UnstableApi::class, ExperimentalFoundationApi::class)
 @Composable
 public fun VideoPlayer(
     uri: String,
@@ -117,7 +121,24 @@ public fun VideoPlayer(
             modifier =
                 Modifier
                     .clipToBounds()
-                    .matchParentSize(),
+                    .let {
+                        if (aspectRatio != null) {
+                            it.aspectRatio(
+                                aspectRatio,
+                            )
+                        } else {
+                            it
+                        }
+                    }.let {
+                        if (onClick != null) {
+                            it.combinedClickable(
+                                onClick = onClick,
+                                onLongClick = onLongClick,
+                            )
+                        } else {
+                            it
+                        }
+                    }.matchParentSize(),
         )
 //        AndroidView(
 //            modifier =

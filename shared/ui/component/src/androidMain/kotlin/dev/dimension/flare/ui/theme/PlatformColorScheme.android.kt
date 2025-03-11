@@ -16,7 +16,7 @@ internal actual object PlatformColorScheme {
         get() = MaterialTheme.colorScheme.onSurfaceVariant
     actual val outline: Color
         @Composable
-        get() = MaterialTheme.colorScheme.outline.copy(alpha = MediumAlpha)
+        get() = MaterialTheme.colorScheme.outlineVariant
     actual val card: Color
         @Composable
         get() = MaterialTheme.colorScheme.surface

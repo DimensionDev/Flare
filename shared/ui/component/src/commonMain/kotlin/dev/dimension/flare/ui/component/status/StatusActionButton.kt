@@ -28,6 +28,7 @@ import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuScope
 import dev.dimension.flare.ui.component.platform.PlatformIcon
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
+import dev.dimension.flare.ui.component.platform.rippleIndication
 import dev.dimension.flare.ui.theme.PlatformContentColor
 
 @Composable
@@ -66,12 +67,13 @@ public fun StatusActionButton(
                     .clickable(
                         onClick = onClicked,
                         enabled = enabled,
-//                        interactionSource = interactionSource,
-//                        indication =
-//                            ripple(
-//                                bounded = false,
-//                                radius = 20.dp,
-//                            ),
+                        interactionSource = interactionSource,
+                        indication =
+                            rippleIndication(
+                                bounded = false,
+                                radius = 20.dp,
+                                color = color,
+                            ),
                     ),
             tint = color,
         )
@@ -81,7 +83,16 @@ public fun StatusActionButton(
                 text = text,
 //                style = MaterialTheme.typography.bodySmall,
                 color = color,
-                modifier = Modifier.width(textMinWidth),
+                modifier =
+                    Modifier
+                        .width(textMinWidth)
+                        .pointerHoverIcon(PointerIcon.Hand)
+                        .clickable(
+                            onClick = onClicked,
+                            enabled = enabled,
+                            interactionSource = interactionSource,
+                            indication = null,
+                        ),
             )
         } else {
             if (withTextMinWidth) {

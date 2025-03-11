@@ -91,9 +91,8 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.HtmlText
+import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.ThemeWrapper
-import dev.dimension.flare.ui.component.status.UserCompat
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
@@ -290,8 +289,8 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         ) {
-                                            HtmlText(
-                                                element = tab.profile.name.data,
+                                            RichText(
+                                                text = tab.profile.name,
                                                 maxLines = 1,
                                                 overflow = TextOverflow.Ellipsis,
                                             )
@@ -309,7 +308,10 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                                 },
                                 icon = {
                                     tabState.onSuccess { tab ->
-                                        UserCompat(tab.profile)
+                                        AvatarComponent(
+                                            tab.profile.avatar,
+                                            size = 24.dp,
+                                        )
                                     }
                                 },
                             )

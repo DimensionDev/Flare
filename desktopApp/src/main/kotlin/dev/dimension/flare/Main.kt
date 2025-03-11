@@ -1,13 +1,11 @@
 package dev.dimension.flare
 
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.key
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -18,7 +16,6 @@ import androidx.navigation.compose.rememberNavController
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.request.crossfade
-import com.jthemedetecor.OsThemeDetector
 import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.di.desktopModule
 import dev.dimension.flare.ui.route.FloatingWindowState
@@ -30,9 +27,6 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.context.startKoin
 import java.awt.Desktop
-import java.util.function.Consumer
-
-private val detector = OsThemeDetector.getDetector()
 
 fun main(args: Array<String>) {
     startKoin {
@@ -60,21 +54,6 @@ fun main(args: Array<String>) {
                 )
             }
         }
-        var isDarkTheme by remember {
-            mutableStateOf(detector.isDark)
-        }
-        val listener =
-            remember {
-                Consumer<Boolean> { isDark ->
-                    isDarkTheme = isDark
-                }
-            }
-        DisposableEffect(Unit) {
-            detector.registerListener(listener)
-            onDispose {
-                detector.removeListener(listener)
-            }
-        }
         val navController = rememberNavController()
         LaunchedEffect(Unit) {
             if (SystemUtils.IS_OS_MAC_OSX) {
@@ -93,9 +72,7 @@ fun main(args: Array<String>) {
                     size = DpSize(1280.dp, 720.dp),
                 ),
         ) {
-            FlareTheme(
-                isDarkTheme = isDarkTheme,
-            ) {
+            FlareTheme {
                 FlareApp(
                     navController = navController,
                     onRawImage = { url ->
@@ -125,13 +102,21 @@ fun main(args: Array<String>) {
                 onCloseRequest = {
                     extraWindowRoutes.remove(key)
                 },
+                onKeyEvent = {
+                    if (it.key == Key.Escape) {
+                        extraWindowRoutes.remove(key)
+                        true
+                    } else {
+                        false
+                    }
+                },
                 content = {
                     LaunchedEffect(key) {
                         value.bringToFront = {
                             window.toFront()
                         }
                     }
-                    FlareTheme(isDarkTheme = isDarkTheme) {
+                    FlareTheme {
                         WindowRouter(
                             route = value.route,
                             onBack = {

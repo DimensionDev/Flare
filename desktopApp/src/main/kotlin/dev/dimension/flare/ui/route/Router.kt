@@ -28,14 +28,15 @@ import dev.dimension.flare.ui.screen.home.DiscoverScreen
 import dev.dimension.flare.ui.screen.home.NotificationScreen
 import dev.dimension.flare.ui.screen.home.ProfileScreen
 import dev.dimension.flare.ui.screen.home.TimelineScreen
+import dev.dimension.flare.ui.screen.list.ListScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import dev.dimension.flare.ui.screen.status.StatusScreen
 import dev.dimension.flare.ui.screen.status.VVOCommentScreen
 import dev.dimension.flare.ui.screen.status.VVOStatusScreen
+import dev.dimension.flare.ui.screen.status.action.AddReactionSheet
 import dev.dimension.flare.ui.screen.status.action.BlueskyReportStatusDialog
 import dev.dimension.flare.ui.screen.status.action.DeleteStatusConfirmDialog
 import dev.dimension.flare.ui.screen.status.action.MastodonReportDialog
-import dev.dimension.flare.ui.screen.status.action.MisskeyReactionSheet
 import dev.dimension.flare.ui.screen.status.action.MisskeyReportDialog
 import kotlinx.collections.immutable.persistentMapOf
 import kotlin.reflect.KType
@@ -110,7 +111,8 @@ internal fun Router(
                 },
             )
         }
-        screen<Route.AllLists> {
+        screen<Route.AllLists> { (_, args) ->
+            ListScreen(args.accountType)
         }
         screen<Route.BlueskyFeeds> {
         }
@@ -255,7 +257,7 @@ internal fun Router(
                 )
             }
         }
-        composable(AppDeepLink.Misskey.AddReaction.ROUTE) {
+        dialog(AppDeepLink.AddReaction.ROUTE) {
             val statusKey =
                 it.arguments
                     ?.getString("statusKey")
@@ -266,7 +268,7 @@ internal fun Router(
                     ?.let(MicroBlogKey::valueOf)
                     ?.let(AccountType::Specific)
             if (statusKey != null && accountKey != null) {
-                MisskeyReactionSheet(
+                AddReactionSheet(
                     statusKey = statusKey,
                     accountType = accountKey,
                     onBack = navController::navigateUp,

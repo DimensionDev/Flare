@@ -21,14 +21,21 @@ struct StatusTimelineComponent: View {
         case let .success(success):
             ForEach(0 ..< success.itemCount, id: \.self) { index in
                 let data = success.peek(index: index)
-                VStack {
+                VStack(spacing: 0) {
                     if let status = data {
                         StatusItemView(
                             data: status,
                             detailKey: detailKey
                         )
+                        .padding(.vertical, 8)
                     } else {
                         StatusPlaceHolder()
+                    }
+                    
+                    if index < success.itemCount - 1 {
+                        Divider()
+                            .background(Color(UIColor.separator))
+                            .padding(.horizontal, 0)
                     }
                 }
                 .onAppear {

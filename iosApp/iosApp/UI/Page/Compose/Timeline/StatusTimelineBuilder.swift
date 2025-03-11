@@ -31,7 +31,7 @@ struct StatusTimelineComponent: View {
                     } else {
                         StatusPlaceHolder()
                     }
-                    
+
                     if index < success.itemCount - 1 {
                         Divider()
                             .background(Color(UIColor.separator))

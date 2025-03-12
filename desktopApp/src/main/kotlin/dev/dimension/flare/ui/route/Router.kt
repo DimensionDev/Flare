@@ -24,6 +24,7 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.screen.feeds.FeedScreen
 import dev.dimension.flare.ui.screen.home.DiscoverScreen
 import dev.dimension.flare.ui.screen.home.NotificationScreen
 import dev.dimension.flare.ui.screen.home.ProfileScreen
@@ -114,7 +115,8 @@ internal fun Router(
         screen<Route.AllLists> { (_, args) ->
             ListScreen(args.accountType)
         }
-        screen<Route.BlueskyFeeds> {
+        screen<Route.BlueskyFeeds> { (_, args) ->
+            FeedScreen(args.accountType)
         }
         screen<Route.DirectMessage> {
         }

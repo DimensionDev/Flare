@@ -8,6 +8,12 @@ internal expect object PlatformColorScheme {
     val primary: Color
 
     @get:Composable
+    val primaryContainer: Color
+
+    @get:Composable
+    val onPrimaryContainer: Color
+
+    @get:Composable
     val error: Color
 
     @get:Composable

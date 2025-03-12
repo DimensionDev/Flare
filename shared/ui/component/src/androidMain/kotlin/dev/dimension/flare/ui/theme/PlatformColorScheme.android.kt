@@ -8,6 +8,12 @@ internal actual object PlatformColorScheme {
     actual val primary: Color
         @Composable
         get() = MaterialTheme.colorScheme.primary
+    actual val primaryContainer: Color
+        @Composable
+        get() = MaterialTheme.colorScheme.primaryContainer
+    actual val onPrimaryContainer: Color
+        @Composable
+        get() = MaterialTheme.colorScheme.onPrimaryContainer
     actual val error: Color
         @Composable
         get() = MaterialTheme.colorScheme.error

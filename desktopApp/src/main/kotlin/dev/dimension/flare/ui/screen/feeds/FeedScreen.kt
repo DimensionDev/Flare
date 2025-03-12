@@ -1,12 +1,12 @@
-package dev.dimension.flare.ui.screen.list
+package dev.dimension.flare.ui.screen.feeds
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.model.AccountType
@@ -17,39 +17,37 @@ import dev.dimension.flare.ui.screen.home.TimelineScreen
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
-internal fun ListScreen(accountType: AccountType) {
+internal fun FeedScreen(accountType: AccountType) {
     val state by producePresenter {
         presenter()
     }
     MasterDetailView(
         state =
-            if (state.selectedList == null) {
+            if (state.selectedFeed == null) {
                 MasterDetailViewState.Master
             } else {
                 MasterDetailViewState.Detail
             },
         master = {
-            AllListScreen(
+            FeedListScreen(
                 accountType = accountType,
-                onAddList = {
-                },
-                toList = {
-                    state.setSelectedList(it)
+                toFeed = {
+                    state.setSelectedFeed(it)
                 },
             )
         },
         detail = {
-            state.selectedList?.let {
+            state.selectedFeed?.let {
                 TimelineScreen(
                     tabItem =
                         remember(it, accountType) {
-                            ListTimelineTabItem(
+                            Bluesky.FeedTabItem(
                                 account = accountType,
-                                listId = it.id,
+                                uri = it.id,
                                 metaData =
                                     TabMetaData(
                                         title = TitleType.Text(it.title),
-                                        icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                                        icon = IconType.Material(IconType.Material.MaterialIcon.Feeds),
                                     ),
                             )
                         },
@@ -62,12 +60,12 @@ internal fun ListScreen(accountType: AccountType) {
 @Composable
 private fun presenter() =
     run {
-        var selectedList by remember { mutableStateOf<UiList?>(null) }
+        var selectedFeed by remember { mutableStateOf<UiList?>(null) }
         object {
-            val selectedList = selectedList
+            val selectedFeed = selectedFeed
 
-            fun setSelectedList(list: UiList?) {
-                selectedList = list
+            fun setSelectedFeed(value: UiList?) {
+                selectedFeed = value
             }
         }
     }

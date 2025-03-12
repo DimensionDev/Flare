@@ -52,6 +52,7 @@ import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.ItemPlaceHolder
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -61,7 +62,6 @@ import dev.dimension.flare.ui.presenter.dm.DMListPresenter
 import dev.dimension.flare.ui.presenter.dm.DMListState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.home.NavigationState
-import dev.dimension.flare.ui.screen.list.ItemPlaceHolder
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch

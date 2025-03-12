@@ -3,6 +3,7 @@
     <string name="ok">OK</string>
     <string name="cancel">Cancel</string>
     <string name="delete">Delete</string>
+    <string name="refresh">Refresh</string>
 
     <string name="home_compose">Compose</string>
     <string name="home_login">Login</string>
@@ -83,4 +84,34 @@
     <string name="media_hide_thumbnail_list">Hide thumbnail list</string>
     <string name="media_save">Save</string>
     <string name="media_fullscreen">Fullscreen</string>
+
+    <string name="list_add">Add list</string>
+    <string name="list_edit">Edit list</string>
+    <string name="list_delete">Delete list</string>
+    <string name="list_delete_confirm">Are you sure you want to delete this list %1$s?</string>
+    <string name="list_empty">No lists</string>
+    <string name="list_error">Failed to load lists</string>
+    <string name="list_create">Create list</string>
+    <string name="list_create_name">List name</string>
+    <string name="list_create_name_hint">List name</string>
+    <string name="list_edit_members">Members</string>
+    <string name="list_edit_edit_members">Edit members</string>
+    <string name="list_edit_no_members">No members</string>
+    <string name="list_edit_members_error">Failed to load members</string>
+    <string name="edit_list_member_title">Edit list members</string>
+    <string name="edit_list_member_placeholder">Search your following</string>
+    <string name="edit_list_member_label">Search</string>
+    <string name="edit_list_member_search">Search</string>
+    <string name="edit_list_member_search_empty">No users found</string>
+    <string name="edit_list_member_search_error">Failed to search users</string>
+    <string name="edit_list_member_add">Add</string>
+    <string name="edit_list_member_remove">Remove</string>
+    <string name="list_create_description">List description</string>
+    <string name="list_create_description_hint">List description</string>
+
+    <string name="feeds_my_feeds_title">My feeds</string>
+    <string name="feeds_discover_feeds_title">Discover feeds</string>
+    <string name="feeds_discover_feeds_created_by">Created by %1$s</string>
+    <string name="feeds_unsubscribe">Unsubscribe</string>
+    <string name="feeds_subscribe">Subscribe</string>
 </resources>

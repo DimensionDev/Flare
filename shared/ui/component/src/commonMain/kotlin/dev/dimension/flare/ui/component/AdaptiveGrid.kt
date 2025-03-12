@@ -57,7 +57,7 @@ internal fun AdaptiveGrid(
                             }
                         }
 
-                val itemSize = (constraints.maxWidth - space * (rowCount - 1)) / rowCount
+                val itemSize = ((constraints.maxWidth - space * (rowCount - 1)) / rowCount).coerceAtLeast(0)
                 val itemConstraints =
                     constraints.copy(
                         maxWidth = itemSize,

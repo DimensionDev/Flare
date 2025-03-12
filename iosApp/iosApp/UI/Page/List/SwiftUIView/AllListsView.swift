@@ -11,6 +11,8 @@ struct AllListsView: View {
     @EnvironmentObject private var router: Router
     @Environment(\.appSettings) private var appSettings
     @State private var lastKnownItemCount: Int = 0
+    @State private var currentUser: UiUserV2?
+    @State private var isMastodonUser: Bool = false
     private let accountType: AccountType
 
     @StateObject private var tabSettingStore: AppBarTabSettingStore
@@ -19,6 +21,20 @@ struct AllListsView: View {
         presenter = .init(accountType: accountType)
         self.accountType = accountType
 
+        let user = UserManager.shared.getCurrentUser()
+        _currentUser = State(initialValue: user)
+
+        // 检查是否为Mastodon账户
+        var isMastodon = false
+        if let user {
+            let platformTypeString = String(describing: user.platformType).lowercased()
+
+            if platformTypeString == "mastodon" {
+                isMastodon = true
+                logger.debug("当前用户平台类型: \(platformTypeString), 是否Mastodon: \(isMastodon)")
+            }
+        }
+        _isMastodonUser = State(initialValue: isMastodon)
         _tabSettingStore = StateObject(wrappedValue: AppBarTabSettingStore(accountType: accountType))
     }
 
@@ -36,7 +52,8 @@ struct AllListsView: View {
                                 EnhancedListRowView(
                                     list: list,
                                     accountType: accountType,
-                                    isPinned: tabSettingStore.pinnedListIds.contains(list.id) // 从 Store 获取 pin 状态
+                                    isPinned: tabSettingStore.pinnedListIds.contains(list.id), // 从 Store 获取 pin 状态
+                                    defaultUser: isMastodonUser ? currentUser : nil
                                 )
                                 .onAppear {
                                     // 获取数据并触发加载
@@ -97,21 +114,23 @@ private struct EnhancedListRowView: View {
     @EnvironmentObject private var router: Router
     @State private var navigateToDetail = false
     let accountType: AccountType
+    let defaultUser: UiUserV2?
 
-    init(list: UiList, accountType: AccountType, isPinned: Bool) {
+    init(list: UiList, accountType: AccountType, isPinned: Bool, defaultUser: UiUserV2? = nil) {
         self.list = list
         self.accountType = accountType
         _isPinned = State(initialValue: isPinned)
+        self.defaultUser = defaultUser
     }
 
     var body: some View {
         ZStack {
-            // 使用ListItemRowView替换原有的实现
             ListItemRowView(
                 list: list,
                 isPinned: isPinned,
                 showCreator: true,
                 showMemberCount: true,
+                defaultUser: defaultUser,
                 onTap: {
                     navigateToDetail = true
                 },
@@ -123,7 +142,11 @@ private struct EnhancedListRowView: View {
 
             // 隐藏的导航链接
             NavigationLink(
-                destination: ListDetailView(list: list, accountType: accountType),
+                destination: ListDetailView(
+                    list: list,
+                    accountType: accountType,
+                    defaultUser: defaultUser
+                ),
                 isActive: $navigateToDetail
             ) {
                 EmptyView()

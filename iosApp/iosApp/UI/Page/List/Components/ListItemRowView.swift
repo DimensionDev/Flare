@@ -8,6 +8,7 @@ public struct ListItemRowView: View {
     let isPinned: Bool
     let showCreator: Bool
     let showMemberCount: Bool
+    let defaultUser: UiUserV2?
     let onTap: (() -> Void)?
     let onPinTap: (() -> Void)?
 
@@ -16,6 +17,7 @@ public struct ListItemRowView: View {
         isPinned: Bool,
         showCreator: Bool = true,
         showMemberCount: Bool = true,
+        defaultUser: UiUserV2? = nil,
         onTap: (() -> Void)? = nil,
         onPinTap: (() -> Void)? = nil,
         onEditTap _: (() -> Void)? = nil
@@ -24,6 +26,7 @@ public struct ListItemRowView: View {
         self.isPinned = isPinned
         self.showCreator = showCreator
         self.showMemberCount = showMemberCount
+        self.defaultUser = defaultUser
         self.onTap = onTap
         self.onPinTap = onPinTap
     }
@@ -33,7 +36,7 @@ public struct ListItemRowView: View {
             onTap?()
         }) {
             HStack(spacing: 12) {
-                ListIconView(imageUrl: list.avatar ?? "", size: 50)
+                ListIconView(imageUrl: list.avatar ?? "", size: 50, listId: list.id)
 
                 // 列表信息
                 VStack(alignment: .leading, spacing: 4) {
@@ -51,31 +54,13 @@ public struct ListItemRowView: View {
                         }
                     }
 
-                    if showCreator, let creator = list.creator {
+                    if showCreator {
                         HStack(spacing: 4) {
-                            let avatarUrl = creator.avatar
-                            if avatarUrl != nil, let url = URL(string: avatarUrl ?? "") {
-                                KFImage(url)
-                                    .placeholder {
-                                        Circle()
-                                            .fill(Color.gray.opacity(0.2))
-                                    }
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: 16, height: 16)
-                                    .clipShape(Circle())
-                            } else {
-                                Image(systemName: "person.circle.fill")
-                                    .resizable()
-                                    .frame(width: 16, height: 16)
-                                    .foregroundColor(.gray)
+                            if let user = defaultUser {
+                                listUserInfoView(avatar: user.avatar, name: user.name.raw)
+                            } else if let creator = list.creator {
+                                listUserInfoView(avatar: creator.avatar, name: creator.name.raw)
                             }
-
-                            Text(creator.name.raw)
-                                .font(.caption)
-                                .foregroundColor(.gray)
-                                .lineLimit(1)
-                                .fixedSize(horizontal: false, vertical: true)
                         }
                     }
                 }

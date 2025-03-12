@@ -1,7 +1,6 @@
 import shared
 import SwiftUI
 
- 
 extension View {
     /// 添加骨架屏加载效果
     func shimmering() -> some View {
@@ -17,8 +16,8 @@ extension View {
             self
         }
     }
- 
 }
+
 //
 //  骨架屏效果
 //
@@ -52,4 +51,3 @@ struct ShimmeringModifier: ViewModifier {
             }
     }
 }
- 

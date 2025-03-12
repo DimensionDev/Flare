@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.Multipart
 import de.jensklingenberg.ktorfit.http.POST
@@ -40,7 +39,7 @@ internal interface DriveApi {
     @POST("drive")
     suspend fun drive(
         @Body body: kotlin.Any,
-    ): Response<Drive200Response>
+    ): Drive200Response
 
     /**
      * drive/files
@@ -58,7 +57,7 @@ internal interface DriveApi {
     @POST("drive/files")
     suspend fun driveFiles(
         @Body driveFilesRequest: DriveFilesRequest,
-    ): Response<kotlin.collections.List<DriveFile>>
+    ): kotlin.collections.List<DriveFile>
 
     /**
      * drive/files/attached-notes
@@ -76,7 +75,7 @@ internal interface DriveApi {
     @POST("drive/files/attached-notes")
     suspend fun driveFilesAttachedNotes(
         @Body driveFilesAttachedNotesRequest: DriveFilesAttachedNotesRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * drive/files/check-existence
@@ -94,7 +93,7 @@ internal interface DriveApi {
     @POST("drive/files/check-existence")
     suspend fun driveFilesCheckExistence(
         @Body driveFilesCheckExistenceRequest: DriveFilesCheckExistenceRequest,
-    ): Response<kotlin.Boolean>
+    ): kotlin.Boolean
 
 //    /**
 //     * drive/files/create
@@ -118,12 +117,12 @@ internal interface DriveApi {
 //     */
 //    @Multipart
 //    @POST("drive/files/create")
-//    suspend fun driveFilesCreate(@Part file: MultipartBody.Part, @Part("folderId") folderId: kotlin.String? = null, @Part("name") name: kotlin.String? = null, @Part("comment") comment: kotlin.String? = null, @Part("isSensitive") isSensitive: kotlin.Boolean? = false, @Part("force") force: kotlin.Boolean? = false): Response<DriveFile>
+//    suspend fun driveFilesCreate(@Part file: MultipartBody.Part, @Part("folderId") folderId: kotlin.String? = null, @Part("name") name: kotlin.String? = null, @Part("comment") comment: kotlin.String? = null, @Part("isSensitive") isSensitive: kotlin.Boolean? = false, @Part("force") force: kotlin.Boolean? = false): DriveFile
     @Multipart
     @POST("drive/files/create")
     suspend fun driveFilesCreate(
         @Body map: MultiPartFormDataContent,
-    ): Response<DriveFile>
+    ): DriveFile
 
     /**
      * drive/files/delete
@@ -141,7 +140,7 @@ internal interface DriveApi {
     @POST("drive/files/delete")
     suspend fun driveFilesDelete(
         @Body driveFilesAttachedNotesRequest: DriveFilesAttachedNotesRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * drive/files/find
@@ -159,7 +158,7 @@ internal interface DriveApi {
     @POST("drive/files/find")
     suspend fun driveFilesFind(
         @Body driveFilesFindRequest: DriveFilesFindRequest,
-    ): Response<kotlin.collections.List<DriveFile>>
+    ): kotlin.collections.List<DriveFile>
 
     /**
      * drive/files/find-by-hash
@@ -177,7 +176,7 @@ internal interface DriveApi {
     @POST("drive/files/find-by-hash")
     suspend fun driveFilesFindByHash(
         @Body driveFilesCheckExistenceRequest: DriveFilesCheckExistenceRequest,
-    ): Response<kotlin.collections.List<DriveFile>>
+    ): kotlin.collections.List<DriveFile>
 
     /**
      * drive/files/show
@@ -195,7 +194,7 @@ internal interface DriveApi {
     @POST("drive/files/show")
     suspend fun driveFilesShow(
         @Body adminDriveShowFileRequest: AdminDriveShowFileRequest,
-    ): Response<DriveFile>
+    ): DriveFile
 
     /**
      * drive/files/update
@@ -213,7 +212,7 @@ internal interface DriveApi {
     @POST("drive/files/update")
     suspend fun driveFilesUpdate(
         @Body driveFilesUpdateRequest: DriveFilesUpdateRequest,
-    ): Response<DriveFile>
+    ): DriveFile
 
     /**
      * drive/files/upload-from-url
@@ -232,7 +231,7 @@ internal interface DriveApi {
     @POST("drive/files/upload-from-url")
     suspend fun driveFilesUploadFromUrl(
         @Body driveFilesUploadFromUrlRequest: DriveFilesUploadFromUrlRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * drive/folders
@@ -250,7 +249,7 @@ internal interface DriveApi {
     @POST("drive/folders")
     suspend fun driveFolders(
         @Body driveFoldersRequest: DriveFoldersRequest,
-    ): Response<kotlin.collections.List<DriveFolder>>
+    ): kotlin.collections.List<DriveFolder>
 
     /**
      * drive/folders/create
@@ -269,7 +268,7 @@ internal interface DriveApi {
     @POST("drive/folders/create")
     suspend fun driveFoldersCreate(
         @Body driveFoldersCreateRequest: DriveFoldersCreateRequest,
-    ): Response<DriveFolder>
+    ): DriveFolder
 
     /**
      * drive/folders/delete
@@ -287,7 +286,7 @@ internal interface DriveApi {
     @POST("drive/folders/delete")
     suspend fun driveFoldersDelete(
         @Body driveFoldersDeleteRequest: DriveFoldersDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * drive/folders/find
@@ -305,7 +304,7 @@ internal interface DriveApi {
     @POST("drive/folders/find")
     suspend fun driveFoldersFind(
         @Body driveFoldersFindRequest: DriveFoldersFindRequest,
-    ): Response<kotlin.collections.List<DriveFolder>>
+    ): kotlin.collections.List<DriveFolder>
 
     /**
      * drive/folders/show
@@ -323,7 +322,7 @@ internal interface DriveApi {
     @POST("drive/folders/show")
     suspend fun driveFoldersShow(
         @Body driveFoldersDeleteRequest: DriveFoldersDeleteRequest,
-    ): Response<DriveFolder>
+    ): DriveFolder
 
     /**
      * drive/folders/update
@@ -341,7 +340,7 @@ internal interface DriveApi {
     @POST("drive/folders/update")
     suspend fun driveFoldersUpdate(
         @Body driveFoldersUpdateRequest: DriveFoldersUpdateRequest,
-    ): Response<DriveFolder>
+    ): DriveFolder
 
     /**
      * drive/stream
@@ -359,5 +358,5 @@ internal interface DriveApi {
     @POST("drive/stream")
     suspend fun driveStream(
         @Body driveStreamRequest: DriveStreamRequest,
-    ): Response<kotlin.collections.List<DriveFile>>
+    ): kotlin.collections.List<DriveFile>
 }

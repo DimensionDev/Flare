@@ -62,7 +62,7 @@ internal class ListTimelineRemoteMediator(
                                 ),
                             )
                     }
-                }.body() ?: return MediatorResult.Success(
+                } ?: return MediatorResult.Success(
                     endOfPaginationReached = true,
                 )
             Misskey.save(

@@ -18,7 +18,7 @@ internal class TrendsUserPagingSource(
         try {
             service
                 .pinnedUsers(PinnedUsersRequest(limit = params.loadSize))
-                .body()
+
                 ?.map {
                     it.render(accountKey)
                 }.let {

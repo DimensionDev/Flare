@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
@@ -57,7 +56,7 @@ internal interface AccountApi {
     @POST("blocking/create")
     suspend fun blockingCreate(
         @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
-    ): Response<UserDetailedNotMe>
+    ): UserDetailedNotMe
 
     /**
      * blocking/delete
@@ -76,7 +75,7 @@ internal interface AccountApi {
     @POST("blocking/delete")
     suspend fun blockingDelete(
         @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
-    ): Response<UserDetailedNotMe>
+    ): UserDetailedNotMe
 
     /**
      * blocking/list
@@ -94,7 +93,7 @@ internal interface AccountApi {
     @POST("blocking/list")
     suspend fun blockingList(
         @Body blockingListRequest: BlockingListRequest,
-    ): Response<kotlin.collections.List<Blocking>>
+    ): kotlin.collections.List<Blocking>
 
     /**
      * clips/add-note
@@ -113,7 +112,7 @@ internal interface AccountApi {
     @POST("clips/add-note")
     suspend fun clipsAddNote(
         @Body clipsAddNoteRequest: ClipsAddNoteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * clips/my-favorites
@@ -131,7 +130,7 @@ internal interface AccountApi {
     @POST("clips/my-favorites")
     suspend fun clipsMyFavorites(
         @Body body: kotlin.Any,
-    ): Response<kotlin.collections.List<Clip>>
+    ): kotlin.collections.List<Clip>
 
     /**
      * clips/notes
@@ -149,7 +148,7 @@ internal interface AccountApi {
     @POST("clips/notes")
     suspend fun clipsNotes(
         @Body clipsNotesRequest: ClipsNotesRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * clips/remove-note
@@ -167,7 +166,7 @@ internal interface AccountApi {
     @POST("clips/remove-note")
     suspend fun clipsRemoveNote(
         @Body clipsAddNoteRequest: ClipsAddNoteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * flash/my
@@ -185,7 +184,7 @@ internal interface AccountApi {
     @POST("flash/my")
     suspend fun flashMy(
         @Body adminAdListRequest: AdminAdListRequest,
-    ): Response<kotlin.collections.List<Flash>>
+    ): kotlin.collections.List<Flash>
 
     /**
      * flash/my-likes
@@ -203,7 +202,7 @@ internal interface AccountApi {
     @POST("flash/my-likes")
     suspend fun flashMyLikes(
         @Body adminAdListRequest: AdminAdListRequest,
-    ): Response<kotlin.collections.List<FlashMyLikes200ResponseInner>>
+    ): kotlin.collections.List<FlashMyLikes200ResponseInner>
 
     /**
      * i
@@ -221,7 +220,7 @@ internal interface AccountApi {
     @POST("i")
     suspend fun i(
         @Body body: kotlin.Any,
-    ): Response<MeDetailed>
+    ): MeDetailed
 
     /**
      * i/favorites
@@ -239,7 +238,7 @@ internal interface AccountApi {
     @POST("i/favorites")
     suspend fun iFavorites(
         @Body adminAdListRequest: AdminAdListRequest,
-    ): Response<kotlin.collections.List<NoteFavorite>>
+    ): kotlin.collections.List<NoteFavorite>
 
     /**
      * i/gallery/likes
@@ -257,7 +256,7 @@ internal interface AccountApi {
     @POST("i/gallery/likes")
     suspend fun iGalleryLikes(
         @Body adminAdListRequest: AdminAdListRequest,
-    ): Response<kotlin.collections.List<IGalleryLikes200ResponseInner>>
+    ): kotlin.collections.List<IGalleryLikes200ResponseInner>
 
     /**
      * i/gallery/posts
@@ -275,7 +274,7 @@ internal interface AccountApi {
     @POST("i/gallery/posts")
     suspend fun iGalleryPosts(
         @Body adminAdListRequest: AdminAdListRequest,
-    ): Response<kotlin.collections.List<GalleryPost>>
+    ): kotlin.collections.List<GalleryPost>
 
     /**
      * i/get-word-muted-notes-count
@@ -293,7 +292,7 @@ internal interface AccountApi {
     @POST("i/get-word-muted-notes-count")
     suspend fun iGetWordMutedNotesCount(
         @Body body: kotlin.Any,
-    ): Response<IGetWordMutedNotesCount200Response>
+    ): IGetWordMutedNotesCount200Response
 
     /**
      * i/notifications
@@ -312,7 +311,7 @@ internal interface AccountApi {
     @POST("i/notifications")
     suspend fun iNotifications(
         @Body inotificationsRequest: INotificationsRequest,
-    ): Response<kotlin.collections.List<Notification>>
+    ): kotlin.collections.List<Notification>
 
     /**
      * i/page-likes
@@ -330,7 +329,7 @@ internal interface AccountApi {
     @POST("i/page-likes")
     suspend fun iPageLikes(
         @Body adminAdListRequest: AdminAdListRequest,
-    ): Response<kotlin.collections.List<IPageLikes200ResponseInner>>
+    ): kotlin.collections.List<IPageLikes200ResponseInner>
 
     /**
      * i/pages
@@ -348,7 +347,7 @@ internal interface AccountApi {
     @POST("i/pages")
     suspend fun iPages(
         @Body adminAdListRequest: AdminAdListRequest,
-    ): Response<kotlin.collections.List<Page>>
+    ): kotlin.collections.List<Page>
 
     /**
      * i/pin
@@ -366,7 +365,7 @@ internal interface AccountApi {
     @POST("i/pin")
     suspend fun iPin(
         @Body ipinRequest: IPinRequest,
-    ): Response<MeDetailed>
+    ): MeDetailed
 
     /**
      * i/read-all-unread-notes
@@ -384,7 +383,7 @@ internal interface AccountApi {
     @POST("i/read-all-unread-notes")
     suspend fun iReadAllUnreadNotes(
         @Body body: kotlin.Any,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * i/read-announcement
@@ -402,7 +401,7 @@ internal interface AccountApi {
     @POST("i/read-announcement")
     suspend fun iReadAnnouncement(
         @Body ireadAnnouncementRequest: IReadAnnouncementRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * i/unpin
@@ -420,7 +419,7 @@ internal interface AccountApi {
     @POST("i/unpin")
     suspend fun iUnpin(
         @Body ipinRequest: IPinRequest,
-    ): Response<MeDetailed>
+    ): MeDetailed
 
     /**
      * i/update
@@ -438,7 +437,7 @@ internal interface AccountApi {
     @POST("i/update")
     suspend fun iUpdate(
         @Body iupdateRequest: IUpdateRequest,
-    ): Response<MeDetailed>
+    ): MeDetailed
 
     /**
      * mute/create
@@ -457,7 +456,7 @@ internal interface AccountApi {
     @POST("mute/create")
     suspend fun muteCreate(
         @Body muteCreateRequest: MuteCreateRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * mute/delete
@@ -475,7 +474,7 @@ internal interface AccountApi {
     @POST("mute/delete")
     suspend fun muteDelete(
         @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * mute/list
@@ -493,7 +492,7 @@ internal interface AccountApi {
     @POST("mute/list")
     suspend fun muteList(
         @Body blockingListRequest: BlockingListRequest,
-    ): Response<kotlin.collections.List<Muting>>
+    ): kotlin.collections.List<Muting>
 
     /**
      * my/apps
@@ -511,7 +510,7 @@ internal interface AccountApi {
     @POST("my/apps")
     suspend fun myApps(
         @Body myAppsRequest: MyAppsRequest,
-    ): Response<kotlin.collections.List<App>>
+    ): kotlin.collections.List<App>
 
     /**
      * renote-mute/create
@@ -530,7 +529,7 @@ internal interface AccountApi {
     @POST("renote-mute/create")
     suspend fun renoteMuteCreate(
         @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * renote-mute/delete
@@ -548,7 +547,7 @@ internal interface AccountApi {
     @POST("renote-mute/delete")
     suspend fun renoteMuteDelete(
         @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * renote-mute/list
@@ -566,7 +565,7 @@ internal interface AccountApi {
     @POST("renote-mute/list")
     suspend fun renoteMuteList(
         @Body blockingListRequest: BlockingListRequest,
-    ): Response<kotlin.collections.List<RenoteMuting>>
+    ): kotlin.collections.List<RenoteMuting>
 
     /**
      * sw/register
@@ -584,7 +583,7 @@ internal interface AccountApi {
     @POST("sw/register")
     suspend fun swRegister(
         @Body swRegisterRequest: SwRegisterRequest,
-    ): Response<SwRegister200Response>
+    ): SwRegister200Response
 
     /**
      * sw/show-registration
@@ -602,7 +601,7 @@ internal interface AccountApi {
     @POST("sw/show-registration")
     suspend fun swShowRegistration(
         @Body endpointRequest: EndpointRequest,
-    ): Response<SwShowRegistration200Response>
+    ): SwShowRegistration200Response
 
     /**
      * sw/unregister
@@ -620,7 +619,7 @@ internal interface AccountApi {
     @POST("sw/unregister")
     suspend fun swUnregister(
         @Body endpointRequest: EndpointRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * sw/update-registration
@@ -638,7 +637,7 @@ internal interface AccountApi {
     @POST("sw/update-registration")
     suspend fun swUpdateRegistration(
         @Body swUpdateRegistrationRequest: SwUpdateRegistrationRequest,
-    ): Response<SwUpdateRegistration200Response>
+    ): SwUpdateRegistration200Response
 
     /**
      * users/update-memo
@@ -656,5 +655,5 @@ internal interface AccountApi {
     @POST("users/update-memo")
     suspend fun usersUpdateMemo(
         @Body usersUpdateMemoRequest: UsersUpdateMemoRequest,
-    ): Response<Unit>
+    ): Unit
 }

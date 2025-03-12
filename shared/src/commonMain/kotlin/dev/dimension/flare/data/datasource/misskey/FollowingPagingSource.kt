@@ -33,12 +33,12 @@ internal class FollowingPagingSource(
                     )
             return LoadResult.Page(
                 data =
-                    response.body().orEmpty().mapNotNull {
+                    response.orEmpty().mapNotNull {
                         // TODO: isn't followee a typo?
                         it.followee?.render(accountKey = accountKey)
                     },
                 prevKey = null,
-                nextKey = response.body()?.lastOrNull()?.id,
+                nextKey = response?.lastOrNull()?.id,
             )
         } catch (e: Throwable) {
             return LoadResult.Error(e)

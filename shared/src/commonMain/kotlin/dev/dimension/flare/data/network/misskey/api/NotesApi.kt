@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.ChannelsTimelineRequest
@@ -44,7 +43,7 @@ internal interface NotesApi {
     @POST("channels/timeline")
     suspend fun channelsTimeline(
         @Body channelsTimelineRequest: ChannelsTimelineRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes
@@ -62,7 +61,7 @@ internal interface NotesApi {
     @POST("notes")
     suspend fun notes(
         @Body notesRequest: NotesRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/children
@@ -80,7 +79,7 @@ internal interface NotesApi {
     @POST("notes/children")
     suspend fun notesChildren(
         @Body notesChildrenRequest: NotesChildrenRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/conversation
@@ -98,7 +97,7 @@ internal interface NotesApi {
     @POST("notes/conversation")
     suspend fun notesConversation(
         @Body notesConversationRequest: NotesConversationRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/create
@@ -117,7 +116,7 @@ internal interface NotesApi {
     @POST("notes/create")
     suspend fun notesCreate(
         @Body notesCreateRequest: NotesCreateRequest,
-    ): Response<NotesCreate200Response>
+    ): NotesCreate200Response
 
     /**
      * notes/delete
@@ -136,7 +135,7 @@ internal interface NotesApi {
     @POST("notes/delete")
     suspend fun notesDelete(
         @Body ipinRequest: IPinRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * notes/favorites/create
@@ -155,7 +154,7 @@ internal interface NotesApi {
     @POST("notes/favorites/create")
     suspend fun notesFavoritesCreate(
         @Body ipinRequest: IPinRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * notes/favorites/delete
@@ -173,7 +172,7 @@ internal interface NotesApi {
     @POST("notes/favorites/delete")
     suspend fun notesFavoritesDelete(
         @Body ipinRequest: IPinRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * notes/featured
@@ -191,7 +190,7 @@ internal interface NotesApi {
     @POST("notes/featured")
     suspend fun notesFeatured(
         @Body notesFeaturedRequest: NotesFeaturedRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/global-timeline
@@ -209,7 +208,7 @@ internal interface NotesApi {
     @POST("notes/global-timeline")
     suspend fun notesGlobalTimeline(
         @Body notesGlobalTimelineRequest: NotesGlobalTimelineRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/hybrid-timeline
@@ -227,7 +226,7 @@ internal interface NotesApi {
     @POST("notes/hybrid-timeline")
     suspend fun notesHybridTimeline(
         @Body notesHybridTimelineRequest: NotesHybridTimelineRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/local-timeline
@@ -245,7 +244,7 @@ internal interface NotesApi {
     @POST("notes/local-timeline")
     suspend fun notesLocalTimeline(
         @Body notesLocalTimelineRequest: NotesLocalTimelineRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/mentions
@@ -263,7 +262,7 @@ internal interface NotesApi {
     @POST("notes/mentions")
     suspend fun notesMentions(
         @Body notesMentionsRequest: NotesMentionsRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/polls/recommendation
@@ -281,7 +280,7 @@ internal interface NotesApi {
     @POST("notes/polls/recommendation")
     suspend fun notesPollsRecommendation(
         @Body myAppsRequest: MyAppsRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/polls/vote
@@ -299,7 +298,7 @@ internal interface NotesApi {
     @POST("notes/polls/vote")
     suspend fun notesPollsVote(
         @Body notesPollsVoteRequest: NotesPollsVoteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * notes/reactions
@@ -317,7 +316,7 @@ internal interface NotesApi {
     @POST("notes/reactions")
     suspend fun notesReactions(
         @Body notesReactionsRequest: NotesReactionsRequest,
-    ): Response<kotlin.collections.List<NoteReaction>>
+    ): kotlin.collections.List<NoteReaction>
 
     /**
      * notes/renotes
@@ -335,7 +334,7 @@ internal interface NotesApi {
     @POST("notes/renotes")
     suspend fun notesRenotes(
         @Body notesChildrenRequest: NotesChildrenRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/replies
@@ -353,7 +352,7 @@ internal interface NotesApi {
     @POST("notes/replies")
     suspend fun notesReplies(
         @Body notesRepliesRequest: NotesRepliesRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/search
@@ -371,7 +370,7 @@ internal interface NotesApi {
     @POST("notes/search")
     suspend fun notesSearch(
         @Body notesSearchRequest: NotesSearchRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/search-by-tag
@@ -389,7 +388,7 @@ internal interface NotesApi {
     @POST("notes/search-by-tag")
     suspend fun notesSearchByTag(
         @Body notesSearchByTagRequest: NotesSearchByTagRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/show
@@ -407,7 +406,7 @@ internal interface NotesApi {
     @POST("notes/show")
     suspend fun notesShow(
         @Body ipinRequest: IPinRequest,
-    ): Response<Note>
+    ): Note
 
     /**
      * notes/state
@@ -425,7 +424,7 @@ internal interface NotesApi {
     @POST("notes/state")
     suspend fun notesState(
         @Body ipinRequest: IPinRequest,
-    ): Response<NotesState200Response>
+    ): NotesState200Response
 
     /**
      * notes/thread-muting/create
@@ -444,7 +443,7 @@ internal interface NotesApi {
     @POST("notes/thread-muting/create")
     suspend fun notesThreadMutingCreate(
         @Body ipinRequest: IPinRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * notes/thread-muting/delete
@@ -462,7 +461,7 @@ internal interface NotesApi {
     @POST("notes/thread-muting/delete")
     suspend fun notesThreadMutingDelete(
         @Body ipinRequest: IPinRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * notes/timeline
@@ -480,7 +479,7 @@ internal interface NotesApi {
     @POST("notes/timeline")
     suspend fun notesTimeline(
         @Body notesHybridTimelineRequest: NotesHybridTimelineRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * notes/translate
@@ -498,7 +497,7 @@ internal interface NotesApi {
     @POST("notes/translate")
     suspend fun notesTranslate(
         @Body notesTranslateRequest: NotesTranslateRequest,
-    ): Response<kotlin.Any>
+    ): kotlin.Any
 
     /**
      * notes/unrenote
@@ -517,7 +516,7 @@ internal interface NotesApi {
     @POST("notes/unrenote")
     suspend fun notesUnrenote(
         @Body ipinRequest: IPinRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * notes/user-list-timeline
@@ -535,7 +534,7 @@ internal interface NotesApi {
     @POST("notes/user-list-timeline")
     suspend fun notesUserListTimeline(
         @Body notesUserListTimelineRequest: NotesUserListTimelineRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * promo/read
@@ -553,5 +552,5 @@ internal interface NotesApi {
     @POST("promo/read")
     suspend fun promoRead(
         @Body ipinRequest: IPinRequest,
-    ): Response<Unit>
+    ): Unit
 }

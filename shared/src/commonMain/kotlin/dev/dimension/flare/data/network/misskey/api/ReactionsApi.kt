@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
@@ -23,7 +22,7 @@ internal interface ReactionsApi {
     @POST("notes/reactions/create")
     suspend fun notesReactionsCreate(
         @Body notesReactionsCreateRequest: NotesReactionsCreateRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * notes/reactions/delete
@@ -42,5 +41,5 @@ internal interface ReactionsApi {
     @POST("notes/reactions/delete")
     suspend fun notesReactionsDelete(
         @Body ipinRequest: IPinRequest,
-    ): Response<Unit>
+    ): Unit
 }

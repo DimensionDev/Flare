@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.ClipsDeleteRequest
@@ -22,7 +21,7 @@ internal interface ClipApi {
     @POST("clips/favorite")
     suspend fun clipsFavorite(
         @Body clipsDeleteRequest: ClipsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * clips/unfavorite
@@ -40,5 +39,5 @@ internal interface ClipApi {
     @POST("clips/unfavorite")
     suspend fun clipsUnfavorite(
         @Body clipsDeleteRequest: ClipsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 }

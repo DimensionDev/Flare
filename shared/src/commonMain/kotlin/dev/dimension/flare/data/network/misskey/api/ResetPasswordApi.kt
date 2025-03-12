@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.RequestResetPasswordRequest
@@ -24,7 +23,7 @@ internal interface ResetPasswordApi {
     @POST("request-reset-password")
     suspend fun requestResetPassword(
         @Body requestResetPasswordRequest: RequestResetPasswordRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * reset-password
@@ -42,5 +41,5 @@ internal interface ResetPasswordApi {
     @POST("reset-password")
     suspend fun resetPassword(
         @Body resetPasswordRequest: ResetPasswordRequest,
-    ): Response<Unit>
+    ): Unit
 }

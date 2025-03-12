@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
@@ -26,7 +25,7 @@ internal interface FollowingApi {
     @POST("following/create")
     suspend fun followingCreate(
         @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
-    ): Response<UserLite>
+    ): UserLite
 
     /**
      * following/delete
@@ -45,7 +44,7 @@ internal interface FollowingApi {
     @POST("following/delete")
     suspend fun followingDelete(
         @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
-    ): Response<UserLite>
+    ): UserLite
 
     /**
      * following/invalidate
@@ -64,7 +63,7 @@ internal interface FollowingApi {
     @POST("following/invalidate")
     suspend fun followingInvalidate(
         @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
-    ): Response<UserLite>
+    ): UserLite
 
     /**
      * following/requests/accept
@@ -82,7 +81,7 @@ internal interface FollowingApi {
     @POST("following/requests/accept")
     suspend fun followingRequestsAccept(
         @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * following/requests/cancel
@@ -100,7 +99,7 @@ internal interface FollowingApi {
     @POST("following/requests/cancel")
     suspend fun followingRequestsCancel(
         @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
-    ): Response<UserLite>
+    ): UserLite
 
     /**
      * following/requests/list
@@ -118,7 +117,7 @@ internal interface FollowingApi {
     @POST("following/requests/list")
     suspend fun followingRequestsList(
         @Body followingRequestsListRequest: FollowingRequestsListRequest,
-    ): Response<kotlin.collections.List<FollowingRequestsList200ResponseInner>>
+    ): kotlin.collections.List<FollowingRequestsList200ResponseInner>
 
     /**
      * following/requests/reject
@@ -136,5 +135,5 @@ internal interface FollowingApi {
     @POST("following/requests/reject")
     suspend fun followingRequestsReject(
         @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 }

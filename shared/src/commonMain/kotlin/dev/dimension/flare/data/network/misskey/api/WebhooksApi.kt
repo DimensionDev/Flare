@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.IWebhooksCreateRequest
@@ -24,7 +23,7 @@ internal interface WebhooksApi {
     @POST("i/webhooks/create")
     suspend fun iWebhooksCreate(
         @Body iwebhooksCreateRequest: IWebhooksCreateRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * i/webhooks/delete
@@ -42,7 +41,7 @@ internal interface WebhooksApi {
     @POST("i/webhooks/delete")
     suspend fun iWebhooksDelete(
         @Body iwebhooksShowRequest: IWebhooksShowRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * i/webhooks/list
@@ -60,7 +59,7 @@ internal interface WebhooksApi {
     @POST("i/webhooks/list")
     suspend fun iWebhooksList(
         @Body body: kotlin.Any,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * i/webhooks/show
@@ -78,7 +77,7 @@ internal interface WebhooksApi {
     @POST("i/webhooks/show")
     suspend fun iWebhooksShow(
         @Body iwebhooksShowRequest: IWebhooksShowRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * i/webhooks/update
@@ -96,5 +95,5 @@ internal interface WebhooksApi {
     @POST("i/webhooks/update")
     suspend fun iWebhooksUpdate(
         @Body iwebhooksUpdateRequest: IWebhooksUpdateRequest,
-    ): Response<Unit>
+    ): Unit
 }

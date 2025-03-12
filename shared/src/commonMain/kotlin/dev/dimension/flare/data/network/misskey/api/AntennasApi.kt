@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.Antenna
@@ -27,7 +26,7 @@ internal interface AntennasApi {
     @POST("antennas/create")
     suspend fun antennasCreate(
         @Body antennasCreateRequest: AntennasCreateRequest,
-    ): Response<Antenna>
+    ): Antenna
 
     /**
      * antennas/delete
@@ -45,7 +44,7 @@ internal interface AntennasApi {
     @POST("antennas/delete")
     suspend fun antennasDelete(
         @Body antennasDeleteRequest: AntennasDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * antennas/list
@@ -63,7 +62,7 @@ internal interface AntennasApi {
     @POST("antennas/list")
     suspend fun antennasList(
         @Body body: kotlin.Any,
-    ): Response<kotlin.collections.List<Antenna>>
+    ): kotlin.collections.List<Antenna>
 
     /**
      * antennas/notes
@@ -81,7 +80,7 @@ internal interface AntennasApi {
     @POST("antennas/notes")
     suspend fun antennasNotes(
         @Body antennasNotesRequest: AntennasNotesRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * antennas/show
@@ -99,7 +98,7 @@ internal interface AntennasApi {
     @POST("antennas/show")
     suspend fun antennasShow(
         @Body antennasDeleteRequest: AntennasDeleteRequest,
-    ): Response<Antenna>
+    ): Antenna
 
     /**
      * antennas/update
@@ -117,5 +116,5 @@ internal interface AntennasApi {
     @POST("antennas/update")
     suspend fun antennasUpdate(
         @Body antennasUpdateRequest: AntennasUpdateRequest,
-    ): Response<Antenna>
+    ): Antenna
 }

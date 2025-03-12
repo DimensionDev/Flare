@@ -49,7 +49,7 @@ internal class HomeTimelineRemoteMediator(
                             ),
                         )
                     }
-                }.body() ?: return MediatorResult.Success(
+                } ?: return MediatorResult.Success(
                     endOfPaginationReached = true,
                 )
             if (loadType == LoadType.REFRESH) {

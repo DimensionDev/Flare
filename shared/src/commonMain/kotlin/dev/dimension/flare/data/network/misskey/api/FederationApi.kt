@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.AdminAccountsDeleteRequest
@@ -33,7 +32,7 @@ internal interface FederationApi {
     @POST("ap/get")
     suspend fun apGet(
         @Body apGetRequest: ApGetRequest,
-    ): Response<kotlin.Any>
+    ): kotlin.Any
 
     /**
      * ap/show
@@ -52,7 +51,7 @@ internal interface FederationApi {
     @POST("ap/show")
     suspend fun apShow(
         @Body apGetRequest: ApGetRequest,
-    ): Response<ApShow200Response>
+    ): ApShow200Response
 
     /**
      * federation/followers
@@ -70,7 +69,7 @@ internal interface FederationApi {
     @POST("federation/followers")
     suspend fun federationFollowers(
         @Body federationFollowersRequest: FederationFollowersRequest,
-    ): Response<kotlin.collections.List<Following>>
+    ): kotlin.collections.List<Following>
 
     /**
      * federation/following
@@ -88,7 +87,7 @@ internal interface FederationApi {
     @POST("federation/following")
     suspend fun federationFollowing(
         @Body federationFollowersRequest: FederationFollowersRequest,
-    ): Response<kotlin.collections.List<Following>>
+    ): kotlin.collections.List<Following>
 
     /**
      * federation/instances
@@ -106,7 +105,7 @@ internal interface FederationApi {
     @POST("federation/instances")
     suspend fun federationInstances(
         @Body federationInstancesRequest: FederationInstancesRequest,
-    ): Response<kotlin.collections.List<FederationInstance>>
+    ): kotlin.collections.List<FederationInstance>
 
     /**
      * federation/show-instance
@@ -124,7 +123,7 @@ internal interface FederationApi {
     @POST("federation/show-instance")
     suspend fun federationShowInstance(
         @Body adminFederationDeleteAllFilesRequest: AdminFederationDeleteAllFilesRequest,
-    ): Response<FederationShowInstance200Response>
+    ): FederationShowInstance200Response
 
     /**
      * federation/stats
@@ -142,7 +141,7 @@ internal interface FederationApi {
     @POST("federation/stats")
     suspend fun federationStats(
         @Body federationStatsRequest: FederationStatsRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * federation/update-remote-user
@@ -160,7 +159,7 @@ internal interface FederationApi {
     @POST("federation/update-remote-user")
     suspend fun federationUpdateRemoteUser(
         @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * federation/users
@@ -178,5 +177,5 @@ internal interface FederationApi {
     @POST("federation/users")
     suspend fun federationUsers(
         @Body federationFollowersRequest: FederationFollowersRequest,
-    ): Response<kotlin.collections.List<UserDetailedNotMe>>
+    ): kotlin.collections.List<UserDetailedNotMe>
 }

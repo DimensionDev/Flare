@@ -7,7 +7,6 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
-import androidx.paging.RemoteMediator.MediatorResult
 import androidx.paging.cachedIn
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
@@ -79,8 +78,6 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.collections.mapNotNull
-import kotlin.collections.orEmpty
 
 @OptIn(ExperimentalPagingApi::class)
 internal class MisskeyDataSource(
@@ -213,7 +210,7 @@ internal class MisskeyDataSource(
                 val user =
                     service
                         .usersShow(UsersShowRequest(username = name, host = host))
-                        .body()
+
                         ?.toDbUser(accountKey.host)
                         ?: throw Exception("User not found")
                 database.userDao().insert(user)
@@ -235,7 +232,7 @@ internal class MisskeyDataSource(
                 val user =
                     service
                         .usersShow(UsersShowRequest(userId = id))
-                        .body()
+
                         ?.toDbUser(accountKey.host)
                         ?: throw Exception("User not found")
                 database.userDao().insert(user)
@@ -257,7 +254,6 @@ internal class MisskeyDataSource(
             val user =
                 service
                     .usersShow(UsersShowRequest(userId = userKey.id))
-                    .body()!!
             UiRelation(
                 following = user.isFollowing ?: false,
                 isFans = user.isFollowed ?: false,
@@ -325,7 +321,7 @@ internal class MisskeyDataSource(
                     service
                         .notesShow(
                             IPinRequest(noteId = statusKey.id),
-                        ).body()
+                        )
                 Misskey.save(
                     database = database,
                     accountKey = accountKey,
@@ -349,7 +345,7 @@ internal class MisskeyDataSource(
                 val emojis =
                     service
                         .emojis()
-                        .body()
+
                         ?.emojis
                         .orEmpty()
                         .toImmutableList()
@@ -572,8 +568,7 @@ internal class MisskeyDataSource(
                                 IPinRequest(
                                     noteId = it.id,
                                 ),
-                            ).body()
-                            ?.url
+                            )?.url
                     }?.let {
                         "Note: $it"
                     }
@@ -948,7 +943,7 @@ internal class MisskeyDataSource(
                 )
             }.fold(
                 onSuccess = {
-                    emit(it.body()?.isFavorited == true)
+                    emit(it?.isFavorited == true)
                 },
                 onFailure = {
                     emit(false)
@@ -1065,8 +1060,7 @@ internal class MisskeyDataSource(
                                 service
                                     .usersListsList(
                                         UsersListsListRequest(),
-                                    ).body()
-                                    .orEmpty()
+                                    ).orEmpty()
                                     .map {
                                         it.render()
                                     }.toImmutableList()
@@ -1093,7 +1087,7 @@ internal class MisskeyDataSource(
                     UsersListsCreateRequest(
                         name = metaData.title,
                     ),
-                ).body()
+                )
         }.onSuccess { response ->
             if (response?.id != null) {
                 MemoryPagingSource.updateWith<UiList>(
@@ -1164,8 +1158,7 @@ internal class MisskeyDataSource(
                         UsersListsShowRequest(
                             listId = listId,
                         ),
-                    ).body()
-                    ?.render() ?: throw Exception("List not found")
+                    )?.render() ?: throw Exception("List not found")
             },
         )
 
@@ -1206,8 +1199,7 @@ internal class MisskeyDataSource(
                                             untilId = key,
                                             limit = state.config.pageSize,
                                         ),
-                                    ).body()
-                                    .orEmpty()
+                                    ).orEmpty()
                                     .map {
                                         it.user.render(accountKey)
                                     }
@@ -1255,8 +1247,7 @@ internal class MisskeyDataSource(
                         UsersShowRequest(
                             userId = userKey.id,
                         ),
-                    ).body()
-                    ?.toDbUser(accountKey.host)
+                    )?.toDbUser(accountKey.host)
                     ?.render(accountKey)
             MemoryPagingSource.updateWith(
                 key = listMemberKey(listId),
@@ -1272,7 +1263,7 @@ internal class MisskeyDataSource(
                         UsersListsShowRequest(
                             listId = listId,
                         ),
-                    ).body()
+                    )
             if (list?.id != null) {
                 MemCacheable.updateWith<ImmutableList<UiList>>(
                     key = userListsKey(userKey),
@@ -1345,8 +1336,7 @@ internal class MisskeyDataSource(
             service
                 .usersListsList(
                     UsersListsListRequest(),
-                ).body()
-                .orEmpty()
+                ).orEmpty()
                 .filter {
                     it.userIds?.contains(userKey.id) == true
                 }.map {

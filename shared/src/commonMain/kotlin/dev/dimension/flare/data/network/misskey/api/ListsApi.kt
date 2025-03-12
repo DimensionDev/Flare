@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.ListMembership
@@ -30,7 +29,7 @@ internal interface ListsApi {
     @POST("users/lists/create")
     suspend fun usersListsCreate(
         @Body usersListsCreateRequest: UsersListsCreateRequest,
-    ): Response<UserList>
+    ): UserList
 
     /**
      * users/lists/delete
@@ -48,7 +47,7 @@ internal interface ListsApi {
     @POST("users/lists/delete")
     suspend fun usersListsDelete(
         @Body usersListsDeleteRequest: UsersListsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * users/lists/list
@@ -66,7 +65,7 @@ internal interface ListsApi {
     @POST("users/lists/list")
     suspend fun usersListsList(
         @Body usersListsListRequest: UsersListsListRequest,
-    ): Response<kotlin.collections.List<UserList>>
+    ): kotlin.collections.List<UserList>
 
     /**
      * users/lists/pull
@@ -84,7 +83,7 @@ internal interface ListsApi {
     @POST("users/lists/pull")
     suspend fun usersListsPull(
         @Body usersListsPullRequest: UsersListsPullRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * users/lists/push
@@ -103,7 +102,7 @@ internal interface ListsApi {
     @POST("users/lists/push")
     suspend fun usersListsPush(
         @Body usersListsPullRequest: UsersListsPullRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * users/lists/show
@@ -121,7 +120,7 @@ internal interface ListsApi {
     @POST("users/lists/show")
     suspend fun usersListsShow(
         @Body usersListsShowRequest: UsersListsShowRequest,
-    ): Response<UserList>
+    ): UserList
 
     /**
      * users/lists/update
@@ -139,10 +138,10 @@ internal interface ListsApi {
     @POST("users/lists/update")
     suspend fun usersListsUpdate(
         @Body usersListsUpdateRequest: UsersListsUpdateRequest,
-    ): Response<UserList>
+    ): UserList
 
     @POST("users/lists/get-memberships")
     suspend fun usersListsGetMemberships(
         @Body usersListsMembershipRequest: UsersListsMembershipRequest,
-    ): Response<kotlin.collections.List<ListMembership>>
+    ): kotlin.collections.List<ListMembership>
 }

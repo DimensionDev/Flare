@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.Clip
@@ -49,7 +48,7 @@ internal interface UsersApi {
     @POST("email-address/available")
     suspend fun emailAddressAvailable(
         @Body emailAddressAvailableRequest: EmailAddressAvailableRequest,
-    ): Response<EmailAddressAvailable200Response>
+    ): EmailAddressAvailable200Response
 
     /**
      * pinned-users
@@ -67,7 +66,7 @@ internal interface UsersApi {
     @POST("pinned-users")
     suspend fun pinnedUsers(
         @Body body: PinnedUsersRequest,
-    ): Response<kotlin.collections.List<UserDetailed>>
+    ): kotlin.collections.List<UserDetailed>
 
     /**
      * retention
@@ -85,7 +84,7 @@ internal interface UsersApi {
     @POST("retention")
     suspend fun retention(
         @Body body: kotlin.Any,
-    ): Response<kotlin.Any>
+    ): kotlin.Any
 
     /**
      * username/available
@@ -103,7 +102,7 @@ internal interface UsersApi {
     @POST("username/available")
     suspend fun usernameAvailable(
         @Body usernameAvailableRequest: UsernameAvailableRequest,
-    ): Response<UsernameAvailable200Response>
+    ): UsernameAvailable200Response
 
     /**
      * users
@@ -121,7 +120,7 @@ internal interface UsersApi {
     @POST("users")
     suspend fun users(
         @Body usersRequest: UsersRequest,
-    ): Response<kotlin.collections.List<UserDetailed>>
+    ): kotlin.collections.List<UserDetailed>
 
     /**
      * users/clips
@@ -139,7 +138,7 @@ internal interface UsersApi {
     @POST("users/clips")
     suspend fun usersClips(
         @Body usersClipsRequest: UsersClipsRequest,
-    ): Response<kotlin.collections.List<Clip>>
+    ): kotlin.collections.List<Clip>
 
     /**
      * users/followers
@@ -157,7 +156,7 @@ internal interface UsersApi {
     @POST("users/followers")
     suspend fun usersFollowers(
         @Body usersFollowersRequest: UsersFollowersRequest,
-    ): Response<kotlin.collections.List<Following>>
+    ): kotlin.collections.List<Following>
 
     /**
      * users/following
@@ -175,7 +174,7 @@ internal interface UsersApi {
     @POST("users/following")
     suspend fun usersFollowing(
         @Body usersFollowersRequest: UsersFollowersRequest,
-    ): Response<kotlin.collections.List<Following>>
+    ): kotlin.collections.List<Following>
 
     /**
      * users/gallery/posts
@@ -193,7 +192,7 @@ internal interface UsersApi {
     @POST("users/gallery/posts")
     suspend fun usersGalleryPosts(
         @Body usersClipsRequest: UsersClipsRequest,
-    ): Response<kotlin.collections.List<GalleryPost>>
+    ): kotlin.collections.List<GalleryPost>
 
     /**
      * users/get-frequently-replied-users
@@ -211,7 +210,7 @@ internal interface UsersApi {
     @POST("users/get-frequently-replied-users")
     suspend fun usersGetFrequentlyRepliedUsers(
         @Body usersGetFrequentlyRepliedUsersRequest: UsersGetFrequentlyRepliedUsersRequest,
-    ): Response<kotlin.collections.List<UsersGetFrequentlyRepliedUsers200ResponseInner>>
+    ): kotlin.collections.List<UsersGetFrequentlyRepliedUsers200ResponseInner>
 
     /**
      * users/notes
@@ -229,7 +228,7 @@ internal interface UsersApi {
     @POST("users/notes")
     suspend fun usersNotes(
         @Body usersNotesRequest: UsersNotesRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * users/pages
@@ -247,7 +246,7 @@ internal interface UsersApi {
     @POST("users/pages")
     suspend fun usersPages(
         @Body usersClipsRequest: UsersClipsRequest,
-    ): Response<kotlin.collections.List<Page>>
+    ): kotlin.collections.List<Page>
 
     /**
      * users/reactions
@@ -265,7 +264,7 @@ internal interface UsersApi {
     @POST("users/reactions")
     suspend fun usersReactions(
         @Body usersReactionsRequest: UsersReactionsRequest,
-    ): Response<kotlin.collections.List<NoteReaction>>
+    ): kotlin.collections.List<NoteReaction>
 
     /**
      * users/recommendation
@@ -283,7 +282,7 @@ internal interface UsersApi {
     @POST("users/recommendation")
     suspend fun usersRecommendation(
         @Body myAppsRequest: MyAppsRequest,
-    ): Response<kotlin.collections.List<UserDetailed>>
+    ): kotlin.collections.List<UserDetailed>
 
     /**
      * users/relation
@@ -301,7 +300,7 @@ internal interface UsersApi {
     @POST("users/relation")
     suspend fun usersRelation(
         @Body usersRelationRequest: UsersRelationRequest,
-    ): Response<UsersRelation200Response>
+    ): UsersRelation200Response
 
     /**
      * users/report-abuse
@@ -319,7 +318,7 @@ internal interface UsersApi {
     @POST("users/report-abuse")
     suspend fun usersReportAbuse(
         @Body usersReportAbuseRequest: UsersReportAbuseRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * users/search
@@ -337,7 +336,7 @@ internal interface UsersApi {
     @POST("users/search")
     suspend fun usersSearch(
         @Body usersSearchRequest: UsersSearchRequest,
-    ): Response<kotlin.collections.List<User>>
+    ): kotlin.collections.List<User>
 
     /**
      * users/search-by-username-and-host
@@ -355,7 +354,7 @@ internal interface UsersApi {
     @POST("users/search-by-username-and-host")
     suspend fun usersSearchByUsernameAndHost(
         @Body usersSearchByUsernameAndHostRequest: UsersSearchByUsernameAndHostRequest,
-    ): Response<kotlin.collections.List<User>>
+    ): kotlin.collections.List<User>
 
     /**
      * users/show
@@ -373,5 +372,5 @@ internal interface UsersApi {
     @POST("users/show")
     suspend fun usersShow(
         @Body usersShowRequest: UsersShowRequest,
-    ): Response<User>
+    ): User
 }

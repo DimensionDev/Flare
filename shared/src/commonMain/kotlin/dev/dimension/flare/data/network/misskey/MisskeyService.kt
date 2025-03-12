@@ -79,6 +79,6 @@ internal class MisskeyService(
             )
         return driveFilesCreate(
             multipart,
-        ).body()
+        )
     }
 }

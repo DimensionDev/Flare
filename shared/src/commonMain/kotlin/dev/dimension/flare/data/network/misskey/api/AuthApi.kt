@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.AuthSessionGenerate200Response
@@ -27,7 +26,7 @@ internal interface AuthApi {
     @POST("auth/session/generate")
     suspend fun authSessionGenerate(
         @Body authSessionGenerateRequest: AuthSessionGenerateRequest,
-    ): Response<AuthSessionGenerate200Response>
+    ): AuthSessionGenerate200Response
 
     /**
      * auth/session/show
@@ -45,7 +44,7 @@ internal interface AuthApi {
     @POST("auth/session/show")
     suspend fun authSessionShow(
         @Body authSessionShowRequest: AuthSessionShowRequest,
-    ): Response<AuthSessionShow200Response>
+    ): AuthSessionShow200Response
 
     /**
      * auth/session/userkey
@@ -63,5 +62,5 @@ internal interface AuthApi {
     @POST("auth/session/userkey")
     suspend fun authSessionUserkey(
         @Body authSessionUserkeyRequest: AuthSessionUserkeyRequest,
-    ): Response<AuthSessionUserkey200Response>
+    ): AuthSessionUserkey200Response
 }

@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.Flash
@@ -26,7 +25,7 @@ internal interface FlashApi {
     @POST("flash/create")
     suspend fun flashCreate(
         @Body flashCreateRequest: FlashCreateRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * flash/featured
@@ -44,7 +43,7 @@ internal interface FlashApi {
     @POST("flash/featured")
     suspend fun flashFeatured(
         @Body body: kotlin.Any,
-    ): Response<kotlin.collections.List<Flash>>
+    ): kotlin.collections.List<Flash>
 
     /**
      * flash/like
@@ -62,7 +61,7 @@ internal interface FlashApi {
     @POST("flash/like")
     suspend fun flashLike(
         @Body flashDeleteRequest: FlashDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * flash/unlike
@@ -80,7 +79,7 @@ internal interface FlashApi {
     @POST("flash/unlike")
     suspend fun flashUnlike(
         @Body flashDeleteRequest: FlashDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * flash/update
@@ -99,5 +98,5 @@ internal interface FlashApi {
     @POST("flash/update")
     suspend fun flashUpdate(
         @Body flashUpdateRequest: FlashUpdateRequest,
-    ): Response<Unit>
+    ): Unit
 }

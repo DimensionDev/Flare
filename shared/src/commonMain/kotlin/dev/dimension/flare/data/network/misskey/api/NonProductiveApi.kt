@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.TestRequest
@@ -22,7 +21,7 @@ internal interface NonProductiveApi {
     @POST("reset-db")
     suspend fun resetDb(
         @Body body: kotlin.Any,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * test
@@ -40,5 +39,5 @@ internal interface NonProductiveApi {
     @POST("test")
     suspend fun test(
         @Body testRequest: TestRequest,
-    ): Response<Unit>
+    ): Unit
 }

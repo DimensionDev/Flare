@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.App
@@ -24,7 +23,7 @@ internal interface AppApi {
     @POST("app/create")
     suspend fun appCreate(
         @Body appCreateRequest: AppCreateRequest,
-    ): Response<App>
+    ): App
 
     /**
      * app/show
@@ -42,5 +41,5 @@ internal interface AppApi {
     @POST("app/show")
     suspend fun appShow(
         @Body appShowRequest: AppShowRequest,
-    ): Response<App>
+    ): App
 }

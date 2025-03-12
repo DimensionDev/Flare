@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.AdminAbuseReportResolverCreate200Response
@@ -30,7 +29,7 @@ internal interface DefaultApi {
     @POST("admin/abuse-report-resolver/delete")
     suspend fun adminAbuseReportResolverDelete(
         @Body adminAbuseReportResolverDeleteRequest: AdminAbuseReportResolverDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * admin/abuse-report-resolver/list
@@ -48,7 +47,7 @@ internal interface DefaultApi {
     @POST("admin/abuse-report-resolver/list")
     suspend fun adminAbuseReportResolverList(
         @Body adminAbuseReportResolverListRequest: AdminAbuseReportResolverListRequest,
-    ): Response<kotlin.collections.List<AdminAbuseReportResolverCreate200Response>>
+    ): kotlin.collections.List<AdminAbuseReportResolverCreate200Response>
 
     /**
      * admin/abuse-report-resolver/update
@@ -66,7 +65,7 @@ internal interface DefaultApi {
     @POST("admin/abuse-report-resolver/update")
     suspend fun adminAbuseReportResolverUpdate(
         @Body adminAbuseReportResolverUpdateRequest: AdminAbuseReportResolverUpdateRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * i/claim-achievement
@@ -84,7 +83,7 @@ internal interface DefaultApi {
     @POST("i/claim-achievement")
     suspend fun iClaimAchievement(
         @Body iclaimAchievementRequest: IClaimAchievementRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * users/achievements
@@ -102,7 +101,7 @@ internal interface DefaultApi {
     @POST("users/achievements")
     suspend fun usersAchievements(
         @Body adminAccountsDeleteRequest: AdminAccountsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * users/lists/create-from-public
@@ -120,7 +119,7 @@ internal interface DefaultApi {
     @POST("users/lists/create-from-public")
     suspend fun usersListsCreateFromPublic(
         @Body usersListsCreateFromPublicRequest: UsersListsCreateFromPublicRequest,
-    ): Response<UserList>
+    ): UserList
 
     /**
      * users/lists/favorite
@@ -138,7 +137,7 @@ internal interface DefaultApi {
     @POST("users/lists/favorite")
     suspend fun usersListsFavorite(
         @Body usersListsDeleteRequest: UsersListsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * users/lists/unfavorite
@@ -156,5 +155,5 @@ internal interface DefaultApi {
     @POST("users/lists/unfavorite")
     suspend fun usersListsUnfavorite(
         @Body usersListsDeleteRequest: UsersListsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 }

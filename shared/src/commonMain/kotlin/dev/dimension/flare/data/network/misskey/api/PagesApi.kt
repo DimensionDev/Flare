@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.Page
@@ -27,7 +26,7 @@ internal interface PagesApi {
     @POST("pages/create")
     suspend fun pagesCreate(
         @Body pagesCreateRequest: PagesCreateRequest,
-    ): Response<Page>
+    ): Page
 
     /**
      * pages/delete
@@ -45,7 +44,7 @@ internal interface PagesApi {
     @POST("pages/delete")
     suspend fun pagesDelete(
         @Body pagesDeleteRequest: PagesDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * pages/featured
@@ -63,7 +62,7 @@ internal interface PagesApi {
     @POST("pages/featured")
     suspend fun pagesFeatured(
         @Body body: kotlin.Any,
-    ): Response<kotlin.collections.List<Page>>
+    ): kotlin.collections.List<Page>
 
     /**
      * pages/like
@@ -81,7 +80,7 @@ internal interface PagesApi {
     @POST("pages/like")
     suspend fun pagesLike(
         @Body pagesDeleteRequest: PagesDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * pages/show
@@ -99,7 +98,7 @@ internal interface PagesApi {
     @POST("pages/show")
     suspend fun pagesShow(
         @Body pagesShowRequest: PagesShowRequest,
-    ): Response<Page>
+    ): Page
 
     /**
      * pages/unlike
@@ -117,7 +116,7 @@ internal interface PagesApi {
     @POST("pages/unlike")
     suspend fun pagesUnlike(
         @Body pagesDeleteRequest: PagesDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * pages/update
@@ -136,5 +135,5 @@ internal interface PagesApi {
     @POST("pages/update")
     suspend fun pagesUpdate(
         @Body pagesUpdateRequest: PagesUpdateRequest,
-    ): Response<Unit>
+    ): Unit
 }

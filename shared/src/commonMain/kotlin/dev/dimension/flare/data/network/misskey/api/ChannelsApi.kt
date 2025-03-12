@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.Channel
@@ -28,7 +27,7 @@ internal interface ChannelsApi {
     @POST("channels/create")
     suspend fun channelsCreate(
         @Body channelsCreateRequest: ChannelsCreateRequest,
-    ): Response<Channel>
+    ): Channel
 
     /**
      * channels/favorite
@@ -46,7 +45,7 @@ internal interface ChannelsApi {
     @POST("channels/favorite")
     suspend fun channelsFavorite(
         @Body channelsFollowRequest: ChannelsFollowRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * channels/featured
@@ -64,7 +63,7 @@ internal interface ChannelsApi {
     @POST("channels/featured")
     suspend fun channelsFeatured(
         @Body body: kotlin.Any,
-    ): Response<kotlin.collections.List<Channel>>
+    ): kotlin.collections.List<Channel>
 
     /**
      * channels/follow
@@ -82,7 +81,7 @@ internal interface ChannelsApi {
     @POST("channels/follow")
     suspend fun channelsFollow(
         @Body channelsFollowRequest: ChannelsFollowRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * channels/followed
@@ -100,7 +99,7 @@ internal interface ChannelsApi {
     @POST("channels/followed")
     suspend fun channelsFollowed(
         @Body channelsFollowedRequest: ChannelsFollowedRequest,
-    ): Response<kotlin.collections.List<Channel>>
+    ): kotlin.collections.List<Channel>
 
     /**
      * channels/my-favorites
@@ -118,7 +117,7 @@ internal interface ChannelsApi {
     @POST("channels/my-favorites")
     suspend fun channelsMyFavorites(
         @Body body: kotlin.Any,
-    ): Response<kotlin.collections.List<Channel>>
+    ): kotlin.collections.List<Channel>
 
     /**
      * channels/owned
@@ -136,7 +135,7 @@ internal interface ChannelsApi {
     @POST("channels/owned")
     suspend fun channelsOwned(
         @Body channelsFollowedRequest: ChannelsFollowedRequest,
-    ): Response<kotlin.collections.List<Channel>>
+    ): kotlin.collections.List<Channel>
 
     /**
      * channels/search
@@ -154,7 +153,7 @@ internal interface ChannelsApi {
     @POST("channels/search")
     suspend fun channelsSearch(
         @Body channelsSearchRequest: ChannelsSearchRequest,
-    ): Response<kotlin.collections.List<Channel>>
+    ): kotlin.collections.List<Channel>
 
     /**
      * channels/show
@@ -172,7 +171,7 @@ internal interface ChannelsApi {
     @POST("channels/show")
     suspend fun channelsShow(
         @Body channelsFollowRequest: ChannelsFollowRequest,
-    ): Response<Channel>
+    ): Channel
 
     /**
      * channels/unfavorite
@@ -190,7 +189,7 @@ internal interface ChannelsApi {
     @POST("channels/unfavorite")
     suspend fun channelsUnfavorite(
         @Body channelsFollowRequest: ChannelsFollowRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * channels/unfollow
@@ -208,7 +207,7 @@ internal interface ChannelsApi {
     @POST("channels/unfollow")
     suspend fun channelsUnfollow(
         @Body channelsFollowRequest: ChannelsFollowRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * channels/update
@@ -226,5 +225,5 @@ internal interface ChannelsApi {
     @POST("channels/update")
     suspend fun channelsUpdate(
         @Body channelsUpdateRequest: ChannelsUpdateRequest,
-    ): Response<Channel>
+    ): Channel
 }

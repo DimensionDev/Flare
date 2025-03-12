@@ -33,11 +33,11 @@ internal class FansPagingSource(
                     )
             return LoadResult.Page(
                 data =
-                    response.body().orEmpty().mapNotNull {
+                    response.orEmpty().mapNotNull {
                         it.follower?.render(accountKey = accountKey)
                     },
                 prevKey = null,
-                nextKey = response.body()?.lastOrNull()?.id,
+                nextKey = response?.lastOrNull()?.id,
             )
         } catch (e: Throwable) {
             return LoadResult.Error(e)

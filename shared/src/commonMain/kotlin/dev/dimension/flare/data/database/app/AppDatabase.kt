@@ -27,6 +27,7 @@ import dev.dimension.flare.data.database.app.dao.SearchHistoryDao
             to = 4,
         ),
     ],
+    exportSchema = true,
 )
 @TypeConverters(
     dev.dimension.flare.data.database.adapter.MicroBlogKeyConverter::class,

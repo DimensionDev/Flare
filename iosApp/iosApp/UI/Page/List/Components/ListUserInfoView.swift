@@ -2,18 +2,17 @@ import Kingfisher
 import shared
 import SwiftUI
 
-// 改为SwiftUI视图结构体
 struct ListUserInfoView: View {
     let avatar: String
     let name: String
     let size: CGFloat
-    
+
     init(avatar: String, name: String, size: CGFloat = 16) {
         self.avatar = avatar
         self.name = name
         self.size = size
     }
-    
+
     var body: some View {
         HStack(spacing: 4) {
             if let url = URL(string: avatar) {
@@ -32,7 +31,7 @@ struct ListUserInfoView: View {
                     .frame(width: size, height: size)
                     .foregroundColor(.gray)
             }
-            
+
             Text(name)
                 .font(.caption)
                 .foregroundColor(.gray)
@@ -42,7 +41,6 @@ struct ListUserInfoView: View {
     }
 }
 
-// 保留兼容性的辅助函数
 func listUserInfoView(avatar: String, name: String) -> some View {
     ListUserInfoView(avatar: avatar, name: name)
 }

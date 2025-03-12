@@ -321,6 +321,7 @@ public fun MediaItem(
                                 .align(Alignment.BottomStart)
                                 .padding(16.dp)
                                 .size(48.dp),
+                        tint = PlatformTheme.colorScheme.card,
                     )
                 }
             }

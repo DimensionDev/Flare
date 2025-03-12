@@ -69,7 +69,7 @@ fun main(args: Array<String>) {
             state =
                 rememberWindowState(
                     position = WindowPosition(Alignment.Center),
-                    size = DpSize(1280.dp, 720.dp),
+                    size = DpSize(480.dp, 720.dp),
                 ),
         ) {
             FlareTheme {

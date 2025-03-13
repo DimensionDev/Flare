@@ -268,6 +268,9 @@
   <string name="tab_settings_drag">Przeciągnij</string>
   <string name="tab_settings_edit">Edytuj</string>
   <string name="tab_settings_remove">Usuń</string>
+  <string name="tab_settings_default">Domyślny</string>
+  <string name="tab_settings_list">Lista</string>
+  <string name="tab_settings_feed">Kanały</string>
   <string name="local_filter_add">Dodaj filtr</string>
   <string name="local_filter_no_expiration">Brak wygaśnięcia</string>
   <string name="local_filter_edit_title">Edytuj filtr</string>
@@ -538,4 +541,8 @@
   <string name="rss_sources_url_label">Adres URL</string>
   <string name="rss_title">Rss</string>
   <string name="empty_rss_sources">Brak źródeł rss</string>
+  <string name="rss_detail_open_in_browser">Otwórz w przeglądarce</string>
+  <string name="rss_detail_share">Udostępnij</string>
+  <string name="emoji_picker_recent">Najnowsze</string>
+  <string name="emoji_picker_search">Szukaj</string>
 </resources>

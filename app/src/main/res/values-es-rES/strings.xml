@@ -268,6 +268,9 @@
   <string name="tab_settings_drag">Arrastre</string>
   <string name="tab_settings_edit">Editar</string>
   <string name="tab_settings_remove">Eliminar</string>
+  <string name="tab_settings_default">Por defecto</string>
+  <string name="tab_settings_list">Lista</string>
+  <string name="tab_settings_feed">Alimentos</string>
   <string name="local_filter_add">Añadir filtro</string>
   <string name="local_filter_no_expiration">No expiración</string>
   <string name="local_filter_edit_title">Editar filtro</string>
@@ -540,4 +543,8 @@
   <string name="rss_sources_url_label">Url</string>
   <string name="rss_title">Bruto</string>
   <string name="empty_rss_sources">Sin fuentes rast</string>
+  <string name="rss_detail_open_in_browser">Abrir en el navegador</string>
+  <string name="rss_detail_share">Compartir</string>
+  <string name="emoji_picker_recent">Recientes</string>
+  <string name="emoji_picker_search">Buscar</string>
 </resources>

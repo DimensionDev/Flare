@@ -100,8 +100,8 @@ public object AppDeepLinkHelper {
             }
 
             "AddReaction" -> {
-                val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
+                val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
+                val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
                 AppleRoute.AddReaction(AccountType.Specific(accountKey), statusKey)
             }
 

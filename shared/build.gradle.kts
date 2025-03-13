@@ -13,7 +13,6 @@ plugins {
     alias(libs.plugins.room)
 }
 
-val enableLinux = providers.gradleProperty("dev.dimension.flare.linux").orNull == "true"
 kotlin {
     explicitApi()
     applyDefaultHierarchyTemplate()
@@ -34,9 +33,6 @@ kotlin {
 //            isStatic = true
             linkerOpts("-ld_classic")
         }
-    }
-    if (enableLinux) {
-        linuxX64()
     }
     targets.forEach { target ->
         target.name.takeIf {
@@ -116,13 +112,6 @@ kotlin {
             dependencies {
                 implementation(libs.stately.isolate)
                 implementation(libs.stately.iso.collections)
-            }
-        }
-        if (enableLinux) {
-            val linuxMain by getting {
-                dependencies {
-                    implementation(libs.ktor.client.curl)
-                }
             }
         }
     }

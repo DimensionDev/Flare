@@ -19,10 +19,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "Flare"
 include(":app")
-val enableLinux = providers.gradleProperty("dev.dimension.flare.linux").orNull == "true"
-if (enableLinux) {
-    include(":linuxApp")
-}
 include(":shared")
 include(":shared:ui")
 include(":shared:ui:component")

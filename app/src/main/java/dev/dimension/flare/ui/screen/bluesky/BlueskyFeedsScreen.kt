@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.screen.bluesky
 
 import android.os.Parcelable
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -21,8 +20,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -76,38 +75,36 @@ internal fun BlueskyFeedsRoute(
     navigator: DestinationsNavigator,
     accountType: AccountType,
 ) {
+    val scope = rememberCoroutineScope()
     val scaffoldNavigator =
         rememberListDetailPaneScaffoldNavigator<BlueskyFeedUri>()
-    BackHandler(
-        scaffoldNavigator.canNavigateBack(),
-    ) {
-        scaffoldNavigator.navigateBack()
-    }
-
-    ListDetailPaneScaffold(
-        directive = scaffoldNavigator.scaffoldDirective,
-        value = scaffoldNavigator.scaffoldValue,
+    NavigableListDetailPaneScaffold(
+        navigator = scaffoldNavigator,
         listPane = {
             AnimatedPane {
                 BlueskyFeedsScreen(
                     accountType = accountType,
                     toFeed = {
-                        scaffoldNavigator.navigateTo(
-                            ListDetailPaneScaffoldRole.Detail,
-                            BlueskyFeedUri(it.id),
-                        )
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(
+                                ListDetailPaneScaffoldRole.Detail,
+                                BlueskyFeedUri(it.id),
+                            )
+                        }
                     },
                 )
             }
         },
         detailPane = {
             AnimatedPane {
-                scaffoldNavigator.currentDestination?.content?.let {
+                scaffoldNavigator.currentDestination?.contentKey?.let {
                     BlueskyFeedScreen(
                         accountType = accountType,
                         uri = it.value,
                         onBack = {
-                            scaffoldNavigator.navigateBack()
+                            scope.launch {
+                                scaffoldNavigator.navigateBack()
+                            }
                         },
                     )
                 }

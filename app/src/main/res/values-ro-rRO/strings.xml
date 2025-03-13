@@ -269,6 +269,9 @@
   <string name="tab_settings_drag">Trage</string>
   <string name="tab_settings_edit">Editare</string>
   <string name="tab_settings_remove">Elimină</string>
+  <string name="tab_settings_default">Implicit</string>
+  <string name="tab_settings_list">Listă</string>
+  <string name="tab_settings_feed">Fluxuri</string>
   <string name="local_filter_add">Adaugă filtru</string>
   <string name="local_filter_no_expiration">Fără expirare</string>
   <string name="local_filter_edit_title">Editare filtru</string>
@@ -541,4 +544,8 @@
   <string name="rss_sources_url_label">Url-ul</string>
   <string name="rss_title">RSS</string>
   <string name="empty_rss_sources">Fără surse rss</string>
+  <string name="rss_detail_open_in_browser">Deschide în browser</string>
+  <string name="rss_detail_share">Distribuie</string>
+  <string name="emoji_picker_recent">Recente</string>
+  <string name="emoji_picker_search">Caută</string>
 </resources>

@@ -1,21 +1,6 @@
 <resources>
-    <string name="app_name" translatable="false">Flare</string>
-
-    <string name="login_button">Login</string>
-    <string name="navigate_back">Navigate back</string>
-
-    <string name="home_tab_home_title">Home</string>
-    <string name="home_tab_notifications_title">Notifications</string>
-    <string name="home_tab_me_title">Me</string>
-    <string name="home_tab_discover_title">Discover</string>
-
-    <string name="home_timeline_new_toots">New toots</string>
-
-    <string name="notification_tab_all_title">All</string>
-    <string name="notification_tab_mentions_title">Mentions</string>
-    <string name="notification_tab_comments_title">Comments</string>
-    <string name="notification_tab_likes_title">Likes</string>
-
+    <string name="delete">Delete</string>
+    
     <string name="profile_header_following_count">%1$s Following</string>
     <string name="profile_header_fans_count">%1$s Followers</string>
     <string name="profile_header_toots_count">%1$s Toots</string>
@@ -26,33 +11,6 @@
     <string name="profile_header_button_requested">Requested</string>
     <string name="profile_header_button_blocked">Blocked</string>
     <string name="profile_header_button_is_fans">Follows you</string>
-
-    <string name="compose_title">Compose</string>
-    <string name="compose_hint">What\'s happening?</string>
-    <string name="compose_poll_option_hint">Option %1$s</string>
-    <string name="compose_add_option">Add option</string>
-    <string name="compose_poll_single_choice">Single choice</string>
-    <string name="compose_poll_multiple_choice">Multiple choice</string>
-    <string name="compose_poll_set_expiration_date">Set expiration date</string>
-    <string name="compose_poll_expiration_at">Expiration at: %1$s</string>
-    <string name="compose_poll_expiration_5_minutes">5 minutes</string>
-    <string name="compose_poll_expiration_30_minutes">30 minutes</string>
-    <string name="compose_poll_expiration_1_hour">1 hour</string>
-    <string name="compose_poll_expiration_6_hours">6 hours</string>
-    <string name="compose_poll_expiration_12_hours">12 hours</string>
-    <string name="compose_poll_expiration_1_day">1 day</string>
-    <string name="compose_poll_expiration_3_days">3 days</string>
-    <string name="compose_poll_expiration_7_days">7 days</string>
-    <string name="compose_content_warning_hint">Content warning</string>
-    <string name="compose_media_sensitive">Mark media as sensitive</string>
-    <string name="compose_notification_title">Sending toot</string>
-    <string name="compose_notification_text">Please wait while we send your toot.</string>
-    <string name="compose_notification_error_title">Error sending toot</string>
-    <string name="compose_notification_error_text">There was an error sending your toot.</string>
-    <string name="compose_notification_success_title">Toot sent</string>
-    <string name="compose_notification_success_text">Your toot was sent successfully.</string>
-
-    <string name="settings_title">Settings</string>
 
     <string name="mastodon_notification_item_followed_you">followed you</string>
     <string name="mastodon_notification_item_favourited_your_status">favourited</string>
@@ -103,23 +61,8 @@
     <string name="mastodon_visibility_private_description">Only followers can see this toot</string>
     <string name="mastodon_visibility_direct_description">Only mentioned users can see this toot</string>
 
-    <string name="settings_accounts_title">Account Management</string>
-    <string name="settings_appearance_title">Appearance</string>
-    <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_notifications_subtitle">Customize how Flare notifies you</string>
-    <string name="settings_storage_title">Storage</string>
-    <string name="settings_storage_subtitle">Manage Flare\'s storage</string>
-    <string name="settings_about_title">About</string>
-    <string name="settings_about_subtitle">Learn more about Flare</string>
-    <string name="settings_tab_customization">Tab customization</string>
-    <string name="settings_tab_customization_description">Customize the tabs on the home screen</string>
-    <string name="settings_local_filter_title">Local filter</string>
-    <string name="settings_local_filter_description">Local filter settings for timeline</string>
-    <string name="settings_guest_setting_title">Guest Mode Host</string>
-    <string name="settings_guest_setting_description">Set the host for guest mode</string>
-    <string name="settings_local_history_title">Local history</string>
-    <string name="settings_local_history_description">View or search your browsing history</string>
 
     <string name="status_loadmore_end">No more toots</string>
     <string name="status_loadmore_error">Error loading more toots</string>
@@ -131,48 +74,11 @@
     <string name="login_expired_message">Click to login again</string>
     <string name="login_expired_relogin">Login again</string>
 
-    <string name="service_select_welcome_title">Welcome to Flare</string>
-    <string name="service_select_welcome_message">Flare is a social network client for Android.\nTo get started, please select a service to connect to.</string>
-    <string name="service_select_mastodon" translatable="false">Mastodon</string>
-    <string name="service_select_passkey" translatable="false">Passkey</string>
-    <string name="service_select_misskey" translatable="false">Misskey</string>
-    <string name="service_select_bluesky" translatable="false">Bluesky</string>
-
-    <string name="mastodon_login_title">Login to Mastodon</string>
-    <string name="mastodon_login_message">Please enter your instance URL below.</string>
-    <string name="mastodon_login_hint">Instance URL, e.g. mastodon.social</string>
-
-    <string name="misskey_login_title">Login to Misskey</string>
-    <string name="misskey_login_message">Please enter your instance URL below.</string>
-    <string name="misskey_login_hint">Instance URL, e.g. misskey.io</string>
-
-    <string name="mastodon_login_verify_message">Please wait while we verify your credentials.</string>
-
-    <string name="notification_channel_compose_name">Compose</string>
-    <string name="notification_channel_compose_description">Notifications about toots being sent</string>
-
-    <string name="status_title">Detail</string>
-
     <string name="misskey_compose_local_only">Local only</string>
     <string name="misskey_compose_local_only_description">Only users on this instance can see this toot</string>
 
     <string name="misskey_item_action_renote">Renote</string>
     <string name="misskey_item_action_quote">Quote</string>
-
-    <string name="misskey_visibility_public">Public</string>
-    <string name="misskey_visibility_home">Home</string>
-    <string name="misskey_visibility_followers">Followers</string>
-    <string name="misskey_visibility_specified">Specified</string>
-    <string name="misskey_visibility_public_description">Anyone can see and boost this toot</string>
-    <string name="misskey_visibility_home_description">Only users on this instance can see this toot</string>
-    <string name="misskey_visibility_followers_description">Only followers can see this toot</string>
-    <string name="misskey_visibility_specified_description">Only mentioned users can see this toot</string>
-
-    <string name="bluesky_login_title">Login to Bluesky</string>
-    <string name="bluesky_login_message">Please enter your login credentials below.</string>
-    <string name="bluesky_login_base_url_hint">Base URL, e.g. https://bsky.social</string>
-    <string name="bluesky_login_username_hint">Username</string>
-    <string name="bluesky_login_password_hint">Password</string>
 
     <string name="bluesky_notification_unknown_message">Unknown notification type %1$s</string>
     <string name="bluesky_notification_unknown_message2">Please report this issue to the developer.</string>
@@ -182,33 +88,10 @@
     <string name="blusky_item_action_report">Report</string>
     <string name="blusky_item_action_delete">Delete</string>
 
-    <string name="report_title">Report</string>
-    <string name="report_description">What\'s the issue with this post?</string>
-
-    <string name="report_reason_spam_title">Spam</string>
-    <string name="report_reason_violation_title">Illegal and Urgent</string>
-    <string name="report_reason_misleading_title">Misleading</string>
-    <string name="report_reason_sexual_title">Unwanted Sexual Content</string>
-    <string name="report_reason_rude_title">Anti-Social Behavior</string>
-    <string name="report_reason_other_title">Other</string>
-
-    <string name="report_reason_spam_description">Excessive mentions or replies</string>
-    <string name="report_reason_violation_description">Glaring violations of law or terms of service</string>
-    <string name="report_reason_misleading_description">This post is misleading</string>
-    <string name="report_reason_sexual_description">Nudity or pornography not labeled as such</string>
-    <string name="report_reason_rude_description">Harassment, trolling, or intolerance</string>
-    <string name="report_reason_other_description">An issue not included in these options</string>
-
-    <string name="delete_status_title">Delete</string>
-    <string name="delete_status_message">Are you sure you want to delete this?</string>
-
     <string name="mastodon_item_unbookmark">Unbookmark</string>
     <string name="mastodon_item_bookmark">Bookmark</string>
     <string name="mastodon_item_delete">Delete</string>
     <string name="mastodon_item_report">Report</string>
-    <string name="mastodon_report_title">Report</string>
-    <string name="mastodon_report_description">Are you sure you want to report this?</string>
-
     <string name="misskey_item_action_delete">Delete</string>
     <string name="misskey_item_action_report">Report</string>
 
@@ -230,190 +113,19 @@
     <string name="user_unblock">Unblock %1$s</string>
     <string name="user_mute">Mute %1$s</string>
     <string name="user_unmute">Unmute %1$s</string>
-
-    <string name="discover_search_placeholder">Search</string>
-    <string name="discover_users">Recommend Users</string>
-    <string name="discover_status">Trending Toots</string>
-    <string name="discover_hashtags">Trending Hashtags</string>
-
-    <string name="search_users">Users</string>
-    <string name="search_status">Status</string>
-
-    <string name="quick_menu_title">Quick menu</string>
-    <string name="quick_menu_add_account">Add account</string>
-
-    <string name="settings_appearance_generic">Generic</string>
-
-    <string name="settings_appearance_show_actions">Show actions</string>
-    <string name="settings_appearance_show_actions_description">Show actions on the bottom of the status</string>
-    <string name="settings_appearance_show_media">Show media</string>
-    <string name="settings_appearance_show_media_description">Show media in the status</string>
-    <string name="settings_appearance_show_numbers">Show numbers</string>
-    <string name="settings_appearance_show_numbers_description">Show numbers on the bottom of the status</string>
-    <string name="settings_appearance_show_cw_img">Show sensitive content</string>
-    <string name="settings_appearance_show_cw_img_description">Always show sensitive content in the status</string>
-    <string name="settings_appearance_expand_media">Expand media to full size</string>
-    <string name="settings_appearance_expand_media_description">Keep the aspectradio of the media in timeline</string>
-    <string name="settings_appearance_video_autoplay">Video autoplay</string>
-    <string name="settings_appearance_video_autoplay_description">Automatically play videos in the status</string>
-    <string name="settings_appearance_video_autoplay_wifi">Wi-Fi only</string>
-    <string name="settings_appearance_video_autoplay_always">Always</string>
-    <string name="settings_appearance_video_autoplay_never">Never</string>
-    <string name="settings_appearance_enable_swipe">Enable swipe gestures</string>
-    <string name="settings_appearance_enable_swipe_description">Enable swipe gestures on status</string>
-    <string name="settings_appearance_avatar_shape">Avatar shape</string>
-    <string name="settings_appearance_avatar_shape_description">Change the shape of the avatar</string>
-    <string name="settings_appearance_avatar_shape_round">Round</string>
-    <string name="settings_appearance_avatar_shape_square">Square</string>
-    <string name="settings_appearance_swipe_left">Swipe left</string>
-    <string name="settings_appearance_swipe_left_description">Action to perform when swiping left on a status</string>
-    <string name="settings_appearance_swipe_right">Swipe right</string>
-    <string name="settings_appearance_swipe_right_description">Action to perform when swiping right on a status</string>
-    <string name="settings_appearance_theme">Theme</string>
-    <string name="settings_appearance_theme_description">Change the theme of the app</string>
-    <string name="settings_appearance_theme_light">Light</string>
-    <string name="settings_appearance_theme_dark">Dark</string>
-    <string name="settings_appearance_theme_auto">Auto</string>
-    <string name="settings_appearance_dynamic_theme">Dynamic theme</string>
-    <string name="settings_appearance_dynamic_theme_description">Change the theme of the app based on the device\'s wallpaper</string>
-    <string name="settings_appearance_show_link_previews">Show link previews</string>
-    <string name="settings_appearance_show_link_previews_description">Show link previews in the status</string>
-    <string name="settings_appearance_compat_link_previews">Simplify link previews</string>
-    <string name="settings_appearance_compat_link_previews_description">Show link previews in simplify mode in the status</string>
-    <string name="settings_appearance_theme_color">Theme color</string>
-    <string name="settings_appearance_theme_color_description">Change the theme color of the app</string>
-    <string name="settings_appearance_theme_pure_color">Pure color</string>
-    <string name="settings_appearance_theme_pure_color_description">Use pure white or black color instead of the themed color as the background color</string>
-
-    <string name="settings_appearance_mastodon_show_visibility">Show visibility</string>
-    <string name="settings_appearance_mastodon_show_visibility_description">Show visibility in the status</string>
-
-    <string name="settings_appearance_misskey_show_visibility">Show visibility</string>
-    <string name="settings_appearance_misskey_show_visibility_description">Show visibility in the status</string>
-    <string name="settings_appearance_misskey_show_reaction">Show reaction</string>
-    <string name="settings_appearance_misskey_show_reaction_description">Show reaction in the status</string>
-
-    <string name="swipe_action_nothing">Nothing</string>
-    <string name="swipe_action_reply">Reply</string>
-    <string name="swipe_action_reblog">Reblog</string>
-    <string name="swipe_action_renote">Renote</string>
-    <string name="swipe_action_favourite">Favourite</string>
-    <string name="swipe_action_add_reaction">Reaction</string>
-    <string name="swipe_action_bookmark">Bookmark</string>
-    <string name="swipe_action_comment">Comment</string>
-
-    <string name="settings_storage_clear_image_cache">Clear image cache</string>
-    <string name="settings_storage_clear_image_cache_description">%1$s MB of images will be removed</string>
-
-    <string name="settings_storage_clear_database">Clear cache database</string>
-    <string name="settings_storage_clear_database_description">%1$s users, %2$s statuses will be removed</string>
-
-    <string name="service_select_instance_input_placeholder">Instance URL</string>
-    <string name="service_select_next_button">Next</string>
-    <string name="service_select_empty_message">No instances found</string>
-
-    <string name="media_viewer_title">Media viewer</string>
-
     <string name="mastodon_item_content_warning">Content warning</string>
-    <string name="settings_accounts_remove">Remove</string>
-
-    <string name="media_menu_save">Save</string>
-    <string name="media_save_success">Saved to Downloads</string>
-
     <string name="reply_to">Reply to %1$s</string>
-
-    <string name="tab_settings_add">Add</string>
-    <string name="tab_settings_drag">Drag</string>
-    <string name="tab_settings_edit">Edit</string>
-    <string name="tab_settings_remove">Remove</string>
-
-    <string name="local_filter_add">Add Filter</string>
-    <string name="local_filter_no_expiration">No expiration</string>
-
-    <string name="local_filter_edit_title">Edit Filter</string>
-    <string name="local_filter_add_title">Add Filter</string>
-    <string name="local_filter_keyword">Keyword</string>
-    <string name="local_filter_keyword_hint">Keyword to filter</string>
-    <string name="local_filter_for_timeline">Filter in timeline</string>
-    <string name="local_filter_for_notification">Filter in notification</string>
-    <string name="local_filter_for_search">Filter in search</string>
-    <string name="local_filter_delete">Delete Filter</string>
-
-    <string name="delete">Delete</string>
-
     <string name="status_detail_translate">Translate to %1$s</string>
 
-    <string name="mastodon_tab_local_title">Local</string>
-    <string name="mastodon_tab_public_title">Public</string>
-
-    <string name="home_tab_featured_title">Featured</string>
-    <string name="home_tab_bookmarks_title">Bookmarks</string>
-    <string name="home_tab_favorite_title">Favorite</string>
-    <string name="home_tab_list_title">List</string>
-    <string name="home_tab_feeds_title">Feeds</string>
-
-    <string name="tab_settings_primary">Primary tab</string>
-    <string name="tab_settings_secondary">Secondary tab</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>
 
     <string name="vvo_notification_like">Liked your status</string>
 
-    <string name="status_detail_comment">Comment</string>
-    <string name="status_detail_repost">Repost</string>
-
-    <string name="account_item_error_title">Error</string>
-    <string name="account_item_error_message">Failed to load account</string>
-
-    <string name="edit_tab_title">Edit tab</string>
-    <string name="edit_tab_name">Name</string>
-    <string name="edit_tab_name_placeholder">Tab name</string>
-    <string name="edit_tab_icon">Icon</string>
-    <string name="edit_tab_with_avatar">With avatar</string>
-
-    <string name="list_add">Add list</string>
-    <string name="list_edit">Edit list</string>
-    <string name="list_delete">Delete list</string>
-    <string name="list_delete_confirm">Are you sure you want to delete this list %1$s?</string>
+    <string name="user_follow_edit_list">Add/Remove from list</string>
     <string name="list_empty">No lists</string>
     <string name="list_error">Failed to load lists</string>
-    <string name="list_create">Create list</string>
-    <string name="list_create_name">List name</string>
-    <string name="list_create_name_hint">List name</string>
-    <string name="list_edit_members">Members</string>
-    <string name="list_edit_edit_members">Edit members</string>
-    <string name="list_edit_no_members">No members</string>
-    <string name="list_edit_members_error">Failed to load members</string>
-    <string name="edit_list_member_title">Edit list members</string>
-    <string name="edit_list_member_placeholder">Search your following</string>
-    <string name="edit_list_member_label">Search</string>
-    <string name="edit_list_member_search">Search</string>
-    <string name="edit_list_member_search_empty">No users found</string>
-    <string name="edit_list_member_search_error">Failed to search users</string>
-    <string name="edit_list_member_add">Add</string>
-    <string name="edit_list_member_remove">Remove</string>
-    <string name="list_create_description">List description</string>
-    <string name="list_create_description_hint">List description</string>
-
-    <string name="user_follow_edit_list">Add/Remove from list</string>
-    <string name="edit_account_list_title">Edit account list</string>
-    <string name="edit_account_list_error">Failed to load lists</string>
-    <string name="edit_account_list_empty">No lists</string>
-
-    <string name="feeds_my_feeds_title">My feeds</string>
-    <string name="feeds_discover_feeds_title">Discover feeds</string>
-    <string name="feeds_discover_feeds_created_by">Created by %1$s</string>
-    <string name="feeds_unsubscribe">Unsubscribe</string>
-    <string name="feeds_subscribe">Subscribe</string>
-
-    <string name="profile_tab_timeline">Posts</string>
-    <string name="profile_tab_timeline_with_reply">Posts and replies</string>
-    <string name="profile_tab_likes">Likes</string>
-    <string name="profile_tab_media">Media</string>
-
-    <string name="tab_settings_title">Tab settings</string>
-
 
     <string name="misskey_achievement_notes1_title">just setting up my msky</string>
     <string name="misskey_achievement_notes1_description">Post your first note</string>
@@ -668,29 +380,10 @@
     <string name="poll_expired">Poll expired</string>
     <string name="poll_voted">Voted</string>
     <string name="poll_expired_at">Expired at %1$s</string>
-
-    <string name="dm_list_title">Direct Messages</string>
-    <string name="dm_list_empty">No direct messages</string>
-    <string name="dm_list_error">Failed to load direct messages</string>
-    <string name="send">Send</string>
-    <string name="dm_send_placeholder">Send a message</string>
-    <string name="dm_deleted">Deleted</string>
-    <string name="dm_conversation">Direct Message Room</string>
-    <string name="dm_sending">Sending</string>
-    <string name="dm_leave">Leave conversation</string>
-    <string name="dm_to_profile">Show profile</string>
     <string name="user_send_message">Send message</string>
-
 
     <string name="profile_search_user_using_account">Find %1$s in %2$s using %3$s</string>
     <string name="profile_search_user_using_account_compat">Find in %1$s</string>
 
-    <string name="notification_login_expired">Login expired, please login again</string>
-
-    <string name="following_title">Following</string>
-    <string name="fans_title">Follower</string>
-
-    <string name="local_history_search_placeholder">Search local cache</string>
-    <string name="local_history_search_status_title">Status</string>
-    <string name="local_history_search_user_title">User</string>
+    <string name="feeds_discover_feeds_created_by">Created by %1$s</string>
 </resources>

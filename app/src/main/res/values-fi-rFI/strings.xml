@@ -269,6 +269,9 @@
   <string name="tab_settings_drag">Vedä</string>
   <string name="tab_settings_edit">Muokkaa</string>
   <string name="tab_settings_remove">Poista</string>
+  <string name="tab_settings_default">Oletus</string>
+  <string name="tab_settings_list">Lista</string>
+  <string name="tab_settings_feed">Syötteet</string>
   <string name="local_filter_add">Lisää Suodatin</string>
   <string name="local_filter_no_expiration">Ei vanhentumista</string>
   <string name="local_filter_edit_title">Muokkaa Suodatinta</string>
@@ -541,4 +544,8 @@
   <string name="rss_sources_url_label">URL-osoite</string>
   <string name="rss_title">RSS</string>
   <string name="empty_rss_sources">Ei RSS-lähteitä</string>
+  <string name="rss_detail_open_in_browser">Avaa selaimessa</string>
+  <string name="rss_detail_share">Jaa</string>
+  <string name="emoji_picker_recent">Viimeisimmät</string>
+  <string name="emoji_picker_search">Etsi</string>
 </resources>

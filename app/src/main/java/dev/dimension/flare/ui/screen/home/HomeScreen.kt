@@ -651,6 +651,7 @@ private fun getDirection(
         is RssTabItem -> RssRouteDestination
     }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun Router(
     navGraph: NavHostGraphSpec,

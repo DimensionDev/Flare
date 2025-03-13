@@ -267,6 +267,9 @@
   <string name="tab_settings_drag">Перетащите</string>
   <string name="tab_settings_edit">Редактирование</string>
   <string name="tab_settings_remove">Удалить</string>
+  <string name="tab_settings_default">По умолчанию</string>
+  <string name="tab_settings_list">Список</string>
+  <string name="tab_settings_feed">Ленты</string>
   <string name="local_filter_add">Добавить фильтр</string>
   <string name="local_filter_no_expiration">Без истечения срока</string>
   <string name="local_filter_edit_title">Изменить фильтр</string>
@@ -539,4 +542,8 @@
   <string name="rss_sources_url_label">Url</string>
   <string name="rss_title">Rss</string>
   <string name="empty_rss_sources">Нет источников rss</string>
+  <string name="rss_detail_open_in_browser">Открыть в браузере</string>
+  <string name="rss_detail_share">Поделиться</string>
+  <string name="emoji_picker_recent">Недавние</string>
+  <string name="emoji_picker_search">Искать</string>
 </resources>

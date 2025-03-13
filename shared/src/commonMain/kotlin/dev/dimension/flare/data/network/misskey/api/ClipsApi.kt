@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.Clip
@@ -26,7 +25,7 @@ internal interface ClipsApi {
     @POST("clips/create")
     suspend fun clipsCreate(
         @Body clipsCreateRequest: ClipsCreateRequest,
-    ): Response<Clip>
+    ): Clip
 
     /**
      * clips/delete
@@ -44,7 +43,7 @@ internal interface ClipsApi {
     @POST("clips/delete")
     suspend fun clipsDelete(
         @Body clipsDeleteRequest: ClipsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * clips/list
@@ -62,7 +61,7 @@ internal interface ClipsApi {
     @POST("clips/list")
     suspend fun clipsList(
         @Body body: kotlin.Any,
-    ): Response<kotlin.collections.List<Clip>>
+    ): kotlin.collections.List<Clip>
 
     /**
      * clips/show
@@ -80,7 +79,7 @@ internal interface ClipsApi {
     @POST("clips/show")
     suspend fun clipsShow(
         @Body clipsDeleteRequest: ClipsDeleteRequest,
-    ): Response<Clip>
+    ): Clip
 
     /**
      * clips/update
@@ -98,7 +97,7 @@ internal interface ClipsApi {
     @POST("clips/update")
     suspend fun clipsUpdate(
         @Body clipsUpdateRequest: ClipsUpdateRequest,
-    ): Response<Clip>
+    ): Clip
 
     /**
      * notes/clips
@@ -116,5 +115,5 @@ internal interface ClipsApi {
     @POST("notes/clips")
     suspend fun notesClips(
         @Body ipinRequest: IPinRequest,
-    ): Response<kotlin.collections.List<Clip>>
+    ): kotlin.collections.List<Clip>
 }

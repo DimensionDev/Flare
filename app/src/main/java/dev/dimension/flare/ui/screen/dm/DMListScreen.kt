@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.screen.dm
 
 import android.os.Parcelable
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,8 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffold
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -79,6 +78,7 @@ internal fun DMScreenRoute(
     navigationState: NavigationState,
     initialUserKey: MicroBlogKey? = null,
 ) {
+    val scope = rememberCoroutineScope()
     val scaffoldNavigator =
         rememberListDetailPaneScaffoldNavigator<DMPaneNavArgs>()
     if (initialUserKey != null) {
@@ -88,38 +88,37 @@ internal fun DMScreenRoute(
                 DMPaneNavArgs(initialUserKey.toString(), isUserKey = true),
             )
         }
-    } else {
-        BackHandler(
-            scaffoldNavigator.canNavigateBack(),
-        ) {
-            scaffoldNavigator.navigateBack()
-        }
     }
 
-    ListDetailPaneScaffold(
-        directive = scaffoldNavigator.scaffoldDirective,
-        value = scaffoldNavigator.scaffoldValue,
+    NavigableListDetailPaneScaffold(
+        navigator = scaffoldNavigator,
         listPane = {
             AnimatedPane {
                 DMListScreen(
                     accountType = accountType,
                     onItemClicked = { key ->
-                        scaffoldNavigator.navigateTo(
-                            ListDetailPaneScaffoldRole.Detail,
-                            DMPaneNavArgs(key.toString(), isUserKey = false),
-                        )
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(
+                                ListDetailPaneScaffoldRole.Detail,
+                                DMPaneNavArgs(key.toString(), isUserKey = false),
+                            )
+                        }
                     },
                 )
             }
         },
         detailPane = {
             AnimatedPane {
-                scaffoldNavigator.currentDestination?.content?.let { args ->
+                scaffoldNavigator.currentDestination?.contentKey?.let { args ->
                     if (args.isUserKey) {
                         UserDMConversationScreen(
                             accountType = accountType,
                             userKey = MicroBlogKey.valueOf(args.key),
-                            onBack = scaffoldNavigator::navigateBack,
+                            onBack = {
+                                scope.launch {
+                                    scaffoldNavigator.navigateBack()
+                                }
+                            },
                             navigationState = navigationState,
                             toProfile = {
                                 navigator.navigate(ProfileRouteDestination(userKey = it, accountType = accountType))
@@ -129,7 +128,11 @@ internal fun DMScreenRoute(
                         DMConversationScreen(
                             accountType = accountType,
                             roomKey = MicroBlogKey.valueOf(args.key),
-                            onBack = scaffoldNavigator::navigateBack,
+                            onBack = {
+                                scope.launch {
+                                    scaffoldNavigator.navigateBack()
+                                }
+                            },
                             navigationState = navigationState,
                             toProfile = {
                                 navigator.navigate(ProfileRouteDestination(userKey = it, accountType = accountType))

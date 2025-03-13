@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.AdminAdListRequest
@@ -26,7 +25,7 @@ internal interface GalleryApi {
     @POST("gallery/featured")
     suspend fun galleryFeatured(
         @Body body: kotlin.Any,
-    ): Response<kotlin.collections.List<GalleryPost>>
+    ): kotlin.collections.List<GalleryPost>
 
     /**
      * gallery/popular
@@ -44,7 +43,7 @@ internal interface GalleryApi {
     @POST("gallery/popular")
     suspend fun galleryPopular(
         @Body body: kotlin.Any,
-    ): Response<kotlin.collections.List<GalleryPost>>
+    ): kotlin.collections.List<GalleryPost>
 
     /**
      * gallery/posts
@@ -62,7 +61,7 @@ internal interface GalleryApi {
     @POST("gallery/posts")
     suspend fun galleryPosts(
         @Body adminAdListRequest: AdminAdListRequest,
-    ): Response<kotlin.collections.List<GalleryPost>>
+    ): kotlin.collections.List<GalleryPost>
 
     /**
      * gallery/posts/create
@@ -81,7 +80,7 @@ internal interface GalleryApi {
     @POST("gallery/posts/create")
     suspend fun galleryPostsCreate(
         @Body galleryPostsCreateRequest: GalleryPostsCreateRequest,
-    ): Response<GalleryPost>
+    ): GalleryPost
 
     /**
      * gallery/posts/delete
@@ -99,7 +98,7 @@ internal interface GalleryApi {
     @POST("gallery/posts/delete")
     suspend fun galleryPostsDelete(
         @Body galleryPostsDeleteRequest: GalleryPostsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * gallery/posts/like
@@ -117,7 +116,7 @@ internal interface GalleryApi {
     @POST("gallery/posts/like")
     suspend fun galleryPostsLike(
         @Body galleryPostsDeleteRequest: GalleryPostsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * gallery/posts/show
@@ -135,7 +134,7 @@ internal interface GalleryApi {
     @POST("gallery/posts/show")
     suspend fun galleryPostsShow(
         @Body galleryPostsDeleteRequest: GalleryPostsDeleteRequest,
-    ): Response<GalleryPost>
+    ): GalleryPost
 
     /**
      * gallery/posts/unlike
@@ -153,7 +152,7 @@ internal interface GalleryApi {
     @POST("gallery/posts/unlike")
     suspend fun galleryPostsUnlike(
         @Body galleryPostsDeleteRequest: GalleryPostsDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * gallery/posts/update
@@ -172,5 +171,5 @@ internal interface GalleryApi {
     @POST("gallery/posts/update")
     suspend fun galleryPostsUpdate(
         @Body galleryPostsUpdateRequest: GalleryPostsUpdateRequest,
-    ): Response<GalleryPost>
+    ): GalleryPost
 }

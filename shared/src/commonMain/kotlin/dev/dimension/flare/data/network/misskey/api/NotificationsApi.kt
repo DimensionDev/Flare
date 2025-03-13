@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.NotificationsCreateRequest
@@ -22,7 +21,7 @@ internal interface NotificationsApi {
     @POST("notifications/create")
     suspend fun notificationsCreate(
         @Body notificationsCreateRequest: NotificationsCreateRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * notifications/mark-all-as-read
@@ -40,5 +39,5 @@ internal interface NotificationsApi {
     @POST("notifications/mark-all-as-read")
     suspend fun notificationsMarkAllAsRead(
         @Body body: kotlin.Any,
-    ): Response<Unit>
+    ): Unit
 }

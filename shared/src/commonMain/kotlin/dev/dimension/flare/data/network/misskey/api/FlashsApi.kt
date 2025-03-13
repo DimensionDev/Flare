@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.Flash
@@ -23,7 +22,7 @@ internal interface FlashsApi {
     @POST("flash/delete")
     suspend fun flashDelete(
         @Body flashDeleteRequest: FlashDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * flash/show
@@ -41,5 +40,5 @@ internal interface FlashsApi {
     @POST("flash/show")
     suspend fun flashShow(
         @Body flashDeleteRequest: FlashDeleteRequest,
-    ): Response<Flash>
+    ): Flash
 }

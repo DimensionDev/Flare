@@ -80,7 +80,7 @@ struct ServiceSelectScreen: View {
                             case .vvo:
                                 vvoLoginView(state: state)
                             }
-
+                            Spacer()
                             // 显示选中的实例卡片
                             if let instance = selectedInstance {
                                 instanceCardView(instance: instance)

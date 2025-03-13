@@ -269,6 +269,9 @@
   <string name="tab_settings_drag">Přetažení</string>
   <string name="tab_settings_edit">Upravit</string>
   <string name="tab_settings_remove">Odebrat</string>
+  <string name="tab_settings_default">Výchozí</string>
+  <string name="tab_settings_list">Seznam</string>
+  <string name="tab_settings_feed">Zdroje</string>
   <string name="local_filter_add">Přidat filtr</string>
   <string name="local_filter_no_expiration">Bez vypršení platnosti</string>
   <string name="local_filter_edit_title">Upravit filtr</string>
@@ -541,4 +544,8 @@
   <string name="rss_sources_url_label">Adresa URL</string>
   <string name="rss_title">RSS</string>
   <string name="empty_rss_sources">Žádné rss zdroje</string>
+  <string name="rss_detail_open_in_browser">Otevřít v prohlížeči</string>
+  <string name="rss_detail_share">Sdílet</string>
+  <string name="emoji_picker_recent">Nedávné</string>
+  <string name="emoji_picker_search">Hledat</string>
 </resources>

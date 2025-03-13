@@ -59,7 +59,7 @@ internal class StatusDetailRemoteMediator(
                         service
                             .notesShow(
                                 IPinRequest(noteId = statusKey.id),
-                            ).body()
+                            )
                     listOf(current)
                 } else {
                     val current =
@@ -68,7 +68,7 @@ internal class StatusDetailRemoteMediator(
                             service
                                 .notesShow(
                                     IPinRequest(noteId = statusKey.id),
-                                ).body()
+                                )
                         } else {
                             page++
                             null
@@ -85,8 +85,7 @@ internal class StatusDetailRemoteMediator(
                                     untilId = lastItem?.timeline?.statusKey?.id,
                                     limit = state.config.pageSize,
                                 ),
-                            ).body()
-                            .orEmpty()
+                            ).orEmpty()
                     listOfNotNull(current?.reply, current) + children
                 }.filterNotNull()
             Misskey.save(

@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
@@ -38,7 +37,7 @@ internal interface MetaApi {
     @POST("admin/meta")
     suspend fun adminMeta(
         @Body body: kotlin.Any,
-    ): Response<AdminMeta200Response>
+    ): AdminMeta200Response
 
     /**
      * announcements
@@ -56,7 +55,7 @@ internal interface MetaApi {
     @POST("announcements")
     suspend fun announcements(
         @Body announcementsRequest: AnnouncementsRequest,
-    ): Response<kotlin.collections.List<Announcements200ResponseInner>>
+    ): kotlin.collections.List<Announcements200ResponseInner>
 
     /**
      * emoji
@@ -74,7 +73,7 @@ internal interface MetaApi {
     @POST("emoji")
     suspend fun emoji(
         @Body emojiRequest: EmojiRequest,
-    ): Response<EmojiDetailed>
+    ): EmojiDetailed
 
     /**
      * emojis
@@ -90,7 +89,7 @@ internal interface MetaApi {
      * @return [Emojis200Response]
      */
     @GET("emojis")
-    suspend fun emojis(): Response<Emojis200Response>
+    suspend fun emojis(): Emojis200Response
 
     /**
      * endpoint
@@ -108,7 +107,7 @@ internal interface MetaApi {
     @POST("endpoint")
     suspend fun endpoint(
         @Body endpointRequest: EndpointRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * endpoints
@@ -126,7 +125,7 @@ internal interface MetaApi {
     @POST("endpoints")
     suspend fun endpoints(
         @Body body: kotlin.Any,
-    ): Response<kotlin.collections.List<kotlin.String>>
+    ): kotlin.collections.List<kotlin.String>
 
     /**
      * fetch-rss
@@ -144,7 +143,7 @@ internal interface MetaApi {
     @POST("fetch-rss")
     suspend fun fetchRss(
         @Body fetchRssRequest: FetchRssRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * get-online-users-count
@@ -162,7 +161,7 @@ internal interface MetaApi {
     @POST("get-online-users-count")
     suspend fun getOnlineUsersCount(
         @Body body: kotlin.Any,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * invite/create
@@ -180,7 +179,7 @@ internal interface MetaApi {
     @POST("invite/create")
     suspend fun inviteCreate(
         @Body body: kotlin.Any,
-    ): Response<AdminInviteCreate200ResponseInner>
+    ): AdminInviteCreate200ResponseInner
 
     /**
      * invite/delete
@@ -198,7 +197,7 @@ internal interface MetaApi {
     @POST("invite/delete")
     suspend fun inviteDelete(
         @Body inviteDeleteRequest: InviteDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * invite/limit
@@ -216,7 +215,7 @@ internal interface MetaApi {
     @POST("invite/limit")
     suspend fun inviteLimit(
         @Body body: kotlin.Any,
-    ): Response<InviteLimit200Response>
+    ): InviteLimit200Response
 
     /**
      * invite/list
@@ -234,7 +233,7 @@ internal interface MetaApi {
     @POST("invite/list")
     suspend fun inviteList(
         @Body blockingListRequest: BlockingListRequest,
-    ): Response<kotlin.collections.List<kotlin.Any>>
+    ): kotlin.collections.List<kotlin.Any>
 
     /**
      * meta
@@ -252,7 +251,7 @@ internal interface MetaApi {
     @POST("meta")
     suspend fun meta(
         @Body metaRequest: MetaRequest,
-    ): Response<Meta200Response>
+    ): Meta200Response
 
     /**
      * ping
@@ -270,7 +269,7 @@ internal interface MetaApi {
     @POST("ping")
     suspend fun ping(
         @Body body: kotlin.Any,
-    ): Response<Ping200Response>
+    ): Ping200Response
 
     /**
      * server-info
@@ -288,7 +287,7 @@ internal interface MetaApi {
     @POST("server-info")
     suspend fun serverInfo(
         @Body body: kotlin.Any,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * stats
@@ -306,5 +305,5 @@ internal interface MetaApi {
     @POST("stats")
     suspend fun stats(
         @Body body: kotlin.Any,
-    ): Response<Stats200Response>
+    ): Stats200Response
 }

@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.POST
@@ -29,7 +28,7 @@ internal interface HashtagsApi {
     @POST("hashtags/list")
     suspend fun hashtagsList(
         @Body hashtagsListRequest: HashtagsListRequest,
-    ): Response<kotlin.collections.List<Hashtag>>
+    ): kotlin.collections.List<Hashtag>
 
     /**
      * hashtags/search
@@ -47,7 +46,7 @@ internal interface HashtagsApi {
     @POST("hashtags/search")
     suspend fun hashtagsSearch(
         @Body hashtagsSearchRequest: HashtagsSearchRequest,
-    ): Response<kotlin.collections.List<kotlin.String>>
+    ): kotlin.collections.List<kotlin.String>
 
     /**
      * hashtags/show
@@ -65,7 +64,7 @@ internal interface HashtagsApi {
     @POST("hashtags/show")
     suspend fun hashtagsShow(
         @Body hashtagsShowRequest: HashtagsShowRequest,
-    ): Response<Hashtag>
+    ): Hashtag
 
     /**
      * hashtags/trend
@@ -81,7 +80,7 @@ internal interface HashtagsApi {
      * @param body * @return [kotlin.collections.List<HashtagsTrend200ResponseInner>]
      */
     @GET("hashtags/trend")
-    suspend fun hashtagsTrend(): Response<kotlin.collections.List<HashtagsTrend200ResponseInner>>
+    suspend fun hashtagsTrend(): kotlin.collections.List<HashtagsTrend200ResponseInner>
 
     /**
      * hashtags/users
@@ -99,5 +98,5 @@ internal interface HashtagsApi {
     @POST("hashtags/users")
     suspend fun hashtagsUsers(
         @Body hashtagsUsersRequest: HashtagsUsersRequest,
-    ): Response<kotlin.collections.List<User>>
+    ): kotlin.collections.List<User>
 }

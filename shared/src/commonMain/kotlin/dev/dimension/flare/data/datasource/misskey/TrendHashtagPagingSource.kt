@@ -14,7 +14,7 @@ internal class TrendHashtagPagingSource(
         try {
             service
                 .hashtagsTrend()
-                .body()
+
                 ?.map {
                     UiHashtag(
                         hashtag = it.tag,

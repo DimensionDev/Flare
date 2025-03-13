@@ -267,6 +267,9 @@
   <string name="tab_settings_drag">اسحب</string>
   <string name="tab_settings_edit">تحرير</string>
   <string name="tab_settings_remove">إزالة</string>
+  <string name="tab_settings_default">الافتراضي</string>
+  <string name="tab_settings_list">قائمة</string>
+  <string name="tab_settings_feed">التحديثات</string>
   <string name="local_filter_add">إضافة فلتر</string>
   <string name="local_filter_no_expiration">لا تنتهي الصلاحية</string>
   <string name="local_filter_edit_title">تعديل عامل التصفية</string>
@@ -539,4 +542,8 @@
   <string name="rss_sources_url_label">الرابط</string>
   <string name="rss_title">راس</string>
   <string name="empty_rss_sources">لا توجد مصادر Rss</string>
+  <string name="rss_detail_open_in_browser">فتح في المتصفح</string>
+  <string name="rss_detail_share">مشاركة</string>
+  <string name="emoji_picker_recent">حديثاً</string>
+  <string name="emoji_picker_search">البحث</string>
 </resources>

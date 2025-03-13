@@ -269,6 +269,9 @@
   <string name="tab_settings_drag">Træk</string>
   <string name="tab_settings_edit">Rediger</string>
   <string name="tab_settings_remove">Fjern</string>
+  <string name="tab_settings_default">Standard</string>
+  <string name="tab_settings_list">Liste</string>
+  <string name="tab_settings_feed">Feeds</string>
   <string name="local_filter_add">Tilføj Filter</string>
   <string name="local_filter_no_expiration">Ingen udløbsdato</string>
   <string name="local_filter_edit_title">Rediger Filter</string>
@@ -541,4 +544,8 @@
   <string name="rss_sources_url_label">URL</string>
   <string name="rss_title">Rss</string>
   <string name="empty_rss_sources">Ingen rss kilder</string>
+  <string name="rss_detail_open_in_browser">Åbn i browser</string>
+  <string name="rss_detail_share">Del</string>
+  <string name="emoji_picker_recent">Seneste</string>
+  <string name="emoji_picker_search">Søg</string>
 </resources>

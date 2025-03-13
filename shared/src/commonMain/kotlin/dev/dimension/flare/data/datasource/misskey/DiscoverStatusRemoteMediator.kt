@@ -50,7 +50,7 @@ internal class DiscoverStatusRemoteMediator(
                             endOfPaginationReached = true,
                         )
                     }
-                }.body() ?: emptyList()
+                } ?: emptyList()
 
             Misskey.save(
                 database = database,

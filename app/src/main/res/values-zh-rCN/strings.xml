@@ -271,6 +271,9 @@
   <string name="tab_settings_drag">拖动</string>
   <string name="tab_settings_edit">编辑</string>
   <string name="tab_settings_remove">删除账户</string>
+  <string name="tab_settings_default">默认设置</string>
+  <string name="tab_settings_list">列表</string>
+  <string name="tab_settings_feed">订阅源</string>
   <string name="local_filter_add">添加过滤器</string>
   <string name="local_filter_no_expiration">无限期</string>
   <string name="local_filter_edit_title">编辑过滤器</string>
@@ -544,4 +547,8 @@
   <string name="rss_sources_url_label">网址</string>
   <string name="rss_title">Rss</string>
   <string name="empty_rss_sources">无 rss 源</string>
+  <string name="rss_detail_open_in_browser">在浏览器中打开</string>
+  <string name="rss_detail_share">分享</string>
+  <string name="emoji_picker_recent">最近的</string>
+  <string name="emoji_picker_search">搜索</string>
 </resources>

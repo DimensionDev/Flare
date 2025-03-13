@@ -269,6 +269,9 @@
   <string name="tab_settings_drag">Sleep</string>
   <string name="tab_settings_edit">Bewerken</string>
   <string name="tab_settings_remove">Verwijderen</string>
+  <string name="tab_settings_default">Standaard</string>
+  <string name="tab_settings_list">Klantenlijst</string>
+  <string name="tab_settings_feed">Feeds</string>
   <string name="local_filter_add">Filter toevoegen</string>
   <string name="local_filter_no_expiration">Geen vervaldatum</string>
   <string name="local_filter_edit_title">Bewerk filter</string>
@@ -541,4 +544,8 @@
   <string name="rss_sources_url_label">URL</string>
   <string name="rss_title">RSS</string>
   <string name="empty_rss_sources">Geen rss bronnen</string>
+  <string name="rss_detail_open_in_browser">Openen in browser</string>
+  <string name="rss_detail_share">Delen</string>
+  <string name="emoji_picker_recent">Recentelijk</string>
+  <string name="emoji_picker_search">Zoeken</string>
 </resources>

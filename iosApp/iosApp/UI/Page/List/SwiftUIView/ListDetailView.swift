@@ -6,34 +6,27 @@ import SwiftUI
 struct ListDetailView: View {
     let listInfo: UiList
     let accountType: AccountType
+    let defaultUser: UiUserV2?
     @State private var showMembers: Bool = false
     @State private var presenter: ListTimelinePresenter
     @State private var showNavigationTitle: Bool = false
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject private var router: Router
-    private let randomGradient: [Color]
+    private let gradientColors: [Color]
 
-    init(list: UiList, accountType: AccountType) {
-        self.listInfo = list
+    init(list: UiList, accountType: AccountType, defaultUser: UiUserV2? = nil) {
+        listInfo = list
         self.accountType = accountType
+        self.defaultUser = defaultUser
         _presenter = State(initialValue: ListTimelinePresenter(accountType: accountType, listId: list.id))
-        let gradients: [[Color]] = [
-            [.blue.opacity(0.7), .purple.opacity(0.5)],
-            [.green.opacity(0.6), .blue.opacity(0.4)],
-            [.purple.opacity(0.6), .pink.opacity(0.4)],
-            [.orange.opacity(0.6), .yellow.opacity(0.4)],
-            [.teal.opacity(0.6), .blue.opacity(0.4)],
-        ]
-        randomGradient = gradients[Int.random(in: 0 ..< gradients.count)]
+
+        gradientColors = ListGradientGenerator.getGradient(for: list.id)
     }
 
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
-            // 使用单一列表，让头部随滚动消失
             List {
-                // 头部信息组（随滚动消失）
                 Group {
-                    // 头部背景
                     headerBackgroundView
                         .listRowInsets(EdgeInsets())
                         .listRowSeparator(.hidden)
@@ -43,8 +36,7 @@ struct ListDetailView: View {
                         .onDisappear {
                             showNavigationTitle = true
                         }
-                    
-                    // 列表基本信息
+
                     VStack(alignment: .leading, spacing: 0) {
                         Text(listInfo.title)
                             .font(.title)
@@ -52,22 +44,24 @@ struct ListDetailView: View {
                             .padding(.top, 16)
 
                         HStack(alignment: .center, spacing: 12) {
-                            if let creator = listInfo.creator {
+                            if let user = defaultUser {
+                                creatorProfileView(creator: user)
+                            } else if let creator = listInfo.creator {
                                 creatorProfileView(creator: creator)
                             } else {
                                 unknownCreatorView
                             }
 
                             Spacer()
-
-                            memberCountsView
+                            if defaultUser == nil {
+                                memberCountsView
+                            }
                         }
                         .padding(.vertical, 12)
                     }
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                     .listRowSeparator(.hidden)
 
-                    // 描述（如果有）
                     if let description = listInfo.description_, !description.isEmpty {
                         Text(description)
                             .font(.body)
@@ -75,34 +69,32 @@ struct ListDetailView: View {
                             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                             .listRowSeparator(.hidden)
                     }
-                    
-                    // 成员按钮
-                    Button(action: {
-                        showMembers = true
-                    }) {
-                        HStack {
-                            Image(systemName: "person.2")
-                                .foregroundColor(.blue)
-                            Text("查看成员")
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .foregroundColor(.gray)
-                                .font(.caption)
+
+                    if defaultUser == nil {
+                        Button(action: {
+                            showMembers = true
+                        }) {
+                            HStack {
+                                Image(systemName: "person.2")
+                                    .foregroundColor(.blue)
+                                Text("Show Members")
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.gray)
+                                    .font(.caption)
+                            }
                         }
+                        .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
                     }
-                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 8, trailing: 16))
-                    
-                    // 时间线标题
-                    Text("列表动态")
+                    Text("List Timeline")
                         .font(.headline)
                         .padding(.top, 16)
                         .padding(.bottom, 8)
                         .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                         .listRowSeparator(.hidden)
                 }
-                
-                // 时间线内容
+
                 StatusTimelineComponent(
                     data: state.listState,
                     detailKey: nil
@@ -139,32 +131,28 @@ struct ListDetailView: View {
         }
     }
 
-    // 头部 banner
     private var headerBackgroundView: some View {
         ZStack {
             if let avatarString = listInfo.avatar,
+               !avatarString.isEmpty,
                let url = URL(string: avatarString)
             {
                 KFImage(url)
-//                    .placeholder { gradientBackground }
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .clipped()
-//                    .blur(radius: 3)
                     .overlay(Color.black.opacity(0.2))
             } else {
-                // 显示渐变背景
                 gradientBackground
             }
         }
     }
 
-    // 随机渐变背景
     private var gradientBackground: some View {
         ZStack {
             LinearGradient(
-                gradient: Gradient(colors: randomGradient),
+                gradient: Gradient(colors: gradientColors),
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )

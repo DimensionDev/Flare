@@ -1,8 +1,8 @@
-//import Combine
-//import Foundation
-//import shared
+// import Combine
+// import Foundation
+// import shared
 //
-//class AllListsViewModel: BaseListViewModel {
+// class AllListsViewModel: BaseListViewModel {
 //    private let presenter: AllListPresenter
 //    // 保存最新的状态，以便可以调用其刷新方法
 //    private var latestState: AllListState? = nil
@@ -29,7 +29,7 @@
 //                    // 更新刷新状态
 //                    self.isRefreshing = listState.isRefreshing
 //
-//                    
+//
 //                    switch onEnum(of: listState.items) {
 //                    case let .success(successData):
 //                        // 处理成功状态
@@ -77,4 +77,4 @@
 //        // 等待一段时间
 //        try? await Task.sleep(nanoseconds: 1_000_000_000)
 //    }
-//}
+// }

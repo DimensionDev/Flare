@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.misskey.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.POST
 import dev.dimension.flare.data.network.misskey.api.model.AdminRolesDeleteRequest
@@ -25,7 +24,7 @@ internal interface RoleApi {
     @POST("roles/list")
     suspend fun rolesList(
         @Body body: kotlin.Any,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * roles/notes
@@ -43,7 +42,7 @@ internal interface RoleApi {
     @POST("roles/notes")
     suspend fun rolesNotes(
         @Body rolesNotesRequest: RolesNotesRequest,
-    ): Response<kotlin.collections.List<Note>>
+    ): kotlin.collections.List<Note>
 
     /**
      * roles/show
@@ -61,7 +60,7 @@ internal interface RoleApi {
     @POST("roles/show")
     suspend fun rolesShow(
         @Body adminRolesDeleteRequest: AdminRolesDeleteRequest,
-    ): Response<Unit>
+    ): Unit
 
     /**
      * roles/users
@@ -79,5 +78,5 @@ internal interface RoleApi {
     @POST("roles/users")
     suspend fun rolesUsers(
         @Body adminRolesUsersRequest: AdminRolesUsersRequest,
-    ): Response<Unit>
+    ): Unit
 }

@@ -2,7 +2,7 @@ import Combine
 import Foundation
 import shared
 
-//class PinnableListViewModel: BaseListViewModel {
+// class PinnableListViewModel: BaseListViewModel {
 //    private let presenter: PinnableListPresenter
 //    let accountType: AccountType
 //
@@ -64,4 +64,4 @@ import shared
 //        // 重新激活以获取新数据
 //        activate()
 //    }
-//}
+// }

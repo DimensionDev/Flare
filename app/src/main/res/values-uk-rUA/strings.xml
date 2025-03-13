@@ -264,6 +264,9 @@
   <string name="tab_settings_drag">Тягнути</string>
   <string name="tab_settings_edit">Редагувати</string>
   <string name="tab_settings_remove">Видалити</string>
+  <string name="tab_settings_default">Типово</string>
+  <string name="tab_settings_list">Список</string>
+  <string name="tab_settings_feed">Стрічки новин</string>
   <string name="local_filter_add">Додати фільтр</string>
   <string name="local_filter_no_expiration">Немає терміну дії</string>
   <string name="local_filter_edit_title">Редагувати</string>
@@ -535,4 +538,8 @@
   <string name="rss_sources_url_label">URL-адреса</string>
   <string name="rss_title">RSS</string>
   <string name="empty_rss_sources">Відсутні вихідні коди для запитів</string>
+  <string name="rss_detail_open_in_browser">Відкрити у браузері</string>
+  <string name="rss_detail_share">Поділитись</string>
+  <string name="emoji_picker_recent">Недавні</string>
+  <string name="emoji_picker_search">Пошук</string>
 </resources>

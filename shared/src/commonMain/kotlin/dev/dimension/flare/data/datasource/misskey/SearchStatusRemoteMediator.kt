@@ -57,7 +57,7 @@ internal class SearchStatusRemoteMediator(
                             ),
                         )
                     }
-                }.body() ?: emptyList()
+                } ?: emptyList()
 
             Misskey.save(
                 database = database,

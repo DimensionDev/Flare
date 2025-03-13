@@ -269,6 +269,9 @@
   <string name="tab_settings_drag">Arrastar</string>
   <string name="tab_settings_edit">Alterar</string>
   <string name="tab_settings_remove">Excluir</string>
+  <string name="tab_settings_default">Padrão</string>
+  <string name="tab_settings_list">Lista</string>
+  <string name="tab_settings_feed">Conteúdos</string>
   <string name="local_filter_add">Adicionar filtro</string>
   <string name="local_filter_no_expiration">Sem vencimento</string>
   <string name="local_filter_edit_title">Editar filtro</string>
@@ -541,4 +544,8 @@
   <string name="rss_sources_url_label">URL</string>
   <string name="rss_title">RSS</string>
   <string name="empty_rss_sources">Sem fontes de RSS</string>
+  <string name="rss_detail_open_in_browser">Abrir no navegador</string>
+  <string name="rss_detail_share">Compartilhar</string>
+  <string name="emoji_picker_recent">Recente</string>
+  <string name="emoji_picker_search">Pesquisa</string>
 </resources>

@@ -271,6 +271,9 @@
   <string name="tab_settings_drag">ドラッグ</string>
   <string name="tab_settings_edit">編集</string>
   <string name="tab_settings_remove">削除</string>
+  <string name="tab_settings_default">デフォルト</string>
+  <string name="tab_settings_list">リスト</string>
+  <string name="tab_settings_feed">フィード</string>
   <string name="local_filter_add">フィルターを追加</string>
   <string name="local_filter_no_expiration">有効期限なし</string>
   <string name="local_filter_edit_title">フィルタの編集</string>
@@ -544,4 +547,8 @@
   <string name="rss_sources_url_label">URL</string>
   <string name="rss_title">RSS</string>
   <string name="empty_rss_sources">RSSソースがありません</string>
+  <string name="rss_detail_open_in_browser">ブラウザで開く</string>
+  <string name="rss_detail_share">共有</string>
+  <string name="emoji_picker_recent">最近のもの</string>
+  <string name="emoji_picker_search">検索</string>
 </resources>

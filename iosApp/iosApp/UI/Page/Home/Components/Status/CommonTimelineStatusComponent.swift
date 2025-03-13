@@ -52,10 +52,15 @@ struct CommonTimelineStatusComponent: View {
             case let .item(item):
                 // 所有非 More 的 item 都加入主操作
                 if !(item is StatusActionItemMore) {
+//                    if item is StatusActionItemReaction {
+//                        // misskey 的+ emoji，先去掉
+//                    } else {
                     bottomMainActions.append(action)
+//                    }
                 }
             case let .group(group):
-                if let displayItem = group.displayItem as? StatusActionItemMore {
+                let displayItem = group.displayItem
+                if (displayItem as? StatusActionItemMore) != nil {
                     // 只处理 More 菜单中的操作
                     for subAction in group.actions {
                         if case let .item(item) = onEnum(of: subAction) {
@@ -66,6 +71,15 @@ struct CommonTimelineStatusComponent: View {
                                 // 其他操作添加到更多操作
                                 bottomMoreActions.append(item)
                             }
+                        } else if subAction is StatusActionAsyncActionItem {
+                            // flow=dev.dimension.flare.ui.model.mappe .combineUnsafe$$inlined$unsafeFlow$1@5cb14370
+                            // 处理异步操作项的flow
+                            // let collector = AsyncActionItemCollector(
+                            //     asyncItem: subAction as! StatusActionAsyncActionItem)
+                            // collector.collect { item in
+                            //     // item本身就是StatusAction的一个实现，可以直接添加
+                            //     bottomMoreActions.append(item)
+                            // }
                         }
                     }
                 } else {
@@ -74,6 +88,12 @@ struct CommonTimelineStatusComponent: View {
                 }
             case let .asyncActionItem(asyncItem):
                 break
+                // 处理异步操作项的flow
+//                let collector = AsyncActionItemCollector(asyncItem: asyncItem)
+//                collector.collect { item in
+//                    // item本身就是StatusAction的一个实现，可以直接添加
+//                    bottomMoreActions.append(item)
+//                }
             }
         }
 
@@ -88,7 +108,8 @@ struct CommonTimelineStatusComponent: View {
                 if let user = data.user {
                     UserComponent(
                         user: user,
-                        topEndContent: data.topEndContent as? UiTimelineItemContentStatusTopEndContent,
+                        topEndContent: data.topEndContent
+                            as? UiTimelineItemContentStatusTopEndContent,
                         onUserClicked: {
                             user.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
                         }
@@ -102,43 +123,60 @@ struct CommonTimelineStatusComponent: View {
                         Menu {
                             ForEach(0 ..< processActions().moreActions.count, id: \.self) { index in
                                 let item = processActions().moreActions[index]
-                                let role: ButtonRole? = if let colorData = item as? StatusActionItemColorized {
-                                    switch colorData.color {
-                                    case .red: .destructive
-                                    case .primaryColor: nil
-                                    case .contentColor: nil
-                                    case .error: .destructive
+                                let role: ButtonRole? =
+                                    if let colorData = item as? StatusActionItemColorized {
+                                        switch colorData.color {
+                                        case .red: .destructive
+                                        case .primaryColor: nil
+                                        case .contentColor: nil
+                                        case .error: .destructive
+                                        }
+                                    } else {
+                                        nil
                                     }
-                                } else {
-                                    nil
-                                }
 
-                                Button(role: role, action: {
-                                    if let clickable = item as? StatusActionItemClickable {
-                                        clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                                        // 如果是举报操作，显示 Toast
-                                        if case .report = onEnum(of: item) {
-                                            showReportToast()
+                                Button(
+                                    role: role,
+                                    action: {
+                                        if let clickable = item as? StatusActionItemClickable {
+                                            clickable.onClicked(
+                                                .init(launcher: AppleUriLauncher(openURL: openURL)))
+                                            // 如果是举报操作，显示 Toast
+                                            if case .report = onEnum(of: item) {
+                                                showReportToast()
+                                            }
+                                        }
+                                    },
+                                    label: {
+                                        let text: LocalizedStringKey =
+                                            switch onEnum(of: item) {
+                                            case let .bookmark(data):
+                                                data.bookmarked
+                                                    ? LocalizedStringKey("status_action_unbookmark")
+                                                    : LocalizedStringKey("status_action_bookmark")
+                                            case .delete: LocalizedStringKey("status_action_delete")
+                                            case let .like(data):
+                                                data.liked
+                                                    ? LocalizedStringKey("status_action_unlike")
+                                                    : LocalizedStringKey("status_action_like")
+                                            case .quote: LocalizedStringKey("quote")
+                                            case .reaction:
+                                                LocalizedStringKey("status_action_add_reaction")
+                                            case .reply: LocalizedStringKey("status_action_reply")
+                                            case .report: LocalizedStringKey("report")
+                                            case let .retweet(data):
+                                                data.retweeted
+                                                    ? LocalizedStringKey("retweet_remove")
+                                                    : LocalizedStringKey("retweet")
+                                            case .more: LocalizedStringKey("status_action_more")
+                                            }
+                                        Label {
+                                            Text(text)
+                                        } icon: {
+                                            StatusActionItemIcon(item: item)
                                         }
                                     }
-                                }, label: {
-                                    let text: LocalizedStringKey = switch onEnum(of: item) {
-                                    case let .bookmark(data): data.bookmarked ? LocalizedStringKey("status_action_unbookmark") : LocalizedStringKey("status_action_bookmark")
-                                    case .delete: LocalizedStringKey("status_action_delete")
-                                    case let .like(data): data.liked ? LocalizedStringKey("status_action_unlike") : LocalizedStringKey("status_action_like")
-                                    case .quote: LocalizedStringKey("quote")
-                                    case .reaction: LocalizedStringKey("status_action_add_reaction")
-                                    case .reply: LocalizedStringKey("status_action_reply")
-                                    case .report: LocalizedStringKey("report")
-                                    case let .retweet(data): data.retweeted ? LocalizedStringKey("retweet_remove") : LocalizedStringKey("retweet")
-                                    case .more: LocalizedStringKey("status_action_more")
-                                    }
-                                    Label {
-                                        Text(text)
-                                    } icon: {
-                                        StatusActionItemIcon(item: item)
-                                    }
-                                })
+                                )
                             }
                         } label: {
                             Image(asset: Asset.Image.Status.more)
@@ -165,32 +203,35 @@ struct CommonTimelineStatusComponent: View {
             // reply
             if let aboveTextContent = data.aboveTextContent {
                 switch onEnum(of: aboveTextContent) {
-                case let .replyTo(data): Text(String(localized: "Reply to \(data.handle)"))
-                    .font(.caption)
-                    .opacity(0.6)
+                case let .replyTo(data):
+                    Text(String(localized: "Reply to \(data.handle)"))
+                        .font(.caption)
+                        .opacity(0.6)
                 }
                 Spacer()
                     .frame(height: 4)
             }
 
             if let cwText = data.contentWarning, !cwText.raw.isEmpty {
-                Button(action: {
-                    withAnimation {
-                        expanded = !expanded
+                Button(
+                    action: {
+                        withAnimation {
+                            expanded = !expanded
+                        }
+                    },
+                    label: {
+                        Image(systemName: "exclamationmark.triangle")
+                        Markdown(cwText.markdown)
+                            .font(.body)
+                            .markdownInlineImageProvider(.emoji)
+                        Spacer()
+                        if expanded {
+                            Image(systemName: "arrowtriangle.down.circle.fill")
+                        } else {
+                            Image(systemName: "arrowtriangle.left.circle.fill")
+                        }
                     }
-                }, label: {
-                    Image(systemName: "exclamationmark.triangle")
-                    Markdown(cwText.markdown)
-                        .font(.body)
-                        .markdownInlineImageProvider(.emoji)
-                    Spacer()
-                    if expanded {
-                        Image(systemName: "arrowtriangle.down.circle.fill")
-                    } else {
-                        Image(systemName: "arrowtriangle.left.circle.fill")
-                    }
-
-                })
+                )
                 .opacity(0.6)
                 .buttonStyle(.plain)
                 if expanded {
@@ -228,7 +269,8 @@ struct CommonTimelineStatusComponent: View {
 
                 // if appSettings.appearanceSettings.showMedia || showMedia {
                 MediaComponent(
-                    hideSensitive: data.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
+                    hideSensitive: data.sensitive
+                        && !appSettings.appearanceSettings.showSensitiveContent,
                     medias: data.images,
                     onMediaClick: handleMediaClick, // 打开预览
                     sensitive: data.sensitive
@@ -272,35 +314,40 @@ struct CommonTimelineStatusComponent: View {
                         .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                 )
                 .cornerRadius(8)
-//               #if os(iOS)
-//                .background(Color(UIColor.secondarySystemBackground))
-//               #else
-//               .background(Color(NSColor.windowBackgroundColor))
-//               #endif
+                //               #if os(iOS)
+                //                .background(Color(UIColor.secondarySystemBackground))
+                //               #else
+                //               .background(Color(NSColor.windowBackgroundColor))
+                //               #endif
             }
-            //
+            // misskey 的+ 的emojis
             if let bottomContent = data.bottomContent {
                 switch onEnum(of: bottomContent) {
                 case let .reaction(data):
                     ScrollView(.horizontal) {
                         LazyHStack {
-                            ForEach(1 ... data.emojiReactions.count, id: \.self) { index in
-                                let reaction = data.emojiReactions[index - 1]
-                                Button(action: {
-                                    reaction.onClicked()
-                                }, label: {
-                                    HStack {
-                                        if !reaction.url.isEmpty {
-                                            KFImage(URL(string: reaction.url))
-                                                .resizable()
-                                                .scaledToFit()
-                                        } else {
-                                            Text(reaction.name)
+                            if !data.emojiReactions.isEmpty {
+                                ForEach(0 ..< data.emojiReactions.count, id: \.self) { index in
+                                    let reaction = data.emojiReactions[index]
+                                    Button(
+                                        action: {
+                                            reaction.onClicked()
+                                        },
+                                        label: {
+                                            HStack {
+                                                if !reaction.url.isEmpty {
+                                                    KFImage(URL(string: reaction.url))
+                                                        .resizable()
+                                                        .scaledToFit()
+                                                } else {
+                                                    Text(reaction.name)
+                                                }
+                                                Text(reaction.humanizedCount)
+                                            }
                                         }
-                                        Text(reaction.humanizedCount)
-                                    }
-                                })
-                                .buttonStyle(.borderless)
+                                    )
+                                    .buttonStyle(.borderless)
+                                }
                             }
                         }
                     }
@@ -329,17 +376,21 @@ struct CommonTimelineStatusComponent: View {
                         switch onEnum(of: action) {
                         case let .asyncActionItem(asyncItem): EmptyView()
                         case let .item(item):
-                            Button(action: {
-                                if let clickable = item as? StatusActionItemClickable {
-                                    clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                                    // 如果是举报操作，显示 Toast
-                                    if case .report = onEnum(of: item) {
-                                        showReportToast()
+                            Button(
+                                action: {
+                                    if let clickable = item as? StatusActionItemClickable {
+                                        clickable.onClicked(
+                                            .init(launcher: AppleUriLauncher(openURL: openURL)))
+                                        // 如果是举报操作，显示 Toast
+                                        if case .report = onEnum(of: item) {
+                                            showReportToast()
+                                        }
                                     }
+                                },
+                                label: {
+                                    StatusActionLabel(item: item)
                                 }
-                            }, label: {
-                                StatusActionLabel(item: item)
-                            })
+                            )
                             .frame(maxWidth: .infinity)
                             .padding(.horizontal, 10) // 添加水平内边距
                         case let .group(group):
@@ -347,38 +398,67 @@ struct CommonTimelineStatusComponent: View {
                                 ForEach(0 ..< group.actions.count, id: \.self) { subActionIndex in
                                     let subAction = group.actions[subActionIndex]
                                     if case let .item(item) = onEnum(of: subAction) {
-                                        let role: ButtonRole? = if let colorData = item as? StatusActionItemColorized {
-                                            switch colorData.color {
-                                            case .red: .destructive
-                                            case .primaryColor: nil
-                                            case .contentColor: nil
-                                            case .error: .destructive
+                                        let role: ButtonRole? =
+                                            if let colorData = item as? StatusActionItemColorized {
+                                                switch colorData.color {
+                                                case .red: .destructive
+                                                case .primaryColor: nil
+                                                case .contentColor: nil
+                                                case .error: .destructive
+                                                }
+                                            } else {
+                                                nil
                                             }
-                                        } else {
-                                            nil
-                                        }
-                                        Button(role: role, action: {
-                                            if let clickable = item as? StatusActionItemClickable {
-                                                clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                                        Button(
+                                            role: role,
+                                            action: {
+                                                if let clickable = item
+                                                    as? StatusActionItemClickable
+                                                {
+                                                    clickable.onClicked(
+                                                        .init(
+                                                            launcher: AppleUriLauncher(
+                                                                openURL: openURL)))
+                                                }
+                                            },
+                                            label: {
+                                                let text: LocalizedStringKey =
+                                                    switch onEnum(of: item) {
+                                                    case let .bookmark(data):
+                                                        data.bookmarked
+                                                            ? LocalizedStringKey(
+                                                                "status_action_unbookmark")
+                                                            : LocalizedStringKey(
+                                                                "status_action_bookmark")
+                                                    case .delete:
+                                                        LocalizedStringKey("status_action_delete")
+                                                    case let .like(data):
+                                                        data.liked
+                                                            ? LocalizedStringKey(
+                                                                "status_action_unlike")
+                                                            : LocalizedStringKey(
+                                                                "status_action_like")
+                                                    case .quote: LocalizedStringKey("quote")
+                                                    case .reaction:
+                                                        LocalizedStringKey(
+                                                            "status_action_add_reaction")
+                                                    case .reply:
+                                                        LocalizedStringKey("status_action_reply")
+                                                    case .report: LocalizedStringKey("report")
+                                                    case let .retweet(data):
+                                                        data.retweeted
+                                                            ? LocalizedStringKey("retweet_remove")
+                                                            : LocalizedStringKey("retweet")
+                                                    case .more:
+                                                        LocalizedStringKey("status_action_more")
+                                                    }
+                                                Label {
+                                                    Text(text)
+                                                } icon: {
+                                                    StatusActionItemIcon(item: item)
+                                                }
                                             }
-                                        }, label: {
-                                            let text: LocalizedStringKey = switch onEnum(of: item) {
-                                            case let .bookmark(data): data.bookmarked ? LocalizedStringKey("status_action_unbookmark") : LocalizedStringKey("status_action_bookmark")
-                                            case .delete: LocalizedStringKey("status_action_delete")
-                                            case let .like(data): data.liked ? LocalizedStringKey("status_action_unlike") : LocalizedStringKey("status_action_like")
-                                            case .quote: LocalizedStringKey("quote")
-                                            case .reaction: LocalizedStringKey("status_action_add_reaction")
-                                            case .reply: LocalizedStringKey("status_action_reply")
-                                            case .report: LocalizedStringKey("report")
-                                            case let .retweet(data): data.retweeted ? LocalizedStringKey("retweet_remove") : LocalizedStringKey("retweet")
-                                            case .more: LocalizedStringKey("status_action_more")
-                                            }
-                                            Label {
-                                                Text(text)
-                                            } icon: {
-                                                StatusActionItemIcon(item: item)
-                                            }
-                                        })
+                                        )
                                     }
                                 }
                             } label: {
@@ -407,8 +487,16 @@ struct CommonTimelineStatusComponent: View {
         }.frame(alignment: .leading)
             .contentShape(Rectangle())
             .onTapGesture {
-                if let tapLocation = (UIApplication.shared.windows.first?.hitTest(UIApplication.shared.windows.first?.convert(CGPoint(x: 0, y: 0), to: nil) ?? .zero, with: nil)) {
-                    let bottomActionBarFrame = CGRect(x: 16, y: tapLocation.frame.height - 44, width: tapLocation.frame.width - 32, height: 44)
+                if let tapLocation =
+                    (UIApplication.shared.windows.first?.hitTest(
+                        UIApplication.shared.windows.first?.convert(CGPoint(x: 0, y: 0), to: nil)
+                            ?? .zero, with: nil
+                    ))
+                {
+                    let bottomActionBarFrame = CGRect(
+                        x: 16, y: tapLocation.frame.height - 44,
+                        width: tapLocation.frame.width - 32, height: 44
+                    )
                     if !bottomActionBarFrame.contains(tapLocation.frame.origin) {
                         data.onClicked(ClickContext(launcher: AppleUriLauncher(openURL: openURL)))
                     }
@@ -508,25 +596,38 @@ struct StatusActionLabel: View {
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
-        let text = switch onEnum(of: item) {
-        case let .like(data): formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
-        case let .retweet(data): formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
-        case let .quote(data): formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
-        case let .reply(data): formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
-        case let .bookmark(data): formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
-        default: ""
-        }
+        let text =
+            switch onEnum(of: item) {
+            case let .like(data):
+                formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
+            case let .retweet(data):
+                formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
+            case let .quote(data):
+                formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
+            case let .reply(data):
+                formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
+            case let .bookmark(data):
+                formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
+            default: ""
+            }
 
-        let color = switch onEnum(of: item) {
-        case let .retweet(data):
-            data.retweeted ? Colors.State.swiftUIRetweetActive : (colorScheme == .dark ? Color.white : Color.black)
-        case let .bookmark(data):
-            data.bookmarked ? Colors.State.swiftUIBookmarkActive : (colorScheme == .dark ? Color.white : Color.black)
-        case let .like(data):
-            data.liked ? Colors.State.swiftUILikeActive : (colorScheme == .dark ? Color.white : Color.black)
-        default:
-            colorScheme == .dark ? Color.white : Color.black
-        }
+        let color =
+            switch onEnum(of: item) {
+            case let .retweet(data):
+                data.retweeted
+                    ? Colors.State.swiftUIRetweetActive
+                    : (colorScheme == .dark ? Color.white : Color.black)
+            case let .bookmark(data):
+                data.bookmarked
+                    ? Colors.State.swiftUIBookmarkActive
+                    : (colorScheme == .dark ? Color.white : Color.black)
+            case let .like(data):
+                data.liked
+                    ? Colors.State.swiftUILikeActive
+                    : (colorScheme == .dark ? Color.white : Color.black)
+            default:
+                colorScheme == .dark ? Color.white : Color.black
+            }
 
         Label {
             Text(text)
@@ -584,7 +685,9 @@ struct ShareButton: View {
         Menu {
             Button(action: {
                 // 系统分享
-                let activityVC = UIActivityViewController(activityItems: [content], applicationActivities: nil)
+                let activityVC = UIActivityViewController(
+                    activityItems: [content], applicationActivities: nil
+                )
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                    let window = windowScene.windows.first,
                    let rootVC = window.rootViewController
@@ -607,7 +710,9 @@ struct ShareButton: View {
                 {
                     let renderer = ImageRenderer(content: view)
                     if let uiImage = renderer.uiImage {
-                        let activityVC = UIActivityViewController(activityItems: [uiImage], applicationActivities: nil)
+                        let activityVC = UIActivityViewController(
+                            activityItems: [uiImage], applicationActivities: nil
+                        )
                         if let rootVC = window.rootViewController {
                             activityVC.popoverPresentationController?.sourceView = window
                             rootVC.present(activityVC, animated: true)
@@ -638,5 +743,33 @@ struct ShareButton: View {
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
+    }
+}
+
+// 用于收集StatusActionAsyncActionItem中Flow数据的类
+class AsyncActionItemCollector {
+    private let asyncItem: StatusActionAsyncActionItem
+    private var task: Task<Void, Never>?
+
+    init(asyncItem: StatusActionAsyncActionItem) {
+        self.asyncItem = asyncItem
+    }
+
+    func collect(onCollect: @escaping (StatusActionItem) -> Void) {
+        task = Task { @MainActor in
+            do {
+                for await value in asyncItem.flow {
+                    if let item = value as? StatusActionItem {
+                        onCollect(item)
+                    }
+                }
+            } catch {
+                print("Error collecting from flow: \(error)")
+            }
+        }
+    }
+
+    deinit {
+        task?.cancel()
     }
 }

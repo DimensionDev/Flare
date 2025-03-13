@@ -39,7 +39,7 @@ bluesky = "0.3.2"
 kotlinx-coroutines = "1.10.1"
 koin = "4.0.2"
 composeIcons = "1.3.0"
-media3 = "1.5.1"
+media3 = "1.6.0-rc01"
 desugar_jdk_libs = "2.1.5"
 firebase-bom = "33.10.0"
 google-services = "4.4.2"
@@ -94,7 +94,7 @@ nestedScrollView = { group = "com.github.Tlaster", name = "NestedScrollView", ve
 webkit = { group = "androidx.webkit", name = "webkit", version = "1.13.0" }
 
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
-media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
+media3-ui = { group = "androidx.media3", name = "media3-ui-compose", version.ref = "media3" }
 media3-hls = { group = "androidx.media3", name = "media3-exoplayer-hls", version.ref = "media3" }
 
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }

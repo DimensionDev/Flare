@@ -91,7 +91,7 @@ internal fun StatusMediaComponent(
                                 .clickable {
                                     onMediaClick(media)
                                 },
-                        keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
+//                        keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
                     )
                 }
             },

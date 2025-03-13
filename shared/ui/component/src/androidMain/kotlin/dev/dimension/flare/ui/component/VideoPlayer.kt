@@ -3,11 +3,8 @@
 package dev.dimension.flare.ui.component
 
 import android.content.Context
-import android.view.Surface
 import androidx.annotation.OptIn
 import androidx.collection.lruCache
-import androidx.compose.foundation.AndroidEmbeddedExternalSurface
-import androidx.compose.foundation.AndroidExternalSurfaceScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -22,7 +19,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,6 +28,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.compose.PlayerSurface
+import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -139,68 +137,8 @@ public fun VideoPlayer(
                             it
                         }
                     }.matchParentSize(),
+            surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
         )
-//        AndroidView(
-//            modifier =
-//                Modifier
-//                    .clipToBounds()
-//                    .matchParentSize(),
-//            factory = { context ->
-//                val exoPlayer =
-//                    playerPool
-//                        .get(uri)
-//                        .apply {
-//                            if (autoPlay) {
-//                                play()
-//                            }
-//                            volume = if (muted) 0f else 1f
-//                        }
-//                val parser = context.resources.getXml(R.xml.video_view)
-//                var type = 0
-//                while (type != XmlPullParser.END_DOCUMENT && type != XmlPullParser.START_TAG) {
-//                    type = parser.next()
-//                }
-//                val attrs = Xml.asAttributeSet(parser)
-//                PlayerView(context, attrs).apply {
-//                    controllerShowTimeoutMs = -1
-//                    useController = showControls
-//                    player = exoPlayer
-//                    scope.launch {
-//                        while (true) {
-//                            isLoaded = !exoPlayer.isLoading || exoPlayer.duration > 0
-//                            if (remainingTimeContent != null) {
-//                                remainingTime = exoPlayer.duration - exoPlayer.currentPosition
-//                            }
-//                            delay(500)
-//                        }
-//                    }
-//                    layoutParams =
-//                        ViewGroup.LayoutParams(
-//                            ViewGroup.LayoutParams.MATCH_PARENT,
-//                            ViewGroup.LayoutParams.MATCH_PARENT,
-//                        )
-//                    if (contentScale == ContentScale.Crop) {
-//                        this.resizeMode = RESIZE_MODE_ZOOM
-//                    }
-//                    this.keepScreenOn = keepScreenOn
-//                    if (onClick != null) {
-//                        setOnClickListener {
-//                            onClick()
-//                        }
-//                    }
-//                    if (onLongClick != null) {
-//                        setOnLongClickListener {
-//                            onLongClick()
-//                            true
-//                        }
-//                    }
-//                }
-//            },
-//            onRelease = { playerView ->
-//                playerView.player = null
-//                playerPool.release(uri)
-//            },
-//        )
         if (!isLoaded) {
             loadingPlaceholder()
         } else {
@@ -279,31 +217,4 @@ public class VideoPlayerPool(
 
         return count == 0L
     }
-}
-
-@Composable
-private fun PlayerSurface(
-    player: Player,
-    modifier: Modifier = Modifier,
-) {
-    // Player might change between compositions,
-    // we need long-lived surface-related lambdas to always use the latest value
-    val currentPlayer by rememberUpdatedState(player)
-    val onSurfaceCreated: (Surface) -> Unit = { surface ->
-        if (currentPlayer.isCommandAvailable(Player.COMMAND_SET_VIDEO_SURFACE)) {
-            currentPlayer.setVideoSurface(surface)
-        }
-    }
-    val onSurfaceDestroyed: () -> Unit = {
-        if (currentPlayer.isCommandAvailable(Player.COMMAND_SET_VIDEO_SURFACE)) {
-            currentPlayer.clearVideoSurface()
-        }
-    }
-    val onSurfaceInitialized: AndroidExternalSurfaceScope.() -> Unit = {
-        onSurface { surface, _, _ ->
-            onSurfaceCreated(surface)
-            surface.onDestroyed { onSurfaceDestroyed() }
-        }
-    }
-    AndroidEmbeddedExternalSurface(modifier = modifier, onInit = onSurfaceInitialized)
 }

@@ -125,8 +125,7 @@ public fun VideoPlayer(
                     .resizeWithContentScale(
                         contentScale = contentScale,
                         sourceSizeDp = state.videoSizeDp,
-                    )
-                    .let {
+                    ).let {
                         if (aspectRatio != null) {
                             it.aspectRatio(
                                 aspectRatio,

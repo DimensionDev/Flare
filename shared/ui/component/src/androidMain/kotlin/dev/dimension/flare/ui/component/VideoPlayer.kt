@@ -30,6 +30,8 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
+import androidx.media3.ui.compose.modifiers.resizeWithContentScale
+import androidx.media3.ui.compose.state.rememberPresentationState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -105,6 +107,7 @@ public fun VideoPlayer(
                         volume = if (muted) 0f else 1f
                     }
             }
+        val state = rememberPresentationState(player)
         LaunchedEffect(player) {
             while (true) {
                 isLoaded = !player.isLoading || player.duration > 0
@@ -119,6 +122,10 @@ public fun VideoPlayer(
             modifier =
                 Modifier
                     .clipToBounds()
+                    .resizeWithContentScale(
+                        contentScale = contentScale,
+                        sourceSizeDp = state.videoSizeDp
+                    )
                     .let {
                         if (aspectRatio != null) {
                             it.aspectRatio(

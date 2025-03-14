@@ -124,7 +124,7 @@ public fun VideoPlayer(
                     .clipToBounds()
                     .resizeWithContentScale(
                         contentScale = contentScale,
-                        sourceSizeDp = state.videoSizeDp
+                        sourceSizeDp = state.videoSizeDp,
                     )
                     .let {
                         if (aspectRatio != null) {

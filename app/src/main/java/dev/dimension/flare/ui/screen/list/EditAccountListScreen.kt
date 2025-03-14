@@ -24,6 +24,7 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.uiListItemComponent
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
@@ -73,7 +74,7 @@ private fun EditAccountListScreen(
             LazyColumn(
                 contentPadding = contentPadding,
             ) {
-                listItemComponent(
+                uiListItemComponent(
                     state.lists,
                 ) { item ->
                     state.userLists

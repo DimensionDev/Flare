@@ -44,6 +44,8 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import moe.tlaster.twitter.parser.TwitterParser
 import sh.christian.ozone.api.model.JsonContent
@@ -76,12 +78,26 @@ internal fun parseBlueskyJson(
     } catch (e: Exception) {
         val jobj = json.decodeAs<JsonObject>()
         val text = jobj["text"]?.jsonPrimitive?.contentOrNull
-        return Element("p")
-            .apply {
-                if (text != null) {
-                    appendText(text)
-                }
-            }.toUi()
+        val facets =
+            jobj["facets"]?.jsonArray?.let {
+                runCatching {
+                    bskyJson.decodeFromJsonElement<List<Facet>>(it)
+                }.getOrNull()
+            }
+        if (facets != null) {
+            return parseBluesky(
+                text = text ?: "",
+                facets = facets,
+                accountKey = accountKey,
+            )
+        } else {
+            return Element("p")
+                .apply {
+                    if (text != null) {
+                        appendText(text)
+                    }
+                }.toUi()
+        }
     }
 }
 

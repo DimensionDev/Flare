@@ -77,10 +77,10 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FloppyDisk
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.VideoPlayerPool
 import dev.dimension.flare.ui.component.status.QuotedStatus
@@ -364,7 +364,7 @@ private fun StatusMediaScreen(
                                             onClick = {
                                                 state.setShowUi(!state.showUi)
                                             },
-                                            //                                                aspectRatio = media.aspectRatio,
+                                            aspectRatio = media.aspectRatio,
                                             onLongClick = {
                                                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                                 state.setShowMenu(true)
@@ -407,7 +407,7 @@ private fun StatusMediaScreen(
                                             onClick = {
                                                 state.setShowUi(!state.showUi)
                                             },
-                                            //                                                aspectRatio = media.aspectRatio,
+                                            aspectRatio = media.aspectRatio,
                                             showControls = true,
                                             keepScreenOn = true,
                                             muted = false,
@@ -504,7 +504,7 @@ private fun StatusMediaScreen(
                                 ),
                         ) {
                             CompositionLocalProvider(
-                                LocalAppearanceSettings provides LocalAppearanceSettings.current.copy(showMedia = false),
+                                LocalComponentAppearance provides LocalComponentAppearance.current.copy(showMedia = false),
                             ) {
                                 QuotedStatus(
                                     data = content,

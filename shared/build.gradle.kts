@@ -9,15 +9,17 @@ plugins {
     alias(libs.plugins.skie)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.room)
 }
 
-val enableLinux = providers.gradleProperty("dev.dimension.flare.linux").orNull == "true"
 kotlin {
     explicitApi()
     applyDefaultHierarchyTemplate()
 
     androidTarget()
+
+    jvm()
 
     listOf(
         iosX64(),
@@ -31,9 +33,6 @@ kotlin {
 //            isStatic = true
             linkerOpts("-ld_classic")
         }
-    }
-    if (enableLinux) {
-        linuxX64()
     }
     targets.forEach { target ->
         target.name.takeIf {
@@ -81,13 +80,27 @@ kotlin {
                 implementation(kotlin("test"))
             }
         }
+        val androidJvmMain by creating {
+            dependsOn(commonMain)
+            dependencies {
+                implementation(compose.foundation)
+                implementation(libs.ktor.client.okhttp)
+            }
+        }
         val androidMain by getting {
+            dependsOn(androidJvmMain)
             dependencies {
                 implementation(project.dependencies.platform(libs.compose.bom))
-                implementation(libs.compose.foundation)
                 implementation(libs.core.ktx)
-                implementation(libs.ktor.client.okhttp)
                 implementation(libs.koin.android)
+            }
+        }
+        val jvmMain by getting {
+            dependsOn(androidJvmMain)
+            dependencies {
+                implementation(libs.commons.lang3)
+                // TODO: workaround for https://issuetracker.google.com/issues/396148592
+                implementation("androidx.sqlite:sqlite-jvm:2.5.0-beta01")
             }
         }
         val appleMain by getting {
@@ -99,13 +112,6 @@ kotlin {
             dependencies {
                 implementation(libs.stately.isolate)
                 implementation(libs.stately.iso.collections)
-            }
-        }
-        if (enableLinux) {
-            val linuxMain by getting {
-                dependencies {
-                    implementation(libs.ktor.client.curl)
-                }
             }
         }
     }

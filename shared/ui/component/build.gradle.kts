@@ -1,5 +1,4 @@
 import org.jetbrains.compose.compose
-import java.util.Locale
 
 plugins {
     alias(libs.plugins.android.library)
@@ -52,6 +51,7 @@ kotlin {
             dependencies {
                 implementation(libs.fluent.ui)
                 implementation(compose("org.jetbrains.compose.material3:material3-window-size-class"))
+                api(libs.bundles.vlcj)
             }
         }
     }

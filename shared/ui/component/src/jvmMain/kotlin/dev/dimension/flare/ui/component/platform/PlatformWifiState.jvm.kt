@@ -6,5 +6,5 @@ import androidx.compose.runtime.State
 @Composable
 internal actual fun rememberPlatformWifiState(): State<Boolean> {
     // TODO: Implement for JVM
-    return androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    return androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(true) }
 }

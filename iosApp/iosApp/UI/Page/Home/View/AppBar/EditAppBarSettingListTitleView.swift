@@ -7,13 +7,23 @@ struct EditAppBarSettingListTitleView: View {
     @Binding var title: String
     let listId: String
     let iconUrl: String?
+    let isBlueskyFeed: Bool
     var onSave: (String) -> Void
     var onCancel: () -> Void
+
+    init(title: Binding<String>, listId: String, iconUrl: String?, onSave: @escaping (String) -> Void, onCancel: @escaping () -> Void, isBlueskyFeed: Bool = false) {
+        _title = title
+        self.listId = listId
+        self.iconUrl = iconUrl
+        self.onSave = onSave
+        self.onCancel = onCancel
+        self.isBlueskyFeed = isBlueskyFeed
+    }
 
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("List Info")) {
+                Section(header: Text(isBlueskyFeed ? "Feed Info" : "List Info")) {
                     HStack {
                         if let iconUrl, let url = URL(string: iconUrl) {
                             KFImage(url)
@@ -29,7 +39,7 @@ struct EditAppBarSettingListTitleView: View {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 8)
                                     .fill(Color.blue.opacity(0.7))
-                                Image(systemName: "list.bullet")
+                                Image(systemName: isBlueskyFeed ? "square.grid.2x2" : "list.bullet")
                                     .foregroundColor(.white)
                                     .font(.system(size: 24))
                             }
@@ -45,18 +55,18 @@ struct EditAppBarSettingListTitleView: View {
                     .padding(.vertical, 8)
                 }
 
-                Section(header: Text("List Name")) {
-                    TextField("List Name", text: $title)
+                Section(header: Text(isBlueskyFeed ? "Feed Name" : "List Name")) {
+                    TextField(isBlueskyFeed ? "Feed Name" : "List Name", text: $title)
                         .autocapitalization(.none)
                 }
 
                 Section {
-                    Text("Note: This only modifies the local display title, not the server list name.")
+                    Text("Note: This only modifies the local display title, not the server \(isBlueskyFeed ? "feed" : "list") name.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
             }
-            .navigationTitle("Edit List Title")
+            .navigationTitle(isBlueskyFeed ? "Edit Feed Title" : "Edit List Title")
             .navigationBarItems(
                 leading: Button("Cancel") {
                     onCancel()

@@ -33,6 +33,11 @@ class UserManager {
                 if case let .success(data) = onEnum(of: state.user) {
                     self.currentUser = data.data
                     isInitialized = true
+
+                    // 初始化AppBarTabSettingStore
+                    let account = AccountTypeSpecific(accountKey: data.data.key)
+                    AppBarTabSettingStore.shared.initialize(with: account, user: data.data)
+
                     // 发送通知
                     NotificationCenter.default.post(name: .userDidUpdate, object: data.data)
                     os_log("[UserManager] 初始化完成，用户: %{public}@", log: .default, type: .debug, data.data.name.raw)

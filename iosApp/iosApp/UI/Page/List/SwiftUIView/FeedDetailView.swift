@@ -3,12 +3,12 @@ import Kingfisher
 import shared
 import SwiftUI
 
-struct ListDetailView: View {
+struct FeedDetailView: View {
     let listInfo: UiList
     let accountType: AccountType
     let defaultUser: UiUserV2?
     @State private var showMembers: Bool = false
-    @State private var presenter: ListTimelinePresenter
+    @State private var presenter: BlueskyFeedTimelinePresenter
     @State private var showNavigationTitle: Bool = false
     @Environment(\.presentationMode) var presentationMode
     @EnvironmentObject private var router: Router
@@ -18,7 +18,8 @@ struct ListDetailView: View {
         listInfo = list
         self.accountType = accountType
         self.defaultUser = defaultUser
-        _presenter = State(initialValue: ListTimelinePresenter(accountType: accountType, listId: list.id))
+
+        _presenter = State(initialValue: BlueskyFeedTimelinePresenter(accountType: accountType, uri: list.id))
 
         gradientColors = ListFeedHeaderView.getGradientColors(for: list.id)
     }
@@ -53,7 +54,7 @@ struct ListDetailView: View {
 
                             Spacer()
                             if defaultUser == nil {
-                                ListFeedHeaderView.ListFeedMemberCountsView(count: listInfo.likedCount, isListView: true)
+                                ListFeedHeaderView.ListFeedMemberCountsView(count: listInfo.likedCount, isListView: false)
                             }
                         }
                         .padding(.vertical, 12)
@@ -67,24 +68,7 @@ struct ListDetailView: View {
                             .listFeedContentStyle()
                     }
 
-                    if defaultUser == nil {
-                        Button(action: {
-                            showMembers = true
-                        }) {
-                            HStack {
-                                Image(systemName: "person.2")
-                                    .foregroundColor(.blue)
-                                Text("Show Members")
-                                    .foregroundColor(.primary)
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.gray)
-                                    .font(.caption)
-                            }
-                        }
-                        .listFeedContentStyle()
-                    }
-                    Text("List Timeline")
+                    Text("Feed Timeline")
                         .font(.headline)
                         .padding(.top, 16)
                         .padding(.bottom, 8)
@@ -110,19 +94,6 @@ struct ListDetailView: View {
                 }
                 .foregroundColor(.blue)
             })
-            .background(
-                NavigationLink(
-                    destination:
-                    ListMembersView(
-                        accountType: accountType,
-                        listId: listInfo.id,
-                        title: listInfo.title
-                    ),
-                    isActive: $showMembers
-                ) {
-                    EmptyView()
-                }
-            )
         }
     }
 }

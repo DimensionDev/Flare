@@ -13,6 +13,9 @@ extension Notification.Name {
 private let logger = Logger(subsystem: "com.flare.app", category: "AppBarTabSettingStore")
 
 class AppBarTabSettingStore: ObservableObject, TabStateProvider {
+    // 单例实现
+    static let shared = AppBarTabSettingStore(accountType: AccountTypeGuest())
+
     @Published var primaryHomeItems: [FLTabItem] = [] // 主要标签（不可更改状态）Appbar 第一个Home 标签
     @Published var secondaryItems: [FLTabItem] = [] // 所有次要标签
     @Published var availableAppBarTabsItems: [FLTabItem] = [] // UserDefaults 存储的已启用标签
@@ -22,30 +25,74 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
     @Published var listTitles: [String: String] = [:] // 列表ID到标题的映射
     @Published var listIconUrls: [String: String] = [:] // 列表ID到头像URL的映射
 
-    // 标记是否已经初始化过列表数据
-    private var hasInitializedLists = false
+    // 添加统一配置存储
+    private var appBarItems: [AppBarItemConfig] = []
+
+    // 添加同步锁，确保线程安全
+    private let storageLock = NSLock()
 
     @Published var selectedAppBarTabKey: String = "" // 选中的 tab key
     @Published var currentPresenter: TimelinePresenter?
     @Published var currentUser: UiUserV2?
 
     private var presenter = ActiveAccountPresenter()
-    private var isInitializing = false
     private let settingsManager = FLTabSettingsManager()
     var accountType: AccountType // 改为变量，允许更新，并将访问级别更改为internal
 
-    // 缓存 presenter 避免重复创建
-    private var presenterCache: [String: TimelinePresenter] = [:]
+    // 添加上次初始化的用户ID
+    private var lastInitializedUserId: MicroBlogKey?
+
+    // 引入服务对象
+    private let configService = AppBarConfigService()
+    private let notificationService = AppBarNotificationService()
+    private let presenterService = AppBarPresenterService()
+
+    // 添加列表管理器和Feed管理器
+    private let listTabManager = ListTabManager()
+    private let feedTabManager = FeedTabManager()
 
     // TabStateProvider 协议实现
     var onTabChange: ((Int) -> Void)?
 
+    // 保留公开初始化方法，但标记为deprecated
+    @available(*, deprecated, message: "请使用AppBarTabSettingStore.shared代替")
     init(accountType: AccountType) {
         self.accountType = accountType
-        observeAccountChanges()
         observeUser()
         observeListPinChanges()
         observeListTitleChanges()
+    }
+
+    // 添加初始化方法，供UserManager调用
+    func initialize(with account: AccountType?, user: UiUserV2?) {
+        // 检查用户ID是否变化
+        let userId = user?.key
+
+        // 如果用户ID相同，不重复初始化
+        if userId == lastInitializedUserId, userId != nil {
+            logger.debug("用户ID未变化，跳过初始化: \(String(describing: userId))")
+            return
+        }
+
+        // 记录新的用户ID
+        lastInitializedUserId = userId
+
+        logger.debug("初始化AppBarTabSettingStore: account=\(account != nil ? "有账号" : "无账号"), user=\(user != nil ? String(describing: user?.name) : "无用户")")
+
+        // 清理现有状态
+        clearAllState()
+
+        // 设置账号类型
+        if let account {
+            updateAccountType(account)
+        } else {
+            updateAccountType(AccountTypeGuest())
+        }
+
+        // 初始化用户相关设置
+        if let user {
+            initializeWithUser(user)
+        }
     }
 
     var tabCount: Int {
@@ -69,27 +116,12 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 
     // 获取或创建 Presenter
     func getOrCreatePresenter(for tab: FLTabItem) -> TimelinePresenter? {
-        guard let timelineTab = tab as? FLTimelineTabItem else { return nil }
-
-        if let cached = presenterCache[tab.key] {
-            return cached
-        }
-        let presenter = timelineTab.createPresenter()
-        presenterCache[tab.key] = presenter
-        return presenter
+        presenterService.getOrCreatePresenter(for: tab)
     }
 
     // 清除缓存
     func clearCache() {
-        presenterCache.removeAll()
-//        currentPresenter = nil
-        // 保留当前 presenter，清理其他缓存
-        // 这个地方估计有问题 todo://
-        //        let current = currentPresenter
-        //
-        //         if let key = currentKey {
-        //            presenterCache[key] = current
-        //        }
+        presenterService.clearCache()
     }
 
     // 更新选中标签
@@ -100,7 +132,12 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 
     // 清除所有状态
     func clearAllState() {
-        presenterCache.removeAll()
+        logger.debug("清除所有AppBar状态...")
+
+        storageLock.lock()
+        defer { storageLock.unlock() }
+
+        presenterService.clearCache()
         currentPresenter = nil
         selectedAppBarTabKey = ""
         primaryHomeItems = []
@@ -109,13 +146,15 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
         pinnedListIds = []
         listTitles = [:]
         listIconUrls = [:]
+        appBarItems = [] // 清空统一配置
+
         objectWillChange.send()
+        logger.debug("状态清除完成")
     }
 
     // 更新账户类型
     func updateAccountType(_ newAccountType: AccountType) {
         accountType = newAccountType
-        clearAllState()
 
         // 如果是游客模式，设置默认的 Home Timeline
         if newAccountType is AccountTypeGuest {
@@ -129,39 +168,28 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
                 ), account: newAccountType
             )
             availableAppBarTabsItems = [homeTab]
+
+            // 添加到统一配置
+            let homeConfig = AppBarItemConfig(
+                key: homeTab.key,
+                type: .main,
+                addedTime: Date(timeIntervalSince1970: 0),
+                metadata: ["title": "home"]
+            )
+            appBarItems = [homeConfig]
+
+            // 保存配置
+            saveAppBarConfig()
+
             updateSelectedTab(homeTab)
-        }
-    }
-
-    // 监听账号变化
-    func observeAccountChanges() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleAccountChange),
-            name: NSNotification.Name("AccountChanged"),
-            object: nil
-        )
-    }
-
-    @objc private func handleAccountChange() {
-        // 获取新的账户类型
-        if let newAccountType = UserManager.shared.getCurrentAccount() {
-            updateAccountType(newAccountType)
-        }
-
-        // 获取新的用户信息
-        if let user = UserManager.shared.getCurrentUser() {
-            initializeWithUser(user)
         }
     }
 
     // 观察列表Pin状态变化
     private func observeListPinChanges() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleListPinChange),
-            name: .listPinStatusChanged,
-            object: nil
+        notificationService.addListPinStatusChangedObserver(
+            target: self,
+            selector: #selector(handleListPinChange)
         )
     }
 
@@ -171,29 +199,38 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
            let listTitle = notification.userInfo?["listTitle"] as? String,
            let isPinned = notification.userInfo?["isPinned"] as? Bool
         {
-            logger.debug("收到列表Pin状态变更通知: 列表\(listId), 标题\(listTitle), isPinned=\(isPinned)")
+            // 检查是否为Feed类型
+            let isBlueskyFeed = notification.userInfo?["itemType"] as? String == "feed"
+
+            logger.debug("收到\(isBlueskyFeed ? "Feed" : "List")Pin状态变更通知: ID=\(listId), 标题=\(listTitle), isPinned=\(isPinned)")
 
             // 记录列表标题，这对于任何情况都需要
             DispatchQueue.main.async {
                 self.listTitles[listId] = listTitle
 
-                if let iconUrl = notification.userInfo?["iconUrl"] as? String {
+                if let iconUrl = notification.userInfo?["listIconUrl"] as? String {
                     self.listIconUrls[listId] = iconUrl
+                    logger.debug("设置图标URL: \(listId) -> \(iconUrl)")
                 }
 
-                let tabId = "list_\(self.accountType)_\(listId)"
+                // 根据类型生成不同前缀的tabId
+                let tabId = isBlueskyFeed ? "feed_\(self.accountType)_\(listId)" : "list_\(self.accountType)_\(listId)"
 
                 if isPinned {
                     // 如果是收藏操作，且标签不存在，则添加标签
                     if !self.availableAppBarTabsItems.contains(where: { $0.key == tabId }) {
                         // 直接调用toggleTab确保完整的标签添加流程被执行
                         self.toggleTab(tabId)
-                        logger.debug("通过toggleTab添加列表标签: \(tabId)")
+                        logger.debug("通过toggleTab添加\(isBlueskyFeed ? "Feed" : "List")标签: \(tabId)")
                     } else {
                         // 标签已存在，仅更新pinnedListIds
                         if !self.pinnedListIds.contains(listId) {
                             self.pinnedListIds.append(listId)
-                            self.savePinnedLists()
+
+                            // 更新并保存统一配置
+                            self.updateConfigFromUiState()
+                            self.saveAppBarConfig()
+
                             logger.debug("标签已存在，仅更新pinnedListIds: \(listId)")
                         }
                     }
@@ -202,11 +239,15 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
                     if self.availableAppBarTabsItems.contains(where: { $0.key == tabId }) {
                         // 直接调用toggleTab确保完整的标签移除流程被执行
                         self.toggleTab(tabId)
-                        logger.debug("通过toggleTab移除列表标签: \(tabId)")
+                        logger.debug("通过toggleTab移除\(isBlueskyFeed ? "Feed" : "List")标签: \(tabId)")
                     } else {
                         // 标签已经不存在，仅更新pinnedListIds
                         self.pinnedListIds.removeAll { $0 == listId }
-                        self.savePinnedLists()
+
+                        // 更新并保存统一配置
+                        self.updateConfigFromUiState()
+                        self.saveAppBarConfig()
+
                         logger.debug("标签已不存在，仅更新pinnedListIds: \(listId)")
                     }
                 }
@@ -215,7 +256,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
     }
 
     deinit {
-        NotificationCenter.default.removeObserver(self)
+        notificationService.removeAllObservers(target: self)
     }
 
     private func observeUser() {
@@ -224,334 +265,340 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
             initializeWithUser(user)
             return
         }
-
-        // 如果没有，则等待用户更新通知
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleUserUpdate),
-            name: .userDidUpdate,
-            object: nil
-        )
-    }
-
-    @objc private func handleUserUpdate(_ notification: Notification) {
-        if let user = notification.object as? UiUserV2 {
-            initializeWithUser(user)
-        }
     }
 
     private func initializeWithUser(_ user: UiUserV2) {
-        if isInitializing || currentUser?.key == user.key {
-            return
-        }
-
         logger.debug("初始化用户: \(user.name)")
 
-        isInitializing = true
         currentUser = user
 
+        // 准备基础标签
         primaryHomeItems = FLTabSettings.defaultPrimary(user: user)
         secondaryItems = FLTabSettings.defaultSecondary(user: user)
 
-        // 从 UserDefaults 加载存储的标签
-        availableAppBarTabsItems = settingsManager.getEnabledItems(for: user) ?? secondaryItems
+        // 加载统一配置
+        loadAppBarConfig()
 
-        if availableAppBarTabsItems.isEmpty {
-            if let homeItem = primaryHomeItems.first {
-                availableAppBarTabsItems = [homeItem] + secondaryItems
-            }
-        } else {
-            // 确保首页标签存在并且是唯一的
-            let hasHomeTab = availableAppBarTabsItems.contains { $0.key.contains("home_") }
+        // 如果没有配置，创建默认配置
+        if appBarItems.isEmpty {
+            appBarItems = configService.createDefaultAppBarConfig(for: user)
+            saveAppBarConfig()
+            logger.debug("创建默认AppBar配置")
+        }
 
-            if let homeItem = primaryHomeItems.first {
-                if !hasHomeTab {
-                    // 如果没有首页标签，添加它
-                    availableAppBarTabsItems = [homeItem] + availableAppBarTabsItems
-                } else {
-                    // 如果已有首页标签，确保没有重复
-                    var uniqueTabs: [FLTabItem] = []
-                    var seenKeys = Set<String>()
+        // 从配置更新UI状态
+        updateUiStateFromConfig()
+    }
 
-                    // 优先添加首页标签
-                    uniqueTabs.append(homeItem)
-                    seenKeys.insert(homeItem.key)
+    // 加载AppBar配置
+    private func loadAppBarConfig() {
+        guard let user = currentUser else { return }
 
-                    // 添加其他非重复标签
-                    for tab in availableAppBarTabsItems {
-                        if !seenKeys.contains(tab.key), tab.key != homeItem.key {
-                            uniqueTabs.append(tab)
-                            seenKeys.insert(tab.key)
-                        }
+        storageLock.lock()
+        defer { storageLock.unlock() }
+
+        // 使用配置服务加载配置
+        appBarItems = configService.loadAppBarConfig(for: user)
+
+        logger.debug("加载到\(self.appBarItems.count)个配置项")
+    }
+
+    // 保存AppBar配置
+    private func saveAppBarConfig() {
+        guard let user = currentUser else { return }
+
+        storageLock.lock()
+        defer { storageLock.unlock() }
+
+        // 使用配置服务保存配置
+        configService.saveAppBarConfig(appBarItems, for: user)
+
+        logger.debug("保存\(self.appBarItems.count)个配置项")
+    }
+
+    // 强制从存储重新加载以确保一致性
+    private func reloadFromStorage() {
+        guard let user = currentUser else { return }
+
+        // 保存当前选中状态
+        let selectedKey = selectedAppBarTabKey
+
+        // 重新加载配置
+        loadAppBarConfig()
+
+        // 更新UI状态
+        updateUiStateFromConfig()
+
+        // 恢复选中状态
+        if let index = availableAppBarTabsItems.firstIndex(where: { $0.key == selectedKey }) {
+            selectedAppBarTabKey = selectedKey
+        } else if !availableAppBarTabsItems.isEmpty {
+            selectedAppBarTabKey = availableAppBarTabsItems[0].key
+        }
+
+        // 通知UI更新
+        objectWillChange.send()
+    }
+
+    // 从配置更新UI状态
+    private func updateUiStateFromConfig() {
+        // 清空当前状态
+        availableAppBarTabsItems = []
+        pinnedListIds = []
+        listTitles = [:]
+        listIconUrls = [:]
+
+        guard let user = currentUser else { return }
+
+        // 使用配置服务转换配置为标签
+        availableAppBarTabsItems = configService.convertConfigToTabs(
+            appBarItems,
+            for: user,
+            accountType: accountType
+        )
+
+        // 提取固定列表和Feed信息
+        for item in appBarItems {
+            if item.type == .list || item.type == .feed {
+                if let components = item.key.split(separator: "_").last {
+                    let itemId = String(components)
+
+                    // 记录信息
+                    if let title = item.metadata["title"] {
+                        listTitles[itemId] = title
                     }
 
-                    availableAppBarTabsItems = uniqueTabs
-                    logger.debug("初始化时移除了重复标签，最终标签数: \(uniqueTabs.count)")
+                    if let iconUrl = item.metadata["iconUrl"] {
+                        listIconUrls[itemId] = iconUrl
+                        logger.debug("加载图标URL: \(itemId) -> \(iconUrl)")
+                    }
+
+                    // 添加到固定ID列表
+                    if !pinnedListIds.contains(itemId) {
+                        pinnedListIds.append(itemId)
+                    }
                 }
             }
         }
 
-        // 选择第一个标签
-        if selectedAppBarTabKey.isEmpty {
-            if let firstItem = availableAppBarTabsItems.first {
-                updateSelectedTab(firstItem)
-            }
+        // 确保首页在第一位（安全检查）
+        ensureHomePageFirst()
+
+        // 初始化选中标签
+        if selectedAppBarTabKey.isEmpty, !availableAppBarTabsItems.isEmpty {
+            selectedAppBarTabKey = availableAppBarTabsItems[0].key
         }
-
-        // 加载已pin的列表
-        loadPinnedLists()
-
-        isInitializing = false
     }
 
-    // 从UserDefaults加载已pin的列表
-    private func loadPinnedLists() {
+    // 确保首页在第一位，同时更新配置中的时间戳
+    private func ensureHomePageFirst() {
+        // 找到首页标签
+        if let homeIndex = availableAppBarTabsItems.firstIndex(where: { tab in
+            primaryHomeItems.contains(where: { $0.key == tab.key })
+        }), homeIndex > 0 {
+            // 移动UI项
+            let homeItem = availableAppBarTabsItems.remove(at: homeIndex)
+            availableAppBarTabsItems.insert(homeItem, at: 0)
+
+            // 同时更新配置中的时间戳
+            if let configIndex = appBarItems.firstIndex(where: { $0.key == homeItem.key }) {
+                var updatedItem = appBarItems[configIndex]
+                // 使用新结构替换旧结构
+                let newItem = AppBarItemConfig(
+                    key: updatedItem.key,
+                    type: updatedItem.type,
+                    addedTime: Date(timeIntervalSince1970: 0), // 极早时间
+                    metadata: updatedItem.metadata
+                )
+                appBarItems[configIndex] = newItem
+
+                // 记录但不立即保存，避免频繁IO
+                logger.debug("更新首页时间戳确保排序")
+            }
+        }
+    }
+
+    // 从UI状态更新统一配置
+    private func updateConfigFromUiState() {
         guard let user = currentUser else { return }
 
-        logger.debug("从UserDefaults加载已pin的列表")
+        // 创建新配置
+        var newItems: [AppBarItemConfig] = []
 
-        // 1. 从UserDefaults加载已pin的列表ID
-        let defaults = UserDefaults.standard
-        let key = "pinnedLists_\(user.key)"
-
-        if let savedData = defaults.data(forKey: key),
-           let savedLists = try? JSONDecoder().decode([PinnedListInfo].self, from: savedData)
-        {
-            // 更新本地状态
-            pinnedListIds = savedLists.map(\.id)
-
-            // 更新标题映射和头像URL映射
-            for list in savedLists {
-                listTitles[list.id] = list.title
-                if let listIconUrl = list.listIconUrl {
-                    listIconUrls[list.id] = listIconUrl
-                }
-                // 确保对应的标签已添加
-                addListTabIfNeeded(listId: list.id, title: list.title)
+        // 遍历UI标签
+        for (index, tab) in availableAppBarTabsItems.enumerated() {
+            let type: AppBarItemType = if primaryHomeItems.contains(where: { $0.key == tab.key }) {
+                .main
+            } else if tab.key.starts(with: "list_") {
+                .list
+            } else if tab.key.starts(with: "feed_") {
+                .feed
+            } else {
+                .secondary
             }
 
-            logger.debug("已加载\(savedLists.count)个已pin的列表")
+            // 尝试保留原有时间戳
+            if let existingItem = appBarItems.first(where: { $0.key == tab.key }) {
+                // 更新元数据但保留时间戳
+                var newMetadata = existingItem.metadata
+
+                // 更新标题
+                switch tab.metaData.title {
+                case let .text(text):
+                    newMetadata["title"] = text
+                case let .localized(key):
+                    newMetadata["title"] = NSLocalizedString(key, comment: "")
+                }
+
+                // 如果是列表或Feed，确保图标URL也被保留
+                if type == .list || type == .feed {
+                    if let components = tab.key.split(separator: "_").last {
+                        let id = String(components)
+                        if let iconUrl = listIconUrls[id], !iconUrl.isEmpty {
+                            newMetadata["iconUrl"] = iconUrl
+                            logger.debug("保留现有图标URL: \(id) -> \(iconUrl)")
+                        }
+                    }
+                }
+
+                // 创建新结构
+                let updatedItem = AppBarItemConfig(
+                    key: existingItem.key,
+                    type: existingItem.type,
+                    addedTime: existingItem.addedTime,
+                    metadata: newMetadata
+                )
+                newItems.append(updatedItem)
+            } else {
+                // 添加新项目，使用适当的时间戳
+                let newTime = if type == .main {
+                    Date(timeIntervalSince1970: 0) // 首页使用最早时间
+                } else {
+                    // 使用当前时间加索引间隔
+                    Date().addingTimeInterval(Double(index) * 60)
+                }
+
+                // 创建元数据，包括标题和图标URL
+                var metadata: [String: String] = [:]
+
+                // 添加标题
+                switch tab.metaData.title {
+                case let .text(text):
+                    metadata["title"] = text
+                case let .localized(key):
+                    metadata["title"] = NSLocalizedString(key, comment: "")
+                }
+
+                // 如果是列表或Feed，添加图标URL
+                if type == .list || type == .feed {
+                    if let components = tab.key.split(separator: "_").last {
+                        let id = String(components)
+                        if let iconUrl = listIconUrls[id], !iconUrl.isEmpty {
+                            metadata["iconUrl"] = iconUrl
+                            logger.debug("添加新图标URL: \(id) -> \(iconUrl)")
+                        }
+                    }
+                }
+
+                // 使用配置服务创建配置
+                let newItem = configService.convertTabToConfig(tab, type: type, addedTime: newTime)
+                newItems.append(newItem)
+            }
         }
+
+        // 更新配置
+        appBarItems = newItems
     }
 
-    // 保存已pin的列表到UserDefaults
+    // 保存已pin的列表到统一配置
     func savePinnedLists() {
-        guard let user = currentUser else { return }
-
-        let listsToSave = pinnedListIds.compactMap { id -> PinnedListInfo? in
-            if let title = listTitles[id] {
-                return PinnedListInfo(id: id, title: title, listIconUrl: listIconUrls[id])
-            }
-            return nil
-        }
-
-        let defaults = UserDefaults.standard
-        let key = "pinnedLists_\(user.key)"
-
-        if let encodedData = try? JSONEncoder().encode(listsToSave) {
-            defaults.set(encodedData, forKey: key)
-        }
+        // 更新配置并保存
+        updateConfigFromUiState()
+        saveAppBarConfig()
     }
 
     // 保存标签结构
     func saveTabs() {
-        guard let user = currentUser else { return }
-
-        // 添加去重逻辑，确保没有重复的标签，特别是首页标签
-        var uniqueTabs: [FLTabItem] = []
-        var seenKeys = Set<String>()
-
-        // 优先添加首页标签（如果存在）
-        if let homeItem = primaryHomeItems.first {
-            uniqueTabs.append(homeItem)
-            seenKeys.insert(homeItem.key)
-        }
-
-        // 添加其余标签，避免重复
-        for tab in availableAppBarTabsItems {
-            if !seenKeys.contains(tab.key) {
-                uniqueTabs.append(tab)
-                seenKeys.insert(tab.key)
-            } else {
-                logger.debug("发现重复标签，已跳过: \(tab.key)")
-            }
-        }
-
-        // 更新标签列表并保存
-        availableAppBarTabsItems = uniqueTabs
-        settingsManager.saveEnabledItems(uniqueTabs, for: user)
-        logger.debug("保存标签: 总数 \(uniqueTabs.count)")
+        // 更新配置并保存
+        updateConfigFromUiState()
+        saveAppBarConfig()
     }
 
-    // 简单的结构体用于存储pin的列表信息
-    private struct PinnedListInfo: Codable {
-        let id: String
-        let title: String
-        let listIconUrl: String?
-    }
-
-    // 修改toggleTab方法处理列表
-    func toggleTab(_ id: String) {
-        guard let user = currentUser else { return }
-
-        logger.debug("切换标签状态: \(id)")
-
-        let wasSelected = selectedAppBarTabKey == id
-
-        if availableAppBarTabsItems.contains(where: { $0.key == id }) {
-            // 关闭标签：从 storeItems 中移除
-            availableAppBarTabsItems.removeAll { $0.key == id }
-
-            // 如果关闭的是当前选中的标签，切换到第一个标签（首页）
-            if wasSelected {
-                if let firstTab = primaryHomeItems.first {
-                    updateSelectedTab(firstTab)
-                    logger.debug("切换到首页标签: \(firstTab.key)")
-                }
-            }
-
-            // 如果是列表标签，同步更新列表状态
-            if id.starts(with: "list_") {
-                let components = id.split(separator: "_")
-                if components.count >= 3 {
-                    let listId = String(components.last!)
-                    logger.debug("从标签移除列表: \(listId)")
-
-                    // 安全地更新本地状态
-                    DispatchQueue.main.async {
-                        // 从已pin列表中移除
-                        self.pinnedListIds.removeAll { $0 == listId }
-
-                        // 保存更新后的pin状态
-                        self.savePinnedLists()
-
-                        // 发送通知，让其他地方知道列表pin状态变化了
-                        if let title = self.listTitles[listId] {
-                            NotificationCenter.default.post(
-                                name: .listPinStatusChanged,
-                                object: nil,
-                                userInfo: [
-                                    "listId": listId,
-                                    "listTitle": title,
-                                    "isPinned": false,
-                                ]
-                            )
-                        }
-                    }
-                }
-            }
-        } else {
-            // 开启标签：添加到 storeItems，但要确保不会添加重复标签
-            // 检查是否已存在相同的标签
-            if !availableAppBarTabsItems.contains(where: { $0.key == id }) {
-                if let item = secondaryItems.first(where: { $0.key == id }) {
-                    availableAppBarTabsItems.append(item)
-                    logger.debug("添加次要标签: \(id)")
-                } else if id.starts(with: "list_") {
-                    // 如果是列表标签
-                    let components = id.split(separator: "_")
-                    if components.count >= 3 {
-                        let listId = String(components.last!)
-                        if let title = listTitles[listId] {
-                            logger.debug("添加列表标签: \(title) (ID: \(listId))")
-
-                            // 安全地在主线程更新UI
-                            DispatchQueue.main.async {
-                                self.addListTab(listId: listId, title: title)
-
-                                // 添加到已pin列表
-                                if !self.pinnedListIds.contains(listId) {
-                                    self.pinnedListIds.append(listId)
-                                }
-
-                                // 保存更新后的pin状态
-                                self.savePinnedLists()
-
-                                // 发送通知，让其他地方知道列表pin状态变化了
-                                NotificationCenter.default.post(
-                                    name: .listPinStatusChanged,
-                                    object: nil,
-                                    userInfo: [
-                                        "listId": listId,
-                                        "listTitle": title,
-                                        "isPinned": true,
-                                    ]
-                                )
-                            }
-                        }
-                    }
-                }
-            } else {
-                logger.debug("标签已存在，跳过添加: \(id)")
-            }
-        }
-
-        // 保存并更新可用标签
-        saveTabs()
-
-        // 确保 UI 更新
-        objectWillChange.send()
-
-        // 发送通知
-        DispatchQueue.main.async {
-            NotificationCenter.default.post(name: NSNotification.Name("TabsDidUpdate"), object: nil)
-        }
-    }
-
-    // 只在标签不存在时添加列表标签
-    private func addListTabIfNeeded(listId: String, title: String) {
-        let tabKey = "list_\(accountType)_\(listId)"
-        if !availableAppBarTabsItems.contains(where: { $0.key == tabKey }) {
-            logger.debug("添加列表标签: \(title) (ID: \(listId))")
-            addListTab(listId: listId, title: title)
-
-            // 保存标签并触发UI更新
-            saveTabs()
-            objectWillChange.send()
-        }
-    }
-
-    // 添加列表标签
-    private func addListTab(listId: String, title: String) {
-        let listTab = FLListTimelineTabItem(
-            metaData: FLTabMetaData(
-                title: .text(title),
-                icon: .material(.list)
-            ),
-            account: accountType,
-            listKey: listId
-        )
-
-        availableAppBarTabsItems.append(listTab)
-    }
-
-    // 移除列表标签
-    private func removeListTab(listId: String) {
-        let tabKey = "list_\(accountType)_\(listId)"
-        let hadTab = availableAppBarTabsItems.contains(where: { $0.key == tabKey })
-        availableAppBarTabsItems.removeAll { $0.key == tabKey }
-        if hadTab {
-            logger.debug("移除列表标签: \(listId)")
-            saveTabs()
-        }
-    }
-
+    // 移动标签逻辑优化
     func moveTab(from source: IndexSet, to destination: Int) {
+        guard let sourceIndex = source.first, sourceIndex < availableAppBarTabsItems.count else {
+            return
+        }
+
+        // 记录源项和选中状态
+        let movedTab = availableAppBarTabsItems[sourceIndex]
+        let selectedKey = selectedAppBarTabKey
+
+        // 执行UI移动
         availableAppBarTabsItems.move(fromOffsets: source, toOffset: destination)
-        saveTabs()
+
+        // 重新计算所有项目的时间，确保顺序
+        for (index, tab) in availableAppBarTabsItems.enumerated() {
+            if let configIndex = appBarItems.firstIndex(where: { $0.key == tab.key }) {
+                var newTime
+
+                    // 首页特殊处理
+                    = if primaryHomeItems.contains(where: { $0.key == tab.key })
+                {
+                    Date(timeIntervalSince1970: 0) // 首页永远在最前
+                } else {
+                    // 其他项目用递增时间，使用大间隔确保顺序清晰
+                    Date().addingTimeInterval(Double(index) * 3600) // 间隔1小时
+                }
+
+                // 使用新结构替换，而不是修改现有结构
+                let updatedItem = AppBarItemConfig(
+                    key: appBarItems[configIndex].key,
+                    type: appBarItems[configIndex].type,
+                    addedTime: newTime,
+                    metadata: appBarItems[configIndex].metadata
+                )
+                appBarItems[configIndex] = updatedItem
+            }
+        }
+
+        // 保存配置
+        saveAppBarConfig()
+
+        // 发送变更通知
+        objectWillChange.send()
+        notificationService.postTabsDidUpdateNotification()
+
+        // 恢复选中状态
+        selectedAppBarTabKey = selectedKey
+        logger.debug("移动标签完成：\(movedTab.key) 移动到位置 \(destination)")
     }
 
-    func notifyTabChange() {
-        onTabChange?(selectedIndex)
+    // 专门用于移动列表标签的方法
+    func moveListTab(from source: IndexSet, to destination: Int) {
+        listTabManager.moveListTab(
+            from: source,
+            to: destination,
+            availableAppBarTabsItems: availableAppBarTabsItems,
+            moveTabHandler: moveTab
+        )
     }
 
-    // 添加观察列表标题变化的方法
+    // 专门用于移动Feed标签的方法
+    func moveFeedTab(from source: IndexSet, to destination: Int) {
+        feedTabManager.moveFeedTab(
+            from: source,
+            to: destination,
+            availableAppBarTabsItems: availableAppBarTabsItems,
+            moveTabHandler: moveTab
+        )
+    }
+
+    // 观察列表标题变化
     private func observeListTitleChanges() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleListTitleChange),
-            name: .listTitleDidUpdate,
-            object: nil
+        notificationService.addListTitleDidUpdateObserver(
+            target: self,
+            selector: #selector(handleListTitleChange)
         )
     }
 
@@ -559,59 +606,251 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
         if let listId = notification.userInfo?["listId"] as? String,
            let newTitle = notification.userInfo?["newTitle"] as? String
         {
-            logger.debug("收到列表标题更新通知: 列表\(listId), 新标题\(newTitle)")
+            // 检查是否为Feed类型
+            let isBlueskyFeed = notification.userInfo?["itemType"] as? String == "feed"
+
+            logger.debug("收到\(isBlueskyFeed ? "Feed" : "列表")标题更新通知: ID=\(listId), 新标题=\(newTitle)")
 
             DispatchQueue.main.async {
                 // 更新标题映射
                 self.listTitles[listId] = newTitle
 
                 // 查找并更新相应的标签标题
-                let tabKey = "list_\(self.accountType)_\(listId)"
+                let tabKey = isBlueskyFeed ?
+                    "feed_\(self.accountType)_\(listId)" :
+                    "list_\(self.accountType)_\(listId)"
+
+                // 更新UI标签
                 for (index, tab) in self.availableAppBarTabsItems.enumerated() {
                     if tab.key == tabKey {
                         // 创建新的标签项替换旧的
-                        let updatedTab = FLListTimelineTabItem(
-                            metaData: FLTabMetaData(
-                                title: .text(newTitle),
-                                icon: .material(.list)
-                            ),
-                            account: self.accountType,
-                            listKey: listId
-                        )
+                        let updatedTab: FLTabItem = if isBlueskyFeed {
+                            self.feedTabManager.createFeedTab(
+                                feedId: listId,
+                                title: newTitle,
+                                accountType: self.accountType,
+                                iconUrl: self.listIconUrls[listId]
+                            )
+                        } else {
+                            self.listTabManager.createListTab(
+                                listId: listId,
+                                title: newTitle,
+                                accountType: self.accountType,
+                                iconUrl: self.listIconUrls[listId]
+                            )
+                        }
 
                         // 替换标签
                         self.availableAppBarTabsItems[index] = updatedTab
-                        logger.debug("更新标签标题: \(tabKey) -> \(newTitle)")
 
-                        // 保存标签设置
-                        self.saveTabs()
+                        // 更新统一配置中的项目（只更新标题，不改变时间）
+                        if let itemIndex = self.appBarItems.firstIndex(where: { $0.key == tabKey }) {
+                            var updatedItem = self.appBarItems[itemIndex]
+                            updatedItem.metadata["title"] = newTitle
+                            self.appBarItems[itemIndex] = updatedItem
+                        }
+
+                        // 保存配置
+                        self.saveAppBarConfig()
 
                         // 如果当前选中的是被更新的标签，刷新选中状态
                         if self.selectedAppBarTabKey == tabKey {
                             self.updateSelectedTab(updatedTab)
                         }
 
-                        // 发送专门的通知，告知AppBar标签标题已更新
-                        // 添加延迟确保UI更新有足够时间
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            NotificationCenter.default.post(
-                                name: NSNotification.Name("TabsDidUpdate"),
-                                object: nil,
-                                userInfo: [
-                                    "updatedTabKey": tabKey,
-                                    "newTitle": newTitle,
-                                ]
+                        // 发送通知告知AppBar标签标题已更新
+                        self.notificationService.postTabsDidUpdateNotification(
+                            updatedTabKey: tabKey,
+                            newTitle: newTitle
+                        )
+
+                        // 通知UI更新
+                        self.objectWillChange.send()
+
+                        break
+                    }
+                }
+            }
+        }
+    }
+
+    // 通知标签变更
+    func notifyTabChange() {
+        onTabChange?(selectedIndex)
+    }
+
+    // 切换标签显示状态
+    func toggleTab(_ id: String) {
+        guard let user = currentUser else { return }
+
+        logger.debug("切换标签状态: \(id)")
+
+        let wasSelected = selectedAppBarTabKey == id
+        let isBlueskyFeed = id.starts(with: "feed_")
+
+        if availableAppBarTabsItems.contains(where: { $0.key == id }) {
+            // 关闭标签：从 availableAppBarTabsItems 中移除
+            availableAppBarTabsItems.removeAll { $0.key == id }
+
+            // 同时从配置中移除
+            appBarItems.removeAll { $0.key == id }
+
+            // 如果关闭的是当前选中的标签，切换到第一个标签（首页）
+            if wasSelected {
+                if let firstTab = primaryHomeItems.first {
+                    updateSelectedTab(firstTab)
+                }
+            }
+
+            // 如果是列表标签或Feed标签，同步更新列表状态
+            if id.starts(with: "list_") || id.starts(with: "feed_") {
+                let components = id.split(separator: "_")
+                if components.count >= 3 {
+                    let listId = String(components.last!)
+
+                    // 安全地更新本地状态
+                    DispatchQueue.main.async { [self] in
+                        // 从已pin列表中移除
+                        pinnedListIds.removeAll { $0 == listId }
+
+                        // 保存更新
+                        updateConfigFromUiState()
+                        saveAppBarConfig()
+
+                        // 发送通知，让其他地方知道列表pin状态变化了
+                        if let title = listTitles[listId] {
+                            notificationService.postListPinStatusChangedNotification(
+                                listId: listId,
+                                listTitle: title,
+                                isPinned: false,
+                                isBlueskyFeed: isBlueskyFeed
                             )
                         }
                     }
                 }
+            } else {
+                // second 保存更新
+                updateConfigFromUiState()
+                saveAppBarConfig()
+            }
+        } else {
+            // 开启标签：添加到 availableAppBarTabsItems
+            // 检查是否已存在相同的标签
+            if !availableAppBarTabsItems.contains(where: { $0.key == id }) {
+                if let item = secondaryItems.first(where: { $0.key == id }) {
+                    availableAppBarTabsItems.append(item)
 
-                // 保存列表信息
-                self.savePinnedLists()
+                    // 添加到配置
+                    let newConfig = configService.convertTabToConfig(
+                        item,
+                        type: .secondary,
+                        addedTime: Date()
+                    )
+                    appBarItems.append(newConfig)
 
-                // 通知UI更新
-                self.objectWillChange.send()
+                    // 保存更新
+                    saveAppBarConfig()
+                } else if id.starts(with: "list_") {
+                    // 如果是列表标签
+                    let components = id.split(separator: "_")
+                    if components.count >= 3 {
+                        let listId = String(components.last!)
+                        if let title = listTitles[listId] {
+                            // 创建列表标签
+                            let listTab = listTabManager.createListTab(
+                                listId: listId,
+                                title: title,
+                                accountType: accountType,
+                                iconUrl: listIconUrls[listId]
+                            )
+
+                            // 安全地在主线程更新UI
+                            DispatchQueue.main.async { [self] in
+                                // 添加到UI
+                                availableAppBarTabsItems.append(listTab)
+
+                                // 创建列表配置
+                                let newConfig = listTabManager.createListConfig(
+                                    listTab: listTab,
+                                    title: title,
+                                    iconUrl: listIconUrls[listId]
+                                )
+                                appBarItems.append(newConfig)
+
+                                // 添加到已pin列表
+                                if !pinnedListIds.contains(listId) {
+                                    pinnedListIds.append(listId)
+                                }
+
+                                // 保存更新
+                                saveAppBarConfig()
+
+                                // 发送通知，让其他地方知道列表pin状态变化了
+                                notificationService.postListPinStatusChangedNotification(
+                                    listId: listId,
+                                    listTitle: title,
+                                    isPinned: true,
+                                    isBlueskyFeed: false,
+                                    iconUrl: listIconUrls[listId]
+                                )
+                            }
+                        }
+                    }
+                } else if id.starts(with: "feed_") {
+                    // 如果是Feed标签
+                    let components = id.split(separator: "_")
+                    if components.count >= 3 {
+                        let feedId = String(components.last!)
+                        if let title = listTitles[feedId] {
+                            // 创建Feed标签
+                            let feedTab = feedTabManager.createFeedTab(
+                                feedId: feedId,
+                                title: title,
+                                accountType: accountType,
+                                iconUrl: listIconUrls[feedId]
+                            )
+
+                            // 安全地在主线程更新UI
+                            DispatchQueue.main.async { [self] in
+                                // 添加到UI
+                                availableAppBarTabsItems.append(feedTab)
+
+                                // 创建Feed配置
+                                let newConfig = feedTabManager.createFeedConfig(
+                                    feedTab: feedTab,
+                                    title: title,
+                                    iconUrl: listIconUrls[feedId]
+                                )
+                                appBarItems.append(newConfig)
+
+                                // 添加到已pin列表
+                                if !pinnedListIds.contains(feedId) {
+                                    pinnedListIds.append(feedId)
+                                }
+
+                                // 保存更新
+                                saveAppBarConfig()
+
+                                // 发送通知，让其他地方知道Feed pin状态变化了
+                                notificationService.postListPinStatusChangedNotification(
+                                    listId: feedId,
+                                    listTitle: title,
+                                    isPinned: true,
+                                    isBlueskyFeed: true,
+                                    iconUrl: listIconUrls[feedId]
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
+
+        // 通知UI更新
+        objectWillChange.send()
+
+        // 添加发送TabsDidUpdate通知，确保HomeTabController更新UI
+        notificationService.postTabsDidUpdateNotification()
+        logger.debug("发送TabsDidUpdate通知，标签状态已更改: \(id)")
     }
 }

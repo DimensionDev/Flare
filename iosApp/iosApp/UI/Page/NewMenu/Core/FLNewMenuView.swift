@@ -1,11 +1,13 @@
 import shared
 import SwiftUI
+import UIKit
 
 struct FLNewMenuView: View {
     @Binding var isOpen: Bool
     @State private var showLogin = false
     @State private var showAccounts = false
     @State private var showLists = false
+    @State private var showFeeds = false
     let accountType: AccountType
     let user: UiUserV2?
     @EnvironmentObject private var router: Router
@@ -42,6 +44,26 @@ struct FLNewMenuView: View {
                     .padding(.vertical, 8)
                 }
                 .buttonStyle(PlainButtonStyle())
+
+                // Misskey平台特有的Feed菜单项
+                if isPlatformBluesky() {
+                    Button(action: {
+                        // 关闭菜单
+                        isOpen = false
+                        // 使用showFeeds展示Feeds页面
+                        showFeeds = true
+                    }) {
+                        HStack {
+                            Image(systemName: "number.square")
+                                .frame(width: 28, height: 28)
+                            Text("Feeds")
+                                .font(.body)
+                            Spacer()
+                        }
+                        .padding(.vertical, 8)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
             }
             .listStyle(PlainListStyle())
 
@@ -65,6 +87,11 @@ struct FLNewMenuView: View {
         .sheet(isPresented: $showLists) {
             NavigationView {
                 AllListsView(accountType: accountType)
+            }
+        }
+        .sheet(isPresented: $showFeeds) {
+            NavigationView {
+                AllFeedsView(accountType: accountType)
             }
         }
     }
@@ -158,5 +185,12 @@ struct FLNewMenuView: View {
             .background(Color(UIColor.secondarySystemBackground))
             .cornerRadius(10)
         }
+    }
+
+    // 检查当前平台是否为Misskey
+    private func isPlatformBluesky() -> Bool {
+        guard let user else { return false }
+        let platformTypeString = String(describing: user.platformType).lowercased()
+        return platformTypeString == "bluesky"
     }
 }

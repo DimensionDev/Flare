@@ -279,14 +279,14 @@ public struct FLTabSettings {
         ]
     }
 
-    private static func defaultBlueskySecondaryItems(accountKey: FLMicroBlogKey) -> [FLTabItem] {
+    private static func defaultBlueskySecondaryItems(accountKey _: FLMicroBlogKey) -> [FLTabItem] {
         [
-            FLAllListTabItem(
-                metaData: FLTabMetaData(
-                    title: .localized(.list),
-                    icon: .mixed(.list, userKey: accountKey)
-                ), account: AccountTypeSpecific(accountKey: accountKey)
-            ),
+            //            FLAllListTabItem(
+//                metaData: FLTabMetaData(
+//                    title: .localized(.list),
+//                    icon: .mixed(.list, userKey: accountKey)
+//                ), account: AccountTypeSpecific(accountKey: accountKey)
+//            ),
 //            FLBlueskyFeedsTabItem(
 //                metaData: FLTabMetaData(
 //                    title: .localized(.feeds),
@@ -1168,5 +1168,208 @@ public struct FLProfileMediaTabItem: FLTabItem {
 
     public func update(metaData: FLTabMetaData) -> FLTabItem {
         FLProfileMediaTabItem(metaData: metaData, account: account as! AccountTypeSpecific, userKey: userKey)
+    }
+}
+
+// - AppBar统一存储数据结构
+// AppBar项目配置结构
+public struct AppBarItemConfig: Codable {
+    public let key: String // 项目唯一标识
+    public let type: AppBarItemType // 项目类型
+    public let addedTime: Date // 添加时间
+    public var metadata: [String: String] // 元数据
+
+    public init(key: String, type: AppBarItemType, addedTime: Date = Date(), metadata: [String: String] = [:]) {
+        self.key = key
+        self.type = type
+        self.addedTime = addedTime
+        self.metadata = metadata
+    }
+}
+
+// 项目类型枚举
+public enum AppBarItemType: String, Codable {
+    case main // 主标签
+    case secondary // 次要标签
+    case list // 固定列表
+    case feed // 固定Feed
+}
+
+// 平台配置结构
+public struct PlatformAppBarConfig: Codable {
+    public var enabledItems: [AppBarItemConfig]
+    public let version: Int = 1 // 添加版本字段便于未来扩展
+
+    public init(enabledItems: [AppBarItemConfig] = []) {
+        self.enabledItems = enabledItems
+    }
+}
+
+// 扩展FLTabSettingsStorage添加AppBar配置相关方法
+public extension FLTabSettingsStorage {
+    // 存储键名前缀
+    private static let appBarConfigKeyPrefix = "appbar_config_4_"
+
+    // 获取AppBar配置存储键
+    private func appBarConfigKey(for platformType: PlatformType, accountKey: MicroBlogKey) -> String {
+        let platformString = platformType.name
+        let accountString = accountKey.id
+        return "\(Self.appBarConfigKeyPrefix)\(platformString)_\(accountString)"
+    }
+
+    // 保存AppBar配置
+    func saveAppBarConfig(_ config: PlatformAppBarConfig, for platformType: PlatformType, accountKey: MicroBlogKey) {
+        let key = appBarConfigKey(for: platformType, accountKey: accountKey)
+        do {
+            let data = try JSONEncoder().encode(config)
+            userDefaults.set(data, forKey: key)
+        } catch {
+            NSLog("保存AppBar配置失败: \(error.localizedDescription)")
+        }
+    }
+
+    // 读取AppBar配置
+    func loadAppBarConfig(for platformType: PlatformType, accountKey: MicroBlogKey) -> PlatformAppBarConfig? {
+        let key = appBarConfigKey(for: platformType, accountKey: accountKey)
+        guard let data = userDefaults.data(forKey: key) else { return nil }
+
+        do {
+            return try JSONDecoder().decode(PlatformAppBarConfig.self, from: data)
+        } catch {
+            NSLog("加载AppBar配置失败: \(error.localizedDescription)")
+            return nil
+        }
+    }
+
+    // 清除AppBar配置
+    func clearAppBarConfig(for platformType: PlatformType, accountKey: MicroBlogKey) {
+        let key = appBarConfigKey(for: platformType, accountKey: accountKey)
+        userDefaults.removeObject(forKey: key)
+    }
+}
+
+// 扩展FLTabSettingsManager添加AppBar配置相关方法
+public extension FLTabSettingsManager {
+    // 保存AppBar配置
+    func saveAppBarConfig(_ config: PlatformAppBarConfig, for user: UiUserV2) {
+        storage.saveAppBarConfig(config, for: user.platformType, accountKey: user.key)
+    }
+
+    // 读取AppBar配置
+    func getAppBarConfig(for user: UiUserV2) -> PlatformAppBarConfig {
+        storage.loadAppBarConfig(for: user.platformType, accountKey: user.key) ?? PlatformAppBarConfig()
+    }
+
+    // 将FLTabItem转换为AppBarItemConfig
+    func convertTabToConfig(_ tab: FLTabItem, type: AppBarItemType, addedTime: Date = Date()) -> AppBarItemConfig {
+        var metadata: [String: String] = [:]
+
+        // 添加标题元数据
+        switch tab.metaData.title {
+        case let .text(text):
+            metadata["title"] = text
+        case let .localized(key):
+            metadata["title"] = NSLocalizedString(key, comment: "")
+        }
+
+        return AppBarItemConfig(
+            key: tab.key,
+            type: type,
+            addedTime: addedTime,
+            metadata: metadata
+        )
+    }
+
+    // 将AppBarItemConfig转换回FLTabItem数组
+    func convertConfigToTabs(_ config: PlatformAppBarConfig, for user: UiUserV2, accountType: AccountType) -> [FLTabItem] {
+        // 获取默认标签以便查找
+        let defaultItems = FLTabSettings.defaultSecondary(user: user)
+        let mainItems = FLTabSettings.defaultPrimary(user: user)
+        let allDefaultItems = mainItems + defaultItems
+
+        // 按添加时间排序
+        let sortedItems = config.enabledItems.sorted { $0.addedTime < $1.addedTime }
+
+        // 转换为FLTabItem
+        var result: [FLTabItem] = []
+
+        for item in sortedItems {
+            // 首先尝试从默认项中查找
+            if let tab = allDefaultItems.first(where: { $0.key == item.key }) {
+                result.append(tab)
+                continue
+            }
+
+            // 特殊处理列表和Feed标签
+            if item.type == .list, let components = item.key.split(separator: "_").last {
+                let listId = String(components)
+                let title = item.metadata["title"] ?? "List"
+
+                let listTab = FLListTimelineTabItem(
+                    metaData: FLTabMetaData(
+                        title: .text(title),
+                        icon: .material(.list)
+                    ),
+                    account: accountType, // 使用传入的accountType
+                    listKey: listId
+                )
+                result.append(listTab)
+            } else if item.type == .feed, let components = item.key.split(separator: "_").last {
+                // 只有Bluesky平台才处理Feed
+                if user.platformType == .bluesky {
+                    let feedId = String(components)
+                    let title = item.metadata["title"] ?? "Feed"
+
+                    let feedTab = FLBlueskyFeedTabItem(
+                        metaData: FLTabMetaData(
+                            title: .text(title),
+                            icon: .material(.feeds)
+                        ),
+                        account: accountType, // 使用传入的accountType
+                        feedKey: feedId
+                    )
+                    result.append(feedTab)
+                }
+            }
+        }
+
+        // 确保至少有主页标签
+        if result.isEmpty, let homeItem = mainItems.first {
+            result.append(homeItem)
+        }
+
+        return result
+    }
+
+    // 创建默认配置
+    func createDefaultAppBarConfig(for user: UiUserV2) -> PlatformAppBarConfig {
+        var items: [AppBarItemConfig] = []
+
+        // 添加主标签，使用1970年确保始终排在最前
+        if let homeItem = FLTabSettings.defaultPrimary(user: user).first {
+            items.append(convertTabToConfig(
+                homeItem,
+                type: .main,
+                addedTime: Date(timeIntervalSince1970: 0)
+            ))
+        }
+
+        // 添加默认次要标签
+        let secondaryItems = FLTabSettings.defaultSecondary(user: user).prefix(3)
+        for (index, item) in secondaryItems.enumerated() {
+            items.append(convertTabToConfig(
+                item,
+                type: .secondary,
+                addedTime: Date().addingTimeInterval(Double(index) * 60)
+            ))
+        }
+
+        return PlatformAppBarConfig(enabledItems: items)
+    }
+
+    // 重置为默认AppBar配置
+    func resetToDefaultAppBarConfig(for user: UiUserV2) {
+        let defaultConfig = createDefaultAppBarConfig(for: user)
+        saveAppBarConfig(defaultConfig, for: user)
     }
 }

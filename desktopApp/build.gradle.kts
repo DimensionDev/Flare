@@ -1,3 +1,4 @@
+
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -51,6 +52,7 @@ compose.desktop {
                 }
 //                iconFile.set(project.file("src/jvmMain/resources/icon/ic_launcher.icns"))
             }
+            appResourcesRootDir.set(file("appResources"))
         }
         buildTypes {
             release {
@@ -67,6 +69,10 @@ compose.desktop {
 
 compose.resources {
     packageOfResClass = "dev.dimension.flare"
+}
+
+tasks.withType<JavaExec> {
+    systemProperty("compose.application.resources.dir", file("appResources").absolutePath)
 }
 
 ktlint {
@@ -91,3 +97,9 @@ val macExtraPlistKeys: String
         </dict>
       </array>
     """
+
+
+apply(from = "vlc-download-task.gradle.kts")
+tasks.named("compileKotlin") {
+    dependsOn("downloadVlc")
+}

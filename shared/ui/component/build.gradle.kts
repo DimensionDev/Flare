@@ -51,7 +51,7 @@ kotlin {
             dependencies {
                 implementation(libs.fluent.ui)
                 implementation(compose("org.jetbrains.compose.material3:material3-window-size-class"))
-                api(libs.bundles.vlcj)
+                api(libs.bundles.mediamp)
             }
         }
     }

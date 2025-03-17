@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -115,6 +116,11 @@ public fun VideoPlayer(
                     remainingTime = player.duration - player.currentPosition
                 }
                 delay(500)
+            }
+        }
+        DisposableEffect(Unit) {
+            onDispose {
+                playerPool.release(uri)
             }
         }
         PlayerSurface(

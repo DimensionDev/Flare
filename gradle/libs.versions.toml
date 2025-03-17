@@ -1,4 +1,5 @@
 [versions]
+collection = "1.5.0"
 compileSdk = "35"
 lifecycleViewmodelCompose = "2.8.4"
 minSdk = "24"
@@ -51,6 +52,7 @@ compose-multiplatform = "1.7.3"
 mediamp = "0.0.21"
 
 [libraries]
+androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
 bluesky = { module = "sh.christian.ozone:bluesky", version.ref = "bluesky" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

@@ -52,7 +52,7 @@ compose.desktop {
                 }
 //                iconFile.set(project.file("src/jvmMain/resources/icon/ic_launcher.icns"))
             }
-            appResourcesRootDir.set(file("appResources"))
+            appResourcesRootDir.set(file("resources"))
         }
         buildTypes {
             release {
@@ -72,7 +72,7 @@ compose.resources {
 }
 
 tasks.withType<JavaExec> {
-    systemProperty("compose.application.resources.dir", file("appResources").absolutePath)
+    systemProperty("compose.application.resources.dir", file("resources").absolutePath)
 }
 
 ktlint {

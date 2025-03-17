@@ -24,7 +24,7 @@ open class DownloadVlcTask : DefaultTask() {
                 System.getProperty("os.arch").lowercase().contains("arm64")
 
         // Use projectDir to locate resource directory
-        val resourcesDir = File(project.projectDir, "appResources")
+        val resourcesDir = File(project.projectDir, "resources")
         if (!resourcesDir.exists()) {
             resourcesDir.mkdirs()
         }
@@ -232,19 +232,24 @@ open class DownloadVlcTask : DefaultTask() {
 
             println("DMG mounted, copying content...")
 
-            // Create lib directory
-            val libDir = File(targetDir, "lib")
-            if (!libDir.exists()) {
-                libDir.mkdirs()
-            }
-
-            // Copy VLC.app to lib directory instead of the target root
+            // Look for the MacOS directory containing the actual binaries
             val vlcApp = File(mountPoint, "VLC.app")
-            if (vlcApp.exists()) {
-                copyDirectory(vlcApp, File(libDir, "VLC.app"))
-                println("VLC.app copied to lib directory")
+            val macOSDir = File(vlcApp, "Contents/MacOS")
+
+            if (macOSDir.exists() && macOSDir.isDirectory) {
+                // Copy all files from MacOS directory directly to targetDir
+                println("Copying files from VLC.app/Contents/MacOS directly to target directory")
+                macOSDir.listFiles()?.forEach { file ->
+                    val targetFile = File(targetDir, file.name)
+                    if (file.isDirectory) {
+                        copyDirectory(file, targetFile)
+                    } else {
+                        Files.copy(file.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
+                    }
+                }
+                println("Files copied successfully")
             } else {
-                println("VLC.app not found in mounted DMG")
+                println("VLC.app/Contents/MacOS not found in mounted DMG")
             }
 
             // Unmount DMG

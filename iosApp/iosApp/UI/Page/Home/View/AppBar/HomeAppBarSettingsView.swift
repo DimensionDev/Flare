@@ -7,13 +7,13 @@ private let logger = Logger(subsystem: "com.flare.app", category: "HomeAppBarSet
 
 struct HomeAppBarSettingsView: View {
     @Environment(\.dismiss) var dismiss
-    @ObservedObject var store: AppBarTabSettingStore = AppBarTabSettingStore.shared
+    @ObservedObject var store: AppBarTabSettingStore = .shared
 
     // 添加列表 presenter 状态
     @State private var listPresenter: AllListPresenter
     @State private var lastListState: AllListState?
     @State private var isActionInProgress = false
-    
+
     // 添加Feeds presenter状态（只用于Bluesky）
     @State private var feedsPresenter: PinnableTimelineTabPresenter?
     @State private var lastFeedsState: PinnableTimelineTabPresenterState?
@@ -30,7 +30,7 @@ struct HomeAppBarSettingsView: View {
 
     // 添加新字段以标识编辑的是Feed还是List
     @State private var editingItemIsBlueskyFeed: Bool = false
-    
+
     // 添加折叠相关状态
     @State private var isAvailableListsExpanded: Bool = false
     @State private var isAvailableFeedsExpanded: Bool = false
@@ -39,27 +39,27 @@ struct HomeAppBarSettingsView: View {
     init() {
         let store = AppBarTabSettingStore.shared
         _listPresenter = State(initialValue: AllListPresenter(accountType: store.accountType))
-        
+
         // 判断当前平台是否为Bluesky
         let isBluesky = store.currentUser?.platformType == .bluesky
         _isBlueskyPlatform = State(initialValue: isBluesky)
-        
+
         // 如果是Bluesky平台，初始化FeedsPresenter
         if isBluesky {
             _feedsPresenter = State(initialValue: PinnableTimelineTabPresenter(accountType: store.accountType))
         }
     }
-    
+
     // 保留旧的初始化方法，但标记为deprecated
     @available(*, deprecated, message: "请使用init()代替")
-    init(store: AppBarTabSettingStore) {
-        self.store = AppBarTabSettingStore.shared // 忽略传入的store，始终使用shared实例
+    init(store _: AppBarTabSettingStore) {
+        store = AppBarTabSettingStore.shared // 忽略传入的store，始终使用shared实例
         _listPresenter = State(initialValue: AllListPresenter(accountType: AppBarTabSettingStore.shared.accountType))
-        
+
         // 判断当前平台是否为Bluesky
         let isBluesky = AppBarTabSettingStore.shared.currentUser?.platformType == .bluesky
         _isBlueskyPlatform = State(initialValue: isBluesky)
-        
+
         // 如果是Bluesky平台，初始化FeedsPresenter
         if isBluesky {
             _feedsPresenter = State(initialValue: PinnableTimelineTabPresenter(accountType: AppBarTabSettingStore.shared.accountType))
@@ -78,14 +78,14 @@ struct HomeAppBarSettingsView: View {
 //                            .foregroundColor(.blue)
 //                    }
 //                    .padding(.leading, 16)
-                    
+
                     Spacer()
-                    
+
                     Text("AppBar Settings")
                         .font(.headline)
-                    
+
                     Spacer()
-                    
+
                     // 平衡布局的空按钮
 //                    Button(action: {}) {
 //                        Text("")
@@ -100,10 +100,10 @@ struct HomeAppBarSettingsView: View {
                     Rectangle()
                         .frame(height: 0.5)
                         .foregroundColor(Color(UIColor.separator))
-                        .offset(y: 20)
-                    , alignment: .bottom
+                        .offset(y: 20),
+                    alignment: .bottom
                 )
-            
+
                 List {
                     // 主要标签
                     if let primaryTab = store.primaryHomeItems.first {
@@ -119,7 +119,7 @@ struct HomeAppBarSettingsView: View {
                         }
                         return false
                     }
-                    
+
                     if !secondaryTabs.isEmpty {
                         Section(header: Text("used tabs")) {
                             ForEach(secondaryTabs, id: \.key) { tab in
@@ -171,13 +171,13 @@ struct HomeAppBarSettingsView: View {
                             }
                             .onMove { source, destination in
                                 store.moveListTab(from: source, to: destination)
-                            } 
+                            }
                         }
                     }
-                    
+
                     // pinned feeds
                     let pinnedFeedTabs = store.availableAppBarTabsItems.filter { $0.key.starts(with: "feed_") }
-                    if isBlueskyPlatform && !pinnedFeedTabs.isEmpty {
+                    if isBlueskyPlatform, !pinnedFeedTabs.isEmpty {
                         Section(header: Text("pinned feeds")) {
                             ForEach(pinnedFeedTabs, id: \.key) { tab in
                                 if let feedId = tab.key.split(separator: "_").last {
@@ -201,16 +201,16 @@ struct HomeAppBarSettingsView: View {
                                     }
                                 }
                             }
-                            
+
                             .onMove { source, destination in
                                 store.moveFeedTab(from: source, to: destination)
-                            }  
+                            }
                         }
                     }
 
                     // available no pinned lists
                     availableListsSection
-                    
+
                     // 仅当为Bluesky平台时显示：available no pinned feeds
                     if isBlueskyPlatform {
                         availableFeedsSection
@@ -221,12 +221,12 @@ struct HomeAppBarSettingsView: View {
                 .onAppear {
                     // 视图出现时启动对列表状态的观察
                     startListObservation()
-                    
+
                     // 如果是Bluesky平台，启动对Feeds状态的观察
                     if isBlueskyPlatform {
                         startFeedsObservation()
                     }
-                    
+
                     // 隐藏系统的拖动控件但保留拖拽功能
                     UITableViewCell.appearance().showsReorderControl = false
                 }
@@ -266,7 +266,6 @@ struct HomeAppBarSettingsView: View {
             // }
         }
         .environment(\.editMode, .constant(.active))
-        
         .sheet(isPresented: $isEditingTitle, onDismiss: {
             editingList = nil // 清理编辑状态
             editingListId = nil
@@ -308,22 +307,23 @@ struct HomeAppBarSettingsView: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private var availableListsSection: some View {
         if let state = lastListState {
             if let successState = state.items as? PagingStateSuccess<UiList>,
-               successState.itemCount > 0 {
+               successState.itemCount > 0
+            {
                 // 检查是否有未固定的列表
                 let hasUnpinnedLists = checkForUnpinnedLists(successState)
                 if hasUnpinnedLists {
                     // 计算实际可用列表总数和当前要显示的数量
                     let totalAvailableCount = countUnpinnedLists(successState)
-                    let displayCount = isAvailableListsExpanded ? 
-                        min(Int(successState.itemCount), 50) : 
+                    let displayCount = isAvailableListsExpanded ?
+                        min(Int(successState.itemCount), 50) :
                         min(availableListsLimit, totalAvailableCount)
-                    
-                    Section(header: 
+
+                    Section(header:
                         HStack {
                             Text("available lists")
                             Spacer()
@@ -346,11 +346,12 @@ struct HomeAppBarSettingsView: View {
                             if let list = successState.peek(index: Int32(index)) {
                                 // 确保此列表没有被固定，并且没有对应的标签
                                 let listTabKey = "list_\(store.accountType)_\(list.id)"
-                                if !store.pinnedListIds.contains(list.id) && 
-                                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey }) {
+                                if !store.pinnedListIds.contains(list.id),
+                                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey })
+                                {
                                     // 计算已显示的未固定列表数量，用于确定是否显示当前列表
                                     let displayedCount = countDisplayedItemsBeforeIndex(successState, currentIndex: index)
-                                    
+
                                     if displayedCount < displayCount {
                                         listRowItem(for: list)
                                             .buttonStyle(PlainButtonStyle())
@@ -358,9 +359,9 @@ struct HomeAppBarSettingsView: View {
                                 }
                             }
                         }
-                        
+
                         // 添加"显示更多"按钮
-                        if !isAvailableListsExpanded && totalAvailableCount > availableListsLimit {
+                        if !isAvailableListsExpanded, totalAvailableCount > availableListsLimit {
                             Button(action: {
                                 withAnimation {
                                     isAvailableListsExpanded = true
@@ -388,37 +389,39 @@ struct HomeAppBarSettingsView: View {
             }
         }
     }
-    
+
     // 辅助方法：计算可用的未固定列表总数
     private func countUnpinnedLists(_ successState: PagingStateSuccess<UiList>) -> Int {
         var count = 0
-        for i in 0..<min(Int(successState.itemCount), 50) {
+        for i in 0 ..< min(Int(successState.itemCount), 50) {
             if let list = successState.peek(index: Int32(i)) {
                 let listTabKey = "list_\(store.accountType)_\(list.id)"
-                if !store.pinnedListIds.contains(list.id) && 
-                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey }) {
+                if !store.pinnedListIds.contains(list.id),
+                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey })
+                {
                     count += 1
                 }
             }
         }
         return count
     }
-    
+
     // 辅助方法：计算在当前索引之前显示的项目数
     private func countDisplayedItemsBeforeIndex(_ successState: PagingStateSuccess<UiList>, currentIndex: Int) -> Int {
         var count = 0
-        for i in 0..<currentIndex {
+        for i in 0 ..< currentIndex {
             if let list = successState.peek(index: Int32(i)) {
                 let listTabKey = "list_\(store.accountType)_\(list.id)"
-                if !store.pinnedListIds.contains(list.id) && 
-                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey }) {
+                if !store.pinnedListIds.contains(list.id),
+                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey })
+                {
                     count += 1
                 }
             }
         }
         return count
     }
-    
+
     @ViewBuilder
     private var availableFeedsSection: some View {
         if let state = lastFeedsState {
@@ -445,11 +448,11 @@ struct HomeAppBarSettingsView: View {
                         if hasUnpinnedFeeds {
                             // 计算实际可用Feed总数和当前要显示的数量
                             let totalAvailableCount = countUnpinnedFeeds(feedsData)
-                            let displayCount = isAvailableFeedsExpanded ? 
-                                min(Int(feedsData.itemCount), 30) : 
+                            let displayCount = isAvailableFeedsExpanded ?
+                                min(Int(feedsData.itemCount), 30) :
                                 min(availableListsLimit, totalAvailableCount)
-                            
-                            Section(header: 
+
+                            Section(header:
                                 HStack {
                                     Text("available feeds")
                                     Spacer()
@@ -472,11 +475,12 @@ struct HomeAppBarSettingsView: View {
                                     if let feed = feedsData.peek(index: Int32(index)) {
                                         // 确保此Feed没有被固定，并且没有对应的标签
                                         let feedTabKey = "feed_\(store.accountType)_\(feed.id)"
-                                        if !store.pinnedListIds.contains(feed.id) && 
-                                           !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey }) {
+                                        if !store.pinnedListIds.contains(feed.id),
+                                           !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey })
+                                        {
                                             // 计算已显示的未固定Feed数量，用于确定是否显示当前Feed
                                             let displayedCount = countDisplayedFeedsBeforeIndex(feedsData, currentIndex: index)
-                                            
+
                                             if displayedCount < displayCount {
                                                 feedRowItem(for: feed)
                                                     .buttonStyle(PlainButtonStyle())
@@ -484,9 +488,9 @@ struct HomeAppBarSettingsView: View {
                                         }
                                     }
                                 }
-                                
+
                                 // 添加"显示更多"按钮
-                                if !isAvailableFeedsExpanded && totalAvailableCount > availableListsLimit {
+                                if !isAvailableFeedsExpanded, totalAvailableCount > availableListsLimit {
                                     Button(action: {
                                         withAnimation {
                                             isAvailableFeedsExpanded = true
@@ -520,56 +524,60 @@ struct HomeAppBarSettingsView: View {
             }
         }
     }
-    
+
     // 辅助方法：计算可用的未固定Feed总数
     private func countUnpinnedFeeds(_ feedsData: PagingStateSuccess<UiList>) -> Int {
         var count = 0
-        for i in 0..<min(Int(feedsData.itemCount), 30) {
+        for i in 0 ..< min(Int(feedsData.itemCount), 30) {
             if let feed = feedsData.peek(index: Int32(i)) {
                 let feedTabKey = "feed_\(store.accountType)_\(feed.id)"
-                if !store.pinnedListIds.contains(feed.id) && 
-                   !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey }) {
+                if !store.pinnedListIds.contains(feed.id),
+                   !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey })
+                {
                     count += 1
                 }
             }
         }
         return count
     }
-    
+
     // 辅助方法：计算在当前索引之前显示的Feed项目数
     private func countDisplayedFeedsBeforeIndex(_ feedsData: PagingStateSuccess<UiList>, currentIndex: Int) -> Int {
         var count = 0
-        for i in 0..<currentIndex {
+        for i in 0 ..< currentIndex {
             if let feed = feedsData.peek(index: Int32(i)) {
                 let feedTabKey = "feed_\(store.accountType)_\(feed.id)"
-                if !store.pinnedListIds.contains(feed.id) && 
-                   !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey }) {
+                if !store.pinnedListIds.contains(feed.id),
+                   !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey })
+                {
                     count += 1
                 }
             }
         }
         return count
     }
-    
+
     private func checkForUnpinnedLists(_ successState: PagingStateSuccess<UiList>) -> Bool {
-        for i in 0..<min(Int(successState.itemCount), 50) {
+        for i in 0 ..< min(Int(successState.itemCount), 50) {
             if let list = successState.peek(index: Int32(i)) {
                 let listTabKey = "list_\(store.accountType)_\(list.id)"
-                if !store.pinnedListIds.contains(list.id) && 
-                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey }) {
+                if !store.pinnedListIds.contains(list.id),
+                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey })
+                {
                     return true
                 }
             }
         }
         return false
     }
-    
+
     private func checkForUnpinnedFeeds(_ feedsData: PagingStateSuccess<UiList>) -> Bool {
-        for i in 0..<min(Int(feedsData.itemCount), 30) {
+        for i in 0 ..< min(Int(feedsData.itemCount), 30) {
             if let feed = feedsData.peek(index: Int32(i)) {
                 let feedTabKey = "feed_\(store.accountType)_\(feed.id)"
-                if !store.pinnedListIds.contains(feed.id) && 
-                   !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey }) {
+                if !store.pinnedListIds.contains(feed.id),
+                   !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey })
+                {
                     return true
                 }
             }
@@ -591,7 +599,7 @@ struct HomeAppBarSettingsView: View {
         .contentShape(Rectangle())
         .onTapGesture {}
     }
-    
+
     // Feed列表项
     private func feedRowItem(for feed: UiList) -> some View {
         ListItemRowView(
@@ -619,11 +627,11 @@ struct HomeAppBarSettingsView: View {
             }
         }
     }
-    
+
     // 观察Feeds状态
     private func startFeedsObservation() {
         guard let presenter = feedsPresenter else { return }
-        
+
         Task {
             for await state in presenter.models {
                 if let state = state as? PinnableTimelineTabPresenterState {
@@ -634,10 +642,10 @@ struct HomeAppBarSettingsView: View {
             }
         }
     }
-    
+
     // 从Tabs中找到Feed类型的Tab
     private func findFeedTab(in tabs: ImmutableListWrapper<PinnableTimelineTabPresenterStateTab>) -> PinnableTimelineTabPresenterStateTab? {
-        for i in 0..<tabs.size {
+        for i in 0 ..< tabs.size {
             if let tab = tabs.get(index: Int32(i)) as? PinnableTimelineTabPresenterStateTab {
                 if tab is PinnableTimelineTabPresenterStateTabFeed {
                     return tab
@@ -658,7 +666,7 @@ struct HomeAppBarSettingsView: View {
                 "listId": list.id,
                 "listTitle": list.title,
                 "isPinned": true,
-                "itemType": "list" // 明确指定为list类型
+                "itemType": "list", // 明确指定为list类型
             ]
 
             if let iconUrl = list.avatar {
@@ -676,7 +684,7 @@ struct HomeAppBarSettingsView: View {
             isActionInProgress = false
         }
     }
-    
+
     // Pin Feed方法
     private func pinFeed(_ feed: UiList) {
         guard !isActionInProgress else { return }
@@ -689,7 +697,7 @@ struct HomeAppBarSettingsView: View {
                 "listId": feed.id,
                 "listTitle": feed.title,
                 "isPinned": true,
-                "itemType": "feed" // 明确指定为feed类型
+                "itemType": "feed", // 明确指定为feed类型
             ]
 
             if let iconUrl = feed.avatar {
@@ -753,7 +761,7 @@ struct HomeAppBarSettingsView: View {
                 "listId": listId,
                 "oldTitle": oldTitle,
                 "newTitle": newTitle,
-                "itemType": editingItemIsBlueskyFeed ? "feed" : "list" // 添加类型标识
+                "itemType": editingItemIsBlueskyFeed ? "feed" : "list", // 添加类型标识
             ]
         )
 

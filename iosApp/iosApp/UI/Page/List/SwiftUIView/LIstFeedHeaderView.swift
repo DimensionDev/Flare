@@ -3,10 +3,8 @@ import Kingfisher
 import shared
 import SwiftUI
 
- 
 @MainActor
 struct ListFeedHeaderView {
-    
     /// header banner background
     static func ListFeedHeaderBackgroundView(listInfo: UiList, gradientColors: [Color]) -> some View {
         ZStack {
@@ -45,7 +43,7 @@ struct ListFeedHeaderView {
                             y: CGFloat.random(in: -100 ... 100))
                     .blur(radius: CGFloat.random(in: 3 ... 8))
             }
-    
+
             if isListView {
                 Image(systemName: "list.bullet.rectangle")
                     .resizable()
@@ -97,7 +95,7 @@ struct ListFeedHeaderView {
         }
     }
 
-    /// unknown 
+    /// unknown
     static func ListFeedUnknownCreatorView() -> some View {
         HStack(spacing: 8) {
             Image(systemName: "person.circle.fill")
@@ -123,25 +121,21 @@ struct ListFeedHeaderView {
             }
         }
     }
-    
- 
+
     static func getGradientColors(for id: String) -> [Color] {
-        return ListGradientGenerator.getGradient(for: id)
+        ListGradientGenerator.getGradient(for: id)
     }
 }
 
- 
 @MainActor
 extension View {
     func listFeedHeaderStyle() -> some View {
-        self
-            .listRowInsets(EdgeInsets())
+        listRowInsets(EdgeInsets())
             .listRowSeparator(.hidden)
     }
-    
+
     func listFeedContentStyle() -> some View {
-        self
-            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+        listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
             .listRowSeparator(.hidden)
     }
-} 
+}

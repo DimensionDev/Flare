@@ -12,7 +12,7 @@ struct HomeTabScreen: View {
 
     init(accountType: AccountType) {
         self.accountType = accountType
-        
+
         // 不再需要创建新的AppBarTabSettingStore实例
         // 游客模式的处理已经在AppBarTabSettingStore.shared中完成
     }
@@ -87,7 +87,7 @@ struct HomeNewViewControllerRepresentable: UIViewControllerRepresentable {
         // 更新选中的标签页
         uiViewController.updateSelectedTab(selectedTab)
         // 更新 AppBar 的可见性
-        if let isShowAppBar = isShowAppBar {
+        if let isShowAppBar {
             uiViewController.updateAppBarVisibility(isShowAppBar)
         }
     }

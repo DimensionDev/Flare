@@ -44,7 +44,7 @@ struct FLNewMenuView: View {
                     .padding(.vertical, 8)
                 }
                 .buttonStyle(PlainButtonStyle())
-                
+
                 // Misskey平台特有的Feed菜单项
                 if isPlatformBluesky() {
                     Button(action: {
@@ -189,7 +189,7 @@ struct FLNewMenuView: View {
 
     // 检查当前平台是否为Misskey
     private func isPlatformBluesky() -> Bool {
-        guard let user = user else { return false }
+        guard let user else { return false }
         let platformTypeString = String(describing: user.platformType).lowercased()
         return platformTypeString == "bluesky"
     }

@@ -21,15 +21,15 @@ class HomeTabController: UIViewController {
     // - Initialization
 
     init(accountType: AccountType) {
-        self.tabStore = AppBarTabSettingStore.shared
+        tabStore = AppBarTabSettingStore.shared
         self.accountType = accountType
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     // 保留旧的初始化方法，但标记为deprecated
     @available(*, deprecated, message: "请使用init(accountType:)代替")
-    init(tabStore: AppBarTabSettingStore, accountType: AccountType) {
-        self.tabStore = AppBarTabSettingStore.shared // 忽略传入的tabStore，始终使用shared实例
+    init(tabStore _: AppBarTabSettingStore, accountType: AccountType) {
+        tabStore = AppBarTabSettingStore.shared // 忽略传入的tabStore，始终使用shared实例
         self.accountType = accountType
         super.init(nibName: nil, bundle: nil)
     }

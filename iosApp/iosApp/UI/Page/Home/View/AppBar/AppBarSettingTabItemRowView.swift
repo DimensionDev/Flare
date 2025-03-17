@@ -12,7 +12,7 @@ struct TabItemRow: View {
 
     // 本地状态用于防止频繁操作
     @State private var isProcessing = false
-    
+
     // 添加日志记录器
     private let logger = Logger(subsystem: "com.flare.app", category: "TabItemRow")
 
@@ -98,7 +98,7 @@ struct ListTabItemRowRow: View {
 
     @State private var isProcessing = false
     @State private var currentTitle: String
-    
+
     // 添加日志记录器
     private let logger = Logger(subsystem: "com.flare.app", category: "ListTabItemRowRow")
 
@@ -120,7 +120,7 @@ struct ListTabItemRowRow: View {
             if let listIconUrl = store.listIconUrls[listId], let url = URL(string: listIconUrl) {
                 ListIconView(imageUrl: listIconUrl ?? "", size: 50, listId: listId)
                     .frame(width: 32, height: 32).clipShape(RoundedRectangle(cornerRadius: 8))
-                    
+
 //                KFImage(url)
 //                    .placeholder {
 //                        RoundedRectangle(cornerRadius: 8)
@@ -161,8 +161,8 @@ struct ListTabItemRowRow: View {
 
                 Toggle("", isOn: Binding(
                     get: {
-                        let tabKey = isBlueskyFeed ? 
-                            "feed_\(store.accountType)_\(listId)" : 
+                        let tabKey = isBlueskyFeed ?
+                            "feed_\(store.accountType)_\(listId)" :
                             "list_\(store.accountType)_\(listId)"
                         let isEnabled = store.availableAppBarTabsItems.contains(where: { $0.key == tabKey })
                         logger.debug("Toggle GET: \(isBlueskyFeed ? "feed" : "list")=\(listId), isEnabled=\(isEnabled), defaultValue=\(defaultToggleValue)")
@@ -171,8 +171,8 @@ struct ListTabItemRowRow: View {
                     set: { _ in
                         if !isProcessing {
                             isProcessing = true
-                            let tabKey = isBlueskyFeed ? 
-                                "feed_\(store.accountType)_\(listId)" : 
+                            let tabKey = isBlueskyFeed ?
+                                "feed_\(store.accountType)_\(listId)" :
                                 "list_\(store.accountType)_\(listId)"
                             logger.debug("Toggle SET: \(isBlueskyFeed ? "feed" : "list")=\(listId), 开始切换状态")
                             store.toggleTab(tabKey)

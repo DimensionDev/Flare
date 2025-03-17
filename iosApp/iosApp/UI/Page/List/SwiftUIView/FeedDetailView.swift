@@ -18,9 +18,9 @@ struct FeedDetailView: View {
         listInfo = list
         self.accountType = accountType
         self.defaultUser = defaultUser
-        
+
         _presenter = State(initialValue: BlueskyFeedTimelinePresenter(accountType: accountType, uri: list.id))
-        
+
         gradientColors = ListFeedHeaderView.getGradientColors(for: list.id)
     }
 

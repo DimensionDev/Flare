@@ -48,16 +48,16 @@ struct AllFeedsView: View {
             }
         }
     }
-    
+
     private var notSupportedView: some View {
         VStack(spacing: 16) {
             Image(systemName: "exclamationmark.triangle")
                 .font(.largeTitle)
                 .foregroundColor(.yellow)
-            
+
             Text("Feeds are only supported in Bluesky")
                 .font(.headline)
-                
+
             Text("Your current account doesn't support feeds")
                 .font(.subheadline)
                 .foregroundColor(.gray)
@@ -65,7 +65,7 @@ struct AllFeedsView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
     }
-    
+
     @ViewBuilder
     private func feedsListView(_ state: PinnableTimelineTabPresenterState) -> some View {
         switch onEnum(of: state.tabs) {
@@ -74,7 +74,7 @@ struct AllFeedsView: View {
         case let .success(tabsData):
             // 查找Feed类型的Tab
             let feedTab = findFeedTab(in: tabsData.data)
-            if let feedTab = feedTab {
+            if let feedTab {
                 switch onEnum(of: feedTab.data) {
                 case .loading:
                     loadingFeedsView
@@ -92,7 +92,7 @@ struct AllFeedsView: View {
                                         // 获取数据并触发加载
                                         print("🟢 Feed加载: itemCount=\(feedsData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
                                         feedsData.get(index: Int32(index))
-                                        
+
                                         lastKnownItemCount = Int(feedsData.itemCount)
                                         print("🟡 Feed更新后: itemCount=\(feedsData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
                                     }
@@ -112,7 +112,7 @@ struct AllFeedsView: View {
                     VStack(spacing: 16) {
                         Text("NO FEEDS")
                             .font(.headline)
-                            
+
                         Button("Refresh") {
                             emptyState.refresh()
                         }
@@ -133,7 +133,7 @@ struct AllFeedsView: View {
                 VStack(spacing: 16) {
                     Text("NO FEEDS FOUND")
                         .font(.headline)
-                    
+
                     Text("Your account doesn't have any feeds")
                         .font(.subheadline)
                         .foregroundColor(.gray)
@@ -149,10 +149,10 @@ struct AllFeedsView: View {
             .navigationTitle("Feeds")
         }
     }
-    
+
     // 从Tabs中找到Feed类型的Tab
     private func findFeedTab(in tabs: ImmutableListWrapper<PinnableTimelineTabPresenterStateTab>) -> PinnableTimelineTabPresenterStateTab? {
-        for i in 0..<tabs.size {
+        for i in 0 ..< tabs.size {
             if let tab = tabs.get(index: Int32(i)) as? PinnableTimelineTabPresenterStateTab {
                 if tab is PinnableTimelineTabPresenterStateTabFeed {
                     return tab
@@ -161,7 +161,7 @@ struct AllFeedsView: View {
         }
         return nil
     }
-    
+
     // 加载状态视图
     private var loadingFeedsView: some View {
         VStack {
@@ -180,13 +180,13 @@ private struct EnhancedFeedRowView: View {
     @EnvironmentObject private var router: Router
     @State private var navigateToDetail = false
     let accountType: AccountType
-    
+
     init(list: UiList, accountType: AccountType, isPinned: Bool) {
         self.list = list
         self.accountType = accountType
         _isPinned = State(initialValue: isPinned)
     }
-    
+
     var body: some View {
         ZStack {
             ListItemRowView(
@@ -203,7 +203,7 @@ private struct EnhancedFeedRowView: View {
                     sendPinStatusToAppBarNotification()
                 }
             )
-            
+
             // 隐藏的导航链接 - 使用FeedDetailView而不是ListDetailView
             NavigationLink(
                 destination: FeedDetailView(
@@ -219,18 +219,18 @@ private struct EnhancedFeedRowView: View {
             .frame(width: 0, height: 0)
         }
     }
-    
+
     private func sendPinStatusToAppBarNotification() {
         var listInfo: [String: Any] = [
             "listId": list.id,
             "listTitle": list.title,
             "isPinned": isPinned,
-            "itemType": "feed"
+            "itemType": "feed",
         ]
         if let listIconUrl = list.avatar {
             listInfo["listIconUrl"] = listIconUrl
         }
-        
+
         NotificationCenter.default.post(
             name: .listPinStatusChanged,
             object: nil,

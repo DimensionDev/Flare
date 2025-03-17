@@ -12,7 +12,7 @@ struct EditAppBarSettingListTitleView: View {
     var onCancel: () -> Void
 
     init(title: Binding<String>, listId: String, iconUrl: String?, onSave: @escaping (String) -> Void, onCancel: @escaping () -> Void, isBlueskyFeed: Bool = false) {
-        self._title = title
+        _title = title
         self.listId = listId
         self.iconUrl = iconUrl
         self.onSave = onSave

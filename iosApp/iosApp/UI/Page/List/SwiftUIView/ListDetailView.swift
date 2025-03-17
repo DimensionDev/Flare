@@ -19,7 +19,7 @@ struct ListDetailView: View {
         self.accountType = accountType
         self.defaultUser = defaultUser
         _presenter = State(initialValue: ListTimelinePresenter(accountType: accountType, listId: list.id))
- 
+
         gradientColors = ListFeedHeaderView.getGradientColors(for: list.id)
     }
 

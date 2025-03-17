@@ -35,7 +35,7 @@ struct AllListsView: View {
             }
         }
         _isMastodonUser = State(initialValue: isMastodon)
-        _tabSettingStore = StateObject(wrappedValue: AppBarTabSettingStore(accountType: accountType))
+        _tabSettingStore = StateObject(wrappedValue: AppBarTabSettingStore.shared)
     }
 
     var body: some View {
@@ -161,6 +161,7 @@ private struct EnhancedListRowView: View {
             "listId": list.id,
             "listTitle": list.title,
             "isPinned": isPinned,
+             "itemType": "list"
         ]
         if let listIconUrl = list.avatar {
             listInfo["listIconUrl"] = listIconUrl

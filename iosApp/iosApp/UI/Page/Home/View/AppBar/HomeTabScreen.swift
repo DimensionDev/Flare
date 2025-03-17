@@ -3,8 +3,7 @@ import SwiftUI
 
 struct HomeTabScreen: View {
     let accountType: AccountType
-//    @StateObject private var timelineStore: AppBarTabSettingStore
-    @StateObject private var tabStore: AppBarTabSettingStore
+    @ObservedObject private var tabStore = AppBarTabSettingStore.shared
     @State private var isShowAppBar: Bool? = true
     @State private var showSettings = false
     @State private var showTabSettings = false
@@ -13,33 +12,15 @@ struct HomeTabScreen: View {
 
     init(accountType: AccountType) {
         self.accountType = accountType
-
-        // 2. 初始化 TabSettingsStore timelineStore: timelineStore,
-        let tabStore = AppBarTabSettingStore(accountType: accountType)
-        _tabStore = StateObject(wrappedValue: tabStore)
-
-        // 3. 游客模式特殊处理
-        if accountType is AccountTypeGuest {
-            // 设置默认的 Home Timeline
-            tabStore.currentPresenter = HomeTimelinePresenter(accountType: accountType)
-
-            // 只使用 Home 标签
-            let homeTab = FLHomeTimelineTabItem(
-                metaData: FLTabMetaData(
-                    title: .localized(.home),
-                    icon: .material(.home)
-                ), account: accountType
-            )
-            tabStore.availableAppBarTabsItems = [homeTab]
-            tabStore.updateSelectedTab(homeTab)
-        }
+        
+        // 不再需要创建新的AppBarTabSettingStore实例
+        // 游客模式的处理已经在AppBarTabSettingStore.shared中完成
     }
 
     var body: some View {
         // 游客模式或者用户数据已加载时显示内容
         if accountType is AccountTypeGuest || tabStore.currentUser != nil {
             HomeNewViewControllerRepresentable(
-                tabStore: tabStore,
                 accountType: accountType,
                 selectedTab: $selectedTab,
                 isShowAppBar: $isShowAppBar
@@ -74,7 +55,7 @@ struct HomeTabScreen: View {
                 SettingsScreen()
             }
             .sheet(isPresented: $showTabSettings) {
-                HomeAppBarSettingsView(store: tabStore)
+                HomeAppBarSettingsView()
             }
             .sheet(isPresented: $showLogin) {
                 ServiceSelectScreen(toHome: {
@@ -91,14 +72,12 @@ struct HomeTabScreen: View {
 
 // - HomeNewViewControllerRepresentable
 struct HomeNewViewControllerRepresentable: UIViewControllerRepresentable {
-    let tabStore: AppBarTabSettingStore
     let accountType: AccountType
     @Binding var selectedTab: Int
     @Binding var isShowAppBar: Bool?
 
     func makeUIViewController(context _: Context) -> HomeTabController {
         let controller = HomeTabController(
-            tabStore: tabStore,
             accountType: accountType
         )
         return controller
@@ -108,6 +87,8 @@ struct HomeNewViewControllerRepresentable: UIViewControllerRepresentable {
         // 更新选中的标签页
         uiViewController.updateSelectedTab(selectedTab)
         // 更新 AppBar 的可见性
-        uiViewController.updateAppBarVisibility(isShowAppBar)
+        if let isShowAppBar = isShowAppBar {
+            uiViewController.updateAppBarVisibility(isShowAppBar)
+        }
     }
 }

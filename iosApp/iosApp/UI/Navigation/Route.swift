@@ -19,9 +19,7 @@ struct RouterView: View {
     @StateObject private var gestureState: FLNewGestureState
 
     init() {
-        let accountType = AccountTypeGuest()
-//        let timelineStore = AppBarTabSettingStore(accountType: accountType)
-        let tabStore = AppBarTabSettingStore(accountType: accountType)
+        let tabStore = AppBarTabSettingStore.shared
         _menuState = StateObject(wrappedValue: FLNewAppState(tabProvider: tabStore))
         _gestureState = StateObject(wrappedValue: FLNewGestureState(tabProvider: tabStore))
     }

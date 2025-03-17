@@ -10,7 +10,13 @@ struct FlareApp: SwiftUI.App {
     #endif
     init() {
         KoinHelper.shared.start(inAppNotification: SwitUIInAppNotification())
+        
+        // 初始化UserManager
         UserManager.shared.initialize()
+        
+        // 初始化AppBarTabSettingStore（使用游客模式）
+        // UserManager初始化完成后会自动更新为正确的账号
+        AppBarTabSettingStore.shared.initialize(with: AccountTypeGuest(), user: nil)
     }
 
     var body: some Scene {

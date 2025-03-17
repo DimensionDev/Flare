@@ -1,3 +1,5 @@
+import Generated
+import Kingfisher
 import shared
 import SwiftUI
 
@@ -38,22 +40,18 @@ struct ListIconView: View {
 
     var body: some View {
         if !imageUrl.isEmpty, let url = URL(string: imageUrl) {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .empty:
+            KFImage(url)
+                .placeholder {
                     ProgressView()
                         .frame(width: size, height: size)
-                case let .success(image):
-                    image.resizable()
-                        .aspectRatio(contentMode: .fill)
-                case .failure:
-                    defaultIconView
-                @unknown default:
-                    EmptyView()
                 }
-            }
-            .frame(width: size, height: size)
-            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
+                .onFailure { _ in
+                    // 加载失败时什么也不做，会显示默认图像
+                }
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: size, height: size)
+                .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
         } else {
             defaultIconView
         }

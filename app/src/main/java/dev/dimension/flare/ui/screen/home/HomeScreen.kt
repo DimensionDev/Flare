@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.screen.home
 
-import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -48,7 +47,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -99,6 +97,7 @@ import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.common.ProxyUriHandler
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.InAppNotificationComponent
@@ -675,19 +674,6 @@ internal fun Router(
                 start = direction,
                 dependenciesContainerBuilder = dependenciesContainerBuilder,
             )
-        }
-    }
-}
-
-private class ProxyUriHandler(
-    private val navController: NavController,
-    private val actualUriHandler: UriHandler,
-) : UriHandler {
-    override fun openUri(uri: String) {
-        if (uri.startsWith("flare://")) {
-            navController.navigate(Uri.parse(uri))
-        } else {
-            actualUriHandler.openUri(uri)
         }
     }
 }

@@ -63,7 +63,6 @@ internal actual fun PlatformVideoPlayer(
         }
     val state by player.playbackState.collectAsState()
     LaunchedEffect(state) {
-        println("State: $state for $uri")
         if (state in listOf(PlaybackState.READY, PlaybackState.PAUSED) && autoPlay) {
             player.features[AudioLevelController.Key]?.setMute(muted)
             player.resume()
@@ -143,7 +142,7 @@ internal actual fun PlatformVideoPlayer(
 }
 
 @Composable
-public fun Modifier.resizeWithContentScale(
+private fun Modifier.resizeWithContentScale(
     contentScale: ContentScale,
     sourceSizeDp: Size?,
     density: Density = LocalDensity.current,

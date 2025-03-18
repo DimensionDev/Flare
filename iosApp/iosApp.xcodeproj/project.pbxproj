@@ -21,6 +21,7 @@
 		06B8514F2B6B22A500DFA075 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 06B8514E2B6B22A500DFA075 /* GoogleService-Info.plist */; };
 		06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B851502B6B22DD00DFA075 /* AppDelegate.swift */; };
 		06B851552B6B926D00DFA075 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 06B851542B6B926D00DFA075 /* Localizable.xcstrings */; };
+		642E46162D89764400C9CC9D /* Swiftful00C9CC9D /* SwiftfulRoRouting in Frameworks */ = {isa = PBXBuildFile; productRef = 642E46152D89764400C9CC9D /* SwiftfulRouting */; };
 		644C84F82D535D0B00E92D0D /* JXPagingView in Frameworks */ = {isa = PBXBuildFile; productRef = 644C84F72D535D0B00E92D0D /* JXPagingView */; };
 		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
 		6488800B2D1AD43E00EFE72C /* JXSegmentedView in Frameworks */ = {isa = PBXBuildFile; productRef = 6488800A2D1AD43E00EFE72C /* JXSegmentedView */; };
@@ -96,6 +97,7 @@
 				64E877C92D0842AA003559B9 /* SwiftSoup in Frameworks */,
 				64E208772CF84612001C64EF /* JXPhotoBrowser in Frameworks */,
 				066AD0472B3ACDC1006F28F4 /* DequeModule in Frameworks */,
+				642E46162D89764400C9CC9D /* SwiftfulRouting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -244,6 +246,7 @@
 				64BFB16C2D549F50002793C0 /* SideMenu */,
 				64EA48E22D6344A900D0F609 /* Hero */,
 				6489B3302D68D50800D8AEBB /* SVGView */,
+				642E46152D89764400C9CC9D /* SwiftfulRouting */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
@@ -295,6 +298,7 @@
 				64BFB16B2D549F50002793C0 /* XCRemoteSwiftPackageReference "SideMenu" */,
 				64EA48E12D6344A900D0F609 /* XCRemoteSwiftPackageReference "Hero" */,
 				6489B32F2D68D50800D8AEBB /* XCRemoteSwiftPackageReference "SVGView" */,
+				642E46142D89764400C9CC9D /* XCRemoteSwiftPackageReference "SwiftfulRouting" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -692,6 +696,14 @@
 				minimumVersion = 10.20.0;
 			};
 		};
+		642E46142D89764400C9CC9D /* XCRemoteSwiftPackageReference "SwiftfulRouting" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SwiftfulThinking/SwiftfulRouting.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.3.6;
+			};
+		};
 		644C84F62D535D0B00E92D0D /* XCRemoteSwiftPackageReference "JXPagingView" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pujiaxin33/JXPagingView";
@@ -833,6 +845,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 06B851492B6B228600DFA075 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
+		};
+		642E46152D89764400C9CC9D /* SwiftfulRouting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 642E46142D89764400C9CC9D /* XCRemoteSwiftPackageReference "SwiftfulRouting" */;
+			productName = SwiftfulRouting;
 		};
 		644C84F72D535D0B00E92D0D /* JXPagingView */ = {
 			isa = XCSwiftPackageProductDependency;

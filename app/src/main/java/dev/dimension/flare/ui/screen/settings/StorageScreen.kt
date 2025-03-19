@@ -20,8 +20,15 @@ import androidx.compose.ui.res.stringResource
 import coil3.imageLoader
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
+import com.ramcosta.composedestinations.generated.destinations.AppLoggingRouteDestination
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Database
+import compose.icons.fontawesomeicons.solid.Envelope
+import compose.icons.fontawesomeicons.solid.Images
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.ThemeWrapper
@@ -37,12 +44,18 @@ import moe.tlaster.precompose.molecule.producePresenter
 internal fun StorageRoute(navigator: ProxyDestinationsNavigator) {
     StorageScreen(
         onBack = navigator::navigateUp,
+        toAppLog = {
+            navigator.navigate(AppLoggingRouteDestination)
+        },
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun StorageScreen(onBack: () -> Unit) {
+private fun StorageScreen(
+    onBack: () -> Unit,
+    toAppLog: () -> Unit,
+) {
     val context = LocalContext.current
     val state by producePresenter {
         storagePresenter(context = context)
@@ -82,6 +95,12 @@ private fun StorageScreen(onBack: () -> Unit) {
                     Modifier.clickable {
                         state.clearImageCache()
                     },
+                leadingContent = {
+                    FAIcon(
+                        FontAwesomeIcons.Solid.Images,
+                        contentDescription = null,
+                    )
+                },
             )
             ListItem(
                 headlineContent = {
@@ -101,6 +120,33 @@ private fun StorageScreen(onBack: () -> Unit) {
                     Modifier.clickable {
                         state.clearCacheDatabase()
                     },
+                leadingContent = {
+                    FAIcon(
+                        FontAwesomeIcons.Solid.Database,
+                        contentDescription = null,
+                    )
+                },
+            )
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(id = R.string.settings_storage_app_log))
+                },
+                supportingContent = {
+                    Text(
+                        text =
+                            stringResource(id = R.string.settings_storage_app_log_description),
+                    )
+                },
+                modifier =
+                    Modifier.clickable {
+                        toAppLog.invoke()
+                    },
+                leadingContent = {
+                    FAIcon(
+                        FontAwesomeIcons.Solid.Envelope,
+                        contentDescription = null,
+                    )
+                },
             )
         }
     }

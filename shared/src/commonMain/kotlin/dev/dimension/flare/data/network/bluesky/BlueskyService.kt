@@ -3,6 +3,7 @@ package dev.dimension.flare.data.network.bluesky
 import com.atproto.server.RefreshSessionResponse
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.network.ktorClient
+import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.client.HttpClient
 import io.ktor.client.call.HttpClientCall
@@ -123,7 +124,7 @@ internal class XrpcAuthPlugin(
                 result = result.save()
 
                 val response =
-                    runCatching<AtpErrorDescription> {
+                    tryRun<AtpErrorDescription> {
                         plugin.json.decodeFromString(result.response.bodyAsText())
                     }
 

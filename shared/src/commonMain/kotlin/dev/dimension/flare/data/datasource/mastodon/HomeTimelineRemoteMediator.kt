@@ -3,7 +3,7 @@ package dev.dimension.flare.data.datasource.mastodon
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Mastodon
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -16,56 +16,52 @@ internal class HomeTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     override suspend fun initialize(): InitializeAction = InitializeAction.SKIP_INITIAL_REFRESH
 
-    override suspend fun load(
+    override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        return try {
-            val response =
-                when (loadType) {
-                    LoadType.REFRESH -> {
-                        service
-                            .homeTimeline(
-                                limit = state.config.pageSize,
-                            ).also {
-                                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                            }
-                    }
-                    LoadType.PREPEND -> {
-                        val firstItem = state.firstItemOrNull()
-                        service.homeTimeline(
+        val response =
+            when (loadType) {
+                LoadType.REFRESH -> {
+                    service
+                        .homeTimeline(
                             limit = state.config.pageSize,
-                            min_id = firstItem?.timeline?.statusKey?.id,
-                        )
-                    }
-
-                    LoadType.APPEND -> {
-                        val lastItem =
-                            database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                                ?: return MediatorResult.Success(
-                                    endOfPaginationReached = true,
-                                )
-                        service.homeTimeline(
-                            limit = state.config.pageSize,
-                            max_id = lastItem.timeline.statusKey.id,
-                        )
-                    }
+                        ).also {
+                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+                        }
                 }
-            Mastodon.save(
-                database = database,
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                data = response,
-            )
+                LoadType.PREPEND -> {
+                    val firstItem = state.firstItemOrNull()
+                    service.homeTimeline(
+                        limit = state.config.pageSize,
+                        min_id = firstItem?.timeline?.statusKey?.id,
+                    )
+                }
 
-            MediatorResult.Success(
-                endOfPaginationReached = response.isEmpty(),
-            )
-        } catch (e: Throwable) {
-            MediatorResult.Error(e)
-        }
+                LoadType.APPEND -> {
+                    val lastItem =
+                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
+                            ?: return MediatorResult.Success(
+                                endOfPaginationReached = true,
+                            )
+                    service.homeTimeline(
+                        limit = state.config.pageSize,
+                        max_id = lastItem.timeline.statusKey.id,
+                    )
+                }
+            }
+        Mastodon.save(
+            database = database,
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            data = response,
+        )
+
+        return MediatorResult.Success(
+            endOfPaginationReached = response.isEmpty(),
+        )
     }
 }

@@ -3,7 +3,7 @@ package dev.dimension.flare.data.datasource.vvo
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -20,62 +20,58 @@ internal class HomeTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val inAppNotification: InAppNotification,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     override suspend fun initialize(): InitializeAction = InitializeAction.SKIP_INITIAL_REFRESH
 
-    override suspend fun load(
+    override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        return try {
-            val config = service.config()
-            if (config.data?.login != true) {
-                inAppNotification.onError(
-                    Message.LoginExpired,
-                    LoginExpiredException,
-                )
-                return MediatorResult.Error(
-                    LoginExpiredException,
-                )
-            }
-            val response =
-                when (loadType) {
-                    LoadType.REFRESH -> {
-                        service.getFriendsTimeline().also {
-                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                        }
-                    }
-
-                    LoadType.PREPEND -> {
-                        return MediatorResult.Success(
-                            endOfPaginationReached = true,
-                        )
-                    }
-
-                    LoadType.APPEND -> {
-                        val lastItem =
-                            database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                                ?: return MediatorResult.Success(
-                                    endOfPaginationReached = true,
-                                )
-                        service.getFriendsTimeline(
-                            maxId = lastItem.timeline.statusKey.id,
-                        )
+        val config = service.config()
+        if (config.data?.login != true) {
+            inAppNotification.onError(
+                Message.LoginExpired,
+                LoginExpiredException,
+            )
+            return MediatorResult.Error(
+                LoginExpiredException,
+            )
+        }
+        val response =
+            when (loadType) {
+                LoadType.REFRESH -> {
+                    service.getFriendsTimeline().also {
+                        database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
                     }
                 }
 
-            VVO.saveStatus(
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                database = database,
-                statuses = response.data?.statuses.orEmpty(),
-            )
+                LoadType.PREPEND -> {
+                    return MediatorResult.Success(
+                        endOfPaginationReached = true,
+                    )
+                }
 
-            MediatorResult.Success(
-                endOfPaginationReached = response.data?.nextCursorStr == null,
-            )
-        } catch (e: Throwable) {
-            MediatorResult.Error(e)
-        }
+                LoadType.APPEND -> {
+                    val lastItem =
+                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
+                            ?: return MediatorResult.Success(
+                                endOfPaginationReached = true,
+                            )
+                    service.getFriendsTimeline(
+                        maxId = lastItem.timeline.statusKey.id,
+                    )
+                }
+            }
+
+        VVO.saveStatus(
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            database = database,
+            statuses = response.data?.statuses.orEmpty(),
+        )
+
+        return MediatorResult.Success(
+            endOfPaginationReached = response.data?.nextCursorStr == null,
+        )
     }
 }

@@ -3,7 +3,7 @@ package dev.dimension.flare.data.datasource.mastodon
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Mastodon
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -16,52 +16,48 @@ internal class BookmarkTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
-    override suspend fun load(
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+    override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        return try {
-            val response =
-                when (loadType) {
-                    LoadType.REFRESH -> {
-                        service
-                            .bookmarks(
-                                limit = state.config.pageSize,
-                            ).also {
-                                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                            }
-                    }
-                    LoadType.PREPEND -> {
-                        return MediatorResult.Success(
-                            endOfPaginationReached = true,
-                        )
-                    }
-
-                    LoadType.APPEND -> {
-                        val lastItem =
-                            database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                                ?: return MediatorResult.Success(
-                                    endOfPaginationReached = true,
-                                )
-                        service.bookmarks(
+        val response =
+            when (loadType) {
+                LoadType.REFRESH -> {
+                    service
+                        .bookmarks(
                             limit = state.config.pageSize,
-                            max_id = lastItem.timeline.statusKey.id,
-                        )
-                    }
+                        ).also {
+                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+                        }
                 }
-            Mastodon.save(
-                database = database,
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                data = response,
-            )
+                LoadType.PREPEND -> {
+                    return MediatorResult.Success(
+                        endOfPaginationReached = true,
+                    )
+                }
 
-            MediatorResult.Success(
-                endOfPaginationReached = response.isEmpty(),
-            )
-        } catch (e: Throwable) {
-            MediatorResult.Error(e)
-        }
+                LoadType.APPEND -> {
+                    val lastItem =
+                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
+                            ?: return MediatorResult.Success(
+                                endOfPaginationReached = true,
+                            )
+                    service.bookmarks(
+                        limit = state.config.pageSize,
+                        max_id = lastItem.timeline.statusKey.id,
+                    )
+                }
+            }
+        Mastodon.save(
+            database = database,
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            data = response,
+        )
+
+        return MediatorResult.Success(
+            endOfPaginationReached = response.isEmpty(),
+        )
     }
 }

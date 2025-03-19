@@ -29,6 +29,7 @@ import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -495,7 +496,7 @@ internal class VVODataSource(
                 following = true,
             )
         }
-        runCatching {
+        tryRun {
             val config = service.config()
             val st = config.data?.st
             requireNotNull(st) { "st is null" }
@@ -523,7 +524,7 @@ internal class VVODataSource(
                 following = false,
             )
         }
-        runCatching {
+        tryRun {
             val config = service.config()
             val st = config.data?.st
             requireNotNull(st) { "st is null" }
@@ -647,7 +648,7 @@ internal class VVODataSource(
                 },
             )
 
-            runCatching {
+            tryRun {
                 val st = service.config().data?.st
                 requireNotNull(st) { "st is null" }
                 if (liked) {
@@ -705,7 +706,7 @@ internal class VVODataSource(
                 },
             )
 
-            runCatching {
+            tryRun {
                 val st = service.config().data?.st
                 requireNotNull(st) { "st is null" }
                 if (liked) {

@@ -4,9 +4,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.AppearanceSettings
+import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.ui.component.ComponentAppearance
+import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.screen.home.HomeScreen
 import org.koin.compose.koinInject
 
@@ -42,6 +47,30 @@ fun FlareApp(content: @Composable () -> Unit) {
     )
     CompositionLocalProvider(
         LocalAppearanceSettings provides appearanceSettings,
+        LocalComponentAppearance provides
+            remember(appearanceSettings) {
+                ComponentAppearance(
+                    dynamicTheme = appearanceSettings.dynamicTheme,
+                    avatarShape =
+                        when (appearanceSettings.avatarShape) {
+                            AvatarShape.CIRCLE -> ComponentAppearance.AvatarShape.CIRCLE
+                            AvatarShape.SQUARE -> ComponentAppearance.AvatarShape.SQUARE
+                        },
+                    showActions = appearanceSettings.showActions,
+                    showNumbers = appearanceSettings.showNumbers,
+                    showLinkPreview = appearanceSettings.showLinkPreview,
+                    showMedia = appearanceSettings.showMedia,
+                    showSensitiveContent = appearanceSettings.showSensitiveContent,
+                    videoAutoplay =
+                        when (appearanceSettings.videoAutoplay) {
+                            VideoAutoplay.ALWAYS -> ComponentAppearance.VideoAutoplay.ALWAYS
+                            VideoAutoplay.WIFI -> ComponentAppearance.VideoAutoplay.WIFI
+                            VideoAutoplay.NEVER -> ComponentAppearance.VideoAutoplay.NEVER
+                        },
+                    expandMediaSize = appearanceSettings.expandMediaSize,
+                    compatLinkPreview = appearanceSettings.compatLinkPreview,
+                )
+            },
         content = content,
     )
 }

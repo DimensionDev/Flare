@@ -28,6 +28,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.model.resId
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.OutlinedTextField2

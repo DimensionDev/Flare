@@ -139,6 +139,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(projects.shared)
     implementation(projects.shared.ui)
+    implementation(projects.shared.ui.component)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)
     implementation(libs.colorpicker.compose)

@@ -16,6 +16,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,10 +31,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -56,6 +60,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import androidx.navigation.NavBackStackEntry
 import coil3.annotation.ExperimentalCoilApi
 import coil3.imageLoader
@@ -75,15 +82,19 @@ import com.ramcosta.composedestinations.spec.DestinationStyle
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FloppyDisk
+import compose.icons.fontawesomeicons.solid.Pause
+import compose.icons.fontawesomeicons.solid.Play
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
-import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.component.DialogWrapper
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.VideoPlayerPool
 import dev.dimension.flare.ui.component.status.QuotedStatus
+import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
@@ -94,10 +105,12 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.theme.FlareTheme
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.saket.telephoto.zoomable.ZoomSpec
@@ -110,6 +123,7 @@ import moe.tlaster.swiper.rememberSwiperState
 import org.koin.compose.koinInject
 import soup.compose.material.motion.animation.materialFadeThroughIn
 import soup.compose.material.motion.animation.materialFadeThroughOut
+import kotlin.time.Duration.Companion.milliseconds
 
 internal object StatusMediaTransitions : DestinationStyle.Animated() {
     override val enterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)?
@@ -141,6 +155,7 @@ internal object StatusMediaTransitions : DestinationStyle.Animated() {
             uriPattern = AppDeepLink.StatusMedia.ROUTE,
         ),
     ],
+    wrappers = [DialogWrapper::class],
 //    style = StatusMediaTransitions::class,
 )
 internal fun StatusMediaDeeplinkRoute(
@@ -170,6 +185,7 @@ internal fun StatusMediaDeeplinkRoute(
             uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
         ),
     ],
+    wrappers = [DialogWrapper::class],
 //    style = StatusMediaTransitions::class,
 )
 internal fun StatusMediaRoute(
@@ -247,6 +263,17 @@ private fun StatusMediaScreen(
     BackHandler(state.showUi) {
         state.setShowUi(false)
     }
+    val pagerState =
+        rememberPagerState(
+            initialPage = index,
+            pageCount = {
+                when (val medias = state.medias) {
+                    is UiState.Error -> 1
+                    is UiState.Loading -> 1
+                    is UiState.Success -> medias.data.size
+                }
+            },
+        )
     FlareTheme(darkTheme = true) {
         val swiperState =
             rememberSwiperState(
@@ -264,23 +291,11 @@ private fun StatusMediaScreen(
                     Modifier
                         .fillMaxSize(),
             ) {
-                val pagerState =
-                    rememberPagerState(
-                        initialPage = index,
-                        pageCount = {
-                            when (val medias = state.medias) {
-                                is UiState.Error -> 1
-                                is UiState.Loading -> 1
-                                is UiState.Success -> medias.data.size
-                            }
-                        },
-                    )
                 state.medias.onSuccess { media ->
                     var lastPage by remember {
                         mutableIntStateOf(pagerState.currentPage)
                     }
                     LaunchedEffect(pagerState.currentPage) {
-                        state.setWithVideoPadding(media[pagerState.currentPage] is UiMedia.Video)
                         state.setCurrentPage(pagerState.currentPage)
                         if (lastPage != pagerState.currentPage) {
                             val player = playerPool.peek(media[pagerState.currentPage].url)
@@ -364,7 +379,7 @@ private fun StatusMediaScreen(
                                             onClick = {
                                                 state.setShowUi(!state.showUi)
                                             },
-                                            //                                                aspectRatio = media.aspectRatio,
+                                            aspectRatio = media.aspectRatio,
                                             onLongClick = {
                                                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                                 state.setShowMenu(true)
@@ -407,7 +422,7 @@ private fun StatusMediaScreen(
                                             onClick = {
                                                 state.setShowUi(!state.showUi)
                                             },
-                                            //                                                aspectRatio = media.aspectRatio,
+                                            aspectRatio = media.aspectRatio,
                                             showControls = true,
                                             keepScreenOn = true,
                                             muted = false,
@@ -494,21 +509,33 @@ private fun StatusMediaScreen(
                     ) {
                         Card(
                             modifier =
-                                Modifier
-                                    .padding(
-                                        bottom = if (state.withVideoPadding) 72.dp else 0.dp,
-                                    ).systemBarsPadding(),
+                                Modifier.systemBarsPadding(),
                             colors =
                                 CardDefaults.cardColors(
                                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
                                 ),
                         ) {
-                            CompositionLocalProvider(
-                                LocalAppearanceSettings provides LocalAppearanceSettings.current.copy(showMedia = false),
-                            ) {
-                                QuotedStatus(
-                                    data = content,
-                                )
+                            Column {
+                                state.medias.onSuccess { medias ->
+                                    if (medias[pagerState.currentPage] is UiMedia.Video) {
+                                        val player = playerPool.peek(medias[pagerState.currentPage].url)
+                                        if (player != null) {
+                                            PlayerControl(
+                                                player,
+                                                modifier =
+                                                    Modifier
+                                                        .padding(end = screenHorizontalPadding),
+                                            )
+                                        }
+                                    }
+                                }
+                                CompositionLocalProvider(
+                                    LocalComponentAppearance provides LocalComponentAppearance.current.copy(showMedia = false),
+                                ) {
+                                    QuotedStatus(
+                                        data = content,
+                                    )
+                                }
                             }
                         }
                     }
@@ -566,6 +593,78 @@ private fun StatusMediaScreen(
                 }
             }
         }
+    }
+}
+
+@androidx.annotation.OptIn(UnstableApi::class)
+@ExperimentalMaterial3Api
+@Composable
+private fun PlayerControl(
+    player: ExoPlayer,
+    modifier: Modifier = Modifier,
+) {
+    val playPauseButtonState = rememberPlayPauseButtonState(player)
+    var time by remember { mutableStateOf("") }
+    var isSliderChanging by remember {
+        mutableStateOf(false)
+    }
+    var sliderValue by remember {
+        mutableStateOf(0f)
+    }
+    if (!playPauseButtonState.showPlay && !isSliderChanging) {
+        LaunchedEffect(Unit) {
+            while (true) {
+                sliderValue = player.currentPosition.toFloat() / player.duration.toFloat()
+                time =
+                    buildString {
+                        append(player.currentPosition.milliseconds.humanize())
+                        append(" / ")
+                        append(player.duration.milliseconds.humanize())
+                    }
+                awaitFrame()
+            }
+        }
+    }
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        IconButton(
+            onClick = {
+                playPauseButtonState.onClick()
+            },
+            enabled = playPauseButtonState.isEnabled,
+        ) {
+            Icon(
+                if (playPauseButtonState.showPlay) {
+                    FontAwesomeIcons.Solid.Play
+                } else {
+                    FontAwesomeIcons.Solid.Pause
+                },
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+            )
+        }
+        Slider(
+            value = sliderValue,
+            onValueChange = {
+                isSliderChanging = true
+                sliderValue = it
+                time =
+                    buildString {
+                        append((player.duration * it).toLong().milliseconds.humanize())
+                        append(" / ")
+                        append(player.duration.milliseconds.humanize())
+                    }
+            },
+            onValueChangeFinished = {
+                player.seekTo((player.duration * sliderValue).toLong())
+                isSliderChanging = false
+            },
+            modifier = Modifier.weight(1f),
+        )
+        Text(time)
     }
 }
 
@@ -656,9 +755,6 @@ private fun statusMediaPresenter(
     var showUi by remember {
         mutableStateOf(false)
     }
-    var withVideoPadding by remember {
-        mutableStateOf(false)
-    }
     var showMenu by remember {
         mutableStateOf(false)
     }
@@ -680,7 +776,6 @@ private fun statusMediaPresenter(
         val status = state.status
         val medias = medias
         val showUi = showUi
-        val withVideoPadding = withVideoPadding
         val showMenu = showMenu
         val currentPage = currentPage
         val lockPager = lockPager
@@ -689,10 +784,6 @@ private fun statusMediaPresenter(
             if (!lockPager) {
                 showUi = value
             }
-        }
-
-        fun setWithVideoPadding(value: Boolean) {
-            withVideoPadding = value
         }
 
         fun setShowMenu(value: Boolean) {

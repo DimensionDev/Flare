@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="settings_about_description">Lopullinen seuraavan sukupolven avoimen lähdekoodin tekoälyn voimanlähteenä hajautettu sosiaalinen verkostoasiakas.</string>
+  <string name="settings_about_source_code">Lähdekoodi</string>
+  <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">Liity meidän Telegram ryhmään</string>
+  <string name="settings_about_line_description">Liity Riviryhmäämme</string>
+  <string name="settings_about_localization">Crowdiini</string>
+  <string name="settings_about_localization_description">Auta meitä kääntämään Flare</string>
+</resources>

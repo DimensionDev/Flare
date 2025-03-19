@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="settings_about_description">O melhor cliente descentralizado de rede social de código-fonte aberto da próxima geração.</string>
+  <string name="settings_about_source_code">Código fonte</string>
+  <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">Junte-se ao nosso grupo do Telegram</string>
+  <string name="settings_about_line_description">Junte-se ao nosso grupo de linhas</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">Ajude-nos a traduzir o Sinalizador</string>
+</resources>

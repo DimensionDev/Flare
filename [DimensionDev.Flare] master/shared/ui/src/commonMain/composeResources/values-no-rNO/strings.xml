@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="settings_about_description">Den ultimate neste generasjonen med åpen AI drevet desentralisert sosial nettverksklient.</string>
+  <string name="settings_about_source_code">Kildekode</string>
+  <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">Bli med i vår Telegram gruppe</string>
+  <string name="settings_about_line_description">Bli med i vår linjegruppe</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">Hjelp oss å oversette Flare</string>
+</resources>

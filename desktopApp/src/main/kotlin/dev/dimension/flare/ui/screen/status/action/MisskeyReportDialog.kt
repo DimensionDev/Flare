@@ -1,11 +1,19 @@
 package dev.dimension.flare.ui.screen.status.action
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.konyaco.fluent.component.ContentDialog
 import com.konyaco.fluent.component.ContentDialogButton
 import com.konyaco.fluent.component.Text
+import com.konyaco.fluent.component.TextField
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
 import dev.dimension.flare.model.AccountType
@@ -32,19 +40,31 @@ internal fun MisskeyReportDialog(
             accountType,
         )
     }
+    var comment by remember { mutableStateOf("") }
 
     ContentDialog(
         title = stringResource(Res.string.report_title),
         visible = true,
         content = {
-            Text(text = stringResource(Res.string.report_description))
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(text = stringResource(Res.string.report_description))
+                TextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = comment,
+                    onValueChange = {
+                        comment = it
+                    },
+                )
+            }
         },
         primaryButtonText = stringResource(Res.string.ok),
         closeButtonText = stringResource(Res.string.cancel),
         onButtonClick = {
             when (it) {
                 ContentDialogButton.Primary -> {
-                    state.report()
+                    state.report(comment)
                     onBack()
                 }
                 ContentDialogButton.Secondary -> Unit

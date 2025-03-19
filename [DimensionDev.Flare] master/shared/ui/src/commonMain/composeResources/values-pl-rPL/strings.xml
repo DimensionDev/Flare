@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="settings_about_description">Najnowszy klient nowej generacji oparty na zdecentralizowanej sieci społecznościowej.</string>
+  <string name="settings_about_source_code">Kod źródłowy</string>
+  <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">Dołącz do naszej grupy Telegram</string>
+  <string name="settings_about_line_description">Dołącz do naszej grupy linii</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">Pomóż nam przetłumaczyć Flare</string>
+</resources>

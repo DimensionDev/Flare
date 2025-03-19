@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="settings_about_description">Το απόλυτο αποκεντρωμένο κοινωνικό δίκτυο που τροφοδοτείται από την επόμενη γενιά ανοικτού κώδικα.</string>
+  <string name="settings_about_source_code">Πηγαίος κώδικας</string>
+  <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">Γίνετε μέλος της ομάδας Telegram</string>
+  <string name="settings_about_line_description">Συμμετοχή στην ομάδα γραμμών μας</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">Βοηθήστε μας να μεταφράσουμε το Flare</string>
+</resources>

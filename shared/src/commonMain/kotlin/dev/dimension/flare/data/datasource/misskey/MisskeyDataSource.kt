@@ -558,9 +558,10 @@ internal class MisskeyDataSource(
     suspend fun report(
         userKey: MicroBlogKey,
         statusKey: MicroBlogKey?,
+        comment: String,
     ) {
         runCatching {
-            val comment =
+            val status =
                 statusKey
                     ?.let {
                         service
@@ -568,14 +569,25 @@ internal class MisskeyDataSource(
                                 IPinRequest(
                                     noteId = it.id,
                                 ),
-                            )?.url
-                    }?.let {
-                        "Note: $it"
+                            )
                     }
+
+            val actualComment =
+                buildString {
+                    if (status != null) {
+                        if (status.uri != null) {
+                            appendLine("Note: ${status.uri}")
+                        }
+                        append("Local Note: https://${userKey.host}/note/${status.id}")
+                        append("-----")
+                    }
+                    append(comment)
+                }
+
             service.usersReportAbuse(
                 dev.dimension.flare.data.network.misskey.api.model.UsersReportAbuseRequest(
                     userId = userKey.id,
-                    comment = comment ?: "",
+                    comment = actualComment,
                 ),
             )
         }

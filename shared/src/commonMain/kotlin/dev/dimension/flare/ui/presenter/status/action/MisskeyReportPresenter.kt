@@ -32,10 +32,10 @@ public class MisskeyReportPresenter(
                 service as MisskeyDataSource
             }
         return object : MisskeyReportState {
-            override fun report() {
+            override fun report(comment: String) {
                 service.onSuccess {
                     scope.launch {
-                        it.report(userKey, statusKey)
+                        it.report(userKey, statusKey, comment)
                     }
                 }
             }
@@ -45,5 +45,5 @@ public class MisskeyReportPresenter(
 
 @Immutable
 public interface MisskeyReportState {
-    public fun report()
+    public fun report(comment: String)
 }

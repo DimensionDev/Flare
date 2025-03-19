@@ -1,12 +1,18 @@
 package dev.dimension.flare.ui.screen.status.action
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.annotation.parameters.DeepLink
@@ -17,6 +23,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.MisskeyReportPresenter
@@ -65,6 +72,7 @@ private fun MisskeyReportDialog(
             accountType,
         )
     }
+    val comment = rememberTextFieldState()
 
     AlertDialog(
         title = {
@@ -73,15 +81,25 @@ private fun MisskeyReportDialog(
             )
         },
         text = {
-            Text(
-                text = stringResource(R.string.report_description),
-            )
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.report_description),
+                )
+                OutlinedTextField2(
+                    state = comment,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         },
         onDismissRequest = onBack,
         confirmButton = {
             TextButton(
                 onClick = {
-                    state.report()
+                    state.report(
+                        comment = comment.text.toString(),
+                    )
                     onBack()
                 },
             ) {

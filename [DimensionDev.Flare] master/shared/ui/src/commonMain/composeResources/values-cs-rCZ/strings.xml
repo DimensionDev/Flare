@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="settings_about_description">Konečná generace AI s otevřeným zdrojem napájí decentralizovaný klient sociální sítě.</string>
+  <string name="settings_about_source_code">Zdrojový kód</string>
+  <string name="settings_about_telegram">Telegram</string>
+  <string name="settings_about_telegram_description">Připojte se k naší skupině Telegram</string>
+  <string name="settings_about_line_description">Připojte se k naší liniové skupině</string>
+  <string name="settings_about_localization">Crowdin</string>
+  <string name="settings_about_localization_description">Pomozte nám přeložit Flare</string>
+</resources>

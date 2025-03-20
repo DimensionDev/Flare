@@ -86,6 +86,7 @@ import compose.icons.fontawesomeicons.solid.Play
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.common.VideoDownloadHelper
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.DialogWrapper
@@ -102,7 +103,6 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.status.DownloadPresenter
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.theme.FlareTheme
@@ -726,6 +726,7 @@ private fun statusMediaPresenter(
     context: Context,
     accountType: AccountType,
     scope: CoroutineScope = koinInject(),
+    videoDownloadHelper: VideoDownloadHelper = koinInject(),
 ) = run {
     var showUi by remember {
         mutableStateOf(true)
@@ -744,7 +745,6 @@ private fun statusMediaPresenter(
     var currentPage by remember {
         mutableIntStateOf(initialIndex)
     }
-    val downloadPresenter = remember { DownloadPresenter() }.invoke()
     object {
         val status = state.status
         val medias = medias
@@ -769,34 +769,47 @@ private fun statusMediaPresenter(
 
         fun save(data: UiMedia) {
             when (data) {
-                is UiMedia.Audio -> download(data.url, "audio/*")
-                is UiMedia.Gif -> download(data.url, "image/gif")
+                is UiMedia.Audio -> download(data.url)
+                is UiMedia.Gif -> download(data.url)
                 is UiMedia.Image -> save(data.url)
-                is UiMedia.Video -> download(data.url, "video/*")
+                is UiMedia.Video -> download(data.url)
             }
         }
 
-        fun download(
-            uri: String,
-            mimeType: String,
-        ) {
+        fun download(uri: String) {
             scope.launch {
-                downloadPresenter.download(uri)
-                    .onSuccess {
-                        saveByteArrayToDownloads(
-                            context,
-                            it,
-                            uri.substringAfterLast("/"),
-                        )
-                        withContext(Dispatchers.Main) {
-                            Toast
-                                .makeText(
-                                    context,
-                                    context.getString(R.string.media_save_success),
-                                    Toast.LENGTH_SHORT,
-                                ).show()
-                        }
-                    }
+                videoDownloadHelper.downloadVideo(
+                    uri = uri,
+                    fileName = uri.substringAfterLast("/"),
+                    callback =
+                        object : VideoDownloadHelper.DownloadCallback {
+                            override fun onDownloadSuccess(downloadId: Long) {
+                                scope.launch {
+                                    withContext(Dispatchers.Main) {
+                                        Toast
+                                            .makeText(
+                                                context,
+                                                context.getString(R.string.media_save_success),
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                    }
+                                }
+                            }
+
+                            override fun onDownloadFailed(downloadId: Long) {
+                                scope.launch {
+                                    withContext(Dispatchers.Main) {
+                                        Toast
+                                            .makeText(
+                                                context,
+                                                context.getString(R.string.media_save_fail),
+                                                Toast.LENGTH_SHORT,
+                                            ).show()
+                                    }
+                                }
+                            }
+                        },
+                )
             }
         }
 

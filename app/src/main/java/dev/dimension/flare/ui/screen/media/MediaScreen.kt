@@ -12,7 +12,6 @@ import android.provider.MediaStore
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import android.webkit.MimeTypeMap
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -313,27 +312,7 @@ private fun getMimeType(byteArray: ByteArray): String {
             inJustDecodeBounds = true
         }
     BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size, options)
-    val extension =
-        when (options.outMimeType?.lowercase()) {
-            "image/jpeg", "image/jpg" -> "jpg"
-            "image/png" -> "png"
-            "image/webp" -> "webp"
-            "image/gif" -> "gif"
-            "image/bmp" -> "bmp"
-            "image/heic" -> "heic"
-            "image/heif" -> "heif"
-            "image/ico" -> "ico"
-            "image/tiff" -> "tiff"
-            "image/svg+xml" -> "svg"
-            "image/x-icon" -> "ico"
-            "image/x-ms-bmp" -> "bmp"
-            "image/x-tiff" -> "tiff"
-            "image/x-tga" -> "tga"
-            "image/x-pcx" -> "pcx"
-            "image/x-pict" -> "pict"
-            else -> "jpg"
-        }
-    return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: "image/jpeg" // 默认为JPEG
+    return options.outMimeType?.lowercase() ?: "image/jpeg" // 默认为JPEG
 }
 
 internal fun saveByteArrayToDownloads(

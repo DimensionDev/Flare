@@ -13,37 +13,38 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,11 +54,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
@@ -76,14 +76,14 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
-import com.ramcosta.composedestinations.generated.destinations.StatusRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.FloppyDisk
+import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
+import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.AccountType
@@ -212,9 +212,6 @@ internal fun StatusMediaRoute(
         accountType = accountType,
         index = mediaIndex,
         preview = preview,
-        toStatus = {
-            navigator.navigate(StatusRouteDestination(statusKey, accountType))
-        },
         onDismiss = navigator::navigateUp,
     )
 //        }
@@ -231,12 +228,10 @@ private fun StatusMediaScreen(
     accountType: AccountType,
     index: Int,
     preview: String?,
-    toStatus: () -> Unit,
     onDismiss: () -> Unit,
     playerPool: VideoPlayerPool = koinInject(),
 ) {
     val context = LocalContext.current
-    val haptics = LocalHapticFeedback.current
     val permissionState =
         rememberPermissionState(
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -249,7 +244,7 @@ private fun StatusMediaScreen(
             accountType = accountType,
         )
     }
-    var backProgress by remember { mutableStateOf(0f) }
+    var backProgress by remember { mutableFloatStateOf(0f) }
     PredictiveBackHandler {
         try {
             it.collect {
@@ -259,9 +254,6 @@ private fun StatusMediaScreen(
         } catch (e: Exception) {
             backProgress = 0f
         }
-    }
-    BackHandler(state.showUi) {
-        state.setShowUi(false)
     }
     val pagerState =
         rememberPagerState(
@@ -357,10 +349,6 @@ private fun StatusMediaScreen(
                                             onClick = {
                                                 state.setShowUi(!state.showUi)
                                             },
-                                            onLongClick = {
-                                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                state.setShowMenu(true)
-                                            },
                                         )
 
                                     is UiMedia.Gif ->
@@ -380,10 +368,6 @@ private fun StatusMediaScreen(
                                                 state.setShowUi(!state.showUi)
                                             },
                                             aspectRatio = media.aspectRatio,
-                                            onLongClick = {
-                                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                state.setShowMenu(true)
-                                            },
                                             contentScale = ContentScale.Fit,
                                         )
 
@@ -401,10 +385,6 @@ private fun StatusMediaScreen(
                                             description = media.description,
                                             onClick = {
                                                 state.setShowUi(!state.showUi)
-                                            },
-                                            onLongClick = {
-                                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                state.setShowMenu(true)
                                             },
                                             setLockPager = state::setLockPager,
                                         )
@@ -426,10 +406,6 @@ private fun StatusMediaScreen(
                                             showControls = true,
                                             keepScreenOn = true,
                                             muted = false,
-                                            onLongClick = {
-                                                haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                state.setShowMenu(true)
-                                            },
                                             contentScale = ContentScale.Fit,
                                         )
                                 }
@@ -440,7 +416,6 @@ private fun StatusMediaScreen(
                                         previewUrl = preview,
                                         description = null,
                                         onClick = { /*TODO*/ },
-                                        onLongClick = { /*TODO*/ },
                                         setLockPager = state::setLockPager,
                                         modifier =
                                             Modifier
@@ -458,126 +433,39 @@ private fun StatusMediaScreen(
                             }
                     }
                 }
-                if (pagerState.pageCount > 1) {
-                    AnimatedVisibility(
-                        visible = !state.lockPager,
-                        enter = slideInVertically { it },
-                        exit = slideOutVertically { it },
+                AnimatedVisibility(
+                    visible = state.showUi,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.TopCenter),
+                    enter = slideInVertically { -it },
+                    exit = slideOutVertically { -it },
+                ) {
+                    Row(
                         modifier =
                             Modifier
-                                .wrapContentHeight()
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter),
+                                .systemBarsPadding()
+                                .padding(horizontal = 4.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Row(
-                            modifier =
-                                Modifier
-                                    .padding(bottom = 8.dp)
-                                    .systemBarsPadding(),
-                            horizontalArrangement = Arrangement.Center,
-                        ) {
-                            repeat(pagerState.pageCount) { iteration ->
-                                val color =
-                                    if (pagerState.currentPage == iteration) {
-                                        MaterialTheme.colorScheme.primary
-                                    } else {
-                                        MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
-                                    }
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .padding(2.dp)
-                                            .clip(CircleShape)
-                                            .background(color)
-                                            .size(8.dp),
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-            state.status.onSuccess { status ->
-                val content = status.content
-                if (content is UiTimeline.ItemContent.Status) {
-                    AnimatedVisibility(
-                        visible = state.showUi,
-                        modifier =
-                            Modifier
-                                .align(Alignment.BottomCenter),
-                        enter = slideInVertically { it },
-                        exit = slideOutVertically { it },
-                    ) {
-                        Card(
-                            modifier =
-                                Modifier.systemBarsPadding(),
-                            colors =
-                                CardDefaults.cardColors(
-                                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                ),
-                        ) {
-                            Column {
-                                state.medias.onSuccess { medias ->
-                                    if (medias[pagerState.currentPage] is UiMedia.Video) {
-                                        val player = playerPool.peek(medias[pagerState.currentPage].url)
-                                        if (player != null) {
-                                            PlayerControl(
-                                                player,
-                                                modifier =
-                                                    Modifier
-                                                        .padding(end = screenHorizontalPadding),
-                                            )
-                                        }
-                                    }
-                                }
-                                CompositionLocalProvider(
-                                    LocalComponentAppearance provides LocalComponentAppearance.current.copy(showMedia = false),
-                                ) {
-                                    QuotedStatus(
-                                        data = content,
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            state.medias.onSuccess { medias ->
-                if (state.showMenu) {
-                    ModalBottomSheet(
-                        onDismissRequest = {
-                            state.setShowMenu(false)
-                        },
-                    ) {
-                        ListItem(
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-                            headlineContent = {
-                                Text(text = stringResource(R.string.media_menu_save))
+                        FilledTonalIconButton(
+                            onClick = {
+                                onDismiss.invoke()
                             },
-                            leadingContent = {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.FloppyDisk,
-                                    contentDescription = stringResource(R.string.media_menu_save),
-                                )
-                            },
-                            modifier =
-                                Modifier
-                                    .clickable {
-                                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                                            if (!permissionState.status.isGranted) {
-                                                permissionState.launchPermissionRequest()
-                                            } else {
-                                                state.setShowMenu(false)
-                                                val url =
-                                                    when (val media = medias[state.currentPage]) {
-                                                        is UiMedia.Audio -> media.url
-                                                        is UiMedia.Gif -> media.url
-                                                        is UiMedia.Image -> media.url
-                                                        is UiMedia.Video -> media.url
-                                                    }
-                                                state.save(url)
-                                            }
+                        ) {
+                            FAIcon(
+                                FontAwesomeIcons.Solid.Xmark,
+                                contentDescription = stringResource(id = R.string.navigate_back),
+                            )
+                        }
+                        state.medias.onSuccess { medias ->
+                            FilledTonalIconButton(
+                                onClick = {
+                                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                                        if (!permissionState.status.isGranted) {
+                                            permissionState.launchPermissionRequest()
                                         } else {
-                                            state.setShowMenu(false)
                                             val url =
                                                 when (val media = medias[state.currentPage]) {
                                                     is UiMedia.Audio -> media.url
@@ -587,8 +475,112 @@ private fun StatusMediaScreen(
                                                 }
                                             state.save(url)
                                         }
-                                    },
-                        )
+                                    } else {
+                                        val url =
+                                            when (val media = medias[state.currentPage]) {
+                                                is UiMedia.Audio -> media.url
+                                                is UiMedia.Gif -> media.url
+                                                is UiMedia.Image -> media.url
+                                                is UiMedia.Video -> media.url
+                                            }
+                                        state.save(url)
+                                    }
+                                },
+                            ) {
+                                FAIcon(
+                                    FontAwesomeIcons.Solid.Download,
+                                    contentDescription = stringResource(id = R.string.media_menu_save),
+                                )
+                            }
+                        }
+                    }
+                }
+                state.status.onSuccess { status ->
+                    val content = status.content
+                    if (content is UiTimeline.ItemContent.Status) {
+                        AnimatedVisibility(
+                            visible = state.showUi,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .align(Alignment.BottomCenter),
+                            enter = slideInVertically { it },
+                            exit = slideOutVertically { it },
+                        ) {
+                            Surface(
+                                color = Color.Transparent,
+                                contentColor = MaterialTheme.colorScheme.onBackground,
+                            ) {
+                                Column(
+                                    modifier =
+                                        Modifier
+                                            .background(
+                                                brush =
+                                                    Brush.verticalGradient(
+                                                        colors =
+                                                            listOf(
+                                                                Color.Transparent,
+                                                                MaterialTheme.colorScheme.surfaceContainer,
+                                                            ),
+                                                    ),
+                                            ).padding(
+                                                horizontal = screenHorizontalPadding,
+                                                vertical = 8.dp,
+                                            ).windowInsetsPadding(
+                                                WindowInsets.systemBars.only(
+                                                    WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                                ),
+                                            ),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    if (pagerState.pageCount > 1) {
+                                        Row(
+                                            modifier =
+                                                Modifier
+                                                    .padding(bottom = 8.dp),
+                                            horizontalArrangement = Arrangement.Center,
+                                        ) {
+                                            repeat(pagerState.pageCount) { iteration ->
+                                                val color =
+                                                    if (pagerState.currentPage == iteration) {
+                                                        MaterialTheme.colorScheme.primary
+                                                    } else {
+                                                        MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                                                    }
+                                                Box(
+                                                    modifier =
+                                                        Modifier
+                                                            .padding(2.dp)
+                                                            .clip(CircleShape)
+                                                            .background(color)
+                                                            .size(8.dp),
+                                                )
+                                            }
+                                        }
+                                    }
+                                    state.medias.onSuccess { medias ->
+                                        if (medias[pagerState.currentPage] is UiMedia.Video) {
+                                            val player = playerPool.peek(medias[pagerState.currentPage].url)
+                                            if (player != null) {
+                                                PlayerControl(
+                                                    player,
+                                                    modifier =
+                                                        Modifier
+                                                            .padding(end = screenHorizontalPadding),
+                                                )
+                                            }
+                                        }
+                                    }
+                                    CompositionLocalProvider(
+                                        LocalComponentAppearance provides LocalComponentAppearance.current.copy(showMedia = false),
+                                    ) {
+                                        QuotedStatus(
+                                            data = content,
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -674,7 +666,6 @@ private fun ImageItem(
     previewUrl: String,
     description: String?,
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
     setLockPager: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -737,9 +728,6 @@ private fun ImageItem(
         onClick = {
             onClick.invoke()
         },
-        onLongClick = {
-            onLongClick.invoke()
-        },
     )
 }
 
@@ -753,10 +741,7 @@ private fun statusMediaPresenter(
     scope: CoroutineScope = koinInject(),
 ) = run {
     var showUi by remember {
-        mutableStateOf(false)
-    }
-    var showMenu by remember {
-        mutableStateOf(false)
+        mutableStateOf(true)
     }
     var lockPager by remember {
         mutableStateOf(false)
@@ -776,7 +761,6 @@ private fun statusMediaPresenter(
         val status = state.status
         val medias = medias
         val showUi = showUi
-        val showMenu = showMenu
         val currentPage = currentPage
         val lockPager = lockPager
 
@@ -786,19 +770,13 @@ private fun statusMediaPresenter(
             }
         }
 
-        fun setShowMenu(value: Boolean) {
-            showMenu = value
-        }
-
         fun setCurrentPage(value: Int) {
             currentPage = value
         }
 
         fun setLockPager(value: Boolean) {
             lockPager = value
-            if (value) {
-                showUi = false
-            }
+            showUi = !value
         }
 
         fun save(uri: String) {

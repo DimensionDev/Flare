@@ -3,7 +3,7 @@ package dev.dimension.flare.data.datasource.misskey
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Misskey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
@@ -23,86 +23,82 @@ internal class StatusDetailRemoteMediator(
     private val service: MisskeyService,
     private val pagingKey: String,
     private val statusOnly: Boolean,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     private var page = 1
 
-    override suspend fun load(
+    override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        return try {
-            if (loadType == LoadType.PREPEND) {
-                return MediatorResult.Success(
-                    endOfPaginationReached = true,
-                )
-            }
-            if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
-                database.statusDao().get(statusKey, accountKey).firstOrNull()?.let {
-                    database
-                        .pagingTimelineDao()
-                        .insertAll(
-                            listOf(
-                                DbPagingTimeline(
-                                    accountKey = accountKey,
-                                    statusKey = statusKey,
-                                    pagingKey = pagingKey,
-                                    sortId = 0,
-                                    _id = Uuid.random().toString(),
-                                ),
+        if (loadType == LoadType.PREPEND) {
+            return MediatorResult.Success(
+                endOfPaginationReached = true,
+            )
+        }
+        if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
+            database.statusDao().get(statusKey, accountKey).firstOrNull()?.let {
+                database
+                    .pagingTimelineDao()
+                    .insertAll(
+                        listOf(
+                            DbPagingTimeline(
+                                accountKey = accountKey,
+                                statusKey = statusKey,
+                                pagingKey = pagingKey,
+                                sortId = 0,
+                                _id = Uuid.random().toString(),
                             ),
-                        )
-                }
+                        ),
+                    )
             }
-            val result =
-                if (statusOnly) {
-                    val current =
+        }
+        val result =
+            if (statusOnly) {
+                val current =
+                    service
+                        .notesShow(
+                            IPinRequest(noteId = statusKey.id),
+                        )
+                listOf(current)
+            } else {
+                val current =
+                    if (loadType == LoadType.REFRESH) {
+                        page = 0
                         service
                             .notesShow(
                                 IPinRequest(noteId = statusKey.id),
                             )
-                    listOf(current)
-                } else {
-                    val current =
-                        if (loadType == LoadType.REFRESH) {
-                            page = 0
-                            service
-                                .notesShow(
-                                    IPinRequest(noteId = statusKey.id),
-                                )
-                        } else {
-                            page++
-                            null
-                        }
-                    val lastItem =
-                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)?.takeIf {
-                            it.timeline.statusKey != statusKey
-                        }
-                    val children =
-                        service
-                            .notesChildren(
-                                NotesChildrenRequest(
-                                    noteId = statusKey.id,
-                                    untilId = lastItem?.timeline?.statusKey?.id,
-                                    limit = state.config.pageSize,
-                                ),
-                            ).orEmpty()
-                    listOfNotNull(current?.reply, current) + children
-                }.filterNotNull()
-            Misskey.save(
-                database = database,
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                data = result,
-                sortIdProvider = {
-                    val index = result.indexOf(it)
-                    -(index + page * state.config.pageSize).toLong()
-                },
-            )
-            MediatorResult.Success(
-                endOfPaginationReached = true,
-            )
-        } catch (e: Throwable) {
-            MediatorResult.Error(e)
-        }
+                    } else {
+                        page++
+                        null
+                    }
+                val lastItem =
+                    database.pagingTimelineDao().getLastPagingTimeline(pagingKey)?.takeIf {
+                        it.timeline.statusKey != statusKey
+                    }
+                val children =
+                    service
+                        .notesChildren(
+                            NotesChildrenRequest(
+                                noteId = statusKey.id,
+                                untilId = lastItem?.timeline?.statusKey?.id,
+                                limit = state.config.pageSize,
+                            ),
+                        ).orEmpty()
+                listOfNotNull(current?.reply, current) + children
+            }.filterNotNull()
+        Misskey.save(
+            database = database,
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            data = result,
+            sortIdProvider = {
+                val index = result.indexOf(it)
+                -(index + page * state.config.pageSize).toLong()
+            },
+        )
+        return MediatorResult.Success(
+            endOfPaginationReached = true,
+        )
     }
 }

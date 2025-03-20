@@ -4,12 +4,12 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
+import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.model.MicroBlogKey
@@ -37,7 +37,7 @@ internal fun StatusEvent.timelinePager(
     database: CacheDatabase,
     scope: CoroutineScope,
     filterFlow: Flow<List<String>>,
-    mediator: RemoteMediator<Int, DbPagingTimelineWithStatus>,
+    mediator: BaseRemoteMediator<Int, DbPagingTimelineWithStatus>,
 ): Flow<PagingData<UiTimeline>> {
     val pagerFlow =
         Pager(
@@ -80,7 +80,7 @@ private fun UiTimeline.contains(keywords: List<String>): Boolean {
 internal class MemoryPagingSource<T : Any>(
     private val key: String,
     private val context: CoroutineContext,
-) : PagingSource<Int, T>() {
+) : BasePagingSource<Int, T>() {
     companion object {
         private val caches = mutableMapOf<String, MutableStateFlow<ImmutableList<Any>>>()
 
@@ -153,7 +153,7 @@ internal class MemoryPagingSource<T : Any>(
             maxOf(0, it - (state.config.initialLoadSize / 2))
         }
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, T> {
+    override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, T> {
         val page = params.key ?: 0
 
         @Suppress("UNCHECKED_CAST")
@@ -174,7 +174,7 @@ internal fun <T : Any> memoryPager(
     pageSize: Int,
     pagingKey: String,
     scope: CoroutineScope,
-    mediator: RemoteMediator<Int, T>,
+    mediator: BaseRemoteMediator<Int, T>,
 ): Flow<PagingData<T>> =
     Pager(
         config = PagingConfig(pageSize = pageSize),

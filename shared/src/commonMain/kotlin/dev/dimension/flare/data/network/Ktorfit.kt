@@ -6,9 +6,11 @@ import co.touchlab.kermit.platformLogWriter
 import de.jensklingenberg.ktorfit.converter.CallConverterFactory
 import de.jensklingenberg.ktorfit.converter.FlowConverterFactory
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
+import dev.dimension.flare.common.BuildConfig
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.network.authorization.Authorization
 import dev.dimension.flare.data.network.authorization.AuthorizationPlugin
+import dev.dimension.flare.data.repository.DebugRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.engine.HttpClientEngine
@@ -56,7 +58,12 @@ internal fun ktorClient(
     config.invoke(this)
     install(Logging) {
         logger = NapierLogger
-        level = LogLevel.ALL
+        level =
+            if (BuildConfig.debug) {
+                LogLevel.ALL
+            } else {
+                LogLevel.BODY
+            }
     }
 }
 
@@ -70,6 +77,9 @@ private data object NapierLogger : io.ktor.client.plugins.logging.Logger {
         )
 
     override fun log(message: String) {
-        log.d(message)
+        if (BuildConfig.debug) {
+            log.d(message)
+        }
+        DebugRepository.log(message)
     }
 }

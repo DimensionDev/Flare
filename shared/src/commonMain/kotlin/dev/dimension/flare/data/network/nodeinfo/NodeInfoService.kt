@@ -7,6 +7,7 @@ import dev.dimension.flare.data.network.nodeinfo.model.Schema10
 import dev.dimension.flare.data.network.nodeinfo.model.Schema11
 import dev.dimension.flare.data.network.nodeinfo.model.Schema20
 import dev.dimension.flare.data.network.nodeinfo.model.Schema21
+import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvo
 import dev.dimension.flare.model.vvoHost
@@ -113,21 +114,19 @@ internal data object NodeInfoService {
             }
             val nodeInfo =
                 async {
-                    runCatching {
+                    tryRun {
                         val nodeInfo = fetchNodeInfo(host)
                         when {
                             mastodonNodeInfoName.any { it.equals(nodeInfo, ignoreCase = true) } -> PlatformType.Mastodon
                             misskeyNodeInfoName.any { it.equals(nodeInfo, ignoreCase = true) } -> PlatformType.Misskey
                             else -> throw IllegalArgumentException("Unsupported platform: $nodeInfo")
                         }
-                    }.onFailure {
-                        it.printStackTrace()
                     }.getOrNull()
                 }
 
             val bluesky =
                 async {
-                    runCatching {
+                    tryRun {
                         BlueskyService("https://$host").describeServer().requireResponse()
                         PlatformType.Bluesky
                     }.getOrNull()

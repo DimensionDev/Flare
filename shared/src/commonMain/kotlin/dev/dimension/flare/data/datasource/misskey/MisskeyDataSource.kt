@@ -6,8 +6,8 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
@@ -49,6 +49,7 @@ import dev.dimension.flare.data.network.misskey.api.model.UsersListsShowRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsUpdateRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -445,7 +446,7 @@ internal class MisskeyDataSource(
                     )
                 },
             )
-            runCatching {
+            tryRun {
                 service.notesCreate(
                     NotesCreateRequest(
                         renoteId = statusKey.id,
@@ -470,7 +471,7 @@ internal class MisskeyDataSource(
     }
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
-        runCatching {
+        tryRun {
             service.notesDelete(
                 IPinRequest(
                     noteId = statusKey.id,
@@ -515,7 +516,7 @@ internal class MisskeyDataSource(
                         ),
                 )
             }
-            runCatching {
+            tryRun {
                 if (hasReacted) {
                     service.notesReactionsDelete(
                         IPinRequest(
@@ -560,7 +561,7 @@ internal class MisskeyDataSource(
         statusKey: MicroBlogKey?,
         comment: String,
     ) {
-        runCatching {
+        tryRun {
             val status =
                 statusKey
                     ?.let {
@@ -602,7 +603,7 @@ internal class MisskeyDataSource(
                 following = false,
             )
         }
-        runCatching {
+        tryRun {
             service.followingDelete(AdminAccountsDeleteRequest(userId = userKey.id))
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -624,7 +625,7 @@ internal class MisskeyDataSource(
                 following = true,
             )
         }
-        runCatching {
+        tryRun {
             service.followingCreate(AdminAccountsDeleteRequest(userId = userKey.id))
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -646,7 +647,7 @@ internal class MisskeyDataSource(
                 blocking = true,
             )
         }
-        runCatching {
+        tryRun {
             service.blockingCreate(AdminAccountsDeleteRequest(userId = userKey.id))
         }.onFailure {
             it.printStackTrace()
@@ -669,7 +670,7 @@ internal class MisskeyDataSource(
                 blocking = false,
             )
         }
-        runCatching {
+        tryRun {
             service.blockingDelete(AdminAccountsDeleteRequest(userId = userKey.id))
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -691,7 +692,7 @@ internal class MisskeyDataSource(
                 muted = true,
             )
         }
-        runCatching {
+        tryRun {
             service.muteCreate(MuteCreateRequest(userId = userKey.id))
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -713,7 +714,7 @@ internal class MisskeyDataSource(
                 muted = false,
             )
         }
-        runCatching {
+        tryRun {
             service.muteDelete(AdminAccountsDeleteRequest(userId = userKey.id))
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -885,7 +886,7 @@ internal class MisskeyDataSource(
                         ),
                 )
             }
-            runCatching {
+            tryRun {
                 options.forEach {
                     service.notesPollsVote(
                         notesPollsVoteRequest =
@@ -927,7 +928,7 @@ internal class MisskeyDataSource(
         favourited: Boolean,
     ) {
         coroutineScope.launch {
-            runCatching {
+            tryRun {
                 if (favourited) {
                     service.notesFavoritesDelete(
                         IPinRequest(
@@ -947,7 +948,7 @@ internal class MisskeyDataSource(
 
     override fun favouriteState(statusKey: MicroBlogKey): Flow<Boolean> =
         flow {
-            runCatching {
+            tryRun {
                 service.notesState(
                     IPinRequest(
                         noteId = statusKey.id,
@@ -1059,41 +1060,37 @@ internal class MisskeyDataSource(
             pagingKey = listKey,
             scope = scope,
             mediator =
-                object : RemoteMediator<Int, UiList>() {
-                    override suspend fun load(
+                object : BaseRemoteMediator<Int, UiList>() {
+                    override suspend fun doLoad(
                         loadType: LoadType,
                         state: PagingState<Int, UiList>,
                     ): MediatorResult {
-                        try {
-                            if (loadType == LoadType.PREPEND) {
-                                return MediatorResult.Success(endOfPaginationReached = true)
-                            }
-                            val result =
-                                service
-                                    .usersListsList(
-                                        UsersListsListRequest(),
-                                    ).orEmpty()
-                                    .map {
-                                        it.render()
-                                    }.toImmutableList()
-
-                            MemoryPagingSource.update<UiList>(
-                                key = listKey,
-                                value = result.toImmutableList(),
-                            )
-
-                            return MediatorResult.Success(
-                                endOfPaginationReached = true,
-                            )
-                        } catch (e: Exception) {
-                            return MediatorResult.Error(e)
+                        if (loadType == LoadType.PREPEND) {
+                            return MediatorResult.Success(endOfPaginationReached = true)
                         }
+                        val result =
+                            service
+                                .usersListsList(
+                                    UsersListsListRequest(),
+                                ).orEmpty()
+                                .map {
+                                    it.render()
+                                }.toImmutableList()
+
+                        MemoryPagingSource.update<UiList>(
+                            key = listKey,
+                            value = result.toImmutableList(),
+                        )
+
+                        return MediatorResult.Success(
+                            endOfPaginationReached = true,
+                        )
                     }
                 },
         )
 
     override suspend fun createList(metaData: ListMetaData) {
-        runCatching {
+        tryRun {
             service
                 .usersListsCreate(
                     UsersListsCreateRequest(
@@ -1119,7 +1116,7 @@ internal class MisskeyDataSource(
     }
 
     override suspend fun deleteList(listId: String) {
-        runCatching {
+        tryRun {
             service.usersListsDelete(
                 UsersListsDeleteRequest(listId = listId),
             )
@@ -1138,7 +1135,7 @@ internal class MisskeyDataSource(
         listId: String,
         metaData: ListMetaData,
     ) {
-        runCatching {
+        tryRun {
             service.usersListsUpdate(
                 UsersListsUpdateRequest(
                     listId = listId,
@@ -1184,56 +1181,52 @@ internal class MisskeyDataSource(
             pagingKey = listMemberKey(listId),
             scope = scope,
             mediator =
-                object : RemoteMediator<Int, UiUserV2>() {
-                    override suspend fun load(
+                object : BaseRemoteMediator<Int, UiUserV2>() {
+                    override suspend fun doLoad(
                         loadType: LoadType,
                         state: PagingState<Int, UiUserV2>,
                     ): MediatorResult {
-                        try {
-                            if (loadType == LoadType.PREPEND) {
-                                return MediatorResult.Success(endOfPaginationReached = true)
-                            }
-                            val key =
-                                if (loadType == LoadType.REFRESH) {
-                                    null
-                                } else {
-                                    MemoryPagingSource
-                                        .get<UiUserV2>(key = listMemberKey(listId))
-                                        ?.lastOrNull()
-                                        ?.key
-                                        ?.id
-                                }
-                            val result =
-                                service
-                                    .usersListsGetMemberships(
-                                        UsersListsMembershipRequest(
-                                            listId = listId,
-                                            untilId = key,
-                                            limit = state.config.pageSize,
-                                        ),
-                                    ).orEmpty()
-                                    .map {
-                                        it.user.render(accountKey)
-                                    }
-
-                            if (loadType == LoadType.REFRESH) {
-                                MemoryPagingSource.update(
-                                    key = listMemberKey(listId),
-                                    value = result.toImmutableList(),
-                                )
-                            } else if (loadType == LoadType.APPEND) {
-                                MemoryPagingSource.append(
-                                    key = listMemberKey(listId),
-                                    value = result.toImmutableList(),
-                                )
-                            }
-
-                            return MediatorResult.Success(
-                                endOfPaginationReached = result.isEmpty(),
-                            )
-                        } catch (e: Exception) {
-                            return MediatorResult.Error(e)
+                        if (loadType == LoadType.PREPEND) {
+                            return MediatorResult.Success(endOfPaginationReached = true)
                         }
+                        val key =
+                            if (loadType == LoadType.REFRESH) {
+                                null
+                            } else {
+                                MemoryPagingSource
+                                    .get<UiUserV2>(key = listMemberKey(listId))
+                                    ?.lastOrNull()
+                                    ?.key
+                                    ?.id
+                            }
+                        val result =
+                            service
+                                .usersListsGetMemberships(
+                                    UsersListsMembershipRequest(
+                                        listId = listId,
+                                        untilId = key,
+                                        limit = state.config.pageSize,
+                                    ),
+                                ).orEmpty()
+                                .map {
+                                    it.user.render(accountKey)
+                                }
+
+                        if (loadType == LoadType.REFRESH) {
+                            MemoryPagingSource.update(
+                                key = listMemberKey(listId),
+                                value = result.toImmutableList(),
+                            )
+                        } else if (loadType == LoadType.APPEND) {
+                            MemoryPagingSource.append(
+                                key = listMemberKey(listId),
+                                value = result.toImmutableList(),
+                            )
+                        }
+
+                        return MediatorResult.Success(
+                            endOfPaginationReached = result.isEmpty(),
+                        )
                     }
                 },
         )
@@ -1246,7 +1239,7 @@ internal class MisskeyDataSource(
         listId: String,
         userKey: MicroBlogKey,
     ) {
-        runCatching {
+        tryRun {
             service.usersListsPush(
                 UsersListsPullRequest(
                     listId = listId,
@@ -1292,7 +1285,7 @@ internal class MisskeyDataSource(
         listId: String,
         userKey: MicroBlogKey,
     ) {
-        runCatching {
+        tryRun {
             service.usersListsPull(
                 UsersListsPullRequest(
                     listId = listId,

@@ -5,9 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
 import androidx.paging.map
 import app.bsky.actor.GetProfileQueryParams
@@ -59,6 +57,8 @@ import com.atproto.repo.ListRecordsQueryParams
 import com.atproto.repo.ListRecordsRecord
 import com.atproto.repo.PutRecordRequest
 import com.atproto.repo.StrongRef
+import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
@@ -92,6 +92,7 @@ import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -484,7 +485,7 @@ internal class BlueskyDataSource(
         statusKey: MicroBlogKey,
         reason: BlueskyReportStatusState.ReportReason,
     ) {
-        runCatching {
+        tryRun {
             val post =
                 service
                     .getPosts(GetPostsQueryParams(persistentListOf(AtUri(statusKey.id))))
@@ -554,7 +555,7 @@ internal class BlueskyDataSource(
                         ),
                 )
             }
-            runCatching {
+            tryRun {
                 if (repostUri != null) {
                     service.deleteRecord(
                         DeleteRecordRequest(
@@ -666,7 +667,7 @@ internal class BlueskyDataSource(
                         ),
                 )
             }
-            runCatching {
+            tryRun {
                 if (likedUri != null) {
                     deleteLikeRecord(likedUri)
                 } else {
@@ -754,7 +755,7 @@ internal class BlueskyDataSource(
         )
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
-        runCatching {
+        tryRun {
             service.deleteRecord(
                 DeleteRecordRequest(
                     repo = Did(did = accountKey.id),
@@ -783,7 +784,7 @@ internal class BlueskyDataSource(
                 following = false,
             )
         }
-        runCatching {
+        tryRun {
             val user =
                 service
                     .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
@@ -819,7 +820,7 @@ internal class BlueskyDataSource(
                 following = true,
             )
         }
-        runCatching {
+        tryRun {
             service.createRecord(
                 CreateRecordRequest(
                     repo = Did(did = accountKey.id),
@@ -852,7 +853,7 @@ internal class BlueskyDataSource(
                 blocking = true,
             )
         }
-        runCatching {
+        tryRun {
             service.createRecord(
                 CreateRecordRequest(
                     repo = Did(did = accountKey.id),
@@ -885,7 +886,7 @@ internal class BlueskyDataSource(
                 blocking = false,
             )
         }
-        runCatching {
+        tryRun {
             val user =
                 service
                     .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
@@ -921,7 +922,7 @@ internal class BlueskyDataSource(
                 muted = true,
             )
         }
-        runCatching {
+        tryRun {
             service.muteActor(MuteActorRequest(actor = Did(did = userKey.id)))
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -943,7 +944,7 @@ internal class BlueskyDataSource(
                 muted = false,
             )
         }
-        runCatching {
+        tryRun {
             service.unmuteActor(UnmuteActorRequest(actor = Did(did = userKey.id)))
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -1119,10 +1120,10 @@ internal class BlueskyDataSource(
         Pager(
             config = PagingConfig(pageSize = 20),
         ) {
-            object : PagingSource<String, UiList>() {
+            object : BasePagingSource<String, UiList>() {
                 override fun getRefreshKey(state: PagingState<String, UiList>): String? = null
 
-                override suspend fun load(params: LoadParams<String>): LoadResult<String, UiList> {
+                override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiList> {
                     val result =
                         service
                             .getPopularFeedGeneratorsUnspecced(
@@ -1203,7 +1204,7 @@ internal class BlueskyDataSource(
         ) {
             (it + data).toImmutableList()
         }
-        runCatching {
+        tryRun {
             val currentPreferences = service.getPreferences().requireResponse()
             val feedInfo =
                 service
@@ -1262,7 +1263,7 @@ internal class BlueskyDataSource(
         ) {
             it.filterNot { item -> item.id == data.id }.toImmutableList()
         }
-        runCatching {
+        tryRun {
             val currentPreferences = service.getPreferences().requireResponse()
             val feedInfo =
                 service
@@ -1323,7 +1324,7 @@ internal class BlueskyDataSource(
                 ),
         )
 
-        runCatching {
+        tryRun {
             val feedInfo =
                 service
                     .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(data.id)))
@@ -1356,40 +1357,37 @@ internal class BlueskyDataSource(
             pagingKey = myListKey,
             scope = scope,
             mediator =
-                object : RemoteMediator<Int, UiList>() {
+                object : BaseRemoteMediator<Int, UiList>() {
                     var cursor: String? = null
 
-                    override suspend fun load(
+                    override suspend fun doLoad(
                         loadType: LoadType,
                         state: PagingState<Int, UiList>,
-                    ): MediatorResult =
-                        try {
-                            val result =
-                                service
-                                    .getLists(
-                                        params =
-                                            GetListsQueryParams(
-                                                actor = Did(did = accountKey.id),
-                                                cursor = cursor,
-                                            ),
-                                    ).requireResponse()
-                            val items =
-                                result
-                                    .lists
-                                    .map {
-                                        it.render(accountKey)
-                                    }.toImmutableList()
-                            cursor = result.cursor
-                            MemoryPagingSource.update<UiList>(
-                                key = myListKey,
-                                value = items,
-                            )
-                            MediatorResult.Success(
-                                endOfPaginationReached = cursor == null,
-                            )
-                        } catch (e: Exception) {
-                            MediatorResult.Error(e)
-                        }
+                    ): MediatorResult {
+                        val result =
+                            service
+                                .getLists(
+                                    params =
+                                        GetListsQueryParams(
+                                            actor = Did(did = accountKey.id),
+                                            cursor = cursor,
+                                        ),
+                                ).requireResponse()
+                        val items =
+                            result
+                                .lists
+                                .map {
+                                    it.render(accountKey)
+                                }.toImmutableList()
+                        cursor = result.cursor
+                        MemoryPagingSource.update<UiList>(
+                            key = myListKey,
+                            value = items,
+                        )
+                        return MediatorResult.Success(
+                            endOfPaginationReached = cursor == null,
+                        )
+                    }
                 },
         )
 
@@ -1438,7 +1436,7 @@ internal class BlueskyDataSource(
         description: String?,
         icon: FileItem?,
     ) {
-        runCatching {
+        tryRun {
             val iconInfo =
                 if (icon != null) {
                     service.uploadBlob(icon.readBytes()).maybeResponse()
@@ -1485,7 +1483,7 @@ internal class BlueskyDataSource(
     }
 
     override suspend fun deleteList(listId: String) {
-        runCatching {
+        tryRun {
             val id = listId.substringAfterLast('/')
             service.applyWrites(
                 request =
@@ -1520,7 +1518,7 @@ internal class BlueskyDataSource(
         description: String?,
         icon: FileItem?,
     ) {
-        runCatching {
+        tryRun {
             val currentInfo: app.bsky.graph.List =
                 service
                     .getRecord(
@@ -1594,56 +1592,52 @@ internal class BlueskyDataSource(
             pagingKey = listMemberKey(listId),
             scope = scope,
             mediator =
-                object : RemoteMediator<Int, UiUserV2>() {
+                object : BaseRemoteMediator<Int, UiUserV2>() {
                     private var cursor: String? = null
 
-                    override suspend fun load(
+                    override suspend fun doLoad(
                         loadType: LoadType,
                         state: PagingState<Int, UiUserV2>,
                     ): MediatorResult {
-                        try {
-                            if (loadType == LoadType.PREPEND) {
-                                return MediatorResult.Success(endOfPaginationReached = true)
-                            }
-                            if (loadType == LoadType.REFRESH) {
-                                cursor = null
-                            }
-                            val response =
-                                service
-                                    .getList(
-                                        params =
-                                            GetListQueryParams(
-                                                list = AtUri(listId),
-                                                cursor = cursor,
-                                                limit = state.config.pageSize.toLong(),
-                                            ),
-                                    ).maybeResponse()
-                            cursor = response?.cursor
-                            val result =
-                                response
-                                    ?.items
-                                    ?.map {
-                                        it.subject.render(accountKey)
-                                    } ?: emptyList()
-
-                            if (loadType == LoadType.REFRESH) {
-                                MemoryPagingSource.update(
-                                    key = listMemberKey(listId),
-                                    value = result.toImmutableList(),
-                                )
-                            } else if (loadType == LoadType.APPEND) {
-                                MemoryPagingSource.append(
-                                    key = listMemberKey(listId),
-                                    value = result.toImmutableList(),
-                                )
-                            }
-
-                            return MediatorResult.Success(
-                                endOfPaginationReached = cursor == null,
-                            )
-                        } catch (e: Exception) {
-                            return MediatorResult.Error(e)
+                        if (loadType == LoadType.PREPEND) {
+                            return MediatorResult.Success(endOfPaginationReached = true)
                         }
+                        if (loadType == LoadType.REFRESH) {
+                            cursor = null
+                        }
+                        val response =
+                            service
+                                .getList(
+                                    params =
+                                        GetListQueryParams(
+                                            list = AtUri(listId),
+                                            cursor = cursor,
+                                            limit = state.config.pageSize.toLong(),
+                                        ),
+                                ).maybeResponse()
+                        cursor = response?.cursor
+                        val result =
+                            response
+                                ?.items
+                                ?.map {
+                                    it.subject.render(accountKey)
+                                } ?: emptyList()
+
+                        if (loadType == LoadType.REFRESH) {
+                            MemoryPagingSource.update(
+                                key = listMemberKey(listId),
+                                value = result.toImmutableList(),
+                            )
+                        } else if (loadType == LoadType.APPEND) {
+                            MemoryPagingSource.append(
+                                key = listMemberKey(listId),
+                                value = result.toImmutableList(),
+                            )
+                        }
+
+                        return MediatorResult.Success(
+                            endOfPaginationReached = cursor == null,
+                        )
                     }
                 },
         )
@@ -1652,7 +1646,7 @@ internal class BlueskyDataSource(
         listId: String,
         userKey: MicroBlogKey,
     ) {
-        runCatching {
+        tryRun {
             val user =
                 service
                     .getProfile(GetProfileQueryParams(actor = Did(did = userKey.id)))
@@ -1700,7 +1694,7 @@ internal class BlueskyDataSource(
         listId: String,
         userKey: MicroBlogKey,
     ) {
-        runCatching {
+        tryRun {
             MemoryPagingSource.updateWith<UiUserV2>(
                 key = listMemberKey(listId),
             ) {
@@ -1929,7 +1923,7 @@ internal class BlueskyDataSource(
         coroutineScope.launch {
             val tempMessage = createSendingDirectMessage(roomKey, message)
             database.messageDao().insertMessages(listOf(tempMessage))
-            runCatching {
+            tryRun {
                 pdsService().sendMessage(
                     request =
                         SendMessageRequest(
@@ -1969,7 +1963,7 @@ internal class BlueskyDataSource(
             if (current != null && current.content is MessageContent.Local) {
                 database.messageDao().deleteMessage(messageKey)
             } else {
-                runCatching {
+                tryRun {
                     pdsService().deleteMessageForSelf(
                         request =
                             DeleteMessageForSelfRequest(
@@ -1999,7 +1993,7 @@ internal class BlueskyDataSource(
                     ),
                 )
 
-                runCatching {
+                tryRun {
                     pdsService().sendMessage(
                         request =
                             SendMessageRequest(
@@ -2139,7 +2133,7 @@ internal class BlueskyDataSource(
 
     override fun leaveDirectMessage(roomKey: MicroBlogKey) {
         coroutineScope.launch {
-            runCatching {
+            tryRun {
                 pdsService().leaveConvo(
                     request =
                         LeaveConvoRequest(
@@ -2157,7 +2151,7 @@ internal class BlueskyDataSource(
 
     override fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> =
         flow {
-            runCatching {
+            tryRun {
                 pdsService()
                     .getConvoForMembers(
                         params =
@@ -2182,7 +2176,7 @@ internal class BlueskyDataSource(
         }
 
     override suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean =
-        runCatching {
+        tryRun {
             pdsService()
                 .getConvoForMembers(
                     params =

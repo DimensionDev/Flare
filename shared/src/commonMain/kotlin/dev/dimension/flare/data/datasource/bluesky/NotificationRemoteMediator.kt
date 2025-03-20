@@ -3,11 +3,11 @@ package dev.dimension.flare.data.datasource.bluesky
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.notification.ListNotificationsQueryParams
 import app.bsky.notification.ListNotificationsReason
 import app.bsky.notification.UpdateSeenRequest
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -24,91 +24,87 @@ internal class NotificationRemoteMediator(
     private val database: CacheDatabase,
     private val pagingKey: String,
     private val onClearMarker: () -> Unit,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     private var cursor: String? = null
 
-    override suspend fun load(
+    override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        return try {
-            val response =
-                when (loadType) {
-                    LoadType.REFRESH -> {
-                        service
-                            .listNotifications(
-                                ListNotificationsQueryParams(
-                                    limit = state.config.pageSize.toLong(),
-                                ),
-                            ).maybeResponse()
-                            .also {
-                                service.updateSeen(request = UpdateSeenRequest(seenAt = Clock.System.now()))
-                                onClearMarker.invoke()
-                            }
-                    }
-
-                    LoadType.APPEND -> {
-                        service
-                            .listNotifications(
-                                ListNotificationsQueryParams(
-                                    limit = state.config.pageSize.toLong(),
-                                    cursor = cursor,
-                                ),
-                            ).maybeResponse()
-                    }
-
-                    else -> {
-                        return MediatorResult.Success(
-                            endOfPaginationReached = true,
-                        )
-                    }
-                } ?: return MediatorResult.Success(
-                    endOfPaginationReached = true,
-                )
-
-            val referencesUri =
-                response.notifications
-                    .mapNotNull {
-                        when (it.reason) {
-                            is ListNotificationsReason.Unknown -> null
-                            ListNotificationsReason.Like ->
-                                it.record
-                                    .decodeAs<app.bsky.feed.Like>()
-                                    .subject.uri
-                            ListNotificationsReason.Repost ->
-                                it.record
-                                    .decodeAs<app.bsky.feed.Repost>()
-                                    .subject.uri
-                            ListNotificationsReason.Follow -> null
-                            ListNotificationsReason.Mention -> it.uri
-                            ListNotificationsReason.Reply -> it.uri
-                            ListNotificationsReason.Quote -> it.uri
-                            ListNotificationsReason.StarterpackJoined -> null
+        val response =
+            when (loadType) {
+                LoadType.REFRESH -> {
+                    service
+                        .listNotifications(
+                            ListNotificationsQueryParams(
+                                limit = state.config.pageSize.toLong(),
+                            ),
+                        ).maybeResponse()
+                        .also {
+                            service.updateSeen(request = UpdateSeenRequest(seenAt = Clock.System.now()))
+                            onClearMarker.invoke()
                         }
-                    }.distinct()
-                    .toImmutableList()
-            val references =
-                service
-                    .getPosts(params = GetPostsQueryParams(uris = referencesUri))
-                    .maybeResponse()
-                    ?.posts
-                    .orEmpty()
-                    .associateBy { it.uri }
-                    .toImmutableMap()
-            cursor = response.cursor
-            Bluesky.saveNotification(
-                accountKey,
-                pagingKey,
-                database,
-                response.notifications,
-                references = references,
+                }
+
+                LoadType.APPEND -> {
+                    service
+                        .listNotifications(
+                            ListNotificationsQueryParams(
+                                limit = state.config.pageSize.toLong(),
+                                cursor = cursor,
+                            ),
+                        ).maybeResponse()
+                }
+
+                else -> {
+                    return MediatorResult.Success(
+                        endOfPaginationReached = true,
+                    )
+                }
+            } ?: return MediatorResult.Success(
+                endOfPaginationReached = true,
             )
 
-            MediatorResult.Success(
-                endOfPaginationReached = cursor == null,
-            )
-        } catch (e: Throwable) {
-            MediatorResult.Error(e)
-        }
+        val referencesUri =
+            response.notifications
+                .mapNotNull {
+                    when (it.reason) {
+                        is ListNotificationsReason.Unknown -> null
+                        ListNotificationsReason.Like ->
+                            it.record
+                                .decodeAs<app.bsky.feed.Like>()
+                                .subject.uri
+                        ListNotificationsReason.Repost ->
+                            it.record
+                                .decodeAs<app.bsky.feed.Repost>()
+                                .subject.uri
+                        ListNotificationsReason.Follow -> null
+                        ListNotificationsReason.Mention -> it.uri
+                        ListNotificationsReason.Reply -> it.uri
+                        ListNotificationsReason.Quote -> it.uri
+                        ListNotificationsReason.StarterpackJoined -> null
+                    }
+                }.distinct()
+                .toImmutableList()
+        val references =
+            service
+                .getPosts(params = GetPostsQueryParams(uris = referencesUri))
+                .maybeResponse()
+                ?.posts
+                .orEmpty()
+                .associateBy { it.uri }
+                .toImmutableMap()
+        cursor = response.cursor
+        Bluesky.saveNotification(
+            accountKey,
+            pagingKey,
+            database,
+            response.notifications,
+            references = references,
+        )
+
+        return MediatorResult.Success(
+            endOfPaginationReached = cursor == null,
+        )
     }
 }

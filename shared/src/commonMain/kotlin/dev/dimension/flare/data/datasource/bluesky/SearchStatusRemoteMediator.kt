@@ -3,8 +3,8 @@ package dev.dimension.flare.data.datasource.bluesky
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
 import app.bsky.feed.SearchPostsQueryParams
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -18,54 +18,50 @@ internal class SearchStatusRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val query: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     var cursor: String? = null
 
-    override suspend fun load(
+    override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        return try {
-            val response =
-                when (loadType) {
-                    LoadType.PREPEND -> {
-                        return MediatorResult.Success(
-                            endOfPaginationReached = true,
-                        )
-                    }
-                    LoadType.REFRESH -> {
-                        service.searchPosts(
-                            SearchPostsQueryParams(
-                                q = query,
-                                limit = state.config.pageSize.toLong(),
-                            ),
-                        )
-                    }
+        val response =
+            when (loadType) {
+                LoadType.PREPEND -> {
+                    return MediatorResult.Success(
+                        endOfPaginationReached = true,
+                    )
+                }
+                LoadType.REFRESH -> {
+                    service.searchPosts(
+                        SearchPostsQueryParams(
+                            q = query,
+                            limit = state.config.pageSize.toLong(),
+                        ),
+                    )
+                }
 
-                    LoadType.APPEND -> {
-                        service.searchPosts(
-                            SearchPostsQueryParams(
-                                q = query,
-                                limit = state.config.pageSize.toLong(),
-                                cursor = cursor,
-                            ),
-                        )
-                    }
-                }.requireResponse()
-            cursor = response.cursor
+                LoadType.APPEND -> {
+                    service.searchPosts(
+                        SearchPostsQueryParams(
+                            q = query,
+                            limit = state.config.pageSize.toLong(),
+                            cursor = cursor,
+                        ),
+                    )
+                }
+            }.requireResponse()
+        cursor = response.cursor
 
-            Bluesky.savePost(
-                accountKey,
-                pagingKey,
-                database,
-                response.posts,
-            )
+        Bluesky.savePost(
+            accountKey,
+            pagingKey,
+            database,
+            response.posts,
+        )
 
-            MediatorResult.Success(
-                endOfPaginationReached = cursor == null,
-            )
-        } catch (e: Throwable) {
-            MediatorResult.Error(e)
-        }
+        return MediatorResult.Success(
+            endOfPaginationReached = cursor == null,
+        )
     }
 }

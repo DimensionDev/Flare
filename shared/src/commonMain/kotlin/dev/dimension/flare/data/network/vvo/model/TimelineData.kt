@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.network.vvo.model
 
 import dev.dimension.flare.common.JSON
+import dev.dimension.flare.data.repository.tryRun
 import kotlinx.datetime.Instant
 import kotlinx.datetime.UtcOffset
 import kotlinx.datetime.format.DateTimeComponents.Companion.Format
@@ -428,7 +429,7 @@ internal object VVODateSerializer : KSerializer<Instant> {
 
     override fun deserialize(decoder: Decoder): Instant {
         val str = decoder.decodeString()
-        return runCatching {
+        return tryRun {
             Instant.parse(
                 str,
                 format =

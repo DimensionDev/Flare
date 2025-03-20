@@ -340,9 +340,8 @@ internal fun saveByteArrayToDownloads(
     context: Context,
     byteArray: ByteArray,
     fileName: String,
+    mimeType: String = getMimeType(byteArray),
 ) {
-    val mimeType = getMimeType(byteArray)
-
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         val values =
             ContentValues().apply {

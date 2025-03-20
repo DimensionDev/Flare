@@ -6,8 +6,8 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
@@ -41,6 +41,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiEmoji
@@ -490,7 +491,7 @@ internal open class MastodonDataSource(
                 },
             )
 
-            runCatching {
+            tryRun {
                 if (liked) {
                     service.unfavourite(statusKey.id)
                 } else {
@@ -554,7 +555,7 @@ internal open class MastodonDataSource(
                 },
             )
 
-            runCatching {
+            tryRun {
                 if (reblogged) {
                     service.unreblog(statusKey.id)
                 } else {
@@ -594,7 +595,7 @@ internal open class MastodonDataSource(
     }
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
-        runCatching {
+        tryRun {
             service.delete(statusKey.id)
             // delete status from cache
             database.statusDao().delete(
@@ -627,7 +628,7 @@ internal open class MastodonDataSource(
                 },
             )
 
-            runCatching {
+            tryRun {
                 if (bookmarked) {
                     service.unbookmark(statusKey.id)
                 } else {
@@ -664,7 +665,7 @@ internal open class MastodonDataSource(
         userKey: MicroBlogKey,
         statusKey: MicroBlogKey?,
     ) {
-        runCatching {
+        tryRun {
             service.report(
                 PostReport(
                     accountId = userKey.id,
@@ -683,7 +684,7 @@ internal open class MastodonDataSource(
                 following = false,
             )
         }
-        runCatching {
+        tryRun {
             service.unfollow(userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -705,7 +706,7 @@ internal open class MastodonDataSource(
                 following = true,
             )
         }
-        runCatching {
+        tryRun {
             service.follow(userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -727,7 +728,7 @@ internal open class MastodonDataSource(
                 blocking = true,
             )
         }
-        runCatching {
+        tryRun {
             service.block(userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -749,7 +750,7 @@ internal open class MastodonDataSource(
                 blocking = false,
             )
         }
-        runCatching {
+        tryRun {
             service.unblock(userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -771,7 +772,7 @@ internal open class MastodonDataSource(
                 muted = true,
             )
         }
-        runCatching {
+        tryRun {
             service.muteUser(userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -793,7 +794,7 @@ internal open class MastodonDataSource(
                 muted = false,
             )
         }
-        runCatching {
+        tryRun {
             service.unmuteUser(userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -967,41 +968,37 @@ internal open class MastodonDataSource(
             pagingKey = listKey,
             scope = scope,
             mediator =
-                object : RemoteMediator<Int, UiList>() {
-                    override suspend fun load(
+                object : BaseRemoteMediator<Int, UiList>() {
+                    override suspend fun doLoad(
                         loadType: LoadType,
                         state: PagingState<Int, UiList>,
                     ): MediatorResult {
-                        try {
-                            if (loadType == LoadType.PREPEND) {
-                                return MediatorResult.Success(endOfPaginationReached = true)
-                            }
-                            val result =
-                                service
-                                    .lists()
-                                    .mapNotNull {
-                                        it.id?.let { it1 ->
-                                            it.render()
-                                        }
-                                    }.toImmutableList()
-
-                            MemoryPagingSource.update<UiList>(
-                                key = listKey,
-                                value = result,
-                            )
-
-                            return MediatorResult.Success(
-                                endOfPaginationReached = true,
-                            )
-                        } catch (e: Exception) {
-                            return MediatorResult.Error(e)
+                        if (loadType == LoadType.PREPEND) {
+                            return MediatorResult.Success(endOfPaginationReached = true)
                         }
+                        val result =
+                            service
+                                .lists()
+                                .mapNotNull {
+                                    it.id?.let { it1 ->
+                                        it.render()
+                                    }
+                                }.toImmutableList()
+
+                        MemoryPagingSource.update<UiList>(
+                            key = listKey,
+                            value = result,
+                        )
+
+                        return MediatorResult.Success(
+                            endOfPaginationReached = true,
+                        )
                     }
                 },
         )
 
     suspend fun createList(title: String) {
-        runCatching {
+        tryRun {
             service.createList(PostList(title = title))
         }.onSuccess { response ->
             if (response.id != null) {
@@ -1022,7 +1019,7 @@ internal open class MastodonDataSource(
     }
 
     override suspend fun deleteList(listId: String) {
-        runCatching {
+        tryRun {
             service.deleteList(listId)
         }.onSuccess {
             MemoryPagingSource.updateWith<UiList>(
@@ -1039,7 +1036,7 @@ internal open class MastodonDataSource(
         listId: String,
         title: String,
     ) {
-        runCatching {
+        tryRun {
             service.updateList(listId, PostList(title = title))
         }.onSuccess {
             MemoryPagingSource.updateWith<UiList>(
@@ -1077,51 +1074,47 @@ internal open class MastodonDataSource(
             pagingKey = listMemberKey(listId),
             scope = scope,
             mediator =
-                object : RemoteMediator<Int, UiUserV2>() {
-                    override suspend fun load(
+                object : BaseRemoteMediator<Int, UiUserV2>() {
+                    override suspend fun doLoad(
                         loadType: LoadType,
                         state: PagingState<Int, UiUserV2>,
                     ): MediatorResult {
-                        try {
-                            if (loadType == LoadType.PREPEND) {
-                                return MediatorResult.Success(endOfPaginationReached = true)
-                            }
-                            val key =
-                                if (loadType == LoadType.REFRESH) {
-                                    null
-                                } else {
-                                    MemoryPagingSource
-                                        .get<UiUserV2>(key = listMemberKey(listId))
-                                        ?.lastOrNull()
-                                        ?.key
-                                        ?.id
-                                }
-                            val result =
-                                service
-                                    .listMembers(listId, limit = pageSize, max_id = key)
-                                    .body()
-                                    ?.map {
-                                        it.toDbUser(accountKey.host).render(accountKey)
-                                    } ?: emptyList()
-
-                            if (loadType == LoadType.REFRESH) {
-                                MemoryPagingSource.update(
-                                    key = listMemberKey(listId),
-                                    value = result.toImmutableList(),
-                                )
-                            } else if (loadType == LoadType.APPEND) {
-                                MemoryPagingSource.append(
-                                    key = listMemberKey(listId),
-                                    value = result.toImmutableList(),
-                                )
-                            }
-
-                            return MediatorResult.Success(
-                                endOfPaginationReached = result.isEmpty(),
-                            )
-                        } catch (e: Exception) {
-                            return MediatorResult.Error(e)
+                        if (loadType == LoadType.PREPEND) {
+                            return MediatorResult.Success(endOfPaginationReached = true)
                         }
+                        val key =
+                            if (loadType == LoadType.REFRESH) {
+                                null
+                            } else {
+                                MemoryPagingSource
+                                    .get<UiUserV2>(key = listMemberKey(listId))
+                                    ?.lastOrNull()
+                                    ?.key
+                                    ?.id
+                            }
+                        val result =
+                            service
+                                .listMembers(listId, limit = pageSize, max_id = key)
+                                .body()
+                                ?.map {
+                                    it.toDbUser(accountKey.host).render(accountKey)
+                                } ?: emptyList()
+
+                        if (loadType == LoadType.REFRESH) {
+                            MemoryPagingSource.update(
+                                key = listMemberKey(listId),
+                                value = result.toImmutableList(),
+                            )
+                        } else if (loadType == LoadType.APPEND) {
+                            MemoryPagingSource.append(
+                                key = listMemberKey(listId),
+                                value = result.toImmutableList(),
+                            )
+                        }
+
+                        return MediatorResult.Success(
+                            endOfPaginationReached = result.isEmpty(),
+                        )
                     }
                 },
         )
@@ -1130,7 +1123,7 @@ internal open class MastodonDataSource(
         listId: String,
         userKey: MicroBlogKey,
     ) {
-        runCatching {
+        tryRun {
             service.addMember(
                 listId,
                 PostAccounts(listOf(userKey.id)),
@@ -1165,7 +1158,7 @@ internal open class MastodonDataSource(
         listId: String,
         userKey: MicroBlogKey,
     ) {
-        runCatching {
+        tryRun {
             service.removeMember(
                 listId,
                 PostAccounts(listOf(userKey.id)),
@@ -1267,7 +1260,7 @@ internal open class MastodonDataSource(
                 },
             )
 
-            runCatching {
+            tryRun {
                 service.vote(id = id, data = PostVote(choices = options.map { it.toString() }))
             }.onFailure {
                 updateStatusUseCase<StatusContent.Mastodon>(

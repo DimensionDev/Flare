@@ -3,8 +3,8 @@ package dev.dimension.flare.data.datasource.bluesky
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
 import app.bsky.feed.GetTimelineQueryParams
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -21,65 +21,64 @@ internal class HomeTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val pagingKey: String,
     private val inAppNotification: InAppNotification,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     var cursor: String? = null
 
-    override suspend fun load(
+    override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        return try {
-            val response =
-                when (loadType) {
-                    LoadType.PREPEND -> return MediatorResult.Success(
-                        endOfPaginationReached = true,
-                    )
-
-                    LoadType.REFRESH -> {
-                        service
-                            .getTimeline(
-                                GetTimelineQueryParams(
-                                    algorithm = "reverse-chronological",
-                                    limit = state.config.pageSize.toLong(),
-                                ),
-                            ).maybeResponse()
-                    }
-
-                    LoadType.APPEND -> {
-                        service
-                            .getTimeline(
-                                GetTimelineQueryParams(
-                                    algorithm = "reverse-chronological",
-                                    limit = state.config.pageSize.toLong(),
-                                    cursor = cursor,
-                                ),
-                            ).maybeResponse()
-                    }
-                } ?: return MediatorResult.Success(
+        val response =
+            when (loadType) {
+                LoadType.PREPEND -> return MediatorResult.Success(
                     endOfPaginationReached = true,
                 )
-            if (loadType == LoadType.REFRESH) {
-                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-            }
-            cursor = response.cursor
-            Bluesky.saveFeed(
-                accountKey,
-                pagingKey,
-                database,
-                response.feed,
-            )
 
-            MediatorResult.Success(
-                endOfPaginationReached = cursor == null,
+                LoadType.REFRESH -> {
+                    service
+                        .getTimeline(
+                            GetTimelineQueryParams(
+                                algorithm = "reverse-chronological",
+                                limit = state.config.pageSize.toLong(),
+                            ),
+                        ).maybeResponse()
+                }
+
+                LoadType.APPEND -> {
+                    service
+                        .getTimeline(
+                            GetTimelineQueryParams(
+                                algorithm = "reverse-chronological",
+                                limit = state.config.pageSize.toLong(),
+                                cursor = cursor,
+                            ),
+                        ).maybeResponse()
+                }
+            } ?: return MediatorResult.Success(
+                endOfPaginationReached = true,
             )
-        } catch (e: Throwable) {
-            if (e is LoginExpiredException) {
-                inAppNotification.onError(
-                    Message.LoginExpired,
-                    LoginExpiredException,
-                )
-            }
-            MediatorResult.Error(e)
+        if (loadType == LoadType.REFRESH) {
+            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+        }
+        cursor = response.cursor
+        Bluesky.saveFeed(
+            accountKey,
+            pagingKey,
+            database,
+            response.feed,
+        )
+
+        return MediatorResult.Success(
+            endOfPaginationReached = cursor == null,
+        )
+    }
+
+    override fun onError(e: Exception) {
+        if (e is LoginExpiredException) {
+            inAppNotification.onError(
+                Message.LoginExpired,
+                LoginExpiredException,
+            )
         }
     }
 }

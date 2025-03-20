@@ -3,7 +3,7 @@ package dev.dimension.flare.data.datasource.xqt
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
@@ -18,54 +18,49 @@ internal class MentionRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     private var cursor: String? = null
 
-    override suspend fun load(
+    override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        return try {
-            val response =
-                when (loadType) {
-                    LoadType.REFRESH -> {
-                        cursor = null
-                        service
-                            .getNotificationsMentions(
-                                count = state.config.pageSize,
-                            ).also {
-                                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                            }
-                    }
-                    LoadType.PREPEND -> {
-                        return MediatorResult.Success(
-                            endOfPaginationReached = true,
-                        )
-                    }
-
-                    LoadType.APPEND -> {
-                        service.getNotificationsMentions(
+        val response =
+            when (loadType) {
+                LoadType.REFRESH -> {
+                    cursor = null
+                    service
+                        .getNotificationsMentions(
                             count = state.config.pageSize,
-                            cursor = cursor,
-                        )
-                    }
+                        ).also {
+                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+                        }
                 }
-            val tweets = response.tweets()
-            cursor = response.cursor()
+                LoadType.PREPEND -> {
+                    return MediatorResult.Success(
+                        endOfPaginationReached = true,
+                    )
+                }
 
-            XQT.save(
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                database = database,
-                tweet = tweets,
-            )
+                LoadType.APPEND -> {
+                    service.getNotificationsMentions(
+                        count = state.config.pageSize,
+                        cursor = cursor,
+                    )
+                }
+            }
+        val tweets = response.tweets()
+        cursor = response.cursor()
 
-            MediatorResult.Success(
-                endOfPaginationReached = cursor == null,
-            )
-        } catch (e: Throwable) {
-            e.printStackTrace()
-            MediatorResult.Error(e)
-        }
+        XQT.save(
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            database = database,
+            tweet = tweets,
+        )
+
+        return MediatorResult.Success(
+            endOfPaginationReached = cursor == null,
+        )
     }
 }

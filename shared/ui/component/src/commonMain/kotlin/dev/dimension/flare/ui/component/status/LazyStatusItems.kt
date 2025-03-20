@@ -147,7 +147,7 @@ public fun LazyStaggeredGridScope.status(
             item(
                 span = StaggeredGridItemSpan.FullLine,
             ) {
-                OnError(error = it, onRetry = { })
+                OnError(error = it, onRetry = onRetry)
             }
         }
         onLoading {
@@ -263,6 +263,7 @@ private fun OnError(
                     modifier = Modifier.size(48.dp),
                 )
                 PlatformText(text = stringResource(Res.string.status_loadmore_error))
+                error.message?.let { PlatformText(text = it) }
             }
         }
     }

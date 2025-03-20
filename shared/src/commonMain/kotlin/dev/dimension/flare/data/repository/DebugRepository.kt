@@ -2,6 +2,7 @@ package dev.dimension.flare.data.repository
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlin.coroutines.cancellation.CancellationException
 
 internal object DebugRepository {
     private val _messages = MutableStateFlow<List<String>>(emptyList())
@@ -20,6 +21,10 @@ internal object DebugRepository {
     }
 
     fun error(exception: Throwable) {
+        if (exception is CancellationException) {
+            // Ignore cancellation exceptions
+            return
+        }
         val message =
             buildString {
                 appendLine("Error: ${exception.message}")

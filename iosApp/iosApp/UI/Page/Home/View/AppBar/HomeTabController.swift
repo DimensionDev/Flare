@@ -148,7 +148,7 @@ class HomeTabController: UIViewController {
             pagingView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             pagingView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             pagingView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            pagingView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            pagingView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
         // 关联 segmentedView
@@ -311,16 +311,16 @@ extension HomeTabController: JXPagingViewDelegate {
 
     @objc private func avatarButtonTapped() {
         // 发送打开新菜单的通知
-        NotificationCenter.default.post(name: NSNotification.Name("flShowNewMenu"), object: nil)
+        NotificationCenter.default.post(name: Notification.Name.flShowNewMenu, object: nil)
         os_log("[📔][HomeNewViewController] avatarButtonTapped - 发送菜单通知", log: .default, type: .debug)
     }
 
     @objc private func handleSettingsTap() {
-        NotificationCenter.default.post(name: NSNotification.Name("ShowTabSettings"), object: nil)
+        NotificationCenter.default.post(name: Notification.Name.showSettings, object: nil)
     }
 
     @objc private func handleLoginTap() {
-        NotificationCenter.default.post(name: NSNotification.Name("ShowLogin"), object: nil)
+        NotificationCenter.default.post(name: Notification.Name.showLogin, object: nil)
     }
 
     func numberOfLists(in _: JXPagingView) -> Int {
@@ -365,8 +365,7 @@ extension HomeTabController: JXSegmentedViewDelegate {
 
             // 获取当前的列表视图并更新其 presenter
             if let currentList = pagingView.validListDict[index] as? TimelineViewController,
-               let presenter = tabStore.currentPresenter
-            {
+               let presenter = tabStore.currentPresenter {
                 os_log("[📔][HomeNewViewController] updatePresenter start", log: .default, type: .debug)
 
                 // 更新 timeline presenter

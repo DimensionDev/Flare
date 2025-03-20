@@ -28,7 +28,7 @@ struct HomeTabScreen: View {
             .onAppear {
                 // 添加通知监听
                 NotificationCenter.default.addObserver(
-                    forName: NSNotification.Name("ShowSettings"),
+                    forName: Notification.Name.showSettings,
                     object: nil,
                     queue: .main
                 ) { _ in
@@ -36,7 +36,7 @@ struct HomeTabScreen: View {
                 }
 
                 NotificationCenter.default.addObserver(
-                    forName: NSNotification.Name("ShowTabSettings"),
+                    forName: Notification.Name.showTabSettings,
                     object: nil,
                     queue: .main
                 ) { _ in
@@ -44,7 +44,7 @@ struct HomeTabScreen: View {
                 }
 
                 NotificationCenter.default.addObserver(
-                    forName: NSNotification.Name("ShowLogin"),
+                    forName: Notification.Name.showLogin,
                     object: nil,
                     queue: .main
                 ) { _ in

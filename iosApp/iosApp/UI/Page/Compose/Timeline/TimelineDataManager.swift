@@ -33,8 +33,7 @@ class TimelineDataManager {
             Task {
                 if let timelineState = self?.presenter?.models.value as? shared.TimelineState,
                    case let .success(data) = onEnum(of: timelineState.listState),
-                   let lastVisibleRow = self?.tableView?.indexPathsForVisibleRows?.last?.row
-                {
+                   let lastVisibleRow = self?.tableView?.indexPathsForVisibleRows?.last?.row {
                     // 触发加载下一页
                     os_log("[📔][TimelineDataManager] 上拉加载触发get: lastVisibleRow = %{public}d", log: .default, type: .debug, lastVisibleRow)
                     _ = data.get(index: Int32(lastVisibleRow))

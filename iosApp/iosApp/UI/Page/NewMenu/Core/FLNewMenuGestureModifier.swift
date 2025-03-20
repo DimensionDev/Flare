@@ -72,7 +72,7 @@ struct FLNewMenuGestureModifier: ViewModifier {
                     handleDragEnd(value)
                 }
         )
-        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("AppBarIndexDidChange"))) { notification in
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name.appBarIndexDidChange)) { notification in
             if let index = notification.object as? Int {
                 currentAppBarIndex = index
                 os_log("[🖐️][GestureModifier] AppBar index updated: %{public}d",

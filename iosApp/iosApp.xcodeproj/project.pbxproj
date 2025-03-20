@@ -21,7 +21,7 @@
 		06B8514F2B6B22A500DFA075 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 06B8514E2B6B22A500DFA075 /* GoogleService-Info.plist */; };
 		06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B851502B6B22DD00DFA075 /* AppDelegate.swift */; };
 		06B851552B6B926D00DFA075 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 06B851542B6B926D00DFA075 /* Localizable.xcstrings */; };
-		642E46162D89764400C9CC9D /* Swiftful00C9CC9D /* SwiftfulRoRouting in Frameworks */ = {isa = PBXBuildFile; productRef = 642E46152D89764400C9CC9D /* SwiftfulRouting */; };
+		642E46162D89764400C9CC9D /* SwiftfulRouting in Frameworks */ = {isa = PBXBuildFile; productRef = 642E46152D89764400C9CC9D /* SwiftfulRouting */; };
 		644C84F82D535D0B00E92D0D /* JXPagingView in Frameworks */ = {isa = PBXBuildFile; productRef = 644C84F72D535D0B00E92D0D /* JXPagingView */; };
 		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
 		6488800B2D1AD43E00EFE72C /* JXSegmentedView in Frameworks */ = {isa = PBXBuildFile; productRef = 6488800A2D1AD43E00EFE72C /* JXSegmentedView */; };

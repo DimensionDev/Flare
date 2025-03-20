@@ -7,19 +7,20 @@ struct SecondNavigation: ViewModifier {
     @EnvironmentObject private var menuState: FLNewAppState
     @Environment(\.dismiss) private var dismiss
     @GestureState private var dragOffset: CGFloat = 0
+    @Environment(\.navigationLevel) private var currentLevel
 
     func body(content: Content) -> some View {
         content
             // 设置导航层级
-            .environment(\.navigationLevel, 1)
+            .environment(\.navigationLevel, currentLevel + 1)
             // 处理页面生命周期
             .onAppear {
                 // 进入详情页时禁用左滑菜单手势
-                menuState.enterNavigationDetail()
+                //menuState.enterNavigationDetail()
             }
             .onDisappear {
                 // 离开详情页时恢复左滑菜单手势
-                menuState.leaveNavigationDetail()
+//                menuState.leaveNavigationDetail()
             }
             // 添加自定义的返回手势
             .gesture(

@@ -8,8 +8,8 @@ struct ServiceIcon: View {
     let domain: String?
     var size: CGFloat = 48
     var contentMode: SwiftUI.ContentMode = .fill
-    var clipShape: AnyShape? = nil
-    var onSuccessURL: ((String) -> Void)? = nil
+    var clipShape: AnyShape?
+    var onSuccessURL: ((String) -> Void)?
     @State private var currentURL: String
     @State private var urlIndex: Int = 0
 
@@ -34,7 +34,7 @@ struct ServiceIcon: View {
             urls.append(contentsOf: [
                 "https://\(domain)/logo.svg",
                 "https://\(domain)/apple-touch-icon.png",
-                "https://\(domain)/favicon.ico",
+                "https://\(domain)/favicon.ico"
             ])
         }
         return urls
@@ -100,7 +100,7 @@ struct SVGIconView: View {
     let contentMode: SwiftUI.ContentMode
     let onSuccess: () -> Void
     let onFailure: () -> Void
-    @State private var svgData: Data? = nil
+    @State private var svgData: Data?
 
     var body: some View {
         Group {
@@ -205,7 +205,7 @@ struct ServiceIconBackground: View {
                         gradient: Gradient(colors: [
                             Color.black.opacity(0.3),
                             Color.black.opacity(0.5),
-                            Color.black.opacity(0.3),
+                            Color.black.opacity(0.3)
                         ]),
                         startPoint: .leading,
                         endPoint: .trailing
@@ -214,7 +214,7 @@ struct ServiceIconBackground: View {
                     LinearGradient(
                         gradient: Gradient(colors: [
                             Color.black.opacity(0.2),
-                            Color.black.opacity(0.6),
+                            Color.black.opacity(0.6)
                         ]),
                         startPoint: .top,
                         endPoint: .bottom
@@ -223,7 +223,7 @@ struct ServiceIconBackground: View {
                     RadialGradient(
                         gradient: Gradient(colors: [
                             Color.black.opacity(0.0),
-                            Color.black.opacity(0.3),
+                            Color.black.opacity(0.3)
                         ]),
                         center: .center,
                         startRadius: 0,

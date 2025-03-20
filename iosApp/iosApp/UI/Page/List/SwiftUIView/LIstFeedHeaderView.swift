@@ -10,8 +10,7 @@ struct ListFeedHeaderView {
         ZStack {
             if let avatarString = listInfo.avatar,
                !avatarString.isEmpty,
-               let url = URL(string: avatarString)
-            {
+               let url = URL(string: avatarString) {
                 KFImage(url)
                     .resizable()
                     .aspectRatio(contentMode: .fit)

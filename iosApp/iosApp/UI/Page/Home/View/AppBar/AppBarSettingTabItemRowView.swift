@@ -39,8 +39,7 @@ struct TabItemRow: View {
                 }
             case let .mixed(icons):
                 if let firstIcon = icons.first,
-                   let materialIcon = FLMaterialIcon(rawValue: firstIcon)
-                {
+                   let materialIcon = FLMaterialIcon(rawValue: firstIcon) {
                     materialIcon.icon
                         .foregroundColor(Color.interactiveActive)
                 }

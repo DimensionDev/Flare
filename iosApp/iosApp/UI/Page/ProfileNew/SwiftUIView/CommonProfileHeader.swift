@@ -217,8 +217,7 @@ struct CommonProfileHeader: View {
                         if case let .success(user) = onEnum(of: state.userState) {
                             if case let .success(relation) = onEnum(of: state.relationState),
                                case let .success(actions) = onEnum(of: state.actions),
-                               actions.data.size > 0
-                            {
+                               actions.data.size > 0 {
                                 ForEach(0 ..< actions.data.size, id: \.self) { index in
                                     let item = actions.data.get(index: index)
                                     Button(action: {
@@ -284,7 +283,7 @@ struct DynamicBannerBackground: View {
                         gradient: Gradient(colors: [
                             Color.black.opacity(0.3),
                             Color.black.opacity(0.1),
-                            Color.black.opacity(0.3),
+                            Color.black.opacity(0.3)
                         ]),
                         startPoint: .leading,
                         endPoint: .trailing

@@ -20,8 +20,7 @@ extension ProfileMediaState {
         if case let .success(data) = onEnum(of: mediaState) {
             for i in 0 ..< data.itemCount {
                 if let mediaItem = data.peek(index: i),
-                   case let .status(statusData) = onEnum(of: mediaItem.status.content)
-                {
+                   case let .status(statusData) = onEnum(of: mediaItem.status.content) {
                     // 按照 timeline 顺序收集所有媒体
                     items.append(contentsOf: statusData.images)
                 }
@@ -52,8 +51,7 @@ struct ProfileMediaListScreen: View {
                         ProfileMediaItemView(media: item.media, appSetting: appSettings) {
                             let allImages = state.allMediaItems
                             if !allImages.isEmpty,
-                               let mediaIndex = allImages.firstIndex(where: { $0 === item.media })
-                            {
+                               let mediaIndex = allImages.firstIndex(where: { $0 === item.media }) {
                                 print("Debug: Opening browser with \(allImages.count) images at index \(mediaIndex)")
                                 showPhotoBrowser(media: item.media, images: allImages, initialIndex: mediaIndex)
                             }
@@ -96,23 +94,20 @@ struct ProfileMediaListScreen: View {
             switch onEnum(of: media) {
             case let .video(data):
                 if let url = URL(string: data.url),
-                   let cell = context.cell as? MediaBrowserVideoCell
-                {
+                   let cell = context.cell as? MediaBrowserVideoCell {
                     cell.load(url: url, previewUrl: URL(string: data.thumbnailUrl), isGIF: false)
                 }
             case let .gif(data):
                 if let url = URL(string: data.url),
-                   let cell = context.cell as? MediaBrowserVideoCell
-                {
+                   let cell = context.cell as? MediaBrowserVideoCell {
                     cell.load(url: url, previewUrl: URL(string: data.previewUrl), isGIF: true)
                 }
             case let .image(data):
                 if let url = URL(string: data.url),
-                   let cell = context.cell as? JXPhotoBrowserImageCell
-                {
+                   let cell = context.cell as? JXPhotoBrowserImageCell {
                     cell.imageView.kf.setImage(with: url, options: [
                         .transition(.fade(0.25)),
-                        .processor(DownsamplingImageProcessor(size: UIScreen.main.bounds.size)),
+                        .processor(DownsamplingImageProcessor(size: UIScreen.main.bounds.size))
                     ])
                 }
             default:
@@ -297,7 +292,7 @@ class HostingCell: UICollectionViewCell {
                 controller.view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
                 controller.view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
                 controller.view.topAnchor.constraint(equalTo: contentView.topAnchor),
-                controller.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+                controller.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
             ])
         }
     }
@@ -549,7 +544,7 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
             newVC.view.leadingAnchor.constraint(equalTo: leadingAnchor),
             newVC.view.trailingAnchor.constraint(equalTo: trailingAnchor),
             newVC.view.topAnchor.constraint(equalTo: topAnchor),
-            newVC.view.bottomAnchor.constraint(equalTo: bottomAnchor),
+            newVC.view.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
 
         // 默认不自动播放，等待 willDisplay 时再播放
@@ -559,8 +554,7 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
     private func cleanupCurrentVideo() {
         // 暂停当前播放的视频
         if let viewModel = videoViewController?.viewModel,
-           let player = viewModel.player
-        {
+           let player = viewModel.player {
             player.pause()
             player.replaceCurrentItem(with: nil) // 清除播放器项
         }
@@ -578,8 +572,7 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
     func willDisplay() {
         // 显示时开始播放视频
         if let viewModel = videoViewController?.viewModel,
-           let player = viewModel.player
-        {
+           let player = viewModel.player {
             player.play()
         }
     }

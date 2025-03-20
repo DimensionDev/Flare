@@ -1,5 +1,6 @@
 import shared
 import SwiftUI
+import SwiftfulRouting
 
 @main
 struct FlareApp: SwiftUI.App {
@@ -23,13 +24,13 @@ struct FlareApp: SwiftUI.App {
         WindowGroup {
             #if os(macOS)
                 ProvideWindowSizeClass {
-                    RouterView()
+                    FlareRouterView()
 //                    .enableInjection()
                         .preferredColorScheme(.light) // 强制使用浅色模式
                 }
                 .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
             #else
-                RouterView()
+                FlareRouterView()
 //                .enableInjection()
                 // .preferredColorScheme(.light)  // 强制使用浅色模式
             #endif

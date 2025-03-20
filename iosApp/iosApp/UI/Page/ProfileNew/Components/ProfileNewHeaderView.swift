@@ -225,7 +225,7 @@ class ProfileNewHeaderView: UIView {
                     .transition(.fade(0.25)),
                     .processor(DownsamplingImageProcessor(size: CGSize(width: 160, height: 160))),
                     .scaleFactor(UIScreen.main.scale),
-                    .cacheOriginalImage,
+                    .cacheOriginalImage
                 ]
             )
         }
@@ -233,15 +233,14 @@ class ProfileNewHeaderView: UIView {
         // 设置banner - 使用 Kingfisher 缓存
         if let url = URL(string: userInfo.profile.banner ?? ""),
            !(userInfo.profile.banner ?? "").isEmpty,
-           (userInfo.profile.banner ?? "").range(of: "^https?://.*example\\.com.*$", options: .regularExpression) == nil
-        {
+           (userInfo.profile.banner ?? "").range(of: "^https?://.*example\\.com.*$", options: .regularExpression) == nil {
             bannerImageView.kf.setImage(
                 with: url,
                 options: [
                     .transition(.fade(0.25)),
                     .processor(DownsamplingImageProcessor(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 300))),
                     .scaleFactor(UIScreen.main.scale),
-                    .cacheOriginalImage,
+                    .cacheOriginalImage
                 ]
             ) { result in
                 switch result {
@@ -337,7 +336,7 @@ class ProfileNewHeaderView: UIView {
                     stackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
                     stackView.topAnchor.constraint(equalTo: containerView.topAnchor),
                     stackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-                    stackView.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor),
+                    stackView.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor)
                 ])
 
                 // 添加 location
@@ -380,7 +379,7 @@ class ProfileNewHeaderView: UIView {
                 .transition(.fade(0.25)),
                 .processor(DownsamplingImageProcessor(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 300))),
                 .scaleFactor(UIScreen.main.scale),
-                .cacheOriginalImage,
+                .cacheOriginalImage
             ]
         ) { [weak self] _ in
             self?.blurEffectView.alpha = 0.7 // 增加模糊效果
@@ -492,8 +491,7 @@ class ProfileNewHeaderView: UIView {
 
                 // 显示提示消息
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let window = windowScene.windows.first
-                {
+                   let window = windowScene.windows.first {
                     let toast = UILabel()
                     toast.text = "copy to clipboard"
                     toast.backgroundColor = UIColor.black.withAlphaComponent(0.7)
@@ -510,7 +508,7 @@ class ProfileNewHeaderView: UIView {
                         toast.centerXAnchor.constraint(equalTo: window.centerXAnchor),
                         toast.bottomAnchor.constraint(equalTo: window.safeAreaLayoutGuide.bottomAnchor, constant: -50),
                         toast.widthAnchor.constraint(greaterThanOrEqualToConstant: 150),
-                        toast.heightAnchor.constraint(equalToConstant: 40),
+                        toast.heightAnchor.constraint(equalToConstant: 40)
                     ])
 
                     UIView.animate(withDuration: 0.3, animations: {

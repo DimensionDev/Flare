@@ -36,7 +36,7 @@ struct StatusDetailScreen: View {
             }
         }
         // 使用封装的二级导航修饰符
-        .secondNavigation()
+        // .secondNavigation()
         // 导航栏背景色（如需自定义可保留）
         // .navigationBarTitleDisplayMode(.inline)
         // .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)

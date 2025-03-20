@@ -143,7 +143,7 @@ public enum FlareMarkdownText {
         nsAttrString.addAttributes(
             [
                 .font: style.font,
-                .foregroundColor: style.textColor,
+                .foregroundColor: style.textColor
             ],
             range: fullRange
         )
@@ -159,7 +159,7 @@ public enum FlareMarkdownText {
             guard isValidRange else { continue }
 
             var attributes: [NSAttributedString.Key: Any] = [
-                .font: style.font,
+                .font: style.font
             ]
 
             switch entity.type {
@@ -222,7 +222,7 @@ public enum FlareMarkdownText {
         for (pattern, type) in [
             (mentionPattern, { (text: String, _: NSRange) in LinkType.mention(text) }),
             (hashtagPattern, { (text: String, _: NSRange) in LinkType.hashtag(text) }),
-            (cashtagPattern, { (text: String, _: NSRange) in LinkType.cashtag(text) }),
+            (cashtagPattern, { (text: String, _: NSRange) in LinkType.cashtag(text) })
         ] {
             if let regex = try? NSRegularExpression(pattern: pattern) {
                 let fullRange = NSRange(location: 0, length: text.utf16.count)

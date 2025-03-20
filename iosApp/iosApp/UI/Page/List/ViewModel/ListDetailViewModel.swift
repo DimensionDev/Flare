@@ -6,10 +6,10 @@ class ListDetailViewModel: BaseListViewModel {
     private let timelinePresenter: ListTimelinePresenter
     private let infoPresenter: ListInfoPresenter
 
-    @Published var listInfo: UiList? = nil
+    @Published var listInfo: UiList?
     @Published var timelineState: ViewState<[UiTimeline]> = .loading
     @Published var isRefreshing: Bool = false
-    @Published var error: Error? = nil
+    @Published var error: Error?
 
     init(accountType: AccountType, listId: String) {
         timelinePresenter = ListTimelinePresenter(accountType: accountType, listId: listId)

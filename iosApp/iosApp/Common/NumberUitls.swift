@@ -1,4 +1,3 @@
-
 func formatCount(_ count: Int64) -> String {
     if count == 0 {
         return ""

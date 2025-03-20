@@ -32,8 +32,7 @@ struct CommonTimelineStatusComponent: View {
 
     private func showReportToast() {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first
-        {
+           let window = windowScene.windows.first {
             let toastView = ToastView(
                 icon: UIImage(systemName: "flag.fill"),
                 message: String(localized: "report") + " success"
@@ -413,8 +412,7 @@ struct CommonTimelineStatusComponent: View {
                                             role: role,
                                             action: {
                                                 if let clickable = item
-                                                    as? StatusActionItemClickable
-                                                {
+                                                    as? StatusActionItemClickable {
                                                     clickable.onClicked(
                                                         .init(
                                                             launcher: AppleUriLauncher(
@@ -491,8 +489,7 @@ struct CommonTimelineStatusComponent: View {
                     (UIApplication.shared.windows.first?.hitTest(
                         UIApplication.shared.windows.first?.convert(CGPoint(x: 0, y: 0), to: nil)
                             ?? .zero, with: nil
-                    ))
-                {
+                    )) {
                     let bottomActionBarFrame = CGRect(
                         x: 16, y: tapLocation.frame.height - 44,
                         width: tapLocation.frame.width - 32, height: 44
@@ -690,8 +687,7 @@ struct ShareButton: View {
                 )
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                    let window = windowScene.windows.first,
-                   let rootVC = window.rootViewController
-                {
+                   let rootVC = window.rootViewController {
                     activityVC.popoverPresentationController?.sourceView = window
                     rootVC.present(activityVC, animated: true)
                 }
@@ -706,8 +702,7 @@ struct ShareButton: View {
             Button(action: {
                 // 截图分享
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let window = windowScene.windows.first
-                {
+                   let window = windowScene.windows.first {
                     let renderer = ImageRenderer(content: view)
                     if let uiImage = renderer.uiImage {
                         let activityVC = UIActivityViewController(

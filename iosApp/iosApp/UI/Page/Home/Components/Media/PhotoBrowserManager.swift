@@ -43,21 +43,18 @@ class PhotoBrowserManager {
             switch onEnum(of: media) {
             case let .video(data):
                 if let url = URL(string: data.url),
-                   let cell = context.cell as? MediaBrowserVideoCell
-                {
+                   let cell = context.cell as? MediaBrowserVideoCell {
                     cell.load(url: url, previewUrl: URL(string: data.thumbnailUrl), isGIF: false)
                 }
             case let .gif(data):
                 if let url = URL(string: data.url),
-                   let cell = context.cell as? MediaBrowserVideoCell
-                {
+                   let cell = context.cell as? MediaBrowserVideoCell {
                     cell.load(url: url, previewUrl: URL(string: data.previewUrl), isGIF: true)
                 }
             case let .image(data):
                 if let url = URL(string: data.url),
                    let previewUrl = URL(string: data.previewUrl),
-                   let cell = context.cell as? JXPhotoBrowserImageCell
-                {
+                   let cell = context.cell as? JXPhotoBrowserImageCell {
                     // 移除已存在的原图标记（如果有）
                     for view in cell.imageView.subviews {
                         if view is OriginalImageMarkView {
@@ -71,7 +68,7 @@ class PhotoBrowserManager {
                         placeholder: nil,
                         options: [
                             .transition(.fade(0.25)),
-                            .processor(DownsamplingImageProcessor(size: UIScreen.main.bounds.size)),
+                            .processor(DownsamplingImageProcessor(size: UIScreen.main.bounds.size))
                         ]
                     ) { result in
                         switch result {
@@ -83,7 +80,7 @@ class PhotoBrowserManager {
                                 options: [
                                     .transition(.fade(0.5)),
                                     .loadDiskFileSynchronously,
-                                    .cacheOriginalImage,
+                                    .cacheOriginalImage
                                 ]
                             ) { result in
                                 switch result {
@@ -103,7 +100,7 @@ class PhotoBrowserManager {
 
                                         NSLayoutConstraint.activate([
                                             markView.trailingAnchor.constraint(equalTo: cell.imageView.trailingAnchor, constant: -16),
-                                            markView.bottomAnchor.constraint(equalTo: cell.imageView.bottomAnchor, constant: bottomPadding),
+                                            markView.bottomAnchor.constraint(equalTo: cell.imageView.bottomAnchor, constant: bottomPadding)
                                         ])
                                     }
                                 case let .failure(error):
@@ -145,8 +142,7 @@ class PhotoBrowserManager {
                         // 获取当前图片的 URL
                         let media = images[index]
                         if case let .image(data) = onEnum(of: media),
-                           let url = URL(string: data.url)
-                        {
+                           let url = URL(string: data.url) {
                             // 添加下载选项
                             let downloadAction = UIAlertAction(title: "Save", style: .default) { _ in
                                 // 先显示加载中的 Toast
@@ -296,8 +292,7 @@ class PhotoBrowserManager {
 
     private func showToast(message: String, icon: UIImage? = nil) {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first
-        {
+           let window = windowScene.windows.first {
             let toastView = ToastView(
                 icon: icon ?? UIImage(systemName: "checkmark.circle.fill"),
                 message: message

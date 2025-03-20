@@ -197,8 +197,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
         // 简化通知处理，只使用ID和标题，避免处理整个Kotlin对象
         if let listId = notification.userInfo?["listId"] as? String,
            let listTitle = notification.userInfo?["listTitle"] as? String,
-           let isPinned = notification.userInfo?["isPinned"] as? Bool
-        {
+           let isPinned = notification.userInfo?["isPinned"] as? Bool {
             // 检查是否为Feed类型
             let isBlueskyFeed = notification.userInfo?["itemType"] as? String == "feed"
 
@@ -543,8 +542,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
                 var newTime
 
                     // 首页特殊处理
-                    = if primaryHomeItems.contains(where: { $0.key == tab.key })
-                {
+                    = if primaryHomeItems.contains(where: { $0.key == tab.key }) {
                     Date(timeIntervalSince1970: 0) // 首页永远在最前
                 } else {
                     // 其他项目用递增时间，使用大间隔确保顺序清晰
@@ -604,8 +602,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 
     @objc private func handleListTitleChange(_ notification: Notification) {
         if let listId = notification.userInfo?["listId"] as? String,
-           let newTitle = notification.userInfo?["newTitle"] as? String
-        {
+           let newTitle = notification.userInfo?["newTitle"] as? String {
             // 检查是否为Feed类型
             let isBlueskyFeed = notification.userInfo?["itemType"] as? String == "feed"
 

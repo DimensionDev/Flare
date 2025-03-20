@@ -9,6 +9,7 @@ extension Notification.Name {
     static let showTabSettings = Notification.Name("ShowTabSettings")
     static let showLogin = Notification.Name("ShowLogin")
     static let flMenuStateDidChange = Notification.Name("FLMenuStateDidChange")
+    static let appBarIndexDidChange = Notification.Name("AppBarIndexDidChange")
 }
 
 struct RouterView: View {
@@ -104,7 +105,7 @@ final class Router: ObservableObject {
     func hideFullScreenCover() {
         fullScreenCover = nil
     }
-}
+}   
 
 extension AppleRoute: Identifiable {}
 
@@ -114,47 +115,48 @@ struct TabItem<Content: View>: View {
     @EnvironmentObject private var menuState: FLNewAppState
 
     var body: some View {
-        NavigationStack(path: $router.navPath) {
-            content(router)
-                .environment(\.navigationLevel, 0)
-                .navigationDestination(for: AppleRoute.self) { route in
-                    getView(route: route, onBack: {}, onNavigate: { route in router.navigate(to: route) })
-                        .environment(\.navigationLevel, 1)
-                        .environmentObject(menuState)
-                }
-        }
-        .sheet(item: $router.sheet) { route in
-            NavigationStack {
-                getView(route: route, onBack: { router.hideSheet() }, onNavigate: { route in router.navigate(to: route) })
-                    .environment(\.navigationLevel, 1)
-                    .environmentObject(menuState)
-                #if os(macOS)
-                    .frame(minWidth: 500, minHeight: 400)
-                #endif
-            }
-        }
-        #if os(iOS)
-        .fullScreenCover(item: $router.fullScreenCover) { route in
-            NavigationStack {
-                getView(route: route, onBack: { router.hideFullScreenCover() }, onNavigate: { route in router.navigate(to: route) })
-                    .environment(\.navigationLevel, 1)
-                    .environmentObject(menuState)
-            }
-            .modifier(SwipeToDismissModifier(onDismiss: {
-                router.hideFullScreenCover()
-            }))
-            .presentationBackground(.black)
-            .environment(\.colorScheme, .dark)
-        }
-        #endif
-        .environment(\.openURL, OpenURLAction { url in
-            if let event = AppDeepLinkHelper.shared.parse(url: url.absoluteString) {
-                router.navigate(to: event)
-                return .handled
-            } else {
-                return .systemAction
-            }
-        })
+        EmptyView()
+//        NavigationStack(path: $router.navPath) {
+//            content(router)
+//                .environment(\.navigationLevel, 0)
+//                .navigationDestination(for: AppleRoute.self) { route in
+//                    getView(route: route, onBack: {}, onNavigate: { route in router.navigate(to: route) })
+//                        .environment(\.navigationLevel, 1)
+//                        .environmentObject(menuState)
+//                }
+//        }
+//        .sheet(item: $router.sheet) { route in
+//            NavigationStack {
+//                getView(route: route, onBack: { router.hideSheet() }, onNavigate: { route in router.navigate(to: route) })
+//                    .environment(\.navigationLevel, 1)
+//                    .environmentObject(menuState)
+//                #if os(macOS)
+//                    .frame(minWidth: 500, minHeight: 400)
+//                #endif
+//            }
+//        }
+//        #if os(iOS)
+//        .fullScreenCover(item: $router.fullScreenCover) { route in
+//            NavigationStack {
+//                getView(route: route, onBack: { router.hideFullScreenCover() }, onNavigate: { route in router.navigate(to: route) })
+//                    .environment(\.navigationLevel, 1)
+//                    .environmentObject(menuState)
+//            }
+//            .modifier(SwipeToDismissModifier(onDismiss: {
+//                router.hideFullScreenCover()
+//            }))
+//            .presentationBackground(.black)
+//            .environment(\.colorScheme, .dark)
+//        }
+//        #endif
+//        .environment(\.openURL, OpenURLAction { url in
+//            if let event = AppDeepLinkHelper.shared.parse(url: url.absoluteString) {
+//                router.navigate(to: event)
+//                return .handled
+//            } else {
+//                return .systemAction
+//            }
+//        })
     }
 
     @ViewBuilder

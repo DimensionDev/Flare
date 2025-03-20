@@ -6,7 +6,7 @@ import SwiftUI
 class ProfilePresenterWrapper: ObservableObject {
     // - Properties
     let presenter: ProfileNewPresenter
-    @Published var isShowAppBar: Bool? = nil // nil: 初始状态, true: 显示, false: 隐藏
+    @Published var isShowAppBar: Bool? // nil: 初始状态, true: 显示, false: 隐藏
     @Published var isShowsegmentedBackButton: Bool = false
 
     // - Init

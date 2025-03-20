@@ -51,8 +51,7 @@ struct ProfileUserInfo {
         // 获取用户字段信息
         let fields: [String: UiRichText] = {
             if let bottomContent = profile.bottomContent,
-               let fieldsContent = bottomContent as? UiProfileBottomContentFields
-            {
+               let fieldsContent = bottomContent as? UiProfileBottomContentFields {
                 return fieldsContent.fields
             }
             return [:]

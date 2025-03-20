@@ -263,14 +263,12 @@ class ProfileNewRefreshViewController: UIViewController {
                 // 获取当前选中的列表视图
                 if let currentList = self.pagingView.validListDict[self.segmentedView.selectedIndex] {
                     if let timelineVC = currentList as? TimelineViewController,
-                       let timelineState = timelineVC.presenter?.models.value as? TimelineState
-                    {
+                       let timelineState = timelineVC.presenter?.models.value as? TimelineState {
                         // 触发时间线刷新
                         try? await timelineState.refresh()
                     } else if let mediaVC = currentList as? ProfileMediaViewController,
                               let mediaPresenterWrapper = self.mediaPresenterWrapper,
-                              case let .success(data) = onEnum(of: mediaPresenterWrapper.presenter.models.value.mediaState)
-                    {
+                              case let .success(data) = onEnum(of: mediaPresenterWrapper.presenter.models.value.mediaState) {
                         // 触发媒体列表刷新
                         data.retry()
                     }
@@ -334,8 +332,7 @@ class ProfileNewRefreshViewController: UIViewController {
         // 添加屏蔽/取消屏蔽选项
         if case let .success(relation) = onEnum(of: state.relationState),
            case let .success(actions) = onEnum(of: state.actions),
-           actions.data.size > 0
-        {
+           actions.data.size > 0 {
             for index in 0 ..< actions.data.size {
                 let item = actions.data.get(index: index)
                 let title = switch onEnum(of: item) {
@@ -606,9 +603,8 @@ extension ProfileNewRefreshViewController: JXSegmentedViewDelegate {
         // 更新选中状态
         selectedTab?.wrappedValue = index
 
-        // 发送通知更新 appbar index
-        // tood: 这个等select Index 解决后要删掉，冗杂的
-        NotificationCenter.default.post(name: NSNotification.Name("AppBarIndexDidChange"), object: index)
+        // 发送标签页切换通知
+        NotificationCenter.default.post(name: Notification.Name.appBarIndexDidChange, object: index)
 
         // 更新当前选中的标签页的presenter
         if let tabStore, index < tabStore.availableTabs.count {
@@ -620,15 +616,13 @@ extension ProfileNewRefreshViewController: JXSegmentedViewDelegate {
             // 获取当前的列表视图并更新其 presenter
             if let currentList = pagingView.validListDict[index] {
                 if let timelineVC = currentList as? TimelineViewController,
-                   let presenter = tabStore.currentPresenter
-                {
+                   let presenter = tabStore.currentPresenter {
                     os_log("[📔][ProfileNewRefreshViewController] updatePresenter start", log: .default, type: .debug)
 
                     // 更新 timeline presenter
                     timelineVC.updatePresenter(presenter)
                 } else if let mediaVC = currentList as? ProfileMediaViewController,
-                          let mediaPresenterWrapper
-                {
+                          let mediaPresenterWrapper {
                     os_log("[📔][ProfileNewRefreshViewController] setupUI end", log: .default, type: .debug)
 
                     // 更新 media presenter

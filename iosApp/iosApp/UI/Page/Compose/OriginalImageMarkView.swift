@@ -53,7 +53,7 @@ public class OriginalImageMarkView: UIView {
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 6),
             stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
             stackView.topAnchor.constraint(equalTo: topAnchor, constant: 4),
-            stackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4),
+            stackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -4)
         ])
     }
 }

@@ -15,8 +15,7 @@ struct NotificationTabScreen: View {
             List {
                 if horizontalSizeClass == .compact,
                    case let .success(data) = onEnum(of: state.allTypes),
-                   data.data.count > 1
-                {
+                   data.data.count > 1 {
                     Picker("notification_type", selection: $notificationType) {
                         ForEach(1 ... data.data.count, id: \.self) { index in
                             if let item = data.data[index - 1] as? NotificationFilter {
@@ -69,8 +68,7 @@ struct NotificationTabScreen: View {
                 .toolbar {
                     if horizontalSizeClass != .compact,
                        case let .success(data) = onEnum(of: state.allTypes),
-                       data.data.count > 1
-                    {
+                       data.data.count > 1 {
                         ToolbarItem(placement: .primaryAction) {
                             Picker("notification_type", selection: $notificationType) {
                                 ForEach(1 ... data.data.count, id: \.self) { index in

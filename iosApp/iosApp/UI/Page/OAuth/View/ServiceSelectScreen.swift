@@ -9,7 +9,7 @@ struct ServiceSelectScreen: View {
     @State private var showXQT: Bool = false
     @State private var showVVo: Bool = false
     @State private var instanceURL = ""
-    @State private var selectedInstance: UiInstance? = nil
+    @State private var selectedInstance: UiInstance?
     @State private var blueskyInputViewModel = BlueskyInputViewModel()
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     let toHome: () -> Void
@@ -66,8 +66,7 @@ struct ServiceSelectScreen: View {
                 ScrollView {
                     LazyVStack(spacing: 8) {
                         if state.canNext,
-                           case let .success(success) = onEnum(of: state.detectedPlatformType)
-                        {
+                           case let .success(success) = onEnum(of: state.detectedPlatformType) {
                             switch success.data.toSwiftEnum() {
                             case .bluesky:
                                 blueskyLoginView(state: state)
@@ -338,7 +337,7 @@ struct ServiceSelectScreen: View {
             "&amp;",
             "&lt;",
             "&gt;",
-            "&quot;",
+            "&quot;"
         ]
 
         let replacements = [
@@ -347,7 +346,7 @@ struct ServiceSelectScreen: View {
             "&",
             "<",
             ">",
-            "\"",
+            "\""
         ]
 
         for (pattern, replacement) in zip(patterns, replacements) {

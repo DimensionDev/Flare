@@ -9,8 +9,7 @@ class FLNewGestureCoordinator: NSObject {
 
     init(gestureState: FLNewGestureState,
          menuState: Binding<Bool>,
-         tabProvider: TabStateProvider? = nil)
-    {
+         tabProvider: TabStateProvider? = nil) {
         self.gestureState = gestureState
         self.menuState = menuState
         self.tabProvider = tabProvider
@@ -37,8 +36,7 @@ class FLNewGestureCoordinator: NSObject {
     private func handleGestureBegan(_: UIPanGestureRecognizer) {
         // 如果不在第一个tab，不处理菜单手势
         if let tabProvider,
-           tabProvider.selectedIndex > 0
-        {
+           tabProvider.selectedIndex > 0 {
             os_log("[🖐️][GestureCoordinator] Gesture ignored - not on first tab", log: .default, type: .debug)
             return
         }

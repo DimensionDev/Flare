@@ -64,7 +64,7 @@ public struct FLTabSettings {
                     ),
                     account: AccountTypeActive.shared,
                     userKey: AccountTypeActive.shared
-                ),
+                )
             ],
             secondaryItems: nil,
             homeTabs: [:]
@@ -91,7 +91,7 @@ public struct FLTabSettings {
                         title: .localized("Settings"),
                         icon: .material(.settings)
                     )
-                ),
+                )
             ],
             secondaryItems: nil,
             homeTabs: [:]
@@ -159,7 +159,7 @@ public struct FLTabSettings {
                 ),
                 account: AccountTypeSpecific(accountKey: accountKey),
                 userKey: AccountTypeSpecific(accountKey: accountKey)
-            ),
+            )
         ]
     }
 
@@ -192,7 +192,7 @@ public struct FLTabSettings {
                     icon: .mixed(.heart, userKey: accountKey)
                 ),
                 account: AccountTypeSpecific(accountKey: accountKey)
-            ),
+            )
 //            FLAllListTabItem(
 //                metaData: FLTabMetaData(
 //                    title: .localized("List"),
@@ -234,7 +234,7 @@ public struct FLTabSettings {
                 ),
                 account: AccountTypeSpecific(accountKey: accountKey),
                 userKey: AccountTypeSpecific(accountKey: accountKey)
-            ),
+            )
         ]
     }
 
@@ -251,7 +251,7 @@ public struct FLTabSettings {
                     title: .localized(.mastodonPublic),
                     icon: .mixed(.world, userKey: accountKey)
                 ), account: AccountTypeSpecific(accountKey: accountKey)
-            ),
+            )
         ]
     }
 
@@ -275,7 +275,7 @@ public struct FLTabSettings {
                     title: .localized(.discover),
                     icon: .mixed(.search, userKey: accountKey)
                 ), account: AccountTypeSpecific(accountKey: accountKey)
-            ),
+            )
         ]
     }
 
@@ -330,7 +330,7 @@ public struct FLTabSettings {
                 ),
                 account: AccountTypeSpecific(accountKey: accountKey),
                 userKey: AccountTypeSpecific(accountKey: accountKey)
-            ),
+            )
         ]
     }
 
@@ -347,7 +347,7 @@ public struct FLTabSettings {
                     title: .localized(.bookmark),
                     icon: .mixed(.bookmark, userKey: accountKey)
                 ), account: AccountTypeSpecific(accountKey: accountKey)
-            ),
+            )
         ]
     }
 
@@ -379,7 +379,7 @@ public struct FLTabSettings {
                 ),
                 account: AccountTypeSpecific(accountKey: accountKey),
                 userKey: AccountTypeSpecific(accountKey: accountKey)
-            ),
+            )
         ]
     }
 
@@ -411,7 +411,7 @@ public struct FLTabSettings {
                     account: AccountTypeSpecific(accountKey: user.key),
                     userKey: actualUserKey,
                     type: .statusWithReplies
-                ),
+                )
             ]
         case .misskey:
             return [
@@ -432,7 +432,7 @@ public struct FLTabSettings {
                     account: AccountTypeSpecific(accountKey: user.key),
                     userKey: actualUserKey,
                     type: .statusWithReplies
-                ),
+                )
             ]
         case .bluesky:
             return [
@@ -462,7 +462,7 @@ public struct FLTabSettings {
                     account: AccountTypeSpecific(accountKey: user.key),
                     userKey: actualUserKey,
                     type: .likes
-                ),
+                )
             ]
         case .xQt:
             return [
@@ -492,7 +492,7 @@ public struct FLTabSettings {
                     account: AccountTypeSpecific(accountKey: user.key),
                     userKey: actualUserKey,
                     type: .likes
-                ),
+                )
             ]
         case .vvo:
             return [
@@ -1113,7 +1113,7 @@ public extension FLTimelineTabItem {
                 ),
                 account: AccountTypeActive.shared,
                 userKey: AccountTypeActive.shared
-            ),
+            )
         ]
     }
 
@@ -1136,7 +1136,7 @@ public extension FLTimelineTabItem {
                     title: .localized(.settings),
                     icon: .material(.settings)
                 )
-            ),
+            )
         ]
     }
 }

@@ -14,8 +14,7 @@ class AppDelegate: NSObject, ApplicationDelegate {
         }
     #else
         func application(_: UIApplication,
-                         didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool
-        {
+                         didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
 //      FirebaseApp.configure()
             true
         }

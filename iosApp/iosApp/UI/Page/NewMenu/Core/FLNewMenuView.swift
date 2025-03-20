@@ -30,7 +30,9 @@ struct FLNewMenuView: View {
                 // 列表入口
                 Button(action: {
                     // 关闭菜单
-                    isOpen = false
+                    withAnimation {
+                        isOpen = false
+                    }
                     // 使用showLists展示列表
                     showLists = true
                 }) {
@@ -49,7 +51,9 @@ struct FLNewMenuView: View {
                 if isPlatformBluesky() {
                     Button(action: {
                         // 关闭菜单
-                        isOpen = false
+                        withAnimation {
+                            isOpen = false
+                        }
                         // 使用showFeeds展示Feeds页面
                         showFeeds = true
                     }) {
@@ -173,7 +177,11 @@ struct FLNewMenuView: View {
 
     private var settingsButton: some View {
         Button(action: {
-            NotificationCenter.default.post(name: NSNotification.Name("ShowSettings"), object: nil)
+            withAnimation {
+                isOpen = false
+            }
+            // 发送设置菜单通知
+            NotificationCenter.default.post(name: Notification.Name.showSettings, object: nil)
         }) {
             HStack {
                 Image(systemName: "gearshape.fill")

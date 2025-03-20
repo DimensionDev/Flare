@@ -4,13 +4,13 @@ import PackageDescription
 let package = Package(
     name: "Generated",
     platforms: [
-        .iOS(.v14),
+        .iOS(.v14)
     ],
     products: [
         .library(
             name: "Generated",
             targets: ["Generated"]
-        ),
+        )
     ],
     dependencies: [],
     targets: [
@@ -18,6 +18,6 @@ let package = Package(
             name: "Generated",
             dependencies: [],
             path: "Sources"
-        ),
+        )
     ]
 )

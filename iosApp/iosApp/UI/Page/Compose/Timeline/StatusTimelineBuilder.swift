@@ -73,9 +73,9 @@ struct StatusItemView: View {
         if let content = data.content {
             switch onEnum(of: content) {
             case let .status(data): Button(action: {
-                    if detailKey != data.statusKey {
+//                    if detailKey != data.statusKey {
                         data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                    }
+//                    }
                 }, label: {
                     CommonTimelineStatusComponent(
                         data: data,

@@ -312,8 +312,7 @@ struct HomeAppBarSettingsView: View {
     private var availableListsSection: some View {
         if let state = lastListState {
             if let successState = state.items as? PagingStateSuccess<UiList>,
-               successState.itemCount > 0
-            {
+               successState.itemCount > 0 {
                 // 检查是否有未固定的列表
                 let hasUnpinnedLists = checkForUnpinnedLists(successState)
                 if hasUnpinnedLists {
@@ -347,8 +346,7 @@ struct HomeAppBarSettingsView: View {
                                 // 确保此列表没有被固定，并且没有对应的标签
                                 let listTabKey = "list_\(store.accountType)_\(list.id)"
                                 if !store.pinnedListIds.contains(list.id),
-                                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey })
-                                {
+                                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey }) {
                                     // 计算已显示的未固定列表数量，用于确定是否显示当前列表
                                     let displayedCount = countDisplayedItemsBeforeIndex(successState, currentIndex: index)
 
@@ -397,8 +395,7 @@ struct HomeAppBarSettingsView: View {
             if let list = successState.peek(index: Int32(i)) {
                 let listTabKey = "list_\(store.accountType)_\(list.id)"
                 if !store.pinnedListIds.contains(list.id),
-                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey })
-                {
+                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey }) {
                     count += 1
                 }
             }
@@ -413,8 +410,7 @@ struct HomeAppBarSettingsView: View {
             if let list = successState.peek(index: Int32(i)) {
                 let listTabKey = "list_\(store.accountType)_\(list.id)"
                 if !store.pinnedListIds.contains(list.id),
-                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey })
-                {
+                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey }) {
                     count += 1
                 }
             }
@@ -476,8 +472,7 @@ struct HomeAppBarSettingsView: View {
                                         // 确保此Feed没有被固定，并且没有对应的标签
                                         let feedTabKey = "feed_\(store.accountType)_\(feed.id)"
                                         if !store.pinnedListIds.contains(feed.id),
-                                           !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey })
-                                        {
+                                           !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey }) {
                                             // 计算已显示的未固定Feed数量，用于确定是否显示当前Feed
                                             let displayedCount = countDisplayedFeedsBeforeIndex(feedsData, currentIndex: index)
 
@@ -532,8 +527,7 @@ struct HomeAppBarSettingsView: View {
             if let feed = feedsData.peek(index: Int32(i)) {
                 let feedTabKey = "feed_\(store.accountType)_\(feed.id)"
                 if !store.pinnedListIds.contains(feed.id),
-                   !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey })
-                {
+                   !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey }) {
                     count += 1
                 }
             }
@@ -548,8 +542,7 @@ struct HomeAppBarSettingsView: View {
             if let feed = feedsData.peek(index: Int32(i)) {
                 let feedTabKey = "feed_\(store.accountType)_\(feed.id)"
                 if !store.pinnedListIds.contains(feed.id),
-                   !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey })
-                {
+                   !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey }) {
                     count += 1
                 }
             }
@@ -562,8 +555,7 @@ struct HomeAppBarSettingsView: View {
             if let list = successState.peek(index: Int32(i)) {
                 let listTabKey = "list_\(store.accountType)_\(list.id)"
                 if !store.pinnedListIds.contains(list.id),
-                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey })
-                {
+                   !store.availableAppBarTabsItems.contains(where: { $0.key == listTabKey }) {
                     return true
                 }
             }
@@ -576,8 +568,7 @@ struct HomeAppBarSettingsView: View {
             if let feed = feedsData.peek(index: Int32(i)) {
                 let feedTabKey = "feed_\(store.accountType)_\(feed.id)"
                 if !store.pinnedListIds.contains(feed.id),
-                   !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey })
-                {
+                   !store.availableAppBarTabsItems.contains(where: { $0.key == feedTabKey }) {
                     return true
                 }
             }
@@ -666,7 +657,7 @@ struct HomeAppBarSettingsView: View {
                 "listId": list.id,
                 "listTitle": list.title,
                 "isPinned": true,
-                "itemType": "list", // 明确指定为list类型
+                "itemType": "list" // 明确指定为list类型
             ]
 
             if let iconUrl = list.avatar {
@@ -697,7 +688,7 @@ struct HomeAppBarSettingsView: View {
                 "listId": feed.id,
                 "listTitle": feed.title,
                 "isPinned": true,
-                "itemType": "feed", // 明确指定为feed类型
+                "itemType": "feed" // 明确指定为feed类型
             ]
 
             if let iconUrl = feed.avatar {
@@ -730,7 +721,7 @@ struct HomeAppBarSettingsView: View {
             userInfo: [
                 "listId": list.id,
                 "oldTitle": list.title,
-                "newTitle": newTitle,
+                "newTitle": newTitle
             ]
         )
 
@@ -761,7 +752,7 @@ struct HomeAppBarSettingsView: View {
                 "listId": listId,
                 "oldTitle": oldTitle,
                 "newTitle": newTitle,
-                "itemType": editingItemIsBlueskyFeed ? "feed" : "list", // 添加类型标识
+                "itemType": editingItemIsBlueskyFeed ? "feed" : "list" // 添加类型标识
             ]
         )
 

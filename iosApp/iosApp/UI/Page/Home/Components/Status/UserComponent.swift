@@ -13,7 +13,6 @@ struct UserComponent: View {
             Button(
                 action: {
                     onUserClicked()
-//                   openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
                 },
                 label: {
                     UserAvatar(data: user.avatar, size: 44)

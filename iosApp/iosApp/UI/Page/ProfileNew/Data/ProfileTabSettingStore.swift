@@ -54,8 +54,7 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
 
     @objc private func handleUserUpdate(_ notification: Notification) {
         if let user = notification.object as? UiUserV2,
-           let userKey = user.key as? MicroBlogKey
-        {
+           let userKey = user.key as? MicroBlogKey {
             initializeWithUser(user, userKey: userKey)
         }
     }

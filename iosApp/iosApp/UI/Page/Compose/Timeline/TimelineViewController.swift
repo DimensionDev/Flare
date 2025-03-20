@@ -43,7 +43,7 @@ class TimelineViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
 
         // 设置代理
@@ -84,8 +84,7 @@ class TimelineViewController: UIViewController {
 extension TimelineViewController: UITableViewDataSource {
     func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
         if let timelineState = presenter?.models.value as? shared.TimelineState,
-           case let .success(data) = onEnum(of: timelineState.listState)
-        {
+           case let .success(data) = onEnum(of: timelineState.listState) {
             return Int(data.itemCount)
         }
         return 0
@@ -95,8 +94,7 @@ extension TimelineViewController: UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TimelineCell", for: indexPath) as! BaseTimelineCell
 
         if let timelineState = presenter?.models.value as? shared.TimelineState,
-           case let .success(data) = onEnum(of: timelineState.listState)
-        {
+           case let .success(data) = onEnum(of: timelineState.listState) {
             if let item = loadingState.handleDataLoading(at: indexPath.row, data: timelineState.listState) {
                 cell.configure(with: item)
             } else {
@@ -122,8 +120,7 @@ extension TimelineViewController: UITableViewDelegate {
         // 获取可见cell的范围
         if let lastVisibleRow = tableView.indexPathsForVisibleRows?.last?.row,
            let timelineState = presenter?.models.value as? shared.TimelineState,
-           case let .success(data) = onEnum(of: timelineState.listState)
-        {
+           case let .success(data) = onEnum(of: timelineState.listState) {
             loadingState.checkAndTriggerPreload(currentRow: lastVisibleRow, data: timelineState.listState)
         }
     }

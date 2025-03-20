@@ -58,10 +58,10 @@ struct ProfileTabScreen: View {
             let userInfo = ProfileUserInfo.from(state: state as! ProfileNewState)
 
             // 打印 isShowAppBar 的值
-            let _ = os_log(
-                "[📔][ProfileTabScreen] userKey=%{public}@", log: .default, type: .debug,
-                String(describing: userKey)
-            )
+//            os_log(
+//                "[📔][ProfileTabScreen] userKey=%{public}@", log: .default, type: .debug,
+//                String(describing: userKey)
+//            )
 
             if userKey == nil {
                 //

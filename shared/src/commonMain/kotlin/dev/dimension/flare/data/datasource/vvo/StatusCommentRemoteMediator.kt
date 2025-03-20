@@ -3,7 +3,7 @@ package dev.dimension.flare.data.datasource.vvo
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.VVO
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -18,68 +18,64 @@ internal class StatusCommentRemoteMediator(
     private val service: VVOService,
     private val statusKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     private var maxId: Long? = null
     private var page = 0
 
-    override suspend fun load(
+    override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        return try {
-            val config = service.config()
-            if (config.data?.login != true) {
-                return MediatorResult.Error(
-                    LoginExpiredException,
-                )
-            }
-            val response =
-                when (loadType) {
-                    LoadType.REFRESH -> {
-                        page = 0
-                        service
-                            .getHotComments(
-                                id = statusKey.id,
-                                mid = statusKey.id,
-                                maxId = null,
-                            ).also {
-                                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                            }
-                    }
-                    LoadType.PREPEND -> {
-                        return MediatorResult.Success(
-                            endOfPaginationReached = true,
-                        )
-                    }
-
-                    LoadType.APPEND -> {
-                        page++
-                        service.getHotComments(
+        val config = service.config()
+        if (config.data?.login != true) {
+            return MediatorResult.Error(
+                LoginExpiredException,
+            )
+        }
+        val response =
+            when (loadType) {
+                LoadType.REFRESH -> {
+                    page = 0
+                    service
+                        .getHotComments(
                             id = statusKey.id,
                             mid = statusKey.id,
-                            maxId = maxId,
-                        )
-                    }
+                            maxId = null,
+                        ).also {
+                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+                        }
+                }
+                LoadType.PREPEND -> {
+                    return MediatorResult.Success(
+                        endOfPaginationReached = true,
+                    )
                 }
 
-            maxId = response.data?.maxID?.takeIf { it != 0L }
-            val status =
-                response.data?.data.orEmpty()
-            VVO.saveComment(
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                database = database,
-                statuses = response.data?.data.orEmpty(),
-                sortIdProvider = {
-                    val index = status.indexOf(it)
-                    -(index + page * state.config.pageSize).toLong()
-                },
-            )
-            MediatorResult.Success(
-                endOfPaginationReached = maxId == null,
-            )
-        } catch (e: Throwable) {
-            MediatorResult.Error(e)
-        }
+                LoadType.APPEND -> {
+                    page++
+                    service.getHotComments(
+                        id = statusKey.id,
+                        mid = statusKey.id,
+                        maxId = maxId,
+                    )
+                }
+            }
+
+        maxId = response.data?.maxID?.takeIf { it != 0L }
+        val status =
+            response.data?.data.orEmpty()
+        VVO.saveComment(
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            database = database,
+            statuses = response.data?.data.orEmpty(),
+            sortIdProvider = {
+                val index = status.indexOf(it)
+                -(index + page * state.config.pageSize).toLong()
+            },
+        )
+        return MediatorResult.Success(
+            endOfPaginationReached = maxId == null,
+        )
     }
 }

@@ -3,7 +3,7 @@ package dev.dimension.flare.data.datasource.xqt
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.XQT
@@ -22,7 +22,7 @@ internal class ListTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     @Serializable
     data class Request(
         @SerialName("listId")
@@ -33,56 +33,52 @@ internal class ListTimelineRemoteMediator(
 
     var cursor: String? = null
 
-    override suspend fun load(
+    override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        return try {
-            val response =
-                when (loadType) {
-                    LoadType.REFRESH -> {
-                        service
-                            .getListLatestTweetsTimeline(
-                                variables =
-                                    Request(
-                                        listID = listId,
-                                        count = state.config.pageSize.toLong(),
-                                    ).encodeJson(),
-                            ).also {
-                                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                            }
-                    }
-                    LoadType.PREPEND -> {
-                        return MediatorResult.Success(
-                            endOfPaginationReached = true,
-                        )
-                    }
-
-                    LoadType.APPEND -> {
-                        service.getListLatestTweetsTimeline(
+        val response =
+            when (loadType) {
+                LoadType.REFRESH -> {
+                    service
+                        .getListLatestTweetsTimeline(
                             variables =
                                 Request(
                                     listID = listId,
                                     count = state.config.pageSize.toLong(),
-                                    cursor = cursor,
                                 ).encodeJson(),
-                        )
-                    }
-                }.body()?.data?.list?.tweetsTimeline?.timeline?.instructions.orEmpty()
-            cursor = response.cursor()
-            val result = response.tweets()
-            XQT.save(
-                database = database,
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                tweet = result,
-            )
+                        ).also {
+                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+                        }
+                }
+                LoadType.PREPEND -> {
+                    return MediatorResult.Success(
+                        endOfPaginationReached = true,
+                    )
+                }
 
-            MediatorResult.Success(
-                endOfPaginationReached = response.isEmpty(),
-            )
-        } catch (e: Throwable) {
-            MediatorResult.Error(e)
-        }
+                LoadType.APPEND -> {
+                    service.getListLatestTweetsTimeline(
+                        variables =
+                            Request(
+                                listID = listId,
+                                count = state.config.pageSize.toLong(),
+                                cursor = cursor,
+                            ).encodeJson(),
+                    )
+                }
+            }.body()?.data?.list?.tweetsTimeline?.timeline?.instructions.orEmpty()
+        cursor = response.cursor()
+        val result = response.tweets()
+        XQT.save(
+            database = database,
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            tweet = result,
+        )
+
+        return MediatorResult.Success(
+            endOfPaginationReached = response.isEmpty(),
+        )
     }
 }

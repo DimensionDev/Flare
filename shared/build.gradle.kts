@@ -135,6 +135,9 @@ android {
     kotlin {
         jvmToolchain(libs.versions.java.get().toInt())
     }
+    buildFeatures {
+        buildConfig = true
+    }
 }
 
 ktlint {

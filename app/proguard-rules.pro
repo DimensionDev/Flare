@@ -76,3 +76,5 @@
 -keep class app.bsky.** { *; }
 -keep class de.jensklingenberg.ktorfit.** { *; }
 -keepclassmembers class de.jensklingenberg.ktorfit.** { *; }
+
+-keepnames class ** { *; }

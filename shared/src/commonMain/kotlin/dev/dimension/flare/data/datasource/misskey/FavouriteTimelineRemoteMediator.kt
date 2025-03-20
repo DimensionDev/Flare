@@ -3,7 +3,7 @@ package dev.dimension.flare.data.datasource.misskey
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Misskey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -18,63 +18,59 @@ internal class FavouriteTimelineRemoteMediator(
     private val service: MisskeyService,
     private val database: CacheDatabase,
     private val pagingKey: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
-    override suspend fun load(
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+    override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        return try {
-            val response =
-                when (loadType) {
-                    LoadType.PREPEND -> return MediatorResult.Success(
-                        endOfPaginationReached = true,
-                    )
-
-                    LoadType.REFRESH -> {
-                        service.iFavorites(
-                            AdminAdListRequest(
-                                limit = state.config.pageSize,
-                            ),
-                        )
-                    }
-
-                    LoadType.APPEND -> {
-                        val lastItem =
-                            database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                                ?: return MediatorResult.Success(
-                                    endOfPaginationReached = true,
-                                )
-                        service.iFavorites(
-                            AdminAdListRequest(
-                                limit = state.config.pageSize,
-                                untilId = lastItem.timeline.statusKey.id,
-                            ),
-                        )
-                    }
-                } ?: return MediatorResult.Success(
+        val response =
+            when (loadType) {
+                LoadType.PREPEND -> return MediatorResult.Success(
                     endOfPaginationReached = true,
                 )
-            if (loadType == LoadType.REFRESH) {
-                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-            }
 
-            Misskey.save(
-                database = database,
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                data = response.map { it.note },
-                sortIdProvider = {
-                    response.find { note -> note.noteId == it.id }?.createdAt?.let {
-                        Instant.parse(it).toEpochMilliseconds()
-                    } ?: 0
-                },
-            )
+                LoadType.REFRESH -> {
+                    service.iFavorites(
+                        AdminAdListRequest(
+                            limit = state.config.pageSize,
+                        ),
+                    )
+                }
 
-            MediatorResult.Success(
-                endOfPaginationReached = response.isEmpty(),
+                LoadType.APPEND -> {
+                    val lastItem =
+                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
+                            ?: return MediatorResult.Success(
+                                endOfPaginationReached = true,
+                            )
+                    service.iFavorites(
+                        AdminAdListRequest(
+                            limit = state.config.pageSize,
+                            untilId = lastItem.timeline.statusKey.id,
+                        ),
+                    )
+                }
+            } ?: return MediatorResult.Success(
+                endOfPaginationReached = true,
             )
-        } catch (e: Throwable) {
-            MediatorResult.Error(e)
+        if (loadType == LoadType.REFRESH) {
+            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
         }
+
+        Misskey.save(
+            database = database,
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            data = response.map { it.note },
+            sortIdProvider = {
+                response.find { note -> note.noteId == it.id }?.createdAt?.let {
+                    Instant.parse(it).toEpochMilliseconds()
+                } ?: 0
+            },
+        )
+
+        return MediatorResult.Success(
+            endOfPaginationReached = response.isEmpty(),
+        )
     }
 }

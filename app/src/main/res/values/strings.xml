@@ -51,6 +51,10 @@
     <string name="settings_guest_setting_description">Set the host for guest mode</string>
     <string name="settings_local_history_title">Local history</string>
     <string name="settings_local_history_description">View or search your browsing history</string>
+    <string name="settings_app_logging_title">App logging</string>
+    <string name="settings_app_logging_save">Save log</string>
+    <string name="settings_app_logging_clear">Clear log</string>
+    <string name="settings_app_logging_enable_network_logging">Enable network logging</string>
 
     <string name="status_loadmore_error_retry">Retry</string>
     <string name="login_expired">Login session expired</string>
@@ -153,6 +157,8 @@
 
     <string name="settings_storage_clear_database">Clear cache database</string>
     <string name="settings_storage_clear_database_description">%1$s users, %2$s statuses will be removed</string>
+    <string name="settings_storage_app_log">Open app log</string>
+    <string name="settings_storage_app_log_description">View the app log</string>
 
     <string name="service_select_instance_input_placeholder">Instance URL</string>
     <string name="service_select_next_button">Next</string>

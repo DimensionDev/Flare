@@ -3,7 +3,7 @@ package dev.dimension.flare.data.datasource.vvo
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.VVO
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -18,59 +18,55 @@ internal class MentionRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val onClearMarker: () -> Unit,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     var page = 1
 
-    override suspend fun load(
+    override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        return try {
-            val config = service.config()
-            if (config.data?.login != true) {
-                return MediatorResult.Error(
-                    LoginExpiredException,
-                )
-            }
-            val response =
-                when (loadType) {
-                    LoadType.REFRESH -> {
-                        page = 0
-                        service
-                            .getMentionsAt(
-                                page = page,
-                            ).also {
-                                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                                onClearMarker.invoke()
-                            }
-                    }
-
-                    LoadType.PREPEND -> {
-                        return MediatorResult.Success(
-                            endOfPaginationReached = true,
-                        )
-                    }
-
-                    LoadType.APPEND -> {
-                        page++
-                        service.getMentionsAt(
+        val config = service.config()
+        if (config.data?.login != true) {
+            return MediatorResult.Error(
+                LoginExpiredException,
+            )
+        }
+        val response =
+            when (loadType) {
+                LoadType.REFRESH -> {
+                    page = 0
+                    service
+                        .getMentionsAt(
                             page = page,
-                        )
-                    }
+                        ).also {
+                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+                            onClearMarker.invoke()
+                        }
                 }
 
-            VVO.saveStatus(
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                database = database,
-                statuses = response.data.orEmpty(),
-            )
+                LoadType.PREPEND -> {
+                    return MediatorResult.Success(
+                        endOfPaginationReached = true,
+                    )
+                }
 
-            MediatorResult.Success(
-                endOfPaginationReached = response.data.isNullOrEmpty(),
-            )
-        } catch (e: Throwable) {
-            MediatorResult.Error(e)
-        }
+                LoadType.APPEND -> {
+                    page++
+                    service.getMentionsAt(
+                        page = page,
+                    )
+                }
+            }
+
+        VVO.saveStatus(
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            database = database,
+            statuses = response.data.orEmpty(),
+        )
+
+        return MediatorResult.Success(
+            endOfPaginationReached = response.data.isNullOrEmpty(),
+        )
     }
 }

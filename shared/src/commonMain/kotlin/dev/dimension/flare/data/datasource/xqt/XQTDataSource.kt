@@ -6,8 +6,8 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
 import androidx.paging.cachedIn
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
@@ -62,6 +62,7 @@ import dev.dimension.flare.data.network.xqt.model.UpdateListRequest
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
@@ -564,7 +565,7 @@ internal class XQTDataSource(
         }
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
-        runCatching {
+        tryRun {
             service.postDeleteTweet(
                 postDeleteTweetRequest =
                     PostDeleteTweetRequest(
@@ -736,7 +737,7 @@ internal class XQTDataSource(
                 },
             )
 
-            runCatching {
+            tryRun {
                 if (liked) {
                     service.postUnfavoriteTweet(
                         postUnfavoriteTweetRequest =
@@ -825,7 +826,7 @@ internal class XQTDataSource(
                 },
             )
 
-            runCatching {
+            tryRun {
                 if (retweeted) {
                     service.postDeleteRetweet(
                         postDeleteRetweetRequest =
@@ -907,7 +908,7 @@ internal class XQTDataSource(
                 },
             )
 
-            runCatching {
+            tryRun {
                 if (bookmarked) {
                     service.postDeleteBookmark(
                         postDeleteBookmarkRequest =
@@ -960,7 +961,7 @@ internal class XQTDataSource(
                 following = true,
             )
         }
-        runCatching {
+        tryRun {
             service.postCreateFriendships(userId = userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -982,7 +983,7 @@ internal class XQTDataSource(
                 following = false,
             )
         }
-        runCatching {
+        tryRun {
             service.postDestroyFriendships(userId = userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -1004,7 +1005,7 @@ internal class XQTDataSource(
                 muted = true,
             )
         }
-        runCatching {
+        tryRun {
             service.postMutesUsersCreate(userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -1026,7 +1027,7 @@ internal class XQTDataSource(
                 muted = false,
             )
         }
-        runCatching {
+        tryRun {
             service.postMutesUsersDestroy(userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -1048,7 +1049,7 @@ internal class XQTDataSource(
                 blocking = true,
             )
         }
-        runCatching {
+        tryRun {
             service.postBlocksCreate(userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -1070,7 +1071,7 @@ internal class XQTDataSource(
                 blocking = false,
             )
         }
-        runCatching {
+        tryRun {
             service.postBlocksDestroy(userKey.id)
         }.onFailure {
             MemCacheable.updateWith<UiRelation>(
@@ -1192,72 +1193,68 @@ internal class XQTDataSource(
             pagingKey = listKey,
             scope = scope,
             mediator =
-                object : RemoteMediator<Int, UiList>() {
+                object : BaseRemoteMediator<Int, UiList>() {
                     var cursor: String? = null
 
-                    override suspend fun load(
+                    override suspend fun doLoad(
                         loadType: LoadType,
                         state: PagingState<Int, UiList>,
                     ): MediatorResult {
-                        try {
-                            if (loadType == LoadType.PREPEND) {
-                                return MediatorResult.Success(endOfPaginationReached = true)
-                            }
-                            if (loadType == LoadType.REFRESH) {
-                                cursor = null
-                            }
-                            val response =
-                                service
-                                    .getListsManagementPageTimeline(
-                                        variables =
-                                            buildString {
-                                                append("{\"count\":20")
-                                                if (cursor != null) {
-                                                    append(",\"cursor\":\"${cursor}\"")
-                                                }
-                                                append("}")
-                                            },
-                                    ).body()
-                                    ?.data
-                                    ?.viewer
-                                    ?.listManagementTimeline
-                                    ?.timeline
-                                    ?.instructions
-
-                            cursor = response?.cursor()
-
-                            val result =
-                                response
-                                    ?.list(accountKey = accountKey)
-                                    .orEmpty()
-                                    .toImmutableList()
-
-                            if (loadType == LoadType.REFRESH) {
-                                MemoryPagingSource.update<UiList>(
-                                    key = listKey,
-                                    value = result,
-                                )
-                            } else if (loadType == LoadType.APPEND) {
-                                MemoryPagingSource.append<UiList>(
-                                    key = listKey,
-                                    value = result,
-                                )
-                            }
-
-                            println("result: $result")
-
-                            return MediatorResult.Success(
-                                endOfPaginationReached = result.isEmpty(),
-                            )
-                        } catch (e: Exception) {
-                            return MediatorResult.Error(e)
+                        if (loadType == LoadType.PREPEND) {
+                            return MediatorResult.Success(endOfPaginationReached = true)
                         }
+                        if (loadType == LoadType.REFRESH) {
+                            cursor = null
+                        }
+                        val response =
+                            service
+                                .getListsManagementPageTimeline(
+                                    variables =
+                                        buildString {
+                                            append("{\"count\":20")
+                                            if (cursor != null) {
+                                                append(",\"cursor\":\"${cursor}\"")
+                                            }
+                                            append("}")
+                                        },
+                                ).body()
+                                ?.data
+                                ?.viewer
+                                ?.listManagementTimeline
+                                ?.timeline
+                                ?.instructions
+
+                        cursor = response?.cursor()
+
+                        val result =
+                            response
+                                ?.list(accountKey = accountKey)
+                                .orEmpty()
+                                .toImmutableList()
+
+                        if (loadType == LoadType.REFRESH) {
+                            MemoryPagingSource.update<UiList>(
+                                key = listKey,
+                                value = result,
+                            )
+                        } else if (loadType == LoadType.APPEND) {
+                            MemoryPagingSource.append<UiList>(
+                                key = listKey,
+                                value = result,
+                            )
+                        }
+
+                        println("result: $result")
+
+                        return MediatorResult.Success(
+                            endOfPaginationReached = result.isEmpty(),
+                        )
                     }
                 },
         )
 
     override suspend fun createList(metaData: ListMetaData) {
-        runCatching {
+        tryRun {
             service.createList(
                 request =
                     CreateListRequest(
@@ -1290,7 +1287,7 @@ internal class XQTDataSource(
     }
 
     override suspend fun deleteList(listId: String) {
-        runCatching {
+        tryRun {
             service.deleteList(
                 request =
                     RemoveListRequest(
@@ -1315,7 +1312,7 @@ internal class XQTDataSource(
         listId: String,
         metaData: ListMetaData,
     ) {
-        runCatching {
+        tryRun {
             service.updateList(
                 request =
                     UpdateListRequest(
@@ -1377,63 +1374,59 @@ internal class XQTDataSource(
             pagingKey = listMemberKey(listId),
             scope = scope,
             mediator =
-                object : RemoteMediator<Int, UiUserV2>() {
+                object : BaseRemoteMediator<Int, UiUserV2>() {
                     var cursor: String? = null
 
-                    override suspend fun load(
+                    override suspend fun doLoad(
                         loadType: LoadType,
                         state: PagingState<Int, UiUserV2>,
                     ): MediatorResult {
-                        try {
-                            if (loadType == LoadType.PREPEND) {
-                                return MediatorResult.Success(endOfPaginationReached = true)
-                            }
-                            if (loadType == LoadType.REFRESH) {
-                                cursor = null
-                            }
-                            val response =
-                                service
-                                    .getListMembers(
-                                        variables =
-                                            buildString {
-                                                append("{\"listId\":\"${listId}\",\"count\":$pageSize")
-                                                if (cursor != null) {
-                                                    append(",\"cursor\":\"${cursor}\"")
-                                                }
-                                                append("}")
-                                            },
-                                    ).body()
-                                    ?.data
-                                    ?.list
-                                    ?.membersTimeline
-                                    ?.timeline
-                                    ?.instructions
-
-                            cursor = response?.cursor()
-
-                            val result =
-                                response?.users().orEmpty().map {
-                                    it.render(accountKey = accountKey)
-                                }
-
-                            if (loadType == LoadType.REFRESH) {
-                                MemoryPagingSource.update(
-                                    key = listMemberKey(listId),
-                                    value = result.toImmutableList(),
-                                )
-                            } else if (loadType == LoadType.APPEND) {
-                                MemoryPagingSource.append(
-                                    key = listMemberKey(listId),
-                                    value = result.toImmutableList(),
-                                )
-                            }
-
-                            return MediatorResult.Success(
-                                endOfPaginationReached = result.isEmpty(),
-                            )
-                        } catch (e: Exception) {
-                            return MediatorResult.Error(e)
+                        if (loadType == LoadType.PREPEND) {
+                            return MediatorResult.Success(endOfPaginationReached = true)
                         }
+                        if (loadType == LoadType.REFRESH) {
+                            cursor = null
+                        }
+                        val response =
+                            service
+                                .getListMembers(
+                                    variables =
+                                        buildString {
+                                            append("{\"listId\":\"${listId}\",\"count\":$pageSize")
+                                            if (cursor != null) {
+                                                append(",\"cursor\":\"${cursor}\"")
+                                            }
+                                            append("}")
+                                        },
+                                ).body()
+                                ?.data
+                                ?.list
+                                ?.membersTimeline
+                                ?.timeline
+                                ?.instructions
+
+                        cursor = response?.cursor()
+
+                        val result =
+                            response?.users().orEmpty().map {
+                                it.render(accountKey = accountKey)
+                            }
+
+                        if (loadType == LoadType.REFRESH) {
+                            MemoryPagingSource.update(
+                                key = listMemberKey(listId),
+                                value = result.toImmutableList(),
+                            )
+                        } else if (loadType == LoadType.APPEND) {
+                            MemoryPagingSource.append(
+                                key = listMemberKey(listId),
+                                value = result.toImmutableList(),
+                            )
+                        }
+
+                        return MediatorResult.Success(
+                            endOfPaginationReached = result.isEmpty(),
+                        )
                     }
                 },
         )
@@ -1444,7 +1437,7 @@ internal class XQTDataSource(
         listId: String,
         userKey: MicroBlogKey,
     ) {
-        runCatching {
+        tryRun {
             service.addMember(
                 request =
                     AddMemberRequest(
@@ -1494,7 +1487,7 @@ internal class XQTDataSource(
         listId: String,
         userKey: MicroBlogKey,
     ) {
-        runCatching {
+        tryRun {
             service.removeMember(
                 request =
                     RemoveMemberRequest(

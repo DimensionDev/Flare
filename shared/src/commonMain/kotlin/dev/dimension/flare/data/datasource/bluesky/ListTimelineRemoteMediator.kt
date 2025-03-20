@@ -3,8 +3,8 @@ package dev.dimension.flare.data.datasource.bluesky
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.paging.RemoteMediator
 import app.bsky.feed.GetListFeedQueryParams
+import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -19,58 +19,54 @@ internal class ListTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val uri: String,
     private val pagingKey: String,
-) : RemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     var cursor: String? = null
 
-    override suspend fun load(
+    override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        return try {
-            val response =
-                when (loadType) {
-                    LoadType.REFRESH ->
-                        service
-                            .getListFeed(
-                                GetListFeedQueryParams(
-                                    list = AtUri(atUri = uri),
-                                    limit = state.config.pageSize.toLong(),
-                                ),
-                            ).maybeResponse()
+        val response =
+            when (loadType) {
+                LoadType.REFRESH ->
+                    service
+                        .getListFeed(
+                            GetListFeedQueryParams(
+                                list = AtUri(atUri = uri),
+                                limit = state.config.pageSize.toLong(),
+                            ),
+                        ).maybeResponse()
 
-                    LoadType.PREPEND -> {
-                        return MediatorResult.Success(
-                            endOfPaginationReached = true,
-                        )
-                    }
+                LoadType.PREPEND -> {
+                    return MediatorResult.Success(
+                        endOfPaginationReached = true,
+                    )
+                }
 
-                    LoadType.APPEND -> {
-                        service
-                            .getListFeed(
-                                GetListFeedQueryParams(
-                                    list = AtUri(atUri = uri),
-                                    limit = state.config.pageSize.toLong(),
-                                    cursor = cursor,
-                                ),
-                            ).maybeResponse()
-                    }
-                } ?: return MediatorResult.Success(
-                    endOfPaginationReached = true,
-                )
-
-            cursor = response.cursor
-            Bluesky.saveFeed(
-                accountKey,
-                pagingKey,
-                database,
-                response.feed,
+                LoadType.APPEND -> {
+                    service
+                        .getListFeed(
+                            GetListFeedQueryParams(
+                                list = AtUri(atUri = uri),
+                                limit = state.config.pageSize.toLong(),
+                                cursor = cursor,
+                            ),
+                        ).maybeResponse()
+                }
+            } ?: return MediatorResult.Success(
+                endOfPaginationReached = true,
             )
 
-            MediatorResult.Success(
-                endOfPaginationReached = cursor == null,
-            )
-        } catch (e: Throwable) {
-            MediatorResult.Error(e)
-        }
+        cursor = response.cursor
+        Bluesky.saveFeed(
+            accountKey,
+            pagingKey,
+            database,
+            response.feed,
+        )
+
+        return MediatorResult.Success(
+            endOfPaginationReached = cursor == null,
+        )
     }
 }

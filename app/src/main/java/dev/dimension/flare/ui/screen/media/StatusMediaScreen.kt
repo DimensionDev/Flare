@@ -102,6 +102,7 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.status.DownloadPresenter
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.theme.FlareTheme
@@ -466,24 +467,10 @@ private fun StatusMediaScreen(
                                         if (!permissionState.status.isGranted) {
                                             permissionState.launchPermissionRequest()
                                         } else {
-                                            val url =
-                                                when (val media = medias[state.currentPage]) {
-                                                    is UiMedia.Audio -> media.url
-                                                    is UiMedia.Gif -> media.url
-                                                    is UiMedia.Image -> media.url
-                                                    is UiMedia.Video -> media.url
-                                                }
-                                            state.save(url)
+                                            state.save(medias[state.currentPage])
                                         }
                                     } else {
-                                        val url =
-                                            when (val media = medias[state.currentPage]) {
-                                                is UiMedia.Audio -> media.url
-                                                is UiMedia.Gif -> media.url
-                                                is UiMedia.Image -> media.url
-                                                is UiMedia.Video -> media.url
-                                            }
-                                        state.save(url)
+                                        state.save(medias[state.currentPage])
                                     }
                                 },
                             ) {
@@ -757,6 +744,7 @@ private fun statusMediaPresenter(
     var currentPage by remember {
         mutableIntStateOf(initialIndex)
     }
+    val downloadPresenter = remember { DownloadPresenter() }.invoke()
     object {
         val status = state.status
         val medias = medias
@@ -777,6 +765,39 @@ private fun statusMediaPresenter(
         fun setLockPager(value: Boolean) {
             lockPager = value
             showUi = !value
+        }
+
+        fun save(data: UiMedia) {
+            when (data) {
+                is UiMedia.Audio -> download(data.url, "audio/*")
+                is UiMedia.Gif -> download(data.url, "image/gif")
+                is UiMedia.Image -> save(data.url)
+                is UiMedia.Video -> download(data.url, "video/*")
+            }
+        }
+
+        fun download(
+            uri: String,
+            mimeType: String,
+        ) {
+            scope.launch {
+                downloadPresenter.download(uri)
+                    .onSuccess {
+                        saveByteArrayToDownloads(
+                            context,
+                            it,
+                            uri.substringAfterLast("/"),
+                        )
+                        withContext(Dispatchers.Main) {
+                            Toast
+                                .makeText(
+                                    context,
+                                    context.getString(R.string.media_save_success),
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                        }
+                    }
+            }
         }
 
         fun save(uri: String) {

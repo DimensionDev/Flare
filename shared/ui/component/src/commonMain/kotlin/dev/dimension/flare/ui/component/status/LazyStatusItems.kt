@@ -73,6 +73,7 @@ public fun LazyStaggeredGridScope.status(
             ) {
                 val item = get(it)
                 AdaptiveCard(
+                    modifier = Modifier.animateItem(),
                     content = {
                         val bigScreen = isBigScreen()
                         Column {
@@ -113,7 +114,11 @@ public fun LazyStaggeredGridScope.status(
                     item(
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
-                        OnError(error = it, onRetry = { retry() })
+                        OnError(
+                            modifier = Modifier.animateItem(),
+                            error = it,
+                            onRetry = { retry() },
+                        )
                     }
                 }.onLoading {
                     items(10) {
@@ -121,6 +126,7 @@ public fun LazyStaggeredGridScope.status(
                             content = {
                                 OnLoading()
                             },
+                            modifier = Modifier.animateItem(),
                         )
                     }
                 }.onEndOfList {
@@ -130,6 +136,7 @@ public fun LazyStaggeredGridScope.status(
                         Column(
                             modifier =
                                 Modifier
+                                    .animateItem()
                                     .fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
@@ -147,12 +154,17 @@ public fun LazyStaggeredGridScope.status(
             item(
                 span = StaggeredGridItemSpan.FullLine,
             ) {
-                OnError(error = it, onRetry = onRetry)
+                OnError(
+                    modifier = Modifier.animateItem(),
+                    error = it,
+                    onRetry = onRetry,
+                )
             }
         }
         onLoading {
             items(10) {
                 AdaptiveCard(
+                    modifier = Modifier.animateItem(),
                     content = {
                         OnLoading()
                     },
@@ -166,6 +178,7 @@ public fun LazyStaggeredGridScope.status(
                 Column(
                     modifier =
                         Modifier
+                            .animateItem()
                             .clickable {
                                 refresh()
                             },

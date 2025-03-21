@@ -261,10 +261,12 @@ public fun CommonStatusComponent(
         }
 
         when (val content = item.bottomContent) {
-            is UiTimeline.ItemContent.Status.BottomContent.Reaction ->
+            is UiTimeline.ItemContent.Status.BottomContent.Reaction -> {
+                Spacer(modifier = Modifier.height(4.dp))
                 StatusReactionComponent(
                     data = content,
                 )
+            }
 
             null -> Unit
         }

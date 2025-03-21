@@ -59,10 +59,6 @@ internal fun Notification.render(
     references: Map<ReferenceType, StatusContent>,
 ): UiTimeline {
     val user = user?.render(accountKey)
-    val status =
-        (references[ReferenceType.Notification] as? StatusContent.Misskey)
-            ?.data
-            ?.renderStatus(accountKey, event)
     val notificationType =
         runCatching {
             NotificationType.entries.first { it.value == type }
@@ -138,6 +134,16 @@ internal fun Notification.render(
             },
             statusKey = MicroBlogKey(id, accountKey.host),
         )
+    val status =
+        (references[ReferenceType.Notification] as? StatusContent.Misskey)
+            ?.data
+            ?.let {
+                if (notificationType == NotificationType.Renote) {
+                    it.renote
+                } else {
+                    it
+                }
+            }?.renderStatus(accountKey, event)
     return UiTimeline(
         topMessage = topMessage,
         content =

@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Host für Gastmodus festlegen</string>
   <string name="settings_local_history_title">Lokale Historie</string>
   <string name="settings_local_history_description">Browserverlauf ansehen oder durchsuchen</string>
+  <string name="settings_app_logging_title">App-Protokollierung</string>
+  <string name="settings_app_logging_save">Log speichern</string>
+  <string name="settings_app_logging_clear">Log löschen</string>
+  <string name="settings_app_logging_enable_network_logging">Netzwerkprotokollierung aktivieren</string>
   <string name="status_loadmore_error_retry">Wiederholen</string>
   <string name="login_expired_message">Zum erneuten Anmelden klicken</string>
   <string name="login_expired_relogin">Erneut anmelden</string>
@@ -126,6 +130,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MB Bilder werden entfernt</string>
   <string name="settings_storage_clear_database">Cache-Datenbank leeren</string>
   <string name="settings_storage_clear_database_description">%1$s Benutzer, %2$s Status werden entfernt</string>
+  <string name="settings_storage_app_log_description">App-Log anzeigen</string>
   <string name="service_select_instance_input_placeholder">Instanz URL</string>
   <string name="service_select_next_button">Nächste</string>
   <string name="service_select_empty_message">Keine Instanzen gefunden</string>
@@ -133,6 +138,7 @@
   <string name="settings_accounts_remove">Entfernen</string>
   <string name="media_menu_save">Speichern</string>
   <string name="media_save_success">In Downloads gespeichert</string>
+  <string name="media_save_fail">Speichern fehlgeschlagen</string>
   <string name="tab_settings_add">Neu</string>
   <string name="tab_settings_drag">Ziehen</string>
   <string name="tab_settings_edit">Bearbeiten</string>

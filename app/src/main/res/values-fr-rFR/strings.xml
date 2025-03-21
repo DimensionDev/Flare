@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Définir l\'hôte pour le mode invité</string>
   <string name="settings_local_history_title">Historique local</string>
   <string name="settings_local_history_description">Voir ou rechercher votre historique de navigation</string>
+  <string name="settings_app_logging_title">Journalisation des applications</string>
+  <string name="settings_app_logging_save">Enregistrer le journal</string>
+  <string name="settings_app_logging_clear">Effacer le journal</string>
+  <string name="settings_app_logging_enable_network_logging">Activer la journalisation du réseau</string>
   <string name="status_loadmore_error_retry">Réessayer</string>
   <string name="login_expired_message">Cliquez pour vous connecter à nouveau</string>
   <string name="login_expired_relogin">Reconnectez-vous</string>
@@ -126,6 +130,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s Mo d\'images seront supprimés</string>
   <string name="settings_storage_clear_database">Vider la base de données du cache</string>
   <string name="settings_storage_clear_database_description">Les utilisateurs %1$s , les statuts %2$s seront supprimés</string>
+  <string name="settings_storage_app_log_description">Voir le journal des applications</string>
   <string name="service_select_instance_input_placeholder">URL de l\'instance</string>
   <string name="service_select_next_button">Suivant</string>
   <string name="service_select_empty_message">Aucune instance trouvée</string>
@@ -133,6 +138,7 @@
   <string name="settings_accounts_remove">Retirer</string>
   <string name="media_menu_save">Enregistrer</string>
   <string name="media_save_success">Enregistré dans les téléchargements</string>
+  <string name="media_save_fail">Échec de l\'enregistrement</string>
   <string name="tab_settings_add">Ajouter</string>
   <string name="tab_settings_drag">Glisser</string>
   <string name="tab_settings_edit">Editer</string>

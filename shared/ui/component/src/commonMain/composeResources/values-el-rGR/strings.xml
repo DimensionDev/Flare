@@ -283,4 +283,6 @@
   <string name="profile_search_user_using_account">Βρείτε %1$s σε %2$s χρησιμοποιώντας %3$s</string>
   <string name="profile_search_user_using_account_compat">Εύρεση σε %1$s</string>
   <string name="feeds_discover_feeds_created_by">Δημιουργήθηκε από %1$s</string>
+  <string name="notification_item_accept_follow_request">Αποδοχή</string>
+  <string name="notification_item_reject_follow_request">Απόρριψη</string>
 </resources>

@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Ustaw host dla trybu gościa</string>
   <string name="settings_local_history_title">Historia lokalna</string>
   <string name="settings_local_history_description">Wyświetl lub przeszukaj historię przeglądania</string>
+  <string name="settings_app_logging_title">Logowanie aplikacji</string>
+  <string name="settings_app_logging_save">Zapisz dziennik</string>
+  <string name="settings_app_logging_clear">Wyczyść log</string>
+  <string name="settings_app_logging_enable_network_logging">Włącz rejestrowanie w sieci</string>
   <string name="status_loadmore_error_retry">Ponów próbę</string>
   <string name="login_expired_message">Kliknij, aby zalogować się ponownie</string>
   <string name="login_expired_relogin">Zaloguj się ponownie</string>
@@ -126,6 +130,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MB obrazów zostanie usunięte</string>
   <string name="settings_storage_clear_database">Wyczyść bazę pamięci podręcznej</string>
   <string name="settings_storage_clear_database_description">%1$s użytkowników, statusy %2$s zostaną usunięte</string>
+  <string name="settings_storage_app_log_description">Zobacz dziennik aplikacji</string>
   <string name="service_select_instance_input_placeholder">Adres URL instancji</string>
   <string name="service_select_next_button">Następny</string>
   <string name="service_select_empty_message">Nie znaleziono instancji</string>
@@ -133,6 +138,7 @@
   <string name="settings_accounts_remove">Usuń</string>
   <string name="media_menu_save">Zapisz</string>
   <string name="media_save_success">Zapisano do pobrania</string>
+  <string name="media_save_fail">Nie udało się zapisać</string>
   <string name="tab_settings_add">Dodaj</string>
   <string name="tab_settings_drag">Przeciągnij</string>
   <string name="tab_settings_edit">Edytuj</string>

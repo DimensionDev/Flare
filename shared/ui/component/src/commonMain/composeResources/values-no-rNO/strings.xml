@@ -286,4 +286,6 @@
   <string name="profile_search_user_using_account">Finn %1$s i %2$s ved å bruke %3$s</string>
   <string name="profile_search_user_using_account_compat">Finn i %1$s</string>
   <string name="feeds_discover_feeds_created_by">Opprettet av %1$s</string>
+  <string name="notification_item_accept_follow_request">Godta</string>
+  <string name="notification_item_reject_follow_request">Avvis</string>
 </resources>

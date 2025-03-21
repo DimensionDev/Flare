@@ -287,4 +287,6 @@
   <string name="profile_search_user_using_account">Najít %1$s v %2$s pomocí %3$s</string>
   <string name="profile_search_user_using_account_compat">Najít v %1$s</string>
   <string name="feeds_discover_feeds_created_by">Vytvořil %1$s</string>
+  <string name="notification_item_accept_follow_request">Přijmout</string>
+  <string name="notification_item_reject_follow_request">Odmítnout</string>
 </resources>

@@ -287,4 +287,6 @@
   <string name="profile_search_user_using_account">Trouvez %1$s dans %2$s en utilisant %3$s</string>
   <string name="profile_search_user_using_account_compat">Trouver dans %1$s</string>
   <string name="feeds_discover_feeds_created_by">Créé par %1$s</string>
+  <string name="notification_item_accept_follow_request">Accepter</string>
+  <string name="notification_item_reject_follow_request">Refuser</string>
 </resources>

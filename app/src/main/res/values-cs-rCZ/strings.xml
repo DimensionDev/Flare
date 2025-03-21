@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Nastavit hostitele pro režim hosta</string>
   <string name="settings_local_history_title">Místní historie</string>
   <string name="settings_local_history_description">Zobrazit nebo vyhledat historii prohlížení</string>
+  <string name="settings_app_logging_title">Protokolování aplikací</string>
+  <string name="settings_app_logging_save">Uložit log</string>
+  <string name="settings_app_logging_clear">Vymazat záznam</string>
+  <string name="settings_app_logging_enable_network_logging">Povolit protokolování do sítě</string>
   <string name="status_loadmore_error_retry">Opakovat</string>
   <string name="login_expired_message">Klikněte pro přihlášení znovu</string>
   <string name="login_expired_relogin">Přihlásit se znovu</string>
@@ -126,6 +130,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MB obrázků bude odstraněno</string>
   <string name="settings_storage_clear_database">Vymazat databázi mezipaměti</string>
   <string name="settings_storage_clear_database_description">%1$s uživatelé, %2$s stavy budou odstraněny</string>
+  <string name="settings_storage_app_log_description">Zobrazit protokol aplikace</string>
   <string name="service_select_instance_input_placeholder">URL instance</string>
   <string name="service_select_next_button">Další</string>
   <string name="service_select_empty_message">Nebyly nalezeny žádné instance</string>
@@ -133,6 +138,7 @@
   <string name="settings_accounts_remove">Odebrat</string>
   <string name="media_menu_save">Uložit</string>
   <string name="media_save_success">Uloženo do souborů</string>
+  <string name="media_save_fail">Uložení se nezdařilo</string>
   <string name="tab_settings_add">Přidat</string>
   <string name="tab_settings_drag">Přetažení</string>
   <string name="tab_settings_edit">Upravit</string>

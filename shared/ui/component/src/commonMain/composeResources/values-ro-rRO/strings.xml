@@ -287,4 +287,6 @@
   <string name="profile_search_user_using_account">Găsește %1$s în %2$s folosind %3$s</string>
   <string name="profile_search_user_using_account_compat">Găsește în %1$s</string>
   <string name="feeds_discover_feeds_created_by">Creat de %1$s</string>
+  <string name="notification_item_accept_follow_request">Acceptă</string>
+  <string name="notification_item_reject_follow_request">Respingere</string>
 </resources>

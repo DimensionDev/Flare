@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Setați gazda pentru modul vizitator</string>
   <string name="settings_local_history_title">Istoric local</string>
   <string name="settings_local_history_description">Vezi sau caută istoricul navigărilor</string>
+  <string name="settings_app_logging_title">Înregistrare aplicații</string>
+  <string name="settings_app_logging_save">Salvare jurnal</string>
+  <string name="settings_app_logging_clear">Curăță jurnalul</string>
+  <string name="settings_app_logging_enable_network_logging">Activați înregistrarea în rețea</string>
   <string name="status_loadmore_error_retry">Reîncercați</string>
   <string name="login_expired_message">Faceți clic pentru a vă reconecta</string>
   <string name="login_expired_relogin">Conectează-te din nou</string>
@@ -126,6 +130,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MB de imagini vor fi eliminate</string>
   <string name="settings_storage_clear_database">Goliţi baza de date cache</string>
   <string name="settings_storage_clear_database_description">%1$s utilizatori, stările %2$s vor fi șterse</string>
+  <string name="settings_storage_app_log_description">Vezi jurnalul aplicațiilor</string>
   <string name="service_select_instance_input_placeholder">URL Instanță</string>
   <string name="service_select_next_button">Următoarea</string>
   <string name="service_select_empty_message">Nu s-au găsit instanțe</string>
@@ -133,6 +138,7 @@
   <string name="settings_accounts_remove">Elimină</string>
   <string name="media_menu_save">Salvează</string>
   <string name="media_save_success">Salvat în Descărcări</string>
+  <string name="media_save_fail">Salvarea nu a reușit</string>
   <string name="tab_settings_add">Adăugare</string>
   <string name="tab_settings_drag">Trage</string>
   <string name="tab_settings_edit">Editare</string>

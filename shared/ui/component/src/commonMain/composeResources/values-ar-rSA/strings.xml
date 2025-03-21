@@ -286,4 +286,6 @@
   <string name="profile_search_user_using_account">البحث عن %1$s في %2$s باستخدام %3$s</string>
   <string name="profile_search_user_using_account_compat">البحث في %1$s</string>
   <string name="feeds_discover_feeds_created_by">تم إنشاؤها بواسطة %1$s</string>
+  <string name="notification_item_accept_follow_request">قبول</string>
+  <string name="notification_item_reject_follow_request">رفض</string>
 </resources>

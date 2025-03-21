@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Установить хост для гостевого режима</string>
   <string name="settings_local_history_title">Локальная история</string>
   <string name="settings_local_history_description">Просмотр или поиск в истории посещений</string>
+  <string name="settings_app_logging_title">Журнал приложений</string>
+  <string name="settings_app_logging_save">Сохранить журнал</string>
+  <string name="settings_app_logging_clear">Очистить журнал</string>
+  <string name="settings_app_logging_enable_network_logging">Включить сетевое журналирование</string>
   <string name="status_loadmore_error_retry">Повторить</string>
   <string name="login_expired_message">Нажмите, чтобы войти снова</string>
   <string name="login_expired_relogin">Войти снова</string>
@@ -125,6 +129,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s МБ изображений будет удалено</string>
   <string name="settings_storage_clear_database">Очистить базу данных кэша</string>
   <string name="settings_storage_clear_database_description">%1$s пользователи, статусы %2$s будут удалены</string>
+  <string name="settings_storage_app_log_description">Просмотр журнала приложений</string>
   <string name="service_select_instance_input_placeholder">URL экземпляра</string>
   <string name="service_select_next_button">Следующий</string>
   <string name="service_select_empty_message">Экземпляров не найдено</string>
@@ -132,6 +137,7 @@
   <string name="settings_accounts_remove">Удалить</string>
   <string name="media_menu_save">Сохранить</string>
   <string name="media_save_success">Сохранено в Загрузках</string>
+  <string name="media_save_fail">Не удалось сохранить</string>
   <string name="tab_settings_add">Добавить</string>
   <string name="tab_settings_drag">Перетащите</string>
   <string name="tab_settings_edit">Редактирование</string>

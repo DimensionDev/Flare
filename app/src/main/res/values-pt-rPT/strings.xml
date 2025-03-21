@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Definir o host para o modo convidado</string>
   <string name="settings_local_history_title">Histórico local</string>
   <string name="settings_local_history_description">Ver ou pesquisar seu histórico de navegação</string>
+  <string name="settings_app_logging_title">Registro do aplicativo</string>
+  <string name="settings_app_logging_save">Salvar log</string>
+  <string name="settings_app_logging_clear">Limpar Log</string>
+  <string name="settings_app_logging_enable_network_logging">Habilitar registro de rede</string>
   <string name="status_loadmore_error_retry">Repetir</string>
   <string name="login_expired_message">Clique para entrar novamente</string>
   <string name="login_expired_relogin">Entrar novamente</string>
@@ -126,6 +130,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MB de imagens serão removidas</string>
   <string name="settings_storage_clear_database">Limpar banco de dados de cache</string>
   <string name="settings_storage_clear_database_description">%1$s usuários, o status %2$s será removido</string>
+  <string name="settings_storage_app_log_description">Ver registro do aplicativo</string>
   <string name="service_select_instance_input_placeholder">Instância URL</string>
   <string name="service_select_next_button">Próximo</string>
   <string name="service_select_empty_message">Nenhuma instância encontrada</string>
@@ -133,6 +138,7 @@
   <string name="settings_accounts_remove">Excluir</string>
   <string name="media_menu_save">Guardar</string>
   <string name="media_save_success">Salvo nos Downloads</string>
+  <string name="media_save_fail">Falha ao salvar</string>
   <string name="tab_settings_add">Adicionar</string>
   <string name="tab_settings_drag">Arrastar</string>
   <string name="tab_settings_edit">Alterar</string>

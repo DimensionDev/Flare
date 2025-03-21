@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">تعيين المضيف لوضع الضيف</string>
   <string name="settings_local_history_title">التاريخ المحلي</string>
   <string name="settings_local_history_description">عرض أو بحث سجل التصفح الخاص بك</string>
+  <string name="settings_app_logging_title">تسجيل التطبيقات</string>
+  <string name="settings_app_logging_save">حفظ السجل</string>
+  <string name="settings_app_logging_clear">مسح السجل</string>
+  <string name="settings_app_logging_enable_network_logging">تمكين تسجيل الشبكة</string>
   <string name="status_loadmore_error_retry">إعادة المحاولة</string>
   <string name="login_expired_message">انقر لتسجيل الدخول مرة أخرى</string>
   <string name="login_expired_relogin">تسجيل الدخول مرة أخرى</string>
@@ -125,6 +129,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MB من الصور سيتم إزالتها</string>
   <string name="settings_storage_clear_database">مسح قاعدة بيانات ذاكرة التخزين المؤقت</string>
   <string name="settings_storage_clear_database_description">%1$s مستخدمين، %2$s حالات سيتم إزالتها</string>
+  <string name="settings_storage_app_log_description">عرض سجل التطبيقات</string>
   <string name="service_select_instance_input_placeholder">رابط مثيل</string>
   <string name="service_select_next_button">التالي</string>
   <string name="service_select_empty_message">لا يوجد مثيلات</string>
@@ -132,6 +137,7 @@
   <string name="settings_accounts_remove">إزالة</string>
   <string name="media_menu_save">حفظ</string>
   <string name="media_save_success">حفظ في التنزيلات</string>
+  <string name="media_save_fail">فشل في الحفظ</string>
   <string name="tab_settings_add">إضافة</string>
   <string name="tab_settings_drag">اسحب</string>
   <string name="tab_settings_edit">تحرير</string>

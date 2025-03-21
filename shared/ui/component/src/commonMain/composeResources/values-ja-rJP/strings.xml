@@ -287,4 +287,6 @@
   <string name="profile_search_user_using_account">%3$s を使用して %2$s で %1$s を見つける</string>
   <string name="profile_search_user_using_account_compat">%1$s で検索</string>
   <string name="feeds_discover_feeds_created_by">作成者: %1$s</string>
+  <string name="notification_item_accept_follow_request">同意する</string>
+  <string name="notification_item_reject_follow_request">拒否</string>
 </resources>

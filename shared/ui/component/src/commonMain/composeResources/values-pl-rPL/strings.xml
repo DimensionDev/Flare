@@ -284,4 +284,6 @@
   <string name="poll_expired_at">Wygasło o %1$s</string>
   <string name="user_send_message">Wyślij wiadomość</string>
   <string name="feeds_discover_feeds_created_by">Utworzone przez %1$s</string>
+  <string name="notification_item_accept_follow_request">Zaakceptuj</string>
+  <string name="notification_item_reject_follow_request">Odrzuć</string>
 </resources>

@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">ゲストモードのホストを設定する</string>
   <string name="settings_local_history_title">ローカル履歴</string>
   <string name="settings_local_history_description">閲覧履歴を表示または検索する</string>
+  <string name="settings_app_logging_title">アプリのログ</string>
+  <string name="settings_app_logging_save">ログを保存</string>
+  <string name="settings_app_logging_clear">ログをクリア</string>
+  <string name="settings_app_logging_enable_network_logging">ネットワークログを有効にする</string>
   <string name="status_loadmore_error_retry">再試行する</string>
   <string name="login_expired">ログインセッションの有効期限が切れました</string>
   <string name="login_expired_message">クリックして再度ログインする</string>
@@ -127,6 +131,8 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MBの画像が削除されます</string>
   <string name="settings_storage_clear_database">キャッシュデータベースをクリア</string>
   <string name="settings_storage_clear_database_description">%1$sユーザー、%2$sステータスが削除されます</string>
+  <string name="settings_storage_app_log">アプリログを開く</string>
+  <string name="settings_storage_app_log_description">アプリのログを表示</string>
   <string name="service_select_instance_input_placeholder">インスタンス URL</string>
   <string name="service_select_next_button">次へ</string>
   <string name="service_select_empty_message">インスタンスが見つかりません</string>
@@ -134,6 +140,7 @@
   <string name="settings_accounts_remove">削除</string>
   <string name="media_menu_save">保存</string>
   <string name="media_save_success">ダウンロードに保存しました</string>
+  <string name="media_save_fail">保存に失敗しました</string>
   <string name="tab_settings_add">追加</string>
   <string name="tab_settings_drag">ドラッグ</string>
   <string name="tab_settings_edit">編集</string>

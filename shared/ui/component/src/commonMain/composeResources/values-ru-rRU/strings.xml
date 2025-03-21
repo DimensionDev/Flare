@@ -286,4 +286,6 @@
   <string name="profile_search_user_using_account">Искать %1$s в %2$s с помощью %3$s</string>
   <string name="profile_search_user_using_account_compat">Найти в %1$s</string>
   <string name="feeds_discover_feeds_created_by">Создано %1$s</string>
+  <string name="notification_item_accept_follow_request">Принять</string>
+  <string name="notification_item_reject_follow_request">Отклонить</string>
 </resources>

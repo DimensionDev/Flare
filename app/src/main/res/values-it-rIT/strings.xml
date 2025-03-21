@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Imposta l\'host per la modalità ospite</string>
   <string name="settings_local_history_title">Cronologia locale</string>
   <string name="settings_local_history_description">Visualizza o cerca nella cronologia di navigazione</string>
+  <string name="settings_app_logging_title">Registrazione app</string>
+  <string name="settings_app_logging_save">Salva log</string>
+  <string name="settings_app_logging_clear">Cancella log</string>
+  <string name="settings_app_logging_enable_network_logging">Abilita registrazione di rete</string>
   <string name="status_loadmore_error_retry">Riprova</string>
   <string name="login_expired_message">Clicca di nuovo per effettuare il login</string>
   <string name="login_expired_relogin">Accedi di nuovo</string>
@@ -126,6 +130,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MB di immagini saranno rimossi</string>
   <string name="settings_storage_clear_database">Cancella database cache</string>
   <string name="settings_storage_clear_database_description">Utenti %1$s , gli stati %2$s verranno rimossi</string>
+  <string name="settings_storage_app_log_description">Visualizza il registro app</string>
   <string name="service_select_instance_input_placeholder">Url Istanza</string>
   <string name="service_select_next_button">Successivo</string>
   <string name="service_select_empty_message">Nessuna istanza trovata</string>
@@ -133,6 +138,7 @@
   <string name="settings_accounts_remove">Rimuovi</string>
   <string name="media_menu_save">Salva</string>
   <string name="media_save_success">Salvato in Download</string>
+  <string name="media_save_fail">Salvataggio non riuscito</string>
   <string name="tab_settings_add">Aggiungi</string>
   <string name="tab_settings_drag">Trascina</string>
   <string name="tab_settings_edit">Modifica</string>

@@ -188,7 +188,7 @@ window-styler = { module = "com.mayakapps.compose:window-styler", version = "0.3
 
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.17.0" }
 
-jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version = "3.6" }
+jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version = "3.9.1" }
 
 jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.8.0-alpha10" }
 

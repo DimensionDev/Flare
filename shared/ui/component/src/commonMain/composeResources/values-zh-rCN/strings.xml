@@ -287,4 +287,6 @@
   <string name="profile_search_user_using_account">使用 %3$s 在 %2$s 寻找 %1$s</string>
   <string name="profile_search_user_using_account_compat">在 %1$s 中查找</string>
   <string name="feeds_discover_feeds_created_by">由%1$s创建</string>
+  <string name="notification_item_accept_follow_request">接受</string>
+  <string name="notification_item_reject_follow_request">拒绝</string>
 </resources>

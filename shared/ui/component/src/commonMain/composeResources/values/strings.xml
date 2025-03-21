@@ -386,4 +386,7 @@
     <string name="profile_search_user_using_account_compat">Find in %1$s</string>
 
     <string name="feeds_discover_feeds_created_by">Created by %1$s</string>
+
+    <string name="notification_item_accept_follow_request">Accept</string>
+    <string name="notification_item_reject_follow_request">Reject</string>
 </resources>

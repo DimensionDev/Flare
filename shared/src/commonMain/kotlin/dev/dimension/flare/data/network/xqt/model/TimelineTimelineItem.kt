@@ -36,7 +36,7 @@ internal data class TimelineTimelineItem(
     @Contextual @SerialName(value = "entryType")
     val entryType: ContentEntryType,
     @SerialName(value = "itemContent")
-    val itemContent: ItemContentUnion,
+    val itemContent: ItemContentUnion? = null,
     @SerialName(value = "clientEventInfo")
     val clientEventInfo: ClientEventInfo? = null,
 //    @Contextual @SerialName(value = "feedbackInfo")

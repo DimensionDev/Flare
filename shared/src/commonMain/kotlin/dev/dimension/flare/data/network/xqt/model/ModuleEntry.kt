@@ -29,5 +29,5 @@ internal data class ModuleEntry(
 //    @SerialName(value = "clientEventInfo")
 //    val clientEventInfo: ClientEventInfo,
     @SerialName(value = "itemContent")
-    val itemContent: ItemContentUnion,
+    val itemContent: ItemContentUnion? = null,
 )

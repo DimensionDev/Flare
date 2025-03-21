@@ -158,7 +158,7 @@ internal class CacheableState<T>(
 internal fun <T : Any> UiState<CacheData<ImmutableList<T>>>.toPagingState(): PagingState<T> =
     when (this) {
         is UiState.Loading -> PagingState.Loading()
-        is UiState.Error -> PagingState.Error(throwable)
+        is UiState.Error -> PagingState.Error(throwable, onRetry = {})
         is UiState.Success -> data.collectAsState().toPagingState()
     }
 
@@ -178,7 +178,7 @@ private fun <T : Any> CacheableState<ImmutableList<T>>.toPagingState(): PagingSt
     } else if (refreshState is LoadState.Loading) {
         PagingState.Loading()
     } else if (refreshState is LoadState.Error) {
-        PagingState.Error((refreshState as LoadState.Error).error)
+        PagingState.Error((refreshState as LoadState.Error).error, onRetry = { refresh() })
     } else {
         PagingState.Empty(this::refresh)
     }

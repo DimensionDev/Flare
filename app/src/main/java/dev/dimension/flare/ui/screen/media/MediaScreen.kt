@@ -12,22 +12,25 @@ import android.provider.MediaStore
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
-import android.webkit.MimeTypeMap
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ListItem
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -38,12 +41,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
 import coil3.annotation.ExperimentalCoilApi
@@ -62,7 +65,8 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.FloppyDisk
+import compose.icons.fontawesomeicons.solid.Download
+import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.ui.component.FAIcon
@@ -210,50 +214,55 @@ internal fun MediaScreen(
                         Modifier
                             .fillMaxSize()
                             .zoomable(zoomableState)
-                            .combinedClickable(
-                                onClick = {
-                                },
-                                onLongClick = {
-                                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    state.setShowMenu(true)
-                                },
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() },
-                            ),
+                            .clickable {
+                                state.setShowUi(!state.showUi)
+                            },
                 )
             }
-            if (state.showMenu) {
-                ModalBottomSheet(
-                    onDismissRequest = {
-                        state.setShowMenu(false)
-                    },
+            AnimatedVisibility(
+                visible = state.showUi,
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter),
+                enter = slideInVertically { -it },
+                exit = slideOutVertically { -it },
+            ) {
+                Row(
+                    modifier =
+                        Modifier
+                            .systemBarsPadding()
+                            .padding(horizontal = 4.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    ListItem(
-                        headlineContent = {
-                            Text(text = stringResource(R.string.media_menu_save))
+                    FilledTonalIconButton(
+                        onClick = {
+                            onDismiss.invoke()
                         },
-                        leadingContent = {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.FloppyDisk,
-                                contentDescription = stringResource(R.string.media_menu_save),
-                            )
+                    ) {
+                        FAIcon(
+                            FontAwesomeIcons.Solid.Xmark,
+                            contentDescription = stringResource(id = R.string.navigate_back),
+                        )
+                    }
+                    FilledTonalIconButton(
+                        onClick = {
+                            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                                if (!permissionState.status.isGranted) {
+                                    permissionState.launchPermissionRequest()
+                                } else {
+                                    state.save()
+                                }
+                            } else {
+                                state.save()
+                            }
                         },
-                        modifier =
-                            Modifier
-                                .clickable {
-                                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                                        if (!permissionState.status.isGranted) {
-                                            permissionState.launchPermissionRequest()
-                                        } else {
-                                            state.setShowMenu(false)
-                                            state.save()
-                                        }
-                                    } else {
-                                        state.setShowMenu(false)
-                                        state.save()
-                                    }
-                                },
-                    )
+                    ) {
+                        FAIcon(
+                            FontAwesomeIcons.Solid.Download,
+                            contentDescription = stringResource(id = R.string.media_menu_save),
+                        )
+                    }
                 }
             }
         }
@@ -267,13 +276,14 @@ private fun mediaPresenter(
     context: Context,
     scope: CoroutineScope = koinInject(),
 ) = run {
-    var showMenu by remember { mutableStateOf(false) }
+    var showUi by remember {
+        mutableStateOf(true)
+    }
     object {
-        val showMenu: Boolean
-            get() = showMenu
+        val showUi = showUi
 
-        fun setShowMenu(value: Boolean) {
-            showMenu = value
+        fun setShowUi(value: Boolean) {
+            showUi = value
         }
 
         fun save() {
@@ -302,27 +312,7 @@ private fun getMimeType(byteArray: ByteArray): String {
             inJustDecodeBounds = true
         }
     BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size, options)
-    val extension =
-        when (options.outMimeType?.lowercase()) {
-            "image/jpeg", "image/jpg" -> "jpg"
-            "image/png" -> "png"
-            "image/webp" -> "webp"
-            "image/gif" -> "gif"
-            "image/bmp" -> "bmp"
-            "image/heic" -> "heic"
-            "image/heif" -> "heif"
-            "image/ico" -> "ico"
-            "image/tiff" -> "tiff"
-            "image/svg+xml" -> "svg"
-            "image/x-icon" -> "ico"
-            "image/x-ms-bmp" -> "bmp"
-            "image/x-tiff" -> "tiff"
-            "image/x-tga" -> "tga"
-            "image/x-pcx" -> "pcx"
-            "image/x-pict" -> "pict"
-            else -> "jpg"
-        }
-    return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: "image/jpeg" // 默认为JPEG
+    return options.outMimeType?.lowercase() ?: "image/jpeg" // 默认为JPEG
 }
 
 internal fun saveByteArrayToDownloads(

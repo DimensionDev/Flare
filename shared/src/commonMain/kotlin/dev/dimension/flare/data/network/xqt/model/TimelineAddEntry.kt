@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class TimelineAddEntry(
     @SerialName(value = "content")
-    val content: ContentUnion,
+    val content: ContentUnion? = null,
     @SerialName(value = "entryId")
     val entryId: kotlin.String,
     @SerialName(value = "sortIndex")

@@ -40,42 +40,76 @@ internal data class Notification(
 
 /**
  * *
- * Values: Follow,Mention,Reply,Renote,Quote,Reaction,PollEnded,ReceiveFollowRequest,FollowRequestAccepted,AchievementEarned,App
+ * 	'note',
+ * 	'follow',
+ * 	'mention',
+ * 	'reply',
+ * 	'renote',
+ * 	'quote',
+ * 	'reaction',
+ * 	'pollEnded',
+ * 	'receiveFollowRequest',
+ * 	'followRequestAccepted',
+ * 	'roleAssigned',
+ * 	'achievementEarned',
+ * 	'exportCompleted',
+ * 	'login',
+ * 	'createToken',
+ * 	'app',
+ * 	'test',
  */
 @Serializable
 internal enum class NotificationType(
     val value: kotlin.String,
 ) {
-    @SerialName(value = "follow")
+    @SerialName("note")
+    Note("note"),
+
+    @SerialName("follow")
     Follow("follow"),
 
-    @SerialName(value = "mention")
+    @SerialName("mention")
     Mention("mention"),
 
-    @SerialName(value = "reply")
+    @SerialName("reply")
     Reply("reply"),
 
-    @SerialName(value = "renote")
+    @SerialName("renote")
     Renote("renote"),
 
-    @SerialName(value = "quote")
+    @SerialName("quote")
     Quote("quote"),
 
-    @SerialName(value = "reaction")
+    @SerialName("reaction")
     Reaction("reaction"),
 
-    @SerialName(value = "pollEnded")
+    @SerialName("pollEnded")
     PollEnded("pollEnded"),
 
-    @SerialName(value = "receiveFollowRequest")
+    @SerialName("receiveFollowRequest")
     ReceiveFollowRequest("receiveFollowRequest"),
 
-    @SerialName(value = "followRequestAccepted")
+    @SerialName("followRequestAccepted")
     FollowRequestAccepted("followRequestAccepted"),
 
-    @SerialName(value = "achievementEarned")
+    @SerialName("roleAssigned")
+    RoleAssigned("roleAssigned"),
+
+    @SerialName("achievementEarned")
     AchievementEarned("achievementEarned"),
 
-    @SerialName(value = "app")
+    @SerialName("exportCompleted")
+    ExportCompleted("exportCompleted"),
+
+    @SerialName("login")
+    Login("login"),
+
+    @SerialName("createToken")
+    CreateToken("createToken"),
+
+    @SerialName("app")
     App("app"),
+
+    @SerialName("test")
+    Test("test"),
 }

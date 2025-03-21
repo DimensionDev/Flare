@@ -23,6 +23,7 @@ public sealed class PagingState<T> {
     @Immutable
     public data class Error<T> internal constructor(
         val error: Throwable,
+        val onRetry: () -> Unit,
     ) : PagingState<T>()
 
     @Immutable
@@ -145,7 +146,7 @@ public inline fun <T : Any> PagingState<T>.onLoading(block: () -> Unit): PagingS
     return this
 }
 
-public inline fun <T : Any> PagingState<T>.onError(block: (Throwable) -> Unit): PagingState<T> {
+public inline fun <T : Any> PagingState<T>.onError(block: PagingState.Error<T>.(Throwable) -> Unit): PagingState<T> {
     if (this is PagingState.Error) {
         block(error)
     }
@@ -190,7 +191,7 @@ public inline fun LoadState.onEndOfList(block: () -> Unit): LoadState {
 internal fun <T : Any> UiState<LazyPagingItems<T>>.toPagingState(): PagingState<T> =
     when (this) {
         is UiState.Loading -> PagingState.Loading()
-        is UiState.Error -> PagingState.Error(throwable)
+        is UiState.Error -> PagingState.Error(throwable, {})
         is UiState.Success -> data.toPagingState()
     }
 
@@ -209,8 +210,10 @@ internal fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
         loadState.prepend is LoadState.Error
     ) {
         return PagingState.Error(
-            (loadState.refresh as? LoadState.Error)?.error
-                ?: (loadState.prepend as LoadState.Error).error,
+            error =
+                (loadState.refresh as? LoadState.Error)?.error
+                    ?: (loadState.prepend as LoadState.Error).error,
+            onRetry = { retry() },
         )
     } else {
         return PagingState.Empty(this::refresh)
@@ -220,7 +223,7 @@ internal fun <T : Any> LazyPagingItems<T>.toPagingState(): PagingState<T> {
 internal fun <T : Any> UiState<PagingState<T>>.flatten(): PagingState<T> =
     when (this) {
         is UiState.Loading -> PagingState.Loading()
-        is UiState.Error -> PagingState.Error(throwable)
+        is UiState.Error -> PagingState.Error(throwable, onRetry = {})
         is UiState.Success -> data
     }
 

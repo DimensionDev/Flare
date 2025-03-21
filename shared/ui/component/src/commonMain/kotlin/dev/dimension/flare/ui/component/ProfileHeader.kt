@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -30,6 +31,7 @@ import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.LocationDot
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.Robot
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.platform.PlatformFilledTonalButton
 import dev.dimension.flare.ui.component.platform.PlatformText
@@ -44,8 +46,6 @@ import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.stringResource
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 @Composable
 public fun ProfileHeader(
@@ -78,7 +78,6 @@ public fun ProfileHeader(
                 expandMatrices = isBigScreen,
                 onAvatarClick = onAvatarClick,
                 onBannerClick = onBannerClick,
-                isBigScreen = isBigScreen,
                 onFollowListClick = onFollowListClick,
                 onFansListClick = onFansListClick,
             )
@@ -95,12 +94,12 @@ private fun ProfileHeaderSuccess(
     onBannerClick: () -> Unit,
     isMe: UiState<Boolean>,
     menu: @Composable RowScope.() -> Unit,
-    isBigScreen: Boolean,
     onFollowListClick: (userKey: MicroBlogKey) -> Unit,
     onFansListClick: (userKey: MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
     expandMatrices: Boolean = false,
 ) {
+    val uriLauncher = LocalUriHandler.current
     CommonProfileHeader(
         modifier = modifier,
         bannerUrl = user.banner,
@@ -108,7 +107,6 @@ private fun ProfileHeaderSuccess(
         displayName = user.name,
         userKey = user.key,
         handle = user.handle,
-        isBigScreen = isBigScreen,
         headerTrailing = {
             isMe.onSuccess {
                 if (!it) {
@@ -169,8 +167,12 @@ private fun ProfileHeaderSuccess(
             }
             menu.invoke(this)
         },
-        onAvatarClick = onAvatarClick,
-        onBannerClick = onBannerClick,
+        onAvatarClick = {
+            uriLauncher.openUri(AppDeepLink.RawImage.invoke(user.avatar))
+        },
+        onBannerClick = {
+            user.banner?.let { uriLauncher.openUri(AppDeepLink.RawImage.invoke(it)) }
+        },
         handleTrailing = {
             user.mark.forEach {
                 when (it) {

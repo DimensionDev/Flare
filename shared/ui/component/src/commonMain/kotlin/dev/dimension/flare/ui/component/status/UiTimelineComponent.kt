@@ -4,18 +4,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.At
+import compose.icons.fontawesomeicons.solid.Check
 import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.Heart
 import compose.icons.fontawesomeicons.solid.Pen
@@ -24,7 +28,9 @@ import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
 import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
 import compose.icons.fontawesomeicons.solid.UserPlus
+import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Res
 import dev.dimension.flare.ui.component.bluesky_notification_item_favourited_your_status
 import dev.dimension.flare.ui.component.bluesky_notification_item_followed_you
@@ -210,7 +216,13 @@ import dev.dimension.flare.ui.component.misskey_notification_item_replied_to_you
 import dev.dimension.flare.ui.component.misskey_notification_item_reposted_your_status
 import dev.dimension.flare.ui.component.misskey_notification_item_requested_follow
 import dev.dimension.flare.ui.component.misskey_notification_unknwon
+import dev.dimension.flare.ui.component.notification_item_accept_follow_request
+import dev.dimension.flare.ui.component.notification_item_reject_follow_request
+import dev.dimension.flare.ui.component.platform.PlatformButton
 import dev.dimension.flare.ui.component.platform.PlatformCard
+import dev.dimension.flare.ui.component.platform.PlatformFilledTonalButton
+import dev.dimension.flare.ui.component.platform.PlatformText
+import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.vvo_notification_like
 import dev.dimension.flare.ui.component.xqt_item_mention_status
@@ -218,6 +230,8 @@ import dev.dimension.flare.ui.component.xqt_item_reblogged_status
 import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
+import dev.dimension.flare.ui.theme.MediumAlpha
+import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
@@ -236,11 +250,17 @@ internal fun UiTimelineComponent(
         item.topMessage?.let {
             TopMessageComponent(
                 data = it,
+                topMessageOnly = item.content == null,
                 modifier =
                     Modifier
                         .padding(horizontal = horizontalPadding)
-                        .padding(top = 8.dp)
-                        .fillMaxWidth(),
+                        .let {
+                            if (item.content == null) {
+                                it.padding(vertical = 8.dp)
+                            } else {
+                                it.padding(top = 8.dp)
+                            }
+                        }.fillMaxWidth(),
             )
         }
         item.content?.let {
@@ -287,22 +307,94 @@ private fun ItemContentComponent(
                         .padding(paddingValues),
             )
 
-        is UiTimeline.ItemContent.User ->
-            CommonStatusHeaderComponent(
-                data = item.value,
-                onUserClick = {
-                    item.value.onClicked.invoke(
-                        ClickContext(
-                            launcher = {
-                                uriHandler.openUri(it)
-                            },
-                        ),
-                    )
-                },
+        is UiTimeline.ItemContent.User -> {
+            Column(
                 modifier =
                     modifier
                         .padding(paddingValues),
-            )
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                CommonStatusHeaderComponent(
+                    data = item.value,
+                    onUserClick = {
+                        item.value.onClicked.invoke(
+                            ClickContext(
+                                launcher = {
+                                    uriHandler.openUri(it)
+                                },
+                            ),
+                        )
+                    },
+                )
+                if (item.button.isNotEmpty()) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        item.button.forEach { button ->
+                            when (button) {
+                                is UiTimeline.ItemContent.User.Button.AcceptFollowRequest ->
+                                    PlatformFilledTonalButton(
+                                        onClick = {
+                                            button.onClicked.invoke(
+                                                ClickContext(
+                                                    launcher = {
+                                                        uriHandler.openUri(it)
+                                                    },
+                                                ),
+                                            )
+                                        },
+                                    ) {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Check,
+                                            contentDescription =
+                                                stringResource(
+                                                    Res.string.notification_item_accept_follow_request,
+                                                ),
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        PlatformText(
+                                            text =
+                                                stringResource(
+                                                    Res.string.notification_item_accept_follow_request,
+                                                ),
+                                        )
+                                    }
+                                is UiTimeline.ItemContent.User.Button.RejectFollowRequest -> {
+                                    PlatformButton(
+                                        onClick = {
+                                            button.onClicked.invoke(
+                                                ClickContext(
+                                                    launcher = {
+                                                        uriHandler.openUri(it)
+                                                    },
+                                                ),
+                                            )
+                                        },
+                                    ) {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Xmark,
+                                            contentDescription =
+                                                stringResource(
+                                                    Res.string.notification_item_reject_follow_request,
+                                                ),
+                                            tint = PlatformTheme.colorScheme.error,
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        PlatformText(
+                                            text =
+                                                stringResource(
+                                                    Res.string.notification_item_reject_follow_request,
+                                                ),
+                                            color = PlatformTheme.colorScheme.error,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         is UiTimeline.ItemContent.UserList ->
             UserListContent(
@@ -381,6 +473,7 @@ private fun StatusContent(
 @Composable
 private fun TopMessageComponent(
     data: UiTimeline.TopMessage,
+    topMessageOnly: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val uriHandler = LocalUriHandler.current
@@ -566,9 +659,21 @@ private fun TopMessageComponent(
             icon = icon,
             user = data.user,
             text = text,
+            textStyle =
+                if (topMessageOnly) {
+                    PlatformTextStyle.current
+                } else {
+                    PlatformTheme.typography.caption
+                },
             modifier =
                 Modifier
-                    .clickable {
+                    .let {
+                        if (topMessageOnly) {
+                            it
+                        } else {
+                            it.alpha(MediumAlpha)
+                        }
+                    }.clickable {
                         data.onClicked.invoke(
                             ClickContext(
                                 launcher = {

@@ -49,4 +49,14 @@ internal interface FriendshipResources {
     suspend fun report(
         @Body data: PostReport,
     )
+
+    @POST("api/v1/follow_requests/{id}/authorize")
+    suspend fun authorizeFollowRequest(
+        @Path(value = "id") id: String,
+    ): RelationshipResponse
+
+    @POST("api/v1/follow_requests/{id}/reject")
+    suspend fun rejectFollowRequest(
+        @Path(value = "id") id: String,
+    ): RelationshipResponse
 }

@@ -190,7 +190,7 @@ commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.17.0
 
 jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version = "3.9.1" }
 
-jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.8.0-alpha10" }
+jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.9.0-alpha15" }
 
 mediamp-vlc-loader = { module = "org.openani.mediamp:mediamp-vlc-loader", version.ref = "mediamp" }
 mediamp-vlc = { module = "org.openani.mediamp:mediamp-vlc", version.ref = "mediamp" }

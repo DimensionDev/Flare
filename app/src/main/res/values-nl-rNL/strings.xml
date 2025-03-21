@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Stel de host in voor gastmodus</string>
   <string name="settings_local_history_title">Lokale geschiedenis</string>
   <string name="settings_local_history_description">Bekijk of zoek uw browsegeschiedenis</string>
+  <string name="settings_app_logging_title">App logboek</string>
+  <string name="settings_app_logging_save">Logboek opslaan</string>
+  <string name="settings_app_logging_clear">Logboek wissen</string>
+  <string name="settings_app_logging_enable_network_logging">Netwerk loggen inschakelen</string>
   <string name="status_loadmore_error_retry">Opnieuw</string>
   <string name="login_expired_message">Klik om opnieuw in te loggen</string>
   <string name="login_expired_relogin">Opnieuw inloggen</string>
@@ -126,6 +130,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MB van afbeeldingen zal worden verwijderd</string>
   <string name="settings_storage_clear_database">Cache database wissen</string>
   <string name="settings_storage_clear_database_description">%1$s gebruikers, %2$s statussen worden verwijderd</string>
+  <string name="settings_storage_app_log_description">Bekijk het app-logboek</string>
   <string name="service_select_instance_input_placeholder">Aanleg URL</string>
   <string name="service_select_next_button">Volgende</string>
   <string name="service_select_empty_message">Geen instanties gevonden</string>
@@ -133,6 +138,7 @@
   <string name="settings_accounts_remove">Verwijderen</string>
   <string name="media_menu_save">Opslaan</string>
   <string name="media_save_success">Opgeslagen in Downloads</string>
+  <string name="media_save_fail">Opslaan mislukt</string>
   <string name="tab_settings_add">Toevoegen</string>
   <string name="tab_settings_drag">Sleep</string>
   <string name="tab_settings_edit">Bewerken</string>

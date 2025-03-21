@@ -287,4 +287,6 @@
   <string name="profile_search_user_using_account">Zoek %1$s in %2$s met %3$s</string>
   <string name="profile_search_user_using_account_compat">Zoeken in %1$s</string>
   <string name="feeds_discover_feeds_created_by">Aangemaakt door %1$s</string>
+  <string name="notification_item_accept_follow_request">Accepteren</string>
+  <string name="notification_item_reject_follow_request">Afwijzen</string>
 </resources>

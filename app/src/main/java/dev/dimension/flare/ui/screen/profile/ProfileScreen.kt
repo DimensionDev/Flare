@@ -65,7 +65,6 @@ import com.ramcosta.composedestinations.generated.destinations.DMScreenRouteDest
 import com.ramcosta.composedestinations.generated.destinations.EditAccountListRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.FansScreenDestination
 import com.ramcosta.composedestinations.generated.destinations.FollowingScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.ProfileMediaRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.SearchRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -331,14 +330,6 @@ internal fun ProfileRoute(
             navigator.navigateUp()
         },
         showBackButton = showBackButton,
-        onProfileMediaClick = {
-            navigator.navigate(
-                ProfileMediaRouteDestination(
-                    userKey,
-                    accountType = accountType,
-                ),
-            )
-        },
         onMediaClick = { statusKey, index, preview ->
             navigator.navigate(
                 StatusMediaRouteDestination(
@@ -401,7 +392,6 @@ private fun ProfileScreen(
     userKey: MicroBlogKey? = null,
     onBack: () -> Unit = {},
     showBackButton: Boolean = true,
-    onProfileMediaClick: () -> Unit = {},
     onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
 ) {
     val state by producePresenter(key = "${accountType}_$userKey") {

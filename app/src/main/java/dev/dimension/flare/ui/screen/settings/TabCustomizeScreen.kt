@@ -350,7 +350,10 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                                                         count = tab.extraTabs.size + 1,
                                                     ),
                                             ) {
-                                                Text(text = stringResource(id = R.string.tab_settings_default))
+                                                Text(
+                                                    text = stringResource(id = R.string.tab_settings_default),
+                                                    maxLines = 1,
+                                                )
                                             }
                                             tab.extraTabs.forEachIndexed { index, extraTab ->
                                                 SegmentedButton(
@@ -369,7 +372,10 @@ private fun TabCustomizeScreen(onBack: () -> Unit) {
                                                             is PinnableTimelineTabPresenter.State.Tab.Feed -> R.string.tab_settings_feed
                                                             is PinnableTimelineTabPresenter.State.Tab.List -> R.string.tab_settings_list
                                                         }
-                                                    Text(text = stringResource(id = text))
+                                                    Text(
+                                                        text = stringResource(id = text),
+                                                        maxLines = 1,
+                                                    )
                                                 }
                                             }
                                         }

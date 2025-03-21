@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Angi verten for gjestemodus</string>
   <string name="settings_local_history_title">Lokal historikk</string>
   <string name="settings_local_history_description">Vis eller søk i historikk</string>
+  <string name="settings_app_logging_title">Logg app</string>
+  <string name="settings_app_logging_save">Lagre logg</string>
+  <string name="settings_app_logging_clear">Tøm logg</string>
+  <string name="settings_app_logging_enable_network_logging">Aktiver nettverkslogging</string>
   <string name="status_loadmore_error_retry">Prøv igjen</string>
   <string name="login_expired_message">Trykk for å logge inn igjen</string>
   <string name="login_expired_relogin">Logg inn på nytt</string>
@@ -126,6 +130,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder vil bli fjernet</string>
   <string name="settings_storage_clear_database">Slett mellomlagerdatabase</string>
   <string name="settings_storage_clear_database_description">%1$s brukere, %2$s statuser vil bli fjernet</string>
+  <string name="settings_storage_app_log_description">Se app-loggen</string>
   <string name="service_select_instance_input_placeholder">Instans URL</string>
   <string name="service_select_next_button">Neste</string>
   <string name="service_select_empty_message">Ingen instanser funnet</string>
@@ -133,6 +138,7 @@
   <string name="settings_accounts_remove">Fjern</string>
   <string name="media_menu_save">Lagre</string>
   <string name="media_save_success">Lagret i Nedlastingen</string>
+  <string name="media_save_fail">Kunne ikke lagre</string>
   <string name="tab_settings_add">Legg til</string>
   <string name="tab_settings_drag">Dra</string>
   <string name="tab_settings_edit">Rediger</string>

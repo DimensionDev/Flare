@@ -25,6 +25,16 @@ internal sealed interface StatusEvent {
             id: String,
             options: List<Int>,
         )
+
+        fun acceptFollowRequest(
+            userKey: MicroBlogKey,
+            notificationStatusKey: MicroBlogKey,
+        )
+
+        fun rejectFollowRequest(
+            userKey: MicroBlogKey,
+            notificationStatusKey: MicroBlogKey,
+        )
     }
 
     interface Pleroma : Mastodon {
@@ -55,6 +65,16 @@ internal sealed interface StatusEvent {
         )
 
         fun favouriteState(statusKey: MicroBlogKey): Flow<Boolean>
+
+        fun acceptFollowRequest(
+            userKey: MicroBlogKey,
+            notificationStatusKey: MicroBlogKey,
+        )
+
+        fun rejectFollowRequest(
+            userKey: MicroBlogKey,
+            notificationStatusKey: MicroBlogKey,
+        )
     }
 
     interface Bluesky : StatusEvent {

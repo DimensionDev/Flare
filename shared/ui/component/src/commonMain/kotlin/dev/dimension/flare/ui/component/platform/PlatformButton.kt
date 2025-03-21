@@ -5,6 +5,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
+internal expect fun PlatformButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable RowScope.() -> Unit,
+)
+
+@Composable
 internal expect fun PlatformTextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,

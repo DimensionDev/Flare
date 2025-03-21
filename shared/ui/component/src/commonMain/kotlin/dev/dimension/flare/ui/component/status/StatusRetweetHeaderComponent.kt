@@ -7,15 +7,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.model.UiUserV2
-import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformTheme
 
 @Composable
@@ -24,11 +23,10 @@ internal fun StatusRetweetHeaderComponent(
     user: UiUserV2?,
     text: String,
     modifier: Modifier = Modifier,
+    textStyle: TextStyle = PlatformTheme.typography.caption,
 ) {
     Row(
-        modifier =
-            modifier
-                .alpha(MediumAlpha),
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FAIcon(
@@ -36,14 +34,14 @@ internal fun StatusRetweetHeaderComponent(
             contentDescription = null,
             modifier =
                 Modifier
-                    .size(12.dp),
+                    .size(textStyle.fontSize.value.dp),
         )
         if (user != null) {
             Spacer(modifier = Modifier.width(8.dp))
             RichText(
                 text = user.name,
                 layoutDirection = LocalLayoutDirection.current,
-                textStyle = PlatformTheme.typography.caption,
+                textStyle = textStyle,
                 modifier =
                     Modifier
                         .alignByBaseline()
@@ -54,7 +52,7 @@ internal fun StatusRetweetHeaderComponent(
         Spacer(modifier = Modifier.width(8.dp))
         PlatformText(
             text = text,
-            style = PlatformTheme.typography.caption,
+            style = textStyle,
             modifier =
                 Modifier.alignByBaseline(),
         )

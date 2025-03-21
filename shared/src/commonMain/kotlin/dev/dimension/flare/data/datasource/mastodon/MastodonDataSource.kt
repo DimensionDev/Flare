@@ -1373,4 +1373,74 @@ internal open class MastodonDataSource(
             ),
             ProfileTab.Media,
         ).toPersistentList()
+
+    override fun acceptFollowRequest(
+        userKey: MicroBlogKey,
+        notificationStatusKey: MicroBlogKey,
+    ) {
+        coroutineScope.launch {
+            tryRun {
+                MemCacheable.updateWith<UiRelation>(
+                    key = relationKeyWithUserKey(userKey),
+                ) {
+                    it.copy(
+                        hasPendingFollowRequestToYou = false,
+                        isFans = true,
+                    )
+                }
+                service.authorizeFollowRequest(
+                    id = userKey.id,
+                )
+            }.onFailure {
+                MemCacheable.updateWith<UiRelation>(
+                    key = relationKeyWithUserKey(userKey),
+                ) {
+                    it.copy(
+                        hasPendingFollowRequestToYou = true,
+                        isFans = false,
+                    )
+                }
+            }.onSuccess {
+                database.pagingTimelineDao().deleteStatus(
+                    accountKey = accountKey,
+                    statusKey = notificationStatusKey,
+                )
+            }
+        }
+    }
+
+    override fun rejectFollowRequest(
+        userKey: MicroBlogKey,
+        notificationStatusKey: MicroBlogKey,
+    ) {
+        coroutineScope.launch {
+            tryRun {
+                MemCacheable.updateWith<UiRelation>(
+                    key = relationKeyWithUserKey(userKey),
+                ) {
+                    it.copy(
+                        hasPendingFollowRequestToYou = false,
+                        isFans = false,
+                    )
+                }
+                service.rejectFollowRequest(
+                    id = userKey.id,
+                )
+            }.onFailure {
+                MemCacheable.updateWith<UiRelation>(
+                    key = relationKeyWithUserKey(userKey),
+                ) {
+                    it.copy(
+                        hasPendingFollowRequestToYou = true,
+                        isFans = false,
+                    )
+                }
+            }.onSuccess {
+                database.pagingTimelineDao().deleteStatus(
+                    accountKey = accountKey,
+                    statusKey = notificationStatusKey,
+                )
+            }
+        }
+    }
 }

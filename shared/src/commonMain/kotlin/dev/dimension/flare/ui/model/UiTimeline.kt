@@ -9,6 +9,7 @@ import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Immutable
 public data class UiTimeline internal constructor(
@@ -140,6 +141,7 @@ public data class UiTimeline internal constructor(
 
         public data class User internal constructor(
             val value: UiUserV2,
+            val button: ImmutableList<Button> = persistentListOf(),
         ) : ItemContent {
             override val itemKey: String
                 get() =
@@ -147,6 +149,16 @@ public data class UiTimeline internal constructor(
                         append("User")
                         append(value.key)
                     }
+
+            public sealed interface Button {
+                public data class AcceptFollowRequest internal constructor(
+                    val onClicked: ClickContext.() -> Unit,
+                ) : Button
+
+                public data class RejectFollowRequest internal constructor(
+                    val onClicked: ClickContext.() -> Unit,
+                ) : Button
+            }
         }
 
         public data class UserList internal constructor(

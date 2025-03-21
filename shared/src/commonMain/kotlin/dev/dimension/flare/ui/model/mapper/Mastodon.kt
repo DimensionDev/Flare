@@ -112,10 +112,31 @@ internal fun Notification.render(
     return UiTimeline(
         topMessage = topMessage,
         content =
-            when {
-                type in listOf(NotificationTypes.Follow, NotificationTypes.FollowRequest) ->
-                    UiTimeline.ItemContent.User(user)
-
+            when (type) {
+                in listOf(NotificationTypes.Follow) -> UiTimeline.ItemContent.User(user)
+                NotificationTypes.FollowRequest ->
+                    UiTimeline.ItemContent.User(
+                        user,
+                        button =
+                            persistentListOf(
+                                UiTimeline.ItemContent.User.Button.AcceptFollowRequest(
+                                    onClicked = {
+                                        event.acceptFollowRequest(
+                                            userKey = user.key,
+                                            notificationStatusKey = MicroBlogKey(id ?: "", accountKey.host),
+                                        )
+                                    },
+                                ),
+                                UiTimeline.ItemContent.User.Button.RejectFollowRequest(
+                                    onClicked = {
+                                        event.rejectFollowRequest(
+                                            userKey = user.key,
+                                            notificationStatusKey = MicroBlogKey(id ?: "", accountKey.host),
+                                        )
+                                    },
+                                ),
+                            ),
+                    )
                 else -> status ?: UiTimeline.ItemContent.User(user)
             },
     )

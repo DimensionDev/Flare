@@ -24,6 +24,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.mapper.MisskeyAchievement.entries
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -145,11 +146,33 @@ internal fun Notification.render(
                     listOf(
                         NotificationType.Follow,
                         NotificationType.FollowRequestAccepted,
-                        NotificationType.ReceiveFollowRequest,
                     ) &&
                     user != null
                 ->
                     UiTimeline.ItemContent.User(user)
+                notificationType == NotificationType.ReceiveFollowRequest && user != null ->
+                    UiTimeline.ItemContent.User(
+                        user,
+                        button =
+                            persistentListOf(
+                                UiTimeline.ItemContent.User.Button.AcceptFollowRequest(
+                                    onClicked = {
+                                        event.acceptFollowRequest(
+                                            userKey = user.key,
+                                            notificationStatusKey = MicroBlogKey(id, accountKey.host),
+                                        )
+                                    },
+                                ),
+                                UiTimeline.ItemContent.User.Button.RejectFollowRequest(
+                                    onClicked = {
+                                        event.rejectFollowRequest(
+                                            userKey = user.key,
+                                            notificationStatusKey = MicroBlogKey(id, accountKey.host),
+                                        )
+                                    },
+                                ),
+                            ),
+                    )
 
                 else ->
                     status ?: user?.let { UiTimeline.ItemContent.User(it) }

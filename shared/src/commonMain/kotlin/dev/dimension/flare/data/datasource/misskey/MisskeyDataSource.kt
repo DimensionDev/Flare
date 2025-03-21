@@ -1351,4 +1351,80 @@ internal class MisskeyDataSource(
 
     override val supportedMetaData: ImmutableList<ListMetaDataType>
         get() = persistentListOf(ListMetaDataType.TITLE)
+
+    override fun acceptFollowRequest(
+        userKey: MicroBlogKey,
+        notificationStatusKey: MicroBlogKey,
+    ) {
+        coroutineScope.launch {
+            tryRun {
+                MemCacheable.updateWith<UiRelation>(
+                    key = relationKeyWithUserKey(userKey),
+                ) {
+                    it.copy(
+                        hasPendingFollowRequestToYou = false,
+                        isFans = true,
+                    )
+                }
+                service.followingRequestsAccept(
+                    adminAccountsDeleteRequest =
+                        AdminAccountsDeleteRequest(
+                            userId = userKey.id,
+                        ),
+                )
+            }.onFailure {
+                MemCacheable.updateWith<UiRelation>(
+                    key = relationKeyWithUserKey(userKey),
+                ) {
+                    it.copy(
+                        hasPendingFollowRequestToYou = true,
+                        isFans = false,
+                    )
+                }
+            }.onSuccess {
+                database.pagingTimelineDao().deleteStatus(
+                    accountKey = accountKey,
+                    statusKey = notificationStatusKey,
+                )
+            }
+        }
+    }
+
+    override fun rejectFollowRequest(
+        userKey: MicroBlogKey,
+        notificationStatusKey: MicroBlogKey,
+    ) {
+        coroutineScope.launch {
+            tryRun {
+                MemCacheable.updateWith<UiRelation>(
+                    key = relationKeyWithUserKey(userKey),
+                ) {
+                    it.copy(
+                        hasPendingFollowRequestToYou = false,
+                        isFans = false,
+                    )
+                }
+                service.followingRequestsReject(
+                    adminAccountsDeleteRequest =
+                        AdminAccountsDeleteRequest(
+                            userId = userKey.id,
+                        ),
+                )
+            }.onFailure {
+                MemCacheable.updateWith<UiRelation>(
+                    key = relationKeyWithUserKey(userKey),
+                ) {
+                    it.copy(
+                        hasPendingFollowRequestToYou = true,
+                        isFans = false,
+                    )
+                }
+            }.onSuccess {
+                database.pagingTimelineDao().deleteStatus(
+                    accountKey = accountKey,
+                    statusKey = notificationStatusKey,
+                )
+            }
+        }
+    }
 }

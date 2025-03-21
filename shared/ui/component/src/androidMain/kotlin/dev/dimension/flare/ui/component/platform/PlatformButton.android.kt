@@ -5,6 +5,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
 @Composable
+internal actual fun PlatformButton(
+    onClick: () -> Unit,
+    modifier: Modifier,
+    content: @Composable RowScope.() -> Unit,
+) {
+    androidx.compose.material3.ElevatedButton(onClick = onClick, modifier = modifier, content = content, elevation = null)
+}
+
+@Composable
 internal actual fun PlatformTextButton(
     onClick: () -> Unit,
     modifier: Modifier,

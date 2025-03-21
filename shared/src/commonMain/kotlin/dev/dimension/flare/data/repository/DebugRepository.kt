@@ -1,22 +1,31 @@
 package dev.dimension.flare.data.repository
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
 internal object DebugRepository {
+    private const val MAX_MESSAGES = 25
     private val _messages = MutableStateFlow<List<String>>(emptyList())
     private val _enabled = MutableStateFlow(false)
+    private val scope = CoroutineScope(Dispatchers.IO)
+
     val enabled get() = _enabled.asSharedFlow()
     val messages get() = _messages.asSharedFlow()
 
     fun setEnabled(enabled: Boolean) {
-        this._enabled.value = enabled
+        _enabled.value = enabled
     }
 
     fun log(message: String) {
         if (_enabled.value) {
-            _messages.value = _messages.value + message
+            scope.launch {
+                _messages.value = (_messages.value + message).takeLast(MAX_MESSAGES)
+            }
         }
     }
 
@@ -25,17 +34,21 @@ internal object DebugRepository {
             // Ignore cancellation exceptions
             return
         }
-        val message =
-            buildString {
-                appendLine("Error: ${exception.message}")
-                appendLine("Stacktrace:")
-                append(exception.stackTraceToString())
-            }
-        _messages.value = _messages.value + message
+        scope.launch {
+            val message =
+                buildString {
+                    appendLine("Error: ${exception.message}")
+                    appendLine("Stacktrace:")
+                    append(exception.stackTraceToString())
+                }
+            _messages.value = (_messages.value + message).takeLast(MAX_MESSAGES)
+        }
     }
 
     fun clear() {
-        _messages.value = emptyList()
+        scope.launch {
+            _messages.value = emptyList()
+        }
     }
 
     fun printToString(): String = _messages.value.joinToString(separator = "\n")

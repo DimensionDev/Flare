@@ -284,4 +284,6 @@
   <string name="profile_search_user_using_account">Знайти %1$s в %2$s за допомогою %3$s</string>
   <string name="profile_search_user_using_account_compat">Знайти в %1$s</string>
   <string name="feeds_discover_feeds_created_by">Створено %1$s</string>
+  <string name="notification_item_accept_follow_request">Прийняти</string>
+  <string name="notification_item_reject_follow_request">Відхилити</string>
 </resources>

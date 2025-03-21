@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Aseta isäntä vierastilaan</string>
   <string name="settings_local_history_title">Paikallinen historia</string>
   <string name="settings_local_history_description">Näytä tai etsi selaushistoriasi</string>
+  <string name="settings_app_logging_title">Sovellusten kirjaaminen</string>
+  <string name="settings_app_logging_save">Tallenna loki</string>
+  <string name="settings_app_logging_clear">Tyhjennä loki</string>
+  <string name="settings_app_logging_enable_network_logging">Salli verkon kirjaaminen</string>
   <string name="status_loadmore_error_retry">Yritä Uudelleen</string>
   <string name="login_expired_message">Klikkaa kirjautuaksesi uudelleen</string>
   <string name="login_expired_relogin">Kirjaudu uudelleen</string>
@@ -126,6 +130,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MB kuvia poistetaan</string>
   <string name="settings_storage_clear_database">Tyhjennä välimuistin tietokanta</string>
   <string name="settings_storage_clear_database_description">%1$s käyttäjää, %2$s tilat poistetaan</string>
+  <string name="settings_storage_app_log_description">Näytä sovellusloki</string>
   <string name="service_select_instance_input_placeholder">Ilmentymän URL</string>
   <string name="service_select_next_button">Seuraava</string>
   <string name="service_select_empty_message">Esiintymiä ei löytynyt</string>
@@ -133,6 +138,7 @@
   <string name="settings_accounts_remove">Poista</string>
   <string name="media_menu_save">Tallenna</string>
   <string name="media_save_success">Tallennettu latauksiin</string>
+  <string name="media_save_fail">Tallennus epäonnistui</string>
   <string name="tab_settings_add">Lisää</string>
   <string name="tab_settings_drag">Vedä</string>
   <string name="tab_settings_edit">Muokkaa</string>

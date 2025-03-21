@@ -42,6 +42,10 @@
   <string name="settings_local_filter_description">Налаштування локального фільтра для стрічки</string>
   <string name="settings_guest_setting_description">Встановити режим гостя</string>
   <string name="settings_local_history_description">Переглянути або шукати історію браузера</string>
+  <string name="settings_app_logging_title">Журналювання програм</string>
+  <string name="settings_app_logging_save">Зберегти журнал</string>
+  <string name="settings_app_logging_clear">Очистити журнал</string>
+  <string name="settings_app_logging_enable_network_logging">Увімкнути ведення журналу мережі</string>
   <string name="status_loadmore_error_retry">Повторити спробу</string>
   <string name="login_expired_message">Нажміть кнопку для входу знову</string>
   <string name="login_expired_relogin">Знову увійти в систему</string>
@@ -124,6 +128,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MB із зображень буде видалено</string>
   <string name="settings_storage_clear_database">Очистити базу даних кешу</string>
   <string name="settings_storage_clear_database_description">%1$s користувачів, статуси %2$s буде видалено</string>
+  <string name="settings_storage_app_log_description">Переглянути журнал програми</string>
   <string name="service_select_instance_input_placeholder">URL-адреса інстансу</string>
   <string name="service_select_next_button">Уперед</string>
   <string name="service_select_empty_message">Екземплярів не знайдено</string>
@@ -131,6 +136,7 @@
   <string name="settings_accounts_remove">Видалити</string>
   <string name="media_menu_save">Зберегти</string>
   <string name="media_save_success">Збережено на завантаження</string>
+  <string name="media_save_fail">Не вдалося зберегти</string>
   <string name="tab_settings_add">Додати</string>
   <string name="tab_settings_drag">Тягнути</string>
   <string name="tab_settings_edit">Редагувати</string>

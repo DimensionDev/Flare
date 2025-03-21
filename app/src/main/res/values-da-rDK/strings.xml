@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Indstil værten for gæstetilstand</string>
   <string name="settings_local_history_title">Lokal historik</string>
   <string name="settings_local_history_description">Se eller søg i din browserhistorik</string>
+  <string name="settings_app_logging_title">App logning</string>
+  <string name="settings_app_logging_save">Gem log</string>
+  <string name="settings_app_logging_clear">Ryd log</string>
+  <string name="settings_app_logging_enable_network_logging">Aktiver logning af netværk</string>
   <string name="status_loadmore_error_retry">Forsøg igen</string>
   <string name="login_expired_message">Klik for at logge ind igen</string>
   <string name="login_expired_relogin">Log ind igen</string>
@@ -126,6 +130,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MB billeder vil blive fjernet</string>
   <string name="settings_storage_clear_database">Ryd cache database</string>
   <string name="settings_storage_clear_database_description">%1$s brugere, %2$s statusser vil blive fjernet</string>
+  <string name="settings_storage_app_log_description">Se app-loggen</string>
   <string name="service_select_instance_input_placeholder">Instance URL</string>
   <string name="service_select_next_button">Næste</string>
   <string name="service_select_empty_message">Ingen forekomster fundet</string>
@@ -133,6 +138,7 @@
   <string name="settings_accounts_remove">Fjern</string>
   <string name="media_menu_save">Gem</string>
   <string name="media_save_success">Gemt i Downloads</string>
+  <string name="media_save_fail">Kunne ikke gemme</string>
   <string name="tab_settings_add">Tilføj</string>
   <string name="tab_settings_drag">Træk</string>
   <string name="tab_settings_edit">Rediger</string>

@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Ställ in värden för gästläge</string>
   <string name="settings_local_history_title">Lokal historik</string>
   <string name="settings_local_history_description">Visa eller sök i din webbhistorik</string>
+  <string name="settings_app_logging_title">Loggning av appar</string>
+  <string name="settings_app_logging_save">Spara logg</string>
+  <string name="settings_app_logging_clear">Rensa logg</string>
+  <string name="settings_app_logging_enable_network_logging">Aktivera nätverksloggning</string>
   <string name="status_loadmore_error_retry">Försök igen</string>
   <string name="login_expired_message">Klicka för att logga in igen</string>
   <string name="login_expired_relogin">Logga in igen</string>
@@ -126,6 +130,7 @@
   <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder kommer att tas bort</string>
   <string name="settings_storage_clear_database">Rensa cache-databas</string>
   <string name="settings_storage_clear_database_description">%1$s användare, %2$s status kommer att tas bort</string>
+  <string name="settings_storage_app_log_description">Visa apploggen</string>
   <string name="service_select_instance_input_placeholder">Instans URL</string>
   <string name="service_select_next_button">Nästa</string>
   <string name="service_select_empty_message">Inga instanser hittades</string>
@@ -133,6 +138,7 @@
   <string name="settings_accounts_remove">Radera</string>
   <string name="media_menu_save">Spara</string>
   <string name="media_save_success">Sparad i hämtningar</string>
+  <string name="media_save_fail">Det gick inte att spara</string>
   <string name="tab_settings_add">Lägg till</string>
   <string name="tab_settings_drag">Dra</string>
   <string name="tab_settings_edit">Redigera</string>

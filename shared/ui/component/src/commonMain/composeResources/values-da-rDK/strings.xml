@@ -287,4 +287,6 @@
   <string name="profile_search_user_using_account">Find %1$s i %2$s ved hjælp af %3$s</string>
   <string name="profile_search_user_using_account_compat">Find i %1$s</string>
   <string name="feeds_discover_feeds_created_by">Oprettet af %1$s</string>
+  <string name="notification_item_accept_follow_request">Accepter</string>
+  <string name="notification_item_reject_follow_request">Afvis</string>
 </resources>

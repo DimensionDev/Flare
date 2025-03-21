@@ -287,4 +287,6 @@
   <string name="profile_search_user_using_account">Hitta %1$s i %2$s med %3$s</string>
   <string name="profile_search_user_using_account_compat">Sök i %1$s</string>
   <string name="feeds_discover_feeds_created_by">Skapad av %1$s</string>
+  <string name="notification_item_accept_follow_request">Acceptera</string>
+  <string name="notification_item_reject_follow_request">Avvisa</string>
 </resources>

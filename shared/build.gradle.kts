@@ -100,7 +100,7 @@ kotlin {
             dependencies {
                 implementation(libs.commons.lang3)
                 // TODO: workaround for https://issuetracker.google.com/issues/396148592
-                implementation("androidx.sqlite:sqlite-jvm:2.5.0-beta01")
+                implementation("androidx.sqlite:sqlite-jvm:2.5.0-rc02")
             }
         }
         val appleMain by getting {

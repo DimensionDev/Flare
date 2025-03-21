@@ -44,6 +44,10 @@
   <string name="settings_guest_setting_description">Ορίστε τον κεντρικό υπολογιστή για τη λειτουργία επισκέπτη</string>
   <string name="settings_local_history_title">Τοπικό ιστορικό</string>
   <string name="settings_local_history_description">Δείτε ή αναζητήστε το ιστορικό περιήγησης</string>
+  <string name="settings_app_logging_title">Καταγραφή εφαρμογών</string>
+  <string name="settings_app_logging_save">Αποθήκευση αρχείου καταγραφής</string>
+  <string name="settings_app_logging_clear">Εκκαθάριση καταγραφής</string>
+  <string name="settings_app_logging_enable_network_logging">Ενεργοποίηση καταγραφής δικτύου</string>
   <string name="status_loadmore_error_retry">Επανάληψη</string>
   <string name="login_expired_message">Κάντε κλικ για να συνδεθείτε ξανά</string>
   <string name="login_expired_relogin">Είσοδος ξανά</string>
@@ -125,6 +129,7 @@
   <string name="settings_storage_clear_image_cache">Εκκαθάριση προσωρινής μνήμης εικόνας</string>
   <string name="settings_storage_clear_image_cache_description">%1$s MB εικόνων θα αφαιρεθούν</string>
   <string name="settings_storage_clear_database">Εκκαθάριση βάσης δεδομένων προσωρινής μνήμης</string>
+  <string name="settings_storage_app_log_description">Δείτε το αρχείο καταγραφής της εφαρμογής</string>
   <string name="service_select_instance_input_placeholder">Διεύθυνση Url Παρουσίας</string>
   <string name="service_select_next_button">Επόμενο</string>
   <string name="service_select_empty_message">Δεν βρέθηκαν παρουσίες</string>
@@ -132,6 +137,7 @@
   <string name="settings_accounts_remove">Αφαίρεση</string>
   <string name="media_menu_save">Αποθήκευση</string>
   <string name="media_save_success">Αποθηκεύτηκε στις Λήψεις</string>
+  <string name="media_save_fail">Αποτυχία αποθήκευσης</string>
   <string name="tab_settings_add">Προσθήκη</string>
   <string name="tab_settings_drag">Σύρετε</string>
   <string name="tab_settings_edit">Επεξεργασία</string>

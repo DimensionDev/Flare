@@ -287,4 +287,6 @@
   <string name="profile_search_user_using_account">Etsi %1$s %2$s käyttäen %3$s</string>
   <string name="profile_search_user_using_account_compat">Etsi kohteesta %1$s</string>
   <string name="feeds_discover_feeds_created_by">Luotu %1$s</string>
+  <string name="notification_item_accept_follow_request">Hyväksy</string>
+  <string name="notification_item_reject_follow_request">Hylkää</string>
 </resources>

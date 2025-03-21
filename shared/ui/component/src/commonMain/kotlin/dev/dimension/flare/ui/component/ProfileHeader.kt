@@ -78,7 +78,6 @@ public fun ProfileHeader(
                 expandMatrices = isBigScreen,
                 onAvatarClick = onAvatarClick,
                 onBannerClick = onBannerClick,
-                isBigScreen = isBigScreen,
                 onFollowListClick = onFollowListClick,
                 onFansListClick = onFansListClick,
             )
@@ -95,7 +94,6 @@ private fun ProfileHeaderSuccess(
     onBannerClick: () -> Unit,
     isMe: UiState<Boolean>,
     menu: @Composable RowScope.() -> Unit,
-    isBigScreen: Boolean,
     onFollowListClick: (userKey: MicroBlogKey) -> Unit,
     onFansListClick: (userKey: MicroBlogKey) -> Unit,
     modifier: Modifier = Modifier,
@@ -109,7 +107,6 @@ private fun ProfileHeaderSuccess(
         displayName = user.name,
         userKey = user.key,
         handle = user.handle,
-        isBigScreen = isBigScreen,
         headerTrailing = {
             isMe.onSuccess {
                 if (!it) {

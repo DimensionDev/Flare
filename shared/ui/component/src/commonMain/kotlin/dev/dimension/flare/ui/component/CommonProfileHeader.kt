@@ -33,7 +33,6 @@ internal fun CommonProfileHeader(
     displayName: UiRichText,
     userKey: MicroBlogKey,
     handle: String,
-    isBigScreen: Boolean,
     modifier: Modifier = Modifier,
     onAvatarClick: (() -> Unit)? = null,
     onBannerClick: (() -> Unit)? = null,
@@ -141,47 +140,11 @@ internal fun CommonProfileHeader(
                                 },
                     )
                 }
-                if (!isBigScreen) {
-                    Column(
-                        modifier =
-                            Modifier
-                                .weight(1f)
-                                .padding(top = actualBannerHeight),
-                    ) {
-                        RichText(
-                            text = displayName,
-                            textStyle = PlatformTheme.typography.title,
-//                        modifier =
-//                            Modifier
-//                                .sharedElement(
-//                                    rememberSharedContentState(key = "profile-display-name-$userKey"),
-//                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
-//                                ),
-                        )
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            PlatformText(
-                                text = handle,
-                                style = PlatformTheme.typography.caption,
-//                            modifier =
-//                                Modifier
-//                                    .sharedElement(
-//                                        rememberSharedContentState(key = "profile-handle-$userKey"),
-//                                        animatedVisibilityScope = this@AnimatedVisibilityScope,
-//                                    ),
-                            )
-                            handleTrailing.invoke(this)
-                        }
-                    }
-                } else {
-                    Spacer(
-                        modifier =
-                            Modifier
-                                .weight(1f),
-                    )
-                }
+                Spacer(
+                    modifier =
+                        Modifier
+                            .weight(1f),
+                )
                 Row(
                     modifier =
                         Modifier
@@ -190,38 +153,36 @@ internal fun CommonProfileHeader(
                     headerTrailing()
                 }
             }
-            if (isBigScreen) {
-                Column(
-                    modifier =
-                        Modifier
-                            .padding(horizontal = screenHorizontalPadding),
-                ) {
-                    RichText(
-                        text = displayName,
-                        textStyle = PlatformTheme.typography.title,
+            Column(
+                modifier =
+                    Modifier
+                        .padding(horizontal = screenHorizontalPadding),
+            ) {
+                RichText(
+                    text = displayName,
+                    textStyle = PlatformTheme.typography.title,
 //                        modifier =
 //                            Modifier
 //                                .sharedElement(
 //                                    rememberSharedContentState(key = "profile-display-name-$userKey"),
 //                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                ),
-                    )
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        PlatformText(
-                            text = handle,
-                            style = PlatformTheme.typography.caption,
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    PlatformText(
+                        text = handle,
+                        style = PlatformTheme.typography.caption,
 //                            modifier =
 //                                Modifier
 //                                    .sharedElement(
 //                                        rememberSharedContentState(key = "profile-handle-$userKey"),
 //                                        animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                    ),
-                        )
-                        handleTrailing.invoke(this)
-                    }
+                    )
+                    handleTrailing.invoke(this)
                 }
             }
             // content

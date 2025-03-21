@@ -201,6 +201,7 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
         }
     }.flatMap { entry ->
         when (entry.content) {
+            null -> emptyList()
             is TimelineTimelineCursor -> emptyList()
             is TimelineTimelineItem -> listOf(entry.content.itemContent to entry.sortIndex.toLong())
             is TimelineTimelineModule ->
@@ -320,6 +321,7 @@ internal fun List<InstructionUnion>.users(): List<User> =
                 union.propertyEntries
                     .flatMap { entry ->
                         when (entry.content) {
+                            null -> emptyList()
                             is TimelineTimelineCursor -> emptyList()
                             is TimelineTimelineItem -> listOf(entry.content.itemContent)
                             is TimelineTimelineModule ->

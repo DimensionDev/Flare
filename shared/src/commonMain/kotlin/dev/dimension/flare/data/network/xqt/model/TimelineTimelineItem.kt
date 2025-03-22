@@ -15,7 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -33,8 +32,9 @@ import kotlinx.serialization.Serializable
 internal data class TimelineTimelineItem(
 //    @Contextual @SerialName(value = "__typename")
 //    val typename: TypeName,
-    @Contextual @SerialName(value = "entryType")
-    val entryType: ContentEntryType,
+//    @Contextual @SerialName(value = "entryType")
+//    val entryType: ContentEntryType,
+    @Serializable(with = SafeItemContentSerializer::class)
     @SerialName(value = "itemContent")
     val itemContent: ItemContentUnion? = null,
     @SerialName(value = "clientEventInfo")

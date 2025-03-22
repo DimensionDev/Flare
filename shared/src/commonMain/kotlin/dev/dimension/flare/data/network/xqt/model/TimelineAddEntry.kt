@@ -27,6 +27,7 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 internal data class TimelineAddEntry(
+    @Serializable(with = SafeContentUnionSerializer::class)
     @SerialName(value = "content")
     val content: ContentUnion? = null,
     @SerialName(value = "entryId")

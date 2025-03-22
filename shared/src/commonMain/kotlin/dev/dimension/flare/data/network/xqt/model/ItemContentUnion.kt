@@ -15,8 +15,13 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
+import dev.dimension.flare.common.SafePolymorphicSerializer
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonClassDiscriminator
 
 /**
@@ -92,4 +97,19 @@ internal sealed interface ItemContentUnion {
 //        @SerialName(value = "SubscribableUser")
 //        subscribableUser("SubscribableUser"),
 //    }
+}
+
+internal class SafeItemContentSerializer : KSerializer<ItemContentUnion?> {
+    private val safeSerializer = SafePolymorphicSerializer(ItemContentUnion.serializer(), "__typename")
+
+    override val descriptor: SerialDescriptor = safeSerializer.descriptor
+
+    override fun serialize(
+        encoder: Encoder,
+        value: ItemContentUnion?,
+    ) {
+        safeSerializer.serialize(encoder, value)
+    }
+
+    override fun deserialize(decoder: Decoder): ItemContentUnion? = safeSerializer.deserialize(decoder)
 }

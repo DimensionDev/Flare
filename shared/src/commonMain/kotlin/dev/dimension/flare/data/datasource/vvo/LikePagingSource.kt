@@ -32,7 +32,7 @@ internal class LikePagingSource(
 
         val nextPage = params.key?.plus(1) ?: 2
         val data =
-            response.data.orEmpty().map {
+            response.data.orEmpty().filter { it.idStr != null }.map {
                 it.render(accountKey, event)
             }
 

@@ -15,8 +15,13 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
+import dev.dimension.flare.common.SafePolymorphicSerializer
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonClassDiscriminator
 
 /**
@@ -101,4 +106,19 @@ internal sealed interface ContentUnion {
 //        @SerialName(value = "Carousel")
 //        carousel("Carousel"),
 //    }
+}
+
+internal class SafeContentUnionSerializer : KSerializer<ContentUnion?> {
+    private val safeSerializer = SafePolymorphicSerializer(ContentUnion.serializer(), "entryType")
+
+    override val descriptor: SerialDescriptor = safeSerializer.descriptor
+
+    override fun serialize(
+        encoder: Encoder,
+        value: ContentUnion?,
+    ) {
+        safeSerializer.serialize(encoder, value)
+    }
+
+    override fun deserialize(decoder: Decoder): ContentUnion? = safeSerializer.deserialize(decoder)
 }

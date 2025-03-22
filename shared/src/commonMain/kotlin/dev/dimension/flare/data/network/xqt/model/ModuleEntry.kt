@@ -28,6 +28,7 @@ import kotlinx.serialization.Serializable
 internal data class ModuleEntry(
 //    @SerialName(value = "clientEventInfo")
 //    val clientEventInfo: ClientEventInfo,
+    @Serializable(with = SafeItemContentSerializer::class)
     @SerialName(value = "itemContent")
     val itemContent: ItemContentUnion? = null,
 )

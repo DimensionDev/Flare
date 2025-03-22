@@ -532,8 +532,8 @@ internal data class Comment(
 
 @Serializable
 internal data class Attitude(
-    val id: Long,
-    val idStr: String,
+    val id: Long? = null,
+    val idStr: String? = null,
     @SerialName("created_at")
     @Serializable(with = VVODateSerializer::class)
     val createdAt: Instant? = null,

@@ -3,6 +3,8 @@ package dev.dimension.flare.ui.presenter.home
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.onEmpty
+import dev.dimension.flare.common.onError
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -16,9 +18,14 @@ public abstract class TimelinePresenter : PresenterBase<TimelineState>() {
             override val listState = listState
 
             override suspend fun refresh() {
-                listState.onSuccess {
-                    refreshSuspend()
-                }
+                listState
+                    .onSuccess {
+                        refreshSuspend()
+                    }.onEmpty {
+                        refresh()
+                    }.onError {
+                        onRetry()
+                    }
             }
         }
     }

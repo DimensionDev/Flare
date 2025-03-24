@@ -387,7 +387,11 @@ private fun StatusMediaScreen(
                                             onClick = {
                                                 state.setShowUi(!state.showUi)
                                             },
-                                            setLockPager = state::setLockPager,
+                                            setLockPager = {
+                                                if (pagerState.currentPage == index) {
+                                                    state.setLockPager(it)
+                                                }
+                                            },
                                         )
                                     }
 

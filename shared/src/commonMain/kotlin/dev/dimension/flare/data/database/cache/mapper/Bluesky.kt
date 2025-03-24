@@ -79,6 +79,8 @@ internal object Bluesky {
             val reason = it.reason
             if (reason is FeedViewPostReasonUnion.ReasonRepost) {
                 reason.value.indexedAt.toEpochMilliseconds()
+            } else if (reason is FeedViewPostReasonUnion.ReasonPin) {
+                Long.MAX_VALUE
             } else {
                 it.post.indexedAt.toEpochMilliseconds()
             }
@@ -386,6 +388,25 @@ internal fun List<FeedViewPost>.toDbPagingTimeline(
                     )
                 }
 
+                is FeedViewPostReasonUnion.ReasonPin -> {
+                    val status = it.post.toDbStatusWithUser(accountKey)
+                    DbStatusWithUser(
+                        user = status.user,
+                        data =
+                            DbStatus(
+                                statusKey =
+                                    MicroBlogKey(
+                                        it.post.uri.atUri + "_pin_${status.user?.userKey}",
+                                        accountKey.host,
+                                    ),
+                                userKey = status.user?.userKey,
+                                content = StatusContent.BlueskyReason(data),
+                                accountKey = accountKey,
+                                text = status.data.text,
+                            ),
+                    )
+                }
+
                 else -> {
                     // bluesky doesn't have "quote" and "retweet" as the same as the other platforms
                     it.post.toDbStatusWithUser(accountKey)
@@ -398,7 +419,7 @@ internal fun List<FeedViewPost>.toDbPagingTimeline(
                 } else {
                     null
                 },
-                if (it.reason is FeedViewPostReasonUnion.ReasonRepost) {
+                if (it.reason != null) {
                     ReferenceType.Retweet to it.post.toDbStatusWithUser(accountKey)
                 } else {
                     null

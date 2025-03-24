@@ -30,7 +30,7 @@ struct StatusRetweetHeaderComponent: View {
             case .status: String(localized: "mastodon_notification_item_posted_status")
             case .update: String(localized: "mastodon_notification_item_updated_status")
             case .unKnown: String(localized: "mastodon_notification_item_updated_status")
-            case .pin: String(localized: "mastodon_item_pin")
+            case .pinned: String(localized: "mastodon_item_pinned")
             }
         case let .misskey(data):
             switch onEnum(of: data) {

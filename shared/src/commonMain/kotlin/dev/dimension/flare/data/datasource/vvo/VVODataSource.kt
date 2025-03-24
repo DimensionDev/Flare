@@ -29,6 +29,7 @@ import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
 import dev.dimension.flare.data.repository.LocalFilterRepository
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -185,7 +186,10 @@ internal class VVODataSource(
         return Cacheable(
             fetchSource = {
                 val config = service.config()
-                val st = config.data?.st
+                if (config.data?.login != true) {
+                    throw LoginExpiredException
+                }
+                val st = config.data.st
                 requireNotNull(st) { "st is null" }
                 val profile = service.profileInfo(id, st)
                 val user = profile.data?.user?.toDbUser()
@@ -207,7 +211,10 @@ internal class VVODataSource(
             relationKeyWithUserKey(userKey),
         ) {
             val config = service.config()
-            val st = config.data?.st
+            if (config.data?.login != true) {
+                throw LoginExpiredException
+            }
+            val st = config.data.st
             requireNotNull(st) { "st is null" }
             val profile = service.profileInfo(userKey.id, st)
             val user =
@@ -346,7 +353,10 @@ internal class VVODataSource(
     ) {
         val maxProgress = data.medias.size + 1
         val config = service.config()
-        val st = config.data?.st
+        if (config.data?.login != true) {
+            throw LoginExpiredException
+        }
+        val st = config.data.st
         requireNotNull(st) { "st is null" }
         val mediaIds =
             data.medias.mapIndexed { index, it ->
@@ -388,7 +398,10 @@ internal class VVODataSource(
 
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
         val config = service.config()
-        val st = config.data?.st
+        if (config.data?.login != true) {
+            throw LoginExpiredException
+        }
+        val st = config.data.st
         requireNotNull(st) { "st is null" }
         service.deleteStatus(
             mid = statusKey.id,
@@ -498,7 +511,10 @@ internal class VVODataSource(
         }
         tryRun {
             val config = service.config()
-            val st = config.data?.st
+            if (config.data?.login != true) {
+                throw LoginExpiredException
+            }
+            val st = config.data.st
             requireNotNull(st) { "st is null" }
             service.follow(
                 st = st,
@@ -526,7 +542,10 @@ internal class VVODataSource(
         }
         tryRun {
             val config = service.config()
-            val st = config.data?.st
+            if (config.data?.login != true) {
+                throw LoginExpiredException
+            }
+            val st = config.data.st
             requireNotNull(st) { "st is null" }
             service.unfollow(
                 st = st,
@@ -617,7 +636,10 @@ internal class VVODataSource(
             "status_extended_text_$statusKey",
         ) {
             val config = service.config()
-            val st = config.data?.st
+            if (config.data?.login != true) {
+                throw LoginExpiredException
+            }
+            val st = config.data.st
             requireNotNull(st) { "st is null" }
             val response = service.getStatusExtend(statusKey.id, st)
             response.data?.longTextContent.orEmpty()
@@ -649,7 +671,11 @@ internal class VVODataSource(
             )
 
             tryRun {
-                val st = service.config().data?.st
+                val config = service.config()
+                if (config.data?.login != true) {
+                    throw LoginExpiredException
+                }
+                val st = config.data.st
                 requireNotNull(st) { "st is null" }
                 if (liked) {
                     service.unlikeStatus(id = statusKey.id, st = st)
@@ -707,7 +733,11 @@ internal class VVODataSource(
             )
 
             tryRun {
-                val st = service.config().data?.st
+                val config = service.config()
+                if (config.data?.login != true) {
+                    throw LoginExpiredException
+                }
+                val st = config.data.st
                 requireNotNull(st) { "st is null" }
                 if (liked) {
                     service.likesDestroy(id = statusKey.id, st = st)
@@ -752,7 +782,10 @@ internal class VVODataSource(
         Cacheable(
             fetchSource = {
                 val config = service.config()
-                val st = config.data?.st
+                if (config.data?.login != true) {
+                    throw LoginExpiredException
+                }
+                val st = config.data.st
                 requireNotNull(st) { "st is null" }
                 val response =
                     service.remindUnread(

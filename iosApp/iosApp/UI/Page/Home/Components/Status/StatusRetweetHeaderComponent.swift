@@ -17,6 +17,7 @@ struct StatusRetweetHeaderComponent: View {
             case .repost: String(localized: "bluesky_notification_item_reblogged_your_status")
             case .unKnown: String(localized: "bluesky_notification_item_unKnown")
             case .starterpackJoined: String(localized: "bluesky_notification_item_starterpack_joined")
+            case .pin: String(localized: "bluesky_notification_item_pin")
             }
         case let .mastodon(data):
             switch onEnum(of: data) {
@@ -29,6 +30,7 @@ struct StatusRetweetHeaderComponent: View {
             case .status: String(localized: "mastodon_notification_item_posted_status")
             case .update: String(localized: "mastodon_notification_item_updated_status")
             case .unKnown: String(localized: "mastodon_notification_item_updated_status")
+            case .pin: String(localized: "mastodon_item_pin")
             }
         case let .misskey(data):
             switch onEnum(of: data) {
@@ -125,6 +127,14 @@ struct StatusRetweetHeaderComponent: View {
                     .size(14)
                     .frame(alignment: .center)
             case .quote: Awesome.Classic.Solid.quoteLeft.image
+                #if os(macOS)
+                    .foregroundColor(.labelColor)
+                #elseif os(iOS)
+                    .foregroundColor(.label)
+                #endif
+                    .size(14)
+                    .frame(alignment: .center)
+            case .pin: Awesome.Classic.Solid.thumbtack.image
                 #if os(macOS)
                     .foregroundColor(.labelColor)
                 #elseif os(iOS)

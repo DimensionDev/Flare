@@ -19,6 +19,7 @@ internal class UserTimelineRemoteMediator(
     private val pagingKey: String,
     private val onlyMedia: Boolean = false,
     private val withReplies: Boolean = false,
+    private val withPinned: Boolean = false,
 ) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     override suspend fun doLoad(
         loadType: LoadType,
@@ -26,13 +27,30 @@ internal class UserTimelineRemoteMediator(
     ): MediatorResult {
         val response =
             when (loadType) {
-                LoadType.REFRESH ->
-                    service.userTimeline(
-                        user_id = userKey.id,
-                        limit = state.config.pageSize,
-                        only_media = onlyMedia,
-                        exclude_replies = !withReplies,
-                    )
+                LoadType.REFRESH -> {
+                    val pinned =
+                        if (withPinned) {
+                            service.userTimeline(
+                                user_id = userKey.id,
+                                limit = state.config.pageSize,
+                                pinned = true,
+                            )
+                        } else {
+                            emptyList()
+                        }
+                    service
+                        .userTimeline(
+                            user_id = userKey.id,
+                            limit = state.config.pageSize,
+                            only_media = onlyMedia,
+                            exclude_replies = !withReplies,
+                        ).also {
+                            database.pagingTimelineDao().delete(
+                                pagingKey = pagingKey,
+                                accountKey = accountKey,
+                            )
+                        } + pinned
+                }
 
                 LoadType.PREPEND -> {
                     val firstItem = state.firstItemOrNull()

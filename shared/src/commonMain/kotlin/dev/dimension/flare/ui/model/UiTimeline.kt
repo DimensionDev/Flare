@@ -205,6 +205,7 @@ public data class UiTimeline internal constructor(
             Info,
             Reply,
             Quote,
+            Pin,
         }
 
         public sealed interface MessageType {
@@ -242,6 +243,10 @@ public data class UiTimeline internal constructor(
                 ) : Mastodon
 
                 public data class UnKnown internal constructor(
+                    val id: String,
+                ) : Mastodon
+
+                public data class Pinned internal constructor(
                     val id: String,
                 ) : Mastodon
             }
@@ -314,6 +319,8 @@ public data class UiTimeline internal constructor(
                 public data object UnKnown : Bluesky
 
                 public data object StarterpackJoined : Bluesky
+
+                public data object Pin : Bluesky
             }
 
             public sealed interface XQT : MessageType {

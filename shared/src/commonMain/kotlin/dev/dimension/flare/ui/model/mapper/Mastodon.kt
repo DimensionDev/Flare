@@ -167,7 +167,17 @@ internal fun Status.render(
     val currentStatus = this.renderStatus(host, accountKey, event)
     val actualStatus = (references[ReferenceType.Retweet] as? StatusContent.Mastodon)?.data ?: this
     val topMessage =
-        if (reblog == null) {
+        if (pinned == true) {
+            UiTimeline.TopMessage(
+                user = null,
+                icon = UiTimeline.TopMessage.Icon.Pin,
+                type =
+                    UiTimeline.TopMessage.MessageType.Mastodon
+                        .Pinned(id = id.orEmpty()),
+                onClicked = { },
+                statusKey = currentStatus.statusKey,
+            )
+        } else if (reblog == null) {
             null
         } else {
             UiTimeline.TopMessage(

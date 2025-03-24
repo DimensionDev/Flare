@@ -1348,7 +1348,24 @@ internal open class MastodonDataSource(
         listOfNotNull(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
-                flow = userTimeline(userKey, scope, pagingSize),
+                flow =
+                    timelinePager(
+                        pageSize = pagingSize,
+                        pagingKey = "user_timeline_$userKey",
+                        accountKey = accountKey,
+                        database = database,
+                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                        scope = scope,
+                        mediator =
+                            UserTimelineRemoteMediator(
+                                service = service,
+                                database = database,
+                                accountKey = accountKey,
+                                userKey = userKey,
+                                pagingKey = "user_timeline_$userKey",
+                                withPinned = true,
+                            ),
+                    ),
             ),
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.StatusWithReplies,

@@ -215,8 +215,8 @@ internal fun FeedViewPostReasonUnion.render(
                 val user = data?.author?.render(accountKey = accountKey)
                 UiTimeline.TopMessage(
                     user = user,
-                    icon = UiTimeline.TopMessage.Icon.Info,
-                    type = UiTimeline.TopMessage.MessageType.Bluesky.UnKnown,
+                    icon = UiTimeline.TopMessage.Icon.Pin,
+                    type = UiTimeline.TopMessage.MessageType.Bluesky.Pin,
                     onClicked = { },
                     statusKey = MicroBlogKey(id = data?.uri?.atUri.orEmpty(), host = accountKey.host),
                 )

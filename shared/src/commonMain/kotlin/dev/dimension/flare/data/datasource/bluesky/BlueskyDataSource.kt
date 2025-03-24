@@ -2226,7 +2226,25 @@ internal class BlueskyDataSource(
         listOfNotNull(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
-                flow = userTimeline(userKey, scope, pagingSize),
+                flow =
+                    timelinePager(
+                        pageSize = pagingSize,
+                        pagingKey = "user_timeline_$userKey",
+                        accountKey = accountKey,
+                        database = database,
+                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                        scope = scope,
+                        mediator =
+                            UserTimelineRemoteMediator(
+                                service = service,
+                                accountKey = accountKey,
+                                database = database,
+                                userKey = userKey,
+                                pagingKey = "user_timeline_$userKey",
+                                onlyMedia = false,
+                                withReplies = false,
+                            ),
+                    ),
             ),
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.StatusWithReplies,

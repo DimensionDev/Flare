@@ -8,8 +8,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.ImmutableListWrapper
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.collectAsState
-import dev.dimension.flare.common.flatten
-import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.common.refreshSuspend
 import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
@@ -161,21 +160,8 @@ public class ProfilePresenter(
                 }
             }
 
-        val listState =
-            remember(tabs) {
-                tabs
-                    .map {
-                        it
-                            .toImmutableList()
-                            .filterIsInstance<ProfileState.Tab.Timeline>()
-                            .first()
-                            .data
-                    }.flatten()
-            }
         return object : ProfileState(
             userState = userState.flatMap { it.toUi() },
-            listState = listState,
-            mediaState = mediaState,
             relationState = relationState,
             isMe = isMe,
             actions = actions,
@@ -192,8 +178,17 @@ public class ProfilePresenter(
                 userState.onSuccess {
                     it.refresh()
                 }
-                listState.onSuccess {
-                    refreshSuspend()
+                tabs.onSuccess {
+                    it.toImmutableList().forEach {
+                        when (it) {
+                            is ProfileState.Tab.Media -> {
+                                it.data.refreshSuspend()
+                            }
+                            is ProfileState.Tab.Timeline -> {
+                                it.data.refreshSuspend()
+                            }
+                        }
+                    }
                 }
             }
 
@@ -229,8 +224,6 @@ public class ProfilePresenter(
 @Immutable
 public abstract class ProfileState(
     public val userState: UiState<UiProfile>,
-    public val listState: PagingState<UiTimeline>,
-    public val mediaState: PagingState<ProfileMedia>,
     public val relationState: UiState<UiRelation>,
     public val isMe: UiState<Boolean>,
     public val actions: UiState<ImmutableListWrapper<ProfileAction>>,

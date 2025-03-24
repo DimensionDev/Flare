@@ -33,7 +33,7 @@ internal class UserTimelineRemoteMediator(
             when {
                 onlyMedia -> GetAuthorFeedFilter.PostsWithMedia
                 withReplies -> GetAuthorFeedFilter.PostsWithReplies
-                else -> null
+                else -> GetAuthorFeedFilter.PostsAndAuthorThreads
             }
         val response =
             when (loadType) {
@@ -44,6 +44,7 @@ internal class UserTimelineRemoteMediator(
                                 limit = state.config.pageSize.toLong(),
                                 actor = Did(did = userKey.id),
                                 filter = filter,
+                                includePins = true,
                             ),
                         ).maybeResponse()
 
@@ -61,6 +62,7 @@ internal class UserTimelineRemoteMediator(
                                 cursor = cursor,
                                 actor = Did(did = userKey.id),
                                 filter = filter,
+                                includePins = true,
                             ),
                         ).maybeResponse()
                 }

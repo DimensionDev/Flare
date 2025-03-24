@@ -209,10 +209,20 @@ internal fun FeedViewPostReasonUnion.render(
     references: Map<ReferenceType, StatusContent>,
 ): UiTimeline {
     val data = (references[ReferenceType.Retweet] as? StatusContent.Bluesky)?.data
-    return UiTimeline(
-        topMessage =
-            (this as? FeedViewPostReasonUnion.ReasonRepost)?.value?.by?.let {
-                val user = it.render(accountKey)
+    val topMessage =
+        when (this) {
+            is FeedViewPostReasonUnion.ReasonPin -> {
+                val user = data?.author?.render(accountKey = accountKey)
+                UiTimeline.TopMessage(
+                    user = user,
+                    icon = UiTimeline.TopMessage.Icon.Info,
+                    type = UiTimeline.TopMessage.MessageType.Bluesky.UnKnown,
+                    onClicked = { },
+                    statusKey = MicroBlogKey(id = data?.uri?.atUri.orEmpty(), host = accountKey.host),
+                )
+            }
+            is FeedViewPostReasonUnion.ReasonRepost -> {
+                val user = value.by.render(accountKey)
                 UiTimeline.TopMessage(
                     user = user,
                     icon = UiTimeline.TopMessage.Icon.Retweet,
@@ -227,7 +237,11 @@ internal fun FeedViewPostReasonUnion.render(
                     },
                     statusKey = MicroBlogKey(id = data?.uri?.atUri.orEmpty(), host = accountKey.host),
                 )
-            },
+            }
+            is FeedViewPostReasonUnion.Unknown -> null
+        }
+    return UiTimeline(
+        topMessage = topMessage,
         content = data?.renderStatus(accountKey, event),
     )
 }

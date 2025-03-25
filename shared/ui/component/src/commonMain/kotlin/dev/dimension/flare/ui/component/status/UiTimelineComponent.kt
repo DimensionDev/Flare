@@ -534,7 +534,7 @@ private fun TopMessageComponent(
                             resource = Res.string.bluesky_notification_item_unKnown,
                         )
 
-                    UiTimeline.TopMessage.MessageType.Bluesky.Pin ->
+                    UiTimeline.TopMessage.MessageType.Bluesky.Pinned ->
                         stringResource(
                             resource = Res.string.bluesky_notification_item_pin,
                         )
@@ -646,6 +646,11 @@ private fun TopMessageComponent(
                         stringResource(
                             resource = Res.string.misskey_notification_unknwon,
                             type.type,
+                        )
+
+                    is UiTimeline.TopMessage.MessageType.Misskey.Pinned ->
+                        stringResource(
+                            resource = Res.string.mastodon_item_pinned,
                         )
                 }
 

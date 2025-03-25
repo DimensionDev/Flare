@@ -216,7 +216,7 @@ internal fun FeedViewPostReasonUnion.render(
                 UiTimeline.TopMessage(
                     user = user,
                     icon = UiTimeline.TopMessage.Icon.Pin,
-                    type = UiTimeline.TopMessage.MessageType.Bluesky.Pin,
+                    type = UiTimeline.TopMessage.MessageType.Bluesky.Pinned,
                     onClicked = { },
                     statusKey = MicroBlogKey(id = data?.uri?.atUri.orEmpty(), host = accountKey.host),
                 )

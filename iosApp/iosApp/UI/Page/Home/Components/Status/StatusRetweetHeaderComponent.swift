@@ -17,7 +17,7 @@ struct StatusRetweetHeaderComponent: View {
             case .repost: String(localized: "bluesky_notification_item_reblogged_your_status")
             case .unKnown: String(localized: "bluesky_notification_item_unKnown")
             case .starterpackJoined: String(localized: "bluesky_notification_item_starterpack_joined")
-            case .pin: String(localized: "bluesky_notification_item_pin")
+            case .pinned: String(localized: "bluesky_notification_item_pin")
             }
         case let .mastodon(data):
             switch onEnum(of: data) {
@@ -46,6 +46,7 @@ struct StatusRetweetHeaderComponent: View {
             case .renote: String(localized: "misskey_notification_renote")
             case .reply: String(localized: "misskey_notification_reply")
             case .unKnown: String(localized: "misskey_notification_unknown")
+            case .pinned: String(localized: "misskey_item_pinned")
             }
         case let .vVO(data):
             switch onEnum(of: data) {

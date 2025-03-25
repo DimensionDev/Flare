@@ -301,6 +301,10 @@ public data class UiTimeline internal constructor(
                     val type: String,
                     val id: String,
                 ) : Misskey
+
+                public data class Pinned internal constructor(
+                    val id: String,
+                ) : Misskey
             }
 
             public sealed interface Bluesky : MessageType {
@@ -320,7 +324,7 @@ public data class UiTimeline internal constructor(
 
                 public data object StarterpackJoined : Bluesky
 
-                public data object Pin : Bluesky
+                public data object Pinned : Bluesky
             }
 
             public sealed interface XQT : MessageType {

@@ -1004,7 +1004,24 @@ internal class MisskeyDataSource(
         listOfNotNull(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
-                flow = userTimeline(userKey, scope, pagingSize),
+                flow =
+                    timelinePager(
+                        pageSize = pagingSize,
+                        pagingKey = "user_timeline_$userKey",
+                        accountKey = accountKey,
+                        database = database,
+                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                        scope = scope,
+                        mediator =
+                            UserTimelineRemoteMediator(
+                                accountKey = accountKey,
+                                service = service,
+                                userKey = userKey,
+                                database = database,
+                                pagingKey = "user_timeline_$userKey",
+                                withPinned = true,
+                            ),
+                    ),
             ),
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.StatusWithReplies,

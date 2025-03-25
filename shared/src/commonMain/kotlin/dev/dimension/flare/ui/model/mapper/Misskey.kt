@@ -284,7 +284,18 @@ internal fun Note.render(
     val currentStatus = this.renderStatus(accountKey, event)
     val actualStatus = renote ?: this
     val topMessage =
-        if (renote == null || !text.isNullOrEmpty()) {
+        // TODO: find a way to detect pinned status
+        if (false) {
+            UiTimeline.TopMessage(
+                user = user,
+                icon = UiTimeline.TopMessage.Icon.Pin,
+                type =
+                    UiTimeline.TopMessage.MessageType.Misskey
+                        .Pinned(id = id),
+                onClicked = {},
+                statusKey = currentStatus.statusKey,
+            )
+        } else if (renote == null || !text.isNullOrEmpty()) {
             null
         } else {
             UiTimeline.TopMessage(
@@ -310,7 +321,7 @@ internal fun Note.render(
     )
 }
 
-internal fun Note.renderStatus(
+private fun Note.renderStatus(
     accountKey: MicroBlogKey,
     event: StatusEvent.Misskey,
 ): UiTimeline.ItemContent.Status {

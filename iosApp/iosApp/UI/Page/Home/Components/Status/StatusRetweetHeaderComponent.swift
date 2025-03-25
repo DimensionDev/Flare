@@ -17,6 +17,7 @@ struct StatusRetweetHeaderComponent: View {
             case .repost: String(localized: "bluesky_notification_item_reblogged_your_status")
             case .unKnown: String(localized: "bluesky_notification_item_unKnown")
             case .starterpackJoined: String(localized: "bluesky_notification_item_starterpack_joined")
+            case .pinned: String(localized: "bluesky_notification_item_pin")
             }
         case let .mastodon(data):
             switch onEnum(of: data) {
@@ -29,6 +30,7 @@ struct StatusRetweetHeaderComponent: View {
             case .status: String(localized: "mastodon_notification_item_posted_status")
             case .update: String(localized: "mastodon_notification_item_updated_status")
             case .unKnown: String(localized: "mastodon_notification_item_updated_status")
+            case .pinned: String(localized: "mastodon_item_pinned")
             }
         case let .misskey(data):
             switch onEnum(of: data) {
@@ -44,6 +46,7 @@ struct StatusRetweetHeaderComponent: View {
             case .renote: String(localized: "misskey_notification_renote")
             case .reply: String(localized: "misskey_notification_reply")
             case .unKnown: String(localized: "misskey_notification_unknown")
+            case .pinned: String(localized: "misskey_item_pinned")
             }
         case let .vVO(data):
             switch onEnum(of: data) {
@@ -125,6 +128,14 @@ struct StatusRetweetHeaderComponent: View {
                     .size(14)
                     .frame(alignment: .center)
             case .quote: Awesome.Classic.Solid.quoteLeft.image
+                #if os(macOS)
+                    .foregroundColor(.labelColor)
+                #elseif os(iOS)
+                    .foregroundColor(.label)
+                #endif
+                    .size(14)
+                    .frame(alignment: .center)
+            case .pin: Awesome.Classic.Solid.thumbtack.image
                 #if os(macOS)
                     .foregroundColor(.labelColor)
                 #elseif os(iOS)

@@ -27,6 +27,7 @@ import compose.icons.fontawesomeicons.solid.QuoteLeft
 import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
 import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
+import compose.icons.fontawesomeicons.solid.Thumbtack
 import compose.icons.fontawesomeicons.solid.UserPlus
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.model.MicroBlogKey
@@ -35,11 +36,13 @@ import dev.dimension.flare.ui.component.Res
 import dev.dimension.flare.ui.component.bluesky_notification_item_favourited_your_status
 import dev.dimension.flare.ui.component.bluesky_notification_item_followed_you
 import dev.dimension.flare.ui.component.bluesky_notification_item_mentioned_you
+import dev.dimension.flare.ui.component.bluesky_notification_item_pin
 import dev.dimension.flare.ui.component.bluesky_notification_item_quoted_your_status
 import dev.dimension.flare.ui.component.bluesky_notification_item_reblogged_your_status
 import dev.dimension.flare.ui.component.bluesky_notification_item_replied_to_you
 import dev.dimension.flare.ui.component.bluesky_notification_item_starterpack_joined
 import dev.dimension.flare.ui.component.bluesky_notification_item_unKnown
+import dev.dimension.flare.ui.component.mastodon_item_pinned
 import dev.dimension.flare.ui.component.mastodon_notification_item_favourited_your_status
 import dev.dimension.flare.ui.component.mastodon_notification_item_followed_you
 import dev.dimension.flare.ui.component.mastodon_notification_item_mentioned_you
@@ -488,6 +491,7 @@ private fun TopMessageComponent(
             UiTimeline.TopMessage.Icon.Info -> FontAwesomeIcons.Solid.CircleInfo
             UiTimeline.TopMessage.Icon.Reply -> FontAwesomeIcons.Solid.Reply
             UiTimeline.TopMessage.Icon.Quote -> FontAwesomeIcons.Solid.QuoteLeft
+            UiTimeline.TopMessage.Icon.Pin -> FontAwesomeIcons.Solid.Thumbtack
         }
     val text: String? =
         when (val type = data.type) {
@@ -528,6 +532,11 @@ private fun TopMessageComponent(
                     UiTimeline.TopMessage.MessageType.Bluesky.UnKnown ->
                         stringResource(
                             resource = Res.string.bluesky_notification_item_unKnown,
+                        )
+
+                    UiTimeline.TopMessage.MessageType.Bluesky.Pinned ->
+                        stringResource(
+                            resource = Res.string.bluesky_notification_item_pin,
                         )
                 }
 
@@ -572,6 +581,10 @@ private fun TopMessageComponent(
                         )
 
                     is UiTimeline.TopMessage.MessageType.Mastodon.UnKnown -> null
+                    is UiTimeline.TopMessage.MessageType.Mastodon.Pinned ->
+                        stringResource(
+                            resource = Res.string.mastodon_item_pinned,
+                        )
                 }
 
             is UiTimeline.TopMessage.MessageType.Misskey ->
@@ -633,6 +646,11 @@ private fun TopMessageComponent(
                         stringResource(
                             resource = Res.string.misskey_notification_unknwon,
                             type.type,
+                        )
+
+                    is UiTimeline.TopMessage.MessageType.Misskey.Pinned ->
+                        stringResource(
+                            resource = Res.string.mastodon_item_pinned,
                         )
                 }
 

@@ -23,6 +23,7 @@
     <string name="mastodon_item_reblogged_status">boosted a toot</string>
     <string name="mastodon_item_show_more">Show more</string>
     <string name="mastodon_item_show_less">Show less</string>
+    <string name="mastodon_item_pinned">Pinned toot</string>
 
     <string name="bluesky_notification_item_followed_you">followed you</string>
     <string name="bluesky_notification_item_favourited_your_status">favourited</string>
@@ -34,6 +35,7 @@
     <string name="bluesky_notification_item_quoted_your_status">quoted</string>
     <string name="bluesky_notification_item_starterpack_joined">Starterpack Joined</string>
     <string name="bluesky_notification_item_unKnown">UnKnown</string>
+    <string name="bluesky_notification_item_pin">Pinned</string>
 
     <string name="misskey_notification_item_mentioned_you">mentioned you</string>
     <string name="misskey_notification_item_replied_to_you">replied to you</string>

@@ -252,6 +252,7 @@ internal class GuestMastodonDataSource(
                             host = host,
                             userId = userKey.id,
                             service = service,
+                            withPinned = true,
                         )
                     }.flow.cachedIn(scope),
             ),

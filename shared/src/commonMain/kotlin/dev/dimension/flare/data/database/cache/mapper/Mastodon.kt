@@ -23,7 +23,13 @@ internal object Mastodon {
         pagingKey: String,
         database: CacheDatabase,
         data: List<Status>,
-        sortIdProvider: (Status) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0 },
+        sortIdProvider: (Status) -> Long = {
+            if (it.pinned == true) {
+                Long.MAX_VALUE
+            } else {
+                it.createdAt?.toEpochMilliseconds() ?: 0
+            }
+        },
     ) {
         val items = data.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider)
         saveToDatabase(database, items)
@@ -62,7 +68,8 @@ internal fun List<Notification>.toDb(
     }
 
 private fun Notification.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser {
-    val user = this.account?.toDbUser(accountKey.host) ?: throw IllegalStateException("account is null")
+    val user =
+        this.account?.toDbUser(accountKey.host) ?: throw IllegalStateException("account is null")
     val status = this.toDbStatus(accountKey)
     return DbStatusWithUser(
         data = status,
@@ -71,7 +78,8 @@ private fun Notification.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusW
 }
 
 private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
-    val user = this.account?.toDbUser(accountKey.host) ?: throw IllegalStateException("account is null")
+    val user =
+        this.account?.toDbUser(accountKey.host) ?: throw IllegalStateException("account is null")
     return DbStatus(
         statusKey =
             MicroBlogKey(
@@ -115,7 +123,8 @@ private fun Status.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUse
         DbStatus(
             statusKey =
                 MicroBlogKey(
-                    id ?: throw IllegalArgumentException("mastodon Status.idStr should not be null"),
+                    id
+                        ?: throw IllegalArgumentException("mastodon Status.idStr should not be null"),
                     host = user.userKey.host,
                 ),
             content =
@@ -129,7 +138,13 @@ private fun Status.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUse
                         append(spoilerText)
                         append("\n\n")
                     }
-                    append(parseMastodonContent(this@toDbStatusWithUser, accountKey, accountKey.host).toUi().raw)
+                    append(
+                        parseMastodonContent(
+                            this@toDbStatusWithUser,
+                            accountKey,
+                            accountKey.host,
+                        ).toUi().raw,
+                    )
                 },
         )
     return DbStatusWithUser(

@@ -12,20 +12,37 @@ internal class GuestUserTimelinePagingSource(
     private val userId: String,
     private val withReply: Boolean = false,
     private val onlyMedia: Boolean = false,
+    private val withPinned: Boolean = false,
 ) : BasePagingSource<String, UiTimeline>() {
     override fun getRefreshKey(state: PagingState<String, UiTimeline>): String? = null
 
     override suspend fun doLoad(params: LoadParams<String>): LoadResult<String, UiTimeline> {
         val maxId = params.key
         val limit = params.loadSize
+        val pinned =
+            if (withPinned && maxId == null) {
+                service.userTimeline(
+                    user_id = userId,
+                    pinned = true,
+                )
+            } else {
+                emptyList()
+            }
         val statuses =
-            service.userTimeline(
-                user_id = userId,
-                limit = limit,
-                max_id = maxId,
-                only_media = onlyMedia,
-                exclude_replies = !withReply,
-            )
+            service
+                .userTimeline(
+                    user_id = userId,
+                    limit = limit,
+                    max_id = maxId,
+                    only_media = onlyMedia,
+                    exclude_replies = !withReply,
+                ).let {
+                    if (withPinned) {
+                        pinned + it
+                    } else {
+                        it
+                    }
+                }
         return LoadResult.Page(
             data =
                 statuses.map {

@@ -11,7 +11,7 @@ struct FeedDetailView: View {
     @State private var presenter: BlueskyFeedTimelinePresenter
     @State private var showNavigationTitle: Bool = false
     @Environment(\.presentationMode) var presentationMode
-    @EnvironmentObject private var router: Router
+
     private let gradientColors: [Color]
 
     init(list: UiList, accountType: AccountType, defaultUser: UiUserV2? = nil) {

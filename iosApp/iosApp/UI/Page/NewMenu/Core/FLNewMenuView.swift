@@ -10,7 +10,6 @@ struct FLNewMenuView: View {
     @State private var showFeeds = false
     let accountType: AccountType
     let user: UiUserV2?
-    @EnvironmentObject private var router: Router
 
     init(isOpen: Binding<Bool>, accountType: AccountType, user: UiUserV2? = nil) {
         _isOpen = isOpen
@@ -20,18 +19,14 @@ struct FLNewMenuView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 用户区域
             userAreaView
                 .padding(.top, 60)
                 .padding(.horizontal, 20)
 
-            // 中间列表区域
             List {
-                // 列表入口
                 Button(action: {
-                    // 关闭菜单
                     isOpen = false
-                    // 使用showLists展示列表
+
                     showLists = true
                 }) {
                     HStack {
@@ -45,12 +40,10 @@ struct FLNewMenuView: View {
                 }
                 .buttonStyle(PlainButtonStyle())
 
-                // Misskey平台特有的Feed菜单项
                 if isPlatformBluesky() {
                     Button(action: {
-                        // 关闭菜单
                         isOpen = false
-                        // 使用showFeeds展示Feeds页面
+
                         showFeeds = true
                     }) {
                         HStack {
@@ -67,7 +60,6 @@ struct FLNewMenuView: View {
             }
             .listStyle(PlainListStyle())
 
-            // 底部设置按钮
             settingsButton
                 .padding(.horizontal, 20)
                 .padding(.bottom, 80)
@@ -98,7 +90,6 @@ struct FLNewMenuView: View {
 
     private var userAreaView: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // 头像和用户名区域
             Button(action: {
                 if user != nil {
                     showAccounts = true

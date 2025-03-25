@@ -6,14 +6,21 @@ import SwiftUI
 struct UserComponent: View {
     let user: UiUserV2
     let topEndContent: UiTimelineItemContentStatusTopEndContent?
-    let onUserClicked: () -> Void
+    // let onUserClicked: () -> Void
+
+    // 添加路由器环境对象，使用可选类型
+    @EnvironmentObject private var router: FlareRouter
 
     var body: some View {
         HStack {
             Button(
                 action: {
-                    onUserClicked()
-//                   openURL(URL(string: AppDeepLink.Profile.shared.invoke(userKey: user.userKey))!)
+                    print("📱 头像按钮被点击: \(user.handle)")
+                    // 使用声明式导航替换KMP回调
+                    router.navigate(to: .profile(
+                        accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
+                        userKey: user.key
+                    ))
                 },
                 label: {
                     UserAvatar(data: user.avatar, size: 44)

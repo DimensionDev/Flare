@@ -14,9 +14,9 @@ class ComposeViewModel: MoleculeViewModelProto {
     var enableCW = false
     var pollViewModel = PollViewModel()
     var mediaViewModel = MediaViewModel()
-    var status: ComposeStatus?
+    var status: shared.ComposeStatus?
     var showEmoji = false
-    init(accountType: AccountType, status: ComposeStatus?) {
+    init(accountType: AccountType, status: shared.ComposeStatus?) {
         self.status = status
         presenter = .init(accountType: accountType, status: status)
         model = presenter.models.value

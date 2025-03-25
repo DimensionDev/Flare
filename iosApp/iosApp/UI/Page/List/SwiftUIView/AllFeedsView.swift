@@ -10,7 +10,7 @@ private let logger = Logger(subsystem: "com.flare.app", category: "AllFeedsView"
 
 struct AllFeedsView: View {
     @State private var presenter: PinnableTimelineTabPresenter
-    @EnvironmentObject private var router: Router
+//    @EnvironmentObject private var router: Router
     @Environment(\.appSettings) private var appSettings
     @State private var lastKnownItemCount: Int = 0
     @State private var currentUser: UiUserV2?
@@ -177,7 +177,7 @@ struct AllFeedsView: View {
 private struct EnhancedFeedRowView: View {
     let list: UiList
     @State private var isPinned: Bool
-    @EnvironmentObject private var router: Router
+//    @EnvironmentObject private var router: Router
     @State private var navigateToDetail = false
     let accountType: AccountType
 

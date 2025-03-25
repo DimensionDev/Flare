@@ -8,7 +8,7 @@ private let logger = Logger(subsystem: "com.flare.app", category: "AllListsView"
 
 struct AllListsView: View {
     @State private var presenter: AllListPresenter
-    @EnvironmentObject private var router: Router
+//    @EnvironmentObject private var router: Router
     @Environment(\.appSettings) private var appSettings
     @State private var lastKnownItemCount: Int = 0
     @State private var currentUser: UiUserV2?
@@ -111,7 +111,7 @@ struct AllListsView: View {
 private struct EnhancedListRowView: View {
     let list: UiList
     @State private var isPinned: Bool
-    @EnvironmentObject private var router: Router
+//    @EnvironmentObject private var router: Router
     @State private var navigateToDetail = false
     let accountType: AccountType
     let defaultUser: UiUserV2?

@@ -1,8 +1,13 @@
 import shared
 import SwiftUI
+import os.log
+import Combine
+import UIKit
 
 class FlareRouter: ObservableObject {
     public var appState: FlareAppState
+    
+    private var cancellables = Set<AnyCancellable>()
 
     @Published var activeDestination: FlareDestination?
 
@@ -13,24 +18,118 @@ class FlareRouter: ObservableObject {
     @Published var isFullScreenPresented: Bool = false
 
     @Published var isDialogPresented: Bool = false
+    
 
-    @Published var navigationDepth: Int = 0
+    @Published var previousPageSnapshot: UIImage? = nil
+    
+     var navigationDepth: Int {
+        get {
+            let depth = switch activeTab {
+            case .timeline: timelineNavigationPath.count
+            case .discover: discoverNavigationPath.count
+            case .notification: notificationNavigationPath.count
+            case .compose: composeNavigationPath.count
+            case .profile: profileNavigationPath.count
+            }
+            
+            os_log("[FlareRouter] Current navigationDepth for tab %{public}@: %{public}d", 
+                  log: .default, type: .debug,
+                  String(describing: activeTab), 
+                  depth)
+            
+            return depth
+        }
+    }
+    
 
-    @Published var navigationPath = NavigationPath()
+    @Published var timelineNavigationPath = NavigationPath()
+    @Published var discoverNavigationPath = NavigationPath()
+    @Published var notificationNavigationPath = NavigationPath()
+    @Published var composeNavigationPath = NavigationPath()
+    @Published var profileNavigationPath = NavigationPath()
+    
+
+    @Published var activeTab: HomeTabs = .timeline
+    
+
+    var navigationPath: NavigationPath {
+        get { currentNavigationPath }
+        set { updateCurrentNavigationPath(newValue) }
+    }
+    
+
+    private var currentNavigationPath: NavigationPath {
+        switch activeTab {
+        case .timeline: return timelineNavigationPath
+        case .discover: return discoverNavigationPath
+        case .notification: return notificationNavigationPath
+        case .compose: return composeNavigationPath
+        case .profile: return profileNavigationPath
+        }
+    }
+    
+
+    private func updateCurrentNavigationPath(_ newPath: NavigationPath) {
+        switch activeTab {
+        case .timeline: timelineNavigationPath = newPath
+        case .discover: discoverNavigationPath = newPath
+        case .notification: notificationNavigationPath = newPath
+        case .compose: composeNavigationPath = newPath
+        case .profile: profileNavigationPath = newPath
+        }
+    }
+    
+
+    func navigationPathFor(_ tab: HomeTabs) -> Binding<NavigationPath> {
+        switch tab {
+        case .timeline: return Binding(get: { self.timelineNavigationPath }, set: { self.timelineNavigationPath = $0 })
+        case .discover: return Binding(get: { self.discoverNavigationPath }, set: { self.discoverNavigationPath = $0 })
+        case .notification: return Binding(get: { self.notificationNavigationPath }, set: { self.notificationNavigationPath = $0 })
+        case .compose: return Binding(get: { self.composeNavigationPath }, set: { self.composeNavigationPath = $0 })
+        case .profile: return Binding(get: { self.profileNavigationPath }, set: { self.profileNavigationPath = $0 })
+        }
+    }
 
     init(appState: FlareAppState = FlareAppState()) {
         self.appState = appState
+        os_log("[FlareRouter] Initialized router: %{public}@", log: .default, type: .debug, String(describing: ObjectIdentifier(self)))
+    }
+    
+
+    func captureCurrentPageSnapshot() {
+        guard let window = UIApplication.shared.windows.first(where: { $0.isKeyWindow }) else { return }
+        
+        UIGraphicsBeginImageContextWithOptions(window.bounds.size, false, UIScreen.main.scale)
+        window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        previousPageSnapshot = image
+        os_log("[FlareRouter] Captured page snapshot", log: .default, type: .debug)
     }
 
     func navigate(to destination: FlareDestination) {
-        // 根据目标类型选择不同的导航方式
+        let routerId = ObjectIdentifier(self)
+        os_log("[FlareRouter] Router %{public}@ navigating to %{public}@, current depth: %{public}d, activeTab: %{public}@", 
+               log: .default, type: .debug, 
+               String(describing: routerId),
+               String(describing: destination),
+               navigationDepth,
+               String(describing: activeTab))
+        
+
+        captureCurrentPageSnapshot()
+        
+         
         presentationType = destination.navigationType
         activeDestination = destination
 
         switch presentationType {
         case .push:
             navigatePush(to: destination)
-            navigationDepth += 1
+          
+            os_log("[FlareRouter] After push, new depth: %{public}d", 
+                   log: .default, type: .debug, navigationDepth)
         case .sheet:
             isSheetPresented = true
         case .fullScreen:
@@ -40,7 +139,8 @@ class FlareRouter: ObservableObject {
         }
     }
 
-    func goBack() {
+    func goBack() { 
+        previousPageSnapshot = nil
         dismissCurrentView()
     }
 
@@ -63,11 +163,37 @@ class FlareRouter: ObservableObject {
     }
 
     private func navigatePush(to destination: FlareDestination) {
-        navigationPath.append(destination)
-        print("导航至: \(destination)")
+        let routerId = ObjectIdentifier(self)
+        os_log("[FlareRouter] Router %{public}@ pushing to %{public}@ for tab %{public}@", 
+               log: .default, type: .debug, 
+               String(describing: routerId),
+               String(describing: destination),
+               String(describing: activeTab))
+        
+
+        switch activeTab {
+        case .timeline:
+            timelineNavigationPath.append(destination)
+        case .discover:
+            discoverNavigationPath.append(destination)
+        case .notification:
+            notificationNavigationPath.append(destination)
+        case .compose:
+            composeNavigationPath.append(destination)
+        case .profile:
+            profileNavigationPath.append(destination)
+        }
     }
 
     private func dismissCurrentView() {
+        let routerId = ObjectIdentifier(self)
+        os_log("[FlareRouter] Router %{public}@ dismissing view, current type: %{public}@, depth: %{public}d, activeTab: %{public}@", 
+               log: .default, type: .debug, 
+               String(describing: routerId),
+               String(describing: presentationType),
+               navigationDepth,
+               String(describing: activeTab))
+        
         switch presentationType {
         case .sheet:
             dismissSheet()
@@ -77,16 +203,41 @@ class FlareRouter: ObservableObject {
             isDialogPresented = false
             activeDestination = nil
         case .push:
-            // 如果有导航路径，则弹出最后一个
-            if !navigationPath.isEmpty {
-                navigationPath.removeLast()
+
+            switch activeTab {
+            case .timeline:
+                if !timelineNavigationPath.isEmpty {
+                    timelineNavigationPath.removeLast()
+                }
+            case .discover:
+                if !discoverNavigationPath.isEmpty {
+                    discoverNavigationPath.removeLast()
+                }
+            case .notification:
+                if !notificationNavigationPath.isEmpty {
+                    notificationNavigationPath.removeLast()
+                }
+            case .compose:
+                if !composeNavigationPath.isEmpty {
+                    composeNavigationPath.removeLast()
+                }
+            case .profile:
+                if !profileNavigationPath.isEmpty {
+                    profileNavigationPath.removeLast()
+                }
             }
+            
             activeDestination = nil
-            if navigationDepth > 0 {
-                navigationDepth -= 1
-            }
+            
+            
+            os_log("[FlareRouter] After dismissing, new depth: %{public}d", 
+                   log: .default, type: .debug, navigationDepth)
         }
     }
+    
+ 
+    
+ 
 
     /// 处理外部URL链接
     @discardableResult

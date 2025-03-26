@@ -2,6 +2,7 @@ import Awesome
 import Generated
 import shared
 import SwiftUI
+import os.log
 
 enum HomeTabs: Int, Equatable, Hashable, Identifiable {
     var id: Self { self }
@@ -32,13 +33,23 @@ struct HomeContent: View {
     @State var showCompose = false
     @State private var selectedHomeTab = 0
     @StateObject private var appState = FlareAppState()
+    
+    // 使用来自FlareMenuContainer的router
+    @EnvironmentObject private var router: FlareRouter
 
     var body: some View {
-        FlareTheme {
+        // 添加日志，但不在View构建树中
+        let routerId = ObjectIdentifier(router)
+        os_log("[HomeContent] Using router: %{public}@, depth: %{public}d", 
+               log: .default, type: .debug, 
+               String(describing: routerId),
+               router.navigationDepth)
+        
+        return FlareTheme {
             TabView(selection: $selectedTab) {
                 // 首页 Tab - 使用 HomeNewScreen
                 Tab(value: .timeline) {
-                    FlareTabItem { _ in
+                    FlareTabItem(router: router, tabType: .timeline) { tabRouter in
                         HomeTabScreen(accountType: accountType)
                     }
                     .environmentObject(appState)
@@ -55,7 +66,7 @@ struct HomeContent: View {
                 // 通知 Tab
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .notification) {
-                        FlareTabItem { _ in
+                        FlareTabItem(router: router, tabType: .notification) { tabRouter in
                             NotificationTabScreen(accountType: accountType)
                         }
                         .environmentObject(appState)
@@ -73,9 +84,9 @@ struct HomeContent: View {
                 // 发布 Tab
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .compose) {
-                        FlareTabItem { router in
+                        FlareTabItem(router: router, tabType: .compose) { tabRouter in
                             ComposeTabView(
-                                router: router,
+                                router: tabRouter,
                                 accountType: accountType,
                                 selectedTab: $selectedTab
                             )
@@ -94,11 +105,11 @@ struct HomeContent: View {
 
                 // 发现 Tab
                 Tab(value: .discover) {
-                    FlareTabItem { router in
+                    FlareTabItem(router: router, tabType: .discover) { tabRouter in
                         DiscoverTabScreen(
                             accountType: accountType,
                             onUserClicked: { user in
-                                router.navigate(to: .profile(accountType: accountType, userKey: user.key))
+                                tabRouter.navigate(to: .profile(accountType: accountType, userKey: user.key))
                             }
                         )
                     }
@@ -116,7 +127,7 @@ struct HomeContent: View {
                 // 个人资料 Tab
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .profile) {
-                        FlareTabItem { _ in
+                        FlareTabItem(router: router, tabType: .profile) { tabRouter in
                             ProfileTabScreen(
                                 accountType: accountType,
                                 userKey: nil,

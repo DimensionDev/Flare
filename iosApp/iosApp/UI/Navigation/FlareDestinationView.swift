@@ -2,13 +2,21 @@ import Kingfisher
 import shared
 import SwiftfulRouting
 import SwiftUI
+import os.log
 
 struct FlareDestinationView: View {
     let destination: FlareDestination
-
+    let router: FlareRouter
+    
     @ObservedObject var appState: FlareAppState
 
     var body: some View {
+        let _ = os_log("[FlareDestinationView] Rendering destination: %{public}@, router: %{public}@, depth: %{public}d", 
+                      log: .default, type: .debug, 
+                      String(describing: destination), 
+                      String(describing: ObjectIdentifier(router)),
+                      router.navigationDepth)
+        
         switch destination {
         case let .profile(accountType, userKey):
             ProfileTabScreen(
@@ -18,6 +26,7 @@ struct FlareDestinationView: View {
 //                    print("查看用户媒体: \(userKey.description)")
                 }
             )
+            .environmentObject(router)
 
         case let .profileWithNameAndHost(accountType, userName, host):
             ProfileWithUserNameScreen(
@@ -29,9 +38,10 @@ struct FlareDestinationView: View {
 //                    print("查看用户媒体: \(userKey.description)")
                 }
             )
+            .environmentObject(router)
 
         case let .statusDetail(accountType, statusKey):
-            StatusDetailScreen(accountType: accountType, statusKey: statusKey)
+            StatusDetailScreen(accountType: accountType, statusKey: statusKey, router: router)
 
         case let .search(accountType, keyword):
             SearchScreen(

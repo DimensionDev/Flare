@@ -1,5 +1,6 @@
 import shared
 import SwiftUI
+import os.log
 
 struct FlareRootView: View {
     @StateObject var appState = FlareAppState()
@@ -22,6 +23,10 @@ struct FlareRootView: View {
                     }
 
                     if let accountType {
+                        let _ = os_log("[FlareRootView] Rendering with router: %{public}@", 
+                                       log: .default, type: .debug, 
+                                       String(describing: ObjectIdentifier(router)))
+                        
                         FlareMenuContainer(
                             content: HomeContent(accountType: accountType),
                             appState: appState,
@@ -31,14 +36,20 @@ struct FlareRootView: View {
                         .environmentObject(router)
                         .sheet(isPresented: $router.isSheetPresented) {
                             if let destination = router.activeDestination {
-                                FlareDestinationView(destination: destination, appState: appState)
-                                    .environmentObject(router)
+                                FlareDestinationView(
+                                    destination: destination, 
+                                    router: router,
+                                    appState: appState
+                                )
                             }
                         }
                         .fullScreenCover(isPresented: $router.isFullScreenPresented) {
                             if let destination = router.activeDestination {
-                                FlareDestinationView(destination: destination, appState: appState)
-                                    .environmentObject(router)
+                                FlareDestinationView(
+                                    destination: destination, 
+                                    router: router,
+                                    appState: appState
+                                )
                             }
                         }
                         .alert(isPresented: $router.isDialogPresented) {

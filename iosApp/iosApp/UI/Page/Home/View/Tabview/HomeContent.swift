@@ -4,6 +4,8 @@ import shared
 import SwiftUI
 import os.log
 
+
+
 enum HomeTabs: Int, Equatable, Hashable, Identifiable {
     var id: Self { self }
     case timeline = 0
@@ -47,10 +49,11 @@ struct HomeContent: View {
         
         return FlareTheme {
             TabView(selection: $selectedTab) {
-                // 首页 Tab - 使用 HomeNewScreen
+                // 首页 Tab - 使用新的SwiftUI实现
                 Tab(value: .timeline) {
                     FlareTabItem(router: router, tabType: .timeline) { tabRouter in
-                        HomeTabScreen(accountType: accountType)
+                        // HomeTabScreen(accountType: accountType)
+                        HomeTabScreenSwiftUI(accountType: accountType)
                     }
                     .environmentObject(appState)
                 } label: {

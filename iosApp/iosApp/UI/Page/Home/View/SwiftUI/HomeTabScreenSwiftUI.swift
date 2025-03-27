@@ -22,8 +22,7 @@ struct HomeTabScreenSwiftUI: View {
                 onSettingsTap: {
                     showTabSettings = true
                 }
-            )
-            .background(Color.red)
+            ) 
             .frame(height: 44)
             
             // 内容区域

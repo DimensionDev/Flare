@@ -75,18 +75,18 @@ struct FlareNavigationGestureModifier: ViewModifier {
                 // 添加阴影效果，增强深度感
                 .shadow(color: .black.opacity(shadowOpacity), radius: 4, x: -2, y: 0)
                 // 添加轻微的3D旋转效果
-                .rotation3DEffect(
-                    Angle(degrees: router.navigationDepth > 0 ? min(dragOffset * -0.015, 0) : 0),
-                    axis: (x: 0, y: 1, z: 0),
-                    anchor: .leading
-                )
+//                .rotation3DEffect(
+//                    Angle(degrees: router.navigationDepth > 0 ? min(dragOffset * -0.015, 0) : 0),
+//                    axis: (x: 0, y: 1, z: 0),
+//                    anchor: .leading
+//                )
                 // 添加轻微的缩放效果
-                .scaleEffect(
-                    router.navigationDepth > 0
-                        ? 1.0 - min(dragOffset * 0.0003, 0.03)
-                        : 1.0,
-                    anchor: .leading
-                )
+//                .scaleEffect(
+//                    router.navigationDepth > 0
+//                        ? 1.0 - min(dragOffset * 0.0003, 0.03)
+//                        : 1.0,
+//                    anchor: .leading
+//                )
                 // 添加轻微的不透明度变化
                 .opacity(1.0 - (dragPercentage * 0.1))
                 .zIndex(1) // 确保在上层

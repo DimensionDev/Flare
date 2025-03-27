@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
@@ -80,6 +81,7 @@ import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
@@ -452,7 +454,7 @@ private fun StatusMediaScreen(
                             Modifier
                                 .systemBarsPadding()
                                 .padding(horizontal = 4.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         FilledTonalIconButton(
                             onClick = {
@@ -464,7 +466,20 @@ private fun StatusMediaScreen(
                                 contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
+                        Spacer(modifier = Modifier.weight(1f))
                         state.medias.onSuccess { medias ->
+                            val current = medias[state.currentPage]
+                            if (!current.description.isNullOrEmpty()) {
+                                FilledTonalIconButton(
+                                    onClick = {
+                                    },
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.CircleInfo,
+                                        contentDescription = stringResource(id = R.string.media_alt_text),
+                                    )
+                                }
+                            }
                             FilledTonalIconButton(
                                 onClick = {
                                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {

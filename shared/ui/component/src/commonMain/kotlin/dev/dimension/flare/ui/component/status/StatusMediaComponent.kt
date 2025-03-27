@@ -71,11 +71,12 @@ internal fun StatusMediaComponent(
         AdaptiveGrid(
             content = {
                 data.forEach { media ->
-                    MediaItem(
-                        media = media,
-                        modifier =
-                            Modifier
-                                .clipToBounds()
+                    Box {
+                        MediaItem(
+                            media = media,
+                            modifier =
+                                Modifier
+                                    .clipToBounds()
 //                                .sharedElement(
 //                                    rememberSharedContentState(
 //                                        when (media) {
@@ -87,12 +88,31 @@ internal fun StatusMediaComponent(
 //                                    ),
 //                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                )
-                                .pointerHoverIcon(PointerIcon.Hand)
-                                .clickable {
-                                    onMediaClick(media)
-                                },
-                        keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
-                    )
+                                    .pointerHoverIcon(PointerIcon.Hand)
+                                    .clickable {
+                                        onMediaClick(media)
+                                    },
+                            keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
+                        )
+                        if (!media.description.isNullOrEmpty()) {
+                            PlatformText(
+                                text = "ALT",
+                                modifier =
+                                    Modifier
+                                        .padding(8.dp)
+                                        .align(Alignment.BottomStart)
+                                        .background(
+                                            color = Color.Black.copy(alpha = 0.75f),
+                                            shape = PlatformTheme.shapes.medium,
+                                        ).padding(
+                                            horizontal = 8.dp,
+                                            vertical = 2.dp,
+                                        ).clickable {
+                                        },
+                                color = Color.White,
+                            )
+                        }
+                    }
                 }
             },
             modifier =

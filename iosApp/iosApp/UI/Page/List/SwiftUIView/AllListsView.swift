@@ -8,7 +8,7 @@ private let logger = Logger(subsystem: "com.flare.app", category: "AllListsView"
 
 struct AllListsView: View {
     @State private var presenter: AllListPresenter
-//    @EnvironmentObject private var router: Router
+    @EnvironmentObject private var router: FlareRouter
     @Environment(\.appSettings) private var appSettings
     @State private var lastKnownItemCount: Int = 0
     @State private var currentUser: UiUserV2?
@@ -111,8 +111,7 @@ struct AllListsView: View {
 private struct EnhancedListRowView: View {
     let list: UiList
     @State private var isPinned: Bool
-//    @EnvironmentObject private var router: Router
-    @State private var navigateToDetail = false
+    @EnvironmentObject private var router: FlareRouter
     let accountType: AccountType
     let defaultUser: UiUserV2?
 
@@ -124,36 +123,25 @@ private struct EnhancedListRowView: View {
     }
 
     var body: some View {
-        ZStack {
-            ListItemRowView(
-                list: list,
-                isPinned: isPinned,
-                showCreator: true,
-                showMemberCount: true,
-                defaultUser: defaultUser,
-                onTap: {
-                    navigateToDetail = true
-                },
-                onPinTap: {
-                    isPinned.toggle()
-                    sendPinStatusToAppBarNotification()
-                }
-            )
-
-            // 隐藏的导航链接
-            NavigationLink(
-                destination: ListDetailView(
-                    list: list,
+        ListItemRowView(
+            list: list,
+            isPinned: isPinned,
+            showCreator: true,
+            showMemberCount: true,
+            defaultUser: defaultUser,
+            onTap: {
+                // 使用FlareRouter导航到List详情页
+                router.navigate(to: .listDetail(
                     accountType: accountType,
+                    list: list,
                     defaultUser: defaultUser
-                ),
-                isActive: $navigateToDetail
-            ) {
-                EmptyView()
+                ))
+            },
+            onPinTap: {
+                isPinned.toggle()
+                sendPinStatusToAppBarNotification()
             }
-            .opacity(0)
-            .frame(width: 0, height: 0)
-        }
+        )
     }
 
     private func sendPinStatusToAppBarNotification() {

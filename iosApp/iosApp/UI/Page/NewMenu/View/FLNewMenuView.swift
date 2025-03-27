@@ -12,6 +12,8 @@ struct FLNewMenuView: View {
     let accountType: AccountType
     let user: UiUserV2?
 
+    @EnvironmentObject private var router: FlareRouter
+
     init(isOpen: Binding<Bool>, accountType: AccountType, user: UiUserV2? = nil) {
         _isOpen = isOpen
         self.accountType = accountType
@@ -27,7 +29,8 @@ struct FLNewMenuView: View {
             VStack(spacing: 16) {
                 Button(action: {
                     isOpen = false
-                    showLists = true
+
+                    router.navigate(to: .lists(accountType: accountType))
                 }) {
                     HStack {
                         Image(systemName: "list.bullet")
@@ -45,7 +48,8 @@ struct FLNewMenuView: View {
                 if isPlatformBluesky() {
                     Button(action: {
                         isOpen = false
-                        showFeeds = true
+
+                        router.navigate(to: .feeds(accountType: accountType))
                     }) {
                         HStack {
                             Image(systemName: "number")
@@ -80,16 +84,6 @@ struct FLNewMenuView: View {
         .sheet(isPresented: $showAccounts) {
             NavigationView {
                 AccountsScreen()
-            }
-        }
-        .sheet(isPresented: $showLists) {
-            NavigationView {
-                AllListsView(accountType: accountType)
-            }
-        }
-        .sheet(isPresented: $showFeeds) {
-            NavigationView {
-                AllFeedsView(accountType: accountType)
             }
         }
         .sheet(isPresented: $showSettings) {

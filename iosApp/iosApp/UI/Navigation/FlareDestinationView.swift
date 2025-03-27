@@ -56,11 +56,36 @@ struct FlareDestinationView: View {
                 index: Int32(index),
                 dismiss: {}
             )
-
-           // case let .compose(accountType, status):
+        // case let .compose(accountType, status):
             // 这段代码不会被执行，因为路由会被FlareRouter拦截
 
-            // NewComposeView(accountType: accountType, status: status)
+        case let .lists(accountType):
+            AllListsView(accountType: accountType)
+                .navigationTitle("Lists")
+                .navigationBarTitleDisplayMode(.inline)
+
+        case let .feeds(accountType):
+            AllFeedsView(accountType: accountType)
+                .navigationTitle("Feeds")
+                .navigationBarTitleDisplayMode(.inline)
+
+        case let .feedDetail(accountType, list, defaultUser):
+            FeedDetailView(
+                list: list,
+                accountType: accountType,
+                defaultUser: defaultUser
+            )
+            .navigationTitle(list.title)
+            .navigationBarTitleDisplayMode(.inline)
+
+        case let .listDetail(accountType, list, defaultUser):
+            ListDetailView(
+                list: list,
+                accountType: accountType,
+                defaultUser: defaultUser
+            )
+            .navigationTitle(list.title)
+            .navigationBarTitleDisplayMode(.inline)
 
         case let .addReaction(accountType, statusKey):
             AddReactionView(accountType: accountType, statusKey: statusKey)

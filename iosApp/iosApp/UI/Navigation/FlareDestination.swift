@@ -13,6 +13,11 @@ enum FlareDestination: Identifiable, Hashable {
     case compose(accountType: AccountType, status: FlareComposeStatus?)
     case addReaction(accountType: AccountType, statusKey: MicroBlogKey)
 
+    case lists(accountType: AccountType)
+    case feeds(accountType: AccountType)
+    case feedDetail(accountType: AccountType, list: UiList, defaultUser: UiUserV2?)
+    case listDetail(accountType: AccountType, list: UiList, defaultUser: UiUserV2?)
+
     case blueskyReportStatus(accountType: AccountType, statusKey: MicroBlogKey)
     case mastodonReportStatus(accountType: AccountType, statusKey: MicroBlogKey, userKey: MicroBlogKey)
     case misskeyReportStatus(accountType: AccountType, statusKey: MicroBlogKey, userKey: MicroBlogKey)
@@ -66,6 +71,14 @@ enum FlareDestination: Identifiable, Hashable {
             "callback_\(type.hashValue)"
         case let .deleteStatus(accountType, statusKey):
             "deleteStatus_\(String(describing: accountType))_\(statusKey.description)"
+        case let .lists(accountType):
+            "lists_\(String(describing: accountType))"
+        case let .feeds(accountType):
+            "feeds_\(String(describing: accountType))"
+        case let .feedDetail(accountType, list, _):
+            "feedDetail_\(String(describing: accountType))_\(list.id)"
+        case let .listDetail(accountType, list, _):
+            "listDetail_\(String(describing: accountType))_\(list.id)"
         }
     }
 

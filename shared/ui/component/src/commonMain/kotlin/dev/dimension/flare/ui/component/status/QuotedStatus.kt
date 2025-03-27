@@ -13,6 +13,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.LocalPlatformContext
+import dev.dimension.flare.ui.common.PlatformShare
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.LocalComponentAppearance
@@ -31,9 +33,11 @@ public fun QuotedStatus(
     data: UiTimeline.ItemContent.Status,
     modifier: Modifier = Modifier,
     maxLines: Int = 6,
+    showActions: Boolean = false,
     onMediaClick: (UiMedia) -> Unit = {},
 ) {
     val uriHandler = LocalUriHandler.current
+    val platformContext = LocalPlatformContext.current
     Column(
         modifier =
             modifier
@@ -75,6 +79,17 @@ public fun QuotedStatus(
                 data = data.images,
                 onMediaClick = onMediaClick,
                 sensitive = data.sensitive,
+            )
+        }
+        if (showActions) {
+            StatusActions(
+                items = data.actions,
+                onShare = {
+                    PlatformShare.shareText(
+                        context = platformContext,
+                        text = data.url,
+                    )
+                },
             )
         }
     }

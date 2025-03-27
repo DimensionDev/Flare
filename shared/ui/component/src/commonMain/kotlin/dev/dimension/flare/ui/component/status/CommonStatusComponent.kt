@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.LocalPlatformContext
 import com.fleeksoft.ksoup.nodes.Element
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Regular
@@ -65,9 +66,11 @@ import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.QuoteLeft
 import compose.icons.fontawesomeicons.solid.Reply
 import compose.icons.fontawesomeicons.solid.Retweet
+import compose.icons.fontawesomeicons.solid.ShareNodes
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.common.PlatformShare
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.EmojiImage
@@ -108,6 +111,7 @@ import dev.dimension.flare.ui.component.reply_to
 import dev.dimension.flare.ui.component.report
 import dev.dimension.flare.ui.component.retweet
 import dev.dimension.flare.ui.component.retweet_remove
+import dev.dimension.flare.ui.component.share
 import dev.dimension.flare.ui.component.show_media
 import dev.dimension.flare.ui.component.status_detail_translate
 import dev.dimension.flare.ui.component.unlike
@@ -139,6 +143,7 @@ public fun CommonStatusComponent(
 ) {
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalComponentAppearance.current
+    val platformContext = LocalPlatformContext.current
     Column(
         modifier =
             Modifier
@@ -285,14 +290,30 @@ public fun CommonStatusComponent(
                 CompositionLocalProvider(
                     PlatformContentColor provides PlatformTheme.colorScheme.caption,
                 ) {
-                    StatusActions(item.actions)
+                    StatusActions(
+                        item.actions,
+                        onShare = {
+                            PlatformShare.shareText(
+                                context = platformContext,
+                                text = item.url,
+                            )
+                        },
+                    )
                 }
             } else {
                 CompositionLocalProvider(
                     PlatformContentColor provides PlatformTheme.colorScheme.caption.copy(alpha = MediumAlpha),
                     PlatformTextStyle provides PlatformTheme.typography.caption,
                 ) {
-                    StatusActions(item.actions)
+                    StatusActions(
+                        item.actions,
+                        onShare = {
+                            PlatformShare.shareText(
+                                context = platformContext,
+                                text = item.url,
+                            )
+                        },
+                    )
                 }
             }
         }
@@ -527,8 +548,9 @@ public fun StatusVisibilityComponent(
 }
 
 @Composable
-private fun StatusActions(
+internal fun StatusActions(
     items: ImmutableList<StatusAction>,
+    onShare: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val launcher = LocalUriHandler.current
@@ -551,6 +573,14 @@ private fun StatusActions(
                         color = statusActionItemColor(item = action.displayItem),
                         withTextMinWidth = index != items.lastIndex,
                     ) { closeMenu, isMenuShown ->
+                        if (action.displayItem is StatusAction.Item.More) {
+                            ShareMenu(
+                                onClick = {
+                                    onShare.invoke()
+                                    closeMenu.invoke()
+                                },
+                            )
+                        }
                         action.actions.forEach { subActions ->
                             when (subActions) {
                                 is StatusAction.Item -> {
@@ -631,6 +661,29 @@ private fun StatusActions(
             }
         }
     }
+}
+
+@Composable
+private fun PlatformDropdownMenuScope.ShareMenu(onClick: () -> Unit) {
+    PlatformDropdownMenuItem(
+        leadingIcon = {
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.ShareNodes,
+                contentDescription = stringResource(Res.string.share),
+                modifier =
+                    Modifier
+                        .size(with(LocalDensity.current) { PlatformTextStyle.current.fontSize.toDp() + 4.dp }),
+            )
+        },
+        text = {
+            PlatformText(
+                text = stringResource(Res.string.share),
+            )
+        },
+        onClick = {
+            onClick.invoke()
+        },
+    )
 }
 
 @Composable

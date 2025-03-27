@@ -14,6 +14,7 @@ import dev.dimension.flare.data.network.vvo.model.User
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.vvoHost
+import dev.dimension.flare.model.vvoHostLong
 import dev.dimension.flare.model.vvoHostShort
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
@@ -251,6 +252,13 @@ internal fun Status.renderStatus(
                 ),
             )
         },
+        url =
+            buildString {
+                append("https://$vvoHostLong/")
+                append(user?.id)
+                append('/')
+                append(bid)
+            },
     )
 }
 
@@ -460,6 +468,13 @@ internal fun Comment.renderStatus(
                 ),
             )
         },
+        url =
+            buildString {
+                append("https://$vvoHostLong/")
+                append(user?.id)
+                append('/')
+                append(bid)
+            },
     )
 }
 

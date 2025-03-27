@@ -536,6 +536,13 @@ internal fun Tweet.renderStatus(
                 ),
             )
         },
+        url =
+            buildString {
+                append("https://$xqtHost/")
+                append(user?.handleWithoutAt)
+                append("/status/")
+                append(legacy?.idStr ?: restId)
+            },
     )
 }
 

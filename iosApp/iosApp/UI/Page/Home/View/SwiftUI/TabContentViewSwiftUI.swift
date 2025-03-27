@@ -5,17 +5,17 @@ struct TabContentViewSwiftUI: View {
     @ObservedObject var tabStore: AppBarTabSettingStore
     @Binding var selectedTab: String
     @State private var scrollPositions: [String: String] = [:]
-    
+
     var body: some View {
         TabView(selection: $selectedTab) {
             ForEach(tabStore.availableAppBarTabsItems, id: \.key) { tab in
                 TimelineViewSwiftUI(
-                    tab: tab, 
+                    tab: tab,
                     store: tabStore,
                     scrollPositionID: Binding(
                         get: { scrollPositions[tab.key] },
                         set: { newValue in
-                            if let newValue = newValue {
+                            if let newValue {
                                 scrollPositions[tab.key] = newValue
                             }
                         }
@@ -26,4 +26,4 @@ struct TabContentViewSwiftUI: View {
         }
         .tabViewStyle(.page(indexDisplayMode: .never))
     }
-} 
+}

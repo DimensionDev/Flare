@@ -1,16 +1,12 @@
 import Foundation
+import os.log
 import shared
 import SwiftUI
-import os.log
-
-// 导入Navigation模块下的自定义组件
-// import SwiftUI
 
 struct StatusDetailScreen: View {
     @State private var presenter: StatusContextPresenter
     private let statusKey: MicroBlogKey
-    
-    // 显式接收router
+
     @ObservedObject var router: FlareRouter
     @EnvironmentObject private var menuState: FlareAppState
 
@@ -38,16 +34,15 @@ struct StatusDetailScreen: View {
                 try? await state.refresh()
             }
             .onAppear {
-                // 添加日志，但不修改导航深度
-                os_log("[StatusDetailScreen] onAppear - Router: %{public}@, current depth: %{public}d", 
-                       log: .default, type: .debug, 
-                       String(describing: ObjectIdentifier(router)), 
+                os_log("[StatusDetailScreen] onAppear - Router: %{public}@, current depth: %{public}d",
+                       log: .default, type: .debug,
+                       String(describing: ObjectIdentifier(router)),
                        router.navigationDepth)
             }
             .onDisappear {
-                os_log("[StatusDetailScreen] onDisappear - Router: %{public}@, current depth: %{public}d", 
-                       log: .default, type: .debug, 
-                       String(describing: ObjectIdentifier(router)), 
+                os_log("[StatusDetailScreen] onDisappear - Router: %{public}@, current depth: %{public}d",
+                       log: .default, type: .debug,
+                       String(describing: ObjectIdentifier(router)),
                        router.navigationDepth)
             }
         }

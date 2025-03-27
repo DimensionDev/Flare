@@ -1,23 +1,23 @@
+import os.log
 import shared
 import SwiftUI
-import os.log
 
 struct FlareTabItem<Content: View>: View {
     @ObservedObject var router: FlareRouter
-    
+
     let tabType: HomeTabs
-    
+
     let content: (FlareRouter) -> Content
 
     @EnvironmentObject private var appState: FlareAppState
-    
+
     init(router: FlareRouter, tabType: HomeTabs, @ViewBuilder content: @escaping (FlareRouter) -> Content) {
         self.router = router
         self.tabType = tabType
         self.content = content
-        
-        os_log("[FlareTabItem] Initialized with router: %{public}@, tab: %{public}@", 
-               log: .default, type: .debug, 
+
+        os_log("[FlareTabItem] Initialized with router: %{public}@, tab: %{public}@",
+               log: .default, type: .debug,
                String(describing: ObjectIdentifier(router)),
                String(describing: tabType))
     }
@@ -31,18 +31,18 @@ struct FlareTabItem<Content: View>: View {
         }
         .onAppear {
             router.activeTab = tabType
-            
-            os_log("[FlareTabItem] View appeared with router: %{public}@, tab: %{public}@, depth: %{public}d", 
-                   log: .default, type: .debug, 
+
+            os_log("[FlareTabItem] View appeared with router: %{public}@, tab: %{public}@, depth: %{public}d",
+                   log: .default, type: .debug,
                    String(describing: ObjectIdentifier(router)),
                    String(describing: tabType),
                    router.navigationDepth)
         }
         .onChange(of: router.navigationPathFor(tabType).wrappedValue.count) { oldCount, newCount in
-            os_log("[FlareTabItem] Navigation path changed for tab %{public}@: %{public}d -> %{public}d", 
+            os_log("[FlareTabItem] Navigation path changed for tab %{public}@: %{public}d -> %{public}d",
                    log: .default, type: .debug,
-                   String(describing: tabType), 
-                   oldCount, 
+                   String(describing: tabType),
+                   oldCount,
                    newCount)
         }
         .sheet(isPresented: $router.isSheetPresented) {

@@ -1,6 +1,6 @@
+import os.log
 import shared
 import SwiftUI
-import os.log
 
 struct FlareRootView: View {
     @StateObject var appState = FlareAppState()
@@ -23,10 +23,10 @@ struct FlareRootView: View {
                     }
 
                     if let accountType {
-                        let _ = os_log("[FlareRootView] Rendering with router: %{public}@", 
-                                       log: .default, type: .debug, 
+                        let _ = os_log("[FlareRootView] Rendering with router: %{public}@",
+                                       log: .default, type: .debug,
                                        String(describing: ObjectIdentifier(router)))
-                        
+
                         FlareMenuContainer(
                             content: HomeContent(accountType: accountType),
                             appState: appState,
@@ -37,7 +37,7 @@ struct FlareRootView: View {
                         .sheet(isPresented: $router.isSheetPresented) {
                             if let destination = router.activeDestination {
                                 FlareDestinationView(
-                                    destination: destination, 
+                                    destination: destination,
                                     router: router,
                                     appState: appState
                                 )
@@ -46,7 +46,7 @@ struct FlareRootView: View {
                         .fullScreenCover(isPresented: $router.isFullScreenPresented) {
                             if let destination = router.activeDestination {
                                 FlareDestinationView(
-                                    destination: destination, 
+                                    destination: destination,
                                     router: router,
                                     appState: appState
                                 )
@@ -55,7 +55,7 @@ struct FlareRootView: View {
                         .alert(isPresented: $router.isDialogPresented) {
                             Alert(
                                 title: Text("OK"),
-                                message: Text("您确定要执行此操作吗？"),
+                                message: Text("Are you sure ?"),
                                 primaryButton: .destructive(Text("OK")) {
                                     // 处理确认操作
                                 },

@@ -1,22 +1,22 @@
 import Kingfisher
+import os.log
 import shared
 import SwiftfulRouting
 import SwiftUI
-import os.log
 
 struct FlareDestinationView: View {
     let destination: FlareDestination
     let router: FlareRouter
-    
+
     @ObservedObject var appState: FlareAppState
 
     var body: some View {
-        let _ = os_log("[FlareDestinationView] Rendering destination: %{public}@, router: %{public}@, depth: %{public}d", 
-                      log: .default, type: .debug, 
-                      String(describing: destination), 
-                      String(describing: ObjectIdentifier(router)),
-                      router.navigationDepth)
-        
+        let _ = os_log("[FlareDestinationView] Rendering destination: %{public}@, router: %{public}@, depth: %{public}d",
+                       log: .default, type: .debug,
+                       String(describing: destination),
+                       String(describing: ObjectIdentifier(router)),
+                       router.navigationDepth)
+
         switch destination {
         case let .profile(accountType, userKey):
             ProfileTabScreen(

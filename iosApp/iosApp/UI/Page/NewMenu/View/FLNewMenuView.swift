@@ -8,6 +8,7 @@ struct FLNewMenuView: View {
     @State private var showAccounts = false
     @State private var showLists = false
     @State private var showFeeds = false
+    @State private var showSettings = false
     let accountType: AccountType
     let user: UiUserV2?
 
@@ -84,6 +85,11 @@ struct FLNewMenuView: View {
         .sheet(isPresented: $showFeeds) {
             NavigationView {
                 AllFeedsView(accountType: accountType)
+            }
+        }
+        .sheet(isPresented: $showSettings) {
+            NavigationView {
+                SettingsScreen()
             }
         }
     }
@@ -164,7 +170,8 @@ struct FLNewMenuView: View {
 
     private var settingsButton: some View {
         Button(action: {
-            NotificationCenter.default.post(name: NSNotification.Name("ShowSettings"), object: nil)
+            isOpen = false
+            showSettings = true
         }) {
             HStack {
                 Image(systemName: "gearshape.fill")

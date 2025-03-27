@@ -1,10 +1,8 @@
 import Awesome
 import Generated
+import os.log
 import shared
 import SwiftUI
-import os.log
-
-
 
 enum HomeTabs: Int, Equatable, Hashable, Identifiable {
     var id: Self { self }
@@ -35,23 +33,22 @@ struct HomeContent: View {
     @State var showCompose = false
     @State private var selectedHomeTab = 0
     @StateObject private var appState = FlareAppState()
-    
+
     // 使用来自FlareMenuContainer的router
     @EnvironmentObject private var router: FlareRouter
 
     var body: some View {
-        // 添加日志，但不在View构建树中
         let routerId = ObjectIdentifier(router)
-        os_log("[HomeContent] Using router: %{public}@, depth: %{public}d", 
-               log: .default, type: .debug, 
+        os_log("[HomeContent] Using router: %{public}@, depth: %{public}d",
+               log: .default, type: .debug,
                String(describing: routerId),
                router.navigationDepth)
-        
+
         return FlareTheme {
             TabView(selection: $selectedTab) {
                 // 首页 Tab - 使用新的SwiftUI实现
                 Tab(value: .timeline) {
-                    FlareTabItem(router: router, tabType: .timeline) { tabRouter in
+                    FlareTabItem(router: router, tabType: .timeline) { _ in
                         // HomeTabScreen(accountType: accountType)
                         HomeTabScreenSwiftUI(accountType: accountType)
                     }
@@ -69,7 +66,7 @@ struct HomeContent: View {
                 // 通知 Tab
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .notification) {
-                        FlareTabItem(router: router, tabType: .notification) { tabRouter in
+                        FlareTabItem(router: router, tabType: .notification) { _ in
                             NotificationTabScreen(accountType: accountType)
                         }
                         .environmentObject(appState)
@@ -130,7 +127,7 @@ struct HomeContent: View {
                 // 个人资料 Tab
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .profile) {
-                        FlareTabItem(router: router, tabType: .profile) { tabRouter in
+                        FlareTabItem(router: router, tabType: .profile) { _ in
                             ProfileTabScreen(
                                 accountType: accountType,
                                 userKey: nil,

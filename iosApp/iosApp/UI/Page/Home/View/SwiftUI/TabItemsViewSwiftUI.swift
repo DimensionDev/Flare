@@ -6,7 +6,7 @@ struct TabItemsViewSwiftUI: View {
     let items: [FLTabItem]
     @Namespace private var tabNamespace
     @State private var scrollPosition: String?
-    
+
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
             ScrollViewReader { proxy in
@@ -21,7 +21,7 @@ struct TabItemsViewSwiftUI: View {
                                         scrollPosition = item.key
                                     }
                                 }
-                            
+
                             if selection == item.key {
                                 Rectangle()
                                     .fill(Color.blue)
@@ -46,7 +46,7 @@ struct TabItemsViewSwiftUI: View {
         .scrollTargetBehavior(.viewAligned)
         .scrollPosition(id: $scrollPosition)
     }
-    
+
     @ViewBuilder
     private func tabItemView(for item: FLTabItem) -> some View {
         switch item.metaData.title {
@@ -60,4 +60,4 @@ struct TabItemsViewSwiftUI: View {
                 .fontWeight(selection == item.key ? .medium : .regular)
         }
     }
-} 
+}

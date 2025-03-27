@@ -15,7 +15,7 @@ internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMedia
     ): MediatorResult =
         try {
             doLoad(loadType, state)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             onError(e)
             DebugRepository.error(e)
             MediatorResult.Error(e)
@@ -26,7 +26,7 @@ internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMedia
         state: PagingState<Key, Value>,
     ): MediatorResult
 
-    protected open fun onError(e: Exception) {
+    protected open fun onError(e: Throwable) {
     }
 }
 
@@ -34,7 +34,7 @@ internal abstract class BasePagingSource<Key : Any, Value : Any> : PagingSource<
     override suspend fun load(params: LoadParams<Key>): LoadResult<Key, Value> =
         try {
             doLoad(params)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             onError(e)
             DebugRepository.error(e)
             LoadResult.Error(e)
@@ -42,6 +42,6 @@ internal abstract class BasePagingSource<Key : Any, Value : Any> : PagingSource<
 
     abstract suspend fun doLoad(params: LoadParams<Key>): LoadResult<Key, Value>
 
-    protected open fun onError(e: Exception) {
+    protected open fun onError(e: Throwable) {
     }
 }

@@ -73,7 +73,7 @@ internal class HomeTimelineRemoteMediator(
         )
     }
 
-    override fun onError(e: Exception) {
+    override fun onError(e: Throwable) {
         if (e is LoginExpiredException) {
             inAppNotification.onError(
                 Message.LoginExpired,

@@ -14,7 +14,6 @@ import dev.dimension.flare.data.datasource.mastodon.MastodonFansPagingSource
 import dev.dimension.flare.data.datasource.mastodon.MastodonFollowingPagingSource
 import dev.dimension.flare.data.datasource.mastodon.SearchUserPagingSource
 import dev.dimension.flare.data.datasource.mastodon.TrendHashtagPagingSource
-import dev.dimension.flare.data.datasource.mastodon.TrendsUserPagingSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
@@ -175,16 +174,10 @@ internal class GuestMastodonDataSource(
             )
         }.flow.cachedIn(scope)
 
-    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
-        Pager(
-            config = PagingConfig(pageSize = pageSize),
-        ) {
-            TrendsUserPagingSource(
-                service = service,
-                accountKey = null,
-                host = host,
-            )
-        }.flow
+    override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> {
+        // not supported
+        throw UnsupportedOperationException("Discover users not supported")
+    }
 
     override fun discoverStatuses(
         pageSize: Int,

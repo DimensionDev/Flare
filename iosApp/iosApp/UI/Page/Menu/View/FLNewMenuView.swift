@@ -8,9 +8,11 @@ struct FLNewMenuView: View {
     @State private var showAccounts = false
     @State private var showLists = false
     @State private var showFeeds = false
+    @State private var showSettings = false
     let accountType: AccountType
     let user: UiUserV2?
-    @EnvironmentObject private var router: Router
+
+    @EnvironmentObject private var router: FlareRouter
 
     init(isOpen: Binding<Bool>, accountType: AccountType, user: UiUserV2? = nil) {
         _isOpen = isOpen
@@ -20,19 +22,15 @@ struct FLNewMenuView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // 用户区域
             userAreaView
-                .padding(.top, 60)
+                .padding(.top, 80)
                 .padding(.horizontal, 20)
 
-            // 中间列表区域
-            List {
-                // 列表入口
+            VStack(spacing: 16) {
                 Button(action: {
-                    // 关闭菜单
                     isOpen = false
-                    // 使用showLists展示列表
-                    showLists = true
+
+                    router.navigate(to: .lists(accountType: accountType))
                 }) {
                     HStack {
                         Image(systemName: "list.bullet")
@@ -41,33 +39,37 @@ struct FLNewMenuView: View {
                             .font(.body)
                         Spacer()
                     }
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 10)
+                    .contentShape(Rectangle())
                 }
-                .buttonStyle(PlainButtonStyle())
+                .buttonStyle(MenuButtonStyle())
 
-                // Misskey平台特有的Feed菜单项
                 if isPlatformBluesky() {
                     Button(action: {
-                        // 关闭菜单
                         isOpen = false
-                        // 使用showFeeds展示Feeds页面
-                        showFeeds = true
+
+                        router.navigate(to: .feeds(accountType: accountType))
                     }) {
                         HStack {
-                            Image(systemName: "number.square")
+                            Image(systemName: "number")
                                 .frame(width: 28, height: 28)
                             Text("Feeds")
                                 .font(.body)
                             Spacer()
                         }
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 10)
+                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .buttonStyle(MenuButtonStyle())
                 }
             }
-            .listStyle(PlainListStyle())
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
 
-            // 底部设置按钮
+            Spacer()
+
             settingsButton
                 .padding(.horizontal, 20)
                 .padding(.bottom, 80)
@@ -84,21 +86,15 @@ struct FLNewMenuView: View {
                 AccountsScreen()
             }
         }
-        .sheet(isPresented: $showLists) {
+        .sheet(isPresented: $showSettings) {
             NavigationView {
-                AllListsView(accountType: accountType)
-            }
-        }
-        .sheet(isPresented: $showFeeds) {
-            NavigationView {
-                AllFeedsView(accountType: accountType)
+                SettingsScreen()
             }
         }
     }
 
     private var userAreaView: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // 头像和用户名区域
             Button(action: {
                 if user != nil {
                     showAccounts = true
@@ -173,7 +169,8 @@ struct FLNewMenuView: View {
 
     private var settingsButton: some View {
         Button(action: {
-            NotificationCenter.default.post(name: NSNotification.Name("ShowSettings"), object: nil)
+            isOpen = false
+            showSettings = true
         }) {
             HStack {
                 Image(systemName: "gearshape.fill")
@@ -192,5 +189,17 @@ struct FLNewMenuView: View {
         guard let user else { return false }
         let platformTypeString = String(describing: user.platformType).lowercased()
         return platformTypeString == "bluesky"
+    }
+}
+
+struct MenuButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundColor(.primary)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(configuration.isPressed ? Color(UIColor.secondarySystemBackground) : Color.clear)
+            )
+            .contentShape(Rectangle())
     }
 }

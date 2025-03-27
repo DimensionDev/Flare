@@ -3,6 +3,7 @@ import Generated
 import JXPhotoBrowser
 import Kingfisher
 import MarkdownUI
+import os.log
 
 // import MarkdownUI
 import shared
@@ -17,6 +18,7 @@ struct CommonTimelineStatusComponent: View {
     @State private var showShareMenu: Bool = false
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
+    @EnvironmentObject private var router: FlareRouter
 
     let data: UiTimelineItemContentStatus
     let onMediaClick: (Int, UiMedia) -> Void
@@ -109,11 +111,9 @@ struct CommonTimelineStatusComponent: View {
                     UserComponent(
                         user: user,
                         topEndContent: data.topEndContent
-                            as? UiTimelineItemContentStatusTopEndContent,
-                        onUserClicked: {
-                            user.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                        }
-                    )
+                            as? UiTimelineItemContentStatusTopEndContent
+
+                    ).environmentObject(router)
                 }
                 Spacer()
                 // icon + time
@@ -379,6 +379,8 @@ struct CommonTimelineStatusComponent: View {
                             Button(
                                 action: {
                                     if let clickable = item as? StatusActionItemClickable {
+                                        // 点赞 收藏
+                                        os_log("[URL点击] 状态操作点击: %{public}@", log: .default, type: .debug, String(describing: type(of: item)))
                                         clickable.onClicked(
                                             .init(launcher: AppleUriLauncher(openURL: openURL)))
                                         // 如果是举报操作，显示 Toast
@@ -498,7 +500,11 @@ struct CommonTimelineStatusComponent: View {
                         width: tapLocation.frame.width - 32, height: 44
                     )
                     if !bottomActionBarFrame.contains(tapLocation.frame.origin) {
-                        data.onClicked(ClickContext(launcher: AppleUriLauncher(openURL: openURL)))
+                        //  data.onClicked(ClickContext(launcher: AppleUriLauncher(openURL: openURL)))
+                        router.navigate(to: .statusDetail(
+                            accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
+                            statusKey: data.statusKey
+                        ))
                     }
                 }
             }

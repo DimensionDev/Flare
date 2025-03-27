@@ -8,6 +8,8 @@ struct FlareApp: SwiftUI.App {
     #else
         @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     #endif
+    @StateObject private var router = FlareRouter()
+
     init() {
         KoinHelper.shared.start(inAppNotification: SwitUIInAppNotification())
 
@@ -23,15 +25,22 @@ struct FlareApp: SwiftUI.App {
         WindowGroup {
             #if os(macOS)
                 ProvideWindowSizeClass {
-                    RouterView()
+                    FlareRootView()
 //                    .enableInjection()
                         .preferredColorScheme(.light) // 强制使用浅色模式
                 }
                 .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
+                .onOpenURL { url in
+                    router.handleDeepLink(url)
+                }
             #else
-                RouterView()
+                FlareRootView()
 //                .enableInjection()
-                // .preferredColorScheme(.light)  // 强制使用浅色模式
+                    // .preferredColorScheme(.light)  // 强制使用浅色模式
+                    .onOpenURL { url in
+                        router.handleDeepLink(url)
+                    }
+                    .environmentObject(router)
             #endif
         }
         #if os(macOS)

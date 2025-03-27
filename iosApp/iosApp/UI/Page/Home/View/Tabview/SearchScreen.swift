@@ -3,12 +3,12 @@ import SwiftUI
 
 struct SearchScreen: View {
     var searchText: String = ""
-    private let onUserClicked: (UiUserV2) -> Void
+//    private let onUserClicked: (UiUserV2) -> Void
     @State private var presenter: SearchPresenter
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
 
-    init(accountType: AccountType, initialQuery: String, onUserClicked: @escaping (UiUserV2) -> Void) {
-        self.onUserClicked = onUserClicked
+    init(accountType: AccountType, initialQuery: String) {
+//        self.onUserClicked = onUserClicked
         presenter = .init(accountType: accountType, initialQuery: initialQuery)
     }
 
@@ -24,10 +24,10 @@ struct SearchScreen: View {
                                     if let item = data.peek(index: index) {
                                         UserComponent(
                                             user: item,
-                                            topEndContent: nil,
-                                            onUserClicked: {
-                                                onUserClicked(item)
-                                            }
+                                            topEndContent: nil
+//                                            onUserClicked: {
+//                                                onUserClicked(item)
+//                                            }
                                         )
                                         .frame(width: 200, alignment: .leading)
                                         .onAppear {

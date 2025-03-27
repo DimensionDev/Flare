@@ -30,10 +30,10 @@ struct DiscoverTabScreen: View {
                                             if let item = data.peek(index: index) {
                                                 UserComponent(
                                                     user: item,
-                                                    topEndContent: nil,
-                                                    onUserClicked: {
-                                                        onUserClicked(item)
-                                                    }
+                                                    topEndContent: nil
+//                                                    onUserClicked: {
+//                                                        onUserClicked(item)
+//                                                    }
                                                 )
                                                 .frame(width: 200, alignment: .leading)
                                                 .onAppear {
@@ -67,11 +67,11 @@ struct DiscoverTabScreen: View {
                                             if let item = data.peek(index: index) {
                                                 UserComponent(
                                                     user: item,
-                                                    topEndContent: nil,
+                                                    topEndContent: nil
 
-                                                    onUserClicked: {
-                                                        onUserClicked(item)
-                                                    }
+//                                                    onUserClicked: {
+//                                                        onUserClicked(item)
+//                                                    }
                                                 )
                                                 .frame(width: 200, alignment: .leading)
                                                 .onAppear {

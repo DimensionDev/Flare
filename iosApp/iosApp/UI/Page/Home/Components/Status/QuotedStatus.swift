@@ -7,13 +7,18 @@ struct QuotedStatus: View {
     @State private var showMedia: Bool = false
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
+    @EnvironmentObject private var router: FlareRouter
 
     let data: UiTimelineItemContentStatus
     let onMediaClick: (Int, UiMedia) -> Void
 
     var body: some View {
         Button(action: {
-            data.onClicked(ClickContext(launcher: AppleUriLauncher(openURL: openURL)))
+            // 移除KMP回调，直接使用FlareRouter导航
+            router.navigate(to: .statusDetail(
+                accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
+                statusKey: data.statusKey
+            ))
         }, label: {
             VStack(alignment: .leading) {
                 if let user = data.user {

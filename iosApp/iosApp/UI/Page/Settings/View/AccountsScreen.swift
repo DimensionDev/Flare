@@ -20,7 +20,7 @@ struct AccountsScreen: View {
                                     state.setActiveAccount(accountKey: user.data.key)
                                 } label: {
                                     HStack {
-                                        UserComponent(user: user.data, topEndContent: nil, onUserClicked: {})
+                                        UserComponent(user: user.data, topEndContent: nil)
                                         Spacer()
                                         switch onEnum(of: state.activeAccount) {
                                         case let .success(activeAccount):

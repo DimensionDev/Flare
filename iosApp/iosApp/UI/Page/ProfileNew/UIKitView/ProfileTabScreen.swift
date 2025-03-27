@@ -1,3 +1,5 @@
+import Combine
+import Kingfisher
 import MarkdownUI
 import OrderedCollections
 import os.log
@@ -15,14 +17,14 @@ struct ProfileTabScreen: View {
     @StateObject private var presenterWrapper: ProfilePresenterWrapper
     @StateObject private var mediaPresenterWrapper: ProfileMediaPresenterWrapper
     @StateObject private var tabStore: ProfileTabSettingStore
-    @StateObject private var menuState: FLNewAppState
-    @StateObject private var gestureState: FLNewGestureState
     @State private var selectedTab: Int = 0
     @State private var userInfo: ProfileUserInfo?
 
     // 横屏 竖屏
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.appSettings) private var appSettings
+    @EnvironmentObject private var router: FlareRouter
+    @EnvironmentObject private var appState: FlareAppState
 
     init(
         accountType: AccountType, userKey: MicroBlogKey?,
@@ -42,10 +44,6 @@ struct ProfileTabScreen: View {
         // 初始化 tabStore
         let tabStore = ProfileTabSettingStore(userKey: userKey)
         _tabStore = StateObject(wrappedValue: tabStore)
-
-        // 初始化手势和菜单状态
-        _menuState = StateObject(wrappedValue: FLNewAppState(tabProvider: tabStore))
-        _gestureState = StateObject(wrappedValue: FLNewGestureState(tabProvider: tabStore))
 
         os_log(
             "[📔][ProfileNewScreen - init]初始化: accountType=%{public}@, userKey=%{public}@", log: .default,
@@ -86,7 +84,7 @@ struct ProfileTabScreen: View {
                     mediaPresenterWrapper: mediaPresenterWrapper
                 )
                 .ignoresSafeArea(edges: .top)
-                .modifier(FLNewMenuGestureModifier(appState: menuState))
+                .flareNavigationGesture(router: router)
 
             } else {
                 ProfileNewRefreshViewControllerWrapper(
@@ -110,8 +108,7 @@ struct ProfileTabScreen: View {
                     mediaPresenterWrapper: mediaPresenterWrapper
                 )
                 .ignoresSafeArea(edges: .top)
-                .modifier(FLNewMenuGestureModifier(appState: menuState))
-                .secondNavigation()
+                .flareNavigationGesture(router: router)
             }
         }
     }

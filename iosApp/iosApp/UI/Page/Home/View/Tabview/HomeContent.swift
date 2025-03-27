@@ -1,5 +1,6 @@
 import Awesome
 import Generated
+import os.log
 import shared
 import SwiftUI
 
@@ -29,17 +30,29 @@ struct HomeContent: View {
     let accountType: AccountType
     @State var showSettings = false
     @State var showLogin = false
-    @State var showCompose = false
+//    @State var showCompose = false
     @State private var selectedHomeTab = 0
+    @StateObject private var appState = FlareAppState()
+
+    // 使用来自FlareMenuContainer的router
+    @EnvironmentObject private var router: FlareRouter
 
     var body: some View {
-        FlareTheme {
+        let routerId = ObjectIdentifier(router)
+        os_log("[HomeContent] Using router: %{public}@, depth: %{public}d",
+               log: .default, type: .debug,
+               String(describing: routerId),
+               router.navigationDepth)
+
+        return FlareTheme {
             TabView(selection: $selectedTab) {
-                // 首页 Tab - 使用 HomeNewScreen
+                // 首页 Tab - 使用新的SwiftUI实现
                 Tab(value: .timeline) {
-                    TabItem { _ in
-                        HomeTabScreen(accountType: accountType)
+                    FlareTabItem(router: router, tabType: .timeline) { _ in
+                        // HomeTabScreen(accountType: accountType)
+                        HomeTabScreenSwiftUI(accountType: accountType)
                     }
+                    .environmentObject(appState)
                 } label: {
                     Label {
                         Text("")
@@ -53,9 +66,10 @@ struct HomeContent: View {
                 // 通知 Tab
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .notification) {
-                        TabItem { _ in
+                        FlareTabItem(router: router, tabType: .notification) { _ in
                             NotificationTabScreen(accountType: accountType)
                         }
+                        .environmentObject(appState)
                     } label: {
                         Label {
                             Text("")
@@ -70,13 +84,18 @@ struct HomeContent: View {
                 // 发布 Tab
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .compose) {
-                        TabItem { router in
-                            ComposeTabView(
-                                router: router,
-                                accountType: accountType,
-                                selectedTab: $selectedTab
-                            )
+                        FlareTabItem(router: router, tabType: .compose) { _ in
+                            // 使用ComposeManager替换直接sheet方式
+                            Color.clear
+                                .onAppear {
+                                    ComposeManager.shared.showNewCompose(accountType: accountType)
+
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                        selectedTab = .timeline
+                                    }
+                                }
                         }
+                        .environmentObject(appState)
                     } label: {
                         Label {
                             Text("")
@@ -90,14 +109,15 @@ struct HomeContent: View {
 
                 // 发现 Tab
                 Tab(value: .discover) {
-                    TabItem { router in
+                    FlareTabItem(router: router, tabType: .discover) { tabRouter in
                         DiscoverTabScreen(
                             accountType: accountType,
                             onUserClicked: { user in
-                                router.navigate(to: AppleRoute.Profile(accountType: accountType, userKey: user.key))
+                                tabRouter.navigate(to: .profile(accountType: accountType, userKey: user.key))
                             }
                         )
                     }
+                    .environmentObject(appState)
                 } label: {
                     Label {
                         Text("")
@@ -111,7 +131,7 @@ struct HomeContent: View {
                 // 个人资料 Tab
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .profile) {
-                        TabItem { _ in
+                        FlareTabItem(router: router, tabType: .profile) { _ in
                             ProfileTabScreen(
                                 accountType: accountType,
                                 userKey: nil,
@@ -120,6 +140,7 @@ struct HomeContent: View {
                                 }
                             )
                         }
+                        .environmentObject(appState)
                     } label: {
                         Label {
                             Text("")
@@ -146,19 +167,5 @@ struct HomeContent: View {
         .sheet(isPresented: $showSettings) {
             SettingsScreen()
         }
-    }
-}
-
-struct ComposeTabView: View {
-    let router: Router
-    let accountType: AccountType
-    @Binding var selectedTab: HomeTabs
-
-    var body: some View {
-        Color.clear
-            .onAppear {
-                router.navigate(to: AppleRoute.ComposeNew(accountType: accountType))
-                selectedTab = .timeline
-            }
     }
 }

@@ -8,7 +8,7 @@ struct VVOStatusDetailScreen: View {
     private let statusKey: MicroBlogKey
 
     // 获取全局的AppState
-    @EnvironmentObject private var menuState: FLNewAppState
+    @EnvironmentObject private var menuState: FlareAppState
 
     init(accountType: AccountType, statusKey: MicroBlogKey) {
         presenter = .init(accountType: accountType, statusKey: statusKey)
@@ -80,8 +80,8 @@ struct VVOStatusDetailScreen: View {
                     }
                 }
         }
-        // 使用封装的二级导航修饰符
-        .secondNavigation()
+        // 使用新的导航手势修饰符
+        .environmentObject(menuState)
     }
 }
 

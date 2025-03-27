@@ -5,7 +5,7 @@ import SwiftUI
 
 struct ListMembersView: View {
     @State private var presenter: ListMembersPresenter
-    @EnvironmentObject private var router: Router
+//    @EnvironmentObject private var router: Router
     @Environment(\.appSettings) private var appSettings
     @State private var lastKnownItemCount: Int = 0
     private let title: String

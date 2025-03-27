@@ -9,6 +9,7 @@ struct ProfileWithUserNameScreen: View {
     @State private var presenter: ProfileWithUserNameAndHostPresenter
     private let accountType: AccountType
     let toProfileMedia: (MicroBlogKey) -> Void
+    @EnvironmentObject var router: FlareRouter
 
     init(accountType: AccountType, userName: String, host: String, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
         self.accountType = accountType
@@ -56,9 +57,10 @@ struct ProfileWithUserNameScreen: View {
                     )
                     .onAppear {
                         os_log("[📔][ProfileWithUserNameScreen]成功加载用户信息: userKey=%{public}@", log: .default, type: .debug, data.data.key.description)
-                    }.secondNavigation()
+                    }
                 }
             }
         }
+        .flareNavigationGesture(router: router)
     }
 }

@@ -51,6 +51,7 @@ struct StatusTimelineComponent: View {
 
 struct StatusItemView: View {
     @Environment(\.openURL) private var openURL
+    @EnvironmentObject private var router: FlareRouter
     let data: UiTimeline
     let detailKey: MicroBlogKey?
     let enableTranslation: Bool
@@ -64,7 +65,12 @@ struct StatusItemView: View {
     var body: some View {
         if let topMessage = data.topMessage {
             Button(action: {
-                topMessage.user?.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                if let user = topMessage.user {
+                    router.navigate(to: .profile(
+                        accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
+                        userKey: user.key
+                    ))
+                }
             }, label: {
                 StatusRetweetHeaderComponent(topMessage: topMessage)
             })
@@ -74,13 +80,22 @@ struct StatusItemView: View {
             switch onEnum(of: content) {
             case let .status(data): Button(action: {
                     if detailKey != data.statusKey {
-                        data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                        // data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                        router.navigate(to: .statusDetail(
+                            accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
+                            statusKey: data.statusKey
+                        ))
                     }
                 }, label: {
                     CommonTimelineStatusComponent(
                         data: data,
-                        onMediaClick: { index, media in
-                            data.onMediaClicked(.init(launcher: AppleUriLauncher(openURL: openURL)), media, KotlinInt(integerLiteral: index))
+                        onMediaClick: { index, _ in
+                            // data.onMediaClicked(.init(launcher: AppleUriLauncher(openURL: openURL)), media, KotlinInt(integerLiteral: index))
+                            router.navigate(to: .statusMedia(
+                                accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
+                                statusKey: data.statusKey,
+                                index: index
+                            ))
                         },
                         isDetail: detailKey == data.statusKey,
                         enableTranslation: enableTranslation
@@ -91,10 +106,7 @@ struct StatusItemView: View {
                 HStack {
                     UserComponent(
                         user: data.value,
-                        topEndContent: nil,
-                        onUserClicked: {
-                            data.value.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                        }
+                        topEndContent: nil
                     )
                     Spacer()
                 }

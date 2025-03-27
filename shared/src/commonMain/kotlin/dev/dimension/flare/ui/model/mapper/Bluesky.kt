@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.model.mapper
 import app.bsky.actor.ProfileView
 import app.bsky.actor.ProfileViewBasic
 import app.bsky.actor.ProfileViewDetailed
+import app.bsky.embed.ExternalView
 import app.bsky.embed.RecordViewRecordEmbedUnion
 import app.bsky.embed.RecordViewRecordUnion
 import app.bsky.embed.RecordWithMediaViewMediaUnion
@@ -35,9 +36,11 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.render.toUi
+import io.ktor.http.Url
 import io.ktor.utils.io.charsets.Charsets
 import io.ktor.utils.io.core.toByteArray
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -485,6 +488,13 @@ internal fun PostView.renderStatus(
                 ),
             )
         },
+        url =
+            buildString {
+                append("https://bsky.app/profile/")
+                append(author.handle)
+                append("/post/")
+                append(uri.atUri.substringAfterLast("/"))
+            },
     )
 }
 
@@ -650,7 +660,9 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
 
         is PostViewEmbedUnion.RecordWithMediaView -> {
             when (val media = embed.value.media) {
-                is RecordWithMediaViewMediaUnion.ExternalView -> persistentListOf()
+                is RecordWithMediaViewMediaUnion.ExternalView -> {
+                    findMediaFromExternal(media.value)
+                }
                 is RecordWithMediaViewMediaUnion.ImagesView ->
                     media.value.images
                         .map {
@@ -684,8 +696,54 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
             }
         }
 
+        is PostViewEmbedUnion.ExternalView -> {
+            findMediaFromExternal(embed.value)
+            persistentListOf(
+                UiMedia.Image(
+                    url = embed.value.external.uri.uri,
+                    previewUrl =
+                        embed.value.external.thumb
+                            ?.uri ?: "",
+                    description = embed.value.external.description,
+                    width = 0f,
+                    height = 0f,
+                    sensitive = false,
+                ),
+            )
+        }
+
         else -> persistentListOf()
     }
+
+private fun findMediaFromExternal(value: ExternalView): PersistentList<UiMedia> {
+    val url = Url(value.external.uri.uri)
+    return url.segments.lastOrNull()?.let {
+        if (it.endsWith(".gif", ignoreCase = true)) {
+            val height = url.parameters["hh"]?.toFloatOrNull() ?: 0f
+            val width = url.parameters["ww"]?.toFloatOrNull() ?: 0f
+            persistentListOf(
+                UiMedia.Gif(
+                    url = value.external.uri.uri,
+                    previewUrl = value.external.thumb?.uri ?: "",
+                    description = value.external.description,
+                    width = width,
+                    height = height,
+                ),
+            )
+        } else {
+            persistentListOf(
+                UiMedia.Image(
+                    url = value.external.uri.uri,
+                    previewUrl = value.external.thumb?.uri ?: "",
+                    description = value.external.description,
+                    width = 0f,
+                    height = 0f,
+                    sensitive = false,
+                ),
+            )
+        }
+    } ?: persistentListOf()
+}
 
 private fun findQuote(
     accountKey: MicroBlogKey,
@@ -886,6 +944,16 @@ private fun render(
                         ),
                     )
                 },
+                url =
+                    buildString {
+                        append("https://bsky.app/profile/")
+                        append(record.value.author.handle)
+                        append("/post/")
+                        append(
+                            record.value.uri.atUri
+                                .substringAfterLast("/"),
+                        )
+                    },
             )
         }
 

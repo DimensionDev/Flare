@@ -567,6 +567,7 @@ private fun StatusMediaScreen(
                                     ) {
                                         QuotedStatus(
                                             data = content,
+                                            showActions = true,
                                         )
                                     }
                                 }

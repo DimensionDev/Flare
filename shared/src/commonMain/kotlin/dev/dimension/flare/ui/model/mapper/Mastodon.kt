@@ -459,6 +459,16 @@ private fun Status.renderStatus(
             )
         },
         bottomContent = bottomContent,
+        url =
+            buildString {
+                if (!uri.isNullOrEmpty()) {
+                    append(uri)
+                } else if (!url.isNullOrEmpty()) {
+                    append(url)
+                } else {
+                    append("https://$host/@${account.acct}/$id")
+                }
+            },
     )
 }
 

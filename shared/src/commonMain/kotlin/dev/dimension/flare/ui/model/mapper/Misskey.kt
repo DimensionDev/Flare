@@ -567,6 +567,19 @@ private fun Note.renderStatus(
                 ),
             )
         },
+        url =
+            buildString {
+                if (!uri.isNullOrEmpty()) {
+                    append(uri)
+                } else if (!url.isNullOrEmpty()) {
+                    append(url)
+                } else {
+                    append("https://")
+                    append(accountKey.host)
+                    append("/notes/")
+                    append(id)
+                }
+            },
     )
 }
 

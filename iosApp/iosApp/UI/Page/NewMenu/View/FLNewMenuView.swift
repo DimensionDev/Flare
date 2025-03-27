@@ -21,13 +21,12 @@ struct FLNewMenuView: View {
     var body: some View {
         VStack(spacing: 0) {
             userAreaView
-                .padding(.top, 60)
+                .padding(.top, 80)
                 .padding(.horizontal, 20)
 
-            List {
+            VStack(spacing: 16) {
                 Button(action: {
                     isOpen = false
-
                     showLists = true
                 }) {
                     HStack {
@@ -37,29 +36,35 @@ struct FLNewMenuView: View {
                             .font(.body)
                         Spacer()
                     }
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 10)
+                    .contentShape(Rectangle())
                 }
-                .buttonStyle(PlainButtonStyle())
+                .buttonStyle(MenuButtonStyle())
 
                 if isPlatformBluesky() {
                     Button(action: {
                         isOpen = false
-
                         showFeeds = true
                     }) {
                         HStack {
-                            Image(systemName: "number.square")
+                            Image(systemName: "number")
                                 .frame(width: 28, height: 28)
                             Text("Feeds")
                                 .font(.body)
                             Spacer()
                         }
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 10)
+                        .contentShape(Rectangle())
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    .buttonStyle(MenuButtonStyle())
                 }
             }
-            .listStyle(PlainListStyle())
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+
+            Spacer()
 
             settingsButton
                 .padding(.horizontal, 20)
@@ -190,5 +195,17 @@ struct FLNewMenuView: View {
         guard let user else { return false }
         let platformTypeString = String(describing: user.platformType).lowercased()
         return platformTypeString == "bluesky"
+    }
+}
+
+struct MenuButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .foregroundColor(.primary)
+            .background(
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(configuration.isPressed ? Color(UIColor.secondarySystemBackground) : Color.clear)
+            )
+            .contentShape(Rectangle())
     }
 }

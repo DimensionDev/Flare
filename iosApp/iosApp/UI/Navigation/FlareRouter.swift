@@ -4,7 +4,6 @@ import shared
 import SwiftUI
 import UIKit
 
- 
 class FlareRouter: ObservableObject {
     public var appState: FlareAppState
 
@@ -99,7 +98,6 @@ class FlareRouter: ObservableObject {
     }
 
     func navigate(to destination: FlareDestination) {
- 
         if case let .compose(accountType, status) = destination {
             showComposeSheet(accountType: accountType, status: status)
             return
@@ -244,7 +242,7 @@ class FlareRouter: ObservableObject {
         for item in queryItems {
             params[item.name] = item.value
         }
- 
+
         return false
     }
 
@@ -303,16 +301,16 @@ class FlareRouter: ObservableObject {
         }
     }
 
-     func showComposeSheet(accountType: AccountType, status: FlareComposeStatus? = nil) {
+    func showComposeSheet(accountType: AccountType, status: FlareComposeStatus? = nil) {
         if status == nil {
             ComposeManager.shared.showNewCompose(accountType: accountType)
         } else {
             switch status {
-            case .reply(let statusKey):
+            case let .reply(statusKey):
                 ComposeManager.shared.showReply(accountType: accountType, statusKey: statusKey)
-            case .quote(let statusKey):
+            case let .quote(statusKey):
                 ComposeManager.shared.showQuote(accountType: accountType, statusKey: statusKey)
-            case .vvoComment(let statusKey, let rootId):
+            case let .vvoComment(statusKey, rootId):
                 ComposeManager.shared.showVVOComment(accountType: accountType, statusKey: statusKey, rootId: rootId)
             case .none:
                 ComposeManager.shared.showNewCompose(accountType: accountType)

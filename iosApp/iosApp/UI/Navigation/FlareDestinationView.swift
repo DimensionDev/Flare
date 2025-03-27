@@ -59,7 +59,7 @@ struct FlareDestinationView: View {
 
            // case let .compose(accountType, status):
             // 这段代码不会被执行，因为路由会被FlareRouter拦截
-             
+
             // NewComposeView(accountType: accountType, status: status)
 
         case let .addReaction(accountType, statusKey):
@@ -92,7 +92,6 @@ struct FlareDestinationView: View {
         case let .deleteStatus(accountType, statusKey):
             DeleteStatusView(accountType: accountType, statusKey: statusKey)
 
-   
         default:
             Text("页面未找到")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

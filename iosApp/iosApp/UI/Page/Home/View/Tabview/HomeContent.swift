@@ -84,13 +84,13 @@ struct HomeContent: View {
                 // 发布 Tab
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .compose) {
-                        FlareTabItem(router: router, tabType: .compose) { tabRouter in
+                        FlareTabItem(router: router, tabType: .compose) { _ in
                             // 使用ComposeManager替换直接sheet方式
                             Color.clear
                                 .onAppear {
                                     ComposeManager.shared.showNewCompose(accountType: accountType)
-                                    
-                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                                         selectedTab = .timeline
                                     }
                                 }

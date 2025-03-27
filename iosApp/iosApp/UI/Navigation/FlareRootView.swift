@@ -91,7 +91,7 @@ struct FlareRootView: View {
     }
 
     private func setupInitialState() {}
-    
+
     private func convertToSharedComposeStatus(_ status: FlareComposeStatus?) -> shared.ComposeStatus? {
         guard let status else { return nil }
 

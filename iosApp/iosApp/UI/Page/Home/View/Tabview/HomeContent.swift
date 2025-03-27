@@ -30,7 +30,7 @@ struct HomeContent: View {
     let accountType: AccountType
     @State var showSettings = false
     @State var showLogin = false
-    @State var showCompose = false
+//    @State var showCompose = false
     @State private var selectedHomeTab = 0
     @StateObject private var appState = FlareAppState()
 
@@ -85,11 +85,15 @@ struct HomeContent: View {
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .compose) {
                         FlareTabItem(router: router, tabType: .compose) { tabRouter in
-                            ComposeTabView(
-                                router: tabRouter,
-                                accountType: accountType,
-                                selectedTab: $selectedTab
-                            )
+                            // 使用ComposeManager替换直接sheet方式
+                            Color.clear
+                                .onAppear {
+                                    ComposeManager.shared.showNewCompose(accountType: accountType)
+                                    
+                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                        selectedTab = .timeline
+                                    }
+                                }
                         }
                         .environmentObject(appState)
                     } label: {
@@ -163,19 +167,5 @@ struct HomeContent: View {
         .sheet(isPresented: $showSettings) {
             SettingsScreen()
         }
-    }
-}
-
-struct ComposeTabView: View {
-    let router: FlareRouter
-    let accountType: AccountType
-    @Binding var selectedTab: HomeTabs
-
-    var body: some View {
-        Color.clear
-            .onAppear {
-                router.navigate(to: .compose(accountType: accountType, status: nil))
-                selectedTab = .timeline
-            }
     }
 }

@@ -4,6 +4,7 @@ import shared
 import SwiftUI
 import UIKit
 
+ 
 class FlareRouter: ObservableObject {
     public var appState: FlareAppState
 
@@ -26,8 +27,8 @@ class FlareRouter: ObservableObject {
         case .timeline: timelineNavigationPath.count
         case .discover: discoverNavigationPath.count
         case .notification: notificationNavigationPath.count
-        case .compose: composeNavigationPath.count
         case .profile: profileNavigationPath.count
+        case .compose: 0
         }
 
         os_log("[FlareRouter] Current navigationDepth for tab %{public}@: %{public}d",
@@ -41,7 +42,6 @@ class FlareRouter: ObservableObject {
     @Published var timelineNavigationPath = NavigationPath()
     @Published var discoverNavigationPath = NavigationPath()
     @Published var notificationNavigationPath = NavigationPath()
-    @Published var composeNavigationPath = NavigationPath()
     @Published var profileNavigationPath = NavigationPath()
 
     @Published var activeTab: HomeTabs = .timeline
@@ -56,8 +56,8 @@ class FlareRouter: ObservableObject {
         case .timeline: timelineNavigationPath
         case .discover: discoverNavigationPath
         case .notification: notificationNavigationPath
-        case .compose: composeNavigationPath
         case .profile: profileNavigationPath
+        case .compose: NavigationPath() // 为compose返回空路径
         }
     }
 
@@ -66,8 +66,8 @@ class FlareRouter: ObservableObject {
         case .timeline: timelineNavigationPath = newPath
         case .discover: discoverNavigationPath = newPath
         case .notification: notificationNavigationPath = newPath
-        case .compose: composeNavigationPath = newPath
         case .profile: profileNavigationPath = newPath
+        case .compose: break // 不存储导航路径
         }
     }
 
@@ -76,8 +76,8 @@ class FlareRouter: ObservableObject {
         case .timeline: Binding(get: { self.timelineNavigationPath }, set: { self.timelineNavigationPath = $0 })
         case .discover: Binding(get: { self.discoverNavigationPath }, set: { self.discoverNavigationPath = $0 })
         case .notification: Binding(get: { self.notificationNavigationPath }, set: { self.notificationNavigationPath = $0 })
-        case .compose: Binding(get: { self.composeNavigationPath }, set: { self.composeNavigationPath = $0 })
         case .profile: Binding(get: { self.profileNavigationPath }, set: { self.profileNavigationPath = $0 })
+        case .compose: Binding(get: { NavigationPath() }, set: { _ in }) // 为compose返回空绑定
         }
     }
 
@@ -99,6 +99,12 @@ class FlareRouter: ObservableObject {
     }
 
     func navigate(to destination: FlareDestination) {
+ 
+        if case let .compose(accountType, status) = destination {
+            showComposeSheet(accountType: accountType, status: status)
+            return
+        }
+
         let routerId = ObjectIdentifier(self)
         os_log("[FlareRouter] Router %{public}@ navigating to %{public}@, current depth: %{public}d, activeTab: %{public}@",
                log: .default, type: .debug,
@@ -165,10 +171,10 @@ class FlareRouter: ObservableObject {
             discoverNavigationPath.append(destination)
         case .notification:
             notificationNavigationPath.append(destination)
-        case .compose:
-            composeNavigationPath.append(destination)
         case .profile:
             profileNavigationPath.append(destination)
+        case .compose:
+            break
         }
     }
 
@@ -204,14 +210,12 @@ class FlareRouter: ObservableObject {
                 if !notificationNavigationPath.isEmpty {
                     notificationNavigationPath.removeLast()
                 }
-            case .compose:
-                if !composeNavigationPath.isEmpty {
-                    composeNavigationPath.removeLast()
-                }
             case .profile:
                 if !profileNavigationPath.isEmpty {
                     profileNavigationPath.removeLast()
                 }
+            case .compose:
+                break
             }
 
             activeDestination = nil
@@ -240,47 +244,7 @@ class FlareRouter: ObservableObject {
         for item in queryItems {
             params[item.name] = item.value
         }
-
-//        switch path {
-//        case "/profile":
-//
-//            if let username = params["username"], let host = params["host"] {
-//
-//                let accountType = AccountTypeGuest()
-//
-//                let userKey = MicroBlogKey(id: username, host: host)
-//                let destination = FlareDestination.profile(accountType: accountType, userKey: userKey)
-//                navigate(to: destination)
-//                return true
-//            }
-//
-//        case "/status":
-//
-//            if let statusId = params["id"], let host = params["host"] {
-//
-//                let accountType = AccountTypeGuest()
-//
-//                let statusKey = MicroBlogKey(id: statusId, host: host)
-//                let destination = FlareDestination.statusDetail(accountType: accountType, statusKey: statusKey)
-//                navigate(to: destination)
-//                return true
-//            }
-//
-//        case "/search":
-//
-//            if let query = params["q"] {
-//
-//                let accountType = AccountTypeGuest()
-//                let destination = FlareDestination.search(accountType: accountType, keyword: query)
-//                navigate(to: destination)
-//                return true
-//            }
-//
-//        default:
-//
-//            return false
-//        }
-
+ 
         return false
     }
 
@@ -336,6 +300,23 @@ class FlareRouter: ObservableObject {
         default:
             print("未处理的路由类型: \(type(of: route))")
             return .search(accountType: AccountTypeGuest(), keyword: "")
+        }
+    }
+
+     func showComposeSheet(accountType: AccountType, status: FlareComposeStatus? = nil) {
+        if status == nil {
+            ComposeManager.shared.showNewCompose(accountType: accountType)
+        } else {
+            switch status {
+            case .reply(let statusKey):
+                ComposeManager.shared.showReply(accountType: accountType, statusKey: statusKey)
+            case .quote(let statusKey):
+                ComposeManager.shared.showQuote(accountType: accountType, statusKey: statusKey)
+            case .vvoComment(let statusKey, let rootId):
+                ComposeManager.shared.showVVOComment(accountType: accountType, statusKey: statusKey, rootId: rootId)
+            case .none:
+                ComposeManager.shared.showNewCompose(accountType: accountType)
+            }
         }
     }
 }

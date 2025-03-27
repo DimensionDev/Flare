@@ -5,6 +5,7 @@ import SwiftUI
 struct FlareRootView: View {
     @StateObject var appState = FlareAppState()
     @StateObject private var router = FlareRouter()
+    @StateObject private var composeManager = ComposeManager.shared
     @State private var presenter = ActiveAccountPresenter()
 
     var body: some View {
@@ -62,6 +63,19 @@ struct FlareRootView: View {
                                 secondaryButton: .cancel(Text("Cancel"))
                             )
                         }
+                        .sheet(isPresented: $composeManager.showCompose) {
+                            if let accountType = composeManager.composeAccountType {
+                                NavigationView {
+                                    ComposeScreen(
+                                        onBack: {
+                                            composeManager.dismiss()
+                                        },
+                                        accountType: accountType,
+                                        status: convertToSharedComposeStatus(composeManager.composeStatus)
+                                    )
+                                }
+                            }
+                        }
                     } else {
                         ProgressView()
                     }
@@ -77,4 +91,17 @@ struct FlareRootView: View {
     }
 
     private func setupInitialState() {}
+    
+    private func convertToSharedComposeStatus(_ status: FlareComposeStatus?) -> shared.ComposeStatus? {
+        guard let status else { return nil }
+
+        switch status {
+        case let .reply(statusKey):
+            return shared.ComposeStatusReply(statusKey: statusKey)
+        case let .quote(statusKey):
+            return shared.ComposeStatusQuote(statusKey: statusKey)
+        case let .vvoComment(statusKey, rootId):
+            return shared.ComposeStatusVVOComment(statusKey: statusKey, rootId: rootId)
+        }
+    }
 }

@@ -21,6 +21,7 @@
   <string name="mastodon_item_reblogged_status">усилил зуб</string>
   <string name="mastodon_item_show_more">Показать еще</string>
   <string name="mastodon_item_show_less">Меньше</string>
+  <string name="mastodon_item_pinned">Закреплённый зуб</string>
   <string name="bluesky_notification_item_followed_you">подписался на вас</string>
   <string name="bluesky_notification_item_favourited_your_status">избранный</string>
   <string name="bluesky_notification_item_reblogged_your_status">репостнуто</string>
@@ -31,6 +32,7 @@
   <string name="bluesky_notification_item_quoted_your_status">процитировано</string>
   <string name="bluesky_notification_item_starterpack_joined">Стартерпак присоединился</string>
   <string name="bluesky_notification_item_unKnown">Неизвестный</string>
+  <string name="bluesky_notification_item_pin">Прикреплено</string>
   <string name="misskey_notification_item_mentioned_you">упомянул вас</string>
   <string name="misskey_notification_item_replied_to_you">ответил вам</string>
   <string name="misskey_notification_item_reposted_your_status">изменено</string>
@@ -93,6 +95,7 @@
   <string name="report">Отчет</string>
   <string name="retweet">Ретвитнуть</string>
   <string name="retweet_remove">Удалить ретвит</string>
+  <string name="share">Поделиться</string>
   <string name="user_block">Блокировать %1$s</string>
   <string name="user_unblock">Разблокировать %1$s</string>
   <string name="user_mute">Выключить звук %1$s</string>

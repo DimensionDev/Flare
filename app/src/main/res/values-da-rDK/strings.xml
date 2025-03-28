@@ -139,6 +139,7 @@
   <string name="media_menu_save">Gem</string>
   <string name="media_save_success">Gemt i Downloads</string>
   <string name="media_save_fail">Kunne ikke gemme</string>
+  <string name="media_alt_text">Alternativ tekst</string>
   <string name="tab_settings_add">Tilføj</string>
   <string name="tab_settings_drag">Træk</string>
   <string name="tab_settings_edit">Rediger</string>

@@ -20,6 +20,7 @@
   <string name="mastodon_item_reblogged_status">wzmocniono wpis</string>
   <string name="mastodon_item_show_more">Pokaż więcej</string>
   <string name="mastodon_item_show_less">Pokaż mniej</string>
+  <string name="mastodon_item_pinned">Przypięty wpis</string>
   <string name="bluesky_notification_item_followed_you">obserwuje Ciebie</string>
   <string name="bluesky_notification_item_favourited_your_status">ulubione</string>
   <string name="bluesky_notification_item_reblogged_your_status">reblogowany</string>
@@ -30,6 +31,7 @@
   <string name="bluesky_notification_item_quoted_your_status">cytowany</string>
   <string name="bluesky_notification_item_starterpack_joined">Starterpack dołączył</string>
   <string name="bluesky_notification_item_unKnown">Odznana</string>
+  <string name="bluesky_notification_item_pin">Przypięte</string>
   <string name="misskey_notification_item_mentioned_you">wspomniał o tobie</string>
   <string name="misskey_notification_item_replied_to_you">odpowiedział(-a) do Ciebie</string>
   <string name="misskey_notification_item_reposted_your_status">ponownie opublikowano</string>
@@ -92,6 +94,7 @@
   <string name="report">Zgłoszenie</string>
   <string name="retweet">crwdns74747:0crwdne74747:0</string>
   <string name="retweet_remove">Usuń retweet</string>
+  <string name="share">Udostępnij</string>
   <string name="user_report">Zgłoś %1$s</string>
   <string name="user_block">Blok %1$s</string>
   <string name="user_unblock">Odblokuj %1$s</string>

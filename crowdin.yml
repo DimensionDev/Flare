@@ -1,3 +1,19 @@
-bundles:
-  - 2
-  - 8
+"project_id_env": "CROWDIN_PROJECT_ID"
+"api_token_env": "CROWDIN_PERSONAL_TOKEN"
+"base_path": "."
+"base_url": "https://api.crowdin.com"
+
+"preserve_hierarchy": true
+
+files:
+  [
+    {
+      "source": "**/values/strings.xml",
+      "translation": "%original_path%-%android_code%/strings.xml",
+    },
+    {
+      "source": "iosApp/iosApp/Localizable.xcstrings",
+      "translation": "iosApp/iosApp/Localizable.xcstrings",
+      "multilingual": true,
+    },
+  ]

@@ -20,6 +20,7 @@
   <string name="mastodon_item_reblogged_status">تم ترقية التبويق</string>
   <string name="mastodon_item_show_more">إظهار المزيد</string>
   <string name="mastodon_item_show_less">إظهار أقل</string>
+  <string name="mastodon_item_pinned">تبويق مثبت</string>
   <string name="bluesky_notification_item_followed_you">تابعك</string>
   <string name="bluesky_notification_item_favourited_your_status">المفضلة</string>
   <string name="bluesky_notification_item_reblogged_your_status">إعادة التدوين</string>
@@ -30,6 +31,7 @@
   <string name="bluesky_notification_item_quoted_your_status">مقتبس</string>
   <string name="bluesky_notification_item_starterpack_joined">انضم إلى حزمة البداية</string>
   <string name="bluesky_notification_item_unKnown">غير معروف</string>
+  <string name="bluesky_notification_item_pin">مثبتة</string>
   <string name="misskey_notification_item_mentioned_you">ذكرك</string>
   <string name="misskey_notification_item_replied_to_you">رد عليك</string>
   <string name="misskey_notification_item_reposted_your_status">أعيد نشرها</string>
@@ -92,6 +94,7 @@
   <string name="report">تقرير</string>
   <string name="retweet">تغريدة</string>
   <string name="retweet_remove">إزالة التغريدة</string>
+  <string name="share">مشاركة</string>
   <string name="user_report">التقرير %1$s</string>
   <string name="user_block">حظر %1$s</string>
   <string name="user_unblock">إلغاء حظر %1$s</string>

@@ -21,6 +21,7 @@
   <string name="mastodon_item_reblogged_status">更新了一条嘟文</string>
   <string name="mastodon_item_show_more">显示更多</string>
   <string name="mastodon_item_show_less">显示更少</string>
+  <string name="mastodon_item_pinned">置顶toot</string>
   <string name="bluesky_notification_item_followed_you">关注了你</string>
   <string name="bluesky_notification_item_favourited_your_status">收藏了</string>
   <string name="bluesky_notification_item_reblogged_your_status">转发了</string>
@@ -31,6 +32,7 @@
   <string name="bluesky_notification_item_quoted_your_status">引用</string>
   <string name="bluesky_notification_item_starterpack_joined">初始包</string>
   <string name="bluesky_notification_item_unKnown">未知</string>
+  <string name="bluesky_notification_item_pin">固定的</string>
   <string name="misskey_notification_item_mentioned_you">提及了你</string>
   <string name="misskey_notification_item_replied_to_you">回复了你</string>
   <string name="misskey_notification_item_reposted_your_status">转发</string>
@@ -93,6 +95,7 @@
   <string name="report">举报</string>
   <string name="retweet">转推</string>
   <string name="retweet_remove">移除转推</string>
+  <string name="share">分享</string>
   <string name="user_report">举报 %1$s</string>
   <string name="user_block">屏蔽 %1$s</string>
   <string name="user_unblock">取消屏蔽 %1$s</string>

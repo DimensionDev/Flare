@@ -21,6 +21,7 @@
   <string name="mastodon_item_reblogged_status">boostet et toot</string>
   <string name="mastodon_item_show_more">Vis mer</string>
   <string name="mastodon_item_show_less">Vis mindre</string>
+  <string name="mastodon_item_pinned">Festet toot</string>
   <string name="bluesky_notification_item_followed_you">fulgte deg</string>
   <string name="bluesky_notification_item_favourited_your_status">favorisert</string>
   <string name="bluesky_notification_item_reblogged_your_status">reblogget</string>
@@ -31,6 +32,7 @@
   <string name="bluesky_notification_item_quoted_your_status">sitert</string>
   <string name="bluesky_notification_item_starterpack_joined">Starterpack er medlem</string>
   <string name="bluesky_notification_item_unKnown">Ukjent</string>
+  <string name="bluesky_notification_item_pin">Festet</string>
   <string name="misskey_notification_item_mentioned_you">nevnte deg</string>
   <string name="misskey_notification_item_replied_to_you">svarte deg</string>
   <string name="misskey_notification_item_reposted_your_status">repostet</string>
@@ -93,6 +95,7 @@
   <string name="report">Rapporter</string>
   <string name="retweet">Prøv igjen</string>
   <string name="retweet_remove">Fjern retweet</string>
+  <string name="share">Del</string>
   <string name="user_block">Blokker %1$s</string>
   <string name="user_unblock">Opphev blokkering %1$s</string>
   <string name="user_mute">Demp %1$s</string>

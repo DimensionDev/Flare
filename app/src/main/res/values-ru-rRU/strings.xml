@@ -138,6 +138,7 @@
   <string name="media_menu_save">Сохранить</string>
   <string name="media_save_success">Сохранено в Загрузках</string>
   <string name="media_save_fail">Не удалось сохранить</string>
+  <string name="media_alt_text">Alt текст</string>
   <string name="tab_settings_add">Добавить</string>
   <string name="tab_settings_drag">Перетащите</string>
   <string name="tab_settings_edit">Редактирование</string>

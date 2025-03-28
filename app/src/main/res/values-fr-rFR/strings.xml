@@ -139,6 +139,7 @@
   <string name="media_menu_save">Enregistrer</string>
   <string name="media_save_success">Enregistré dans les téléchargements</string>
   <string name="media_save_fail">Échec de l\'enregistrement</string>
+  <string name="media_alt_text">Texte Alt</string>
   <string name="tab_settings_add">Ajouter</string>
   <string name="tab_settings_drag">Glisser</string>
   <string name="tab_settings_edit">Editer</string>

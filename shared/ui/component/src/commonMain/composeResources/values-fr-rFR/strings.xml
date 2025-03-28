@@ -21,6 +21,7 @@
   <string name="mastodon_item_reblogged_status">a boosté un pouet</string>
   <string name="mastodon_item_show_more">Afficher plus</string>
   <string name="mastodon_item_show_less">Afficher moins</string>
+  <string name="mastodon_item_pinned">Pouet épinglé</string>
   <string name="bluesky_notification_item_followed_you">vous a suivi</string>
   <string name="bluesky_notification_item_favourited_your_status">favori</string>
   <string name="bluesky_notification_item_reblogged_your_status">reblogué</string>
@@ -31,6 +32,7 @@
   <string name="bluesky_notification_item_quoted_your_status">citée</string>
   <string name="bluesky_notification_item_starterpack_joined">Starterpack rejoint</string>
   <string name="bluesky_notification_item_unKnown">Inconnu</string>
+  <string name="bluesky_notification_item_pin">Épinglé</string>
   <string name="misskey_notification_item_mentioned_you">vous a mentionné</string>
   <string name="misskey_notification_item_replied_to_you">vous a répondu</string>
   <string name="misskey_notification_item_reposted_your_status">reposté</string>
@@ -93,6 +95,7 @@
   <string name="report">Rapporter</string>
   <string name="retweet">Retweet</string>
   <string name="retweet_remove">Supprimer le retweet</string>
+  <string name="share">Partager</string>
   <string name="user_report">Signaler %1$s</string>
   <string name="user_block">Bloquer %1$s</string>
   <string name="user_unblock">Débloquer %1$s</string>

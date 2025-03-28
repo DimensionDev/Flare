@@ -17,6 +17,7 @@
   <string name="mastodon_item_reblogged_status">ενίσχυσε μια φωνή</string>
   <string name="mastodon_item_show_more">Εμφάνιση περισσότερων</string>
   <string name="mastodon_item_show_less">Εμφάνιση λιγότερων</string>
+  <string name="mastodon_item_pinned">Καρφιτσωμένη φωνή</string>
   <string name="bluesky_notification_item_followed_you">σας ακολούθησε</string>
   <string name="bluesky_notification_item_favourited_your_status">αγαπημένο</string>
   <string name="bluesky_notification_item_reblogged_your_status">επανασυνδεδεμένο</string>
@@ -27,6 +28,7 @@
   <string name="bluesky_notification_item_quoted_your_status">παρέθεσε</string>
   <string name="bluesky_notification_item_starterpack_joined">Συνδεδεμένο Starterpack</string>
   <string name="bluesky_notification_item_unKnown">Άγνωστος</string>
+  <string name="bluesky_notification_item_pin">Καρφιτσωμένο</string>
   <string name="misskey_notification_item_mentioned_you">σας ανέφερε</string>
   <string name="misskey_notification_item_replied_to_you">σας απάντησε</string>
   <string name="misskey_notification_item_reposted_your_status">αναρτήθηκε</string>
@@ -89,6 +91,7 @@
   <string name="report">Αναφορά</string>
   <string name="retweet">Retweet</string>
   <string name="retweet_remove">Αφαίρεση retweet</string>
+  <string name="share">Κοινοποίηση</string>
   <string name="user_report">Αναφορά %1$s</string>
   <string name="user_block">Αποκλεισμός %1$s</string>
   <string name="user_unblock">Ξεμπλοκάρισμα %1$s</string>

@@ -139,6 +139,7 @@
   <string name="media_menu_save">Opslaan</string>
   <string name="media_save_success">Opgeslagen in Downloads</string>
   <string name="media_save_fail">Opslaan mislukt</string>
+  <string name="media_alt_text">Alternatieve tekst</string>
   <string name="tab_settings_add">Toevoegen</string>
   <string name="tab_settings_drag">Sleep</string>
   <string name="tab_settings_edit">Bewerken</string>

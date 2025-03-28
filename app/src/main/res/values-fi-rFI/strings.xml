@@ -139,6 +139,7 @@
   <string name="media_menu_save">Tallenna</string>
   <string name="media_save_success">Tallennettu latauksiin</string>
   <string name="media_save_fail">Tallennus epäonnistui</string>
+  <string name="media_alt_text">Alt teksti</string>
   <string name="tab_settings_add">Lisää</string>
   <string name="tab_settings_drag">Vedä</string>
   <string name="tab_settings_edit">Muokkaa</string>

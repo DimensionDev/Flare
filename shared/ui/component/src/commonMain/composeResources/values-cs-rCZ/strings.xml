@@ -21,6 +21,7 @@
   <string name="mastodon_item_reblogged_status">boostnul toot</string>
   <string name="mastodon_item_show_more">Zobrazit více</string>
   <string name="mastodon_item_show_less">Zobrazit méně</string>
+  <string name="mastodon_item_pinned">Připnutý toot</string>
   <string name="bluesky_notification_item_followed_you">vás sleduje</string>
   <string name="bluesky_notification_item_favourited_your_status">oblíbený</string>
   <string name="bluesky_notification_item_reblogged_your_status">sdíleno</string>
@@ -31,6 +32,7 @@
   <string name="bluesky_notification_item_quoted_your_status">citováno</string>
   <string name="bluesky_notification_item_starterpack_joined">Starterpack se připojil</string>
   <string name="bluesky_notification_item_unKnown">Neznámé</string>
+  <string name="bluesky_notification_item_pin">Připnuté</string>
   <string name="misskey_notification_item_mentioned_you">vás zmínil</string>
   <string name="misskey_notification_item_replied_to_you">odpověděl vám</string>
   <string name="misskey_notification_item_reposted_your_status">přeposíláno</string>
@@ -93,6 +95,7 @@
   <string name="report">Nahlásit</string>
   <string name="retweet">Opakovat</string>
   <string name="retweet_remove">Odstranit retweet</string>
+  <string name="share">Sdílet</string>
   <string name="user_report">Nahlásit %1$s</string>
   <string name="user_block">Blokovat %1$s</string>
   <string name="user_unblock">Odblokovat %1$s</string>

@@ -139,6 +139,7 @@
   <string name="media_menu_save">Spara</string>
   <string name="media_save_success">Sparad i hämtningar</string>
   <string name="media_save_fail">Det gick inte att spara</string>
+  <string name="media_alt_text">Alt text</string>
   <string name="tab_settings_add">Lägg till</string>
   <string name="tab_settings_drag">Dra</string>
   <string name="tab_settings_edit">Redigera</string>

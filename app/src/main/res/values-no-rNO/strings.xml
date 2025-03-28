@@ -139,6 +139,7 @@
   <string name="media_menu_save">Lagre</string>
   <string name="media_save_success">Lagret i Nedlastingen</string>
   <string name="media_save_fail">Kunne ikke lagre</string>
+  <string name="media_alt_text">Alt. tekst</string>
   <string name="tab_settings_add">Legg til</string>
   <string name="tab_settings_drag">Dra</string>
   <string name="tab_settings_edit">Rediger</string>

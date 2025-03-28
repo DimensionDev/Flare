@@ -21,6 +21,7 @@
   <string name="mastodon_item_reblogged_status">a amplificat o notiță</string>
   <string name="mastodon_item_show_more">Arată mai mult</string>
   <string name="mastodon_item_show_less">Arată mai puțin</string>
+  <string name="mastodon_item_pinned">Notiță fixată</string>
   <string name="bluesky_notification_item_followed_you">te urmărește</string>
   <string name="bluesky_notification_item_favourited_your_status">favorit</string>
   <string name="bluesky_notification_item_reblogged_your_status">redistribuit</string>
@@ -31,6 +32,7 @@
   <string name="bluesky_notification_item_quoted_your_status">citat</string>
   <string name="bluesky_notification_item_starterpack_joined">Starterpack alăturat</string>
   <string name="bluesky_notification_item_unKnown">Necunoscut</string>
+  <string name="bluesky_notification_item_pin">Fixat</string>
   <string name="misskey_notification_item_mentioned_you">te-a menționat</string>
   <string name="misskey_notification_item_replied_to_you">ți-a răspuns</string>
   <string name="misskey_notification_item_reposted_your_status">repostat</string>
@@ -93,6 +95,7 @@
   <string name="report">Raport</string>
   <string name="retweet">Retweet</string>
   <string name="retweet_remove">Elimină retweet</string>
+  <string name="share">Distribuie</string>
   <string name="user_report">Raportează %1$s</string>
   <string name="user_block">Blochează %1$s</string>
   <string name="user_unblock">Deblochează %1$s</string>

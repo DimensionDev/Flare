@@ -77,6 +77,7 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
+import com.ramcosta.composedestinations.generated.destinations.AltTextSheetRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import compose.icons.FontAwesomeIcons
@@ -216,6 +217,9 @@ internal fun StatusMediaRoute(
         index = mediaIndex,
         preview = preview,
         onDismiss = navigator::navigateUp,
+        toAltText = {
+            it.description?.let { text -> navigator.navigate(AltTextSheetRouteDestination(text)) }
+        },
     )
 //        }
 //    }
@@ -232,6 +236,7 @@ private fun StatusMediaScreen(
     index: Int,
     preview: String?,
     onDismiss: () -> Unit,
+    toAltText: (UiMedia) -> Unit,
     playerPool: VideoPlayerPool = koinInject(),
 ) {
     val context = LocalContext.current
@@ -472,6 +477,7 @@ private fun StatusMediaScreen(
                             if (!current.description.isNullOrEmpty()) {
                                 FilledTonalIconButton(
                                     onClick = {
+                                        toAltText.invoke(current)
                                     },
                                 ) {
                                     FAIcon(
@@ -565,8 +571,15 @@ private fun StatusMediaScreen(
                                         }
                                     }
                                     state.medias.onSuccess { medias ->
-                                        if (medias[pagerState.currentPage] is UiMedia.Video) {
-                                            val player = playerPool.peek(medias[pagerState.currentPage].url)
+                                        val current =
+                                            remember(
+                                                medias,
+                                                state.currentPage,
+                                            ) {
+                                                medias[state.currentPage]
+                                            }
+                                        if (current is UiMedia.Video) {
+                                            val player = playerPool.peek(current.url)
                                             if (player != null) {
                                                 PlayerControl(
                                                     player,

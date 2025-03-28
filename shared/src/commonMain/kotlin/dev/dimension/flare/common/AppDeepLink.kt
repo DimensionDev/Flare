@@ -204,4 +204,10 @@ public object AppDeepLink {
             return "$APPSCHEMA://StatusMedia/${statusKey.toString().encodeURLPathPart()}/$mediaIndex?$query"
         }
     }
+
+    public object AltText {
+        public const val ROUTE: String = "$APPSCHEMA://AltText/{text}"
+
+        public operator fun invoke(text: String): String = "$APPSCHEMA://AltText/${text.encodeURLPathPart()}"
+    }
 }

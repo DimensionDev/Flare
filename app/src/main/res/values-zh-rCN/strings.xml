@@ -141,6 +141,7 @@
   <string name="media_menu_save">保存</string>
   <string name="media_save_success">已保存到下载文件夹</string>
   <string name="media_save_fail">保存失败</string>
+  <string name="media_alt_text">备用文本</string>
   <string name="tab_settings_add">添加</string>
   <string name="tab_settings_drag">拖动</string>
   <string name="tab_settings_edit">编辑</string>

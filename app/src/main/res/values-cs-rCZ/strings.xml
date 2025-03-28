@@ -139,6 +139,7 @@
   <string name="media_menu_save">Uložit</string>
   <string name="media_save_success">Uloženo do souborů</string>
   <string name="media_save_fail">Uložení se nezdařilo</string>
+  <string name="media_alt_text">Alternativní text</string>
   <string name="tab_settings_add">Přidat</string>
   <string name="tab_settings_drag">Přetažení</string>
   <string name="tab_settings_edit">Upravit</string>

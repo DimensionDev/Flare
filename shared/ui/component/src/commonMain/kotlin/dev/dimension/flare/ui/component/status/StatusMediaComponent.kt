@@ -23,11 +23,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CirclePlay
 import compose.icons.fontawesomeicons.solid.EyeSlash
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.ui.component.AdaptiveGrid
 import dev.dimension.flare.ui.component.AudioPlayer
 import dev.dimension.flare.ui.component.ComponentAppearance
@@ -55,13 +57,14 @@ internal fun StatusMediaComponent(
     sensitive: Boolean,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalComponentAppearance.current
     var hideSensitive by remember(appearanceSettings.showSensitiveContent) {
         mutableStateOf(sensitive && !appearanceSettings.showSensitiveContent)
     }
     val showSensitiveButton =
-        remember(data, sensitive) {
-            data.all { it is UiMedia.Image } && sensitive
+        remember(sensitive) {
+            sensitive
         }
     Box(
         modifier =
@@ -71,11 +74,12 @@ internal fun StatusMediaComponent(
         AdaptiveGrid(
             content = {
                 data.forEach { media ->
-                    MediaItem(
-                        media = media,
-                        modifier =
-                            Modifier
-                                .clipToBounds()
+                    Box {
+                        MediaItem(
+                            media = media,
+                            modifier =
+                                Modifier
+                                    .clipToBounds()
 //                                .sharedElement(
 //                                    rememberSharedContentState(
 //                                        when (media) {
@@ -87,12 +91,34 @@ internal fun StatusMediaComponent(
 //                                    ),
 //                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                )
-                                .pointerHoverIcon(PointerIcon.Hand)
-                                .clickable {
-                                    onMediaClick(media)
-                                },
-                        keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
-                    )
+                                    .pointerHoverIcon(PointerIcon.Hand)
+                                    .clickable {
+                                        onMediaClick(media)
+                                    },
+                            keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
+                        )
+                        if (!media.description.isNullOrEmpty()) {
+                            PlatformText(
+                                text = "ALT",
+                                modifier =
+                                    Modifier
+                                        .padding(16.dp)
+                                        .align(Alignment.BottomEnd)
+                                        .background(
+                                            color = Color.Black.copy(alpha = 0.75f),
+                                            shape = PlatformTheme.shapes.medium,
+                                        ).padding(
+                                            horizontal = 8.dp,
+                                            vertical = 2.dp,
+                                        ).clickable {
+                                            media.description?.let {
+                                                uriHandler.openUri(AppDeepLink.AltText(it))
+                                            }
+                                        },
+                                color = Color.White,
+                            )
+                        }
+                    }
                 }
             },
             modifier =

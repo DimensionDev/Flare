@@ -5,12 +5,13 @@ import androidx.compose.runtime.Immutable
 @Immutable
 public sealed interface UiMedia {
     public val url: String
+    public val description: String?
 
     @Immutable
     public data class Image internal constructor(
         override val url: String,
         val previewUrl: String,
-        val description: String?,
+        override val description: String?,
         val height: Float,
         val width: Float,
         val sensitive: Boolean,
@@ -23,7 +24,7 @@ public sealed interface UiMedia {
     public data class Video internal constructor(
         override val url: String,
         val thumbnailUrl: String,
-        val description: String?,
+        override val description: String?,
         val height: Float,
         val width: Float,
     ) : UiMedia {
@@ -35,7 +36,7 @@ public sealed interface UiMedia {
     public data class Gif internal constructor(
         override val url: String,
         val previewUrl: String,
-        val description: String?,
+        override val description: String?,
         val height: Float,
         val width: Float,
     ) : UiMedia {
@@ -46,7 +47,7 @@ public sealed interface UiMedia {
     @Immutable
     public data class Audio internal constructor(
         override val url: String,
-        val description: String?,
+        override val description: String?,
         val previewUrl: String?,
     ) : UiMedia
 }

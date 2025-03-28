@@ -15,7 +15,7 @@ internal class GuestTimelinePagingSource(
     override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiTimeline> {
         val offset = params.key ?: 0
         val limit = params.loadSize
-        val statuses = service.trendsStatuses(limit = limit, offset = offset)
+        val statuses = service.trendsStatuses(limit = limit, offset = offset).distinctBy { it.id }
         return LoadResult.Page(
             data =
                 statuses.map { it.renderGuest(host = host) },

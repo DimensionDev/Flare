@@ -36,12 +36,15 @@ internal class GuestUserTimelinePagingSource(
                     max_id = maxId,
                     only_media = onlyMedia,
                     exclude_replies = !withReply,
+                    pinned = false,
                 ).let {
                     if (withPinned) {
                         pinned + it
                     } else {
                         it
                     }
+                }.distinctBy {
+                    it.id
                 }
         return LoadResult.Page(
             data =

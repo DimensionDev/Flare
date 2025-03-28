@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.aspectRatio
@@ -76,10 +77,12 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.annotation.parameters.DeepLink
 import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
+import com.ramcosta.composedestinations.generated.destinations.AltTextSheetRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import com.ramcosta.composedestinations.spec.DestinationStyle
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CircleInfo
 import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
@@ -214,6 +217,9 @@ internal fun StatusMediaRoute(
         index = mediaIndex,
         preview = preview,
         onDismiss = navigator::navigateUp,
+        toAltText = {
+            it.description?.let { text -> navigator.navigate(AltTextSheetRouteDestination(text)) }
+        },
     )
 //        }
 //    }
@@ -230,6 +236,7 @@ private fun StatusMediaScreen(
     index: Int,
     preview: String?,
     onDismiss: () -> Unit,
+    toAltText: (UiMedia) -> Unit,
     playerPool: VideoPlayerPool = koinInject(),
 ) {
     val context = LocalContext.current
@@ -452,7 +459,7 @@ private fun StatusMediaScreen(
                             Modifier
                                 .systemBarsPadding()
                                 .padding(horizontal = 4.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         FilledTonalIconButton(
                             onClick = {
@@ -464,7 +471,21 @@ private fun StatusMediaScreen(
                                 contentDescription = stringResource(id = R.string.navigate_back),
                             )
                         }
+                        Spacer(modifier = Modifier.weight(1f))
                         state.medias.onSuccess { medias ->
+                            val current = medias[state.currentPage]
+                            if (!current.description.isNullOrEmpty()) {
+                                FilledTonalIconButton(
+                                    onClick = {
+                                        toAltText.invoke(current)
+                                    },
+                                ) {
+                                    FAIcon(
+                                        FontAwesomeIcons.Solid.CircleInfo,
+                                        contentDescription = stringResource(id = R.string.media_alt_text),
+                                    )
+                                }
+                            }
                             FilledTonalIconButton(
                                 onClick = {
                                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -550,8 +571,15 @@ private fun StatusMediaScreen(
                                         }
                                     }
                                     state.medias.onSuccess { medias ->
-                                        if (medias[pagerState.currentPage] is UiMedia.Video) {
-                                            val player = playerPool.peek(medias[pagerState.currentPage].url)
+                                        val current =
+                                            remember(
+                                                medias,
+                                                state.currentPage,
+                                            ) {
+                                                medias[state.currentPage]
+                                            }
+                                        if (current is UiMedia.Video) {
+                                            val player = playerPool.peek(current.url)
                                             if (player != null) {
                                                 PlayerControl(
                                                     player,

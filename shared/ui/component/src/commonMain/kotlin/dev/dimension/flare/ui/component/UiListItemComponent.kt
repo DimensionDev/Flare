@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -36,7 +37,7 @@ import org.jetbrains.compose.resources.stringResource
 public fun LazyListScope.uiListItemComponent(
     items: PagingState<UiList>,
     onClicked: ((UiList) -> Unit)? = null,
-    trailingContent: @Composable (UiList) -> Unit = {},
+    trailingContent: @Composable RowScope.(UiList) -> Unit = {},
 ) {
     items(
         items,
@@ -100,7 +101,7 @@ public fun LazyListScope.uiListItemComponent(
 public fun UiListItem(
     onClicked: ((UiList) -> Unit)?,
     item: UiList,
-    trailingContent: @Composable ((UiList) -> Unit),
+    trailingContent: @Composable (RowScope.(UiList) -> Unit),
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -163,7 +164,7 @@ public fun UiListItem(
                 }
             },
             trailingContent = {
-                trailingContent.invoke(item)
+                trailingContent.invoke(this, item)
             },
             modifier = Modifier.padding(horizontal = screenHorizontalPadding),
         )

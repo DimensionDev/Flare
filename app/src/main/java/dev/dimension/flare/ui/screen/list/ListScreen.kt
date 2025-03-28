@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.list
 
 import android.os.Parcelable
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.DrawerState
@@ -36,12 +37,16 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.Thumbtack
+import compose.icons.fontawesomeicons.solid.ThumbtackSlash
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
+import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -50,12 +55,21 @@ import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.uiListItemComponent
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.onSuccess
+import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.AllListPresenter
+import dev.dimension.flare.ui.presenter.list.AllListState
 import dev.dimension.flare.ui.screen.home.TimelineRoute
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import moe.tlaster.precompose.molecule.producePresenter
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Destination<RootGraph>(
@@ -190,6 +204,38 @@ private fun ListScreen(
                         state.items,
                         toList,
                         trailingContent = { item ->
+                            state.currentTabs.onSuccess { currentTabs ->
+                                val isPinned =
+                                    remember(
+                                        item,
+                                        currentTabs,
+                                    ) {
+                                        currentTabs.contains(item.id)
+                                    }
+                                IconButton(
+                                    onClick = {
+                                        if (isPinned) {
+                                            state.unpinList(item)
+                                        } else {
+                                            state.pinList(item)
+                                        }
+                                    },
+                                ) {
+                                    AnimatedContent(isPinned) {
+                                        if (it) {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.ThumbtackSlash,
+                                                contentDescription = stringResource(id = R.string.tab_settings_add),
+                                            )
+                                        } else {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Thumbtack,
+                                                contentDescription = stringResource(id = R.string.tab_settings_remove),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                             if (!item.readonly) {
                                 var showDropdown by remember {
                                     mutableStateOf(false)
@@ -251,9 +297,83 @@ private fun ListScreen(
 }
 
 @Composable
-private fun presenter(accountType: AccountType) =
-    run {
+private fun presenter(
+    accountType: AccountType,
+    settingsRepository: SettingsRepository = koinInject(),
+    appScope: CoroutineScope = koinInject(),
+) = run {
+    val tabSettings by settingsRepository.tabSettings.collectAsUiState()
+    val accountState =
+        remember(accountType) {
+            UserPresenter(
+                accountType = accountType,
+                userKey = null,
+            )
+        }.invoke()
+    val currentTabs =
+        accountState.user.flatMap { user ->
+            tabSettings.map {
+                it.homeTabs
+                    .getOrDefault(user.key, listOf(HomeTimelineTabItem(accountType = AccountType.Specific(user.key))))
+                    .filterIsInstance<ListTimelineTabItem>()
+                    .map { it.listId }
+                    .toImmutableList()
+            }
+        }
+    val state =
         remember(accountType) {
             AllListPresenter(accountType)
         }.invoke()
+
+    object : AllListState by state {
+        val currentTabs = currentTabs
+
+        fun pinList(item: UiList) {
+            accountState.user.onSuccess { user ->
+                appScope.launch {
+                    settingsRepository.updateTabSettings {
+                        copy(
+                            homeTabs =
+                                homeTabs + (
+                                    user.key to
+                                        homeTabs[user.key].orEmpty().plus(
+                                            ListTimelineTabItem(
+                                                account = AccountType.Specific(user.key),
+                                                listId = item.id,
+                                                metaData =
+                                                    TabMetaData(
+                                                        title = TitleType.Text(item.title),
+                                                        icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                                                    ),
+                                            ),
+                                        )
+                                ),
+                        )
+                    }
+                }
+            }
+        }
+
+        fun unpinList(item: UiList) {
+            accountState.user.onSuccess { user ->
+                appScope.launch {
+                    settingsRepository.updateTabSettings {
+                        copy(
+                            homeTabs =
+                                homeTabs + (
+                                    user.key to
+                                        homeTabs[user.key].orEmpty().filter {
+                                            if (it is ListTimelineTabItem) {
+                                                it.listId != item.id
+                                            } else {
+                                                true
+                                            }
+                                        }
+                                ),
+                        )
+                    }
+                }
+            }
+        }
     }
+}

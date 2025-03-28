@@ -138,6 +138,7 @@
   <string name="media_menu_save">Αποθήκευση</string>
   <string name="media_save_success">Αποθηκεύτηκε στις Λήψεις</string>
   <string name="media_save_fail">Αποτυχία αποθήκευσης</string>
+  <string name="media_alt_text">Εναλλακτικό κείμενο</string>
   <string name="tab_settings_add">Προσθήκη</string>
   <string name="tab_settings_drag">Σύρετε</string>
   <string name="tab_settings_edit">Επεξεργασία</string>

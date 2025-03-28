@@ -21,6 +21,7 @@
   <string name="mastodon_item_reblogged_status">förstärkte en toot</string>
   <string name="mastodon_item_show_more">Visa mer</string>
   <string name="mastodon_item_show_less">Visa mindre</string>
+  <string name="mastodon_item_pinned">Klistrad toot</string>
   <string name="bluesky_notification_item_followed_you">följde dig</string>
   <string name="bluesky_notification_item_favourited_your_status">Favoriterad</string>
   <string name="bluesky_notification_item_reblogged_your_status">återbloggad</string>
@@ -31,6 +32,7 @@
   <string name="bluesky_notification_item_quoted_your_status">citerad</string>
   <string name="bluesky_notification_item_starterpack_joined">Startpaket anslutet</string>
   <string name="bluesky_notification_item_unKnown">Okänd</string>
+  <string name="bluesky_notification_item_pin">Klistrad</string>
   <string name="misskey_notification_item_mentioned_you">nämnde dig</string>
   <string name="misskey_notification_item_replied_to_you">svarade dig</string>
   <string name="misskey_notification_item_reposted_your_status">repostad</string>
@@ -93,6 +95,7 @@
   <string name="report">Rapportera</string>
   <string name="retweet">Retweet</string>
   <string name="retweet_remove">Ta bort retweet</string>
+  <string name="share">Dela</string>
   <string name="user_report">Rapportera %1$s</string>
   <string name="user_block">Blockera %1$s</string>
   <string name="user_unblock">Avblockera %1$s</string>

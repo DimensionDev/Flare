@@ -21,6 +21,7 @@
   <string name="mastodon_item_reblogged_status">toot heeft geboost</string>
   <string name="mastodon_item_show_more">Toon meer</string>
   <string name="mastodon_item_show_less">Minder weergeven</string>
+  <string name="mastodon_item_pinned">Vastgepinde toot</string>
   <string name="bluesky_notification_item_followed_you">volgt jou nu</string>
   <string name="bluesky_notification_item_favourited_your_status">favoriet</string>
   <string name="bluesky_notification_item_reblogged_your_status">gedeeld</string>
@@ -31,6 +32,7 @@
   <string name="bluesky_notification_item_quoted_your_status">geciteerd</string>
   <string name="bluesky_notification_item_starterpack_joined">Starterpack toegetreden</string>
   <string name="bluesky_notification_item_unKnown">Onbekend</string>
+  <string name="bluesky_notification_item_pin">Vastgezet</string>
   <string name="misskey_notification_item_mentioned_you">noemde je</string>
   <string name="misskey_notification_item_replied_to_you">heeft u geantwoord</string>
   <string name="misskey_notification_item_reposted_your_status">gepost</string>
@@ -93,6 +95,7 @@
   <string name="report">Rapporteren</string>
   <string name="retweet">Retweet</string>
   <string name="retweet_remove">Verwijder retweet</string>
+  <string name="share">Delen</string>
   <string name="user_report">Rapporteer %1$s</string>
   <string name="user_block">Blokkeren %1$s</string>
   <string name="user_unblock">Deblokkeer %1$s</string>

@@ -21,6 +21,7 @@
   <string name="mastodon_item_reblogged_status">ブーストしました</string>
   <string name="mastodon_item_show_more">詳細を表示</string>
   <string name="mastodon_item_show_less">表示を減らす</string>
+  <string name="mastodon_item_pinned">ピン留めされたトゥート</string>
   <string name="bluesky_notification_item_followed_you">あなたをフォローしました</string>
   <string name="bluesky_notification_item_favourited_your_status">お気に入り</string>
   <string name="bluesky_notification_item_reblogged_your_status">リブログ</string>
@@ -31,6 +32,7 @@
   <string name="bluesky_notification_item_quoted_your_status">クォート</string>
   <string name="bluesky_notification_item_starterpack_joined">Starterpackが参加しました</string>
   <string name="bluesky_notification_item_unKnown">Unknown</string>
+  <string name="bluesky_notification_item_pin">ピン留めしました</string>
   <string name="misskey_notification_item_mentioned_you">メンションされました</string>
   <string name="misskey_notification_item_replied_to_you">あなたに返信しました</string>
   <string name="misskey_notification_item_reposted_your_status">再投稿</string>
@@ -93,6 +95,7 @@
   <string name="report">レポート</string>
   <string name="retweet">リツイート</string>
   <string name="retweet_remove">リツイートを削除</string>
+  <string name="share">共有</string>
   <string name="user_report">%1$sを報告</string>
   <string name="user_block">%1$sをブロック</string>
   <string name="user_unblock">%1$sのブロックを解除</string>

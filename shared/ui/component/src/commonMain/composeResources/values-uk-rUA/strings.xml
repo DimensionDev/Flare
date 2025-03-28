@@ -19,6 +19,7 @@
   <string name="mastodon_item_reblogged_status">передмухнув</string>
   <string name="mastodon_item_show_more">Показати більше</string>
   <string name="mastodon_item_show_less">Показати менше</string>
+  <string name="mastodon_item_pinned">Закріплений дмух</string>
   <string name="bluesky_notification_item_followed_you">підписався на вас</string>
   <string name="bluesky_notification_item_favourited_your_status">улюблене</string>
   <string name="bluesky_notification_item_reblogged_your_status">репост</string>
@@ -29,6 +30,7 @@
   <string name="bluesky_notification_item_quoted_your_status">цитований</string>
   <string name="bluesky_notification_item_starterpack_joined">Початковий пакунок приєднаний</string>
   <string name="bluesky_notification_item_unKnown">Унґновн</string>
+  <string name="bluesky_notification_item_pin">Закріплено</string>
   <string name="misskey_notification_item_mentioned_you">згадав вас</string>
   <string name="misskey_notification_item_replied_to_you">відповів вам</string>
   <string name="misskey_notification_item_reposted_your_status">перерозміщено</string>
@@ -91,6 +93,7 @@
   <string name="report">Доповісти</string>
   <string name="retweet">Ретвіт</string>
   <string name="retweet_remove">Видалити ретвіт</string>
+  <string name="share">Поділитись</string>
   <string name="user_block">Блокувати %1$s</string>
   <string name="user_unblock">Розблокувати %1$s</string>
   <string name="user_mute">Вимкнути звук %1$s</string>

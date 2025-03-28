@@ -139,6 +139,7 @@
   <string name="media_menu_save">Salvează</string>
   <string name="media_save_success">Salvat în Descărcări</string>
   <string name="media_save_fail">Salvarea nu a reușit</string>
+  <string name="media_alt_text">Text alternativ</string>
   <string name="tab_settings_add">Adăugare</string>
   <string name="tab_settings_drag">Trage</string>
   <string name="tab_settings_edit">Editare</string>

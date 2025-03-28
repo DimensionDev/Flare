@@ -139,6 +139,7 @@
   <string name="media_menu_save">Speichern</string>
   <string name="media_save_success">In Downloads gespeichert</string>
   <string name="media_save_fail">Speichern fehlgeschlagen</string>
+  <string name="media_alt_text">Alt Text</string>
   <string name="tab_settings_add">Neu</string>
   <string name="tab_settings_drag">Ziehen</string>
   <string name="tab_settings_edit">Bearbeiten</string>

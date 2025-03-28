@@ -21,6 +21,7 @@
   <string name="mastodon_item_reblogged_status">einen toot gebootet</string>
   <string name="mastodon_item_show_more">Mehr anzeigen</string>
   <string name="mastodon_item_show_less">Weniger anzeigen</string>
+  <string name="mastodon_item_pinned">Angehängter toot</string>
   <string name="bluesky_notification_item_followed_you">folgte dir</string>
   <string name="bluesky_notification_item_favourited_your_status">favorisiert</string>
   <string name="bluesky_notification_item_reblogged_your_status">reblogged</string>
@@ -31,6 +32,7 @@
   <string name="bluesky_notification_item_quoted_your_status">zitiert</string>
   <string name="bluesky_notification_item_starterpack_joined">Starterpack beigetreten</string>
   <string name="bluesky_notification_item_unKnown">Unbekannt</string>
+  <string name="bluesky_notification_item_pin">Angeheftet</string>
   <string name="misskey_notification_item_mentioned_you">erwähnte dich</string>
   <string name="misskey_notification_item_replied_to_you">geantwortet</string>
   <string name="misskey_notification_item_reposted_your_status">repostet</string>
@@ -93,6 +95,7 @@
   <string name="report">Bericht</string>
   <string name="retweet">Retweet</string>
   <string name="retweet_remove">Retweet entfernen</string>
+  <string name="share">Teilen</string>
   <string name="user_report">Bericht %1$s</string>
   <string name="user_block">Blockieren %1$s</string>
   <string name="user_unblock">%1$s entsperren</string>

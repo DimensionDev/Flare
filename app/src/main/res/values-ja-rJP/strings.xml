@@ -141,6 +141,7 @@
   <string name="media_menu_save">保存</string>
   <string name="media_save_success">ダウンロードに保存しました</string>
   <string name="media_save_fail">保存に失敗しました</string>
+  <string name="media_alt_text">Altテキスト</string>
   <string name="tab_settings_add">追加</string>
   <string name="tab_settings_drag">ドラッグ</string>
   <string name="tab_settings_edit">編集</string>

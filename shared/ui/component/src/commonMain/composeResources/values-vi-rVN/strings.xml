@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="date_format_year_month_day">dd MMM yy</string>
-  <string name="date_format_full">dd MMM yy HH:mm</string>
+    <string name="date_format_year_month_day">dd MMM yy</string>
+    <string name="date_format_full">dd MMM yy HH:mm</string>
 </resources>

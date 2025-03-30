@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <string name="settings_about_description">Конечное поколение с открытым исходным кодом обеспечило децентрализованный клиент социальных сетей.</string>
-  <string name="settings_about_source_code">Исходный код</string>
-  <string name="settings_about_telegram">Телеграмма</string>
-  <string name="settings_about_telegram_description">Присоединяйтесь к нашей группе Telegram</string>
-  <string name="settings_about_line_description">Присоединиться к нашей группе Line</string>
-  <string name="settings_about_localization">Crowdin</string>
-  <string name="settings_about_localization_description">Помогите нам перевести сигнал</string>
+    <string name="settings_about_description">Конечное поколение с открытым исходным кодом обеспечило децентрализованный клиент социальных сетей.</string>
+    <string name="settings_about_source_code">Исходный код</string>
+    <string name="settings_about_telegram">Телеграмма</string>
+    <string name="settings_about_telegram_description">Присоединяйтесь к нашей группе Telegram</string>
+    <string name="settings_about_line_description">Присоединиться к нашей группе Line</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Помогите нам перевести сигнал</string>
 </resources>

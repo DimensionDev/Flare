@@ -12,45 +12,45 @@ struct UserComponent: View {
     @EnvironmentObject private var router: FlareRouter
 
     var body: some View {
-        HStack {
-            Button(
-                action: {
+        Button(
+            action: {
                     print("📱 头像按钮被点击: \(user.handle)")
-                    // 使用声明式导航替换KMP回调
-                    router.navigate(to: .profile(
-                        accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
-                        userKey: user.key
-                    ))
-                },
-                label: {
-                    UserAvatar(data: user.avatar, size: 44)
-                }
-            )
-            .buttonStyle(.borderless)
-            VStack(alignment: .leading, spacing: 2) {
-                Markdown(user.name.markdown)
-                    .lineLimit(1)
-                    .font(.headline)
-                    .markdownInlineImageProvider(.emoji)
+                // 使用声明式导航替换KMP回调
+                router.navigate(to: .profile(
+                    accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
+                    userKey: user.key
+                ))
+            },
+            label: {
                 HStack {
-                    Text(user.handle)
-                        .lineLimit(1)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                    // 设置 pawoo 用户的可见状态
-                    if topEndContent != nil {
-                        if let topEndContent {
-                            switch onEnum(of: topEndContent) {
-                            case let .visibility(data): StatusVisibilityComponent(visibility: data.visibility)
+                    UserAvatar(data: user.avatar, size: 44)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Markdown(user.name.markdown)
+                            .lineLimit(1)
+                            .font(.headline)
+                            .markdownInlineImageProvider(.emoji)
+                        HStack {
+                            Text(user.handle)
+                                .lineLimit(1)
+                                .font(.subheadline)
                                 .foregroundColor(.gray)
-                                .font(.caption)
+                            // 设置 pawoo 用户的可见状态
+                            if topEndContent != nil {
+                                if let topEndContent {
+                                    switch onEnum(of: topEndContent) {
+                                    case let .visibility(data): StatusVisibilityComponent(visibility: data.visibility)
+                                        .foregroundColor(.gray)
+                                        .font(.caption)
+                                    }
+                                }
                             }
                         }
                     }
+                    .padding(.bottom, 2)
                 }
             }
-            .padding(.bottom, 2)
-        }
+        )
+        .buttonStyle(.plain)
     }
 }
 

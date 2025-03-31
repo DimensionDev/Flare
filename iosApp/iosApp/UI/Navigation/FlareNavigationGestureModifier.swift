@@ -10,18 +10,18 @@ struct FlareNavigationGestureModifier: ViewModifier {
 
     @GestureState private var dragOffset: CGFloat = 0
     @State private var isTransitioning: Bool = false
-    @State private var lastUpdateProgress: CGFloat = 0  // 用于节流控制
+    @State private var lastUpdateProgress: CGFloat = 0 // 用于节流控制
 
     // 屏幕宽度阈值和速度阈值
     private let screenWidthThreshold: CGFloat = UIScreen.main.bounds.width * 0.25
     private let velocityThreshold: CGFloat = 800
-    
+
     // 菜单宽度 - 菜单占屏幕的80%
     private let menuWidth: CGFloat = UIScreen.main.bounds.width * 0.8
-    
+
     // 用于计算菜单进度的最大滑动距离
     private let maxDragForFullMenu: CGFloat = UIScreen.main.bounds.width * 0.6
-    
+
     // 菜单进度更新的最小变化阈值
     private let progressUpdateThreshold: CGFloat = 0.03
 
@@ -88,7 +88,7 @@ struct FlareNavigationGestureModifier: ViewModifier {
                 // 菜单状态下添加覆盖层，随着菜单打开程度逐渐变暗
                 .overlay(
                     Group {
-                        if router.navigationDepth == 0 && (dragOffset > 0 || router.appState.isMenuOpen) {
+                        if router.navigationDepth == 0, dragOffset > 0 || router.appState.isMenuOpen {
                             // 优化：限制最大不透明度，简化计算
                             Color.black.opacity(min(dragOffset / maxDragForFullMenu * 0.25, 0.25))
                                 .edgesIgnoringSafeArea(.all)
@@ -105,15 +105,15 @@ struct FlareNavigationGestureModifier: ViewModifier {
                     // 只处理从左向右的手势
                     if value.translation.width > 0, value.startLocation.x < 50 {
                         state = value.translation.width
-                        
+
                         // 如果在首页（无导航深度），实时更新菜单进度，但添加节流控制
                         if router.navigationDepth == 0 {
                             let newProgress = min(value.translation.width / maxDragForFullMenu, 1.0)
-                            
+
                             // 节流控制：只有当进度变化超过阈值才更新
                             if abs(newProgress - lastUpdateProgress) > progressUpdateThreshold {
                                 lastUpdateProgress = newProgress
-                                
+
                                 // 更新菜单进度，使用较短的动画时间降低渲染负担
                                 withAnimation(.linear(duration: 0.08)) {
                                     router.appState.menuProgress = newProgress
@@ -131,11 +131,11 @@ struct FlareNavigationGestureModifier: ViewModifier {
                 .onEnded { value in
                     // 重置节流控制变量
                     lastUpdateProgress = 0
-                    
+
                     // 手势处理逻辑
                     let velocity = value.predictedEndLocation.x - value.location.x
                     let progress = value.translation.width / UIScreen.main.bounds.width
-                    
+
                     // 判断是否应该完成过渡（基于进度或速度）- 降低阈值以提高响应性
                     let shouldComplete = progress > 0.25 || velocity > velocityThreshold
 
@@ -219,7 +219,7 @@ struct FlareNavigationGestureModifier: ViewModifier {
     }
 
     /// 处理导航手势结束
-    private func handleNavigationGestureEnd(_ value: DragGesture.Value) {
+    private func handleNavigationGestureEnd(_: DragGesture.Value) {
         os_log("[FlareNavigationGestureModifier] Handling navigation gesture end, router: %{public}@, depth: %{public}d",
                log: .default, type: .debug,
                String(describing: ObjectIdentifier(router)),

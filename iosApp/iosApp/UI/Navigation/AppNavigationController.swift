@@ -1,7 +1,8 @@
 import SwiftUI
 import UIKit
+
 //
-//class AppNavigationController: UINavigationController, ObservableObject {
+// class AppNavigationController: UINavigationController, ObservableObject {
 //    // MARK: - Properties
 //
 //    private var interactiveTransition: UIPercentDrivenInteractiveTransition?
@@ -99,11 +100,11 @@ import UIKit
 ////    func presentModally(route: AppRoute) {
 ////        AppNavigation.shared.presentModally(route, source: self)
 ////    }
-//}
+// }
 //
 //// MARK: - UIGestureRecognizerDelegate
 //
-//extension AppNavigationController: UIGestureRecognizerDelegate {
+// extension AppNavigationController: UIGestureRecognizerDelegate {
 //    // 控制手势何时可以开始
 //    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
 //        guard let panGesture = gestureRecognizer as? UIPanGestureRecognizer else { return false }
@@ -116,11 +117,11 @@ import UIKit
 //        // 确保有可返回的控制器且不在转场过程中
 //        return viewControllers.count > 1 && !isTransitioning && isHorizontalPan && isRightDirection
 //    }
-//}
+// }
 //
 //// MARK: - UINavigationControllerDelegate
 //
-//extension AppNavigationController: UINavigationControllerDelegate {
+// extension AppNavigationController: UINavigationControllerDelegate {
 //    func navigationController(_: UINavigationController,
 //                              animationControllerFor operation: UINavigationController.Operation,
 //                              from _: UIViewController,
@@ -134,11 +135,11 @@ import UIKit
 //    {
 //        interactiveTransition
 //    }
-//}
+// }
 //
 //// MARK: - 自定义导航动画
 //
-//private class CustomNavigationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
+// private class CustomNavigationAnimator: NSObject, UIViewControllerAnimatedTransitioning {
 //    private let operation: UINavigationController.Operation
 //
 //    init(operation: UINavigationController.Operation) {
@@ -198,4 +199,4 @@ import UIKit
 //            transitionContext.completeTransition(success)
 //        }
 //    }
-//}
+// }

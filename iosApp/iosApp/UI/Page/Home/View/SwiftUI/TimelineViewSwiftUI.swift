@@ -6,7 +6,6 @@ struct TimelineViewSwiftUI: View {
     @ObservedObject var store: AppBarTabSettingStore
     @State private var presenter: TimelinePresenter?
     @Binding var scrollPositionID: String?
- 
 
     var body: some View {
         ScrollView {
@@ -60,7 +59,7 @@ struct TimelineViewSwiftUI: View {
             }
         }
         // 添加两个手势：菜单手势和标签导航手势
-         .scrollPosition(id: $scrollPositionID)
+        .scrollPosition(id: $scrollPositionID)
         .refreshable {
             if let presenter,
                let timelineState = presenter.models.value as? TimelineState

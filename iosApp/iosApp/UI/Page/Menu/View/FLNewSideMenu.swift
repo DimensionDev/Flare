@@ -3,7 +3,7 @@ import SwiftUI
 struct FLNewSideMenu<Menu: View, Content: View>: View {
     @Binding var isOpen: Bool
     @EnvironmentObject var appState: FlareAppState
-    
+
     let menu: Menu
     let content: Content
 

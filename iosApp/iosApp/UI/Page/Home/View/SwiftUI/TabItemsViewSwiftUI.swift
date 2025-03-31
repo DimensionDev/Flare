@@ -51,13 +51,123 @@ struct TabItemsViewSwiftUI: View {
     private func tabItemView(for item: FLTabItem) -> some View {
         switch item.metaData.title {
         case let .text(title):
-            Text(title)
-                .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
-                .fontWeight(selection == item.key ? .medium : .regular)
+            if containsEmoji(title) {
+                let components = splitTextAndEmoji(title)
+                HStack(spacing: 2) {
+                    ForEach(components.indices, id: \.self) { index in
+                        let component = components[index]
+                        if component.isEmoji {
+                            EmojiText(
+                                text: component.text,
+                                color: selection == item.key ? Color.textPrimary : Color.textSecondary
+                            )
+                        } else {
+                            Text(component.text)
+                                .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
+                                .fontWeight(selection == item.key ? .medium : .regular)
+                        }
+                    }
+                }
+            } else {
+                Text(title)
+                    .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
+                    .fontWeight(selection == item.key ? .medium : .regular)
+            }
         case let .localized(key):
-            Text(NSLocalizedString(key, comment: ""))
-                .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
-                .fontWeight(selection == item.key ? .medium : .regular)
+            let title = NSLocalizedString(key, comment: "")
+            if containsEmoji(title) {
+                let components = splitTextAndEmoji(title)
+                HStack(spacing: 2) {
+                    ForEach(components.indices, id: \.self) { index in
+                        let component = components[index]
+                        if component.isEmoji {
+                            EmojiText(
+                                text: component.text,
+                                color: selection == item.key ? Color.textPrimary : Color.textSecondary
+                            )
+                        } else {
+                            Text(component.text)
+                                .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
+                                .fontWeight(selection == item.key ? .medium : .regular)
+                        }
+                    }
+                }
+            } else {
+                Text(title)
+                    .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
+                    .fontWeight(selection == item.key ? .medium : .regular)
+            }
         }
+    }
+    
+    private func containsEmoji(_ text: String) -> Bool {
+        for scalar in text.unicodeScalars {
+            if scalar.properties.isEmoji {
+                return true
+            }
+        }
+        return false
+    }
+    
+    private func splitTextAndEmoji(_ text: String) -> [TextComponent] {
+        var components: [TextComponent] = []
+        var currentComponent = ""
+        var currentIsEmoji = false
+        
+        for character in text {
+            let isEmoji = character.unicodeScalars.first?.properties.isEmoji ?? false
+            
+            if currentComponent.isEmpty {
+                currentComponent.append(character)
+                currentIsEmoji = isEmoji
+            } else if isEmoji == currentIsEmoji {
+                currentComponent.append(character)
+            } else {
+                components.append(TextComponent(text: currentComponent, isEmoji: currentIsEmoji))
+                currentComponent = String(character)
+                currentIsEmoji = isEmoji
+            }
+        }
+        
+        if !currentComponent.isEmpty {
+            components.append(TextComponent(text: currentComponent, isEmoji: currentIsEmoji))
+        }
+        
+        return components
+    }
+}
+
+struct TextComponent {
+    let text: String
+    let isEmoji: Bool
+}
+
+extension UnicodeScalar {
+    var isEmoji: Bool {
+        properties.isEmoji
+    }
+}
+
+extension Character {
+    var isEmoji: Bool {
+        for scalar in unicodeScalars {
+            if scalar.isEmoji {
+                return true
+            }
+        }
+        return false
+    }
+}
+
+
+struct EmojiText: View {
+    let text: String
+    let color: Color
+    
+    var body: some View {
+        Text(text)
+            .font(.system(size: 14)) // emoji使用较小字体
+            .foregroundColor(color)
+            .scaleEffect(0.85) // 再稍微缩小一点
     }
 }

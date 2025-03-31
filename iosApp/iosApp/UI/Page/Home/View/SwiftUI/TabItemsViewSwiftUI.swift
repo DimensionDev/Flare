@@ -159,7 +159,7 @@ extension Character {
     }
 }
 
- 
+
 struct EmojiText: View {
     let text: String
     let color: Color

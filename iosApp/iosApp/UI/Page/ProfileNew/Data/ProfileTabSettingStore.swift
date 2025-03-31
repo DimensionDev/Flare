@@ -41,6 +41,11 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
         if let user = UserManager.shared.getCurrentUser() {
             initializeWithUser(user, userKey: userKey)
             return
+        } else if let userKey = userKey {
+            // 如果是未登录状态但查看他人资料，创建临时游客用户
+            os_log("[📔][ProfileTabSettingStore]未登录状态查看用户：userKey=%{public}@", log: .default, type: .debug, userKey.description)
+             initializeWithUser( createSampleUser(), userKey: userKey)
+            return
         }
 
         // 如果没有，则等待用户更新通知
@@ -135,10 +140,10 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
 
     // - Private Methods
     private func updateTabs(user: UiUserV2, userKey: MicroBlogKey?) {
-        // 根据平台类型获取对应的标签
-        var tabs = FLTabSettings.defaultThree(user: user, userKey: userKey)
-
-        // 添加 media tab 到倒数第二的位置
+        // 检查是否是未登录模式
+        let isGuestMode = user.key is AccountTypeGuest || UserManager.shared.getCurrentUser() == nil
+        
+        // 创建media标签
         let mediaTab = FLProfileMediaTabItem(
             metaData: FLTabMetaData(
                 title: .localized(.profileMedia),
@@ -147,15 +152,23 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
             account: AccountTypeSpecific(accountKey: user.key),
             userKey: userKey
         )
-
-        // 插入到倒数第二的位置
-        if tabs.isEmpty {
-            tabs.append(mediaTab)
+        
+        // 如果是未登录用户查看别人的资料，只显示media标签
+        if isGuestMode && userKey != nil {
+            availableTabs = [mediaTab]
         } else {
-            tabs.insert(mediaTab, at: max(0, tabs.count - 1))
+            // 已登录用户显示所有标签
+            var tabs = FLTabSettings.defaultThree(user: user, userKey: userKey)
+            
+            // 插入到倒数第二的位置
+            if tabs.isEmpty {
+                tabs.append(mediaTab)
+            } else {
+                tabs.insert(mediaTab, at: max(0, tabs.count - 1))
+            }
+            
+            availableTabs = tabs
         }
-
-        availableTabs = tabs
 
         // 如果没有选中的标签，选中第一个
         if selectedTabKey == nil, let firstTab = availableTabs.first {

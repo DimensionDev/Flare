@@ -4,6 +4,7 @@ import SwiftUI
 
 class FlareAppState: ObservableObject {
     @Published var isMenuOpen: Bool = false
+    @Published var menuProgress: CGFloat = 0.0 // 0表示完全关闭，1表示完全打开
 
     @Published var selectedTab: Int = 0
     @Published var previousTab: Int = 0
@@ -21,6 +22,7 @@ class FlareAppState: ObservableObject {
     func toggleMenu() {
         withAnimation(.spring()) {
             isMenuOpen.toggle()
+            menuProgress = isMenuOpen ? 1.0 : 0.0
         }
     }
 
@@ -28,6 +30,7 @@ class FlareAppState: ObservableObject {
         if isMenuOpen {
             withAnimation(.spring()) {
                 isMenuOpen = false
+                menuProgress = 0.0
             }
         }
     }
@@ -47,6 +50,9 @@ class FlareAppState: ObservableObject {
             .sink { [weak self] notification in
                 if let isOpen = notification.object as? Bool {
                     self?.isMenuOpen = isOpen
+                    withAnimation(.spring()) {
+                        self?.menuProgress = isOpen ? 1.0 : 0.0
+                    }
                 }
             }
             .store(in: &cancellables)
@@ -56,6 +62,7 @@ class FlareAppState: ObservableObject {
             .sink { [weak self] _ in
                 withAnimation(.spring()) {
                     self?.isMenuOpen = true
+                    self?.menuProgress = 1.0
                 }
             }
             .store(in: &cancellables)

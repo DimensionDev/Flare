@@ -2,13 +2,15 @@ import SwiftUI
 
 struct FLNewSideMenu<Menu: View, Content: View>: View {
     @Binding var isOpen: Bool
+    @EnvironmentObject var appState: FlareAppState
+    
     let menu: Menu
     let content: Content
 
     private let menuWidth: CGFloat = UIScreen.main.bounds.width * 0.7
-    private let animationDuration: Double = 0.3
-    private let springDampingRatio: Double = 0.8
-    private let springVelocity: Double = 0.5
+    private let animationDuration: Double = 0.25
+    private let springDampingRatio: Double = 0.7
+    private let springVelocity: Double = 0.2
 
     init(isOpen: Binding<Bool>, menu: Menu, content: Content) {
         _isOpen = isOpen
@@ -20,19 +22,10 @@ struct FLNewSideMenu<Menu: View, Content: View>: View {
         ZStack(alignment: .leading) {
             content
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .offset(x: isOpen ? menuWidth : 0)
-                .animation(
-                    .spring(
-                        response: animationDuration,
-                        dampingFraction: springDampingRatio,
-                        blendDuration: springVelocity
-                    ),
-                    value: isOpen
-                )
 
-            if isOpen {
+            if appState.menuProgress > 0.01 {
                 Color.black
-                    .opacity(0.3)
+                    .opacity(min(0.3 * appState.menuProgress, 0.3))
                     .ignoresSafeArea()
                     .onTapGesture {
                         withAnimation(
@@ -43,9 +36,10 @@ struct FLNewSideMenu<Menu: View, Content: View>: View {
                             )
                         ) {
                             isOpen = false
+                            appState.menuProgress = 0
                         }
                     }
-                    .transition(.opacity)
+                    .animation(nil, value: appState.menuProgress)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .zIndex(1)
             }
@@ -53,19 +47,16 @@ struct FLNewSideMenu<Menu: View, Content: View>: View {
             menu
                 .frame(width: menuWidth)
                 .frame(maxHeight: .infinity)
-                .offset(x: isOpen ? 0 : -menuWidth)
-                .animation(
-                    .spring(
-                        response: animationDuration,
-                        dampingFraction: springDampingRatio,
-                        blendDuration: springVelocity
-                    ),
-                    value: isOpen
+                .mask(
+                    Rectangle()
+                        .offset(x: appState.menuProgress * menuWidth - menuWidth)
                 )
+                .offset(x: -menuWidth * (1 - appState.menuProgress))
+                .animation(nil, value: appState.menuProgress)
                 .clipped()
                 .shadow(
-                    color: Color.black.opacity(isOpen ? 0.2 : 0),
-                    radius: 10,
+                    color: appState.menuProgress > 0.3 ? Color.black.opacity(0.2) : .clear,
+                    radius: 8,
                     x: 5,
                     y: 0
                 )
@@ -74,5 +65,16 @@ struct FLNewSideMenu<Menu: View, Content: View>: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(UIColor.systemBackground))
         .ignoresSafeArea()
+        .onChange(of: isOpen) { newValue in
+            if (appState.menuProgress < 0.1 && newValue) || (appState.menuProgress > 0.9 && !newValue) {
+                withAnimation(.spring(
+                    response: animationDuration,
+                    dampingFraction: springDampingRatio,
+                    blendDuration: springVelocity
+                )) {
+                    appState.menuProgress = newValue ? 1.0 : 0.0
+                }
+            }
+        }
     }
 }

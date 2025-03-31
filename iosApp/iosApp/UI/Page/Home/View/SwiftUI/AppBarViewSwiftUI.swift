@@ -5,6 +5,7 @@ struct AppBarViewSwiftUI: View {
     @Binding var selectedTab: String
     let tabs: [FLTabItem]
     let user: UiUserV2?
+    let accountType: AccountType
     let onAvatarTap: () -> Void
     let onSettingsTap: () -> Void
 
@@ -31,13 +32,20 @@ struct AppBarViewSwiftUI: View {
                 items: tabs
             )
 
-            // 设置按钮
-            Button(action: onSettingsTap) {
-                Image(systemName: "line.3.horizontal")
-                    .foregroundColor(.primary)
+            // 设置按钮 - 仅在 登录模式 下显示
+            if !(accountType is AccountTypeGuest) {
+                Button(action: onSettingsTap) {
+                    Image(systemName: "line.3.horizontal")
+                        .foregroundColor(.primary)
+                }
+                .frame(width: 44)
+                .padding(.trailing, 8)
+            } else {
+                
+                // Spacer()
+                //     .frame(width: 44)
+                //     .padding(.trailing, 8)
             }
-            .frame(width: 44)
-            .padding(.trailing, 8)
         }
         .frame(height: 44)
         .background(Color(.systemBackground).opacity(0.95))

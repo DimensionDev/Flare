@@ -14,6 +14,7 @@ struct HomeTabScreenSwiftUI: View {
                 selectedTab: $selectedTabKey,
                 tabs: tabStore.availableAppBarTabsItems,
                 user: tabStore.currentUser,
+                accountType: accountType,
                 onAvatarTap: {
                     NotificationCenter.default.post(name: NSNotification.Name("flShowNewMenu"), object: nil)
                 },

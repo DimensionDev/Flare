@@ -36,7 +36,7 @@ struct AppBarViewSwiftUI: View {
             if !(accountType is AccountTypeGuest) {
                 Button(action: onSettingsTap) {
                     Image(systemName: "line.3.horizontal")
-                        .foregroundColor(.primary)
+                        .foregroundColor(.textSecondary)
                 }
                 .frame(width: 44)
                 .padding(.trailing, 8)

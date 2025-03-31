@@ -7,27 +7,6 @@ struct TimelineViewSwiftUI: View {
     @State private var presenter: TimelinePresenter?
     @Binding var scrollPositionID: String?
 
-    var edgeSwipeGesture: some Gesture {
-        DragGesture(minimumDistance: 20)
-            .onEnded { gesture in
-
-                // left --- right
-                guard gesture.translation.width > 80 else { return }
-
-                // start point is left edge
-                guard gesture.startLocation.x < 30 else { return }
-
-                // vertical constraint
-                guard abs(gesture.translation.height) < 80 else { return }
-
-                // first tab
-                guard tab.key == store.availableAppBarTabsItems.first?.key else { return }
-
-                // trigger left menu
-                NotificationCenter.default.post(name: NSNotification.Name("flShowNewMenu"), object: nil)
-            }
-    }
-
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
@@ -79,8 +58,7 @@ struct TimelineViewSwiftUI: View {
                 }
             }
         }
-
-        .simultaneousGesture(edgeSwipeGesture, including: .gesture)
+        // 添加两个手势：菜单手势和标签导航手势
         .scrollPosition(id: $scrollPositionID)
         .refreshable {
             if let presenter,

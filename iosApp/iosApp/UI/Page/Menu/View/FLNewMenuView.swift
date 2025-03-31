@@ -27,34 +27,17 @@ struct FLNewMenuView: View {
                 .padding(.horizontal, 20)
 
             VStack(spacing: 16) {
-                Button(action: {
-                    isOpen = false
-
-                    router.navigate(to: .lists(accountType: accountType))
-                }) {
-                    HStack {
-                        Image(systemName: "list.bullet")
-                            .frame(width: 28, height: 28)
-                        Text("List")
-                            .font(.body)
-                        Spacer()
-                    }
-                    .padding(.vertical, 12)
-                    .padding(.horizontal, 10)
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(MenuButtonStyle())
-
-                if isPlatformBluesky() {
+                // 仅在登录状态下显示List按钮
+                if !(accountType is AccountTypeGuest) {
                     Button(action: {
                         isOpen = false
 
-                        router.navigate(to: .feeds(accountType: accountType))
+                        router.navigate(to: .lists(accountType: accountType))
                     }) {
                         HStack {
-                            Image(systemName: "number")
+                            Image(systemName: "list.bullet")
                                 .frame(width: 28, height: 28)
-                            Text("Feeds")
+                            Text("List")
                                 .font(.body)
                             Spacer()
                         }
@@ -63,6 +46,27 @@ struct FLNewMenuView: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(MenuButtonStyle())
+
+                    // 仅在登录状态且平台为Bluesky时显示Feeds按钮
+                    if isPlatformBluesky() {
+                        Button(action: {
+                            isOpen = false
+
+                            router.navigate(to: .feeds(accountType: accountType))
+                        }) {
+                            HStack {
+                                Image(systemName: "number")
+                                    .frame(width: 28, height: 28)
+                                Text("Feeds")
+                                    .font(.body)
+                                Spacer()
+                            }
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 10)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(MenuButtonStyle())
+                    }
                 }
             }
             .padding(.horizontal, 20)

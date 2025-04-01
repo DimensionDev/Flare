@@ -28,6 +28,8 @@ struct SettingsScreen: View {
                         Section {
                             Label("settings_appearance_generic", systemImage: "paintpalette")
                                 .tag(SettingsDestination.appearance)
+                            Label("Other", systemImage: "gear")
+                                .tag(SettingsDestination.other)
                             Label("settings_storage_title", systemImage: "externaldrive")
                                 .tag(SettingsDestination.storage)
                             Label("settings_about_subtitle", systemImage: "exclamationmark.circle")
@@ -42,6 +44,8 @@ struct SettingsScreen: View {
                             AccountsScreen()
                         case .appearance:
                             AppearanceScreen()
+                        case .other:
+                            OtherSettingsScreen()
                         case .storage:
                             StorageScreen()
                         case .about:
@@ -74,6 +78,7 @@ struct ListItem: View {
 public enum SettingsDestination: String, CaseIterable, Identifiable {
     case account
     case appearance
+    case other
     case storage
     case about
     public var id: String {

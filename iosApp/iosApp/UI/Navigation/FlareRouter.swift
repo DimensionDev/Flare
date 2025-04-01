@@ -1,11 +1,14 @@
 import Combine
 import os.log
+import SafariServices
 import shared
 import SwiftUI
 import UIKit
 
 class FlareRouter: ObservableObject {
     public var appState: FlareAppState
+
+    @Environment(\.appSettings) private var appSettings
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -222,8 +225,8 @@ class FlareRouter: ObservableObject {
                    log: .default, type: .debug, navigationDepth)
         }
     }
-
-    /// 处理外部URL链接
+    
+    /// 处理所有URL请求的统一入口
     @discardableResult
     func handleDeepLink(_ url: URL) -> Bool {
         // 使用KMP提供的AppDeepLinkHelper解析URL
@@ -233,17 +236,32 @@ class FlareRouter: ObservableObject {
             navigate(to: destination)
             return true
         }
-
-        let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: true)
-        let path = url.path
-        let queryItems = urlComponents?.queryItems ?? []
-
-        var params: [String: String] = [:]
-        for item in queryItems {
-            params[item.name] = item.value
+//        let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: true)
+//                let path = url.path
+//                let queryItems = urlComponents?.queryItems ?? []
+//
+//                var params: [String: String] = [:]
+//                for item in queryItems {
+//                    params[item.name] = item.value
+//                }
+//
+        // 2. 处理外部URL
+        // 检查是否是http/https链接
+        guard let scheme = url.scheme?.lowercased(),
+              ["http", "https"].contains(scheme) else {
+            return false
         }
 
-        return false
+        // 根据设置决定使用哪种浏览器打开
+        if appSettings.otherSettings.preferredBrowser == .inAppSafari {
+            Task { @MainActor in
+                _ = await SafariManager.shared.open(url)
+            }
+            return true
+        } else {
+            UIApplication.shared.open(url)
+            return true
+        }
     }
 
     private func convertRouteToDestination(_ route: AppleRoute) -> FlareDestination {

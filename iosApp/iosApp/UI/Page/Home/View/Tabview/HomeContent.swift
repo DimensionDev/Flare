@@ -4,29 +4,12 @@ import os.log
 import shared
 import SwiftUI
 
-enum HomeTabs: Int, Equatable, Hashable, Identifiable {
-    var id: Self { self }
-    case timeline = 0
-    case notification = 1
-    case compose = 2
-    case discover = 3
-    case profile = 4
 
-    var customizationID: String {
-        switch self {
-        case .timeline: "home_timeline"
-        case .notification: "home_notification"
-        case .compose: "home_compose"
-        case .discover: "home_discover"
-        case .profile: "home_profile"
-        }
-    }
-}
 
 struct HomeContent: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @AppStorage("homeSidebarCustomizations") var tabViewCustomization: TabViewCustomization
-    @State private var selectedTab: HomeTabs = .timeline
+    @State private var selectedTab: FlareHomeTabs = .timeline
     let accountType: AccountType
     @State var showSettings = false
     @State var showLogin = false
@@ -61,7 +44,7 @@ struct HomeContent: View {
                             .foregroundColor(.init(.accentColor))
                     }
                 }
-                .customizationID(HomeTabs.timeline.customizationID)
+                .customizationID(FlareHomeTabs.timeline.customizationID)
 
                 // 通知 Tab
                 if !(accountType is AccountTypeGuest) {
@@ -78,7 +61,7 @@ struct HomeContent: View {
                                 .foregroundColor(.init(.accentColor))
                         }
                     }
-                    .customizationID(HomeTabs.notification.customizationID)
+                    .customizationID(FlareHomeTabs.notification.customizationID)
                 }
 
                 // 发布 Tab
@@ -104,7 +87,7 @@ struct HomeContent: View {
                                 .foregroundColor(.init(.accentColor))
                         }
                     }
-                    .customizationID(HomeTabs.compose.customizationID)
+                    .customizationID(FlareHomeTabs.compose.customizationID)
                 }
 
                 // 发现 Tab
@@ -126,7 +109,7 @@ struct HomeContent: View {
                             .foregroundColor(.init(.accentColor))
                     }
                 }
-                .customizationID(HomeTabs.discover.customizationID)
+                .customizationID(FlareHomeTabs.discover.customizationID)
 
                 // 个人资料 Tab
                 if !(accountType is AccountTypeGuest) {
@@ -149,7 +132,7 @@ struct HomeContent: View {
                                 .foregroundColor(.init(.accentColor))
                         }
                     }
-                    .customizationID(HomeTabs.profile.customizationID)
+                    .customizationID(FlareHomeTabs.profile.customizationID)
                 }
             }
             .tabViewStyle(.automatic)

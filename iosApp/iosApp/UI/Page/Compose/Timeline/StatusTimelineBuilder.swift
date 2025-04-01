@@ -31,7 +31,6 @@ struct StatusTimelineComponent: View {
                     } else {
                         StatusPlaceHolder()
                     }
- 
                 }
                 .onAppear {
                     success.get(index: index)

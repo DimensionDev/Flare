@@ -14,7 +14,7 @@ struct UserComponent: View {
     var body: some View {
         Button(
             action: {
-                    print("📱 头像按钮被点击: \(user.handle)")
+                print("📱 头像按钮被点击: \(user.handle)")
                 // 使用声明式导航替换KMP回调
                 router.navigate(to: .profile(
                     accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),

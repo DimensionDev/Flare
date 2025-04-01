@@ -63,6 +63,7 @@ struct TabItemsViewSwiftUI: View {
                             )
                         } else {
                             Text(component.text)
+                                .font(.system(size: 14))
                                 .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
                                 .fontWeight(selection == item.key ? .medium : .regular)
                         }
@@ -70,6 +71,7 @@ struct TabItemsViewSwiftUI: View {
                 }
             } else {
                 Text(title)
+                    .font(.system(size: 14))
                     .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
                     .fontWeight(selection == item.key ? .medium : .regular)
             }
@@ -87,6 +89,7 @@ struct TabItemsViewSwiftUI: View {
                             )
                         } else {
                             Text(component.text)
+                                .font(.system(size: 14))
                                 .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
                                 .fontWeight(selection == item.key ? .medium : .regular)
                         }
@@ -94,6 +97,7 @@ struct TabItemsViewSwiftUI: View {
                 }
             } else {
                 Text(title)
+                    .font(.system(size: 14))
                     .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
                     .fontWeight(selection == item.key ? .medium : .regular)
             }
@@ -166,7 +170,7 @@ struct EmojiText: View {
     
     var body: some View {
         Text(text)
-            .font(.system(size: 14)) // emoji使用较小字体
+            .font(.system(size: 12)) // emoji使用较小字体
             .foregroundColor(color)
             .scaleEffect(0.85) // 再稍微缩小一点
     }

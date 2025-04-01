@@ -43,7 +43,7 @@ class FlareRouter: ObservableObject {
     @Published var notificationNavigationPath = NavigationPath()
     @Published var profileNavigationPath = NavigationPath()
 
-    @Published var activeTab: HomeTabs = .timeline
+    @Published var activeTab: FlareHomeTabs = .timeline
 
     var navigationPath: NavigationPath {
         get { currentNavigationPath }
@@ -70,7 +70,7 @@ class FlareRouter: ObservableObject {
         }
     }
 
-    func navigationPathFor(_ tab: HomeTabs) -> Binding<NavigationPath> {
+    func navigationPathFor(_ tab: FlareHomeTabs) -> Binding<NavigationPath> {
         switch tab {
         case .timeline: Binding(get: { self.timelineNavigationPath }, set: { self.timelineNavigationPath = $0 })
         case .discover: Binding(get: { self.discoverNavigationPath }, set: { self.discoverNavigationPath = $0 })

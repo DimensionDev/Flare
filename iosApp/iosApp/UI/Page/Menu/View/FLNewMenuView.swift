@@ -1,6 +1,9 @@
 import shared
 import SwiftUI
 import UIKit
+import Foundation
+import os.log
+
 
 struct FLNewMenuView: View {
     @Binding var isOpen: Bool
@@ -48,7 +51,7 @@ struct FLNewMenuView: View {
                     .buttonStyle(MenuButtonStyle())
 
                     // 仅在登录状态且平台为Bluesky时显示Feeds按钮
-                    if isPlatformBluesky() {
+                    if user?.isBluesky == true {
                         Button(action: {
                             isOpen = false
 
@@ -58,6 +61,46 @@ struct FLNewMenuView: View {
                                 Image(systemName: "number")
                                     .frame(width: 28, height: 28)
                                 Text("Feeds")
+                                    .font(.body)
+                                Spacer()
+                            }
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 10)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(MenuButtonStyle())
+                    }
+
+                    // Message
+                    Button(action: {
+                        isOpen = false
+
+                        router.navigate(to: .messages(accountType: accountType))
+                    }) {
+                        HStack {
+                            Image(systemName: "bubble.left.and.bubble.right")
+                                .frame(width: 28, height: 28)
+                            Text("Message")
+                                .font(.body)
+                            Spacer()
+                        }
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 10)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(MenuButtonStyle())
+
+                    // X Spaces
+                    if user?.isXQt == true {
+                        Button(action: {
+                            isOpen = false
+
+                            router.navigate(to: .spaces(accountType: accountType))
+                        }) {
+                            HStack {
+                                Image(systemName: "person.3")
+                                    .frame(width: 28, height: 28)
+                                Text("Spaces")
                                     .font(.body)
                                 Spacer()
                             }
@@ -186,13 +229,6 @@ struct FLNewMenuView: View {
             .background(Color(UIColor.secondarySystemBackground))
             .cornerRadius(10)
         }
-    }
-
-    // 检查当前平台是否为Misskey
-    private func isPlatformBluesky() -> Bool {
-        guard let user else { return false }
-        let platformTypeString = String(describing: user.platformType).lowercased()
-        return platformTypeString == "bluesky"
     }
 }
 

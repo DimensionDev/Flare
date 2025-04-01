@@ -5,13 +5,13 @@ import SwiftUI
 struct FlareTabItem<Content: View>: View {
     @ObservedObject var router: FlareRouter
 
-    let tabType: HomeTabs
+    let tabType: FlareHomeTabs
 
     let content: (FlareRouter) -> Content
 
     @EnvironmentObject private var appState: FlareAppState
 
-    init(router: FlareRouter, tabType: HomeTabs, @ViewBuilder content: @escaping (FlareRouter) -> Content) {
+    init(router: FlareRouter, tabType: FlareHomeTabs, @ViewBuilder content: @escaping (FlareRouter) -> Content) {
         self.router = router
         self.tabType = tabType
         self.content = content

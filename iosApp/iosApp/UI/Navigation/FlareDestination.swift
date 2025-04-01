@@ -18,6 +18,9 @@ enum FlareDestination: Identifiable, Hashable {
     case feedDetail(accountType: AccountType, list: UiList, defaultUser: UiUserV2?)
     case listDetail(accountType: AccountType, list: UiList, defaultUser: UiUserV2?)
 
+    case spaces(accountType: AccountType)
+    case messages(accountType: AccountType)
+
     case blueskyReportStatus(accountType: AccountType, statusKey: MicroBlogKey)
     case mastodonReportStatus(accountType: AccountType, statusKey: MicroBlogKey, userKey: MicroBlogKey)
     case misskeyReportStatus(accountType: AccountType, statusKey: MicroBlogKey, userKey: MicroBlogKey)
@@ -79,6 +82,10 @@ enum FlareDestination: Identifiable, Hashable {
             "feedDetail_\(String(describing: accountType))_\(list.id)"
         case let .listDetail(accountType, list, _):
             "listDetail_\(String(describing: accountType))_\(list.id)"
+        case let .spaces(accountType):
+            "spaces_\(String(describing: accountType))"
+        case let .messages(accountType):
+            "messages_\(String(describing: accountType))"
         }
     }
 

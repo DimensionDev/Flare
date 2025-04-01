@@ -6,4 +6,6 @@ extension Notification.Name {
     static let showTabSettings = Notification.Name("ShowTabSettings")
     static let showLogin = Notification.Name("ShowLogin")
     static let flMenuStateDidChange = Notification.Name("FLMenuStateDidChange")
+    static let userDidUpdate = Notification.Name("userDidUpdate")
 }
+ 

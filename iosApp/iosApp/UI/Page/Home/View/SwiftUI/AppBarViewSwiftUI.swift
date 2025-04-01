@@ -41,7 +41,6 @@ struct AppBarViewSwiftUI: View {
                 .frame(width: 44)
                 .padding(.trailing, 8)
             } else {
-                
                 // Spacer()
                 //     .frame(width: 44)
                 //     .padding(.trailing, 8)

@@ -49,6 +49,5 @@ class UserManager {
 }
 
 // 添加通知名称
-extension Notification.Name {
-    static let userDidUpdate = Notification.Name("userDidUpdate")
-}
+
+ 

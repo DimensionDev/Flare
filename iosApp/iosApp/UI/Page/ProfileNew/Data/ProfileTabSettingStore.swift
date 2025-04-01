@@ -41,10 +41,10 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
         if let user = UserManager.shared.getCurrentUser() {
             initializeWithUser(user, userKey: userKey)
             return
-        } else if let userKey = userKey {
+        } else if let userKey {
             // 如果是未登录状态但查看他人资料，创建临时游客用户
             os_log("[📔][ProfileTabSettingStore]未登录状态查看用户：userKey=%{public}@", log: .default, type: .debug, userKey.description)
-             initializeWithUser( createSampleUser(), userKey: userKey)
+            initializeWithUser(createSampleUser(), userKey: userKey)
             return
         }
 
@@ -142,7 +142,7 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
     private func updateTabs(user: UiUserV2, userKey: MicroBlogKey?) {
         // 检查是否是未登录模式
         let isGuestMode = user.key is AccountTypeGuest || UserManager.shared.getCurrentUser() == nil
-        
+
         // 创建media标签
         let mediaTab = FLProfileMediaTabItem(
             metaData: FLTabMetaData(
@@ -152,21 +152,21 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
             account: AccountTypeSpecific(accountKey: user.key),
             userKey: userKey
         )
-        
+
         // 如果是未登录用户查看别人的资料，只显示media标签
-        if isGuestMode && userKey != nil {
+        if isGuestMode, userKey != nil {
             availableTabs = [mediaTab]
         } else {
             // 已登录用户显示所有标签
             var tabs = FLTabSettings.defaultThree(user: user, userKey: userKey)
-            
+
             // 插入到倒数第二的位置
             if tabs.isEmpty {
                 tabs.append(mediaTab)
             } else {
                 tabs.insert(mediaTab, at: max(0, tabs.count - 1))
             }
-            
+
             availableTabs = tabs
         }
 

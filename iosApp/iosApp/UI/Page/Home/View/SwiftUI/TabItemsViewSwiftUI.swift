@@ -63,6 +63,7 @@ struct TabItemsViewSwiftUI: View {
                             )
                         } else {
                             Text(component.text)
+                                .font(.system(size: 14))
                                 .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
                                 .fontWeight(selection == item.key ? .medium : .regular)
                         }
@@ -70,6 +71,7 @@ struct TabItemsViewSwiftUI: View {
                 }
             } else {
                 Text(title)
+                    .font(.system(size: 14))
                     .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
                     .fontWeight(selection == item.key ? .medium : .regular)
             }
@@ -87,6 +89,7 @@ struct TabItemsViewSwiftUI: View {
                             )
                         } else {
                             Text(component.text)
+                                .font(.system(size: 14))
                                 .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
                                 .fontWeight(selection == item.key ? .medium : .regular)
                         }
@@ -94,12 +97,13 @@ struct TabItemsViewSwiftUI: View {
                 }
             } else {
                 Text(title)
+                    .font(.system(size: 14))
                     .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
                     .fontWeight(selection == item.key ? .medium : .regular)
             }
         }
     }
-    
+
     private func containsEmoji(_ text: String) -> Bool {
         for scalar in text.unicodeScalars {
             if scalar.properties.isEmoji {
@@ -108,15 +112,15 @@ struct TabItemsViewSwiftUI: View {
         }
         return false
     }
-    
+
     private func splitTextAndEmoji(_ text: String) -> [TextComponent] {
         var components: [TextComponent] = []
         var currentComponent = ""
         var currentIsEmoji = false
-        
+
         for character in text {
             let isEmoji = character.unicodeScalars.first?.properties.isEmoji ?? false
-            
+
             if currentComponent.isEmpty {
                 currentComponent.append(character)
                 currentIsEmoji = isEmoji
@@ -128,11 +132,11 @@ struct TabItemsViewSwiftUI: View {
                 currentIsEmoji = isEmoji
             }
         }
-        
+
         if !currentComponent.isEmpty {
             components.append(TextComponent(text: currentComponent, isEmoji: currentIsEmoji))
         }
-        
+
         return components
     }
 }
@@ -159,14 +163,13 @@ extension Character {
     }
 }
 
-
 struct EmojiText: View {
     let text: String
     let color: Color
-    
+
     var body: some View {
         Text(text)
-            .font(.system(size: 14)) // emoji使用较小字体
+            .font(.system(size: 12)) // emoji使用较小字体
             .foregroundColor(color)
             .scaleEffect(0.85) // 再稍微缩小一点
     }

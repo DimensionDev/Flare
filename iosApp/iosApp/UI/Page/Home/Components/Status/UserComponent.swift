@@ -25,10 +25,16 @@ struct UserComponent: View {
                 HStack {
                     UserAvatar(data: user.avatar, size: 44)
                     VStack(alignment: .leading, spacing: 2) {
-                        Markdown(user.name.markdown)
-                            .lineLimit(1)
-                            .font(.headline)
-                            .markdownInlineImageProvider(.emoji)
+                        if user.name.markdown.isEmpty {
+                            Text(" ") // 使用空格占位
+                                .lineLimit(1)
+                                .font(.headline)
+                        } else {
+                            Markdown(user.name.markdown)
+                                .lineLimit(1)
+                                .font(.headline)
+                                .markdownInlineImageProvider(.emoji)
+                        }
                         HStack {
                             Text(user.handle)
                                 .lineLimit(1)
@@ -89,10 +95,16 @@ struct AccountItem: View {
             HStack {
                 UserAvatar(data: user.avatar, size: 48)
                 VStack(alignment: .leading) {
-                    Markdown(user.name.markdown)
-                        .lineLimit(1)
-                        .font(.headline)
-                        .markdownInlineImageProvider(.emoji)
+                    if user.name.markdown.isEmpty {
+                        Text(" ") // 使用空格占位，有的这个是空的，导致位置错乱
+                            .lineLimit(1)
+                            .font(.headline)
+                    } else {
+                        Markdown(user.name.markdown)
+                            .lineLimit(1)
+                            .font(.headline)
+                            .markdownInlineImageProvider(.emoji)
+                    }
                     supportingContent(user)
                 }
             }

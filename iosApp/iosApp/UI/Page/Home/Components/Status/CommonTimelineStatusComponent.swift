@@ -472,7 +472,7 @@ struct CommonTimelineStatusComponent: View {
                     }
 
                     // 使用新的 ShareButton
-                    ShareButton(content: data.content.raw, view: self)
+                    ShareButton(content: data, view: self)
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal, 0) // 添加水平内边距
                 }

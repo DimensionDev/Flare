@@ -1,4 +1,3 @@
- 
 import Awesome
 import Generated
 import JXPhotoBrowser
@@ -13,13 +12,19 @@ import UIKit
 struct ShareButton: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.appSettings) var appSettings
+    @Environment(\.openURL) private var openURL
     @EnvironmentObject var router: FlareRouter
     @State private var isShareAsImageSheetPresented: Bool = false
     @State private var renderer: ImageRenderer<AnyView>?
     @State private var capturedImage: UIImage?
     @State private var isPreparingShare: Bool = false
-    let content: String
+    let content: UiTimelineItemContentStatus
     let view: CommonTimelineStatusComponent
+    
+    private var statusUrl: URL? {
+        guard let urlString = content.url as String? else { return nil }
+        return URL(string: urlString)
+    }
     
     private func prepareScreenshot(completion: @escaping (UIImage?) -> Void) {
         let captureView = StatusCaptureWrapper(content: view)
@@ -48,42 +53,46 @@ struct ShareButton: View {
     
     private func getShareTitle(allContent: Bool) -> String {
         if allContent {
-            return content
+            return content.content.raw
         }
         let maxLength = 100
-        if content.count > maxLength {
-            let index = content.index(content.startIndex, offsetBy: maxLength)
-            return String(content[..<index]) + "..."
+        if content.content.raw.count > maxLength {
+            let index = content.content.raw.index(content.content.raw.startIndex, offsetBy: maxLength)
+            return String(content.content.raw[..<index]) + "..."
         }
-        return content
+        return content.content.raw
     }
     
     var body: some View {
         Menu {
-            
             Button(action: {
-               
+                UIPasteboard.general.string = content.content.raw
             }) {
                 Label("Copy Text", systemImage: "doc.on.doc")
             }
             
-           
             Button(action: {
                 
             }) {
                 Label("Select Text", systemImage: "text.cursor")
             }
             
-             
-            Button(action: {
-              
-            }) {
-                Label("Copy Link", systemImage: "link")
+            if let url = statusUrl {
+                Button(action: {
+                    UIPasteboard.general.string = url.absoluteString
+                }) {
+                    Label("Copy Link", systemImage: "link")
+                }
+                
+                Button(action: {
+                    openURL(url)
+                }) {
+                    Label("Open in Browser", systemImage: "safari")
+                }
             }
             
             Divider()
-            
-            // 分享子菜单
+             
             Menu {
                 // 普通分享
                 Button(action: {
@@ -94,6 +103,10 @@ struct ShareButton: View {
                             let shareTitle = getShareTitle(allContent: true)
                             activityItems.append(shareTitle)
                             activityItems.append(image)
+                            
+                            if let url = statusUrl {
+                                activityItems.append(url)
+                            }
                             
                             let activityVC = UIActivityViewController(
                                 activityItems: activityItems,

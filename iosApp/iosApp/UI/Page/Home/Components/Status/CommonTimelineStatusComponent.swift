@@ -472,7 +472,7 @@ struct CommonTimelineStatusComponent: View {
                     }
 
                     // 使用新的 ShareButton
-                    ShareButton(content: data.content.raw, view: self)
+                    ShareButton(content: data, view: self)
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal, 0) // 添加水平内边距
                 }
@@ -681,76 +681,6 @@ struct SmallIconModifier: ViewModifier {
     }
 }
 
-// 添加一个新的 View 来处理分享按钮
-struct ShareButton: View {
-    @Environment(\.colorScheme) var colorScheme
-    let content: String
-    let view: CommonTimelineStatusComponent
-
-    var body: some View {
-        Menu {
-            Button(action: {
-                // 系统分享
-                let activityVC = UIActivityViewController(
-                    activityItems: [content], applicationActivities: nil
-                )
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let window = windowScene.windows.first,
-                   let rootVC = window.rootViewController
-                {
-                    activityVC.popoverPresentationController?.sourceView = window
-                    rootVC.present(activityVC, animated: true)
-                }
-            }) {
-                Label {
-                    Text("Share")
-                } icon: {
-                    Image(systemName: "square.and.arrow.up")
-                }
-            }
-
-            Button(action: {
-                // 截图分享
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let window = windowScene.windows.first
-                {
-                    let renderer = ImageRenderer(content: view)
-                    if let uiImage = renderer.uiImage {
-                        let activityVC = UIActivityViewController(
-                            activityItems: [uiImage], applicationActivities: nil
-                        )
-                        if let rootVC = window.rootViewController {
-                            activityVC.popoverPresentationController?.sourceView = window
-                            rootVC.present(activityVC, animated: true)
-                        }
-                    }
-                }
-            }) {
-                Label {
-                    Text("Screenshot Share")
-                } icon: {
-                    Image(systemName: "camera")
-                }
-            }
-        } label: {
-            HStack {
-                Spacer()
-                Spacer()
-                Label {
-                    Text("") // 空文本，保持与其他按钮一致的结构
-                } icon: {
-                    Image(systemName: "square.and.arrow.up")
-                        .imageScale(.medium)
-                        .font(.system(size: 13))
-                        .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
-                }
-                Spacer()
-            }
-            .frame(maxWidth: .infinity)
-            .contentShape(Rectangle())
-        }
-    }
-}
 
 // 用于收集StatusActionAsyncActionItem中Flow数据的类
 class AsyncActionItemCollector {

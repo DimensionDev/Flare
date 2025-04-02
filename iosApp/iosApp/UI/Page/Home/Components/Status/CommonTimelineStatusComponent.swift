@@ -684,45 +684,120 @@ struct SmallIconModifier: ViewModifier {
 // 添加一个新的 View 来处理分享按钮
 struct ShareButton: View {
     @Environment(\.colorScheme) var colorScheme
+    @Environment(\.appSettings) var appSettings
+    @EnvironmentObject var router: FlareRouter
+    @State private var isShareAsImageSheetPresented: Bool = false
+    @State private var renderer: ImageRenderer<AnyView>?
+    @State private var capturedImage: UIImage?
+    @State private var isPreparingShare: Bool = false
     let content: String
     let view: CommonTimelineStatusComponent
+    
+    private func prepareScreenshot(completion: @escaping (UIImage?) -> Void) {
+        let captureView = StatusCaptureWrapper(content: view)
+            .environment(\.appSettings, appSettings)
+            .environment(\.colorScheme, colorScheme)
+            .environment(\.isInCaptureMode, true)
+            .environmentObject(router)
+        
+        // 先创建一个UIHostingController来预加载视图
+        let controller = UIHostingController(rootView: captureView)
+        
+        //  内容大小
+        let targetSize = controller.sizeThatFits(in: CGSize(
+            width: UIScreen.main.bounds.width - 24,
+            height: UIView.layoutFittingExpandedSize.height
+        ))
+        
+        controller.view.frame = CGRect(origin: .zero, size: targetSize)
+        controller.view.backgroundColor = .clear
+        
+        // 确保视图已经布局
+        controller.view.layoutIfNeeded()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            let image = ScreenshotRenderer.render(captureView)
+            completion(image)
+        }
+    }
+    
+    private func getShareTitle(allContent: Bool) -> String {
+        if allContent {
+            return content
+        }
 
+        let maxLength = 100
+        if content.count > maxLength {
+            let index = content.index(content.startIndex, offsetBy: maxLength)
+            return String(content[..<index]) + "..."
+        }
+        return content
+    }
+    
     var body: some View {
         Menu {
             Button(action: {
-                // 系统分享
-                let activityVC = UIActivityViewController(
-                    activityItems: [content], applicationActivities: nil
-                )
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let window = windowScene.windows.first,
-                   let rootVC = window.rootViewController
-                {
-                    activityVC.popoverPresentationController?.sourceView = window
-                    rootVC.present(activityVC, animated: true)
-                }
-            }) {
-                Label {
-                    Text("Share")
-                } icon: {
-                    Image(systemName: "square.and.arrow.up")
-                }
-            }
+                isPreparingShare = true
+                // 先准备截图
+                prepareScreenshot { image in
+                    if let image = image {
 
-            Button(action: {
-                // 截图分享
-                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                   let window = windowScene.windows.first
-                {
-                    let renderer = ImageRenderer(content: view)
-                    if let uiImage = renderer.uiImage {
+                        var activityItems: [Any] = []
+                        
+
+                        let shareTitle = getShareTitle(allContent: true)
+                        activityItems.append(shareTitle)
+
+                        activityItems.append(image)
+                        
+
                         let activityVC = UIActivityViewController(
-                            activityItems: [uiImage], applicationActivities: nil
+                            activityItems: activityItems,
+                            applicationActivities: nil
                         )
-                        if let rootVC = window.rootViewController {
+                        
+                        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                           let window = windowScene.windows.first,
+                           let rootVC = window.rootViewController
+                        {
                             activityVC.popoverPresentationController?.sourceView = window
                             rootVC.present(activityVC, animated: true)
                         }
+                    }
+                    isPreparingShare = false
+                }
+            }) {
+                if isPreparingShare {
+                    Label {
+                        Text("Preparing...")
+                    } icon: {
+                        ProgressView()
+                    }
+                } else {
+                    Label {
+                        Text("Share")
+                    } icon: {
+                        Image(systemName: "square.and.arrow.up")
+                    }
+                }
+            }
+            .disabled(isPreparingShare)
+
+            Button(action: {
+                prepareScreenshot { image in
+                    if let image = image {
+                        capturedImage = image
+                        let newRenderer = ImageRenderer(content: AnyView(
+                            StatusCaptureWrapper(content: view)
+                                .environment(\.appSettings, appSettings)
+                                .environment(\.colorScheme, colorScheme)
+                                .environment(\.isInCaptureMode, true)
+                                .environmentObject(router)
+                        ))
+                        newRenderer.scale = 3.0
+                        newRenderer.isOpaque = true
+                        renderer = newRenderer
+                        isShareAsImageSheetPresented = true
                     }
                 }
             }) {
@@ -748,6 +823,19 @@ struct ShareButton: View {
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
+        }
+        .sheet(isPresented: $isShareAsImageSheetPresented) {
+            if let renderer = renderer {
+                StatusShareAsImageView(
+                    content: view,
+                    renderer: renderer,
+                    shareText: getShareTitle(allContent: false)
+                )
+                .environment(\.appSettings, appSettings)
+                .environment(\.colorScheme, colorScheme)
+                .environment(\.isInCaptureMode, true)
+                .environmentObject(router)
+            }
         }
     }
 }

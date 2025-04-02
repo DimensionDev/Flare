@@ -1,0 +1,173 @@
+ 
+import Awesome
+import Generated
+import JXPhotoBrowser
+import Kingfisher
+import MarkdownUI
+import os.log 
+import shared
+import SwiftDate
+import SwiftUI
+import UIKit
+
+struct ShareButton: View {
+    @Environment(\.colorScheme) var colorScheme
+    @Environment(\.appSettings) var appSettings
+    @EnvironmentObject var router: FlareRouter
+    @State private var isShareAsImageSheetPresented: Bool = false
+    @State private var renderer: ImageRenderer<AnyView>?
+    @State private var capturedImage: UIImage?
+    @State private var isPreparingShare: Bool = false
+    let content: String
+    let view: CommonTimelineStatusComponent
+    
+    private func prepareScreenshot(completion: @escaping (UIImage?) -> Void) {
+        let captureView = StatusCaptureWrapper(content: view)
+            .environment(\.appSettings, appSettings)
+            .environment(\.colorScheme, colorScheme)
+            .environment(\.isInCaptureMode, true)
+            .environmentObject(router)
+        
+        let controller = UIHostingController(rootView: captureView)
+        
+        let targetSize = controller.sizeThatFits(in: CGSize(
+            width: UIScreen.main.bounds.width - 24,
+            height: UIView.layoutFittingExpandedSize.height
+        ))
+        
+        controller.view.frame = CGRect(origin: .zero, size: targetSize)
+        controller.view.backgroundColor = .clear
+        
+        controller.view.layoutIfNeeded()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            let image = ScreenshotRenderer.render(captureView)
+            completion(image)
+        }
+    }
+    
+    private func getShareTitle(allContent: Bool) -> String {
+        if allContent {
+            return content
+        }
+        let maxLength = 100
+        if content.count > maxLength {
+            let index = content.index(content.startIndex, offsetBy: maxLength)
+            return String(content[..<index]) + "..."
+        }
+        return content
+    }
+    
+    var body: some View {
+        Menu {
+            
+            Button(action: {
+               
+            }) {
+                Label("Copy Text", systemImage: "doc.on.doc")
+            }
+            
+           
+            Button(action: {
+                
+            }) {
+                Label("Select Text", systemImage: "text.cursor")
+            }
+            
+             
+            Button(action: {
+              
+            }) {
+                Label("Copy Link", systemImage: "link")
+            }
+            
+            Divider()
+            
+            // 分享子菜单
+            Menu {
+                // 普通分享
+                Button(action: {
+                    isPreparingShare = true
+                    prepareScreenshot { image in
+                        if let image = image {
+                            var activityItems: [Any] = []
+                            let shareTitle = getShareTitle(allContent: true)
+                            activityItems.append(shareTitle)
+                            activityItems.append(image)
+                            
+                            let activityVC = UIActivityViewController(
+                                activityItems: activityItems,
+                                applicationActivities: nil
+                            )
+                            
+                            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                               let window = windowScene.windows.first,
+                               let rootVC = window.rootViewController
+                            {
+                                activityVC.popoverPresentationController?.sourceView = window
+                                rootVC.present(activityVC, animated: true)
+                            }
+                        }
+                        isPreparingShare = false
+                    }
+                }) {
+                    if isPreparingShare {
+                        Label("Preparing...", systemImage: "hourglass")
+                    } else {
+                        Label("Share Post", systemImage: "square.and.arrow.up")
+                    }
+                }
+                .disabled(isPreparingShare)
+                
+                // 截图分享
+                Button(action: {
+                    prepareScreenshot { image in
+                        if let image = image {
+                            capturedImage = image
+                            let newRenderer = ImageRenderer(content: AnyView(
+                                StatusCaptureWrapper(content: view)
+                                    .environment(\.appSettings, appSettings)
+                                    .environment(\.colorScheme, colorScheme)
+                                    .environment(\.isInCaptureMode, true)
+                                    .environmentObject(router)
+                            ))
+                            newRenderer.scale = 3.0
+                            newRenderer.isOpaque = true
+                            renderer = newRenderer
+                            isShareAsImageSheetPresented = true
+                        }
+                    }
+                }) {
+                    Label("Share as Image", systemImage: "camera")
+                }
+            } label: {
+                Label("Share", systemImage: "square.and.arrow.up")
+            }
+            
+        } label: {
+            HStack {
+                Spacer()
+                Label("", systemImage: "square.and.arrow.up")
+                    .imageScale(.medium)
+                    .font(.system(size: 13))
+                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+                Spacer()
+            }
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
+        }
+        .sheet(isPresented: $isShareAsImageSheetPresented) {
+            if let renderer = renderer {
+                StatusShareAsImageView(
+                    content: view,
+                    renderer: renderer,
+                    shareText: getShareTitle(allContent: false)
+                )
+                .environment(\.appSettings, appSettings)
+                .environment(\.colorScheme, colorScheme)
+                .environment(\.isInCaptureMode, true)
+                .environmentObject(router)
+            }
+        }
+    }
+}

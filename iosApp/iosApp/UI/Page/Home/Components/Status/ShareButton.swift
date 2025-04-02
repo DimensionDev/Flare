@@ -15,6 +15,7 @@ struct ShareButton: View {
     @Environment(\.openURL) private var openURL
     @EnvironmentObject var router: FlareRouter
     @State private var isShareAsImageSheetPresented: Bool = false
+    @State private var showTextForSelection: Bool = false
     @State private var renderer: ImageRenderer<AnyView>?
     @State private var capturedImage: UIImage?
     @State private var isPreparingShare: Bool = false
@@ -68,11 +69,18 @@ struct ShareButton: View {
             Button(action: {
                 UIPasteboard.general.string = content.content.raw
             }) {
-                Label("Copy Text", systemImage: "doc.on.doc")
+                Label("Copy Text ", systemImage: "doc.on.doc")
             }
             
             Button(action: {
-                
+                UIPasteboard.general.string = content.content.markdown
+            }) {
+                Label("Copy Text (MarkDown)", systemImage: "doc.on.doc")
+            }
+           
+            
+            Button(action: {
+                showTextForSelection = true
             }) {
                 Label("Select Text", systemImage: "text.cursor")
             }
@@ -92,9 +100,8 @@ struct ShareButton: View {
             }
             
             Divider()
-             
+            
             Menu {
-                // 普通分享
                 Button(action: {
                     isPreparingShare = true
                     prepareScreenshot { image in
@@ -132,7 +139,6 @@ struct ShareButton: View {
                 }
                 .disabled(isPreparingShare)
                 
-                // 截图分享
                 Button(action: {
                     prepareScreenshot { image in
                         if let image = image {
@@ -168,6 +174,11 @@ struct ShareButton: View {
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
+        }
+        .sheet(isPresented: $showTextForSelection) {
+            let selectableContent = AttributedString(content.content.markdown)
+            StatusRowSelectableTextView(content: selectableContent)
+                .tint(.accentColor)
         }
         .sheet(isPresented: $isShareAsImageSheetPresented) {
             if let renderer = renderer {

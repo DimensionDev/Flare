@@ -8,6 +8,21 @@ import shared
 import SwiftDate
 import SwiftUI
 import UIKit
+#if canImport(_Translation_SwiftUI)
+import Translation
+#endif
+
+#if canImport(_Translation_SwiftUI)
+extension View {
+    func addTranslateView(isPresented: Binding<Bool>, text: String) -> some View {
+        if #available(iOS 17, *) {
+            return self.translationPresentation(isPresented: isPresented, text: text)
+        } else {
+            return self
+        }
+    }
+}
+#endif
 
 struct ShareButton: View {
     @Environment(\.colorScheme) var colorScheme
@@ -19,6 +34,7 @@ struct ShareButton: View {
     @State private var renderer: ImageRenderer<AnyView>?
     @State private var capturedImage: UIImage?
     @State private var isPreparingShare: Bool = false
+    @State private var showTranslation: Bool = false
     let content: UiTimelineItemContentStatus
     let view: CommonTimelineStatusComponent
     
@@ -78,7 +94,6 @@ struct ShareButton: View {
                 Label("Copy Text (MarkDown)", systemImage: "doc.on.doc")
             }
            
-            
             Button(action: {
                 showTextForSelection = true
             }) {
@@ -162,6 +177,14 @@ struct ShareButton: View {
             } label: {
                 Label("Share", systemImage: "square.and.arrow.up")
             }
+
+            #if canImport(_Translation_SwiftUI)
+            Button(action: {
+                showTranslation = true
+            }) {
+                Label("Apple Translate UI", systemImage: "character.bubble")
+            }
+            #endif
             
         } label: {
             HStack {
@@ -180,6 +203,9 @@ struct ShareButton: View {
             StatusRowSelectableTextView(content: selectableContent)
                 .tint(.accentColor)
         }
+        #if canImport(_Translation_SwiftUI)
+        .addTranslateView(isPresented: $showTranslation, text: content.content.raw)
+        #endif
         .sheet(isPresented: $isShareAsImageSheetPresented) {
             if let renderer = renderer {
                 StatusShareAsImageView(

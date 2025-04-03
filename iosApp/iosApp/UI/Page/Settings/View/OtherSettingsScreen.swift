@@ -1,8 +1,13 @@
 import shared
 import SwiftUI
+#if canImport(_Translation_SwiftUI)
+import Translation
+#endif
 
 struct OtherSettingsScreen: View {
     @Environment(\.appSettings) private var appSettings
+    @State private var isTranslating: Bool = false
+    @State private var translationConfig: TranslationSession.Configuration?
     
     var body: some View {
         List {
@@ -26,12 +31,76 @@ struct OtherSettingsScreen: View {
                     .pickerStyle(.menu)
                 }
             }
+            
+            Section("Translation Settings") {
+                HStack {
+                    Label("Translation Engine", systemImage: "character.bubble")
+                    Spacer()
+                    Picker("", selection: Binding(get: {
+                        appSettings.otherSettings.translationProvider
+                    }, set: { value in
+                        appSettings.updateOther(newValue: appSettings.otherSettings.also { settings in
+                            settings.translationProvider = value
+                        })
+                    })) {
+                        Text("Google Translate")
+                            .tag(TranslationProvider.google)
+                        Text("System Offline Translation")
+                            .tag(TranslationProvider.systemOffline)
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                }
+                
+                if #available(iOS 18, *) {
+                    if appSettings.otherSettings.translationProvider == .systemOffline {
+                        Button(action: {
+                            if translationConfig == nil {
+                                translationConfig = TranslationSession.Configuration()
+                            } else {
+                                translationConfig?.invalidate()
+                            }
+                            isTranslating = true
+                        }) {
+                            HStack {
+                                Label("First Initialize Offline Languages", systemImage: "arrow.down.circle")
+                                Spacer()
+                                if isTranslating {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                } else {
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Test Translation")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                        
+                        Text("Hello World!")
+                            .font(.body)
+                        
+                        // 使用TranslatableText进行翻译测试
+                        TranslatableText(originalText: "Hello World!")
+                            .id(appSettings.otherSettings.translationProvider) // 切换引擎时刷新
+                    }
+                    .padding(.vertical, 8)
+                }
+            }
             .buttonStyle(.plain)
             .navigationTitle("Other Settings")
         }
         #if os(macOS)
         .toggleStyle(.switch)
         #endif
+        .translationTask(translationConfig) { session in
+                isTranslating = false
+        }
     }
 }
 

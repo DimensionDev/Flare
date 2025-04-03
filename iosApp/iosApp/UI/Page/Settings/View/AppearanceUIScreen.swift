@@ -1,7 +1,7 @@
 import shared
 import SwiftUI
 
-struct AppearanceScreen: View {
+struct AppearanceUIScreen: View {
     @Environment(\.appSettings) private var appSettings
     @State private var presenter = AppearancePresenter()
 
@@ -30,15 +30,6 @@ struct AppearanceScreen: View {
                         Text("settings_appearance_theme_color")
                         Text("settings_appearance_theme_color_description")
                     })
-
-                    Toggle(isOn: Binding(get: {
-                        appSettings.appearanceSettings.autoTranslate
-                    }, set: { value in
-                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.autoTranslate, to: value))
-                    })) {
-                        Text("自动翻译")
-                        Text("自动翻译非当前语言的内容")
-                    }
 
                     Picker(selection: Binding(get: {
                         appSettings.appearanceSettings.avatarShape

@@ -4,7 +4,7 @@ import SwiftUI
 import Translation
 #endif
 
-struct OtherSettingsScreen: View {
+struct BaseSettingScreen: View {
     @Environment(\.appSettings) private var appSettings
     @State private var isTranslating: Bool = false
     @State private var translationConfig: TranslationSession.Configuration?
@@ -91,6 +91,15 @@ struct OtherSettingsScreen: View {
                     }
                     .padding(.vertical, 8)
                 }
+                
+                Toggle(isOn: Binding(get: {
+                    appSettings.appearanceSettings.autoTranslate
+                }, set: { value in
+                    appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.autoTranslate, to: value))
+                })) {
+                    Text("Auto Translate")
+                    Text("Auto translate non-current language content")
+                }
             }
             .buttonStyle(.plain)
             .navigationTitle("Other Settings")
@@ -111,6 +120,4 @@ extension OtherSettings {
     }
 }
 
-#Preview {
-    OtherSettingsScreen()
-} 
+ 

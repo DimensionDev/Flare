@@ -52,7 +52,7 @@ struct HomeTabScreen: View {
                 }
             }
             .sheet(isPresented: $showSettings) {
-                SettingsScreen()
+                SettingsUIScreen()
             }
             .sheet(isPresented: $showTabSettings) {
                 HomeAppBarSettingsView()

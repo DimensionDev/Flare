@@ -148,7 +148,7 @@ struct HomeContent: View {
             #endif
         }
         .sheet(isPresented: $showSettings) {
-            SettingsScreen()
+            SettingsUIScreen()
         }
     }
 }

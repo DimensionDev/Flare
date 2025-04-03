@@ -1,7 +1,7 @@
 import shared
 import SwiftUI
 
-struct SettingsScreen: View {
+struct SettingsUIScreen: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State private var selectedDetail: SettingsDestination?
     @State private var presenter = ActiveAccountPresenter()
@@ -28,7 +28,7 @@ struct SettingsScreen: View {
                         Section {
                             Label("settings_appearance_generic", systemImage: "paintpalette")
                                 .tag(SettingsDestination.appearance)
-                            Label("Other", systemImage: "gear")
+                            Label("base settings", systemImage: "gear")
                                 .tag(SettingsDestination.other)
                             Label("settings_storage_title", systemImage: "externaldrive")
                                 .tag(SettingsDestination.storage)
@@ -43,9 +43,9 @@ struct SettingsScreen: View {
                         case .account:
                             AccountsScreen()
                         case .appearance:
-                            AppearanceScreen()
+                            AppearanceUIScreen()
                         case .other:
-                            OtherSettingsScreen()
+                            BaseSettingScreen()
                         case .storage:
                             StorageScreen()
                         case .about:

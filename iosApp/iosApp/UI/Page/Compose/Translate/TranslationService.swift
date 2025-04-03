@@ -1,8 +1,8 @@
 import Foundation
 import NaturalLanguage
 
-public enum TranslationProvider {
-    case apple
+public enum TranslationProvider: String, Codable {
+    case systemOffline
     case google
 }
 

@@ -12,7 +12,7 @@ class TranslationViewModel: ObservableObject {
     init() {
         let locale = Locale.current
         let targetLanguage = locale.language.languageCode?.identifier ?? "en"
-        translationService = GoogleTranslationService(targetLanguage: targetLanguage)
+            translationService = GoogleTranslationService(targetLanguage: targetLanguage)
         // self.translationService = AppleTranslationServiceImpl(targetLanguage: targetLanguage)
     }
 

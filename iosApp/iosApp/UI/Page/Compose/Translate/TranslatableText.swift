@@ -10,6 +10,7 @@ struct TranslatableText: View {
     @StateObject private var viewModel = TranslationViewModel()
     private let languageDetector = LanguageDetector()
     @Environment(\.appSettings) private var appSettings
+    @Environment(\.isInCaptureMode) private var isInCaptureMode // 截图不翻译
     
     // 添加Apple翻译相关的状态
     @State private var translationConfig: TranslationSession.Configuration?
@@ -18,7 +19,12 @@ struct TranslatableText: View {
     @State private var translationTask: Task<Void, Never>?
     
     private func shouldAutoTranslate() -> Bool {
-        appSettings.appearanceSettings.autoTranslate && // 检查是否开启了自动翻译
+        
+        if isInCaptureMode {
+            return false
+        }
+        
+        return appSettings.appearanceSettings.autoTranslate && // 检查是否开启了自动翻译
         getTranslatedText() == nil && // 检查是否已经翻译过
         !isTranslating() && // 检查是否正在翻译
         languageDetector.shouldTranslate(text: originalText, targetLanguage: Locale.current.language.languageCode?.identifier ?? "en") // 检查是否需要翻译
@@ -88,7 +94,8 @@ struct TranslatableText: View {
             }
         }
         .onAppear {
-            if shouldAutoTranslate() {
+          
+            if !isInCaptureMode && shouldAutoTranslate() {
                 startTranslation()
             }
         }
@@ -100,10 +107,9 @@ struct TranslatableText: View {
             viewModel.reset()
             appleTranslatedText = nil
             isAppleTranslating = false
-        }
-        // 添加Apple翻译支持
+        } 
         .modifier(OfflineTranslationModifier(
-            isEnabled: appSettings.otherSettings.translationProvider == .systemOffline,
+            isEnabled: !isInCaptureMode && appSettings.otherSettings.translationProvider == .systemOffline,
             config: translationConfig,
             text: originalText,
             isTranslating: $isAppleTranslating,

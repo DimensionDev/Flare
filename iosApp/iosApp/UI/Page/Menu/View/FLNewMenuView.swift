@@ -110,6 +110,25 @@ struct FLNewMenuView: View {
                         }
                         .buttonStyle(MenuButtonStyle())
                     }
+                    
+                    // download manager
+                    Button(action: {
+                        isOpen = false 
+                        router.navigate(to: .download(accountType: accountType))
+                    }) {
+                        HStack {
+                            Image(systemName: "arrow.down.circle")
+                                .frame(width: 28, height: 28)
+                            Text("Donwload")
+                                .font(.body)
+                            Spacer()
+                        }
+                        .padding(.vertical, 12)
+                        .padding(.horizontal, 10)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(MenuButtonStyle())
+                    
                 }
             }
             .padding(.horizontal, 20)

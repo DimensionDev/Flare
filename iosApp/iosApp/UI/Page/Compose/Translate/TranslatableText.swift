@@ -18,7 +18,20 @@ struct TranslatableText: View {
     @State private var appleTranslatedText: String?
     @State private var translationTask: Task<Void, Never>?
     
+    // 检查是否在模拟器上运行
+    private var isRunningOnSimulator: Bool {
+        #if targetEnvironment(simulator)
+        return true
+        #else
+        return false
+        #endif
+    }
+    
     private func shouldAutoTranslate() -> Bool {
+
+        if isRunningOnSimulator {
+            return false
+        }
         
         if isInCaptureMode {
             return false
@@ -94,8 +107,7 @@ struct TranslatableText: View {
             }
         }
         .onAppear {
-          
-            if !isInCaptureMode && shouldAutoTranslate() {
+            if shouldAutoTranslate() {
                 startTranslation()
             }
         }
@@ -107,9 +119,9 @@ struct TranslatableText: View {
             viewModel.reset()
             appleTranslatedText = nil
             isAppleTranslating = false
-        } 
+        }
         .modifier(OfflineTranslationModifier(
-            isEnabled: !isInCaptureMode && appSettings.otherSettings.translationProvider == .systemOffline,
+            isEnabled: !isRunningOnSimulator && !isInCaptureMode && appSettings.otherSettings.translationProvider == .systemOffline,
             config: translationConfig,
             text: originalText,
             isTranslating: $isAppleTranslating,

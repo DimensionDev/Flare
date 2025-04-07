@@ -49,7 +49,7 @@ materialKolor = "2.1.1"
 room = "2.7.0-rc03"
 sqlite = "2.5.0-rc03"
 compose-multiplatform = "1.7.3"
-mediamp = "0.0.22"
+mediamp = "0.0.25"
 
 [libraries]
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }

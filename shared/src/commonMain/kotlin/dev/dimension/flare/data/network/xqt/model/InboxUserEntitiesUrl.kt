@@ -10,31 +10,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.InboxURL
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param urls 
+ *
+ * @param urls
  */
 @Serializable
-
-internal data class InboxUserEntitiesUrl (
-
+internal data class InboxUserEntitiesUrl(
     @SerialName(value = "urls")
-    val urls: kotlin.collections.List<InboxURL>? = null
-
-) {
-
-
-}
-
+    val urls: kotlin.collections.List<InboxURL>? = null,
+)

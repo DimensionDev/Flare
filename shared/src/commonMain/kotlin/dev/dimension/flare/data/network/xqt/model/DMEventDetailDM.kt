@@ -10,56 +10,42 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMEventDetailDMEntities
 import dev.dimension.flare.data.network.xqt.model.DMUserResults
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 /**
- * 
  *
- * @param createdAtSec 
- * @param id 
- * @param text 
- * @param entities 
- * @param attachments 
- * @param recipientResults 
- * @param senderResults 
+ *
+ * @param createdAtSec
+ * @param id
+ * @param text
+ * @param entities
+ * @param attachments
+ * @param recipientResults
+ * @param senderResults
  */
 @Serializable
-
-internal data class DMEventDetailDM (
-
+internal data class DMEventDetailDM(
     @SerialName(value = "created_at_sec")
     val createdAtSec: kotlin.String? = null,
-
     @SerialName(value = "id")
     val id: kotlin.String? = null,
-
     @SerialName(value = "text")
     val text: kotlin.String? = null,
-
     @SerialName(value = "entities")
     val entities: DMEventDetailDMEntities? = null,
-
     @SerialName(value = "attachments")
-    val attachments: kotlin.collections.List<@Contextual kotlin.Any>? = null,
-
+    val attachments: kotlin.collections.List<JsonObject>? = null,
     @SerialName(value = "recipient_results")
     val recipientResults: DMUserResults? = null,
-
     @SerialName(value = "sender_results")
-    val senderResults: DMUserResults? = null
-
-) {
-
-
-}
-
+    val senderResults: DMUserResults? = null,
+)

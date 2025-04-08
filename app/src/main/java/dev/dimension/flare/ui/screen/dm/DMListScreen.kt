@@ -66,6 +66,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import moe.tlaster.precompose.molecule.producePresenter
+import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Destination<RootGraph>(
@@ -259,27 +260,30 @@ private fun DMListScreen(
                                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                                             verticalAlignment = Alignment.CenterVertically,
                                         ) {
-                                            val user = item.user
-                                            if (user != null) {
+                                            if (item.hasUser) {
                                                 Row(
                                                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                                                     verticalAlignment = Alignment.CenterVertically,
                                                     modifier = Modifier.weight(1f),
                                                 ) {
-                                                    RichText(
-                                                        text = user.name,
-                                                        maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis,
-                                                    )
-                                                    Text(
-                                                        text = user.handle,
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        modifier =
-                                                            Modifier
-                                                                .alpha(MediumAlpha),
-                                                        maxLines = 1,
-                                                        overflow = TextOverflow.Ellipsis,
-                                                    )
+                                                    item.users.forEach { user ->
+                                                        RichText(
+                                                            text = user.name,
+                                                            maxLines = 1,
+                                                            overflow = TextOverflow.Ellipsis,
+                                                        )
+                                                        if (item.users.size == 1) {
+                                                            Text(
+                                                                text = user.handle,
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                modifier =
+                                                                    Modifier
+                                                                        .alpha(MediumAlpha),
+                                                                maxLines = 1,
+                                                                overflow = TextOverflow.Ellipsis,
+                                                            )
+                                                        }
+                                                    }
                                                 }
                                             }
                                             val lastMessage = item.lastMessage
@@ -297,8 +301,7 @@ private fun DMListScreen(
                                         }
                                     },
                                     leadingContent = {
-                                        val avatar = item.user?.avatar
-                                        if (avatar.isNullOrEmpty()) {
+                                        if (!item.hasUser) {
                                             FAIcon(
                                                 FontAwesomeIcons.Solid.CircleUser,
                                                 contentDescription = null,
@@ -308,7 +311,12 @@ private fun DMListScreen(
                                                 tint = MaterialTheme.colorScheme.primary,
                                             )
                                         } else {
-                                            AvatarComponent(avatar)
+                                            repeat(
+                                                min(item.users.size, 2),
+                                            ) {
+                                                val avatar = item.users[it].avatar
+                                                AvatarComponent(avatar)
+                                            }
                                         }
                                     },
                                     supportingContent = {

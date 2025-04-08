@@ -10,31 +10,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataAttachmentMediaColorPalette
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param palette 
+ *
+ * @param palette
  */
 @Serializable
-
-internal data class InboxConversationTimelineMessageDataAttachmentMediaExtMediaColor (
-
+internal data class InboxConversationTimelineMessageDataAttachmentMediaExtMediaColor(
     @SerialName(value = "palette")
-    val palette: kotlin.collections.List<InboxConversationTimelineMessageDataAttachmentMediaColorPalette>? = null
-
-) {
-
-
-}
-
+    val palette: kotlin.collections.List<InboxConversationTimelineMessageDataAttachmentMediaColorPalette>? = null,
+)

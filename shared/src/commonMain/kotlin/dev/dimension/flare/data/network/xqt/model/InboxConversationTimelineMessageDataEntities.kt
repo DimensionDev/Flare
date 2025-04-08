@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
@@ -19,37 +19,25 @@ import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessa
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataEntitiesSymbolEntity
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataEntitiesUrlEntity
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataEntitiesUserMentionEntity
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param hashtags 
- * @param symbols 
- * @param userMentions 
- * @param urls 
+ *
+ * @param hashtags
+ * @param symbols
+ * @param userMentions
+ * @param urls
  */
 @Serializable
-
-internal data class InboxConversationTimelineMessageDataEntities (
-
+internal data class InboxConversationTimelineMessageDataEntities(
     @SerialName(value = "hashtags")
     val hashtags: kotlin.collections.List<InboxConversationTimelineMessageDataEntitiesHashtagEntity>? = null,
-
     @SerialName(value = "symbols")
     val symbols: kotlin.collections.List<InboxConversationTimelineMessageDataEntitiesSymbolEntity>? = null,
-
     @SerialName(value = "user_mentions")
     val userMentions: kotlin.collections.List<InboxConversationTimelineMessageDataEntitiesUserMentionEntity>? = null,
-
     @SerialName(value = "urls")
-    val urls: kotlin.collections.List<InboxConversationTimelineMessageDataEntitiesUrlEntity>? = null
-
-) {
-
-
-}
-
+    val urls: kotlin.collections.List<InboxConversationTimelineMessageDataEntitiesUrlEntity>? = null,
+)

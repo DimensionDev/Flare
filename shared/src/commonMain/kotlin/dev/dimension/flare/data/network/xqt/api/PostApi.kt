@@ -158,7 +158,7 @@ internal interface PostApi {
         @Path("pathQueryId") pathQueryId: kotlin.String = "oBwyQ0_xVbAQ8FAyG0pCRA",
         @Query("queryId") queryId: kotlin.String = "oBwyQ0_xVbAQ8FAyG0pCRA",
         @Query("addedParticipants") addedParticipants: kotlin.collections.List<kotlin.String>,
-        @Query("conversationId") conversationId: kotlin.String = "426425493-1714936029558476800"
+        @Query("conversationId") conversationId: kotlin.String = "426425493-1714936029558476800",
     ): Response<kotlin.Any>
 
     /**
@@ -177,7 +177,7 @@ internal interface PostApi {
     public suspend fun postDMBlockUser(
         @Path("pathQueryId") pathQueryId: kotlin.String = "IYw9u1KEhrS-t-BXsau4Uw",
         @Query("queryId") queryId: kotlin.String = "IYw9u1KEhrS-t-BXsau4Uw",
-        @Query("target_user_id") target_user_id: kotlin.String = "1"
+        @Query("target_user_id") target_user_id: kotlin.String = "1",
     ): Response<kotlin.Any>
 
     /**
@@ -198,7 +198,7 @@ internal interface PostApi {
         @Path("pathQueryId") pathQueryId: kotlin.String = "BJ6DtxA2llfjnRoRjaiIiw",
         @Query("queryId") queryId: kotlin.String = "BJ6DtxA2llfjnRoRjaiIiw",
         @Query("messageId") messageId: kotlin.String = "1844651953697296738",
-        @Query("requestId") requestId: kotlin.String = "c71a2690-87a8-11ef-9564-b7a4d8a5f00c"
+        @Query("requestId") requestId: kotlin.String = "c71a2690-87a8-11ef-9564-b7a4d8a5f00c",
     ): Response<kotlin.Any>
 
     /**
@@ -219,7 +219,7 @@ internal interface PostApi {
         @Path("pathQueryId") pathQueryId: kotlin.String = "o0aymgGiJY-53Y52YSUGVA",
         @Query("queryId") queryId: kotlin.String = "o0aymgGiJY-53Y52YSUGVA",
         @Query("conversation_id") conversation_id: kotlin.String = "426425493-1714936029558476800",
-        @Query("label") label: kotlin.String = "Pinned"
+        @Query("label") label: kotlin.String = "Pinned",
     ): Response<kotlin.Any>
 
     /**
@@ -240,7 +240,7 @@ internal interface PostApi {
         @Path("pathQueryId") pathQueryId: kotlin.String = "_TQxP2Rb0expwVP9ktGrTQ",
         @Query("queryId") queryId: kotlin.String = "_TQxP2Rb0expwVP9ktGrTQ",
         @Query("conversation_id") conversation_id: kotlin.String = "426425493-1714936029558476800",
-        @Query("label_type") label_type: kotlin.String = "Pinned"
+        @Query("label_type") label_type: kotlin.String = "Pinned",
     ): Response<kotlin.Any>
 
     /**
@@ -259,7 +259,7 @@ internal interface PostApi {
     public suspend fun postDMUnBlockUser(
         @Path("pathQueryId") pathQueryId: kotlin.String = "Krbs6Nak_o7liWQwfV1jOQ",
         @Query("queryId") queryId: kotlin.String = "Krbs6Nak_o7liWQwfV1jOQ",
-        @Query("target_user_id") target_user_id: kotlin.String = "1"
+        @Query("target_user_id") target_user_id: kotlin.String = "1",
     ): Response<kotlin.Any>
 
     /**
@@ -284,7 +284,7 @@ internal interface PostApi {
         @Query("conversationId") conversationId: kotlin.String = "426425493-1714936029558476800",
         @Query("emojiReactions") emojiReactions: kotlin.collections.List<kotlin.String>,
         @Query("messageId") messageId: kotlin.String = "1844628043379425446",
-        @Query("reactionTypes") reactionTypes: kotlin.collections.List<kotlin.String>
+        @Query("reactionTypes") reactionTypes: kotlin.collections.List<kotlin.String>,
     ): Response<kotlin.Any>
 
     /**
@@ -309,7 +309,6 @@ internal interface PostApi {
         @Query("conversationId") conversationId: kotlin.String = "426425493-1714936029558476800",
         @Query("emojiReactions") emojiReactions: kotlin.collections.List<kotlin.String>,
         @Query("messageId") messageId: kotlin.String = "1844628043379425446",
-        @Query("reactionTypes") reactionTypes: kotlin.collections.List<kotlin.String>
+        @Query("reactionTypes") reactionTypes: kotlin.collections.List<kotlin.String>,
     ): Response<kotlin.Any>
-
 }

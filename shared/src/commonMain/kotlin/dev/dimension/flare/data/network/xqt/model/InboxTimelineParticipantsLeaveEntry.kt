@@ -10,31 +10,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.InboxTimelineParticipantsLeaveEntryParticipantsLeave
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param participantsLeave 
+ *
+ * @param participantsLeave
  */
 @Serializable
-
-internal data class InboxTimelineParticipantsLeaveEntry (
-
+internal data class InboxTimelineParticipantsLeaveEntry(
     @SerialName(value = "participants_leave")
-    val participantsLeave: InboxTimelineParticipantsLeaveEntryParticipantsLeave? = null
-
-) {
-
-
-}
-
+    val participantsLeave: InboxTimelineParticipantsLeaveEntryParticipantsLeave? = null,
+)

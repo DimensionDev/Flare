@@ -1,12 +1,21 @@
 package dev.dimension.flare.data.database.cache.mapper
 
+import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimeline
+import dev.dimension.flare.data.database.cache.model.DbMessageItem
+import dev.dimension.flare.data.database.cache.model.DbMessageRoom
+import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.database.cache.model.DbUser
+import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.network.xqt.model.CursorType
+import dev.dimension.flare.data.network.xqt.model.InboxConversation
+import dev.dimension.flare.data.network.xqt.model.InboxTimelineEntry
+import dev.dimension.flare.data.network.xqt.model.InboxUser
 import dev.dimension.flare.data.network.xqt.model.InstructionUnion
 import dev.dimension.flare.data.network.xqt.model.ItemResult
 import dev.dimension.flare.data.network.xqt.model.TimelineAddEntries
@@ -23,6 +32,7 @@ import dev.dimension.flare.data.network.xqt.model.TweetTombstone
 import dev.dimension.flare.data.network.xqt.model.TweetUnion
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.data.network.xqt.model.User
+import dev.dimension.flare.data.network.xqt.model.UserLegacy
 import dev.dimension.flare.data.network.xqt.model.UserResultCore
 import dev.dimension.flare.data.network.xqt.model.UserResults
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
@@ -36,12 +46,123 @@ internal object XQT {
     suspend fun save(
         accountKey: MicroBlogKey,
         pagingKey: String,
-        database: dev.dimension.flare.data.database.cache.CacheDatabase,
+        database: CacheDatabase,
         tweet: List<XQTTimeline>,
         sortIdProvider: (XQTTimeline) -> Long = { it.sortedIndex },
     ) {
         val items = tweet.map { it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider) }
         saveToDatabase(database, items)
+    }
+
+    suspend fun saveDM(
+        accountKey: MicroBlogKey,
+        database: CacheDatabase,
+        propertyEntries: List<InboxTimelineEntry>? = null,
+        users: Map<String, InboxUser>? = null,
+        conversations: Map<String, InboxConversation>? = null,
+    ) {
+        val trustedConversations =
+            conversations?.values.orEmpty().filter { it.trusted == true }
+        val rooms =
+            trustedConversations.map {
+                DbMessageRoom(
+                    roomKey = MicroBlogKey(it.conversationId.orEmpty(), accountKey.host),
+                    platformType = PlatformType.xQt,
+                    messageKey =
+                        propertyEntries
+                            ?.firstOrNull { entries -> entries.message?.id == it.maxEntryId }
+                            ?.let {
+                                MicroBlogKey(it.message?.id.orEmpty(), accountKey.host)
+                            },
+                )
+            }
+        val references =
+            trustedConversations.flatMap { conversation ->
+                conversation.participants.orEmpty().map {
+                    DbMessageRoomReference(
+                        roomKey = MicroBlogKey(conversation.conversationId.orEmpty(), accountKey.host),
+                        userKey = MicroBlogKey(it.userId.orEmpty(), accountKey.host),
+                    )
+                }
+            }
+        val messages =
+            trustedConversations
+                .flatMap { conversation ->
+                    propertyEntries
+                        ?.filter {
+                            it.message?.conversationId == conversation.conversationId
+                        }?.mapNotNull { it.message }
+                        .orEmpty()
+                }.mapNotNull {
+                    if (it.messageData == null || it.conversationId == null || it.messageData.senderId == null) {
+                        return@mapNotNull null
+                    }
+                    DbMessageItem(
+                        messageKey = MicroBlogKey(it.id.orEmpty(), accountKey.host),
+                        roomKey = MicroBlogKey(it.conversationId, accountKey.host),
+                        content = MessageContent.XQT.Message(it.messageData),
+                        timestamp = it.time?.toLongOrNull() ?: 0L,
+                        userKey = MicroBlogKey(it.messageData.senderId, accountKey.host),
+                    )
+                }
+        val timeline =
+            trustedConversations.map { conversation ->
+                DbDirectMessageTimeline(
+                    accountKey = accountKey,
+                    roomKey = MicroBlogKey(conversation.conversationId.orEmpty(), accountKey.host),
+                    sortId = conversation.sortTimestamp?.toLongOrNull() ?: 0L,
+                    unreadCount =
+                        messages
+                            .filter {
+                                it.roomKey.id == conversation.conversationId
+                            }.count { message ->
+                                message.messageKey.id
+                                    .toLongOrNull()
+                                    ?.let { id ->
+                                        conversation.lastReadEventId?.toLongOrNull()?.let { lastRead -> id > lastRead }
+                                    } == true
+                            }.toLong(),
+                )
+            }
+        val users =
+            users?.values.orEmpty().mapNotNull {
+                if (it.name == null || it.screenName == null || it.idStr == null) {
+                    return@mapNotNull null
+                }
+                User(
+                    legacy =
+                        with(it) {
+                            UserLegacy(
+                                name = name.orEmpty(),
+                                screenName = screenName.orEmpty(),
+                                location = location,
+                                description = description,
+                                url = url,
+                                entities = entities,
+                                `protected` = `protected`,
+                                followersCount = followersCount ?: 0,
+                                friendsCount = friendsCount ?: 0,
+                                listedCount = listedCount ?: 0,
+                                createdAt = createdAt.orEmpty(),
+                                favouritesCount = favouritesCount ?: 0,
+                                verified = verified == true,
+                                statusesCount = statusesCount ?: 0,
+                                isTranslator = isTranslator == true,
+                                profileImageUrlHttps = profileImageUrlHttps.orEmpty(),
+                                profileBannerUrl = profileBannerUrl,
+                                translatorType = translatorType.orEmpty(),
+                            )
+                        },
+                    isBlueVerified = it.isBlueVerified == true,
+                    restId = it.idStr,
+                ).toDbUser()
+            }
+
+        database.userDao().insertAll(users)
+        database.messageDao().insertMessages(messages)
+        database.messageDao().insertReferences(references)
+        database.messageDao().insert(rooms)
+        database.messageDao().insertTimeline(timeline)
     }
 }
 

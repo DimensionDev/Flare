@@ -146,6 +146,7 @@ internal fun DbMessageItemWithUser.render(accountKey: MicroBlogKey) =
         content =
             when (val content = message.content) {
                 is MessageContent.Bluesky -> content.render(accountKey = accountKey)
+                is MessageContent.XQT -> content.render(accountKey = accountKey)
                 is MessageContent.Local ->
                     UiDMItem.Message.Text(
                         Element("span")
@@ -162,7 +163,7 @@ internal fun DbMessageItemWithUser.render(accountKey: MicroBlogKey) =
                         MessageContent.Local.State.SENDING -> UiDMItem.SendState.Sending
                         MessageContent.Local.State.FAILED -> UiDMItem.SendState.Failed
                     }
-                is MessageContent.Bluesky -> null
+                else -> null
             },
     )
 

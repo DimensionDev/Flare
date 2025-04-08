@@ -10,30 +10,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 /**
- * 
  *
- * @param urls 
+ *
+ * @param urls
  */
 @Serializable
-
-internal data class DMEventDetailDMEntities (
-
+internal data class DMEventDetailDMEntities(
     @SerialName(value = "urls")
-    val urls: kotlin.collections.List<@Contextual kotlin.Any>? = null
-
-) {
-
-
-}
-
+    val urls: kotlin.collections.List<JsonObject>? = null,
+)

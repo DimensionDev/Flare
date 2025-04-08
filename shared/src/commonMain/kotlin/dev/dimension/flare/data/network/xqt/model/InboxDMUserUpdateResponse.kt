@@ -10,36 +10,26 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.InboxDMUserUpdateResponseInboxInitialState
 import dev.dimension.flare.data.network.xqt.model.InboxDMUserUpdateResponseUserEvents
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  * get dm user updates
  *
- * @param userEvents 
- * @param inboxInitialState 
+ * @param userEvents
+ * @param inboxInitialState
  */
 @Serializable
-
-internal data class InboxDMUserUpdateResponse (
-
+internal data class InboxDMUserUpdateResponse(
     @SerialName(value = "user_events")
     val userEvents: InboxDMUserUpdateResponseUserEvents? = null,
-
     @SerialName(value = "inbox_initial_state")
-    val inboxInitialState: InboxDMUserUpdateResponseInboxInitialState? = null
-
-) {
-
-
-}
-
+    val inboxInitialState: InboxDMUserUpdateResponseInboxInitialState? = null,
+)

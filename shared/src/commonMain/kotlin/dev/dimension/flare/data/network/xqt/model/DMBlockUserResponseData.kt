@@ -10,31 +10,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMBlockUserResponseDataDmBlockByRestId
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param dmBlockByRestId 
+ *
+ * @param dmBlockByRestId
  */
 @Serializable
-
-internal data class DMBlockUserResponseData (
-
+internal data class DMBlockUserResponseData(
     @SerialName(value = "dm_block_by_rest_id")
-    val dmBlockByRestId: DMBlockUserResponseDataDmBlockByRestId? = null
-
-) {
-
-
-}
-
+    val dmBlockByRestId: DMBlockUserResponseDataDmBlockByRestId? = null,
+)

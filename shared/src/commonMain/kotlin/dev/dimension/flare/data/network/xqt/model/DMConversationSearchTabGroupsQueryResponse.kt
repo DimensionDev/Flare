@@ -10,31 +10,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMConversationSearchTabGroupsQueryResponseData
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param `data` 
+ *
+ * @param `data`
  */
 @Serializable
-
-internal data class DMConversationSearchTabGroupsQueryResponse (
-
+internal data class DMConversationSearchTabGroupsQueryResponse(
     @SerialName(value = "data")
-    val `data`: DMConversationSearchTabGroupsQueryResponseData? = null
-
-) {
-
-
-}
-
+    val `data`: DMConversationSearchTabGroupsQueryResponseData? = null,
+)

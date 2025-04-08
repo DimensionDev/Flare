@@ -23,8 +23,8 @@ public data class UiDMRoom internal constructor(
     val id: String by lazy {
         key.toString()
     }
-    val user: UiUserV2? by lazy {
-        users.firstOrNull()
+    val hasUser: Boolean by lazy {
+        users.isNotEmpty()
     }
 }
 

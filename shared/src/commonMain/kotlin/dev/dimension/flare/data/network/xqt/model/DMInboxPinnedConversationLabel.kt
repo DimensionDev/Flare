@@ -10,34 +10,24 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param labelType 
- * @param timestamp 
+ *
+ * @param labelType
+ * @param timestamp
  */
 @Serializable
-
-internal data class DMInboxPinnedConversationLabel (
-
+internal data class DMInboxPinnedConversationLabel(
     @SerialName(value = "label_type")
     val labelType: kotlin.String? = null,
-
     @SerialName(value = "timestamp")
-    val timestamp: kotlin.Long? = null
-
-) {
-
-
-}
-
+    val timestamp: kotlin.Long? = null,
+)

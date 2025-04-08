@@ -10,30 +10,21 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param isLowQuality 
+ *
+ * @param isLowQuality
  */
 @Serializable
-
-internal data class DMEventDetailInitialLowQualityState (
-
+internal data class DMEventDetailInitialLowQualityState(
     @SerialName(value = "is_low_quality")
-    val isLowQuality: kotlin.Boolean? = null
-
-) {
-
-
-}
-
+    val isLowQuality: kotlin.Boolean? = null,
+)

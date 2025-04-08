@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
@@ -18,77 +18,55 @@ package dev.dimension.flare.data.network.xqt.model
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataAttachmentMediaOriginalInfo
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataAttachmentMediaSizes
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataAttachmentMediaVideoInfo
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param id 
- * @param idStr 
- * @param indices 
- * @param mediaUrl 
- * @param mediaUrlHttps 
- * @param url 
- * @param displayUrl 
- * @param expandedUrl 
- * @param type 
- * @param originalInfo 
- * @param sizes 
- * @param videoInfo 
- * @param features 
- * @param extAltText 
+ *
+ * @param id
+ * @param idStr
+ * @param indices
+ * @param mediaUrl
+ * @param mediaUrlHttps
+ * @param url
+ * @param displayUrl
+ * @param expandedUrl
+ * @param type
+ * @param originalInfo
+ * @param sizes
+ * @param videoInfo
+ * @param features
+ * @param extAltText
  */
 @Serializable
-
-internal data class InboxConversationTimelineMessageDataAttachmentAnimatedGif (
-
+internal data class InboxConversationTimelineMessageDataAttachmentAnimatedGif(
     @SerialName(value = "id")
     val id: kotlin.Long? = null,
-
     @SerialName(value = "id_str")
     val idStr: kotlin.String? = null,
-
     @SerialName(value = "indices")
     val indices: kotlin.collections.List<kotlin.Int>? = null,
-
     @SerialName(value = "media_url")
     val mediaUrl: kotlin.String? = null,
-
     @SerialName(value = "media_url_https")
     val mediaUrlHttps: kotlin.String? = null,
-
     @SerialName(value = "url")
     val url: kotlin.String? = null,
-
     @SerialName(value = "display_url")
     val displayUrl: kotlin.String? = null,
-
     @SerialName(value = "expanded_url")
     val expandedUrl: kotlin.String? = null,
-
     @SerialName(value = "type")
     val type: kotlin.String? = null,
-
     @SerialName(value = "original_info")
     val originalInfo: InboxConversationTimelineMessageDataAttachmentMediaOriginalInfo? = null,
-
     @SerialName(value = "sizes")
     val sizes: InboxConversationTimelineMessageDataAttachmentMediaSizes? = null,
-
     @SerialName(value = "video_info")
     val videoInfo: InboxConversationTimelineMessageDataAttachmentMediaVideoInfo? = null,
-
-    @Contextual @SerialName(value = "features")
-    val features: kotlin.Any? = null,
-
+//    @Contextual @SerialName(value = "features")
+//    val features: kotlin.Any? = null,
     @SerialName(value = "ext_alt_text")
-    val extAltText: kotlin.String? = null
-
-) {
-
-
-}
-
+    val extAltText: kotlin.String? = null,
+)

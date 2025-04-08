@@ -10,48 +10,36 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.InboxConversation
 import dev.dimension.flare.data.network.xqt.model.InboxUser
-
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param status 
- * @param minEntryId 
- * @param propertyEntries 
- * @param users 
- * @param conversations 
+ *
+ * @param status
+ * @param minEntryId
+ * @param propertyEntries
+ * @param users
+ * @param conversations
  */
 @Serializable
-
-internal data class InboxDMTrustedTimelineResponseInboxTimeline (
-
+internal data class InboxDMTrustedTimelineResponseInboxTimeline(
     @SerialName(value = "status")
     val status: kotlin.String? = null,
-
     @SerialName(value = "min_entry_id")
     val minEntryId: kotlin.String? = null,
-
     @SerialName(value = "entries")
-    val propertyEntries: kotlin.collections.List<@Contextual kotlin.Any>? = null,
-
+    val propertyEntries: kotlin.collections.List<InboxTimelineEntry>? = null,
     @Contextual @SerialName(value = "users")
     val users: kotlin.collections.Map<kotlin.String, InboxUser>? = null,
-
     @Contextual @SerialName(value = "conversations")
-    val conversations: kotlin.collections.Map<kotlin.String, InboxConversation>? = null
-
-) {
-
-
-}
-
+    val conversations: kotlin.collections.Map<kotlin.String, InboxConversation>? = null,
+)

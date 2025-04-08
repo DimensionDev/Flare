@@ -10,36 +10,26 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMEvent
 import dev.dimension.flare.data.network.xqt.model.DMGroupSearchSliceItemsInnerHighlighting
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param dmEvent 
- * @param highlighting 
+ *
+ * @param dmEvent
+ * @param highlighting
  */
 @Serializable
-
-internal data class DMMessageSearchSliceItemsInner (
-
+internal data class DMMessageSearchSliceItemsInner(
     @SerialName(value = "dm_event")
     val dmEvent: DMEvent? = null,
-
     @SerialName(value = "highlighting")
-    val highlighting: DMGroupSearchSliceItemsInnerHighlighting? = null
-
-) {
-
-
-}
-
+    val highlighting: DMGroupSearchSliceItemsInnerHighlighting? = null,
+)

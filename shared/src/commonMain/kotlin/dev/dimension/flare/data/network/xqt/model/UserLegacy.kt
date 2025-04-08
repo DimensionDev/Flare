@@ -80,7 +80,7 @@ internal data class UserLegacy(
     @SerialName(value = "description")
     val description: kotlin.String? = null,
     @SerialName(value = "entities")
-    val entities: Entities,
+    val entities: Entities? = null,
     @SerialName(value = "fast_followers_count")
     val fastFollowersCount: kotlin.Int? = null,
     @SerialName(value = "favourites_count")

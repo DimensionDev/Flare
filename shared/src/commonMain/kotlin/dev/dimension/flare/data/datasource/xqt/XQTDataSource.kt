@@ -7,6 +7,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
+import androidx.paging.map
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
@@ -24,6 +25,7 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
@@ -67,6 +69,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
@@ -90,6 +94,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -108,7 +113,8 @@ internal class XQTDataSource(
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.XQT,
-    ListDataSource {
+    ListDataSource,
+    DirectMessageDataSource {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
@@ -1557,4 +1563,81 @@ internal class XQTDataSource(
                     "list_${accountKey}_$listId",
                 ),
         )
+
+    override fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
+        Pager(
+            config = PagingConfig(pageSize = 20),
+            remoteMediator =
+                DMListRemoteMediator(
+                    service = service,
+                    accountKey = accountKey,
+                    database = database,
+                ),
+            pagingSourceFactory = {
+                database.messageDao().getRoomPagingSource(
+                    accountKey = accountKey,
+                )
+            },
+        ).flow
+            .map {
+                it.map {
+                    it.render(accountKey)
+                }
+            }.cachedIn(scope)
+
+    override fun directMessageConversation(
+        roomKey: MicroBlogKey,
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiDMItem>> {
+        TODO("Not yet implemented")
+    }
+
+    override fun sendDirectMessage(
+        roomKey: MicroBlogKey,
+        message: String,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun retrySendDirectMessage(messageKey: MicroBlogKey) {
+        TODO("Not yet implemented")
+    }
+
+    override fun deleteDirectMessage(
+        roomKey: MicroBlogKey,
+        messageKey: MicroBlogKey,
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey) {
+        TODO("Not yet implemented")
+    }
+
+    private val dmNotificationMarkerKey: String
+        get() = "dm_notificationBadgeCount_$accountKey"
+    override val directMessageBadgeCount: CacheData<Int>
+        get() =
+            MemCacheable(
+                key = dmNotificationMarkerKey,
+                fetchSource = {
+                    service.getBadgeCount().dmUnreadCount?.toInt() ?: 0
+                },
+            )
+
+    override fun leaveDirectMessage(roomKey: MicroBlogKey) {
+        TODO("Not yet implemented")
+    }
+
+    override fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean {
+        TODO("Not yet implemented")
+    }
 }

@@ -10,79 +10,58 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.InboxConversationParticipantsInner
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param conversationId 
- * @param type 
- * @param sortEventId 
- * @param sortTimestamp 
- * @param participants 
- * @param nsfw 
- * @param notificationsDisabled 
- * @param mentionNotificationsDisabled 
- * @param lastReadEventId 
- * @param readOnly 
- * @param trusted 
- * @param lowQuality 
- * @param muted 
+ *
+ * @param conversationId
+ * @param type
+ * @param sortEventId
+ * @param sortTimestamp
+ * @param participants
+ * @param nsfw
+ * @param notificationsDisabled
+ * @param mentionNotificationsDisabled
+ * @param lastReadEventId
+ * @param readOnly
+ * @param trusted
+ * @param lowQuality
+ * @param muted
  */
 @Serializable
-
-internal data class InboxConversationTimelineConversation (
-
+internal data class InboxConversationTimelineConversation(
     @SerialName(value = "conversation_id")
     val conversationId: kotlin.String? = null,
-
     @SerialName(value = "type")
     val type: kotlin.String? = null,
-
     @SerialName(value = "sort_event_id")
     val sortEventId: kotlin.String? = null,
-
     @SerialName(value = "sort_timestamp")
     val sortTimestamp: kotlin.String? = null,
-
     @SerialName(value = "participants")
     val participants: kotlin.collections.List<InboxConversationParticipantsInner>? = null,
-
     @SerialName(value = "nsfw")
     val nsfw: kotlin.Boolean? = null,
-
     @SerialName(value = "notifications_disabled")
     val notificationsDisabled: kotlin.Boolean? = null,
-
     @SerialName(value = "mention_notifications_disabled")
     val mentionNotificationsDisabled: kotlin.Boolean? = null,
-
     @SerialName(value = "last_read_event_id")
     val lastReadEventId: kotlin.String? = null,
-
     @SerialName(value = "read_only")
     val readOnly: kotlin.Boolean? = null,
-
     @SerialName(value = "trusted")
     val trusted: kotlin.Boolean? = null,
-
     @SerialName(value = "low_quality")
     val lowQuality: kotlin.Boolean? = null,
-
     @SerialName(value = "muted")
-    val muted: kotlin.Boolean? = null
-
-) {
-
-
-}
-
+    val muted: kotlin.Boolean? = null,
+)

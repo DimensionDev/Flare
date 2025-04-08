@@ -10,30 +10,21 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param dmMessageHideDelete 
+ *
+ * @param dmMessageHideDelete
  */
 @Serializable
-
-internal data class DMMessageDeleteMutationResponseData (
-
+internal data class DMMessageDeleteMutationResponseData(
     @SerialName(value = "dm_message_hide_delete")
-    val dmMessageHideDelete: kotlin.String? = null
-
-) {
-
-
-}
-
+    val dmMessageHideDelete: kotlin.String? = null,
+)

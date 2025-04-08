@@ -1,6 +1,5 @@
 package dev.dimension.flare.data.network.xqt.api
 
-
 import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
@@ -26,7 +25,7 @@ internal interface DmApi {
     @GET("graphql/{pathQueryId}/DMConversationSearchTabGroupsQuery")
     public suspend fun getDMConversationSearchTabGroupsQuery(
         @Path("pathQueryId") pathQueryId: kotlin.String = "8D8KoSq5q9d5Su3emu2dwg",
-        @Query("variables") variables: kotlin.String
+        @Query("variables") variables: kotlin.String,
     ): Response<DMConversationSearchTabGroupsQueryResponse>
 
     /**
@@ -43,7 +42,7 @@ internal interface DmApi {
     @GET("graphql/{pathQueryId}/DMConversationSearchTabPeopleQuery")
     public suspend fun getDMConversationSearchTabPeopleQuery(
         @Path("pathQueryId") pathQueryId: kotlin.String = "qno3lU4_eSHtSFoWQUhEag",
-        @Query("variables") variables: kotlin.String
+        @Query("variables") variables: kotlin.String,
     ): Response<DMConversationSearchTabPeopleQueryResponse>
 
     /**
@@ -62,7 +61,7 @@ internal interface DmApi {
     public suspend fun getDMMessageSearchTabQuery(
         @Path("pathQueryId") pathQueryId: kotlin.String = "QUobOGFxSYwNxfh2zCpVGA",
         @Query("variables") variables: kotlin.String,
-        @Query("features") features: kotlin.String
+        @Query("features") features: kotlin.String,
     ): Response<DMMessageSearchTabQueryResponse>
 
     /**
@@ -79,8 +78,8 @@ internal interface DmApi {
     @GET("graphql/{pathQueryId}/DMPinnedInboxQuery")
     public suspend fun getDMPinnedInboxQuery(
         @Path("pathQueryId") pathQueryId: kotlin.String = "_gBQBgClVuMQb8efxWkbbQ",
-        @Query("variables") variables: kotlin.String
-    ): Response<DMInboxPinnedInboxQueryResponse>
+        @Query("variables") variables: kotlin.String = "{\"label\":\"Pinned\"}",
+    ): DMInboxPinnedInboxQueryResponse
 
     /**
      * GET graphql/{pathQueryId}/DmAllSearchSlice
@@ -98,6 +97,6 @@ internal interface DmApi {
     public suspend fun getDmAllSearchSlice(
         @Path("pathQueryId") pathQueryId: kotlin.String = "hNFpW5uN1FOZBE8u1HJicw",
         @Query("variables") variables: kotlin.String,
-        @Query("features") features: kotlin.String
+        @Query("features") features: kotlin.String,
     ): Response<DmAllSearchSliceResponse>
 }

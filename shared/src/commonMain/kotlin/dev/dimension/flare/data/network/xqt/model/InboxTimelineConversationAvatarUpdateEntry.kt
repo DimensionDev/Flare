@@ -10,31 +10,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.InboxTimelineConversationAvatarUpdateEntryConversationAvatarUpdate
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param conversationAvatarUpdate 
+ *
+ * @param conversationAvatarUpdate
  */
 @Serializable
-
-internal data class InboxTimelineConversationAvatarUpdateEntry (
-
+internal data class InboxTimelineConversationAvatarUpdateEntry(
     @SerialName(value = "conversation_avatar_update")
-    val conversationAvatarUpdate: InboxTimelineConversationAvatarUpdateEntryConversationAvatarUpdate? = null
-
-) {
-
-
-}
-
+    val conversationAvatarUpdate: InboxTimelineConversationAvatarUpdateEntryConversationAvatarUpdate? = null,
+)

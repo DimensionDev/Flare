@@ -10,46 +10,33 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param id 
- * @param time 
- * @param affectsSort 
- * @param conversationId 
- * @param mentionNotificationsDisabled 
+ *
+ * @param id
+ * @param time
+ * @param affectsSort
+ * @param conversationId
+ * @param mentionNotificationsDisabled
  */
 @Serializable
-
-internal data class InboxTimelineMentionNotificationsSettingUpdateEntryMentionNotificationsSettingUpdate (
-
+internal data class InboxTimelineMentionNotificationsSettingUpdateEntryMentionNotificationsSettingUpdate(
     @SerialName(value = "id")
     val id: kotlin.String? = null,
-
     @SerialName(value = "time")
     val time: kotlin.String? = null,
-
     @SerialName(value = "affects_sort")
     val affectsSort: kotlin.Boolean? = null,
-
     @SerialName(value = "conversation_id")
     val conversationId: kotlin.String? = null,
-
     @SerialName(value = "mention_notifications_disabled")
-    val mentionNotificationsDisabled: kotlin.Boolean? = null
-
-) {
-
-
-}
-
+    val mentionNotificationsDisabled: kotlin.Boolean? = null,
+)

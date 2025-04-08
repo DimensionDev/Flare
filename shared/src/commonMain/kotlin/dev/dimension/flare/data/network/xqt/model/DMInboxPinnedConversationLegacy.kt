@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
@@ -18,37 +18,25 @@ package dev.dimension.flare.data.network.xqt.model
 import dev.dimension.flare.data.network.xqt.model.DMInboxPinnedConversationLegacyMetadata
 import dev.dimension.flare.data.network.xqt.model.DMInboxPinnedConversationParticipant
 import dev.dimension.flare.data.network.xqt.model.DMInboxPinnedConversationPerspectivalMetadata
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param conversationId 
- * @param metadata 
- * @param participantsMetadata 
- * @param perspectivalConversationMetadata 
+ *
+ * @param conversationId
+ * @param metadata
+ * @param participantsMetadata
+ * @param perspectivalConversationMetadata
  */
 @Serializable
-
-internal data class DMInboxPinnedConversationLegacy (
-
+internal data class DMInboxPinnedConversationLegacy(
     @SerialName(value = "conversation_id")
     val conversationId: kotlin.String? = null,
-
     @SerialName(value = "metadata")
     val metadata: DMInboxPinnedConversationLegacyMetadata? = null,
-
     @SerialName(value = "participants_metadata")
     val participantsMetadata: kotlin.collections.List<DMInboxPinnedConversationParticipant>? = null,
-
     @SerialName(value = "perspectival_conversation_metadata")
-    val perspectivalConversationMetadata: DMInboxPinnedConversationPerspectivalMetadata? = null
-
-) {
-
-
-}
-
+    val perspectivalConversationMetadata: DMInboxPinnedConversationPerspectivalMetadata? = null,
+)

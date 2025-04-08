@@ -10,31 +10,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMInboxPinnedConversationUser
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param result 
+ *
+ * @param result
  */
 @Serializable
-
-internal data class DMUserResults (
-
+internal data class DMUserResults(
     @SerialName(value = "result")
-    val result: DMInboxPinnedConversationUser? = null
-
-) {
-
-
-}
-
+    val result: DMInboxPinnedConversationUser? = null,
+)

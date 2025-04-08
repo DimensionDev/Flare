@@ -121,7 +121,6 @@ internal interface V11PostApi {
         @Body body: PostMediaMetadataCreateRequest,
     ): Response<Unit>
 
-
     /**
      * POST 1.1/dm/conversation/{conversation_id}/accept.json
      *
@@ -135,7 +134,10 @@ internal interface V11PostApi {
      */
     @FormUrlEncoded
     @POST("1.1/dm/conversation/{conversation_id}/accept.json")
-    public suspend fun postDMConversationAccept(@Path("conversation_id") conversationId: kotlin.String, @Field("conversationId") conversationId2: kotlin.String = "426425493-1714936029558476800"): Response<Unit>
+    public suspend fun postDMConversationAccept(
+        @Path("conversation_id") conversationId: kotlin.String,
+        @Field("conversationId") conversationId2: kotlin.String = "426425493-1714936029558476800",
+    ): Response<Unit>
 
     /**
      * POST 1.1/dm/conversation/{conversation_id}/delete.json
@@ -166,7 +168,26 @@ internal interface V11PostApi {
      */
     @FormUrlEncoded
     @POST("1.1/dm/conversation/{conversation_id}/delete.json")
-    public suspend fun postDMConversationDelete(@Path("conversation_id") conversationId: kotlin.String, @Field("cards_platform") cardsPlatform: kotlin.String = "Web-12", @Field("dm_secret_conversations_enabled") dmSecretConversationsEnabled: kotlin.Boolean = false, @Field("dm_users") dmUsers: kotlin.Boolean = false, @Field("include_cards") includeCards: kotlin.Int = 1, @Field("include_conversation_info") includeConversationInfo: kotlin.Boolean = true, @Field("include_ext_alt_text") includeExtAltText: kotlin.Boolean = true, @Field("include_ext_limited_action_results") includeExtLimitedActionResults: kotlin.Boolean = true, @Field("include_ext_media_color") includeExtMediaColor: kotlin.Boolean = true, @Field("include_ext_views") includeExtViews: kotlin.Boolean = true, @Field("include_groups") includeGroups: kotlin.Boolean = true, @Field("include_inbox_timelines") includeInboxTimelines: kotlin.Boolean = true, @Field("include_quote_count") includeQuoteCount: kotlin.Boolean = true, @Field("include_reply_count") includeReplyCount: kotlin.Int = 1, @Field("krs_registration_enabled") krsRegistrationEnabled: kotlin.Boolean = true, @Field("supports_edit") supportsEdit: kotlin.Boolean = true, @Field("supports_reactions") supportsReactions: kotlin.Boolean = true, @Field("tweet_mode") tweetMode: kotlin.String = "extended"): Response<Unit>
+    public suspend fun postDMConversationDelete(
+        @Path("conversation_id") conversationId: kotlin.String,
+        @Field("cards_platform") cardsPlatform: kotlin.String = "Web-12",
+        @Field("dm_secret_conversations_enabled") dmSecretConversationsEnabled: kotlin.Boolean = false,
+        @Field("dm_users") dmUsers: kotlin.Boolean = false,
+        @Field("include_cards") includeCards: kotlin.Int = 1,
+        @Field("include_conversation_info") includeConversationInfo: kotlin.Boolean = true,
+        @Field("include_ext_alt_text") includeExtAltText: kotlin.Boolean = true,
+        @Field("include_ext_limited_action_results") includeExtLimitedActionResults: kotlin.Boolean = true,
+        @Field("include_ext_media_color") includeExtMediaColor: kotlin.Boolean = true,
+        @Field("include_ext_views") includeExtViews: kotlin.Boolean = true,
+        @Field("include_groups") includeGroups: kotlin.Boolean = true,
+        @Field("include_inbox_timelines") includeInboxTimelines: kotlin.Boolean = true,
+        @Field("include_quote_count") includeQuoteCount: kotlin.Boolean = true,
+        @Field("include_reply_count") includeReplyCount: kotlin.Int = 1,
+        @Field("krs_registration_enabled") krsRegistrationEnabled: kotlin.Boolean = true,
+        @Field("supports_edit") supportsEdit: kotlin.Boolean = true,
+        @Field("supports_reactions") supportsReactions: kotlin.Boolean = true,
+        @Field("tweet_mode") tweetMode: kotlin.String = "extended",
+    ): Response<Unit>
 
     /**
      * POST 1.1/dm/conversation/{conversation_id}/disable_notifications.json
@@ -181,7 +202,10 @@ internal interface V11PostApi {
      */
     @FormUrlEncoded
     @POST("1.1/dm/conversation/{conversation_id}/disable_notifications.json")
-    public suspend fun postDMConversationDisableNotifications(@Path("conversation_id") conversationId: kotlin.String, @Field("duration") duration: kotlin.Int = 0): Response<Unit>
+    public suspend fun postDMConversationDisableNotifications(
+        @Path("conversation_id") conversationId: kotlin.String,
+        @Field("duration") duration: kotlin.Int = 0,
+    ): Response<Unit>
 
     /**
      * POST 1.1/dm/conversation/{conversation_id}/enable_notifications.json
@@ -196,7 +220,10 @@ internal interface V11PostApi {
      */
     @FormUrlEncoded
     @POST("1.1/dm/conversation/{conversation_id}/enable_notifications.json")
-    public suspend fun postDMConversationEnableNotifications(@Path("conversation_id") conversationId: kotlin.String, @Field("conversationId") conversationId2: kotlin.String = "426425493-1714936029558476800"): Response<Unit>
+    public suspend fun postDMConversationEnableNotifications(
+        @Path("conversation_id") conversationId: kotlin.String,
+        @Field("conversationId") conversationId2: kotlin.String = "426425493-1714936029558476800",
+    ): Response<Unit>
 
     /**
      * POST 1.1/dm/conversation/{conversation_id}/mark_read.json
@@ -212,7 +239,11 @@ internal interface V11PostApi {
      */
     @FormUrlEncoded
     @POST("1.1/dm/conversation/{conversation_id}/mark_read.json")
-    public suspend fun postDMConversationMarkRead(@Path("conversation_id") conversationId: kotlin.String, @Field("conversationId") conversationId2: kotlin.String = "426425493-1714936029558476800", @Field("last_read_event_id") lastReadEventId: kotlin.String = "1840695565337944534"): Response<Unit>
+    public suspend fun postDMConversationMarkRead(
+        @Path("conversation_id") conversationId: kotlin.String,
+        @Field("conversationId") conversationId2: kotlin.String = "426425493-1714936029558476800",
+        @Field("last_read_event_id") lastReadEventId: kotlin.String = "1840695565337944534",
+    ): Response<Unit>
 
     /**
      * POST 1.1/dm/conversation/{conversation_id}/update_avatar.json
@@ -227,7 +258,10 @@ internal interface V11PostApi {
      */
     @FormUrlEncoded
     @POST("1.1/dm/conversation/{conversation_id}/update_avatar.json")
-    public suspend fun postDMConversationUpdateAvatar(@Path("conversation_id") conversationId: kotlin.String, @Field("avatar_id") avatarId: kotlin.String = "1850839812296884224"): Response<Unit>
+    public suspend fun postDMConversationUpdateAvatar(
+        @Path("conversation_id") conversationId: kotlin.String,
+        @Field("avatar_id") avatarId: kotlin.String = "1850839812296884224",
+    ): Response<Unit>
 
     /**
      * POST 1.1/dm/conversation/{conversation_id}/update_mention_notifications_setting.json
@@ -242,7 +276,10 @@ internal interface V11PostApi {
      */
     @FormUrlEncoded
     @POST("1.1/dm/conversation/{conversation_id}/update_mention_notifications_setting.json")
-    public suspend fun postDMConversationUpdateMentionNotificationsSetting(@Path("conversation_id") conversationId: kotlin.String, @Field("mention_notifications_disabled") mentionNotificationsDisabled: kotlin.Boolean = true): Response<Unit>
+    public suspend fun postDMConversationUpdateMentionNotificationsSetting(
+        @Path("conversation_id") conversationId: kotlin.String,
+        @Field("mention_notifications_disabled") mentionNotificationsDisabled: kotlin.Boolean = true,
+    ): Response<Unit>
 
     /**
      * POST 1.1/dm/conversation/{conversation_id}/update_name.json
@@ -257,7 +294,10 @@ internal interface V11PostApi {
      */
     @FormUrlEncoded
     @POST("1.1/dm/conversation/{conversation_id}/update_name.json")
-    public suspend fun postDMConversationUpdateName(@Path("conversation_id") conversationId: kotlin.String, @Field("name") name: kotlin.String = "test"): Response<Unit>
+    public suspend fun postDMConversationUpdateName(
+        @Path("conversation_id") conversationId: kotlin.String,
+        @Field("name") name: kotlin.String = "test",
+    ): Response<Unit>
 
     /**
      * POST 1.1/dm/update_last_seen_event_id.json
@@ -272,7 +312,10 @@ internal interface V11PostApi {
      */
     @FormUrlEncoded
     @POST("1.1/dm/update_last_seen_event_id.json")
-    public suspend fun postDMUpdateLastSeenEventId(@Field("last_seen_event_id") lastSeenEventId: kotlin.String = "1840695565337944534", @Field("trusted_last_seen_event_id") trustedLastSeenEventId: kotlin.String = "1840695565337944534"): Response<Unit>
+    public suspend fun postDMUpdateLastSeenEventId(
+        @Field("last_seen_event_id") lastSeenEventId: kotlin.String = "1840695565337944534",
+        @Field("trusted_last_seen_event_id") trustedLastSeenEventId: kotlin.String = "1840695565337944534",
+    ): Response<Unit>
 
     /**
      * POST 1.1/account/settings.json
@@ -293,6 +336,14 @@ internal interface V11PostApi {
      */
     @FormUrlEncoded
     @POST("1.1/account/settings.json")
-    public suspend fun postUpdateAccountSettings(@Field("include_alt_text_compose") includeAltTextCompose: kotlin.Boolean = true, @Field("include_mention_filter") includeMentionFilter: kotlin.Boolean = true, @Field("include_nsfw_admin_flag") includeNsfwAdminFlag: kotlin.Boolean = true, @Field("include_nsfw_user_flag") includeNsfwUserFlag: kotlin.Boolean = true, @Field("include_ranked_timeline") includeRankedTimeline: kotlin.Boolean = true, @Field("allow_dms_from") allowDmsFrom: kotlin.String? = null, @Field("dm_quality_filter") dmQualityFilter: kotlin.String? = null, @Field("dm_receipt_setting") dmReceiptSetting: kotlin.String? = null): Response<UpdateAccountSettingsResponse>
-
+    public suspend fun postUpdateAccountSettings(
+        @Field("include_alt_text_compose") includeAltTextCompose: kotlin.Boolean = true,
+        @Field("include_mention_filter") includeMentionFilter: kotlin.Boolean = true,
+        @Field("include_nsfw_admin_flag") includeNsfwAdminFlag: kotlin.Boolean = true,
+        @Field("include_nsfw_user_flag") includeNsfwUserFlag: kotlin.Boolean = true,
+        @Field("include_ranked_timeline") includeRankedTimeline: kotlin.Boolean = true,
+        @Field("allow_dms_from") allowDmsFrom: kotlin.String? = null,
+        @Field("dm_quality_filter") dmQualityFilter: kotlin.String? = null,
+        @Field("dm_receipt_setting") dmReceiptSetting: kotlin.String? = null,
+    ): Response<UpdateAccountSettingsResponse>
 }

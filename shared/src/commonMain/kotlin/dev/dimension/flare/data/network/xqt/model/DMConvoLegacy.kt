@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
@@ -18,37 +18,25 @@ package dev.dimension.flare.data.network.xqt.model
 import dev.dimension.flare.data.network.xqt.model.DMConvoMetadata
 import dev.dimension.flare.data.network.xqt.model.DMParticipantMetadata
 import dev.dimension.flare.data.network.xqt.model.DMPerspectivalConversationMetadata
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param conversationId 
- * @param metadata 
- * @param participantsMetadata 
- * @param perspectivalConversationMetadata 
+ *
+ * @param conversationId
+ * @param metadata
+ * @param participantsMetadata
+ * @param perspectivalConversationMetadata
  */
 @Serializable
-
-internal data class DMConvoLegacy (
-
+internal data class DMConvoLegacy(
     @SerialName(value = "conversation_id")
     val conversationId: kotlin.String? = null,
-
     @SerialName(value = "metadata")
     val metadata: DMConvoMetadata? = null,
-
     @SerialName(value = "participants_metadata")
     val participantsMetadata: kotlin.collections.List<DMParticipantMetadata>? = null,
-
     @SerialName(value = "perspectival_conversation_metadata")
-    val perspectivalConversationMetadata: DMPerspectivalConversationMetadata? = null
-
-) {
-
-
-}
-
+    val perspectivalConversationMetadata: DMPerspectivalConversationMetadata? = null,
+)

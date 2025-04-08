@@ -10,46 +10,33 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param id 
- * @param time 
- * @param affectsSort 
- * @param conversationId 
- * @param lastReadEventId 
+ *
+ * @param id
+ * @param time
+ * @param affectsSort
+ * @param conversationId
+ * @param lastReadEventId
  */
 @Serializable
-
-internal data class InboxTimelineConversationReadEntryConversationRead (
-
+internal data class InboxTimelineConversationReadEntryConversationRead(
     @SerialName(value = "id")
     val id: kotlin.String? = null,
-
     @SerialName(value = "time")
     val time: kotlin.String? = null,
-
     @SerialName(value = "affects_sort")
     val affectsSort: kotlin.Boolean? = null,
-
     @SerialName(value = "conversation_id")
     val conversationId: kotlin.String? = null,
-
     @SerialName(value = "last_read_event_id")
-    val lastReadEventId: kotlin.String? = null
-
-) {
-
-
-}
-
+    val lastReadEventId: kotlin.String? = null,
+)

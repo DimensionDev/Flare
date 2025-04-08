@@ -134,7 +134,6 @@ internal interface V11GetApi {
         @Query("filter_to_owned_lists") filterToOwnedLists: Boolean = true,
     ): Response<ListsMembershipsResponse>
 
-
     /**
      * GET 1.1/dm/conversation/{conversation_id}.json
      *
@@ -177,7 +176,44 @@ internal interface V11GetApi {
      * @return [InboxConversationTimelineResponse]
      */
     @GET("1.1/dm/conversation/{conversation_id}.json")
-    public suspend fun getDMConversationTimeline(@Path("conversation_id") conversationId: kotlin.String, @Query("max_id") maxId: kotlin.String? = null, @Query("context") context: kotlin.String? = "FETCH_DM_CONVERSATION_HISTORY", @Query("include_profile_interstitial_type") includeProfileInterstitialType: kotlin.Int? = 1, @Query("include_blocking") includeBlocking: kotlin.Int? = 1, @Query("include_blocked_by") includeBlockedBy: kotlin.Int? = 1, @Query("include_followed_by") includeFollowedBy: kotlin.Int? = 1, @Query("include_want_retweets") includeWantRetweets: kotlin.Int? = 1, @Query("include_mute_edge") includeMuteEdge: kotlin.Int? = 1, @Query("include_can_dm") includeCanDm: kotlin.Int? = 1, @Query("include_can_media_tag") includeCanMediaTag: kotlin.Int? = 1, @Query("include_ext_is_blue_verified") includeExtIsBlueVerified: kotlin.Int? = 1, @Query("include_ext_verified_type") includeExtVerifiedType: kotlin.Int? = 1, @Query("include_ext_profile_image_shape") includeExtProfileImageShape: kotlin.Int? = 1, @Query("skip_status") skipStatus: kotlin.Int? = 1, @Query("cards_platform") cardsPlatform: kotlin.String? = "Web-12", @Query("include_cards") includeCards: kotlin.Int? = 1, @Query("include_ext_alt_text") includeExtAltText: kotlin.Boolean? = true, @Query("include_ext_limited_action_results") includeExtLimitedActionResults: kotlin.Boolean? = true, @Query("include_quote_count") includeQuoteCount: kotlin.Boolean? = true, @Query("include_reply_count") includeReplyCount: kotlin.Int? = 1, @Query("tweet_mode") tweetMode: kotlin.String? = "extended", @Query("include_ext_views") includeExtViews: kotlin.Boolean? = true, @Query("dm_users") dmUsers: kotlin.Boolean? = false, @Query("include_groups") includeGroups: kotlin.Boolean? = true, @Query("include_inbox_timelines") includeInboxTimelines: kotlin.Boolean? = true, @Query("include_ext_media_color") includeExtMediaColor: kotlin.Boolean? = true, @Query("supports_reactions") supportsReactions: kotlin.Boolean? = true, @Query("dm_secret_conversations_enabled") dmSecretConversationsEnabled: kotlin.Boolean? = false, @Query("krs_registration_enabled") krsRegistrationEnabled: kotlin.Boolean? = true, @Query("include_conversation_info") includeConversationInfo: kotlin.Boolean? = true, @Query("ext") ext: kotlin.String? = "mediaColor,altText,mediaStats,highlightedLabel,voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo,editControl,article"): Response<InboxConversationTimelineResponse>
+    public suspend fun getDMConversationTimeline(
+        @Path("conversation_id") conversationId: kotlin.String,
+        @Query("max_id") maxId: kotlin.String? = null,
+        @Query("context") context: kotlin.String? = "FETCH_DM_CONVERSATION_HISTORY",
+        @Query("include_profile_interstitial_type") includeProfileInterstitialType: kotlin.Int? = 1,
+        @Query("include_blocking") includeBlocking: kotlin.Int? = 1,
+        @Query("include_blocked_by") includeBlockedBy: kotlin.Int? = 1,
+        @Query("include_followed_by") includeFollowedBy: kotlin.Int? = 1,
+        @Query("include_want_retweets") includeWantRetweets: kotlin.Int? = 1,
+        @Query("include_mute_edge") includeMuteEdge: kotlin.Int? = 1,
+        @Query("include_can_dm") includeCanDm: kotlin.Int? = 1,
+        @Query("include_can_media_tag") includeCanMediaTag: kotlin.Int? = 1,
+        @Query("include_ext_is_blue_verified") includeExtIsBlueVerified: kotlin.Int? = 1,
+        @Query("include_ext_verified_type") includeExtVerifiedType: kotlin.Int? = 1,
+        @Query("include_ext_profile_image_shape") includeExtProfileImageShape: kotlin.Int? = 1,
+        @Query("skip_status") skipStatus: kotlin.Int? = 1,
+        @Query("cards_platform") cardsPlatform: kotlin.String? = "Web-12",
+        @Query("include_cards") includeCards: kotlin.Int? = 1,
+        @Query("include_ext_alt_text") includeExtAltText: kotlin.Boolean? = true,
+        @Query("include_ext_limited_action_results") includeExtLimitedActionResults: kotlin.Boolean? = true,
+        @Query("include_quote_count") includeQuoteCount: kotlin.Boolean? = true,
+        @Query("include_reply_count") includeReplyCount: kotlin.Int? = 1,
+        @Query("tweet_mode") tweetMode: kotlin.String? = "extended",
+        @Query("include_ext_views") includeExtViews: kotlin.Boolean? = true,
+        @Query("dm_users") dmUsers: kotlin.Boolean? = false,
+        @Query("include_groups") includeGroups: kotlin.Boolean? = true,
+        @Query("include_inbox_timelines") includeInboxTimelines: kotlin.Boolean? = true,
+        @Query("include_ext_media_color") includeExtMediaColor: kotlin.Boolean? = true,
+        @Query("supports_reactions") supportsReactions: kotlin.Boolean? = true,
+        @Query("dm_secret_conversations_enabled") dmSecretConversationsEnabled: kotlin.Boolean? = false,
+        @Query("krs_registration_enabled") krsRegistrationEnabled: kotlin.Boolean? = true,
+        @Query("include_conversation_info") includeConversationInfo: kotlin.Boolean? = true,
+        @Query(
+            "ext",
+        ) ext: kotlin.String? =
+            "mediaColor,altText,mediaStats,highlightedLabel,voiceInfo," +
+                "birdwatchPivot,superFollowMetadata,unmentionInfo,editControl,article",
+    ): Response<InboxConversationTimelineResponse>
 
     /**
      * GET 1.1/dm/inbox_timeline/trusted.json
@@ -222,7 +258,46 @@ internal interface V11GetApi {
      * @return [InboxDMTrustedTimelineResponse]
      */
     @GET("1.1/dm/inbox_timeline/trusted.json")
-    public suspend fun getDMInboxTimelineTrusted(@Query("filter_low_quality") filterLowQuality: kotlin.Boolean = false, @Query("include_quality") includeQuality: kotlin.String = "all", @Query("max_id") maxId: kotlin.String = "1830485838461018112", @Query("nsfw_filtering_enabled") nsfwFilteringEnabled: kotlin.Boolean = false, @Query("include_profile_interstitial_type") includeProfileInterstitialType: kotlin.Int = 1, @Query("include_blocking") includeBlocking: kotlin.Int = 1, @Query("include_blocked_by") includeBlockedBy: kotlin.Int = 1, @Query("include_followed_by") includeFollowedBy: kotlin.Int = 1, @Query("include_want_retweets") includeWantRetweets: kotlin.Int = 1, @Query("include_mute_edge") includeMuteEdge: kotlin.Int = 1, @Query("include_can_dm") includeCanDm: kotlin.Int = 1, @Query("include_can_media_tag") includeCanMediaTag: kotlin.Int = 1, @Query("include_ext_is_blue_verified") includeExtIsBlueVerified: kotlin.Int = 1, @Query("include_ext_verified_type") includeExtVerifiedType: kotlin.Int = 1, @Query("include_ext_profile_image_shape") includeExtProfileImageShape: kotlin.Int = 1, @Query("skip_status") skipStatus: kotlin.Int = 1, @Query("dm_secret_conversations_enabled") dmSecretConversationsEnabled: kotlin.Boolean = false, @Query("krs_registration_enabled") krsRegistrationEnabled: kotlin.Boolean = true, @Query("cards_platform") cardsPlatform: kotlin.String = "Web-12", @Query("include_cards") includeCards: kotlin.Int = 1, @Query("include_ext_alt_text") includeExtAltText: kotlin.Boolean = true, @Query("include_ext_limited_action_results") includeExtLimitedActionResults: kotlin.Boolean = true, @Query("include_quote_count") includeQuoteCount: kotlin.Boolean = true, @Query("include_reply_count") includeReplyCount: kotlin.Int = 1, @Query("tweet_mode") tweetMode: kotlin.String = "extended", @Query("include_ext_views") includeExtViews: kotlin.Boolean = true, @Query("dm_users") dmUsers: kotlin.Boolean = false, @Query("include_groups") includeGroups: kotlin.Boolean = true, @Query("include_inbox_timelines") includeInboxTimelines: kotlin.Boolean = true, @Query("include_ext_media_color") includeExtMediaColor: kotlin.Boolean = true, @Query("supports_reactions") supportsReactions: kotlin.Boolean = true, @Query("include_ext_edit_control") includeExtEditControl: kotlin.Boolean = true, @Query("ext") ext: kotlin.String = "mediaColor,altText,businessAffiliationsLabel,mediaStats,highlightedLabel,voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo,editControl,article"): Response<InboxDMTrustedTimelineResponse>
+    public suspend fun getDMInboxTimelineTrusted(
+        @Query("filter_low_quality") filterLowQuality: kotlin.Boolean = false,
+        @Query("include_quality") includeQuality: kotlin.String = "all",
+        @Query("max_id") maxId: kotlin.String,
+        @Query("nsfw_filtering_enabled") nsfwFilteringEnabled: kotlin.Boolean = false,
+        @Query("include_profile_interstitial_type") includeProfileInterstitialType: kotlin.Int = 1,
+        @Query("include_blocking") includeBlocking: kotlin.Int = 1,
+        @Query("include_blocked_by") includeBlockedBy: kotlin.Int = 1,
+        @Query("include_followed_by") includeFollowedBy: kotlin.Int = 1,
+        @Query("include_want_retweets") includeWantRetweets: kotlin.Int = 1,
+        @Query("include_mute_edge") includeMuteEdge: kotlin.Int = 1,
+        @Query("include_can_dm") includeCanDm: kotlin.Int = 1,
+        @Query("include_can_media_tag") includeCanMediaTag: kotlin.Int = 1,
+        @Query("include_ext_is_blue_verified") includeExtIsBlueVerified: kotlin.Int = 1,
+        @Query("include_ext_verified_type") includeExtVerifiedType: kotlin.Int = 1,
+        @Query("include_ext_profile_image_shape") includeExtProfileImageShape: kotlin.Int = 1,
+        @Query("skip_status") skipStatus: kotlin.Int = 1,
+        @Query("dm_secret_conversations_enabled") dmSecretConversationsEnabled: kotlin.Boolean = false,
+        @Query("krs_registration_enabled") krsRegistrationEnabled: kotlin.Boolean = true,
+        @Query("cards_platform") cardsPlatform: kotlin.String = "Web-12",
+        @Query("include_cards") includeCards: kotlin.Int = 1,
+        @Query("include_ext_alt_text") includeExtAltText: kotlin.Boolean = true,
+        @Query("include_ext_limited_action_results") includeExtLimitedActionResults: kotlin.Boolean = true,
+        @Query("include_quote_count") includeQuoteCount: kotlin.Boolean = true,
+        @Query("include_reply_count") includeReplyCount: kotlin.Int = 1,
+        @Query("tweet_mode") tweetMode: kotlin.String = "extended",
+        @Query("include_ext_views") includeExtViews: kotlin.Boolean = true,
+        @Query("dm_users") dmUsers: kotlin.Boolean = false,
+        @Query("include_groups") includeGroups: kotlin.Boolean = true,
+        @Query("include_inbox_timelines") includeInboxTimelines: kotlin.Boolean = true,
+        @Query("include_ext_media_color") includeExtMediaColor: kotlin.Boolean = true,
+        @Query("supports_reactions") supportsReactions: kotlin.Boolean = true,
+        @Query("include_ext_edit_control") includeExtEditControl: kotlin.Boolean = true,
+        @Query(
+            "ext",
+        ) ext: kotlin.String =
+            "mediaColor,altText,businessAffiliationsLabel,mediaStats," +
+                "highlightedLabel,voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo," +
+                "editControl,article",
+    ): InboxDMTrustedTimelineResponse
 
     /**
      * GET 1.1/dm/inbox_timeline/untrusted.json
@@ -268,7 +343,47 @@ internal interface V11GetApi {
      * @return [InboxDMTrustedTimelineResponse]
      */
     @GET("1.1/dm/inbox_timeline/untrusted.json")
-    public suspend fun getDMInboxTimelineUNTrusted(@Query("filter_low_quality") filterLowQuality: kotlin.Boolean = false, @Query("include_quality") includeQuality: kotlin.String = "high", @Query("max_id") maxId: kotlin.String = "1847521733978595752", @Query("nsfw_filtering_enabled") nsfwFilteringEnabled: kotlin.Boolean = false, @Query("include_profile_interstitial_type") includeProfileInterstitialType: kotlin.Int = 1, @Query("include_blocking") includeBlocking: kotlin.Int = 1, @Query("include_blocked_by") includeBlockedBy: kotlin.Int = 1, @Query("include_followed_by") includeFollowedBy: kotlin.Int = 1, @Query("include_want_retweets") includeWantRetweets: kotlin.Int = 1, @Query("include_mute_edge") includeMuteEdge: kotlin.Int = 1, @Query("include_can_dm") includeCanDm: kotlin.Int = 1, @Query("include_can_media_tag") includeCanMediaTag: kotlin.Int = 1, @Query("include_ext_is_blue_verified") includeExtIsBlueVerified: kotlin.Int = 1, @Query("include_ext_verified_type") includeExtVerifiedType: kotlin.Int = 1, @Query("include_ext_profile_image_shape") includeExtProfileImageShape: kotlin.Int = 1, @Query("skip_status") skipStatus: kotlin.Int = 1, @Query("dm_secret_conversations_enabled") dmSecretConversationsEnabled: kotlin.Boolean = false, @Query("krs_registration_enabled") krsRegistrationEnabled: kotlin.Boolean = true, @Query("cards_platform") cardsPlatform: kotlin.String = "Web-12", @Query("include_cards") includeCards: kotlin.Int = 1, @Query("include_ext_alt_text") includeExtAltText: kotlin.Boolean = true, @Query("include_ext_limited_action_results") includeExtLimitedActionResults: kotlin.Boolean = true, @Query("include_quote_count") includeQuoteCount: kotlin.Boolean = true, @Query("include_reply_count") includeReplyCount: kotlin.Int = 1, @Query("tweet_mode") tweetMode: kotlin.String = "extended", @Query("include_ext_views") includeExtViews: kotlin.Boolean = true, @Query("dm_users") dmUsers: kotlin.Boolean = false, @Query("include_groups") includeGroups: kotlin.Boolean = true, @Query("include_inbox_timelines") includeInboxTimelines: kotlin.Boolean = true, @Query("include_ext_media_color") includeExtMediaColor: kotlin.Boolean = true, @Query("supports_reactions") supportsReactions: kotlin.Boolean = true, @Query("supports_edit") supportsEdit: kotlin.Boolean = true, @Query("include_ext_edit_control") includeExtEditControl: kotlin.Boolean = true, @Query("ext") ext: kotlin.String = "mediaColor,altText,businessAffiliationsLabel,mediaStats,highlightedLabel,voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo,editControl,article"): Response<InboxDMTrustedTimelineResponse>
+    public suspend fun getDMInboxTimelineUNTrusted(
+        @Query("filter_low_quality") filterLowQuality: kotlin.Boolean = false,
+        @Query("include_quality") includeQuality: kotlin.String = "high",
+        @Query("max_id") maxId: kotlin.String? = null,
+        @Query("nsfw_filtering_enabled") nsfwFilteringEnabled: kotlin.Boolean = false,
+        @Query("include_profile_interstitial_type") includeProfileInterstitialType: kotlin.Int = 1,
+        @Query("include_blocking") includeBlocking: kotlin.Int = 1,
+        @Query("include_blocked_by") includeBlockedBy: kotlin.Int = 1,
+        @Query("include_followed_by") includeFollowedBy: kotlin.Int = 1,
+        @Query("include_want_retweets") includeWantRetweets: kotlin.Int = 1,
+        @Query("include_mute_edge") includeMuteEdge: kotlin.Int = 1,
+        @Query("include_can_dm") includeCanDm: kotlin.Int = 1,
+        @Query("include_can_media_tag") includeCanMediaTag: kotlin.Int = 1,
+        @Query("include_ext_is_blue_verified") includeExtIsBlueVerified: kotlin.Int = 1,
+        @Query("include_ext_verified_type") includeExtVerifiedType: kotlin.Int = 1,
+        @Query("include_ext_profile_image_shape") includeExtProfileImageShape: kotlin.Int = 1,
+        @Query("skip_status") skipStatus: kotlin.Int = 1,
+        @Query("dm_secret_conversations_enabled") dmSecretConversationsEnabled: kotlin.Boolean = false,
+        @Query("krs_registration_enabled") krsRegistrationEnabled: kotlin.Boolean = true,
+        @Query("cards_platform") cardsPlatform: kotlin.String = "Web-12",
+        @Query("include_cards") includeCards: kotlin.Int = 1,
+        @Query("include_ext_alt_text") includeExtAltText: kotlin.Boolean = true,
+        @Query("include_ext_limited_action_results") includeExtLimitedActionResults: kotlin.Boolean = true,
+        @Query("include_quote_count") includeQuoteCount: kotlin.Boolean = true,
+        @Query("include_reply_count") includeReplyCount: kotlin.Int = 1,
+        @Query("tweet_mode") tweetMode: kotlin.String = "extended",
+        @Query("include_ext_views") includeExtViews: kotlin.Boolean = true,
+        @Query("dm_users") dmUsers: kotlin.Boolean = false,
+        @Query("include_groups") includeGroups: kotlin.Boolean = true,
+        @Query("include_inbox_timelines") includeInboxTimelines: kotlin.Boolean = true,
+        @Query("include_ext_media_color") includeExtMediaColor: kotlin.Boolean = true,
+        @Query("supports_reactions") supportsReactions: kotlin.Boolean = true,
+        @Query("supports_edit") supportsEdit: kotlin.Boolean = true,
+        @Query("include_ext_edit_control") includeExtEditControl: kotlin.Boolean = true,
+        @Query(
+            "ext",
+        ) ext: kotlin.String =
+            "mediaColor,altText,businessAffiliationsLabel,mediaStats," +
+                "highlightedLabel,voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo," +
+                "editControl,article",
+    ): Response<InboxDMTrustedTimelineResponse>
 
     /**
      * GET 1.1/dm/permissions.json
@@ -282,7 +397,10 @@ internal interface V11GetApi {
      * @return [DMPermissionsCreateGroupConversationResponse]
      */
     @GET("1.1/dm/permissions.json")
-    public suspend fun getDMPermissions(@Query("recipient_ids") recipientIds: kotlin.String = "111,222", @Query("dm_users") dmUsers: kotlin.Boolean = true): Response<DMPermissionsCreateGroupConversationResponse>
+    public suspend fun getDMPermissions(
+        @Query("recipient_ids") recipientIds: kotlin.String = "111,222",
+        @Query("dm_users") dmUsers: kotlin.Boolean = true,
+    ): Response<DMPermissionsCreateGroupConversationResponse>
 
     /**
      * GET 1.1/dm/user_updates.json
@@ -317,6 +435,34 @@ internal interface V11GetApi {
      * @return [InboxDMUserUpdateResponse]
      */
     @GET("1.1/dm/user_updates.json")
-    public suspend fun getDMUserUpdates(@Query("nsfw_filtering_enabled") nsfwFilteringEnabled: kotlin.Boolean = false, @Query("filter_low_quality") filterLowQuality: kotlin.Boolean = false, @Query("include_quality") includeQuality: kotlin.String = "all", @Query("dm_secret_conversations_enabled") dmSecretConversationsEnabled: kotlin.Boolean = false, @Query("krs_registration_enabled") krsRegistrationEnabled: kotlin.Boolean = true, @Query("cards_platform") cardsPlatform: kotlin.String = "Web-12", @Query("include_cards") includeCards: kotlin.Int = 1, @Query("include_ext_alt_text") includeExtAltText: kotlin.Boolean = true, @Query("include_ext_limited_action_results") includeExtLimitedActionResults: kotlin.Boolean = true, @Query("include_quote_count") includeQuoteCount: kotlin.Boolean = true, @Query("include_reply_count") includeReplyCount: kotlin.Int = 1, @Query("tweet_mode") tweetMode: kotlin.String = "extended", @Query("include_ext_views") includeExtViews: kotlin.Boolean = true, @Query("dm_users") dmUsers: kotlin.Boolean = false, @Query("include_groups") includeGroups: kotlin.Boolean = true, @Query("include_inbox_timelines") includeInboxTimelines: kotlin.Boolean = true, @Query("include_ext_media_color") includeExtMediaColor: kotlin.Boolean = true, @Query("supports_reactions") supportsReactions: kotlin.Boolean = true, @Query("include_ext_edit_control") includeExtEditControl: kotlin.Boolean = true, @Query("include_ext_business_affiliations_label") includeExtBusinessAffiliationsLabel: kotlin.Boolean = true, @Query("supports_edit") supportsEdit: kotlin.Boolean = true, @Query("ext") ext: kotlin.String = "mediaColor,altText,businessAffiliationsLabel,mediaStats,highlightedLabel,voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo,editControl,article", @Query("cursor") cursor: kotlin.String? = null): Response<InboxDMUserUpdateResponse>
-
+    public suspend fun getDMUserUpdates(
+        @Query("nsfw_filtering_enabled") nsfwFilteringEnabled: kotlin.Boolean = false,
+        @Query("filter_low_quality") filterLowQuality: kotlin.Boolean = false,
+        @Query("include_quality") includeQuality: kotlin.String = "all",
+        @Query("dm_secret_conversations_enabled") dmSecretConversationsEnabled: kotlin.Boolean = false,
+        @Query("krs_registration_enabled") krsRegistrationEnabled: kotlin.Boolean = true,
+        @Query("cards_platform") cardsPlatform: kotlin.String = "Web-12",
+        @Query("include_cards") includeCards: kotlin.Int = 1,
+        @Query("include_ext_alt_text") includeExtAltText: kotlin.Boolean = true,
+        @Query("include_ext_limited_action_results") includeExtLimitedActionResults: kotlin.Boolean = true,
+        @Query("include_quote_count") includeQuoteCount: kotlin.Boolean = true,
+        @Query("include_reply_count") includeReplyCount: kotlin.Int = 1,
+        @Query("tweet_mode") tweetMode: kotlin.String = "extended",
+        @Query("include_ext_views") includeExtViews: kotlin.Boolean = true,
+        @Query("dm_users") dmUsers: kotlin.Boolean = false,
+        @Query("include_groups") includeGroups: kotlin.Boolean = true,
+        @Query("include_inbox_timelines") includeInboxTimelines: kotlin.Boolean = true,
+        @Query("include_ext_media_color") includeExtMediaColor: kotlin.Boolean = true,
+        @Query("supports_reactions") supportsReactions: kotlin.Boolean = true,
+        @Query("include_ext_edit_control") includeExtEditControl: kotlin.Boolean = true,
+        @Query("include_ext_business_affiliations_label") includeExtBusinessAffiliationsLabel: kotlin.Boolean = true,
+        @Query("supports_edit") supportsEdit: kotlin.Boolean = true,
+        @Query(
+            "ext",
+        ) ext: kotlin.String =
+            "mediaColor,altText,businessAffiliationsLabel,mediaStats," +
+                "highlightedLabel,voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo," +
+                "editControl,article",
+        @Query("cursor") cursor: kotlin.String? = null,
+    ): InboxDMUserUpdateResponse
 }

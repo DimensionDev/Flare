@@ -10,56 +10,41 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMConvoMetadataAvatar
 import dev.dimension.flare.data.network.xqt.model.DMUserResults
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param conversationId 
- * @param name 
- * @param avatar 
- * @param conversationType 
- * @param createdByUserResults 
- * @param createdAtMillis 
- * @param adminUserResults 
+ *
+ * @param conversationId
+ * @param name
+ * @param avatar
+ * @param conversationType
+ * @param createdByUserResults
+ * @param createdAtMillis
+ * @param adminUserResults
  */
 @Serializable
-
-internal data class DMConvoMetadata (
-
+internal data class DMConvoMetadata(
     @SerialName(value = "conversation_id")
     val conversationId: kotlin.String? = null,
-
     @SerialName(value = "name")
     val name: kotlin.String? = null,
-
     @SerialName(value = "avatar")
     val avatar: DMConvoMetadataAvatar? = null,
-
     @SerialName(value = "conversation_type")
     val conversationType: kotlin.String? = null,
-
     @SerialName(value = "created_by_user_results")
     val createdByUserResults: DMUserResults? = null,
-
     @SerialName(value = "created_at_millis")
     val createdAtMillis: kotlin.String? = null,
-
     @SerialName(value = "admin_user_results")
-    val adminUserResults: DMUserResults? = null
-
-) {
-
-
-}
-
+    val adminUserResults: DMUserResults? = null,
+)

@@ -10,30 +10,21 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param queryTokens 
+ *
+ * @param queryTokens
  */
 @Serializable
-
-internal data class DMGroupSearchSliceItemsInnerHighlighting (
-
+internal data class DMGroupSearchSliceItemsInnerHighlighting(
     @SerialName(value = "query_tokens")
-    val queryTokens: kotlin.collections.List<kotlin.String>? = null
-
-) {
-
-
-}
-
+    val queryTokens: kotlin.collections.List<kotlin.String>? = null,
+)

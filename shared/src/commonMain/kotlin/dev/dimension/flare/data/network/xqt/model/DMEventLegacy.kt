@@ -10,56 +10,41 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMConvoSearch
 import dev.dimension.flare.data.network.xqt.model.DMEventDetail
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param affectsSort 
- * @param createdAtMillis 
- * @param requestId 
- * @param eventId 
- * @param eventType 
- * @param conversation 
- * @param eventDetail 
+ *
+ * @param affectsSort
+ * @param createdAtMillis
+ * @param requestId
+ * @param eventId
+ * @param eventType
+ * @param conversation
+ * @param eventDetail
  */
 @Serializable
-
-internal data class DMEventLegacy (
-
+internal data class DMEventLegacy(
     @SerialName(value = "affects_sort")
     val affectsSort: kotlin.Boolean? = null,
-
     @SerialName(value = "created_at_millis")
     val createdAtMillis: kotlin.String? = null,
-
     @SerialName(value = "request_id")
     val requestId: kotlin.String? = null,
-
     @SerialName(value = "event_id")
     val eventId: kotlin.String? = null,
-
     @SerialName(value = "event_type")
     val eventType: kotlin.String? = null,
-
     @SerialName(value = "conversation")
     val conversation: DMConvoSearch? = null,
-
     @SerialName(value = "event_detail")
-    val eventDetail: DMEventDetail? = null
-
-) {
-
-
-}
-
+    val eventDetail: DMEventDetail? = null,
+)

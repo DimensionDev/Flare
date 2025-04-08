@@ -10,31 +10,23 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMPermissionsCreateGroupConversationResponsePermissionsIdKeysValue
-
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param idKeys 
+ *
+ * @param idKeys
  */
 @Serializable
-
-internal data class DMPermissionsCreateGroupConversationResponsePermissions (
-
+internal data class DMPermissionsCreateGroupConversationResponsePermissions(
     @Contextual @SerialName(value = "id_keys")
-    val idKeys: kotlin.collections.Map<kotlin.String, DMPermissionsCreateGroupConversationResponsePermissionsIdKeysValue>? = null
-
-) {
-
-
-}
-
+    val idKeys: kotlin.collections.Map<kotlin.String, DMPermissionsCreateGroupConversationResponsePermissionsIdKeysValue>? = null,
+)

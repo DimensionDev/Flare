@@ -10,31 +10,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.InboxUserEventReactionEntry
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param reactionCreate 
+ *
+ * @param reactionCreate
  */
 @Serializable
-
-internal data class InboxTimelineReactionCreateEntry (
-
+internal data class InboxTimelineReactionCreateEntry(
     @SerialName(value = "reaction_create")
-    val reactionCreate: InboxUserEventReactionEntry? = null
-
-) {
-
-
-}
-
+    val reactionCreate: InboxUserEventReactionEntry? = null,
+)

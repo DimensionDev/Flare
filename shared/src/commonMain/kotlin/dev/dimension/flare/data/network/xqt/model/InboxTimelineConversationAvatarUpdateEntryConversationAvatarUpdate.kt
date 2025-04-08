@@ -10,55 +10,40 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.InboxTimelineConversationAvatarUpdateEntryConversationAvatarUpdateAvatar
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param id 
- * @param time 
- * @param affectsSort 
- * @param conversationId 
- * @param conversationAvatarImageHttps 
- * @param avatar 
- * @param byUserId 
+ *
+ * @param id
+ * @param time
+ * @param affectsSort
+ * @param conversationId
+ * @param conversationAvatarImageHttps
+ * @param avatar
+ * @param byUserId
  */
 @Serializable
-
-internal data class InboxTimelineConversationAvatarUpdateEntryConversationAvatarUpdate (
-
+internal data class InboxTimelineConversationAvatarUpdateEntryConversationAvatarUpdate(
     @SerialName(value = "id")
     val id: kotlin.String? = null,
-
     @SerialName(value = "time")
     val time: kotlin.String? = null,
-
     @SerialName(value = "affects_sort")
     val affectsSort: kotlin.Boolean? = null,
-
     @SerialName(value = "conversation_id")
     val conversationId: kotlin.String? = null,
-
     @SerialName(value = "conversation_avatar_image_https")
     val conversationAvatarImageHttps: kotlin.String? = null,
-
     @SerialName(value = "avatar")
     val avatar: InboxTimelineConversationAvatarUpdateEntryConversationAvatarUpdateAvatar? = null,
-
     @SerialName(value = "by_user_id")
-    val byUserId: kotlin.String? = null
-
-) {
-
-
-}
-
+    val byUserId: kotlin.String? = null,
+)

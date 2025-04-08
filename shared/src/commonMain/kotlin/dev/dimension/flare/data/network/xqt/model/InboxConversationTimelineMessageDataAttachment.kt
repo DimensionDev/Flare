@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
@@ -18,33 +18,22 @@ package dev.dimension.flare.data.network.xqt.model
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataAttachmentAnimatedGif
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataAttachmentPhoto
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataAttachmentVideo
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param photo 
- * @param animatedGif 
- * @param video 
+ *
+ * @param photo
+ * @param animatedGif
+ * @param video
  */
 @Serializable
-
-internal data class InboxConversationTimelineMessageDataAttachment (
-
+internal data class InboxConversationTimelineMessageDataAttachment(
     @SerialName(value = "photo")
     val photo: InboxConversationTimelineMessageDataAttachmentPhoto? = null,
-
     @SerialName(value = "animated_gif")
     val animatedGif: InboxConversationTimelineMessageDataAttachmentAnimatedGif? = null,
-
     @SerialName(value = "video")
-    val video: InboxConversationTimelineMessageDataAttachmentVideo? = null
-
-) {
-
-
-}
-
+    val video: InboxConversationTimelineMessageDataAttachmentVideo? = null,
+)

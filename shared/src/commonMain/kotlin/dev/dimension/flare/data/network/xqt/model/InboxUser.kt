@@ -10,235 +10,175 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.InboxUserEntities
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param id 
- * @param idStr 
- * @param name 
- * @param screenName 
- * @param location 
- * @param description 
- * @param url 
- * @param entities 
- * @param `protected` 
- * @param followersCount 
- * @param friendsCount 
- * @param listedCount 
- * @param createdAt 
- * @param favouritesCount 
- * @param utcOffset 
- * @param timeZone 
- * @param geoEnabled 
- * @param verified 
- * @param statusesCount 
- * @param lang 
- * @param contributorsEnabled 
- * @param isTranslator 
- * @param isTranslationEnabled 
- * @param isBlueVerified 
- * @param profileBackgroundColor 
- * @param profileBackgroundImageUrl 
- * @param profileBackgroundImageUrlHttps 
- * @param profileBackgroundTile 
- * @param profileImageUrl 
- * @param profileImageUrlHttps 
- * @param profileBannerUrl 
- * @param profileLinkColor 
- * @param profileSidebarBorderColor 
- * @param profileSidebarFillColor 
- * @param profileTextColor 
- * @param profileUseBackgroundImage 
- * @param defaultProfile 
- * @param defaultProfileImage 
- * @param following 
- * @param followRequestSent 
- * @param notifications 
- * @param translatorType 
- * @param withheldInCountries 
- * @param followedBy 
- * @param blocking 
- * @param subscribedBy 
- * @param canMediaTag 
- * @param dmBlockedBy 
- * @param dmBlocking 
- * @param blockedBy 
- * @param wantRetweets 
- * @param businessProfileState 
+ *
+ * @param id
+ * @param idStr
+ * @param name
+ * @param screenName
+ * @param location
+ * @param description
+ * @param url
+ * @param entities
+ * @param `protected`
+ * @param followersCount
+ * @param friendsCount
+ * @param listedCount
+ * @param createdAt
+ * @param favouritesCount
+ * @param utcOffset
+ * @param timeZone
+ * @param geoEnabled
+ * @param verified
+ * @param statusesCount
+ * @param lang
+ * @param contributorsEnabled
+ * @param isTranslator
+ * @param isTranslationEnabled
+ * @param isBlueVerified
+ * @param profileBackgroundColor
+ * @param profileBackgroundImageUrl
+ * @param profileBackgroundImageUrlHttps
+ * @param profileBackgroundTile
+ * @param profileImageUrl
+ * @param profileImageUrlHttps
+ * @param profileBannerUrl
+ * @param profileLinkColor
+ * @param profileSidebarBorderColor
+ * @param profileSidebarFillColor
+ * @param profileTextColor
+ * @param profileUseBackgroundImage
+ * @param defaultProfile
+ * @param defaultProfileImage
+ * @param following
+ * @param followRequestSent
+ * @param notifications
+ * @param translatorType
+ * @param withheldInCountries
+ * @param followedBy
+ * @param blocking
+ * @param subscribedBy
+ * @param canMediaTag
+ * @param dmBlockedBy
+ * @param dmBlocking
+ * @param blockedBy
+ * @param wantRetweets
+ * @param businessProfileState
  */
 @Serializable
-
-internal data class InboxUser (
-
+internal data class InboxUser(
     @SerialName(value = "id")
     val id: kotlin.String? = null,
-
     @SerialName(value = "id_str")
     val idStr: kotlin.String? = null,
-
     @SerialName(value = "name")
     val name: kotlin.String? = null,
-
     @SerialName(value = "screen_name")
     val screenName: kotlin.String? = null,
-
     @SerialName(value = "location")
     val location: kotlin.String? = null,
-
     @SerialName(value = "description")
     val description: kotlin.String? = null,
-
     @SerialName(value = "url")
     val url: kotlin.String? = null,
-
     @SerialName(value = "entities")
-    val entities: InboxUserEntities? = null,
-
+    val entities: Entities? = null,
     @SerialName(value = "protected")
     val `protected`: kotlin.Boolean? = null,
-
     @SerialName(value = "followers_count")
     val followersCount: kotlin.Int? = null,
-
     @SerialName(value = "friends_count")
     val friendsCount: kotlin.Int? = null,
-
     @SerialName(value = "listed_count")
     val listedCount: kotlin.Int? = null,
-
     @SerialName(value = "created_at")
     val createdAt: kotlin.String? = null,
-
     @SerialName(value = "favourites_count")
     val favouritesCount: kotlin.Int? = null,
-
     @SerialName(value = "utc_offset")
     val utcOffset: kotlin.Int? = null,
-
     @SerialName(value = "time_zone")
     val timeZone: kotlin.String? = null,
-
     @SerialName(value = "geo_enabled")
     val geoEnabled: kotlin.Boolean? = null,
-
     @SerialName(value = "verified")
     val verified: kotlin.Boolean? = null,
-
     @SerialName(value = "statuses_count")
     val statusesCount: kotlin.Int? = null,
-
     @SerialName(value = "lang")
     val lang: kotlin.String? = null,
-
     @SerialName(value = "contributors_enabled")
     val contributorsEnabled: kotlin.Boolean? = null,
-
     @SerialName(value = "is_translator")
     val isTranslator: kotlin.Boolean? = null,
-
     @SerialName(value = "is_translation_enabled")
     val isTranslationEnabled: kotlin.Boolean? = null,
-
     @SerialName(value = "is_blue_verified")
     val isBlueVerified: kotlin.Boolean? = null,
-
     @SerialName(value = "profile_background_color")
     val profileBackgroundColor: kotlin.String? = null,
-
     @SerialName(value = "profile_background_image_url")
     val profileBackgroundImageUrl: kotlin.String? = null,
-
     @SerialName(value = "profile_background_image_url_https")
     val profileBackgroundImageUrlHttps: kotlin.String? = null,
-
     @SerialName(value = "profile_background_tile")
     val profileBackgroundTile: kotlin.Boolean? = null,
-
     @SerialName(value = "profile_image_url")
     val profileImageUrl: kotlin.String? = null,
-
     @SerialName(value = "profile_image_url_https")
     val profileImageUrlHttps: kotlin.String? = null,
-
     @SerialName(value = "profile_banner_url")
     val profileBannerUrl: kotlin.String? = null,
-
     @SerialName(value = "profile_link_color")
     val profileLinkColor: kotlin.String? = null,
-
     @SerialName(value = "profile_sidebar_border_color")
     val profileSidebarBorderColor: kotlin.String? = null,
-
     @SerialName(value = "profile_sidebar_fill_color")
     val profileSidebarFillColor: kotlin.String? = null,
-
     @SerialName(value = "profile_text_color")
     val profileTextColor: kotlin.String? = null,
-
     @SerialName(value = "profile_use_background_image")
     val profileUseBackgroundImage: kotlin.Boolean? = null,
-
     @SerialName(value = "default_profile")
     val defaultProfile: kotlin.Boolean? = null,
-
     @SerialName(value = "default_profile_image")
     val defaultProfileImage: kotlin.Boolean? = null,
-
     @SerialName(value = "following")
     val following: kotlin.Boolean? = null,
-
     @SerialName(value = "follow_request_sent")
     val followRequestSent: kotlin.Boolean? = null,
-
     @SerialName(value = "notifications")
     val notifications: kotlin.Boolean? = null,
-
     @SerialName(value = "translator_type")
     val translatorType: kotlin.String? = null,
-
     @SerialName(value = "withheld_in_countries")
     val withheldInCountries: kotlin.collections.List<kotlin.String>? = null,
-
     @SerialName(value = "followed_by")
     val followedBy: kotlin.Boolean? = null,
-
     @SerialName(value = "blocking")
     val blocking: kotlin.Boolean? = null,
-
     @SerialName(value = "subscribed_by")
     val subscribedBy: kotlin.Boolean? = null,
-
     @SerialName(value = "can_media_tag")
     val canMediaTag: kotlin.Boolean? = null,
-
     @SerialName(value = "dm_blocked_by")
     val dmBlockedBy: kotlin.Boolean? = null,
-
     @SerialName(value = "dm_blocking")
     val dmBlocking: kotlin.Boolean? = null,
-
     @SerialName(value = "blocked_by")
     val blockedBy: kotlin.Boolean? = null,
-
     @SerialName(value = "want_retweets")
     val wantRetweets: kotlin.Boolean? = null,
-
     @SerialName(value = "business_profile_state")
-    val businessProfileState: kotlin.String? = null
-
-) {
-
-
-}
-
+    val businessProfileState: kotlin.String? = null,
+)

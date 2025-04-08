@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
@@ -18,57 +18,40 @@ package dev.dimension.flare.data.network.xqt.model
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataAttachment
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataEntities
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataReplyData
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param id 
- * @param time 
- * @param recipientId 
- * @param senderId 
- * @param text 
- * @param editCount 
- * @param entities 
- * @param attachment 
- * @param replyData 
+ *
+ * @param id
+ * @param time
+ * @param recipientId
+ * @param senderId
+ * @param text
+ * @param editCount
+ * @param entities
+ * @param attachment
+ * @param replyData
  */
 @Serializable
-
-internal data class InboxMessageData (
-
+internal data class InboxMessageData(
     @SerialName(value = "id")
     val id: kotlin.String? = null,
-
     @SerialName(value = "time")
     val time: kotlin.String? = null,
-
     @SerialName(value = "recipient_id")
     val recipientId: kotlin.String? = null,
-
     @SerialName(value = "sender_id")
     val senderId: kotlin.String? = null,
-
     @SerialName(value = "text")
     val text: kotlin.String? = null,
-
     @SerialName(value = "edit_count")
     val editCount: kotlin.Int? = null,
-
     @SerialName(value = "entities")
     val entities: InboxConversationTimelineMessageDataEntities? = null,
-
     @SerialName(value = "attachment")
     val attachment: InboxConversationTimelineMessageDataAttachment? = null,
-
     @SerialName(value = "reply_data")
-    val replyData: InboxConversationTimelineMessageDataReplyData? = null
-
-) {
-
-
-}
-
+    val replyData: InboxConversationTimelineMessageDataReplyData? = null,
+)

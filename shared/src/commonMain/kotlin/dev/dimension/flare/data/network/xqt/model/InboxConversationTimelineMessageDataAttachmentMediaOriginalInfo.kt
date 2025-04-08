@@ -10,38 +10,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param url 
- * @param width 
- * @param height 
+ *
+ * @param url
+ * @param width
+ * @param height
  */
 @Serializable
-
-internal data class InboxConversationTimelineMessageDataAttachmentMediaOriginalInfo (
-
+internal data class InboxConversationTimelineMessageDataAttachmentMediaOriginalInfo(
     @SerialName(value = "url")
     val url: kotlin.String? = null,
-
     @SerialName(value = "width")
     val width: kotlin.Int? = null,
-
     @SerialName(value = "height")
-    val height: kotlin.Int? = null
-
-) {
-
-
-}
-
+    val height: kotlin.Int? = null,
+)

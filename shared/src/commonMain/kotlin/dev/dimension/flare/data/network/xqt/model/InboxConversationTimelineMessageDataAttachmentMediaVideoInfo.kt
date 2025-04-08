@@ -10,39 +10,28 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataAttachmentMediaVideoVariant
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param aspectRatio 
- * @param durationMillis 
- * @param variants 
+ *
+ * @param aspectRatio
+ * @param durationMillis
+ * @param variants
  */
 @Serializable
-
-internal data class InboxConversationTimelineMessageDataAttachmentMediaVideoInfo (
-
+internal data class InboxConversationTimelineMessageDataAttachmentMediaVideoInfo(
     @SerialName(value = "aspect_ratio")
     val aspectRatio: kotlin.collections.List<kotlin.Int>? = null,
-
     @SerialName(value = "duration_millis")
     val durationMillis: kotlin.Int? = null,
-
     @SerialName(value = "variants")
-    val variants: kotlin.collections.List<InboxConversationTimelineMessageDataAttachmentMediaVideoVariant>? = null
-
-) {
-
-
-}
-
+    val variants: kotlin.collections.List<InboxConversationTimelineMessageDataAttachmentMediaVideoVariant>? = null,
+)

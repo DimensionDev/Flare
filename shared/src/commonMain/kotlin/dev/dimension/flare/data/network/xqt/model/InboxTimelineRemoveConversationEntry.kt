@@ -10,31 +10,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.InboxTimelineDisableNotificationsORRemoveConversationEntry
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param removeConversation 
+ *
+ * @param removeConversation
  */
 @Serializable
-
-internal data class InboxTimelineRemoveConversationEntry (
-
+internal data class InboxTimelineRemoveConversationEntry(
     @SerialName(value = "remove_conversation")
-    val removeConversation: InboxTimelineDisableNotificationsORRemoveConversationEntry? = null
-
-) {
-
-
-}
-
+    val removeConversation: InboxTimelineDisableNotificationsORRemoveConversationEntry? = null,
+)

@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
@@ -19,53 +19,38 @@ import dev.dimension.flare.data.network.xqt.model.InboxConversation
 import dev.dimension.flare.data.network.xqt.model.InboxDMUserUpdateResponseInboxInitialStateInboxTimelines
 import dev.dimension.flare.data.network.xqt.model.InboxTimelineEntry
 import dev.dimension.flare.data.network.xqt.model.InboxUser
-
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param lastSeenEventId 
- * @param trustedLastSeenEventId 
- * @param untrustedLastSeenEventId 
- * @param cursor 
- * @param inboxTimelines 
- * @param propertyEntries 
- * @param users 
- * @param conversations 
+ *
+ * @param lastSeenEventId
+ * @param trustedLastSeenEventId
+ * @param untrustedLastSeenEventId
+ * @param cursor
+ * @param inboxTimelines
+ * @param propertyEntries
+ * @param users
+ * @param conversations
  */
 @Serializable
-
-internal data class InboxDMUserUpdateResponseInboxInitialState (
-
+internal data class InboxDMUserUpdateResponseInboxInitialState(
     @SerialName(value = "last_seen_event_id")
     val lastSeenEventId: kotlin.String? = null,
-
     @SerialName(value = "trusted_last_seen_event_id")
     val trustedLastSeenEventId: kotlin.String? = null,
-
     @SerialName(value = "untrusted_last_seen_event_id")
     val untrustedLastSeenEventId: kotlin.String? = null,
-
     @SerialName(value = "cursor")
     val cursor: kotlin.String? = null,
-
     @SerialName(value = "inbox_timelines")
     val inboxTimelines: InboxDMUserUpdateResponseInboxInitialStateInboxTimelines? = null,
-
     @SerialName(value = "entries")
     val propertyEntries: kotlin.collections.List<InboxTimelineEntry>? = null,
-
     @Contextual @SerialName(value = "users")
     val users: kotlin.collections.Map<kotlin.String, InboxUser>? = null,
-
     @Contextual @SerialName(value = "conversations")
-    val conversations: kotlin.collections.Map<kotlin.String, InboxConversation>? = null
-
-) {
-
-
-}
-
+    val conversations: kotlin.collections.Map<kotlin.String, InboxConversation>? = null,
+)

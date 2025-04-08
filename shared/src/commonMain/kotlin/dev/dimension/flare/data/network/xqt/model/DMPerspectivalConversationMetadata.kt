@@ -10,50 +10,36 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param lastReadEventId 
- * @param lowQuality 
- * @param muted 
- * @param mutedDueToMutedUser 
- * @param readOnly 
- * @param trusted 
+ *
+ * @param lastReadEventId
+ * @param lowQuality
+ * @param muted
+ * @param mutedDueToMutedUser
+ * @param readOnly
+ * @param trusted
  */
 @Serializable
-
-internal data class DMPerspectivalConversationMetadata (
-
+internal data class DMPerspectivalConversationMetadata(
     @SerialName(value = "last_read_event_id")
     val lastReadEventId: kotlin.String? = null,
-
     @SerialName(value = "low_quality")
     val lowQuality: kotlin.Boolean? = null,
-
     @SerialName(value = "muted")
     val muted: kotlin.Boolean? = null,
-
     @SerialName(value = "muted_due_to_muted_user")
     val mutedDueToMutedUser: kotlin.Boolean? = null,
-
     @SerialName(value = "read_only")
     val readOnly: kotlin.Boolean? = null,
-
     @SerialName(value = "trusted")
-    val trusted: kotlin.Boolean? = null
-
-) {
-
-
-}
-
+    val trusted: kotlin.Boolean? = null,
+)

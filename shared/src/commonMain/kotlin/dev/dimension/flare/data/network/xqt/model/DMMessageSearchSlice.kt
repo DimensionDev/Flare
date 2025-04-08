@@ -10,40 +10,29 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMGroupSearchSliceSliceInfo
 import dev.dimension.flare.data.network.xqt.model.DMMessageSearchSliceItemsInner
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param typename 
- * @param sliceInfo 
- * @param items 
+ *
+ * @param typename
+ * @param sliceInfo
+ * @param items
  */
 @Serializable
-
-internal data class DMMessageSearchSlice (
-
+internal data class DMMessageSearchSlice(
     @SerialName(value = "__typename")
     val typename: kotlin.String? = null,
-
     @SerialName(value = "sliceInfo")
     val sliceInfo: DMGroupSearchSliceSliceInfo? = null,
-
     @SerialName(value = "items")
-    val items: kotlin.collections.List<DMMessageSearchSliceItemsInner>? = null
-
-) {
-
-
-}
-
+    val items: kotlin.collections.List<DMMessageSearchSliceItemsInner>? = null,
+)

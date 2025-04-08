@@ -10,34 +10,24 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param conversationId 
- * @param conversationType 
+ *
+ * @param conversationId
+ * @param conversationType
  */
 @Serializable
-
-internal data class DMInboxPinnedConversationLegacyMetadata (
-
+internal data class DMInboxPinnedConversationLegacyMetadata(
     @SerialName(value = "conversation_id")
     val conversationId: kotlin.String? = null,
-
     @SerialName(value = "conversation_type")
-    val conversationType: kotlin.String? = null
-
-) {
-
-
-}
-
+    val conversationType: kotlin.String? = null,
+)

@@ -4,6 +4,7 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
 import de.cketti.codepoints.deluxe.codePointSequence
 import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
@@ -28,6 +29,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiCard
+import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
@@ -569,7 +571,8 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                     .map { token ->
                         if (token is UrlToken) {
                             val actual =
-                                legacy.entities.description
+                                legacy.entities
+                                    ?.description
                                     ?.urls
                                     ?.firstOrNull { it.url == token.value.trim() }
                                     ?.expandedUrl
@@ -619,7 +622,8 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
                             },
                             if (!legacy.url.isNullOrEmpty()) {
                                 val actualUrl =
-                                    legacy.entities.url
+                                    legacy.entities
+                                        ?.url
                                         ?.urls
                                         ?.firstOrNull { it.url == legacy.url }
                                 val displayUrl = actualUrl?.displayUrl ?: legacy.url
@@ -759,3 +763,13 @@ internal fun TwitterList.render(accountKey: MicroBlogKey): UiList {
         readonly = user?.key != accountKey,
     )
 }
+
+internal fun MessageContent.XQT.render(accountKey: MicroBlogKey): UiDMItem.Message =
+    when (this) {
+        is MessageContent.XQT.Message -> render(accountKey)
+    }
+
+private fun MessageContent.XQT.Message.render(accountKey: MicroBlogKey): UiDMItem.Message =
+    UiDMItem.Message.Text(
+        twitterParser.parse(this.data.text.orEmpty()).toHtml(accountKey).toUi(),
+    )

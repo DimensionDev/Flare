@@ -10,39 +10,34 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param typename 
+ *
+ * @param typename
  */
 @Serializable
-
-internal data class DMUseDMReactionMutationAddMutationResponseDataCreateDmReaction (
-
+internal data class DMUseDMReactionMutationAddMutationResponseDataCreateDmReaction(
     @SerialName(value = "__typename")
-    val typename: DMUseDMReactionMutationAddMutationResponseDataCreateDmReaction.Typename? = null
-
+    val typename: DMUseDMReactionMutationAddMutationResponseDataCreateDmReaction.Typename? = null,
 ) {
-
     /**
-     * 
+     *
      *
      * Values: CreateDMReactionSuccess
      */
     @Serializable
-    public enum class Typename(public val value: kotlin.String) {
-        @SerialName(value = "CreateDMReactionSuccess") CreateDMReactionSuccess("CreateDMReactionSuccess");
+    public enum class Typename(
+        public val value: kotlin.String,
+    ) {
+        @SerialName(value = "CreateDMReactionSuccess")
+        CreateDMReactionSuccess("CreateDMReactionSuccess"),
     }
-
 }
-

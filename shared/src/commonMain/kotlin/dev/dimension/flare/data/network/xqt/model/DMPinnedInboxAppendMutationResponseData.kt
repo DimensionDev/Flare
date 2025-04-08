@@ -10,31 +10,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMPinnedInboxAppendMutationResponseDataAddDmConversationLabelV3
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param addDmConversationLabelV3 
+ *
+ * @param addDmConversationLabelV3
  */
 @Serializable
-
-internal data class DMPinnedInboxAppendMutationResponseData (
-
+internal data class DMPinnedInboxAppendMutationResponseData(
     @SerialName(value = "add_dm_conversation_label_v3")
-    val addDmConversationLabelV3: DMPinnedInboxAppendMutationResponseDataAddDmConversationLabelV3? = null
-
-) {
-
-
-}
-
+    val addDmConversationLabelV3: DMPinnedInboxAppendMutationResponseDataAddDmConversationLabelV3? = null,
+)

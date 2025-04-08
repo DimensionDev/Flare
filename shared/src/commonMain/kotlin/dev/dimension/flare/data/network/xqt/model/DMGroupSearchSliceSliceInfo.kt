@@ -10,30 +10,21 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param nextCursor 
+ *
+ * @param nextCursor
  */
 @Serializable
-
-internal data class DMGroupSearchSliceSliceInfo (
-
+internal data class DMGroupSearchSliceSliceInfo(
     @SerialName(value = "next_cursor")
-    val nextCursor: kotlin.String? = null
-
-) {
-
-
-}
-
+    val nextCursor: kotlin.String? = null,
+)

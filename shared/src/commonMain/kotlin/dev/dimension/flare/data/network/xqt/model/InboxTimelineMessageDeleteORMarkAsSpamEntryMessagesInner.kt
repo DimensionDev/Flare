@@ -10,34 +10,24 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param messageId 
- * @param messageCreateEventId 
+ *
+ * @param messageId
+ * @param messageCreateEventId
  */
 @Serializable
-
-internal data class InboxTimelineMessageDeleteORMarkAsSpamEntryMessagesInner (
-
+internal data class InboxTimelineMessageDeleteORMarkAsSpamEntryMessagesInner(
     @SerialName(value = "message_id")
     val messageId: kotlin.String? = null,
-
     @SerialName(value = "message_create_event_id")
-    val messageCreateEventId: kotlin.String? = null
-
-) {
-
-
-}
-
+    val messageCreateEventId: kotlin.String? = null,
+)

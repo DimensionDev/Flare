@@ -10,39 +10,28 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMConvoLegacy
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param id 
- * @param restId 
- * @param legacy 
+ *
+ * @param id
+ * @param restId
+ * @param legacy
  */
 @Serializable
-
-internal data class DMConvoSearch (
-
+internal data class DMConvoSearch(
     @SerialName(value = "id")
     val id: kotlin.String? = null,
-
     @SerialName(value = "rest_id")
     val restId: kotlin.String? = null,
-
     @SerialName(value = "legacy")
-    val legacy: DMConvoLegacy? = null
-
-) {
-
-
-}
-
+    val legacy: DMConvoLegacy? = null,
+)

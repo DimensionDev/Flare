@@ -10,36 +10,26 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMUseDMReactionMutationAddMutationResponseDataCreateDmReaction
 import dev.dimension.flare.data.network.xqt.model.DMUseDMReactionMutationAddMutationResponseDataDeleteDmReaction
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param createDmReaction 
- * @param deleteDmReaction 
+ *
+ * @param createDmReaction
+ * @param deleteDmReaction
  */
 @Serializable
-
-internal data class DMUseDMReactionMutationAddMutationResponseData (
-
+internal data class DMUseDMReactionMutationAddMutationResponseData(
     @SerialName(value = "create_dm_reaction")
     val createDmReaction: DMUseDMReactionMutationAddMutationResponseDataCreateDmReaction? = null,
-
     @SerialName(value = "delete_dm_reaction")
-    val deleteDmReaction: DMUseDMReactionMutationAddMutationResponseDataDeleteDmReaction? = null
-
-) {
-
-
-}
-
+    val deleteDmReaction: DMUseDMReactionMutationAddMutationResponseDataDeleteDmReaction? = null,
+)

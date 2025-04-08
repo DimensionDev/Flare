@@ -10,31 +10,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMAddParticipantsMutationResponseDataAddParticipantsParticipantsJoinEventDmEventResultsResult
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param result 
+ *
+ * @param result
  */
 @Serializable
-
-internal data class DMAddParticipantsMutationResponseDataAddParticipantsParticipantsJoinEventDmEventResults (
-
+internal data class DMAddParticipantsMutationResponseDataAddParticipantsParticipantsJoinEventDmEventResults(
     @SerialName(value = "result")
-    val result: DMAddParticipantsMutationResponseDataAddParticipantsParticipantsJoinEventDmEventResultsResult? = null
-
-) {
-
-
-}
-
+    val result: DMAddParticipantsMutationResponseDataAddParticipantsParticipantsJoinEventDmEventResultsResult? = null,
+)

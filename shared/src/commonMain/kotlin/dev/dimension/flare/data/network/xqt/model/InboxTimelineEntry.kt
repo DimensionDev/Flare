@@ -10,7 +10,7 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
@@ -44,10 +44,8 @@ import dev.dimension.flare.data.network.xqt.model.InboxTimelineRemoveConversatio
 import dev.dimension.flare.data.network.xqt.model.InboxTimelineTrustConversationEntry
 import dev.dimension.flare.data.network.xqt.model.InboxTimelineTrustConversationEntryTrustConversation
 import dev.dimension.flare.data.network.xqt.model.InboxUserEventReactionEntry
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
  *
@@ -70,39 +68,37 @@ import kotlinx.serialization.Contextual
  * @param conversationNameUpdate
  */
 @Serializable
-
 internal data class InboxTimelineEntry(
     @SerialName(value = "message")
-    val message: InboxTimelineMessageEntryMessage?,
+    val message: InboxTimelineMessageEntryMessage? = null,
     @SerialName(value = "trust_conversation")
-    val trustConversation: InboxTimelineTrustConversationEntryTrustConversation?,
+    val trustConversation: InboxTimelineTrustConversationEntryTrustConversation? = null,
     @SerialName(value = "join_conversation")
-    val joinConversation: InboxTimelineJoinConversationEntryJoinConversation?,
+    val joinConversation: InboxTimelineJoinConversationEntryJoinConversation? = null,
     @SerialName(value = "message_mark_as_spam")
-    val messageMarkAsSpam: InboxTimelineMessageDeleteORMarkAsSpamEntry?,
+    val messageMarkAsSpam: InboxTimelineMessageDeleteORMarkAsSpamEntry? = null,
     @SerialName(value = "conversation_read")
-    val conversationRead: InboxTimelineConversationReadEntryConversationRead?,
+    val conversationRead: InboxTimelineConversationReadEntryConversationRead? = null,
     @SerialName(value = "message_delete")
-    val messageDelete: InboxTimelineMessageDeleteORMarkAsSpamEntry?,
+    val messageDelete: InboxTimelineMessageDeleteORMarkAsSpamEntry? = null,
     @SerialName(value = "participants_join")
-    val participantsJoin: InboxTimelineParticipantsJoinEntryParticipantsJoin?,
+    val participantsJoin: InboxTimelineParticipantsJoinEntryParticipantsJoin? = null,
     @SerialName(value = "participants_leave")
-    val participantsLeave: InboxTimelineParticipantsLeaveEntryParticipantsLeave?,
+    val participantsLeave: InboxTimelineParticipantsLeaveEntryParticipantsLeave? = null,
     @SerialName(value = "reaction_create")
-    val reactionCreate: InboxUserEventReactionEntry?,
+    val reactionCreate: InboxUserEventReactionEntry? = null,
     @SerialName(value = "reaction_delete")
-    val reactionDelete: InboxUserEventReactionEntry?,
+    val reactionDelete: InboxUserEventReactionEntry? = null,
     @SerialName(value = "conversation_create")
-    val conversationCreate: InboxTimelineConversationCreateEntryConversationCreate?,
+    val conversationCreate: InboxTimelineConversationCreateEntryConversationCreate? = null,
     @SerialName(value = "mention_notifications_setting_update")
-    val mentionNotificationsSettingUpdate: InboxTimelineMentionNotificationsSettingUpdateEntryMentionNotificationsSettingUpdate?,
+    val mentionNotificationsSettingUpdate: InboxTimelineMentionNotificationsSettingUpdateEntryMentionNotificationsSettingUpdate? = null,
     @SerialName(value = "disable_notifications")
-    val disableNotifications: InboxTimelineDisableNotificationsORRemoveConversationEntry?,
+    val disableNotifications: InboxTimelineDisableNotificationsORRemoveConversationEntry? = null,
     @SerialName(value = "remove_conversation")
-    val removeConversation: InboxTimelineDisableNotificationsORRemoveConversationEntry?,
+    val removeConversation: InboxTimelineDisableNotificationsORRemoveConversationEntry? = null,
     @SerialName(value = "conversation_avatar_update")
-    val conversationAvatarUpdate: InboxTimelineConversationAvatarUpdateEntryConversationAvatarUpdate?,
+    val conversationAvatarUpdate: InboxTimelineConversationAvatarUpdateEntryConversationAvatarUpdate? = null,
     @SerialName(value = "conversation_name_update")
-    val conversationNameUpdate: InboxTimelineConversationNameUpdateEntryConversationNameUpdate?
+    val conversationNameUpdate: InboxTimelineConversationNameUpdateEntryConversationNameUpdate? = null,
 )
-

@@ -10,31 +10,22 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMConvoMetadataAvatarMediaInfo
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param mediaInfo 
+ *
+ * @param mediaInfo
  */
 @Serializable
-
-internal data class DMConvoMetadataAvatar (
-
+internal data class DMConvoMetadataAvatar(
     @SerialName(value = "media_info")
-    val mediaInfo: DMConvoMetadataAvatarMediaInfo? = null
-
-) {
-
-
-}
-
+    val mediaInfo: DMConvoMetadataAvatarMediaInfo? = null,
+)

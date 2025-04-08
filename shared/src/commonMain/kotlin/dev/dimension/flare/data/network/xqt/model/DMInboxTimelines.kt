@@ -10,34 +10,24 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param status 
- * @param minEntryId 
+ *
+ * @param status
+ * @param minEntryId
  */
 @Serializable
-
-internal data class DMInboxTimelines (
-
+internal data class DMInboxTimelines(
     @SerialName(value = "status")
     val status: kotlin.String? = null,
-
     @SerialName(value = "min_entry_id")
-    val minEntryId: kotlin.String? = null
-
-) {
-
-
-}
-
+    val minEntryId: kotlin.String? = null,
+)

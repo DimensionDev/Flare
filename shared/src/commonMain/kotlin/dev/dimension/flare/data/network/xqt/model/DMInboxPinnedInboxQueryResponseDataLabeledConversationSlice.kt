@@ -10,35 +10,27 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
 import dev.dimension.flare.data.network.xqt.model.DMInboxPinnedConversationItem
-
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 /**
- * 
  *
- * @param items 
- * @param sliceInfo 
+ *
+ * @param items
+ * @param sliceInfo
  */
 @Serializable
-
-internal data class DMInboxPinnedInboxQueryResponseDataLabeledConversationSlice (
-
+internal data class DMInboxPinnedInboxQueryResponseDataLabeledConversationSlice(
     @SerialName(value = "items")
     val items: kotlin.collections.List<DMInboxPinnedConversationItem>? = null,
-
     @Contextual @SerialName(value = "slice_info")
-    val sliceInfo: kotlin.Any? = null
-
-) {
-
-
-}
-
+    val sliceInfo: JsonObject? = null,
+)

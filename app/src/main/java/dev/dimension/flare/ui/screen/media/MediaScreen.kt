@@ -312,7 +312,7 @@ private fun getMimeType(byteArray: ByteArray): String {
             inJustDecodeBounds = true
         }
     BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size, options)
-    return options.outMimeType?.lowercase() ?: "image/jpeg" // 默认为JPEG
+    return options.outMimeType?.lowercase() ?: "image/jpeg"
 }
 
 internal fun saveByteArrayToDownloads(

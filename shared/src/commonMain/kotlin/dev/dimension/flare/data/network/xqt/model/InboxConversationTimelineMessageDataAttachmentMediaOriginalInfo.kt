@@ -30,7 +30,7 @@ internal data class InboxConversationTimelineMessageDataAttachmentMediaOriginalI
     @SerialName(value = "url")
     val url: kotlin.String? = null,
     @SerialName(value = "width")
-    val width: kotlin.Int? = null,
+    val width: kotlin.Double? = null,
     @SerialName(value = "height")
-    val height: kotlin.Int? = null,
+    val height: kotlin.Double? = null,
 )

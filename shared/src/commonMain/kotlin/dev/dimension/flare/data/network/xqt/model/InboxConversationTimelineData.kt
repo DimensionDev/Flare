@@ -44,5 +44,5 @@ internal data class InboxConversationTimelineData(
     @Contextual @SerialName(value = "users")
     val users: kotlin.collections.Map<kotlin.String, InboxUser>? = null,
     @Contextual @SerialName(value = "conversations")
-    val conversations: kotlin.collections.Map<kotlin.String, InboxConversationTimelineConversation>? = null,
+    val conversations: kotlin.collections.Map<kotlin.String, InboxConversation>? = null,
 )

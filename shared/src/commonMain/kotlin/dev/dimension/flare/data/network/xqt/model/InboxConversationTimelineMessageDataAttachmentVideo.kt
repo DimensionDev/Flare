@@ -43,7 +43,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class InboxConversationTimelineMessageDataAttachmentVideo(
     @SerialName(value = "id")
-    val id: kotlin.Long? = null,
+    val id: kotlin.String? = null,
     @SerialName(value = "id_str")
     val idStr: kotlin.String? = null,
     @SerialName(value = "indices")

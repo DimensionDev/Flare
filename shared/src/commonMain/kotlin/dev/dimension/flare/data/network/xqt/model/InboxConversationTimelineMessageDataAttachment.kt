@@ -15,9 +15,6 @@
 
 package dev.dimension.flare.data.network.xqt.model
 
-import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataAttachmentAnimatedGif
-import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataAttachmentPhoto
-import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineMessageDataAttachmentVideo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -36,4 +33,6 @@ internal data class InboxConversationTimelineMessageDataAttachment(
     val animatedGif: InboxConversationTimelineMessageDataAttachmentAnimatedGif? = null,
     @SerialName(value = "video")
     val video: InboxConversationTimelineMessageDataAttachmentVideo? = null,
+    @SerialName(value = "tweet")
+    val tweet: InboxConversationTimelineMessageDataAttachmentTweet? = null,
 )

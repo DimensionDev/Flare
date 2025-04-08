@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
@@ -39,7 +40,7 @@ public class DMListPresenter(
         return object : DMListState {
             override val items = items
 
-            override val isRefreshing = false
+            override val isRefreshing = items.isRefreshing
 
             override suspend fun refreshSuspend() {
                 items.onSuccess {

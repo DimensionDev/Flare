@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.dm
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -41,8 +42,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -53,6 +56,7 @@ import compose.icons.fontawesomeicons.solid.CircleUser
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.PaperPlane
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -65,7 +69,10 @@ import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.status.MediaItem
+import dev.dimension.flare.ui.component.status.QuotedStatus
 import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.dm.DMConversationPresenter
@@ -309,6 +316,7 @@ private fun DMItem(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier =
             modifier
@@ -386,6 +394,21 @@ private fun DMItem(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+
+                    is UiDMItem.Message.Media ->
+                        MediaItem(
+                            media = message.media,
+                            modifier =
+                                Modifier
+                                    .clickable {
+                                        if (message.media is UiMedia.Image) {
+                                            uriHandler.openUri(AppDeepLink.RawImage.invoke(message.media.url))
+                                        }
+                                    }.clip(MaterialTheme.shapes.large),
+                        )
+
+                    is UiDMItem.Message.Status ->
+                        QuotedStatus(message.status)
                 }
             }
         }

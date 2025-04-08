@@ -241,8 +241,8 @@ internal interface V11PostApi {
     @POST("1.1/dm/conversation/{conversation_id}/mark_read.json")
     public suspend fun postDMConversationMarkRead(
         @Path("conversation_id") conversationId: kotlin.String,
-        @Field("conversationId") conversationId2: kotlin.String = "426425493-1714936029558476800",
-        @Field("last_read_event_id") lastReadEventId: kotlin.String = "1840695565337944534",
+        @Field("conversationId") conversationId2: kotlin.String,
+        @Field("last_read_event_id") lastReadEventId: kotlin.String,
     ): Response<Unit>
 
     /**

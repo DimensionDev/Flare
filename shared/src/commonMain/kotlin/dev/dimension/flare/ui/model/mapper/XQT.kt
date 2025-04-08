@@ -4,6 +4,8 @@ import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.TextNode
 import de.cketti.codepoints.deluxe.codePointSequence
 import dev.dimension.flare.common.AppDeepLink
+import dev.dimension.flare.common.decodeJson
+import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.StatusAction
@@ -28,6 +30,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.xqtHost
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiList
@@ -39,6 +42,7 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentMap
 import kotlinx.datetime.Clock
@@ -135,6 +139,7 @@ internal fun TopLevel.renderNotifications(
                             } else {
                                 null
                             }
+
                         tweet != null -> tweet
                         else -> null
                     }
@@ -146,13 +151,20 @@ internal fun TopLevel.renderNotifications(
                             icon = icon,
                             type =
                                 UiTimeline.TopMessage.MessageType.XQT
-                                    .Custom(message = message.orEmpty(), id = notification.id ?: Uuid.random().toString()),
+                                    .Custom(
+                                        message = message.orEmpty(),
+                                        id = notification.id ?: Uuid.random().toString(),
+                                    ),
                             onClicked = {
                                 if (itemContent == null && url != null) {
                                     launcher.launch(url)
                                 }
                             },
-                            statusKey = MicroBlogKey(id = notification.id.orEmpty(), host = accountKey.host),
+                            statusKey =
+                                MicroBlogKey(
+                                    id = notification.id.orEmpty(),
+                                    host = accountKey.host,
+                                ),
                         ),
                     content = itemContent,
                 )
@@ -195,9 +207,18 @@ internal fun TopLevel.renderNotifications(
                             icon = UiTimeline.TopMessage.Icon.Retweet,
                             type = UiTimeline.TopMessage.MessageType.XQT.Mention,
                             onClicked = {
-                                launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = renderedUser.key))
+                                launcher.launch(
+                                    AppDeepLink.Profile(
+                                        accountKey = accountKey,
+                                        userKey = renderedUser.key,
+                                    ),
+                                )
                             },
-                            statusKey = MicroBlogKey(id = notification?.id.orEmpty(), host = accountKey.host),
+                            statusKey =
+                                MicroBlogKey(
+                                    id = notification?.id.orEmpty(),
+                                    host = accountKey.host,
+                                ),
                         ),
                     content = data,
                 )
@@ -227,7 +248,12 @@ internal fun Tweet.render(
                 icon = UiTimeline.TopMessage.Icon.Retweet,
                 type = UiTimeline.TopMessage.MessageType.XQT.Retweet,
                 onClicked = {
-                    launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
+                    launcher.launch(
+                        AppDeepLink.Profile(
+                            accountKey = accountKey,
+                            userKey = user.key,
+                        ),
+                    )
                 },
                 statusKey = currentTweet.statusKey,
             )
@@ -320,7 +346,11 @@ internal fun Tweet.renderStatus(
                     multiple = false,
                     ownVotes = persistentListOf(),
                     expiresAt =
-                        cardLegacy.get("end_datetime_utc")?.stringValue?.let { parseCustomDateTime(it) }
+                        cardLegacy.get("end_datetime_utc")?.stringValue?.let {
+                            parseCustomDateTime(
+                                it,
+                            )
+                        }
                             ?: Clock.System.now(),
                     onVote = { options -> },
                     enabled = false,
@@ -519,7 +549,12 @@ internal fun Tweet.renderStatus(
             ).toImmutableList(),
         sensitive = legacy?.possiblySensitive == true,
         onClicked = {
-            launcher.launch(AppDeepLink.StatusDetail(accountKey = accountKey, statusKey = statusKey))
+            launcher.launch(
+                AppDeepLink.StatusDetail(
+                    accountKey = accountKey,
+                    statusKey = statusKey,
+                ),
+            )
         },
         platformType = PlatformType.xQt,
         onMediaClicked = { media, index ->
@@ -727,9 +762,11 @@ internal fun List<InstructionUnion>.list(accountKey: MicroBlogKey): List<UiList>
                                     else -> null
                                 }
                             }
+
                         else -> emptyList()
                     }
                 }
+
             is TimelineAddToModule ->
                 it.moduleItems.flatMap {
                     when (it.item.itemContent) {
@@ -737,6 +774,7 @@ internal fun List<InstructionUnion>.list(accountKey: MicroBlogKey): List<UiList>
                         else -> emptyList()
                     }
                 }
+
             else -> emptyList()
         }
     }.filter {
@@ -759,17 +797,157 @@ internal fun TwitterList.render(accountKey: MicroBlogKey): UiList {
         description = description.orEmpty(),
         platformType = PlatformType.xQt,
         creator = user,
-        avatar = customBannerMedia?.mediaInfo?.originalImgURL ?: defaultBannerMedia?.mediaInfo?.originalImgURL,
+        avatar =
+            customBannerMedia?.mediaInfo?.originalImgURL
+                ?: defaultBannerMedia?.mediaInfo?.originalImgURL,
         readonly = user?.key != accountKey,
     )
 }
 
-internal fun MessageContent.XQT.render(accountKey: MicroBlogKey): UiDMItem.Message =
+internal fun MessageContent.XQT.render(
+    accountKey: MicroBlogKey,
+    credential: UiAccount.Credential,
+    statusEvent: StatusEvent,
+): UiDMItem.Message =
     when (this) {
-        is MessageContent.XQT.Message -> render(accountKey)
+        is MessageContent.XQT.Message -> render(accountKey, credential, statusEvent)
     }
 
-private fun MessageContent.XQT.Message.render(accountKey: MicroBlogKey): UiDMItem.Message =
-    UiDMItem.Message.Text(
-        twitterParser.parse(this.data.text.orEmpty()).toHtml(accountKey).toUi(),
-    )
+private fun MessageContent.XQT.Message.render(
+    accountKey: MicroBlogKey,
+    credential: UiAccount.Credential,
+    statusEvent: StatusEvent,
+): UiDMItem.Message {
+    if (!data.attachment
+            ?.photo
+            ?.url
+            .isNullOrEmpty() &&
+        data.text
+            .orEmpty()
+            .endsWith(data.attachment.photo.url) &&
+        !data.attachment.photo.mediaUrlHttps
+            .isNullOrEmpty() &&
+        credential is UiAccount.XQT.Credential
+    ) {
+        return UiDMItem.Message.Media(
+            UiMedia.Image(
+                url = data.attachment.photo.mediaUrlHttps,
+                previewUrl = data.attachment.photo.mediaUrlHttps,
+                height =
+                    data.attachment.photo.originalInfo
+                        ?.height
+                        ?.toFloat() ?: 0f,
+                width =
+                    data.attachment.photo.originalInfo
+                        ?.width
+                        ?.toFloat() ?: 0f,
+                sensitive = false,
+                description = data.attachment.photo.extAltText,
+                customHeaders =
+                    persistentMapOf(
+                        "Cookie" to credential.chocolate,
+                        "Referer" to "https://$xqtHost/",
+                    ),
+            ),
+        )
+    } else if (!data.attachment
+            ?.animatedGif
+            ?.url
+            .isNullOrEmpty() &&
+        data.text
+            .orEmpty()
+            .endsWith(data.attachment.animatedGif.url) &&
+        !data.attachment.animatedGif.mediaUrlHttps
+            .isNullOrEmpty() &&
+        credential is UiAccount.XQT.Credential
+    ) {
+        return UiDMItem.Message.Media(
+            UiMedia.Gif(
+                url = data.attachment.animatedGif.mediaUrlHttps,
+                previewUrl = data.attachment.animatedGif.mediaUrlHttps,
+                height =
+                    data.attachment.animatedGif.originalInfo
+                        ?.height
+                        ?.toFloat() ?: 0f,
+                width =
+                    data.attachment.animatedGif.originalInfo
+                        ?.width
+                        ?.toFloat() ?: 0f,
+                description = data.attachment.animatedGif.extAltText,
+                customHeaders =
+                    persistentMapOf(
+                        "Cookie" to credential.chocolate,
+                        "Referer" to "https://$xqtHost/",
+                    ),
+            ),
+        )
+    } else if (!data.attachment
+            ?.video
+            ?.url
+            .isNullOrEmpty() &&
+        data.text
+            .orEmpty()
+            .endsWith(data.attachment.video.url) &&
+        !data.attachment.video.mediaUrlHttps
+            .isNullOrEmpty() &&
+        credential is UiAccount.XQT.Credential
+    ) {
+        return UiDMItem.Message.Media(
+            UiMedia.Video(
+                url = data.attachment.video.mediaUrlHttps,
+                thumbnailUrl = data.attachment.video.mediaUrlHttps,
+                height =
+                    data.attachment.video.originalInfo
+                        ?.height
+                        ?.toFloat() ?: 0f,
+                width =
+                    data.attachment.video.originalInfo
+                        ?.width
+                        ?.toFloat() ?: 0f,
+                description = data.attachment.video.extAltText,
+                customHeaders =
+                    persistentMapOf(
+                        "Cookie" to credential.chocolate,
+                        "Referer" to "https://$xqtHost/",
+                    ),
+            ),
+        )
+    } else if (!data.attachment
+            ?.tweet
+            ?.url
+            .isNullOrEmpty() &&
+        data.text
+            .orEmpty()
+            .endsWith(data.attachment.tweet.url) &&
+        data.attachment.tweet.status != null &&
+        statusEvent is StatusEvent.XQT
+    ) {
+        val tweetLegacy = data.attachment.tweet.status
+        val status =
+            Tweet(
+                restId = tweetLegacy.idStr,
+                core =
+                    tweetLegacy.user?.let {
+                        UserResultCore(
+                            userResults =
+                                UserResults(
+                                    result =
+                                        User(
+                                            legacy = tweetLegacy.user.encodeJson().decodeJson(),
+                                            isBlueVerified = tweetLegacy.user.isBlueVerified == true,
+                                            restId = tweetLegacy.user.idStr.orEmpty(),
+                                        ),
+                                ),
+                        )
+                    },
+                legacy = tweetLegacy,
+            ).renderStatus(accountKey, statusEvent, emptyMap())
+        return UiDMItem.Message.Status(
+            status = status,
+        )
+    } else {
+        return UiDMItem.Message.Text(
+            twitterParser.parse(this.data.text.orEmpty()).toHtml(accountKey).toUi(),
+        )
+    }
+}

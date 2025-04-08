@@ -213,7 +213,7 @@ internal interface V11GetApi {
         ) ext: kotlin.String? =
             "mediaColor,altText,mediaStats,highlightedLabel,voiceInfo," +
                 "birdwatchPivot,superFollowMetadata,unmentionInfo,editControl,article",
-    ): Response<InboxConversationTimelineResponse>
+    ): InboxConversationTimelineResponse
 
     /**
      * GET 1.1/dm/inbox_timeline/trusted.json

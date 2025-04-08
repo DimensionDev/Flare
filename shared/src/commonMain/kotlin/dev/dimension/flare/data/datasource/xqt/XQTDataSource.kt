@@ -1581,41 +1581,102 @@ internal class XQTDataSource(
         ).flow
             .map {
                 it.map {
-                    it.render(accountKey)
+                    it.render(accountKey = accountKey, credential = credential, statusEvent = this)
                 }
             }.cachedIn(scope)
 
     override fun directMessageConversation(
         roomKey: MicroBlogKey,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiDMItem>> {
-        TODO("Not yet implemented")
-    }
+    ): Flow<PagingData<UiDMItem>> =
+        Pager(
+            config = PagingConfig(pageSize = 20),
+            remoteMediator =
+                DMConversationRemoteMediator(
+                    service = service,
+                    accountKey = accountKey,
+                    database = database,
+                    roomKey = roomKey,
+                    clearBadge = ::clearDirectMessageBadgeCount,
+                ),
+            pagingSourceFactory = {
+                database.messageDao().getRoomMessagesPagingSource(
+                    roomKey = roomKey,
+                )
+            },
+        ).flow
+            .map {
+                it.map {
+                    it.render(accountKey = accountKey, credential = credential, statusEvent = this)
+                }
+            }.cachedIn(scope)
 
     override fun sendDirectMessage(
         roomKey: MicroBlogKey,
         message: String,
     ) {
-        TODO("Not yet implemented")
     }
 
     override fun retrySendDirectMessage(messageKey: MicroBlogKey) {
-        TODO("Not yet implemented")
     }
 
     override fun deleteDirectMessage(
         roomKey: MicroBlogKey,
         messageKey: MicroBlogKey,
     ) {
-        TODO("Not yet implemented")
     }
 
-    override fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> {
-        TODO("Not yet implemented")
-    }
+    override fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> =
+        Cacheable(
+            fetchSource = {
+                val response = service.getDMConversationTimeline(conversationId = roomKey.id)
+                XQT.saveDM(
+                    accountKey = accountKey,
+                    database = database,
+                    propertyEntries = response.conversationTimeline?.propertyEntries,
+                    users = response.conversationTimeline?.users,
+                    conversations = response.conversationTimeline?.conversations,
+                )
+            },
+            cacheSource = {
+                database
+                    .messageDao()
+                    .getRoomInfo(
+                        roomKey = roomKey,
+                        accountKey = accountKey,
+                    ).distinctUntilChanged()
+                    .mapNotNull {
+                        it?.render(accountKey = accountKey, credential = credential, statusEvent = this)
+                    }
+            },
+        )
 
     override suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey) {
-        TODO("Not yet implemented")
+        val response = service.getDMConversationTimeline(conversationId = roomKey.id)
+        service.postDMConversationMarkRead(
+            conversationId = roomKey.id,
+            conversationId2 = roomKey.id,
+            lastReadEventId = response.conversationTimeline?.maxEntryId.orEmpty(),
+        )
+        XQT.saveDM(
+            accountKey = accountKey,
+            database = database,
+            propertyEntries = response.conversationTimeline?.propertyEntries,
+            users = response.conversationTimeline?.users,
+            conversations = response.conversationTimeline?.conversations,
+        )
+    }
+
+    private fun clearDirectMessageBadgeCount(
+        roomKey: MicroBlogKey,
+        lastReadId: String,
+    ) {
+//        coroutineScope.launch {
+//            tryRun {
+//                service.postDMConversationMarkRead(roomKey.id, roomKey.id, lastReadId)
+//            }
+//        }
+        directMessageBadgeCount.refresh()
     }
 
     private val dmNotificationMarkerKey: String
@@ -1630,7 +1691,6 @@ internal class XQTDataSource(
             )
 
     override fun leaveDirectMessage(roomKey: MicroBlogKey) {
-        TODO("Not yet implemented")
     }
 
     override fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> {

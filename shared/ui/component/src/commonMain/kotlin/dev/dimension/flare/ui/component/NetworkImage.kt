@@ -23,9 +23,12 @@ import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
 import coil3.compose.SubcomposeAsyncImage
 import coil3.compose.rememberAsyncImagePainter
+import coil3.network.NetworkHeaders
+import coil3.network.httpHeaders
 import coil3.request.ImageRequest
 import coil3.size.Size
 import dev.dimension.flare.ui.component.platform.placeholder
+import kotlinx.collections.immutable.ImmutableMap
 
 @Composable
 public fun NetworkImage(
@@ -45,19 +48,37 @@ public fun NetworkImage(
     alpha: Float = DefaultAlpha,
     colorFilter: ColorFilter? = null,
     filterQuality: FilterQuality = DrawScope.DefaultFilterQuality,
+    customHeaders: ImmutableMap<String, String>? = null,
 ) {
+    val platformContext = LocalPlatformContext.current
     SubcomposeAsyncImage(
         model =
-            ImageRequest
-                .Builder(LocalPlatformContext.current)
-                .data(model)
-                .let {
-                    if (model is String) {
-                        it.memoryCacheKey(model)
-                    } else {
-                        it
-                    }
-                }.build(),
+            remember(model, platformContext, customHeaders) {
+                ImageRequest
+                    .Builder(platformContext)
+                    .data(model)
+                    .let {
+                        if (customHeaders != null) {
+                            it.httpHeaders(
+                                NetworkHeaders
+                                    .Builder()
+                                    .apply {
+                                        customHeaders.forEach { (key, value) ->
+                                            set(key, value)
+                                        }
+                                    }.build(),
+                            )
+                        } else {
+                            it
+                        }
+                    }.let {
+                        if (model is String) {
+                            it.memoryCacheKey(model)
+                        } else {
+                            it
+                        }
+                    }.build()
+            },
         contentDescription = contentDescription,
         alignment = alignment,
         contentScale = contentScale,

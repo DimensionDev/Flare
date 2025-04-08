@@ -60,27 +60,19 @@ internal object XQT {
         propertyEntries: List<InboxTimelineEntry>? = null,
         users: Map<String, InboxUser>? = null,
         conversations: Map<String, InboxConversation>? = null,
+        updateRoom: Boolean = true,
     ) {
         val trustedConversations =
             conversations?.values.orEmpty().filter { it.trusted == true }
-        val rooms =
-            trustedConversations.map {
-                DbMessageRoom(
-                    roomKey = MicroBlogKey(it.conversationId.orEmpty(), accountKey.host),
-                    platformType = PlatformType.xQt,
-                    messageKey =
-                        propertyEntries
-                            ?.firstOrNull { entries -> entries.message?.id == it.maxEntryId }
-                            ?.let {
-                                MicroBlogKey(it.message?.id.orEmpty(), accountKey.host)
-                            },
-                )
-            }
         val references =
             trustedConversations.flatMap { conversation ->
                 conversation.participants.orEmpty().map {
                     DbMessageRoomReference(
-                        roomKey = MicroBlogKey(conversation.conversationId.orEmpty(), accountKey.host),
+                        roomKey =
+                            MicroBlogKey(
+                                conversation.conversationId.orEmpty(),
+                                accountKey.host,
+                            ),
                         userKey = MicroBlogKey(it.userId.orEmpty(), accountKey.host),
                     )
                 }
@@ -91,19 +83,9 @@ internal object XQT {
                     propertyEntries
                         ?.filter {
                             it.message?.conversationId == conversation.conversationId
-                        }?.mapNotNull { it.message }
-                        .orEmpty()
+                        }.orEmpty()
                 }.mapNotNull {
-                    if (it.messageData == null || it.conversationId == null || it.messageData.senderId == null) {
-                        return@mapNotNull null
-                    }
-                    DbMessageItem(
-                        messageKey = MicroBlogKey(it.id.orEmpty(), accountKey.host),
-                        roomKey = MicroBlogKey(it.conversationId, accountKey.host),
-                        content = MessageContent.XQT.Message(it.messageData),
-                        timestamp = it.time?.toLongOrNull() ?: 0L,
-                        userKey = MicroBlogKey(it.messageData.senderId, accountKey.host),
-                    )
+                    it.toDbMessageItem(accountKey)
                 }
         val timeline =
             trustedConversations.map { conversation ->
@@ -119,51 +101,88 @@ internal object XQT {
                                 message.messageKey.id
                                     .toLongOrNull()
                                     ?.let { id ->
-                                        conversation.lastReadEventId?.toLongOrNull()?.let { lastRead -> id > lastRead }
+                                        conversation.lastReadEventId
+                                            ?.toLongOrNull()
+                                            ?.let { lastRead -> id > lastRead }
                                     } == true
                             }.toLong(),
                 )
             }
-        val users =
-            users?.values.orEmpty().mapNotNull {
-                if (it.name == null || it.screenName == null || it.idStr == null) {
-                    return@mapNotNull null
+        if (updateRoom) {
+            val rooms =
+                trustedConversations.map {
+                    DbMessageRoom(
+                        roomKey = MicroBlogKey(it.conversationId.orEmpty(), accountKey.host),
+                        platformType = PlatformType.xQt,
+                        messageKey =
+                            propertyEntries
+                                ?.firstOrNull { entries -> entries.message?.id == it.lastReadEventId }
+                                ?.let {
+                                    MicroBlogKey(it.message?.id.orEmpty(), accountKey.host)
+                                },
+                    )
                 }
-                User(
-                    legacy =
-                        with(it) {
-                            UserLegacy(
-                                name = name.orEmpty(),
-                                screenName = screenName.orEmpty(),
-                                location = location,
-                                description = description,
-                                url = url,
-                                entities = entities,
-                                `protected` = `protected`,
-                                followersCount = followersCount ?: 0,
-                                friendsCount = friendsCount ?: 0,
-                                listedCount = listedCount ?: 0,
-                                createdAt = createdAt.orEmpty(),
-                                favouritesCount = favouritesCount ?: 0,
-                                verified = verified == true,
-                                statusesCount = statusesCount ?: 0,
-                                isTranslator = isTranslator == true,
-                                profileImageUrlHttps = profileImageUrlHttps.orEmpty(),
-                                profileBannerUrl = profileBannerUrl,
-                                translatorType = translatorType.orEmpty(),
-                            )
-                        },
-                    isBlueVerified = it.isBlueVerified == true,
-                    restId = it.idStr,
-                ).toDbUser()
-            }
-
-        database.userDao().insertAll(users)
+            database.messageDao().insert(rooms)
+        }
+        database.userDao().insertAll(
+            users
+                ?.values
+                .orEmpty()
+                .toList()
+                .toDbUser(),
+        )
         database.messageDao().insertMessages(messages)
         database.messageDao().insertReferences(references)
-        database.messageDao().insert(rooms)
         database.messageDao().insertTimeline(timeline)
     }
+}
+
+private fun List<InboxUser>.toDbUser(): List<DbUser> {
+    return mapNotNull {
+        if (it.name == null || it.screenName == null || it.idStr == null) {
+            return@mapNotNull null
+        }
+        User(
+            legacy =
+                with(it) {
+                    UserLegacy(
+                        name = name.orEmpty(),
+                        screenName = screenName.orEmpty(),
+                        location = location,
+                        description = description,
+                        url = url,
+                        entities = entities,
+                        `protected` = `protected`,
+                        followersCount = followersCount ?: 0,
+                        friendsCount = friendsCount ?: 0,
+                        listedCount = listedCount ?: 0,
+                        createdAt = createdAt.orEmpty(),
+                        favouritesCount = favouritesCount ?: 0,
+                        verified = verified == true,
+                        statusesCount = statusesCount ?: 0,
+                        isTranslator = isTranslator == true,
+                        profileImageUrlHttps = profileImageUrlHttps.orEmpty(),
+                        profileBannerUrl = profileBannerUrl,
+                        translatorType = translatorType.orEmpty(),
+                    )
+                },
+            isBlueVerified = it.isBlueVerified == true,
+            restId = it.idStr,
+        ).toDbUser()
+    }
+}
+
+private fun InboxTimelineEntry.toDbMessageItem(accountKey: MicroBlogKey): DbMessageItem? {
+    if (message == null) {
+        return null
+    }
+    return DbMessageItem(
+        messageKey = MicroBlogKey(message.id ?: return null, accountKey.host),
+        roomKey = MicroBlogKey(message.conversationId ?: return null, accountKey.host),
+        content = MessageContent.XQT.Message(message.messageData ?: return null),
+        timestamp = message.time?.toLongOrNull() ?: 0L,
+        userKey = MicroBlogKey(message.messageData.senderId ?: return null, accountKey.host),
+    )
 }
 
 private fun TweetUnion.getRetweet(): TweetUnion? =

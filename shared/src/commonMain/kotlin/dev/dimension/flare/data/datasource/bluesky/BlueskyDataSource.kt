@@ -1860,7 +1860,7 @@ internal class BlueskyDataSource(
         ).flow
             .map {
                 it.map {
-                    it.render(accountKey = accountKey)
+                    it.render(accountKey = accountKey, credential = credential, statusEvent = this)
                 }
             }.cachedIn(scope)
 
@@ -1886,7 +1886,7 @@ internal class BlueskyDataSource(
         ).flow
             .map {
                 it.map {
-                    it.render(accountKey = accountKey)
+                    it.render(accountKey = accountKey, credential = credential, statusEvent = this)
                 }
             }.cachedIn(scope)
 
@@ -1911,7 +1911,7 @@ internal class BlueskyDataSource(
                         accountKey = accountKey,
                     ).distinctUntilChanged()
                     .mapNotNull {
-                        it?.render(accountKey = accountKey)
+                        it?.render(accountKey = accountKey, credential = credential, statusEvent = this)
                     }
             },
         )

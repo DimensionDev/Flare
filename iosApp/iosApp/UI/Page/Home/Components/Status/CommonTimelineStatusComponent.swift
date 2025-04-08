@@ -681,7 +681,6 @@ struct SmallIconModifier: ViewModifier {
     }
 }
 
-
 // 用于收集StatusActionAsyncActionItem中Flow数据的类
 class AsyncActionItemCollector {
     private let asyncItem: StatusActionAsyncActionItem

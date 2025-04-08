@@ -3,7 +3,7 @@ import SwiftUI
 
 struct MessageScreen: View {
     let accountType: AccountType
- 
+
     var body: some View {
         VStack {
             Text("Messages")
@@ -14,8 +14,5 @@ struct MessageScreen: View {
                 .foregroundColor(.gray)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-       
     }
 }
-
- 

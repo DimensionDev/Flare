@@ -3,25 +3,25 @@ import Generated
 import JXPhotoBrowser
 import Kingfisher
 import MarkdownUI
-import os.log 
+import os.log
 import shared
 import SwiftDate
 import SwiftUI
 import UIKit
 #if canImport(_Translation_SwiftUI)
-import Translation
+    import Translation
 #endif
 
 #if canImport(_Translation_SwiftUI)
-extension View {
-    func addTranslateView(isPresented: Binding<Bool>, text: String) -> some View {
-        if #available(iOS 17, *) {
-            return self.translationPresentation(isPresented: isPresented, text: text)
-        } else {
-            return self
+    extension View {
+        func addTranslateView(isPresented: Binding<Bool>, text: String) -> some View {
+            if #available(iOS 17, *) {
+                return self.translationPresentation(isPresented: isPresented, text: text)
+            } else {
+                return self
+            }
         }
     }
-}
 #endif
 
 struct ShareButton: View {
@@ -37,37 +37,37 @@ struct ShareButton: View {
     @State private var showTranslation: Bool = false
     let content: UiTimelineItemContentStatus
     let view: CommonTimelineStatusComponent
-    
+
     private var statusUrl: URL? {
         guard let urlString = content.url as String? else { return nil }
         return URL(string: urlString)
     }
-    
+
     private func prepareScreenshot(completion: @escaping (UIImage?) -> Void) {
         let captureView = StatusCaptureWrapper(content: view)
             .environment(\.appSettings, appSettings)
             .environment(\.colorScheme, colorScheme)
             .environment(\.isInCaptureMode, true)
             .environmentObject(router)
-        
+
         let controller = UIHostingController(rootView: captureView)
-        
+
         let targetSize = controller.sizeThatFits(in: CGSize(
             width: UIScreen.main.bounds.width - 24,
             height: UIView.layoutFittingExpandedSize.height
         ))
-        
+
         controller.view.frame = CGRect(origin: .zero, size: targetSize)
         controller.view.backgroundColor = .clear
-        
+
         controller.view.layoutIfNeeded()
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             let image = ScreenshotRenderer.render(captureView)
             completion(image)
         }
     }
-    
+
     private func getShareTitle(allContent: Bool) -> String {
         if allContent {
             return content.content.raw
@@ -79,7 +79,7 @@ struct ShareButton: View {
         }
         return content.content.raw
     }
-    
+
     var body: some View {
         Menu {
             Button(action: {
@@ -87,54 +87,54 @@ struct ShareButton: View {
             }) {
                 Label("Copy Text ", systemImage: "doc.on.doc")
             }
-            
+
             Button(action: {
                 UIPasteboard.general.string = content.content.markdown
             }) {
                 Label("Copy Text (MarkDown)", systemImage: "doc.on.doc")
             }
-           
+
             Button(action: {
                 showTextForSelection = true
             }) {
                 Label("Select Text", systemImage: "text.cursor")
             }
-            
+
             if let url = statusUrl {
                 Button(action: {
                     UIPasteboard.general.string = url.absoluteString
                 }) {
                     Label("Copy Link", systemImage: "link")
                 }
-                
+
                 Button(action: {
                     openURL(url)
                 }) {
                     Label("Open in Browser", systemImage: "safari")
                 }
             }
-            
+
             Divider()
-            
+
             Menu {
                 Button(action: {
                     isPreparingShare = true
                     prepareScreenshot { image in
-                        if let image = image {
+                        if let image {
                             var activityItems: [Any] = []
                             let shareTitle = getShareTitle(allContent: true)
                             activityItems.append(shareTitle)
                             activityItems.append(image)
-                            
+
                             if let url = statusUrl {
                                 activityItems.append(url)
                             }
-                            
+
                             let activityVC = UIActivityViewController(
                                 activityItems: activityItems,
                                 applicationActivities: nil
                             )
-                            
+
                             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                                let window = windowScene.windows.first,
                                let rootVC = window.rootViewController
@@ -153,10 +153,10 @@ struct ShareButton: View {
                     }
                 }
                 .disabled(isPreparingShare)
-                
+
                 Button(action: {
                     prepareScreenshot { image in
-                        if let image = image {
+                        if let image {
                             capturedImage = image
                             let newRenderer = ImageRenderer(content: AnyView(
                                 StatusCaptureWrapper(content: view)
@@ -179,13 +179,13 @@ struct ShareButton: View {
             }
 
             #if canImport(_Translation_SwiftUI)
-            Button(action: {
-                showTranslation = true
-            }) {
-                Label("Apple Translate UI", systemImage: "character.bubble")
-            }
+                Button(action: {
+                    showTranslation = true
+                }) {
+                    Label("Apple Translate UI", systemImage: "character.bubble")
+                }
             #endif
-            
+
         } label: {
             HStack {
                 Spacer()
@@ -207,7 +207,7 @@ struct ShareButton: View {
         .addTranslateView(isPresented: $showTranslation, text: content.content.raw)
         #endif
         .sheet(isPresented: $isShareAsImageSheetPresented) {
-            if let renderer = renderer {
+            if let renderer {
                 StatusShareAsImageView(
                     content: view,
                     renderer: renderer,

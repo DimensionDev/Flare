@@ -446,12 +446,12 @@ class ProfileNewRefreshViewController: UIViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        
-        // 离开页面时重置状态，不然 详情页会导致没appbar 
+
+        // 离开页面时重置状态，不然 详情页会导致没appbar
         //
         isShowAppBar?.wrappedValue = true
         isShowsegmentedBackButton?.wrappedValue = false
-        
+
         // 确保系统导航栏状态正确
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
@@ -490,14 +490,14 @@ class ProfileNewRefreshViewController: UIViewController {
 
     @objc private func handleBackButtonTap() {
         os_log("[📔][ProfileRefreshViewController]点击返回按钮", log: .default, type: .debug)
-        
+
         // 在返回前重置导航状态 // 离开页面时重置状态，不然 详情页会导致没appbar
         isShowAppBar?.wrappedValue = true
         isShowsegmentedBackButton?.wrappedValue = false
-        
+
         // 确保导航栏可见
         navigationController?.setNavigationBarHidden(false, animated: true)
-        
+
         // 执行返回操作
         navigationController?.popViewController(animated: true)
     }

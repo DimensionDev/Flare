@@ -1,9 +1,8 @@
+import Foundation
+import os.log
 import shared
 import SwiftUI
 import UIKit
-import Foundation
-import os.log
-
 
 struct FLNewMenuView: View {
     @Binding var isOpen: Bool
@@ -110,10 +109,10 @@ struct FLNewMenuView: View {
                         }
                         .buttonStyle(MenuButtonStyle())
                     }
-                    
+
                     // download manager
                     Button(action: {
-                        isOpen = false 
+                        isOpen = false
                         router.navigate(to: .download(accountType: accountType))
                     }) {
                         HStack {
@@ -128,7 +127,6 @@ struct FLNewMenuView: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(MenuButtonStyle())
-                    
                 }
             }
             .padding(.horizontal, 20)

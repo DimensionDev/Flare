@@ -3,7 +3,7 @@ import SwiftUI
 
 struct SpaceScreen: View {
     let accountType: AccountType
- 
+
     var body: some View {
         VStack {
             Text("Spaces")
@@ -16,7 +16,5 @@ struct SpaceScreen: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationTitle("Spaces")
         .navigationBarTitleDisplayMode(.inline)
-   
     }
 }
- 

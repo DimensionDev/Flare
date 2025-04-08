@@ -1,12 +1,12 @@
-import SwiftUI
 import Generated
+import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 
 @available(iOS 16.0, *)
 struct TransferableImage: Transferable {
     let image: UIImage
-    
+
     static var transferRepresentation: some TransferRepresentation {
         DataRepresentation(exportedContentType: .png) { transferableImage in
             guard let data = transferableImage.image.pngData() else {
@@ -30,7 +30,7 @@ extension EnvironmentValues {
 
 struct StatusCaptureWrapper: View {
     let content: CommonTimelineStatusComponent
-    
+
     var body: some View {
         content
             .padding(.horizontal, 12)
@@ -46,10 +46,10 @@ class ScreenshotRenderer {
             width: UIScreen.main.bounds.width - 24,
             height: UIView.layoutFittingExpandedSize.height
         ))
-        
+
         controller.view.bounds = CGRect(origin: .zero, size: targetSize)
         controller.view.backgroundColor = .clear
-        
+
         let renderer = UIGraphicsImageRenderer(size: targetSize)
         return renderer.image { _ in
             controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
@@ -62,25 +62,23 @@ struct StatusShareAsImageView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.appSettings) private var appSettings
     @EnvironmentObject private var router: FlareRouter
-    
+
     let content: CommonTimelineStatusComponent
     let renderer: ImageRenderer<AnyView>
     @State private var capturedImage: UIImage?
     @State private var isImageReady: Bool = false
     let shareText: String
-    
+
     var rendererImage: Image {
         if let image = capturedImage {
             return Image(uiImage: image)
         }
         return Image(uiImage: renderer.uiImage ?? UIImage())
     }
-    
+
     var body: some View {
         NavigationStack {
             Form {
-              
-                
                 Section {
                     if isImageReady {
                         rendererImage
@@ -92,23 +90,21 @@ struct StatusShareAsImageView: View {
                     }
                 }
                 .listRowBackground(colorScheme == .dark ? Color.black : Color.white)
-                
+
                 Section {
                     if let image = capturedImage {
-                       
-                            ShareLink(
-                                item: TransferableImage(image: image),
-                                subject: Text(shareText),
-                                message: Text(shareText),
-                                preview: SharePreview(
-                                    shareText,
-                                    image: rendererImage
-                                )
-                            ) {
-                                Label("Share", systemImage: "square.and.arrow.up")
-                            }
-                            .disabled(!isImageReady)
-                      
+                        ShareLink(
+                            item: TransferableImage(image: image),
+                            subject: Text(shareText),
+                            message: Text(shareText),
+                            preview: SharePreview(
+                                shareText,
+                                image: rendererImage
+                            )
+                        ) {
+                            Label("Share", systemImage: "square.and.arrow.up")
+                        }
+                        .disabled(!isImageReady)
                     }
                 }
             }
@@ -129,18 +125,16 @@ struct StatusShareAsImageView: View {
         .presentationBackground(.ultraThinMaterial)
         .presentationCornerRadius(16)
         .onAppear {
-             
             let view = StatusCaptureWrapper(content: content)
                 .environment(\.appSettings, appSettings)
                 .environment(\.colorScheme, colorScheme)
                 .environment(\.isInCaptureMode, true)
                 .environmentObject(router)
-            
-             
+
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                 if let image = ScreenshotRenderer.render(view) {
                     capturedImage = image
-                    isImageReady = true   
+                    isImageReady = true
                 }
             }
         }

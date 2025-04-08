@@ -1,66 +1,64 @@
 import NaturalLanguage
 import SwiftUI
 #if canImport(_Translation_SwiftUI)
-import Translation
+    import Translation
 #endif
 
 struct TranslatableText: View {
-
     let originalText: String
     @StateObject private var viewModel = TranslationViewModel()
     private let languageDetector = LanguageDetector()
     @Environment(\.appSettings) private var appSettings
     @Environment(\.isInCaptureMode) private var isInCaptureMode // 截图不翻译
-    
+
     // 添加Apple翻译相关的状态
     @State private var translationConfig: TranslationSession.Configuration?
     @State private var isAppleTranslating = false
     @State private var appleTranslatedText: String?
     @State private var translationTask: Task<Void, Never>?
-    
+
     // 检查是否在模拟器上运行
     private var isRunningOnSimulator: Bool {
         #if targetEnvironment(simulator)
-        return true
+            return true
         #else
-        return false
+            return false
         #endif
     }
-    
-    private func shouldAutoTranslate() -> Bool {
 
+    private func shouldAutoTranslate() -> Bool {
         if isRunningOnSimulator {
             return false
         }
-        
+
         if isInCaptureMode {
             return false
         }
-        
+
         return appSettings.appearanceSettings.autoTranslate && // 检查是否开启了自动翻译
-        getTranslatedText() == nil && // 检查是否已经翻译过
-        !isTranslating() && // 检查是否正在翻译
-        languageDetector.shouldTranslate(text: originalText, targetLanguage: Locale.current.language.languageCode?.identifier ?? "en") // 检查是否需要翻译
+            getTranslatedText() == nil && // 检查是否已经翻译过
+            !isTranslating() && // 检查是否正在翻译
+            languageDetector.shouldTranslate(text: originalText, targetLanguage: Locale.current.language.languageCode?.identifier ?? "en") // 检查是否需要翻译
     }
-    
+
     // 统一获取翻译文本
     private func getTranslatedText() -> String? {
         if appSettings.otherSettings.translationProvider == .systemOffline {
-            return appleTranslatedText
+            appleTranslatedText
         } else {
-            return viewModel.translatedText
+            viewModel.translatedText
         }
     }
-    
+
     // 统一获取翻译状态
     private func isTranslating() -> Bool {
         if appSettings.otherSettings.translationProvider == .systemOffline {
-            return isAppleTranslating
+            isAppleTranslating
         } else {
-            return viewModel.isTranslating
+            viewModel.isTranslating
         }
     }
-    
+
     // 开始翻译
     private func startTranslation() {
         if appSettings.otherSettings.translationProvider == .systemOffline {
@@ -81,25 +79,24 @@ struct TranslatableText: View {
             viewModel.translate(originalText)
         }
     }
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             if let translatedText = getTranslatedText() {
-                
                 HStack(spacing: 2) {
-                    ForEach(0..<30) { _ in
+                    ForEach(0 ..< 30) { _ in
                         Rectangle()
                             .fill(Color.gray.opacity(0.3))
                             .frame(width: 4, height: 1)
                     }
                 }
                 .padding(.vertical, 4)
-                
+
                 Text(translatedText + "\n -- \(appSettings.otherSettings.translationProvider == .systemOffline ? "System Offline" : "Google Translate")")
                     .font(.body)
                     .foregroundColor(.secondary)
             }
-            
+
             if let error = viewModel.error {
                 Text(error.localizedDescription)
                     .font(.caption)
@@ -131,7 +128,6 @@ struct TranslatableText: View {
     }
 }
 
- 
 @available(iOS 18, *)
 private struct OfflineTranslationModifier: ViewModifier {
     let isEnabled: Bool
@@ -140,15 +136,14 @@ private struct OfflineTranslationModifier: ViewModifier {
     @Binding var isTranslating: Bool
     @Binding var translatedText: String?
     @Binding var translationTask: Task<Void, Never>?
-    
+
     func body(content: Content) -> some View {
         if isEnabled {
             content.translationTask(config) { session in
-                
+
                 translationTask?.cancel()
                 translationTask = Task {
                     do {
-                        
                         try Task.checkCancellation()
                         let response = try await session.translate(text)
                         if !Task.isCancelled {

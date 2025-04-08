@@ -225,7 +225,7 @@ class FlareRouter: ObservableObject {
                    log: .default, type: .debug, navigationDepth)
         }
     }
-    
+
     /// 处理所有URL请求的统一入口
     @discardableResult
     func handleDeepLink(_ url: URL) -> Bool {
@@ -248,7 +248,8 @@ class FlareRouter: ObservableObject {
         // 2. 处理外部URL
         // 检查是否是http/https链接
         guard let scheme = url.scheme?.lowercased(),
-              ["http", "https"].contains(scheme) else {
+              ["http", "https"].contains(scheme)
+        else {
             return false
         }
 

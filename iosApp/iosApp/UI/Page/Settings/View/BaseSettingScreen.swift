@@ -1,14 +1,14 @@
 import shared
 import SwiftUI
 #if canImport(_Translation_SwiftUI)
-import Translation
+    import Translation
 #endif
 
 struct BaseSettingScreen: View {
     @Environment(\.appSettings) private var appSettings
     @State private var isTranslating: Bool = false
     @State private var translationConfig: TranslationSession.Configuration?
-    
+
     var body: some View {
         List {
             Section("Browser Settings") {
@@ -31,7 +31,7 @@ struct BaseSettingScreen: View {
                     .pickerStyle(.menu)
                 }
             }
-            
+
             Section("Translation Settings") {
                 HStack {
                     Label("Translation Engine", systemImage: "character.bubble")
@@ -51,7 +51,7 @@ struct BaseSettingScreen: View {
                     .labelsHidden()
                     .pickerStyle(.menu)
                 }
-                
+
                 if #available(iOS 18, *) {
                     if appSettings.otherSettings.translationProvider == .systemOffline {
                         Button(action: {
@@ -76,22 +76,22 @@ struct BaseSettingScreen: View {
                         }
                         .buttonStyle(.plain)
                     }
-                    
+
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Test Translation")
                             .font(.subheadline)
                             .foregroundColor(.gray)
-                        
+
                         Text("Hello World!")
                             .font(.body)
-                        
+
                         // 使用TranslatableText进行翻译测试
                         TranslatableText(originalText: "Hello World!")
                             .id(appSettings.otherSettings.translationProvider) // 切换引擎时刷新
                     }
                     .padding(.vertical, 8)
                 }
-                
+
                 Toggle(isOn: Binding(get: {
                     appSettings.appearanceSettings.autoTranslate
                 }, set: { value in
@@ -107,8 +107,8 @@ struct BaseSettingScreen: View {
         #if os(macOS)
         .toggleStyle(.switch)
         #endif
-        .translationTask(translationConfig) { session in
-                isTranslating = false
+        .translationTask(translationConfig) { _ in
+            isTranslating = false
         }
     }
 }
@@ -119,5 +119,3 @@ extension OtherSettings {
         return self
     }
 }
-
- 

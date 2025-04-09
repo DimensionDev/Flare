@@ -19,6 +19,8 @@ import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.mapper.users
+import dev.dimension.flare.data.database.cache.model.DbMessageItem
+import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
@@ -34,6 +36,7 @@ import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
 import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
@@ -55,6 +58,7 @@ import dev.dimension.flare.data.network.xqt.model.PostCreateTweetRequestVariable
 import dev.dimension.flare.data.network.xqt.model.PostDeleteRetweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostDeleteRetweetRequestVariables
 import dev.dimension.flare.data.network.xqt.model.PostDeleteTweetRequest
+import dev.dimension.flare.data.network.xqt.model.PostDmNew2Request
 import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
@@ -102,6 +106,7 @@ import org.koin.core.component.inject
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.seconds
+import kotlin.uuid.Uuid
 
 private const val BULK_SIZE: Long = 512 * 1024L // 512 Kib
 private const val MAX_ASYNC_UPLOAD_SIZE = 10
@@ -1615,9 +1620,86 @@ internal class XQTDataSource(
         roomKey: MicroBlogKey,
         message: String,
     ) {
+        coroutineScope.launch {
+            val tempMessage = createSendingDirectMessage(roomKey, message)
+            database.messageDao().insertMessages(listOf(tempMessage))
+            sendMessage(roomKey, message, tempMessage)
+        }
+    }
+
+    private suspend fun sendMessage(
+        roomKey: MicroBlogKey,
+        message: String,
+        tempMessage: DbMessageItem,
+    ) {
+        tryRun {
+            val response =
+                service.getDMConversationTimeline(
+                    conversationId = roomKey.id,
+                    context = "FETCH_DM_CONVERSATION",
+                    maxId = "0",
+                )
+            val recipientIds =
+                response
+                    .conversationTimeline
+                    ?.conversations
+                    ?.values
+                    ?.firstOrNull()
+                    ?.participants
+                    ?.map { it.userId }
+                    .orEmpty()
+            service.postDmNew2(
+                PostDmNew2Request(
+                    conversationId = roomKey.id,
+                    requestId = Uuid.random().toString(),
+                    text = message,
+                    recipientIds = recipientIds,
+                ),
+            ) to response
+        }.onSuccess { (response, conversationResponse) ->
+            database.messageDao().deleteMessage(tempMessage.messageKey)
+            XQT.saveDM(
+                accountKey = accountKey,
+                database = database,
+                propertyEntries = response.propertyEntries,
+                users = response.users,
+                conversations = conversationResponse.conversationTimeline?.conversations,
+            )
+        }.onFailure {
+            database.messageDao().insertMessages(
+                listOf(
+                    tempMessage.copy(
+                        content =
+                            (tempMessage.content as MessageContent.Local).copy(
+                                state = MessageContent.Local.State.FAILED,
+                            ),
+                    ),
+                ),
+            )
+        }
     }
 
     override fun retrySendDirectMessage(messageKey: MicroBlogKey) {
+        coroutineScope.launch {
+            val current = database.messageDao().getMessage(messageKey)
+            if (current != null && current.content is MessageContent.Local) {
+                database.messageDao().insertMessages(
+                    listOf(
+                        current.copy(
+                            content =
+                                current.content.copy(
+                                    state = MessageContent.Local.State.SENDING,
+                                ),
+                        ),
+                    ),
+                )
+                sendMessage(
+                    roomKey = current.roomKey,
+                    message = current.content.text,
+                    tempMessage = current,
+                )
+            }
+        }
     }
 
     override fun deleteDirectMessage(
@@ -1629,7 +1711,12 @@ internal class XQTDataSource(
     override fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> =
         Cacheable(
             fetchSource = {
-                val response = service.getDMConversationTimeline(conversationId = roomKey.id)
+                val response =
+                    service.getDMConversationTimeline(
+                        conversationId = roomKey.id,
+                        context = "FETCH_DM_CONVERSATION",
+                        maxId = "0",
+                    )
                 XQT.saveDM(
                     accountKey = accountKey,
                     database = database,
@@ -1646,7 +1733,11 @@ internal class XQTDataSource(
                         accountKey = accountKey,
                     ).distinctUntilChanged()
                     .mapNotNull {
-                        it?.render(accountKey = accountKey, credential = credential, statusEvent = this)
+                        it?.render(
+                            accountKey = accountKey,
+                            credential = credential,
+                            statusEvent = this,
+                        )
                     }
             },
         )

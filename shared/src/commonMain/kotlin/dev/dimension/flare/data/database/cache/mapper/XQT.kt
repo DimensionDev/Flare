@@ -57,9 +57,9 @@ internal object XQT {
     suspend fun saveDM(
         accountKey: MicroBlogKey,
         database: CacheDatabase,
-        propertyEntries: List<InboxTimelineEntry>? = null,
-        users: Map<String, InboxUser>? = null,
-        conversations: Map<String, InboxConversation>? = null,
+        propertyEntries: List<InboxTimelineEntry>?,
+        users: Map<String, InboxUser>?,
+        conversations: Map<String, InboxConversation>?,
         updateRoom: Boolean = true,
     ) {
         val trustedConversations =

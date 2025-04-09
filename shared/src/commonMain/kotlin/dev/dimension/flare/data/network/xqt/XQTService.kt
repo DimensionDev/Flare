@@ -18,6 +18,7 @@ import dev.dimension.flare.data.network.xqt.api.UsersApi
 import dev.dimension.flare.data.network.xqt.api.V11GetApi
 import dev.dimension.flare.data.network.xqt.api.V11PostApi
 import dev.dimension.flare.data.network.xqt.api.V20GetApi
+import dev.dimension.flare.data.network.xqt.api.VDmPostJsonPostApi
 import dev.dimension.flare.data.network.xqt.api.createDefaultApi
 import dev.dimension.flare.data.network.xqt.api.createDmApi
 import dev.dimension.flare.data.network.xqt.api.createGuestApi
@@ -32,6 +33,7 @@ import dev.dimension.flare.data.network.xqt.api.createUsersApi
 import dev.dimension.flare.data.network.xqt.api.createV11GetApi
 import dev.dimension.flare.data.network.xqt.api.createV11PostApi
 import dev.dimension.flare.data.network.xqt.api.createV20GetApi
+import dev.dimension.flare.data.network.xqt.api.createVDmPostJsonPostApi
 import dev.dimension.flare.model.xqtHost
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -106,7 +108,10 @@ internal class XQTService(
     ).createListsApi(),
     DmApi by config(
         chocolate = chocolate,
-    ).createDmApi() {
+    ).createDmApi(),
+    VDmPostJsonPostApi by config(
+        chocolate = chocolate,
+    ).createVDmPostJsonPostApi() {
     companion object {
         fun checkChocolate(value: String) =
 //            value.contains("gt=") &&

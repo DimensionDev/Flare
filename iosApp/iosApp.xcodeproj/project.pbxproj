@@ -718,7 +718,7 @@
 		};
 		64541A8E2DA3CE5A001208C7 /* XCRemoteSwiftPackageReference "Tiercel" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "git@github.com:Danie1s/Tiercel.git";
+			repositoryURL = "https://github.com/danie1s/Tiercel.git";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 3.2.6;

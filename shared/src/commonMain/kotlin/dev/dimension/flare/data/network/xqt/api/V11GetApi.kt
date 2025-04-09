@@ -122,7 +122,6 @@ internal interface V11GetApi {
         @Query("skip_status") skipStatus: Int = 1,
         @Query("cards_platform") cardsPlatform: String = "Web-12",
         @Query("include_cards") includeCards: Int = 1,
-        @Query("include_ext_alt_text") includeExtAltText: Boolean = true,
         @Query("include_ext_limited_action_results") includeExtLimitedActionResults: Boolean = true,
         @Query("include_quote_count") includeQuoteCount: Boolean = true,
         @Query("include_reply_count") includeReplyCount: Int = 1,
@@ -132,6 +131,7 @@ internal interface V11GetApi {
         @Query("user_id") userId: String,
         @Query("count") count: Int = 1000,
         @Query("filter_to_owned_lists") filterToOwnedLists: Boolean = true,
+        @Query("include_ext_alt_text") includeExtAltText: Boolean = true,
     ): Response<ListsMembershipsResponse>
 
     /**

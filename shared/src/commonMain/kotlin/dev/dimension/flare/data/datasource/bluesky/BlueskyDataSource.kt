@@ -1911,7 +1911,11 @@ internal class BlueskyDataSource(
                         accountKey = accountKey,
                     ).distinctUntilChanged()
                     .mapNotNull {
-                        it?.render(accountKey = accountKey, credential = credential, statusEvent = this)
+                        it?.render(
+                            accountKey = accountKey,
+                            credential = credential,
+                            statusEvent = this,
+                        )
                     }
             },
         )
@@ -2052,22 +2056,26 @@ internal class BlueskyDataSource(
                     when (val message = it.value.message) {
                         is LogCreateMessageMessageUnion.MessageView ->
                             handleMessage(roomKey = roomKey, message = message.value)
+
                         is LogCreateMessageMessageUnion.DeletedMessageView ->
                             handleMessage(roomKey = roomKey, message = message.value)
 
                         is LogCreateMessageMessageUnion.Unknown -> Unit
                     }
                 }
+
                 is GetLogResponseLogUnion.DeleteMessage -> {
                     when (val message = it.value.message) {
                         is LogDeleteMessageMessageUnion.MessageView ->
                             handleMessage(roomKey = roomKey, message = message.value)
+
                         is LogDeleteMessageMessageUnion.DeletedMessageView ->
                             handleMessage(roomKey = roomKey, message = message.value)
 
                         is LogDeleteMessageMessageUnion.Unknown -> Unit
                     }
                 }
+
                 is GetLogResponseLogUnion.BeginConvo -> Unit
                 is GetLogResponseLogUnion.LeaveConvo -> Unit
                 is GetLogResponseLogUnion.Unknown -> Unit

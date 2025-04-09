@@ -103,6 +103,7 @@ internal data class DbMessageItem(
     val userKey: MicroBlogKey,
     val timestamp: Long,
     val content: MessageContent,
+    val showSender: Boolean,
     val isLocal: Boolean = false,
 )
 

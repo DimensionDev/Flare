@@ -51,7 +51,7 @@ internal data class TweetLegacy(
     @SerialName(value = "bookmarked")
     val bookmarked: kotlin.Boolean? = null,
     @SerialName(value = "conversation_id_str")
-    val conversationIdStr: kotlin.String,
+    val conversationIdStr: kotlin.String? = null,
     @SerialName(value = "created_at")
     val createdAt: kotlin.String,
     @SerialName(value = "display_text_range")
@@ -79,7 +79,7 @@ internal data class TweetLegacy(
     @SerialName(value = "retweeted")
     val retweeted: kotlin.Boolean,
     @SerialName(value = "user_id_str")
-    val userIdStr: kotlin.String,
+    val userIdStr: kotlin.String? = null,
     @SerialName(value = "extended_entities")
     val extendedEntities: ExtendedEntities? = null,
     @SerialName(value = "possibly_sensitive")

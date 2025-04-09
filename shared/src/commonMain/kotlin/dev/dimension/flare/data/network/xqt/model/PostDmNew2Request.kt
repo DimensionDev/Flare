@@ -10,80 +10,66 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param cardsPlatform 
- * @param dmUsers 
- * @param includeCards 
- * @param includeQuoteCount 
- * @param recipientIds 
- * @param requestId 
- * @param text 
- * @param audioOnlyMediaAttachment 
- * @param conversationId 
- * @param mediaId 
- * @param replyToDmId 
- * @param simpleQuotedTweet 
- * @param stratoExt 
+ *
+ * @param cardsPlatform
+ * @param dmUsers
+ * @param includeCards
+ * @param includeQuoteCount
+ * @param recipientIds
+ * @param requestId
+ * @param text
+ * @param audioOnlyMediaAttachment
+ * @param conversationId
+ * @param mediaId
+ * @param replyToDmId
+ * @param simpleQuotedTweet
+ * @param stratoExt
  */
 @Serializable
-
-internal data class PostDmNew2Request (
-
+internal data class PostDmNew2Request(
     @SerialName(value = "cards_platform")
     val cardsPlatform: kotlin.String = "Web-12",
-
     @SerialName(value = "dm_users")
     val dmUsers: kotlin.Boolean = false,
-
     @SerialName(value = "include_cards")
     val includeCards: kotlin.Int = 1,
-
     @SerialName(value = "include_quote_count")
     val includeQuoteCount: kotlin.Boolean = true,
-
-    @Contextual @SerialName(value = "recipient_ids")
-    val recipientIds: kotlin.Any?,
-
+    @SerialName(value = "recipient_ids")
+    val recipientIds: Boolean? = false,
     @SerialName(value = "request_id")
     val requestId: kotlin.String,
-
     @SerialName(value = "text")
     val text: kotlin.String,
-
     @SerialName(value = "audio_only_media_attachment")
     val audioOnlyMediaAttachment: kotlin.Boolean? = null,
-
     @SerialName(value = "conversation_id")
     val conversationId: kotlin.String? = null,
-
     @SerialName(value = "media_id")
     val mediaId: kotlin.String? = null,
-
     @SerialName(value = "reply_to_dm_id")
     val replyToDmId: kotlin.String? = null,
-
     @SerialName(value = "simple_quoted_tweet")
     val simpleQuotedTweet: kotlin.Boolean? = null,
-
     @SerialName(value = "strato_ext")
-    val stratoExt: kotlin.String? = "mediaRestrictions,altText,mediaStats,mediaColor,info360," +
+    val stratoExt: kotlin.String? =
+        "mediaRestrictions,altText,mediaStats,mediaColor,info360," +
             "highlightedLabel,unmentionInfo,editControl,previousCounts,limitedActionResults," +
-            "superFollowMetadata"
+            "superFollowMetadata",
+)
 
-) {
-
-
-}
-
+@Serializable
+internal data class AddToConversationRequest(
+    @SerialName("conversation_id")
+    val conversationId: kotlin.String,
+)

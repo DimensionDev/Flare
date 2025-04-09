@@ -118,7 +118,7 @@ internal fun TopLevel.renderNotifications(
                                                         globalObjects?.users?.get(it.userIdStr)
                                                             ?: return@let null,
                                                     isBlueVerified = false,
-                                                    restId = it.userIdStr,
+                                                    restId = it.userIdStr ?: return@let null,
                                                 ),
                                         ),
                                 ),
@@ -170,6 +170,9 @@ internal fun TopLevel.renderNotifications(
                 )
             } else if (mentionTweet != null) {
                 val tweet = globalObjects?.tweets?.get(mentionTweet.id) ?: return@mapNotNull null
+                if (tweet.userIdStr == null) {
+                    return@mapNotNull null
+                }
                 val user = globalObjects.users?.get(tweet.userIdStr) ?: return@mapNotNull null
                 if (mentionTweet.id == null) {
                     return@mapNotNull null

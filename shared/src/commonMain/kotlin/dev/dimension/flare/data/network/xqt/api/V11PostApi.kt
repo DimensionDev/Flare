@@ -4,8 +4,11 @@ import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.Field
 import de.jensklingenberg.ktorfit.http.FormUrlEncoded
+import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
+import de.jensklingenberg.ktorfit.http.Query
+import dev.dimension.flare.data.network.xqt.model.AddToConversationRequest
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.UpdateAccountSettingsResponse
 
@@ -346,4 +349,12 @@ internal interface V11PostApi {
         @Field("dm_quality_filter") dmQualityFilter: kotlin.String? = null,
         @Field("dm_receipt_setting") dmReceiptSetting: kotlin.String? = null,
     ): Response<UpdateAccountSettingsResponse>
+
+    @POST("1.1/dm/welcome_messages/add_to_conversation.json")
+    suspend fun postDMWelcomeMessagesAddToConversation(
+        @Header("Content-Type") contentType: String = "application/json",
+        @Query("cards_platform") cardsPlatform: kotlin.String = "Web-12",
+        @Query("request_id") requestId: kotlin.String,
+        @Body body: AddToConversationRequest,
+    ): Response<Unit>
 }

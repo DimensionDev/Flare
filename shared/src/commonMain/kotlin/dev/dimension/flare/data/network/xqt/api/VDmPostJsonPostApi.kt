@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.network.xqt.api
 
 import de.jensklingenberg.ktorfit.http.Body
+import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.xqt.model.DmNew2Response
@@ -31,7 +32,8 @@ internal interface VDmPostJsonPostApi {
     @POST("1.1/dm/new2.json")
     public suspend fun postDmNew2(
         @Body postDmNew2Request: PostDmNew2Request,
-        @Query("ext") ext: kotlin.String? = "mediaColor,altText,mediaStats,highlightedLabel," +
+        @Query("ext") ext: kotlin.String? =
+            "mediaColor,altText,mediaStats,highlightedLabel," +
                 "voiceInfo,birdwatchPivot,superFollowMetadata,unmentionInfo,editControl,article",
         @Query("include_ext_alt_text") includeExtAltText: kotlin.Boolean? = true,
         @Query("include_ext_limited_action_results") includeExtLimitedActionResults: kotlin.Boolean? = true,
@@ -42,7 +44,7 @@ internal interface VDmPostJsonPostApi {
         @Query("include_inbox_timelines") includeInboxTimelines: kotlin.Boolean? = true,
         @Query("include_ext_media_color") includeExtMediaColor: kotlin.Boolean? = true,
         @Query("supports_reactions") supportsReactions: kotlin.Boolean? = true,
-        @Query("supports_edit") supportsEdit: kotlin.Boolean? = true
+        @Query("supports_edit") supportsEdit: kotlin.Boolean? = true,
+        @Header("Content-Type") contentType: String = "application/json",
     ): DmNew2Response
-
 }

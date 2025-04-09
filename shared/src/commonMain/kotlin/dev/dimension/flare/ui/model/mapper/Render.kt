@@ -184,6 +184,7 @@ internal fun DbMessageItemWithUser.render(
 
             else -> null
         },
+    showSender = message.showSender && message.userKey != accountKey,
 )
 
 internal fun DbRssSources.render() =

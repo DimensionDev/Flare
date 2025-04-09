@@ -38,6 +38,7 @@ public data class UiDMItem internal constructor(
     val timestamp: UiDateTime,
     val isFromMe: Boolean,
     val sendState: SendState?,
+    val showSender: Boolean,
 ) {
     public sealed interface Message {
         public data class Text(

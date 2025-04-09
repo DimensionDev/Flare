@@ -42,6 +42,7 @@ import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.AddMemberRequest
+import dev.dimension.flare.data.network.xqt.model.AddToConversationRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequestVariables
 import dev.dimension.flare.data.network.xqt.model.CreateListRequest
@@ -98,6 +99,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
@@ -1639,21 +1641,11 @@ internal class XQTDataSource(
                     context = "FETCH_DM_CONVERSATION",
                     maxId = "0",
                 )
-            val recipientIds =
-                response
-                    .conversationTimeline
-                    ?.conversations
-                    ?.values
-                    ?.firstOrNull()
-                    ?.participants
-                    ?.map { it.userId }
-                    .orEmpty()
             service.postDmNew2(
                 PostDmNew2Request(
                     conversationId = roomKey.id,
                     requestId = Uuid.random().toString(),
                     text = message,
-                    recipientIds = recipientIds,
                 ),
             ) to response
         }.onSuccess { (response, conversationResponse) ->
@@ -1706,6 +1698,21 @@ internal class XQTDataSource(
         roomKey: MicroBlogKey,
         messageKey: MicroBlogKey,
     ) {
+        coroutineScope.launch {
+            val current = database.messageDao().getMessage(messageKey)
+            if (current != null && current.content is MessageContent.Local) {
+                database.messageDao().deleteMessage(messageKey)
+            } else {
+                tryRun {
+                    service.postDMMessageDeleteMutation(
+                        messageId = messageKey.id,
+                        requestId = Uuid.random().toString(),
+                    )
+                }.onSuccess {
+                    database.messageDao().deleteMessage(messageKey)
+                }
+            }
+        }
     }
 
     override fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> =
@@ -1782,13 +1789,91 @@ internal class XQTDataSource(
             )
 
     override fun leaveDirectMessage(roomKey: MicroBlogKey) {
+        coroutineScope.launch {
+            tryRun {
+                service.postDMConversationDelete(
+                    conversationId = roomKey.id,
+                )
+            }.onSuccess {
+                database.messageDao().deleteRoomTimeline(roomKey, accountKey = accountKey)
+                database.messageDao().deleteRoom(roomKey)
+                database.messageDao().deleteRoomReference(roomKey)
+                database.messageDao().deleteRoomMessages(roomKey)
+            }
+        }
     }
 
-    override fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> {
-        TODO("Not yet implemented")
-    }
+    override fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> =
+        flow {
+            val accountIdLong =
+                accountKey.id.toLongOrNull()
+                    ?: throw Exception("Invalid account key")
+            val userIdLong =
+                userKey.id.toLongOrNull()
+                    ?: throw Exception("Invalid user key")
+            val roomId =
+                listOf(
+                    accountIdLong,
+                    userIdLong,
+                ).sortedBy { it }
+                    .joinToString("-")
+            tryRun {
+                val response =
+                    service.getDMConversationTimeline(
+                        conversationId = roomId,
+                    )
+                if (response.conversationTimeline?.propertyEntries.isNullOrEmpty()) {
+                    service
+                        .postDMWelcomeMessagesAddToConversation(
+                            requestId = Uuid.random().toString(),
+                            body =
+                                AddToConversationRequest(
+                                    conversationId = roomId,
+                                ),
+                        )
+                    service.getDMConversationTimeline(
+                        conversationId = roomId,
+                    )
+                } else {
+                    response
+                }
+            }.onSuccess { response ->
+                XQT.saveDM(
+                    accountKey = accountKey,
+                    database = database,
+                    propertyEntries = response.conversationTimeline?.propertyEntries,
+                    users = response.conversationTimeline?.users,
+                    conversations = response.conversationTimeline?.conversations,
+                )
+            }.fold(
+                onSuccess = {
+                    emit(
+                        UiState.Success(
+                            MicroBlogKey(
+                                id = roomId,
+                                host = accountKey.host,
+                            ),
+                        ),
+                    )
+                },
+                onFailure = {
+                    emit(UiState.Error(it))
+                },
+            )
+        }
 
-    override suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean {
-        TODO("Not yet implemented")
-    }
+    override suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean =
+        tryRun {
+            val canDm =
+                service
+                    .getDMPermissions(userKey.id)
+                    .body()
+                    ?.permissions
+                    ?.idKeys
+                    ?.get(userKey.id)
+                    ?.canDm == true
+            if (!canDm) {
+                throw Exception("Cannot send DM")
+            }
+        }.isSuccess
 }

@@ -10,33 +10,24 @@
     "ArrayInDataClass",
     "EnumEntryName",
     "RemoveRedundantQualifierName",
-    "UnusedImport"
+    "UnusedImport",
 )
 
 package dev.dimension.flare.data.network.xqt.model
 
-import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.Contextual
+import kotlinx.serialization.Serializable
 
 /**
- * 
  *
- * @param propertyEntries 
- * @param users 
+ *
+ * @param propertyEntries
+ * @param users
  */
 @Serializable
-
-internal data class DmNew2Response (
-
+internal data class DmNew2Response(
     @SerialName(value = "entries")
     val propertyEntries: kotlin.collections.List<InboxTimelineEntry>? = null,
-
     @SerialName(value = "users")
-    val users: kotlin.collections.Map<kotlin.String, InboxUser>? = null
-
-) {
-
-
-}
-
+    val users: kotlin.collections.Map<kotlin.String, InboxUser>? = null,
+)

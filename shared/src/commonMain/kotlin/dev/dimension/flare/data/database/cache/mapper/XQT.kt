@@ -84,8 +84,14 @@ internal object XQT {
                         ?.filter {
                             it.message?.conversationId == conversation.conversationId
                         }.orEmpty()
+                        .map {
+                            it.toDbMessageItem(
+                                accountKey,
+                                showSender = conversation.participants.orEmpty().size > 2,
+                            )
+                        }
                 }.mapNotNull {
-                    it.toDbMessageItem(accountKey)
+                    it
                 }
         val timeline =
             trustedConversations.map { conversation ->
@@ -172,7 +178,10 @@ private fun List<InboxUser>.toDbUser(): List<DbUser> {
     }
 }
 
-private fun InboxTimelineEntry.toDbMessageItem(accountKey: MicroBlogKey): DbMessageItem? {
+private fun InboxTimelineEntry.toDbMessageItem(
+    accountKey: MicroBlogKey,
+    showSender: Boolean,
+): DbMessageItem? {
     if (message == null) {
         return null
     }
@@ -182,6 +191,7 @@ private fun InboxTimelineEntry.toDbMessageItem(accountKey: MicroBlogKey): DbMess
         content = MessageContent.XQT.Message(message.messageData ?: return null),
         timestamp = message.time?.toLongOrNull() ?: 0L,
         userKey = MicroBlogKey(message.messageData.senderId ?: return null, accountKey.host),
+        showSender = showSender,
     )
 }
 
@@ -422,20 +432,21 @@ internal fun TopLevel.tweets(): List<XQTTimeline> =
             // build tweet
             Tweet(
                 restId = tweetLegacy.idStr,
-//
                 core =
-                    globalObjects?.users?.get(tweetLegacy.userIdStr)?.let {
-                        UserResultCore(
-                            userResults =
-                                UserResults(
-                                    result =
-                                        User(
-                                            legacy = it,
-                                            isBlueVerified = it.verified,
-                                            restId = tweetLegacy.userIdStr,
-                                        ),
-                                ),
-                        )
+                    tweetLegacy.userIdStr?.let {
+                        globalObjects?.users?.get(tweetLegacy.userIdStr)?.let {
+                            UserResultCore(
+                                userResults =
+                                    UserResults(
+                                        result =
+                                            User(
+                                                legacy = it,
+                                                isBlueVerified = it.verified,
+                                                restId = tweetLegacy.userIdStr,
+                                            ),
+                                    ),
+                            )
+                        }
                     },
                 legacy = tweetLegacy,
             ) to index

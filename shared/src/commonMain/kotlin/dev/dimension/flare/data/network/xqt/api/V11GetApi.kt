@@ -398,7 +398,7 @@ internal interface V11GetApi {
      */
     @GET("1.1/dm/permissions.json")
     public suspend fun getDMPermissions(
-        @Query("recipient_ids") recipientIds: kotlin.String = "111,222",
+        @Query("recipient_ids") recipientIds: kotlin.String,
         @Query("dm_users") dmUsers: kotlin.Boolean = true,
     ): Response<DMPermissionsCreateGroupConversationResponse>
 

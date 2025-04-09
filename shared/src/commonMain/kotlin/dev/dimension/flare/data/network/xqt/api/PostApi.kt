@@ -22,6 +22,7 @@ import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweet200Response
 import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweet200Response
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
+import kotlinx.serialization.json.JsonObject
 
 internal interface PostApi {
     /**
@@ -197,9 +198,9 @@ internal interface PostApi {
     public suspend fun postDMMessageDeleteMutation(
         @Path("pathQueryId") pathQueryId: kotlin.String = "BJ6DtxA2llfjnRoRjaiIiw",
         @Query("queryId") queryId: kotlin.String = "BJ6DtxA2llfjnRoRjaiIiw",
-        @Query("messageId") messageId: kotlin.String = "1844651953697296738",
-        @Query("requestId") requestId: kotlin.String = "c71a2690-87a8-11ef-9564-b7a4d8a5f00c",
-    ): Response<kotlin.Any>
+        @Query("messageId") messageId: kotlin.String,
+        @Query("requestId") requestId: kotlin.String,
+    ): Response<JsonObject>
 
     /**
      * POST graphql/{pathQueryId}/DMPinnedInboxAppend_Mutation

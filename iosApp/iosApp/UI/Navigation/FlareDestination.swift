@@ -9,6 +9,7 @@ enum FlareDestination: Identifiable, Hashable {
     case statusDetail(accountType: AccountType, statusKey: MicroBlogKey)
     case search(accountType: AccountType, keyword: String)
     case statusMedia(accountType: AccountType, statusKey: MicroBlogKey, index: Int)
+    case download(accountType: AccountType)
 
     case compose(accountType: AccountType, status: FlareComposeStatus?)
     case addReaction(accountType: AccountType, statusKey: MicroBlogKey)
@@ -86,6 +87,8 @@ enum FlareDestination: Identifiable, Hashable {
             "spaces_\(String(describing: accountType))"
         case let .messages(accountType):
             "messages_\(String(describing: accountType))"
+        case let .download(accountType):
+            "download_\(String(describing: accountType))"
         }
     }
 
@@ -97,6 +100,8 @@ enum FlareDestination: Identifiable, Hashable {
             .fullScreen
         case .blueskyReportStatus, .mastodonReportStatus, .misskeyReportStatus, .deleteStatus:
             .dialog
+        case .download:
+            .push
         default:
             .push
         }

@@ -4,8 +4,6 @@ import os.log
 import shared
 import SwiftUI
 
-
-
 struct HomeContent: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @AppStorage("homeSidebarCustomizations") var tabViewCustomization: TabViewCustomization

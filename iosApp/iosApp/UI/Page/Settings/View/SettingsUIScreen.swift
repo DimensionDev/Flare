@@ -28,15 +28,19 @@ struct SettingsUIScreen: View {
                         Section {
                             Label("settings_appearance_generic", systemImage: "paintpalette")
                                 .tag(SettingsDestination.appearance)
+
                             Label("base settings", systemImage: "gear")
                                 .tag(SettingsDestination.other)
+
                             Label("settings_storage_title", systemImage: "externaldrive")
                                 .tag(SettingsDestination.storage)
+
                             Label("settings_about_subtitle", systemImage: "exclamationmark.circle")
                                 .tag(SettingsDestination.about)
                         }
                     }
                     .navigationTitle("settings_title")
+                    .environment(\.defaultMinListRowHeight, 50)
                 } detail: {
                     if let detail = selectedDetail {
                         switch detail {

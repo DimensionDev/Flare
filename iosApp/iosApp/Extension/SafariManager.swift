@@ -9,38 +9,38 @@ public final class SafariManager: NSObject, SFSafariViewControllerDelegate {
         }
         return SafariManager()
     }()
-    
+
     private var windowScene: UIWindowScene?
     private let viewController: UIViewController = .init()
     private var window: UIWindow?
-    
-    nonisolated override init() {
+
+    override nonisolated init() {
         super.init()
     }
-    
+
     @MainActor
     public func open(_ url: URL) -> OpenURLAction.Result {
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else { 
-            return .systemAction 
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene else {
+            return .systemAction
         }
-        
+
         window = setupWindow(windowScene: windowScene)
-        
+
         let configuration = SFSafariViewController.Configuration()
         configuration.entersReaderIfAvailable = true // 默认启用阅读模式
-        
+
         let safari = SFSafariViewController(url: url, configuration: configuration)
         safari.preferredBarTintColor = .systemBackground
         safari.preferredControlTintColor = .systemBlue
         safari.delegate = self
-        
+
         DispatchQueue.main.async { [weak self] in
             self?.viewController.present(safari, animated: true)
         }
-        
+
         return .handled
     }
-    
+
     private func setupWindow(windowScene: UIWindowScene) -> UIWindow {
         let window = window ?? UIWindow(windowScene: windowScene)
         window.rootViewController = viewController
@@ -49,19 +49,19 @@ public final class SafariManager: NSObject, SFSafariViewControllerDelegate {
         self.window = window
         return window
     }
-    
+
     public func dismiss() {
         viewController.presentedViewController?.dismiss(animated: true)
         window?.resignKey()
         window?.isHidden = false
         window = nil
     }
-    
-    nonisolated public func safariViewControllerDidFinish(_: SFSafariViewController) {
+
+    public nonisolated func safariViewControllerDidFinish(_: SFSafariViewController) {
         Task { @MainActor in
             window?.resignKey()
             window?.isHidden = false
             window = nil
         }
     }
-} 
+}

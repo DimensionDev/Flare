@@ -302,7 +302,7 @@ class PhotoBrowserManager {
                 icon: icon ?? UIImage(systemName: "checkmark.circle.fill"),
                 message: message
             )
-            toastView.show(in: window)
+            toastView.show()
         }
     }
 }

@@ -8,4 +8,3 @@ extension Notification.Name {
     static let flMenuStateDidChange = Notification.Name("FLMenuStateDidChange")
     static let userDidUpdate = Notification.Name("userDidUpdate")
 }
- 

@@ -40,7 +40,7 @@ struct CommonTimelineStatusComponent: View {
                 icon: UIImage(systemName: "flag.fill"),
                 message: String(localized: "report") + " success"
             )
-            toastView.show(in: window)
+            toastView.show()
         }
     }
 
@@ -680,7 +680,6 @@ struct SmallIconModifier: ViewModifier {
             .frame(width: 24, height: 24)
     }
 }
-
 
 // 用于收集StatusActionAsyncActionItem中Flow数据的类
 class AsyncActionItemCollector {

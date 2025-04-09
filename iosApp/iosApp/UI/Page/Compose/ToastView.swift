@@ -49,9 +49,11 @@ public class ToastView: UIView {
         messageLabel.frame = CGRect(x: 0, y: 70, width: 120, height: 20)
     }
 
-    public func show(in window: UIWindow, duration: TimeInterval = 1.3) {
-        center = window.center
-        window.addSubview(self)
+    public func show(duration: TimeInterval = 1.3) {
+        let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene
+        let window = windowScene!.windows.first
+        center = window!.center
+        window!.addSubview(self)
 
         UIView.animate(withDuration: 0.3, delay: duration, options: [], animations: {
             self.alpha = 0

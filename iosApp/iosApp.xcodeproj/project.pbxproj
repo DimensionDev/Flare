@@ -22,6 +22,7 @@
 		06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B851502B6B22DD00DFA075 /* AppDelegate.swift */; };
 		06B851552B6B926D00DFA075 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 06B851542B6B926D00DFA075 /* Localizable.xcstrings */; };
 		644C84F82D535D0B00E92D0D /* JXPagingView in Frameworks */ = {isa = PBXBuildFile; productRef = 644C84F72D535D0B00E92D0D /* JXPagingView */; };
+		64541A902DA3CE5A001208C7 /* Tiercel in Frameworks */ = {isa = PBXBuildFile; productRef = 64541A8F2DA3CE5A001208C7 /* Tiercel */; };
 		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
 		6488800B2D1AD43E00EFE72C /* JXSegmentedView in Frameworks */ = {isa = PBXBuildFile; productRef = 6488800A2D1AD43E00EFE72C /* JXSegmentedView */; };
 		6489B3312D68D50800D8AEBB /* SVGView in Frameworks */ = {isa = PBXBuildFile; productRef = 6489B3302D68D50800D8AEBB /* SVGView */; };
@@ -30,6 +31,7 @@
 		64BA00252D1AD84D0053F205 /* JXPhotoBrowser in Frameworks */ = {isa = PBXBuildFile; productRef = 64BA00242D1AD84D0053F205 /* JXPhotoBrowser */; };
 		64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */ = {isa = PBXBuildFile; productRef = 64BBDA712CFDD8420052E599 /* SwiftDate */; };
 		64BFB16D2D549F50002793C0 /* SideMenu in Frameworks */ = {isa = PBXBuildFile; productRef = 64BFB16C2D549F50002793C0 /* SideMenu */; };
+		64C17B592DA3E683000291EA /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 64C17B582DA3E683000291EA /* GRDB */; };
 		64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */; };
 		64E208712CF8458A001C64EF /* FLAnimatedImage in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208702CF8458A001C64EF /* FLAnimatedImage */; };
 		64E208742CF845C2001C64EF /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208732CF845C2001C64EF /* Kingfisher */; };
@@ -74,6 +76,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				64541A902DA3CE5A001208C7 /* Tiercel in Frameworks */,
 				64E877CC2D0842C5003559B9 /* Fuzi in Frameworks */,
 				64E208712CF8458A001C64EF /* FLAnimatedImage in Frameworks */,
 				0690507B2CAE634C007FC957 /* Awesome in Frameworks */,
@@ -92,6 +95,7 @@
 				64E2087A2CF84670001C64EF /* Generated in Frameworks */,
 				64BA00252D1AD84D0053F205 /* JXPhotoBrowser in Frameworks */,
 				06B8514B2B6B228600DFA075 /* FirebaseAnalytics in Frameworks */,
+				64C17B592DA3E683000291EA /* GRDB in Frameworks */,
 				64E890742D2D28400001B93D /* MJRefresh in Frameworks */,
 				6489B3312D68D50800D8AEBB /* SVGView in Frameworks */,
 				64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */,
@@ -250,6 +254,8 @@
 				6489B3302D68D50800D8AEBB /* SVGView */,
 				648EE5BC2D8D71EA00A457AA /* SwiftfulRouting */,
 				64B780532D9D3B7F00955C56 /* TagCloud */,
+				64541A8F2DA3CE5A001208C7 /* Tiercel */,
+				64C17B582DA3E683000291EA /* GRDB */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
@@ -303,6 +309,8 @@
 				6489B32F2D68D50800D8AEBB /* XCRemoteSwiftPackageReference "SVGView" */,
 				648EE5BB2D8D71EA00A457AA /* XCRemoteSwiftPackageReference "SwiftfulRouting" */,
 				64B780522D9D3B7F00955C56 /* XCRemoteSwiftPackageReference "TagCloud" */,
+				64541A8E2DA3CE5A001208C7 /* XCRemoteSwiftPackageReference "Tiercel" */,
+				64C17B572DA3E683000291EA /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -708,6 +716,14 @@
 				minimumVersion = 2.1.3;
 			};
 		};
+		64541A8E2DA3CE5A001208C7 /* XCRemoteSwiftPackageReference "Tiercel" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@github.com:Danie1s/Tiercel.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.2.6;
+			};
+		};
 		648880092D1AD43E00EFE72C /* XCRemoteSwiftPackageReference "JXSegmentedView" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pujiaxin33/JXSegmentedView";
@@ -762,6 +778,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.1.1;
+			};
+		};
+		64C17B572DA3E683000291EA /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift.git";
+			requirement = {
+				branch = master;
+				kind = branch;
 			};
 		};
 		64E2086F2CF8458A001C64EF /* XCRemoteSwiftPackageReference "FLAnimatedImage" */ = {
@@ -863,6 +887,11 @@
 			package = 644C84F62D535D0B00E92D0D /* XCRemoteSwiftPackageReference "JXPagingView" */;
 			productName = JXPagingView;
 		};
+		64541A8F2DA3CE5A001208C7 /* Tiercel */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64541A8E2DA3CE5A001208C7 /* XCRemoteSwiftPackageReference "Tiercel" */;
+			productName = Tiercel;
+		};
 		6488800A2D1AD43E00EFE72C /* JXSegmentedView */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 648880092D1AD43E00EFE72C /* XCRemoteSwiftPackageReference "JXSegmentedView" */;
@@ -897,6 +926,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 64BFB16B2D549F50002793C0 /* XCRemoteSwiftPackageReference "SideMenu" */;
 			productName = SideMenu;
+		};
+		64C17B582DA3E683000291EA /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64C17B572DA3E683000291EA /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
 		};
 		64E208702CF8458A001C64EF /* FLAnimatedImage */ = {
 			isa = XCSwiftPackageProductDependency;

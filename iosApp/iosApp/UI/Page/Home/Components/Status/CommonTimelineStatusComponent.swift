@@ -40,7 +40,7 @@ struct CommonTimelineStatusComponent: View {
                 icon: UIImage(systemName: "flag.fill"),
                 message: String(localized: "report") + " success"
             )
-            toastView.show(in: window)
+            toastView.show()
         }
     }
 

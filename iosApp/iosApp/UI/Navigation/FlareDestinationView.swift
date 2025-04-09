@@ -117,6 +117,11 @@ struct FlareDestinationView: View {
         case let .deleteStatus(accountType, statusKey):
             DeleteStatusView(accountType: accountType, statusKey: statusKey)
 
+        case let .download(accountType):
+            DownloadManagerScreen(accountType: accountType, router: router)
+                .environmentObject(router)
+                .environmentObject(appState)
+
         default:
             Text("页面未找到")
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

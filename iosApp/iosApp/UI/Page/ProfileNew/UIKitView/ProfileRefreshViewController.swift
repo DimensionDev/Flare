@@ -369,7 +369,7 @@ class ProfileNewRefreshViewController: UIViewController {
                                         }
                                     }
                                     let toastView = ToastView(icon: icon, message: message)
-                                    toastView.show(in: window)
+                                    toastView.show()
                                 }
                             }
                         }
@@ -385,7 +385,7 @@ class ProfileNewRefreshViewController: UIViewController {
                 // 显示举报成功的 Toast
                 if let window = self?.view.window {
                     let toastView = ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("report", comment: ""))
-                    toastView.show(in: window)
+                    toastView.show()
                 }
             })
         }

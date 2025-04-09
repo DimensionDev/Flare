@@ -186,6 +186,58 @@ struct ShareButton: View {
                 }
             #endif
 
+            Divider()
+
+            Button(action: {
+                print("Save Media tapped")
+                // 先显示加载中的 Toast
+                let toastView = ToastView(
+                    icon: UIImage(systemName: "download.fill"),
+                    message: String(localized: "download") + " success"
+                )
+                toastView.show()
+
+                for media in content.images {
+                    if let image = media as? UiMediaImage {
+                        let imageUrl = image.url
+                        print("Starting download for Image: \(imageUrl)")
+                        DownloadService.shared.startDownload(
+                            url: imageUrl,
+                            previewImageUrl: image.previewUrl ?? imageUrl,
+                            itemType: .image
+                        )
+                    } else if let video = media as? UiMediaVideo {
+                        let videoUrl = video.url
+                        // todo 这个地方要用mp4，现在返回的是 m3u8 地址
+                        print("Starting download for Video: \(videoUrl)")
+
+//                        DownloadService.shared.startDownload(
+//                            url: "https://video.twimg.com/amplify_video/1899444944089083904/vid/avc1/720x720/QyUhpaYIvB7rSiow.mp4?tag=14",
+//                            previewImageUrl: video.thumbnailUrl,
+//                            itemType: .video
+//                        )
+                    } else if let gif = media as? UiMediaGif {
+                        let gifUrl = gif.url
+                        print("Starting download for GIF: \(gifUrl)")
+                        DownloadService.shared.startDownload(
+                            url: gifUrl,
+                            previewImageUrl: gif.previewUrl,
+                            itemType: .gif
+                        )
+                    } else if let audio = media as? UiMediaAudio {
+                        let audioUrl = audio.url
+                        print("Starting download for Audio: \(audioUrl)")
+                        DownloadService.shared.startDownload(
+                            url: audioUrl,
+                            previewImageUrl: "",
+                            itemType: .unknown
+                        )
+                    }
+                }
+            }) {
+                Label("Save Media", systemImage: "arrow.down.to.line")
+            }
+
         } label: {
             HStack {
                 Spacer()

@@ -221,6 +221,7 @@ public fun MediaItem(
                 model = media.previewUrl,
                 contentDescription = media.description,
                 contentScale = contentScale,
+                customHeaders = media.customHeaders,
                 modifier =
                     modifier
                         .fillMaxSize()
@@ -324,6 +325,7 @@ public fun MediaItem(
                     NetworkImage(
                         contentScale = contentScale,
                         model = media.thumbnailUrl,
+                        customHeaders = media.customHeaders,
                         contentDescription = media.description,
                         modifier =
                             Modifier
@@ -391,6 +393,7 @@ public fun MediaItem(
                 ) {
                     NetworkImage(
                         contentScale = contentScale,
+                        customHeaders = media.customHeaders,
                         model = media.previewUrl,
                         contentDescription = media.description,
                         modifier =

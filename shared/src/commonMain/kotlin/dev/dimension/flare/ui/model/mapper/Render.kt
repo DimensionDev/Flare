@@ -13,6 +13,7 @@ import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiRssSource
@@ -119,52 +120,72 @@ internal fun DbUser.render(accountKey: MicroBlogKey) =
     when (content) {
         is UserContent.Bluesky -> content.data.render(accountKey = accountKey)
         is UserContent.BlueskyLite -> content.data.render(accountKey = accountKey)
-        is UserContent.Mastodon -> content.data.render(accountKey = accountKey, host = accountKey.host)
+        is UserContent.Mastodon ->
+            content.data.render(
+                accountKey = accountKey,
+                host = accountKey.host,
+            )
+
         is UserContent.Misskey -> content.data.render(accountKey = accountKey)
         is UserContent.MisskeyLite -> content.data.render(accountKey = accountKey)
         is UserContent.VVO -> content.data.render(accountKey = accountKey)
         is UserContent.XQT -> content.data.render(accountKey = accountKey)
     }
 
-internal fun DbDirectMessageTimelineWithRoom.render(accountKey: MicroBlogKey) =
-    UiDMRoom(
-        key = room.room.roomKey,
-        lastMessage = room.lastMessage?.render(accountKey),
-        users =
-            room.users
-                .filter { it.reference.userKey != accountKey }
-                .map { it.user.render(accountKey) }
-                .toImmutableList(),
-        unreadCount = timeline.unreadCount,
-    )
+internal fun DbDirectMessageTimelineWithRoom.render(
+    accountKey: MicroBlogKey,
+    credential: UiAccount.Credential,
+    statusEvent: StatusEvent,
+) = UiDMRoom(
+    key = room.room.roomKey,
+    lastMessage = room.lastMessage?.render(accountKey, credential, statusEvent),
+    users =
+        room.users
+            .filter { it.reference.userKey != accountKey }
+            .map { it.user.render(accountKey) }
+            .toImmutableList(),
+    unreadCount = timeline.unreadCount,
+)
 
-internal fun DbMessageItemWithUser.render(accountKey: MicroBlogKey) =
-    UiDMItem(
-        key = message.messageKey,
-        user = user.render(accountKey),
-        timestamp = Instant.fromEpochMilliseconds(message.timestamp).toUi(),
-        content =
-            when (val content = message.content) {
-                is MessageContent.Bluesky -> content.render(accountKey = accountKey)
-                is MessageContent.Local ->
-                    UiDMItem.Message.Text(
-                        Element("span")
-                            .apply {
-                                appendText(content.text)
-                            }.toUi(),
-                    )
-            },
-        isFromMe = accountKey == message.userKey,
-        sendState =
-            when (val content = message.content) {
-                is MessageContent.Local ->
-                    when (content.state) {
-                        MessageContent.Local.State.SENDING -> UiDMItem.SendState.Sending
-                        MessageContent.Local.State.FAILED -> UiDMItem.SendState.Failed
-                    }
-                is MessageContent.Bluesky -> null
-            },
-    )
+internal fun DbMessageItemWithUser.render(
+    accountKey: MicroBlogKey,
+    credential: UiAccount.Credential,
+    statusEvent: StatusEvent,
+) = UiDMItem(
+    key = message.messageKey,
+    user = user.render(accountKey),
+    timestamp = Instant.fromEpochMilliseconds(message.timestamp).toUi(),
+    content =
+        when (val content = message.content) {
+            is MessageContent.Bluesky -> content.render(accountKey = accountKey)
+            is MessageContent.XQT ->
+                content.render(
+                    accountKey = accountKey,
+                    credential = credential,
+                    statusEvent = statusEvent,
+                )
+
+            is MessageContent.Local ->
+                UiDMItem.Message.Text(
+                    Element("span")
+                        .apply {
+                            appendText(content.text)
+                        }.toUi(),
+                )
+        },
+    isFromMe = accountKey == message.userKey,
+    sendState =
+        when (val content = message.content) {
+            is MessageContent.Local ->
+                when (content.state) {
+                    MessageContent.Local.State.SENDING -> UiDMItem.SendState.Sending
+                    MessageContent.Local.State.FAILED -> UiDMItem.SendState.Failed
+                }
+
+            else -> null
+        },
+    showSender = message.showSender && message.userKey != accountKey,
+)
 
 internal fun DbRssSources.render() =
     UiRssSource(

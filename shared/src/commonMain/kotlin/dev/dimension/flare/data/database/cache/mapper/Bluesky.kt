@@ -578,6 +578,7 @@ private fun MessageView.toDbMessageItem(roomKey: MicroBlogKey) =
         userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host),
         timestamp = sentAt.toEpochMilliseconds(),
         content = MessageContent.Bluesky.Message(this),
+        showSender = false,
     )
 
 private fun ConvoViewLastMessageUnion.MessageView.toDbMessageItem(roomKey: MicroBlogKey) = value.toDbMessageItem(roomKey)
@@ -590,5 +591,6 @@ private fun ConvoViewLastMessageUnion.DeletedMessageView.toDbMessageItem(roomKey
             userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host),
             timestamp = sentAt.toEpochMilliseconds(),
             content = MessageContent.Bluesky.Deleted(this),
+            showSender = false,
         )
     }

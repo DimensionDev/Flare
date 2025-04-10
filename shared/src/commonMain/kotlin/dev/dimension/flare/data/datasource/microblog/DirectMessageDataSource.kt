@@ -60,4 +60,5 @@ internal fun DirectMessageDataSource.createSendingDirectMessage(
             state = MessageContent.Local.State.SENDING,
         ),
     isLocal = true,
+    showSender = false,
 )

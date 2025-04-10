@@ -1,11 +1,14 @@
 package dev.dimension.flare.ui.screen.dm
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -16,6 +19,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -41,9 +45,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -53,10 +60,13 @@ import compose.icons.fontawesomeicons.solid.CircleUser
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.PaperPlane
 import dev.dimension.flare.R
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.items
+import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDividerDefaults
@@ -65,8 +75,13 @@ import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.status.MediaItem
+import dev.dimension.flare.ui.component.status.QuotedStatus
 import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.localizedShortTime
+import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.dm.DMConversationPresenter
 import dev.dimension.flare.ui.presenter.dm.DMConversationState
@@ -112,18 +127,21 @@ internal fun DMConversationScreen(
         topBar = {
             FlareTopAppBar(
                 title = {
-                    state.users.onSuccess {
-                        if (it.size == 1) {
-                            RichText(
-                                text = it.first().name,
-                                maxLines = 1,
-                            )
-                        } else {
-                            Text(
-                                text = stringResource(id = R.string.dm_conversation),
-                            )
+                    state.users
+                        .onSuccess {
+                            if (it.size == 1) {
+                                RichText(
+                                    text = it.first().name,
+                                    maxLines = 1,
+                                )
+                            } else {
+                                Text(
+                                    text = stringResource(id = R.string.dm_conversation),
+                                )
+                            }
+                        }.onError {
+                            Text(it.message.toString())
                         }
-                    }
                 },
                 navigationIcon = {
                     BackButton(onBack = onBack)
@@ -269,6 +287,7 @@ internal fun DMConversationScreen(
                     .fillMaxSize()
                     .imePadding()
                     .imeNestedScroll(),
+            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Bottom),
         ) {
             items(
                 state.items,
@@ -296,6 +315,9 @@ internal fun DMConversationScreen(
                                 .padding(
                                     horizontal = screenHorizontalPadding,
                                 ),
+                        onUserClicked = {
+                            toProfile.invoke(it.key)
+                        },
                     )
                 },
             )
@@ -307,8 +329,10 @@ internal fun DMConversationScreen(
 private fun DMItem(
     item: UiDMItem,
     onRetry: () -> Unit,
+    onUserClicked: (UiUserV2) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val uriHandler = LocalUriHandler.current
     Column(
         modifier =
             modifier
@@ -331,7 +355,18 @@ private fun DMItem(
                     Alignment.CenterStart
                 },
         ) {
-            Row {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                if (item.showSender) {
+                    AvatarComponent(
+                        data = item.user.avatar,
+                        modifier =
+                            Modifier.clickable {
+                                onUserClicked.invoke(item.user)
+                            },
+                    )
+                }
                 if (item.sendState == UiDMItem.SendState.Failed) {
                     IconButton(
                         onClick = onRetry,
@@ -386,21 +421,66 @@ private fun DMItem(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
+
+                    is UiDMItem.Message.Media ->
+                        MediaItem(
+                            media = message.media,
+                            modifier =
+                                Modifier
+                                    .clip(MaterialTheme.shapes.large)
+                                    .clickable {
+                                        if (message.media is UiMedia.Image) {
+                                            uriHandler.openUri(AppDeepLink.RawImage.invoke(message.media.url))
+                                        }
+                                    },
+                        )
+
+                    is UiDMItem.Message.Status ->
+                        QuotedStatus(
+                            message.status,
+                            modifier =
+                                Modifier
+                                    .clip(MaterialTheme.shapes.large)
+                                    .background(
+                                        color =
+                                            if (item.isFromMe) {
+                                                MaterialTheme.colorScheme.primaryContainer
+                                            } else {
+                                                MaterialTheme.colorScheme.surfaceDim
+                                            },
+                                        shape = MaterialTheme.shapes.large,
+                                    ),
+                        )
                 }
             }
         }
-        if (item.sendState == UiDMItem.SendState.Sending) {
-            Text(
-                text = stringResource(id = R.string.dm_sending),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        } else if (item.sendState == null || item.sendState != UiDMItem.SendState.Failed) {
-            Text(
-                item.timestamp.shortTime.localizedShortTime,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            if (item.showSender) {
+                Spacer(modifier = Modifier.width(AvatarComponentDefaults.size))
+                RichText(
+                    text = item.user.name,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textStyle = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            if (item.sendState == UiDMItem.SendState.Sending) {
+                Text(
+                    text = stringResource(id = R.string.dm_sending),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            } else if (item.sendState == null || item.sendState != UiDMItem.SendState.Failed) {
+                Text(
+                    item.timestamp.shortTime.localizedShortTime,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

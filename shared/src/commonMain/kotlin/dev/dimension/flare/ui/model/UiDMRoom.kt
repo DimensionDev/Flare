@@ -18,13 +18,15 @@ public data class UiDMRoom internal constructor(
             is UiDMItem.Message.Text -> message.text.raw
             UiDMItem.Message.Deleted -> ""
             null -> ""
+            is UiDMItem.Message.Media -> ""
+            is UiDMItem.Message.Status -> message.status.content.raw
         }
     }
     val id: String by lazy {
         key.toString()
     }
-    val user: UiUserV2? by lazy {
-        users.firstOrNull()
+    val hasUser: Boolean by lazy {
+        users.isNotEmpty()
     }
 }
 
@@ -36,10 +38,19 @@ public data class UiDMItem internal constructor(
     val timestamp: UiDateTime,
     val isFromMe: Boolean,
     val sendState: SendState?,
+    val showSender: Boolean,
 ) {
     public sealed interface Message {
         public data class Text(
             val text: UiRichText,
+        ) : Message
+
+        public data class Media(
+            val media: UiMedia,
+        ) : Message
+
+        public data class Status(
+            val status: UiTimeline.ItemContent.Status,
         ) : Message
 
         public data object Deleted : Message

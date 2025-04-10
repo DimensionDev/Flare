@@ -5,6 +5,7 @@ import de.jensklingenberg.ktorfit.http.Body
 import de.jensklingenberg.ktorfit.http.Header
 import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
+import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.xqt.model.CreateBookmark200Response
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequest
 import dev.dimension.flare.data.network.xqt.model.DeleteBookmark200Response
@@ -21,6 +22,7 @@ import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweet200Response
 import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweet200Response
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
+import kotlinx.serialization.json.JsonObject
 
 internal interface PostApi {
     /**
@@ -138,4 +140,176 @@ internal interface PostApi {
         @Path("pathQueryId") pathQueryId: kotlin.String = "Wlmlj2-xzyS1GN3a6cj-mQ",
         @Body postDeleteBookmarkRequest: DeleteBookmarkRequest,
     ): Response<DeleteBookmark200Response>
+
+    /**
+     * POST graphql/{pathQueryId}/AddParticipantsMutation
+     *
+     * post DM Un Block User
+     * Responses:
+     *  - 200: Successful operation
+     *
+     * @param pathQueryId  (default to "oBwyQ0_xVbAQ8FAyG0pCRA")
+     * @param queryId  (default to "oBwyQ0_xVbAQ8FAyG0pCRA")
+     * @param addedParticipants
+     * @param conversationId  (default to "426425493-1714936029558476800")
+     * @return [kotlin.Any]
+     */
+    @POST("graphql/{pathQueryId}/AddParticipantsMutation")
+    public suspend fun postDMAddParticipantsMutation(
+        @Path("pathQueryId") pathQueryId: kotlin.String = "oBwyQ0_xVbAQ8FAyG0pCRA",
+        @Query("queryId") queryId: kotlin.String = "oBwyQ0_xVbAQ8FAyG0pCRA",
+        @Query("addedParticipants") addedParticipants: kotlin.collections.List<kotlin.String>,
+        @Query("conversationId") conversationId: kotlin.String = "426425493-1714936029558476800",
+    ): Response<kotlin.Any>
+
+    /**
+     * POST graphql/{pathQueryId}/dmBlockUser
+     *
+     * post DM Block User
+     * Responses:
+     *  - 200: Successful operation
+     *
+     * @param pathQueryId  (default to "IYw9u1KEhrS-t-BXsau4Uw")
+     * @param queryId  (default to "IYw9u1KEhrS-t-BXsau4Uw")
+     * @param target_user_id  (default to "1")
+     * @return [kotlin.Any]
+     */
+    @POST("graphql/{pathQueryId}/dmBlockUser")
+    public suspend fun postDMBlockUser(
+        @Path("pathQueryId") pathQueryId: kotlin.String = "IYw9u1KEhrS-t-BXsau4Uw",
+        @Query("queryId") queryId: kotlin.String = "IYw9u1KEhrS-t-BXsau4Uw",
+        @Query("target_user_id") target_user_id: kotlin.String = "1",
+    ): Response<kotlin.Any>
+
+    /**
+     * POST graphql/{pathQueryId}/DMMessageDeleteMutation
+     *
+     * post DM Message Delete Mutation
+     * Responses:
+     *  - 200: Successful operation
+     *
+     * @param pathQueryId  (default to "BJ6DtxA2llfjnRoRjaiIiw")
+     * @param queryId  (default to "BJ6DtxA2llfjnRoRjaiIiw")
+     * @param messageId  (default to "1844651953697296738")
+     * @param requestId  (default to "c71a2690-87a8-11ef-9564-b7a4d8a5f00c")
+     * @return [kotlin.Any]
+     */
+    @POST("graphql/{pathQueryId}/DMMessageDeleteMutation")
+    public suspend fun postDMMessageDeleteMutation(
+        @Path("pathQueryId") pathQueryId: kotlin.String = "BJ6DtxA2llfjnRoRjaiIiw",
+        @Query("queryId") queryId: kotlin.String = "BJ6DtxA2llfjnRoRjaiIiw",
+        @Query("messageId") messageId: kotlin.String,
+        @Query("requestId") requestId: kotlin.String,
+    ): Response<JsonObject>
+
+    /**
+     * POST graphql/{pathQueryId}/DMPinnedInboxAppend_Mutation
+     *
+     * post DM Pinned Inbox
+     * Responses:
+     *  - 200: Successful operation
+     *
+     * @param pathQueryId  (default to "o0aymgGiJY-53Y52YSUGVA")
+     * @param queryId  (default to "o0aymgGiJY-53Y52YSUGVA")
+     * @param conversation_id  (default to "426425493-1714936029558476800")
+     * @param label  (default to "Pinned")
+     * @return [kotlin.Any]
+     */
+    @POST("graphql/{pathQueryId}/DMPinnedInboxAppend_Mutation")
+    public suspend fun postDMPinnedInboxAppendMutation(
+        @Path("pathQueryId") pathQueryId: kotlin.String = "o0aymgGiJY-53Y52YSUGVA",
+        @Query("queryId") queryId: kotlin.String = "o0aymgGiJY-53Y52YSUGVA",
+        @Query("conversation_id") conversation_id: kotlin.String = "426425493-1714936029558476800",
+        @Query("label") label: kotlin.String = "Pinned",
+    ): Response<kotlin.Any>
+
+    /**
+     * POST graphql/{pathQueryId}/DMPinnedInboxDelete_Mutation
+     *
+     * post Delete DM Pinned Inbox
+     * Responses:
+     *  - 200: Successful operation
+     *
+     * @param pathQueryId  (default to "_TQxP2Rb0expwVP9ktGrTQ")
+     * @param queryId  (default to "_TQxP2Rb0expwVP9ktGrTQ")
+     * @param conversation_id  (default to "426425493-1714936029558476800")
+     * @param label_type  (default to "Pinned")
+     * @return [kotlin.Any]
+     */
+    @POST("graphql/{pathQueryId}/DMPinnedInboxDelete_Mutation")
+    public suspend fun postDMPinnedInboxDeleteMutation(
+        @Path("pathQueryId") pathQueryId: kotlin.String = "_TQxP2Rb0expwVP9ktGrTQ",
+        @Query("queryId") queryId: kotlin.String = "_TQxP2Rb0expwVP9ktGrTQ",
+        @Query("conversation_id") conversation_id: kotlin.String = "426425493-1714936029558476800",
+        @Query("label_type") label_type: kotlin.String = "Pinned",
+    ): Response<kotlin.Any>
+
+    /**
+     * POST graphql/{pathQueryId}/dmUnblockUser
+     *
+     * post DM Un Block User
+     * Responses:
+     *  - 200: Successful operation
+     *
+     * @param pathQueryId  (default to "Krbs6Nak_o7liWQwfV1jOQ")
+     * @param queryId  (default to "Krbs6Nak_o7liWQwfV1jOQ")
+     * @param target_user_id  (default to "1")
+     * @return [kotlin.Any]
+     */
+    @POST("graphql/{pathQueryId}/dmUnblockUser")
+    public suspend fun postDMUnBlockUser(
+        @Path("pathQueryId") pathQueryId: kotlin.String = "Krbs6Nak_o7liWQwfV1jOQ",
+        @Query("queryId") queryId: kotlin.String = "Krbs6Nak_o7liWQwfV1jOQ",
+        @Query("target_user_id") target_user_id: kotlin.String = "1",
+    ): Response<kotlin.Any>
+
+    /**
+     * POST graphql/{pathQueryId}/useDMReactionMutationAddMutation
+     *
+     * post Use DM Reaction Mutation Add Mutation
+     * Responses:
+     *  - 200: Successful operation
+     *
+     * @param pathQueryId  (default to "VyDyV9pC2oZEj6g52hgnhA")
+     * @param queryId  (default to "VyDyV9pC2oZEj6g52hgnhA")
+     * @param conversationId  (default to "426425493-1714936029558476800")
+     * @param emojiReactions
+     * @param messageId  (default to "1844628043379425446")
+     * @param reactionTypes
+     * @return [kotlin.Any]
+     */
+    @POST("graphql/{pathQueryId}/useDMReactionMutationAddMutation")
+    public suspend fun postDMUseReactionMutationAddMutation(
+        @Path("pathQueryId") pathQueryId: kotlin.String = "VyDyV9pC2oZEj6g52hgnhA",
+        @Query("queryId") queryId: kotlin.String = "VyDyV9pC2oZEj6g52hgnhA",
+        @Query("conversationId") conversationId: kotlin.String = "426425493-1714936029558476800",
+        @Query("emojiReactions") emojiReactions: kotlin.collections.List<kotlin.String>,
+        @Query("messageId") messageId: kotlin.String = "1844628043379425446",
+        @Query("reactionTypes") reactionTypes: kotlin.collections.List<kotlin.String>,
+    ): Response<kotlin.Any>
+
+    /**
+     * POST graphql/{pathQueryId}/useDMReactionMutationRemoveMutation
+     *
+     * post Use DM Reaction Mutation remove Mutation
+     * Responses:
+     *  - 200: Successful operation
+     *
+     * @param pathQueryId  (default to "bV_Nim3RYHsaJwMkTXJ6ew")
+     * @param queryId  (default to "bV_Nim3RYHsaJwMkTXJ6ew")
+     * @param conversationId  (default to "426425493-1714936029558476800")
+     * @param emojiReactions
+     * @param messageId  (default to "1844628043379425446")
+     * @param reactionTypes
+     * @return [kotlin.Any]
+     */
+    @POST("graphql/{pathQueryId}/useDMReactionMutationRemoveMutation")
+    public suspend fun postDMUseReactionMutationRemoveMutation(
+        @Path("pathQueryId") pathQueryId: kotlin.String = "bV_Nim3RYHsaJwMkTXJ6ew",
+        @Query("queryId") queryId: kotlin.String = "bV_Nim3RYHsaJwMkTXJ6ew",
+        @Query("conversationId") conversationId: kotlin.String = "426425493-1714936029558476800",
+        @Query("emojiReactions") emojiReactions: kotlin.collections.List<kotlin.String>,
+        @Query("messageId") messageId: kotlin.String = "1844628043379425446",
+        @Query("reactionTypes") reactionTypes: kotlin.collections.List<kotlin.String>,
+    ): Response<kotlin.Any>
 }

@@ -7,6 +7,7 @@ import androidx.room.Relation
 import androidx.room.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.data.network.xqt.model.InboxMessageData
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import kotlinx.serialization.SerialName
@@ -102,6 +103,7 @@ internal data class DbMessageItem(
     val userKey: MicroBlogKey,
     val timestamp: Long,
     val content: MessageContent,
+    val showSender: Boolean,
     val isLocal: Boolean = false,
 )
 
@@ -130,6 +132,15 @@ internal sealed interface MessageContent {
         data class Deleted(
             val data: chat.bsky.convo.DeletedMessageView,
         ) : Bluesky
+    }
+
+    @Serializable
+    sealed interface XQT : MessageContent {
+        @Serializable
+        @SerialName("xqt-message")
+        data class Message(
+            val data: InboxMessageData,
+        ) : XQT
     }
 
     @Serializable

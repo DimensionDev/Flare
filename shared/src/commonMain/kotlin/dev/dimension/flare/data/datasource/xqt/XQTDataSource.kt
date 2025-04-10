@@ -7,6 +7,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
+import androidx.paging.map
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
@@ -18,12 +19,15 @@ import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.toDbUser
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.mapper.users
+import dev.dimension.flare.data.database.cache.model.DbMessageItem
+import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.updateStatusUseCase
 import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.data.datasource.microblog.ComposeProgress
+import dev.dimension.flare.data.datasource.microblog.DirectMessageDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
 import dev.dimension.flare.data.datasource.microblog.ListMetaData
 import dev.dimension.flare.data.datasource.microblog.ListMetaDataType
@@ -32,11 +36,13 @@ import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.data.datasource.microblog.ProfileAction
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
 import dev.dimension.flare.data.datasource.microblog.memoryPager
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.AddMemberRequest
+import dev.dimension.flare.data.network.xqt.model.AddToConversationRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequest
 import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequestVariables
 import dev.dimension.flare.data.network.xqt.model.CreateListRequest
@@ -53,6 +59,7 @@ import dev.dimension.flare.data.network.xqt.model.PostCreateTweetRequestVariable
 import dev.dimension.flare.data.network.xqt.model.PostDeleteRetweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostDeleteRetweetRequestVariables
 import dev.dimension.flare.data.network.xqt.model.PostDeleteTweetRequest
+import dev.dimension.flare.data.network.xqt.model.PostDmNew2Request
 import dev.dimension.flare.data.network.xqt.model.PostFavoriteTweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostMediaMetadataCreateRequest
 import dev.dimension.flare.data.network.xqt.model.PostUnfavoriteTweetRequest
@@ -67,6 +74,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiAccount
+import dev.dimension.flare.ui.model.UiDMItem
+import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
@@ -90,6 +99,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -97,6 +108,7 @@ import org.koin.core.component.inject
 import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.seconds
+import kotlin.uuid.Uuid
 
 private const val BULK_SIZE: Long = 512 * 1024L // 512 Kib
 private const val MAX_ASYNC_UPLOAD_SIZE = 10
@@ -108,7 +120,8 @@ internal class XQTDataSource(
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.XQT,
-    ListDataSource {
+    ListDataSource,
+    DirectMessageDataSource {
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
@@ -1557,4 +1570,310 @@ internal class XQTDataSource(
                     "list_${accountKey}_$listId",
                 ),
         )
+
+    override fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
+        Pager(
+            config = PagingConfig(pageSize = 20),
+            remoteMediator =
+                DMListRemoteMediator(
+                    service = service,
+                    accountKey = accountKey,
+                    database = database,
+                ),
+            pagingSourceFactory = {
+                database.messageDao().getRoomPagingSource(
+                    accountKey = accountKey,
+                )
+            },
+        ).flow
+            .map {
+                it.map {
+                    it.render(accountKey = accountKey, credential = credential, statusEvent = this)
+                }
+            }.cachedIn(scope)
+
+    override fun directMessageConversation(
+        roomKey: MicroBlogKey,
+        scope: CoroutineScope,
+    ): Flow<PagingData<UiDMItem>> =
+        Pager(
+            config = PagingConfig(pageSize = 20),
+            remoteMediator =
+                DMConversationRemoteMediator(
+                    service = service,
+                    accountKey = accountKey,
+                    database = database,
+                    roomKey = roomKey,
+                    clearBadge = ::clearDirectMessageBadgeCount,
+                ),
+            pagingSourceFactory = {
+                database.messageDao().getRoomMessagesPagingSource(
+                    roomKey = roomKey,
+                )
+            },
+        ).flow
+            .map {
+                it.map {
+                    it.render(accountKey = accountKey, credential = credential, statusEvent = this)
+                }
+            }.cachedIn(scope)
+
+    override fun sendDirectMessage(
+        roomKey: MicroBlogKey,
+        message: String,
+    ) {
+        coroutineScope.launch {
+            val tempMessage = createSendingDirectMessage(roomKey, message)
+            database.messageDao().insertMessages(listOf(tempMessage))
+            sendMessage(roomKey, message, tempMessage)
+        }
+    }
+
+    private suspend fun sendMessage(
+        roomKey: MicroBlogKey,
+        message: String,
+        tempMessage: DbMessageItem,
+    ) {
+        tryRun {
+            val response =
+                service.getDMConversationTimeline(
+                    conversationId = roomKey.id,
+                    context = "FETCH_DM_CONVERSATION",
+                    maxId = "0",
+                )
+            service.postDmNew2(
+                PostDmNew2Request(
+                    conversationId = roomKey.id,
+                    requestId = Uuid.random().toString(),
+                    text = message,
+                ),
+            ) to response
+        }.onSuccess { (response, conversationResponse) ->
+            database.messageDao().deleteMessage(tempMessage.messageKey)
+            XQT.saveDM(
+                accountKey = accountKey,
+                database = database,
+                propertyEntries = response.propertyEntries,
+                users = response.users,
+                conversations = conversationResponse.conversationTimeline?.conversations,
+            )
+        }.onFailure {
+            database.messageDao().insertMessages(
+                listOf(
+                    tempMessage.copy(
+                        content =
+                            (tempMessage.content as MessageContent.Local).copy(
+                                state = MessageContent.Local.State.FAILED,
+                            ),
+                    ),
+                ),
+            )
+        }
+    }
+
+    override fun retrySendDirectMessage(messageKey: MicroBlogKey) {
+        coroutineScope.launch {
+            val current = database.messageDao().getMessage(messageKey)
+            if (current != null && current.content is MessageContent.Local) {
+                database.messageDao().insertMessages(
+                    listOf(
+                        current.copy(
+                            content =
+                                current.content.copy(
+                                    state = MessageContent.Local.State.SENDING,
+                                ),
+                        ),
+                    ),
+                )
+                sendMessage(
+                    roomKey = current.roomKey,
+                    message = current.content.text,
+                    tempMessage = current,
+                )
+            }
+        }
+    }
+
+    override fun deleteDirectMessage(
+        roomKey: MicroBlogKey,
+        messageKey: MicroBlogKey,
+    ) {
+        coroutineScope.launch {
+            val current = database.messageDao().getMessage(messageKey)
+            if (current != null && current.content is MessageContent.Local) {
+                database.messageDao().deleteMessage(messageKey)
+            } else {
+                tryRun {
+                    service.postDMMessageDeleteMutation(
+                        messageId = messageKey.id,
+                        requestId = Uuid.random().toString(),
+                    )
+                }.onSuccess {
+                    database.messageDao().deleteMessage(messageKey)
+                }
+            }
+        }
+    }
+
+    override fun getDirectMessageConversationInfo(roomKey: MicroBlogKey): CacheData<UiDMRoom> =
+        Cacheable(
+            fetchSource = {
+                val response =
+                    service.getDMConversationTimeline(
+                        conversationId = roomKey.id,
+                        context = "FETCH_DM_CONVERSATION",
+                        maxId = "0",
+                    )
+                XQT.saveDM(
+                    accountKey = accountKey,
+                    database = database,
+                    propertyEntries = response.conversationTimeline?.propertyEntries,
+                    users = response.conversationTimeline?.users,
+                    conversations = response.conversationTimeline?.conversations,
+                )
+            },
+            cacheSource = {
+                database
+                    .messageDao()
+                    .getRoomInfo(
+                        roomKey = roomKey,
+                        accountKey = accountKey,
+                    ).distinctUntilChanged()
+                    .mapNotNull {
+                        it?.render(
+                            accountKey = accountKey,
+                            credential = credential,
+                            statusEvent = this,
+                        )
+                    }
+            },
+        )
+
+    override suspend fun fetchNewDirectMessageForConversation(roomKey: MicroBlogKey) {
+        val response = service.getDMConversationTimeline(conversationId = roomKey.id)
+        service.postDMConversationMarkRead(
+            conversationId = roomKey.id,
+            conversationId2 = roomKey.id,
+            lastReadEventId = response.conversationTimeline?.maxEntryId.orEmpty(),
+        )
+        XQT.saveDM(
+            accountKey = accountKey,
+            database = database,
+            propertyEntries = response.conversationTimeline?.propertyEntries,
+            users = response.conversationTimeline?.users,
+            conversations = response.conversationTimeline?.conversations,
+        )
+    }
+
+    private fun clearDirectMessageBadgeCount(
+        roomKey: MicroBlogKey,
+        lastReadId: String,
+    ) {
+//        coroutineScope.launch {
+//            tryRun {
+//                service.postDMConversationMarkRead(roomKey.id, roomKey.id, lastReadId)
+//            }
+//        }
+        directMessageBadgeCount.refresh()
+    }
+
+    private val dmNotificationMarkerKey: String
+        get() = "dm_notificationBadgeCount_$accountKey"
+    override val directMessageBadgeCount: CacheData<Int>
+        get() =
+            MemCacheable(
+                key = dmNotificationMarkerKey,
+                fetchSource = {
+                    service.getBadgeCount().dmUnreadCount?.toInt() ?: 0
+                },
+            )
+
+    override fun leaveDirectMessage(roomKey: MicroBlogKey) {
+        coroutineScope.launch {
+            tryRun {
+                service.postDMConversationDelete(
+                    conversationId = roomKey.id,
+                )
+            }.onSuccess {
+                database.messageDao().deleteRoomTimeline(roomKey, accountKey = accountKey)
+                database.messageDao().deleteRoom(roomKey)
+                database.messageDao().deleteRoomReference(roomKey)
+                database.messageDao().deleteRoomMessages(roomKey)
+            }
+        }
+    }
+
+    override fun createDirectMessageRoom(userKey: MicroBlogKey): Flow<UiState<MicroBlogKey>> =
+        flow {
+            val accountIdLong =
+                accountKey.id.toLongOrNull()
+                    ?: throw Exception("Invalid account key")
+            val userIdLong =
+                userKey.id.toLongOrNull()
+                    ?: throw Exception("Invalid user key")
+            val roomId =
+                listOf(
+                    accountIdLong,
+                    userIdLong,
+                ).sortedBy { it }
+                    .joinToString("-")
+            tryRun {
+                val response =
+                    service.getDMConversationTimeline(
+                        conversationId = roomId,
+                    )
+                if (response.conversationTimeline?.propertyEntries.isNullOrEmpty()) {
+                    service
+                        .postDMWelcomeMessagesAddToConversation(
+                            requestId = Uuid.random().toString(),
+                            body =
+                                AddToConversationRequest(
+                                    conversationId = roomId,
+                                ),
+                        )
+                    service.getDMConversationTimeline(
+                        conversationId = roomId,
+                    )
+                } else {
+                    response
+                }
+            }.onSuccess { response ->
+                XQT.saveDM(
+                    accountKey = accountKey,
+                    database = database,
+                    propertyEntries = response.conversationTimeline?.propertyEntries,
+                    users = response.conversationTimeline?.users,
+                    conversations = response.conversationTimeline?.conversations,
+                )
+            }.fold(
+                onSuccess = {
+                    emit(
+                        UiState.Success(
+                            MicroBlogKey(
+                                id = roomId,
+                                host = accountKey.host,
+                            ),
+                        ),
+                    )
+                },
+                onFailure = {
+                    emit(UiState.Error(it))
+                },
+            )
+        }
+
+    override suspend fun canSendDirectMessage(userKey: MicroBlogKey): Boolean =
+        tryRun {
+            val canDm =
+                service
+                    .getDMPermissions(userKey.id)
+                    .body()
+                    ?.permissions
+                    ?.idKeys
+                    ?.get(userKey.id)
+                    ?.canDm == true
+            if (!canDm) {
+                throw Exception("Cannot send DM")
+            }
+        }.isSuccess
 }

@@ -1,12 +1,14 @@
 package dev.dimension.flare.ui.screen.dm
 
 import android.os.Parcelable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +23,7 @@ import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -122,7 +125,12 @@ internal fun DMScreenRoute(
                             },
                             navigationState = navigationState,
                             toProfile = {
-                                navigator.navigate(ProfileRouteDestination(userKey = it, accountType = accountType))
+                                navigator.navigate(
+                                    ProfileRouteDestination(
+                                        userKey = it,
+                                        accountType = accountType,
+                                    ),
+                                )
                             },
                         )
                     } else {
@@ -136,7 +144,12 @@ internal fun DMScreenRoute(
                             },
                             navigationState = navigationState,
                             toProfile = {
-                                navigator.navigate(ProfileRouteDestination(userKey = it, accountType = accountType))
+                                navigator.navigate(
+                                    ProfileRouteDestination(
+                                        userKey = it,
+                                        accountType = accountType,
+                                    ),
+                                )
                             },
                         )
                     }
@@ -213,7 +226,10 @@ private fun DMListScreen(
                                 modifier =
                                     Modifier
                                         .fillMaxSize()
-                                        .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
+                                        .padding(
+                                            horizontal = screenHorizontalPadding,
+                                            vertical = 8.dp,
+                                        ),
                                 verticalArrangement = Arrangement.spacedBy(8.dp),
                             ) {
                                 ItemPlaceHolder()
@@ -311,11 +327,45 @@ private fun DMListScreen(
                                                 tint = MaterialTheme.colorScheme.primary,
                                             )
                                         } else {
-                                            repeat(
-                                                min(item.users.size, 2),
+                                            Box(
+                                                modifier =
+                                                    Modifier
+                                                        .size(AvatarComponentDefaults.size),
                                             ) {
-                                                val avatar = item.users[it].avatar
-                                                AvatarComponent(avatar)
+                                                repeat(
+                                                    min(item.users.size, 2),
+                                                ) {
+                                                    val avatar = item.users[it].avatar
+                                                    if (item.users.size == 1) {
+                                                        AvatarComponent(avatar)
+                                                    } else {
+                                                        Box(
+                                                            modifier =
+                                                                Modifier
+                                                                    .offset(
+                                                                        x = (it * 12).dp,
+                                                                        y = (it * 12).dp,
+                                                                    ),
+                                                        ) {
+                                                            AvatarComponent(
+                                                                avatar,
+                                                                size = AvatarComponentDefaults.compatSize,
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                                if (item.users.size > 1) {
+                                                    Text(
+                                                        item.users.size.toString(),
+                                                        modifier =
+                                                            Modifier
+                                                                .align(Alignment.BottomEnd)
+                                                                .background(
+                                                                    MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
+                                                                    shape = MaterialTheme.shapes.small,
+                                                                ).padding(horizontal = 4.dp),
+                                                    )
+                                                }
                                             }
                                         }
                                     },

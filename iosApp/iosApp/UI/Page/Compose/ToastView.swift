@@ -62,3 +62,18 @@ public class ToastView: UIView {
         }
     }
 }
+
+extension View {
+    func successToast(_ message: String, isPresented: Binding<Bool>) -> some View {
+        alert(
+            "Tips",
+            isPresented: isPresented,
+            actions: {
+                Button("OK", role: .cancel) {}
+            },
+            message: {
+                Text(message)
+            }
+        )
+    }
+}

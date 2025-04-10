@@ -203,7 +203,7 @@ struct ShareButton: View {
                         print("Starting download for Image: \(imageUrl)")
                         DownloadService.shared.startDownload(
                             url: imageUrl,
-                            previewImageUrl: image.previewUrl ?? imageUrl,
+                            previewImageUrl: image.previewUrl,
                             itemType: .image
                         )
                     } else if let video = media as? UiMediaVideo {
@@ -211,11 +211,11 @@ struct ShareButton: View {
                         // todo 这个地方要用mp4，现在返回的是 m3u8 地址
                         print("Starting download for Video: \(videoUrl)")
 
-//                        DownloadService.shared.startDownload(
-//                            url: "https://video.twimg.com/amplify_video/1899444944089083904/vid/avc1/720x720/QyUhpaYIvB7rSiow.mp4?tag=14",
-//                            previewImageUrl: video.thumbnailUrl,
-//                            itemType: .video
-//                        )
+                        DownloadService.shared.startDownload(
+                            url: "https://video.twimg.com/amplify_video/1899444944089083904/vid/avc1/720x720/QyUhpaYIvB7rSiow.mp4?tag=14",
+                            previewImageUrl: video.thumbnailUrl,
+                            itemType: .video
+                        )
                     } else if let gif = media as? UiMediaGif {
                         let gifUrl = gif.url
                         print("Starting download for GIF: \(gifUrl)")

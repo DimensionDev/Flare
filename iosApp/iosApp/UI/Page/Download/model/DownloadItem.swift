@@ -9,6 +9,20 @@ enum DownloadStatus {
     case paused
 }
 
+extension DownloadStatus {
+    init?(rawValue: String) {
+        switch rawValue {
+        case "initial": self = .initial
+        case "downloading": self = .downloading
+        case "downloaded": self = .downloaded
+        case "removed": self = .removed
+        case "paused": self = .paused
+        case "failed": self = .failed
+        default: return nil
+        }
+    }
+}
+
 enum DownItemType: String {
     case image
     case gif
@@ -92,22 +106,5 @@ struct DownloadItem: Identifiable {
         case .paused:
             "paused"
         }
-    }
-
-    // 更新进度信息
-    func updating(progress: Double, speed: String, remainingTime: TimeInterval) -> DownloadItem {
-        var item = self
-        item.progress = progress
-        item.speed = speed
-        item.remainingTime = remainingTime
-        return item
-    }
-
-    // 更新错误信息
-    func updating(error: Error) -> DownloadItem {
-        var item = self
-        item.error = error
-        item.status = .failed
-        return item
     }
 }

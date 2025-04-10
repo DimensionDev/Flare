@@ -129,9 +129,7 @@ struct StorageScreen: View {
                     .disabled(isCleaningCache)
                 }
 
-                // Download Cache Section
                 Section("Download Cache") {
-                    // 清理下载数据库
                     Button(role: .destructive) {
                         showClearDBConfirm = true
                     } label: {
@@ -155,7 +153,6 @@ struct StorageScreen: View {
                     .buttonStyle(.borderless)
                     .disabled(isCleaningDownloadDB)
 
-                    // 清理下载文件
                     Button(role: .destructive) {
                         showClearFilesConfirm = true
                     } label: {
@@ -185,7 +182,6 @@ struct StorageScreen: View {
                 calculateImageCacheSize()
                 updateDownloadSizes()
             }
-            // 确认对话框
             .confirmationDialog(
                 title: "Clean Download Record",
                 message: "Are you sure you want to clear all download records? This action cannot be undone.",
@@ -198,7 +194,6 @@ struct StorageScreen: View {
                 isPresented: $showClearFilesConfirm,
                 action: clearDownloadFiles
             )
-            // 成功提示
             .successToast(successMessage, isPresented: $showSuccessAlert)
         }
     }

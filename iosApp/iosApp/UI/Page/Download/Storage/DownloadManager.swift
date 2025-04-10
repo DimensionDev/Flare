@@ -50,20 +50,14 @@ final class DownloadManager {
         task?.progress { [weak self] task in
             guard let self, var currentItem = downloadItems[item.url] else { return }
 
-            // total file size
-            let totalBytes = task.progress.totalUnitCount
-            // completed downlaod file size
-            let completedBytes = task.progress.completedUnitCount
-
-            // Update progress
             currentItem.progress = task.progress.fractionCompleted
 
-            if totalBytes > 0, currentItem.totalSize <= 0 {
-                currentItem.totalSize = Int(totalBytes)
+            if task.progress.totalUnitCount > 0, currentItem.totalSize <= 0 {
+                currentItem.totalSize = Int(task.progress.totalUnitCount)
             }
 
-            if completedBytes >= 0 {
-                currentItem.downloadedSize = Int(completedBytes)
+            if task.progress.completedUnitCount >= 0 {
+                currentItem.downloadedSize = Int(task.progress.completedUnitCount)
             }
 
             downloadItems[item.url] = currentItem
@@ -167,9 +161,9 @@ final class DownloadManager {
     }
 
     func resumeDownload(url: String) {
-        if let task = sessionManager.fetchTask(url) {
-            sessionManager.download(url) // 重新创建下载任务
-        }
+//        if let task = sessionManager.fetchTask(url) {
+            sessionManager.start(url) // 重新创建下载任务
+//        }
     }
 
     func cancelDownload(url: String) {

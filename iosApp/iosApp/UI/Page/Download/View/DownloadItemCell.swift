@@ -24,32 +24,44 @@ struct DownloadItemCell: View {
 
     var body: some View {
         HStack(spacing: Design.contentSpacing) {
-            thumbnailView
-                .frame(width: Design.thumbnailSize, height: Design.thumbnailSize)
-                .cornerRadius(Design.cornerRadius)
-                .overlay(
-                    RoundedRectangle(cornerRadius: Design.cornerRadius)
-                        .stroke(Color.gray.opacity(0.1), lineWidth: 1)
-                )
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.fileName ?? "unknown")
-                    .font(Design.titleFont)
-                    .foregroundColor(.primary)
-                    .lineLimit(1)
-
-                downloadInfoView
+            Button(action: onTapAction) {
+                thumbnailView
+                    .frame(width: Design.thumbnailSize, height: Design.thumbnailSize)
+                    .cornerRadius(Design.cornerRadius)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: Design.cornerRadius)
+                            .stroke(Color.gray.opacity(0.1), lineWidth: 1)
+                    )
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .buttonStyle(.plain)
 
-            actionButton
-                .frame(width: 44)
+            Button(action: onTapAction) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.fileName)
+                        .font(Design.titleFont)
+                        .foregroundColor(.primary)
+                        .lineLimit(1)
+
+                    downloadInfoView
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+
+            Button {
+                onShareAction(item)
+            } label: {
+                Image(systemName: statusIcon)
+                    .font(.system(size: Design.iconSize, weight: .medium))
+                    .foregroundColor(statusColor)
+                    .frame(width: 44, height: 44)
+                    .contentShape(Rectangle())
+            }
+            .frame(width: 44)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, Design.cellPadding)
         .background(Color(.systemBackground))
-        .contentShape(Rectangle())
-        .onTapGesture(perform: onTapAction)
     }
 
     private var thumbnailView: some View {
@@ -163,22 +175,6 @@ struct DownloadItemCell: View {
         }
     }
 
-    private var actionButton: some View {
-        Button {
-//            if item.status == .downloaded, item.downItemType == .image || item.downItemType == .gif {
-                onShareAction(item)
-//            } else {
-//                onTapAction()
-//            }
-        } label: {
-            Image(systemName: statusIcon)
-                .font(.system(size: Design.iconSize, weight: .medium))
-                .foregroundColor(statusColor)
-                .frame(width: 44, height: 44)
-                .contentShape(Rectangle())
-        }
-    }
-
     private var statusIcon: String {
         switch item.status {
         case .initial:
@@ -186,11 +182,7 @@ struct DownloadItemCell: View {
         case .downloading:
             "pause"
         case .downloaded:
-//            if item.downItemType == .image || item.downItemType == .gif {
-                "square.and.arrow.up"
-//            } else {
-//                "play.fill"
-//            }
+            "square.and.arrow.up"
         case .removed:
             "xmark"
         case .failed:
@@ -207,11 +199,7 @@ struct DownloadItemCell: View {
         case .downloading:
             .blue
         case .downloaded:
-            if item.downItemType == .image || item.downItemType == .gif {
-                .blue
-            } else {
-                .green
-            }
+            .blue
         case .removed:
             .red
         case .failed:

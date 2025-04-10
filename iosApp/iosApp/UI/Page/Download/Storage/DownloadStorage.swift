@@ -211,14 +211,4 @@ actor DownloadStorage {
     }
 }
 
-extension DownloadStatus {
-    init?(rawValue: String) {
-        switch rawValue {
-        case "initial": self = .initial
-        case "downloading": self = .downloading
-        case "downloaded": self = .downloaded
-        case "removed": self = .removed
-        default: return nil
-        }
-    }
-}
+

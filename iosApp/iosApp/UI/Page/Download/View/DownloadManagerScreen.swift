@@ -3,6 +3,13 @@ import GRDB
 import shared
 import SwiftUI
 
+extension Notification.Name {
+    static let downloadProgressUpdated = Notification.Name("downloadProgressUpdated")
+    static let downloadCompleted = Notification.Name("downloadCompleted")
+    static let downloadTaskDidSucceed = Notification.Name("downloadTaskDidSucceed")
+    static let downloadFailed = Notification.Name("downloadFailed")
+}
+
 struct ShareableFile: Identifiable {
     let id = UUID()
     let url: URL
@@ -132,12 +139,17 @@ struct DownloadManagerScreen: View {
                 case .downloading:
                     DownloadService.shared.pauseDownload(item: item)
                 case .downloaded:
-                    handleItemShare(item)
+                    print("Tapped downloaded item: \(item.fileName)")
                 case .removed:
-                    print("Tapped removed item: \(item.fileName ?? "")")
+                    print("Tapped removed item: \(item.fileName)")
                 case .failed:
-                    DownloadService.shared.startDownload(url: item.url, previewImageUrl: item.url, itemType: item.downItemType) // Retry
+                    DownloadService.shared.startDownload(url: item.url, previewImageUrl: item.url, itemType: item.downItemType)
                 case .paused:
+                    // Update UI state immediately
+                    if let index = downloadItems.firstIndex(where: { $0.id == item.id }) {
+                        downloadItems[index].status = .downloading
+                    }
+                    // Call the service to handle the actual resume
                     DownloadService.shared.resumeDownload(item: item)
                 }
             } catch {
@@ -148,15 +160,30 @@ struct DownloadManagerScreen: View {
 
     private func handleItemShare(_ item: DownloadItem) {
         Task {
-//            guard item.status == .downloaded, item.downItemType == .image || item.downItemType == .gif else {
-//                print("Share action called on non-shareable item.")
-//                return
-//            }
-
-            if let path = await DownloadStorage.shared.localFilePath(for: item) {
-                itemToShare = ShareableFile(url: path)
-            } else {
-                print("Could not get file path for sharing item: \(item.fileName ?? "")")
+            do {
+                switch item.status {
+                case .initial:
+                    DownloadService.shared.startDownload(url: item.url, previewImageUrl: item.url, itemType: item.downItemType)
+                case .downloading:
+                    DownloadService.shared.pauseDownload(item: item)
+                case .downloaded:
+                    if let path = await DownloadStorage.shared.localFilePath(for: item) {
+                        itemToShare = ShareableFile(url: path)
+                    } else {
+                        print("Could not get file path for sharing item: \(item.fileName ?? "")")
+                    }
+                case .removed:
+                    print("Tapped removed item: \(item.fileName ?? "")")
+                case .failed:
+                    DownloadService.shared.startDownload(url: item.url, previewImageUrl: item.url, itemType: item.downItemType) // Retry
+                case .paused:
+                    if let index = downloadItems.firstIndex(where: { $0.id == item.id }) {
+                        downloadItems[index].status = .downloading
+                    }
+                    DownloadService.shared.resumeDownload(item: item)
+                }
+            } catch {
+                print("Failed to handle tap action: \(error)")
             }
         }
     }

@@ -1,6 +1,7 @@
 import Kingfisher
 import shared
 import SwiftUI
+import Tiercel
 
 struct StorageScreen: View {
     @State private var presenter = StoragePresenter()
@@ -8,13 +9,10 @@ struct StorageScreen: View {
     @State private var isCleaningCache = false
 
     // 下载相关状态
-    @State private var downloadDBSize: String = "Calculating..."
     @State private var downloadFilesInfo: String = "Calculating..."
-    @State private var isCleaningDownloadDB = false
     @State private var isCleaningDownloadFiles = false
 
     // 对话框状态
-    @State private var showClearDBConfirm = false
     @State private var showClearFilesConfirm = false
     @State private var showSuccessAlert = false
     @State private var successMessage = ""
@@ -31,15 +29,12 @@ struct StorageScreen: View {
     }
 
     private func updateDownloadSizes() {
-        Task {
-            // 获取数据库大小
-            let dbSize = await DownloadStorage.shared.getDatabaseSize()
-            downloadDBSize = StorageFormatter.formatFileSize(dbSize)
-
-            // 获取下载文件信息
-            let (fileCount, totalSize) = await DownloadStorage.shared.getDownloadsInfo()
-            downloadFilesInfo = StorageFormatter.formatDownloadInfo(fileCount: fileCount, totalSize: totalSize)
+        let tasks = DownloadManager.shared.tasks
+        let taskCount = tasks.count
+        let totalSize = tasks.reduce(0) { total, task in
+            return total + Int(task.progress.totalUnitCount)
         }
+        downloadFilesInfo = StorageFormatter.formatDownloadInfo(fileCount: taskCount, totalSize: Int64(totalSize))
     }
 
     private func clearImageCache() {
@@ -52,32 +47,16 @@ struct StorageScreen: View {
         }
     }
 
-    private func clearDownloadDB() {
-        Task {
-            isCleaningDownloadDB = true
-            do {
-                try await DownloadStorage.shared.clearDatabase()
-                updateDownloadSizes()
-                showSuccessAlert(message: "download record cleaned")
-            } catch {
-                print("Failed to clear download database: \(error)")
-            }
-            isCleaningDownloadDB = false
-        }
-    }
-
     private func clearDownloadFiles() {
-        Task {
-            isCleaningDownloadFiles = true
-            do {
-                try await DownloadStorage.shared.clearDownloads()
-                updateDownloadSizes()
-                showSuccessAlert(message: "download files cleaned")
-            } catch {
-                print("Failed to clear download files: \(error)")
-            }
-            isCleaningDownloadFiles = false
-        }
+        isCleaningDownloadFiles = true
+        
+     
+        DownloadManager.shared.clearAllTasks(completely: true)
+        
+       
+        updateDownloadSizes()
+        isCleaningDownloadFiles = false
+        showSuccessAlert(message: "download files cleaned")
     }
 
     private func showSuccessAlert(message: String) {
@@ -131,29 +110,6 @@ struct StorageScreen: View {
 
                 Section("Download Cache") {
                     Button(role: .destructive) {
-                        showClearDBConfirm = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "database")
-                                .font(.title)
-                            Spacer()
-                                .frame(width: 16)
-                            VStack(alignment: .leading) {
-                                Text("Clean Download Record")
-                                Text("Database Size: \(downloadDBSize)")
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            if isCleaningDownloadDB {
-                                Spacer()
-                                ProgressView()
-                            }
-                        }
-                    }
-                    .buttonStyle(.borderless)
-                    .disabled(isCleaningDownloadDB)
-
-                    Button(role: .destructive) {
                         showClearFilesConfirm = true
                     } label: {
                         HStack {
@@ -182,12 +138,6 @@ struct StorageScreen: View {
                 calculateImageCacheSize()
                 updateDownloadSizes()
             }
-            .confirmationDialog(
-                title: "Clean Download Record",
-                message: "Are you sure you want to clear all download records? This action cannot be undone.",
-                isPresented: $showClearDBConfirm,
-                action: clearDownloadDB
-            )
             .confirmationDialog(
                 title: "Clean Download Files",
                 message: "Are you sure you want to delete all downloaded files? This action cannot be undone.",

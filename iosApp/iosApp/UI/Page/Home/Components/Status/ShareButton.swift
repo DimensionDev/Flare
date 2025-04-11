@@ -199,38 +199,42 @@ struct ShareButton: View {
 
                 for media in content.images {
                     if let image = media as? UiMediaImage {
-                        let imageUrl = image.url
+                        var imageUrl = image.url
+                        
+                        if content.card?.url == imageUrl {
+                            //article image
+                            imageUrl = image.previewUrl
+                        }
                         print("Starting download for Image: \(imageUrl)")
-                        DownloadService.shared.startDownload(
+                        DownloadHelper.shared.startMediaDownload(
                             url: imageUrl,
-                            previewImageUrl: image.previewUrl,
-                            itemType: .image
+                            mediaType: .image,
+                            previewImageUrl: imageUrl
                         )
                     } else if let video = media as? UiMediaVideo {
                         let videoUrl = video.url
                         // todo 这个地方要用mp4，现在返回的是 m3u8 地址
                         print("Starting download for Video: \(videoUrl)")
 
-                        DownloadService.shared.startDownload(
-                            url: "https://video.twimg.com/amplify_video/1899444944089083904/vid/avc1/720x720/QyUhpaYIvB7rSiow.mp4?tag=14",
-                            previewImageUrl: video.thumbnailUrl,
-                            itemType: .video
-                        )
+//                        DownloadHelper.shared.startMediaDownload(
+//                            url: "https://video.twimg.com/amplify_video/1899444944089083904/vid/avc1/720x720/QyUhpaYIvB7rSiow.mp4?tag=14",
+//                            mediaType: .video,
+//                            previewImageUrl: video.thumbnailUrl
+//                        )
                     } else if let gif = media as? UiMediaGif {
                         let gifUrl = gif.url
                         print("Starting download for GIF: \(gifUrl)")
-                        DownloadService.shared.startDownload(
+                        DownloadHelper.shared.startMediaDownload(
                             url: gifUrl,
-                            previewImageUrl: gif.previewUrl,
-                            itemType: .gif
+                            mediaType: .gif,
+                            previewImageUrl: gif.previewUrl
                         )
                     } else if let audio = media as? UiMediaAudio {
                         let audioUrl = audio.url
                         print("Starting download for Audio: \(audioUrl)")
-                        DownloadService.shared.startDownload(
+                        DownloadHelper.shared.startMediaDownload(
                             url: audioUrl,
-                            previewImageUrl: "",
-                            itemType: .unknown
+                            mediaType: .audio
                         )
                     }
                 }

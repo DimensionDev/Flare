@@ -1,7 +1,7 @@
 import Foundation
-import GRDB
-import shared
 import SwiftUI
+import Tiercel
+import shared
 
 extension Notification.Name {
     static let downloadProgressUpdated = Notification.Name("downloadProgressUpdated")
@@ -21,8 +21,8 @@ struct DownloadManagerScreen: View {
     @EnvironmentObject private var menuState: FlareAppState
 
     let accountType: AccountType
-    @State private var downloadItems: [DownloadItem] = []
-    @State private var itemToShare: ShareableFile? = nil // New state for .sheet(item:)
+    @State private var downloadTasks: [DownloadTask] = []
+    @State private var itemToShare: ShareableFile? = nil
 
     init(accountType: AccountType, router: FlareRouter) {
         self.accountType = accountType
@@ -31,20 +31,20 @@ struct DownloadManagerScreen: View {
 
     var body: some View {
         List {
-            ForEach(downloadItems) { item in
-                DownloadItemCell(
-                    item: item,
+            ForEach(downloadTasks, id: \.url.absoluteString) { task in
+                DownloadTaskCell(
+                    task: task,
                     onTapAction: {
-                        handleItemTap(item)
+                        handleTaskTap(task)
                     },
-                    onShareAction: { shareItem in
-                        handleItemShare(shareItem)
+                    onShareAction: {
+                        handleTaskShare(task)
                     }
                 )
                 .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
                 .listRowBackground(Colors.Background.swiftUIPrimary)
             }
-            .onDelete(perform: deleteItems)
+            .onDelete(perform: deleteTasks)
         }
         .listStyle(.plain)
         .scrollContentBackground(.hidden)
@@ -61,13 +61,22 @@ struct DownloadManagerScreen: View {
         .environmentObject(router)
         .environmentObject(menuState)
         .task {
-            await loadDownloadItems()
+            loadDownloadTasks()
         }
-        .onAppear {
-            setupNotifications()
+        .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeRunning"))) { _ in
+            loadDownloadTasks()
         }
-        .onDisappear {
-            removeNotifications()
+        .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeWaiting"))) { _ in
+            loadDownloadTasks()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeSucceeded"))) { _ in
+            loadDownloadTasks()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeSuspended"))) { _ in
+            loadDownloadTasks()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeFailed"))) { _ in
+            loadDownloadTasks()
         }
         .sheet(item: $itemToShare) { shareableFile in
             ActivityView(activityItems: [shareableFile.url])
@@ -75,202 +84,59 @@ struct DownloadManagerScreen: View {
         }
     }
 
-    private func loadDownloadItems() async {
-        do {
-            downloadItems = try await DownloadStorage.shared.getAllItems()
-        } catch {
-            print("Failed to load download items: \(error)")
+    private func loadDownloadTasks() {
+        downloadTasks = DownloadManager.shared.tasks
+    }
+
+    private func deleteTasks(at offsets: IndexSet) {
+        let tasksToDelete = offsets.map { downloadTasks[$0] }
+        
+        for task in tasksToDelete {
+            DownloadManager.shared.remove(url: task.url.absoluteString)
+        }
+        
+        // 立即从本地数组中移除这些任务
+        var indexSet = IndexSet()
+        for (index, task) in downloadTasks.enumerated() {
+            if tasksToDelete.contains(where: { $0.url.absoluteString == task.url.absoluteString }) {
+                indexSet.insert(index)
+            }
+        }
+        if !indexSet.isEmpty {
+            downloadTasks.remove(atOffsets: indexSet)
+        }
+        
+        // 异步刷新列表，确保删除操作在UI上完全生效
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.loadDownloadTasks()
         }
     }
 
-    private func deleteItems(at offsets: IndexSet) {
-        let itemsToDelete = offsets.map { downloadItems[$0] }
-        var successfullyDeletedIndices = IndexSet()
-
-        let originalIndices = offsets.sorted()
-
-        Task {
-            for i in 0 ..< itemsToDelete.count {
-                let item = itemsToDelete[i]
-                let originalIndex = originalIndices[i]
-
-                do {
-                    // 1. delete download
-                    DownloadService.shared.removeDownload(item: item)
-
-                    // 2. delete file
-                    if let filePath = await DownloadStorage.shared.localFilePath(for: item) {
-                        do {
-                            try FileManager.default.removeItem(at: filePath)
-                            print("Successfully deleted file at: \(filePath.path)")
-                        } catch let error as NSError where error.domain == NSCocoaErrorDomain && error.code == NSFileNoSuchFileError {
-                            print("File already removed or not found at: \(filePath.path), skipping.")
-                        } catch {
-                            print("Failed to delete file for item \(item.id) at \(filePath.path): \(error)")
-                        }
-                    }
-
-                    // 3. delete db record
-                    try await DownloadStorage.shared.delete(id: item.id)
-                    print("Successfully deleted DB record for item \(item.id)")
-
-                    successfullyDeletedIndices.insert(originalIndex)
-
-                } catch {
-                    print("Failed overall deletion process for item \(item.id): \(error)")
-                }
-            }
-
-            // 4. delete item form ui
-            if !successfullyDeletedIndices.isEmpty {
-                await MainActor.run {
-                    downloadItems.remove(atOffsets: successfullyDeletedIndices)
-                }
-            }
+    private func handleTaskTap(_ task: DownloadTask) {
+        switch task.status {
+        case .waiting:
+            DownloadManager.shared.pause(url: task.url.absoluteString)
+        case .running:
+            DownloadManager.shared.pause(url: task.url.absoluteString)
+        case .suspended:
+            DownloadManager.shared.resume(url: task.url.absoluteString)
+        case .succeeded:
+            let fileURL = URL(fileURLWithPath: task.filePath)
+            itemToShare = ShareableFile(url: fileURL)
+        case .failed:
+            DownloadManager.shared.resume(url: task.url.absoluteString)
+        case .removed:
+            // 已删除，无操作
+            break
+        @unknown default:
+            break
         }
     }
 
-    private func handleItemTap(_ item: DownloadItem) {
-        Task {
-            do {
-                switch item.status {
-                case .initial:
-                    DownloadService.shared.startDownload(url: item.url, previewImageUrl: item.url, itemType: item.downItemType)
-                case .downloading:
-                    DownloadService.shared.pauseDownload(item: item)
-                case .downloaded:
-                    print("Tapped downloaded item: \(item.fileName)")
-                case .removed:
-                    print("Tapped removed item: \(item.fileName)")
-                case .failed:
-                    DownloadService.shared.startDownload(url: item.url, previewImageUrl: item.url, itemType: item.downItemType)
-                case .paused:
-                    // Update UI state immediately
-                    if let index = downloadItems.firstIndex(where: { $0.id == item.id }) {
-                        downloadItems[index].status = .downloading
-                    }
-                    // Call the service to handle the actual resume
-                    DownloadService.shared.resumeDownload(item: item)
-                }
-            } catch {
-                print("Failed to handle tap action: \(error)")
-            }
-        }
-    }
-
-    private func handleItemShare(_ item: DownloadItem) {
-        Task {
-            do {
-                switch item.status {
-                case .initial:
-                    DownloadService.shared.startDownload(url: item.url, previewImageUrl: item.url, itemType: item.downItemType)
-                case .downloading:
-                    DownloadService.shared.pauseDownload(item: item)
-                case .downloaded:
-                    if let path = await DownloadStorage.shared.localFilePath(for: item) {
-                        itemToShare = ShareableFile(url: path)
-                    } else {
-                        print("Could not get file path for sharing item: \(item.fileName ?? "")")
-                    }
-                case .removed:
-                    print("Tapped removed item: \(item.fileName ?? "")")
-                case .failed:
-                    DownloadService.shared.startDownload(url: item.url, previewImageUrl: item.url, itemType: item.downItemType) // Retry
-                case .paused:
-                    if let index = downloadItems.firstIndex(where: { $0.id == item.id }) {
-                        downloadItems[index].status = .downloading
-                    }
-                    DownloadService.shared.resumeDownload(item: item)
-                }
-            } catch {
-                print("Failed to handle tap action: \(error)")
-            }
-        }
-    }
-
-    private func setupNotifications() {
-        NotificationCenter.default.addObserver(
-            forName: .downloadProgressUpdated,
-            object: nil,
-            queue: .main
-        ) { notification in
-            handleProgressUpdate(notification)
-        }
-
-        NotificationCenter.default.addObserver(
-            forName: .downloadCompleted,
-            object: nil,
-            queue: .main
-        ) { notification in
-            handleDownloadCompletion(notification)
-        }
-
-        NotificationCenter.default.addObserver(
-            forName: .downloadFailed,
-            object: nil,
-            queue: .main
-        ) { notification in
-            handleDownloadError(notification)
-        }
-    }
-
-    private func removeNotifications() {
-        NotificationCenter.default.removeObserver(self)
-    }
-
-    private func handleProgressUpdate(_ notification: Notification) {
-        guard let userInfo = notification.userInfo,
-              let url = userInfo["url"] as? String,
-              let progress = userInfo["progress"] as? Double,
-              let totalSize = userInfo["totalSize"] as? Int,
-              let downloadedSize = userInfo["downloadedSize"] as? Int
-        else {
-            print("Error: Invalid progress notification received or size missing.")
-            return
-        }
-
-        if let index = downloadItems.firstIndex(where: { $0.url == url }) {
-            // Update progress
-            downloadItems[index].progress = progress
-
-            if totalSize > 0 {
-                downloadItems[index].totalSize = totalSize
-            }
-            if downloadedSize >= 0 {
-                downloadItems[index].downloadedSize = downloadedSize
-            }
-
-            if downloadItems[index].status != .downloading, downloadItems[index].status != .paused {
-                downloadItems[index].status = .downloading
-            }
-        }
-    }
-
-    private func handleDownloadCompletion(_ notification: Notification) {
-        guard let userInfo = notification.userInfo,
-              let url = userInfo["url"] as? String,
-              let finalStatus = userInfo["finalStatus"] as? DownloadStatus
-        else {
-            return
-        }
-
-        if let index = downloadItems.firstIndex(where: { $0.url == url }) {
-            downloadItems[index].status = finalStatus
-            if finalStatus == .downloaded {
-                downloadItems[index].progress = 1.0
-            }
-        }
-    }
-
-    private func handleDownloadError(_ notification: Notification) {
-        guard let userInfo = notification.userInfo,
-              let url = userInfo["url"] as? String
-        else {
-            return
-        }
-
-        if let index = downloadItems.firstIndex(where: { $0.url == url }) {
-            downloadItems[index].status = .failed
+    private func handleTaskShare(_ task: DownloadTask) {
+        if task.status == .succeeded {
+            let fileURL = URL(fileURLWithPath: task.filePath)
+            itemToShare = ShareableFile(url: fileURL)
         }
     }
 }

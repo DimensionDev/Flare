@@ -1,5 +1,6 @@
 import FirebaseCore
 import SwiftUI
+import Tiercel
 
 #if os(iOS)
     typealias ApplicationDelegate = UIApplicationDelegate
@@ -17,7 +18,19 @@ class AppDelegate: NSObject, ApplicationDelegate {
                          didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool
         {
 //      FirebaseApp.configure()
-            true
+            // DownloadManager初始化
+            _ = DownloadManager.shared
+            return true
+        }
+        
+        // 处理后台下载
+        func application(_ application: UIApplication, 
+                        handleEventsForBackgroundURLSession identifier: String, 
+                        completionHandler: @escaping () -> Void) {
+
+            if identifier == DownloadManager.shared.sessionManager.identifier {
+                DownloadManager.shared.setCompletionHandler(completionHandler)
+            }
         }
     #endif
 }

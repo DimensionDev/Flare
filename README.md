@@ -1,5 +1,5 @@
 # Flare
-![license](https://img.shields.io/github/license/DimensionDev/Flare)
+[![license](https://img.shields.io/github/license/DimensionDev/Flare)](https://www.gnu.org/licenses/agpl-3.0.html)
 [![Crowdin](https://badges.crowdin.net/flareapp/localized.svg)](https://crowdin.com/project/flareapp)
 [![Telegram](https://img.shields.io/badge/-telegram-blue?logo=telegram&color=white)](https://t.me/+0UtcP6_qcDoyOWE1)
 [![Line](https://img.shields.io/badge/-Line_Group-green?logo=line&color=white)](https://line.me/ti/g/hf95HyGJ9k)

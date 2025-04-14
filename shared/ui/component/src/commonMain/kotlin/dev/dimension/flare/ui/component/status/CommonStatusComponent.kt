@@ -425,8 +425,28 @@ private fun StatusReactionComponent(
         modifier = modifier,
     ) {
         items(data.emojiReactions) { reaction ->
+            val color =
+                if (reaction.me) {
+                    PlatformTheme.colorScheme.primaryContainer
+                } else {
+                    PlatformTheme.colorScheme.cardAlt
+                }
+            val borderColor =
+                if (reaction.me) {
+                    PlatformTheme.colorScheme.primary
+                } else {
+                    Color.Transparent
+                }
             PlatformCard(
                 shape = RoundedCornerShape(100),
+                containerColor = color,
+                modifier =
+                    Modifier
+                        .border(
+                            FlareDividerDefaults.thickness,
+                            color = borderColor,
+                            shape = RoundedCornerShape(100),
+                        ),
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,

@@ -508,7 +508,12 @@ internal class MisskeyDataSource(
                             reactions =
                                 it.data.reactions.toMutableMap().apply {
                                     if (hasReacted) {
-                                        remove(reaction)
+                                        val current = it.data.reactions[reaction] ?: 0
+                                        if (current > 1) {
+                                            put(reaction, current - 1)
+                                        } else {
+                                            remove(reaction)
+                                        }
                                     } else {
                                         put(reaction, it.data.reactions[reaction]?.plus(1) ?: 1)
                                     }
@@ -546,7 +551,12 @@ internal class MisskeyDataSource(
                                         if (hasReacted) {
                                             put(reaction, it.data.reactions[reaction]?.plus(1) ?: 1)
                                         } else {
-                                            remove(reaction)
+                                            val current = it.data.reactions[reaction] ?: 0
+                                            if (current > 1) {
+                                                put(reaction, current - 1)
+                                            } else {
+                                                remove(reaction)
+                                            }
                                         }
                                     },
                             ),

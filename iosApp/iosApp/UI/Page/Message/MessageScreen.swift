@@ -3,16 +3,12 @@ import SwiftUI
 
 struct MessageScreen: View {
     let accountType: AccountType
+    
+    @EnvironmentObject private var router: FlareRouter
 
     var body: some View {
-        VStack {
-            Text("Messages")
-                .font(.largeTitle)
-                .padding()
-
-            Text("Coming soon...")
-                .foregroundColor(.gray)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        DMListView(accountType: accountType)
+            .navigationTitle("消息")
+            .navigationBarTitleDisplayMode(.inline)
     }
 }

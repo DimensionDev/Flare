@@ -126,13 +126,7 @@ struct DMRoomItemView: View {
                             }
                         } else {
                             // 多个用户时只显示名称列表
-                            let users = room.users
-                            let firstUser = users.count > 0 ? users[0].name.raw : ""
-                            let secondUser = users.count > 1 ? users[1].name.raw : ""
-                            let nameText = users.count > 1 
-                                ? "\(firstUser), \(secondUser)\(users.count > 2 ? "..." : "")" 
-                                : firstUser
-                            Text(nameText)
+                            Text(room.getFormattedTitle())
                                 .font(.headline)
                                 .lineLimit(1)
                         }
@@ -185,5 +179,32 @@ struct DMRoomItemView: View {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter.string(from: date)
+    }
+}
+
+// MARK: - UiDMRoom扩展
+extension UiDMRoom {
+    /// 获取格式化的对话标题
+    func getFormattedTitle() -> String {
+        if hasUser {
+            if users.count == 1 {
+                // 单个用户时，检查是否是自己
+                if UserManager.shared.isCurrentUser(user: users[0]) {
+                    return "我"
+                }
+                // 否则使用用户名称
+                return users[0].name.raw
+            } else if users.count > 1 {
+                // 多个用户时组合名称
+                let firstUser = users[0].name.raw
+                let secondUser = users[1].name.raw
+                return users.count > 2 
+                    ? "\(firstUser), \(secondUser)..." 
+                    : "\(firstUser), \(secondUser)"
+            }
+        }
+        
+        // 默认标题
+        return "私信对话"
     }
 }

@@ -6,195 +6,127 @@ import ExyteChat
 struct DMConversationView: View {
     let accountType: AccountType
     let roomKey: MicroBlogKey
+    let title: String
+    @State private var presenter: DMConversationPresenter
+    
+    init(accountType: AccountType, roomKey: MicroBlogKey, title: String) {
+        self.accountType = accountType
+        self.roomKey = roomKey
+        self.title = title
+        self._presenter = State(initialValue: DMConversationPresenter(
+            accountType: accountType,
+            roomKey: roomKey
+        ))
+    }
     
     var body: some View {
-        DMConversationContent(
-            presenter: DMConversationPresenter(
-                accountType: accountType,
-                roomKey: roomKey
-            )
-        )
+        ObservePresenter(presenter: presenter) { anyState in
+            if let state = anyState as? DMConversationState {
+                conversationContent(state: state)
+            } else {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .navigationTitle(title)
     }
-}
-
-/// 使用KMPView协议封装DM对话内容
-struct DMConversationContent: KMPView {
-    typealias P = DMConversationPresenter
-    typealias S = DMConversationState
     
-    let presenter: DMConversationPresenter
-    @State private var messages: [ExyteChat.Message] = []
-    @State private var conversationTitle: String = "对话"
-    @State private var isLoading = false
-    @State private var refreshTrigger = false // 用于触发刷新
-    
-    // 创建当前用户
-    private let currentUser = ExyteChat.User(
-        id: UUID().uuidString,
-        name: "我",
-        avatarURL: nil,
-        isCurrentUser: true
-    )
-    
-    func body(state: DMConversationState) -> some View {
+    @ViewBuilder
+    private func conversationContent(state: DMConversationState) -> some View {
         VStack {
-            if isLoading {
+            if case let .success(success) = onEnum(of: state.items) {
+                if success.itemCount > 0 {
+                    // 有消息数据时显示聊天视图
+                    ExyteChat.ChatView(
+                        messages: convertMessages(success),
+                        chatType: .conversation
+                    ) { draft in
+                        // 暂时只实现UI部分，不处理发送逻辑
+                        print("发送消息: \(draft.text)")
+                    }
+                    .chatTheme(
+                        ChatTheme(
+                            colors: .init(
+                                sendButtonBackground: Color.accentColor
+                            )
+                        )
+                    )
+                } else {
+                    // 没有消息时显示空状态
+                    VStack(spacing: 16) {
+                        Spacer()
+                        Text("暂无消息")
+                            .foregroundColor(.gray)
+                        Button("刷新") {
+                            // 通过创建新的Presenter触发刷新
+                            presenter = DMConversationPresenter(
+                                accountType: accountType,
+                                roomKey: roomKey
+                            )
+                        }
+                        .buttonStyle(.bordered)
+                        Spacer()
+                    }
+                }
+            } else if case .loading = onEnum(of: state.items) {
+                // 加载中状态
                 ProgressView()
                     .scaleEffect(1.5)
-                    .padding()
-            } else if messages.isEmpty {
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if case .error = onEnum(of: state.items) {
+                // 错误状态
                 VStack(spacing: 16) {
                     Spacer()
-                    Text("暂无消息")
-                        .foregroundColor(.gray)
-                    Button("刷新") {
-                        refreshTrigger.toggle() // 切换触发器状态
-                        updateMessages(state: state)
+                    Text("加载失败")
+                        .foregroundColor(.red)
+                    Button("重试") {
+                        // 通过创建新的Presenter触发刷新
+                        presenter = DMConversationPresenter(
+                            accountType: accountType,
+                            roomKey: roomKey
+                        )
                     }
                     .buttonStyle(.bordered)
                     Spacer()
                 }
-            } else {
-                ExyteChat.ChatView(
-                    messages: messages,
-                    chatType: .conversation
-                ) { draft in
-                    // 暂时只实现UI部分，不处理发送逻辑
-                    print("发送消息: \(draft.text)")
-                }
-                .chatTheme(
-                    ChatTheme(
-                        colors: .init(
-                            sendButtonBackground: Color.accentColor
-                        )
-                    )
-                )
-            }
-        }
-        .navigationTitle(conversationTitle)
-        .onAppear {
-            // 更新对话标题
-            updateConversationTitle(state: state)
-            // 初始加载消息
-            loadMessages(state: state)
-        }
-        // 监听刷新触发器变化
-        .onChange(of: refreshTrigger) { _ in
-            loadMessages(state: state)
-        }
-        .onDisappear {
-            // 清理资源
-            messages = []
-        }
-    }
-    
-    // 初始加载消息
-    private func loadMessages(state: DMConversationState) {
-        isLoading = true
-        // 延迟一小段时间让UI更新，确保KMP数据加载完成
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            updateMessages(state: state)
-            isLoading = false 
-        }
-    }
-    
-    // 更新对话标题
-    private func updateConversationTitle(state: DMConversationState) {
-        if case let .success(users) = onEnum(of: state.users) {
-            if (users as NSObject).value(forKey: "count") as? Int ?? 0 > 0 {
-                let userArray = users as! [UiUserV2]
-                if userArray.count > 0 {
-                    // 使用参与者名称作为标题
-                    let names = userArray.prefix(2).map { $0.name.raw }.joined(separator: ", ")
-                    conversationTitle = userArray.count > 2 ? "\(names)..." : names
-                }
-            } else {
-                conversationTitle = "私信对话"
             }
         }
     }
     
-    // 更新消息列表
-    private func updateMessages(state: DMConversationState) {
-        print("开始更新消息列表")
+    // 转换消息列表
+    private func convertMessages(_ success: PagingStateSuccess<UiDMItem>) -> [ExyteChat.Message] {
+        var messages: [ExyteChat.Message] = []
         
-        if case let .success(success) = onEnum(of: state.items) {
-            print("成功获取消息数据，消息数量: \(success.itemCount)")
-            
-            var newMessages: [ExyteChat.Message] = []
-            
-            // 将KMP的消息转换为ExyteChat的消息
-            for index in 0..<success.itemCount {
-                if let message = success.peek(index: index) {
-                    print("处理第\(index)条消息: \(message.id)")
-                    
-                    if let chatMessage = convertToChatMessage(message) {
-                        newMessages.append(chatMessage)
-                        print("转换成功: \(chatMessage.text)")
-                    } else {
-                        print("消息转换失败")
-                    }
-                    
-                    // 加载当前消息
-                    success.get(index: index)
-                } else {
-                    print("无法获取第\(index)条消息")
+        // 创建当前用户
+        let currentUser = ExyteChat.User(
+            id: UUID().uuidString,
+            name: "我",
+            avatarURL: nil,
+            isCurrentUser: true
+        )
+        
+        // 转换所有消息
+        for index in 0..<success.itemCount {
+            if let message = success.peek(index: index) {
+                if let chatMessage = convertToChatMessage(message) {
+                    messages.append(chatMessage)
                 }
-            }
-            
-            print("转换后的消息数量: \(newMessages.count)")
-            
-            // 如果没有实际消息，添加一个测试消息
-            if newMessages.isEmpty {
-                // 添加一条测试消息
-                var testMessage = ExyteChat.Message(
-                    id: UUID().uuidString,
-                    user: currentUser,
-                    createdAt: Date()
-                )
-                testMessage.text = "这是一条测试消息，实际消息加载失败。"
-                newMessages.append(testMessage)
                 
-                // 添加一条来自其他用户的测试消息
-                let otherUser = ExyteChat.User(
-                    id: UUID().uuidString,
-                    name: "测试用户",
-                    avatarURL: nil,
-                    isCurrentUser: false
-                )
-                var testMessage2 = ExyteChat.Message(
-                    id: UUID().uuidString,
-                    user: otherUser,
-                    createdAt: Date().addingTimeInterval(-60)
-                )
-                testMessage2.text = "你好，这是一条来自其他用户的测试消息。"
-                newMessages.append(testMessage2)
+                // 加载当前消息
+                success.get(index: index)
             }
-            
-            // 更新消息列表
-            self.messages = newMessages
-        } else if case .loading = onEnum(of: state.items) {
-            print("消息正在加载中")
-            isLoading = true
-        } else if case let .error(error) = onEnum(of: state.items) {
-            print("加载消息失败: \(error)")
-            // 添加一条错误提示消息
-            var errorMessage = ExyteChat.Message(
-                id: UUID().uuidString,
-                user: currentUser,
-                createdAt: Date()
-            )
-            errorMessage.text = "加载消息失败，请重试。"
-            self.messages = [errorMessage]
-        } else {
-            print("未知状态")
         }
+        
+        // 如果没有消息但状态是成功，添加提示信息
+        if messages.isEmpty {
+            print("消息列表为空，但状态是成功")
+        }
+        
+        return messages
     }
     
     // 将UiDMItem转换为Chat库的Message
     private func convertToChatMessage(_ item: UiDMItem) -> ExyteChat.Message? {
-        print("转换消息 ID: \(item.id), 用户: \(item.user.name.raw)")
-        
         // 创建用户
         let chatUser = ExyteChat.User(
             id: item.user.key.description,
@@ -213,7 +145,6 @@ struct DMConversationContent: KMPView {
         // 设置消息状态
         if let sendState = item.sendState {
             let className = String(describing: type(of: sendState))
-            print("消息状态类名: \(className)")
             
             if className.contains("Sending") {
                 message.status = .sending
@@ -240,7 +171,6 @@ struct DMConversationContent: KMPView {
         case is UiDMItemMessageText:
             let textContent = item.content as! UiDMItemMessageText
             message.text = textContent.text.raw
-            print("文本消息: \(message.text)")
             
         case is UiDMItemMessageMedia:
             let mediaContent = item.content as! UiDMItemMessageMedia
@@ -252,36 +182,67 @@ struct DMConversationContent: KMPView {
                     message.attachments = [
                         ExyteChat.Attachment(id: UUID().uuidString, url: url, type: .image)
                     ]
-                    print("图片消息: \(imageMedia.url)")
                 }
                 
             case is UiMediaVideo:
                 let videoMedia = mediaContent.media as! UiMediaVideo
                 if let url = URL(string: videoMedia.url) {
+                    // 添加缩略图URL作为预览
+                    let thumbnailURL = URL(string: videoMedia.thumbnailUrl)
                     message.attachments = [
-                        ExyteChat.Attachment(id: UUID().uuidString, url: url, type: .video)
+                        ExyteChat.Attachment(
+                            id: UUID().uuidString, 
+                            url: url,
+                            type: .video
+                        )
                     ]
-                    print("视频消息: \(videoMedia.url)")
+                }
+                
+            case is UiMediaGif:
+                let gifMedia = mediaContent.media as! UiMediaGif
+                if let url = URL(string: gifMedia.url) {
+                    // 处理GIF类型，将其当作自动播放的视频处理
+                    message.attachments = [
+                        ExyteChat.Attachment(
+                            id: UUID().uuidString, 
+                            url: url,
+                            type: .video // GIF作为视频处理，会自动播放
+                        )
+                    ]
+                }
+                
+            case is UiMediaAudio:
+                let audioMedia = mediaContent.media as! UiMediaAudio
+                // 将音频转换为ExyteChat的Recording类型
+                if let url = URL(string: audioMedia.url) {
+                    // 创建一个Recording实例
+                    let recording = ExyteChat.Recording(
+                        duration: 30.0,  // 假设30秒，实际应该从媒体获取
+                        waveformSamples: Array(repeating: CGFloat(0.5), count: 50),  // 示例波形
+                        url: url
+                    )
+                    // 设置到消息的recording字段
+                    message.recording = recording
+                    
+                    // 添加一个简短的描述文本
+                    let desc = audioMedia.description_ ?? "语音消息"
+                    message.text = "🎵 \(desc)"
                 }
                 
             default:
-                // 其他媒体类型
-                message.text = "不支持的媒体类型"
-                print("不支持的媒体类型")
+                // 其他未知媒体类型
+                message.text = "不支持的媒体类型: \(type(of: mediaContent.media))"
             }
             
         case is UiDMItemMessageStatus:
             let statusContent = item.content as! UiDMItemMessageStatus
             message.text = "转发: " + statusContent.status.content.raw
-            print("转发消息: \(message.text)")
             
         case is UiDMItemMessageDeleted:
             message.text = "此消息已删除"
-            print("已删除消息")
             
         default:
             message.text = "未知消息类型: \(type(of: item.content))"
-            print("未知消息类型: \(type(of: item.content))")
         }
         
         return message
@@ -451,22 +412,4 @@ struct MessageBubbleView: View {
         return formatter.string(from: date)
     }
 }
-
-//// 自定义ForEach替代视图，处理Int32类型
-//struct ForEachWithIndex<Content: View>: View {
-//    let startIndex: Int32
-//    let count: Int32
-//    let content: (Int32) -> Content
-//    
-//    init(_ startIndex: Int32, count: Int32, @ViewBuilder content: @escaping (Int32) -> Content) {
-//        self.startIndex = startIndex
-//        self.count = count
-//        self.content = content
-//    }
-//    
-//    var body: some View {
-//        ForEach(0..<Int(count), id: \.self) { index in
-//            content(Int32(index) + startIndex)
-//        }
-//    }
-//}
+ 

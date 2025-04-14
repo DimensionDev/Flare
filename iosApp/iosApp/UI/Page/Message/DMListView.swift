@@ -4,20 +4,25 @@ import shared
 /// DM对话列表视图
 struct DMListView: View {
     let accountType: AccountType
+    @State private var presenter: DMListPresenter
+    
+    init(accountType: AccountType) {
+        self.accountType = accountType
+        self._presenter = State(initialValue: DMListPresenter(accountType: accountType))
+    }
     
     var body: some View {
-        DMListContent(presenter: DMListPresenter(accountType: accountType))
+        ObservePresenter(presenter: presenter) { anyState in
+            if let state = anyState as? DMListState {
+                listContent(state: state)
+            } else {
+                ProgressView()
+            }
+        }
     }
-}
-
-/// 使用KMPView协议封装DM列表内容
-struct DMListContent: KMPView {
-    typealias P = DMListPresenter
-    typealias S = DMListState
     
-    let presenter: DMListPresenter
-    
-    func body(state: DMListState) -> some View {
+    @ViewBuilder
+    private func listContent(state: DMListState) -> some View {
         List {
             if case let .success(success) = onEnum(of: state.items) {
                 ForEachWithIndex(0, count: success.itemCount) { index in
@@ -25,7 +30,8 @@ struct DMListContent: KMPView {
                         NavigationLink(
                             destination: DMConversationView(
                                 accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
-                                roomKey: room.key
+                                roomKey: room.key,
+                                title: room.getFormattedTitle()
                             )
                         ) {
                             DMRoomItemView(room: room)
@@ -33,8 +39,6 @@ struct DMListContent: KMPView {
                         .onAppear {
                             // 当单元格出现时，请求加载该项目数据
                             success.get(index: index)
-                            
-                            // 不需要手动加载更多，KMP会自动处理
                         }
                     } else {
                         DMRoomPlaceholderView()
@@ -61,9 +65,6 @@ struct DMListContent: KMPView {
         }
     }
 }
-
-
-
 
 // 占位视图
 struct DMRoomPlaceholderView: View {

@@ -2,7 +2,7 @@ import shared
 import SwiftUI
 
 // tweet medias 布局gridView layout view
-public struct FeedMediaGridView: View {
+public struct TweetMediaGridView: View {
     static var spacing: CGFloat { 8 }
     static var cornerRadius: CGFloat { 12 }
 
@@ -20,7 +20,7 @@ public struct FeedMediaGridView: View {
 
     var cornerRadius: CGFloat {
         option.preferredApplyCornerRadius
-            ? FeedMediaGridView.cornerRadius
+            ? TweetMediaGridView.cornerRadius
             : .zero
     }
 
@@ -135,7 +135,7 @@ public struct FeedMediaGridView: View {
 
     // tweet 单张图片
     private func singleMediaView(of viewModel: FeedMediaViewModel) -> some View {
-        LensMediaView(
+        SingleMediaView(
             viewModel: viewModel,
             isSingleVideo: true,
             fixedAspectRatio: fixedAspectRatio
@@ -147,7 +147,7 @@ public struct FeedMediaGridView: View {
         .overlay(alignment: .bottomLeading) {
             if viewModel.mediaKind == .video {
                 if let duration = viewModel.playableAsset?.duration {
-                    FeedMediaPlayButton(duration: duration) {
+                    TweetMediaPlayButton(duration: duration) {
                         let actionContext = ActionContext(index: 0, viewModels: viewModels)
                         action(actionContext)
                     }
@@ -156,7 +156,7 @@ public struct FeedMediaGridView: View {
                 }
             } else if viewModel.mediaKind == .audio {
                 if let duration = viewModel.playableAsset?.duration {
-                    FeedMediaPlayButton(duration: duration) {
+                    TweetMediaPlayButton(duration: duration) {
                         let actionContext = ActionContext(index: 0, viewModels: viewModels)
                         action(actionContext)
                     }
@@ -168,7 +168,7 @@ public struct FeedMediaGridView: View {
 
     // 方格中 --- 单个图片的view
     private func mediaView(of viewModel: FeedMediaViewModel, at index: Int) -> some View {
-        LensMediaView(
+        SingleMediaView(
             viewModel: viewModel,
             isSingleVideo: false,
             fixedAspectRatio: nil
@@ -180,7 +180,7 @@ public struct FeedMediaGridView: View {
         .overlay(alignment: .bottomLeading) {
             if viewModel.mediaKind == .video {
                 if let duration = viewModel.playableAsset?.duration {
-                    FeedMediaPlayButton(duration: duration) {
+                    TweetMediaPlayButton(duration: duration) {
                         let actionContext = ActionContext(index: index, viewModels: viewModels)
                         action(actionContext)
                     }
@@ -189,7 +189,7 @@ public struct FeedMediaGridView: View {
                 }
             } else if viewModel.mediaKind == .audio {
                 if let duration = viewModel.playableAsset?.duration {
-                    FeedMediaPlayButton(duration: duration) {
+                    TweetMediaPlayButton(duration: duration) {
                         let actionContext = ActionContext(index: index, viewModels: viewModels)
                         action(actionContext)
                     }

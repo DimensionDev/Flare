@@ -98,8 +98,3 @@ val macExtraPlistKeys: String
       </array>
     """
 
-
-apply(from = "vlc-download-task.gradle.kts")
-tasks.named("compileKotlin") {
-    dependsOn("downloadVlc")
-}

@@ -11,10 +11,10 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Size
@@ -23,21 +23,14 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
-import org.openani.mediamp.InternalMediampApi
-import org.openani.mediamp.PlaybackState
-import org.openani.mediamp.features.AudioLevelController
-import org.openani.mediamp.playUri
-import org.openani.mediamp.vlc.VlcMediampPlayer
-import org.openani.mediamp.vlc.compose.VlcMediampPlayerSurface
+import io.github.kdroidfilter.composemediaplayer.VideoPlayerState
+import io.github.kdroidfilter.composemediaplayer.VideoPlayerSurface
+import kotlinx.coroutines.delay
 import kotlin.concurrent.timer
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.math.roundToInt
 import kotlin.time.Duration.Companion.minutes
 
-@OptIn(ExperimentalFoundationApi::class, InternalMediampApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal actual fun PlatformVideoPlayer(
     uri: String,
@@ -60,54 +53,49 @@ internal actual fun PlatformVideoPlayer(
         remember(uri) {
             playerPool
                 .get(uri)
+                .apply {
+                    if (autoPlay) {
+                        play()
+                    }
+                    volume = if (muted) 0f else 1f
+                }
         }
-    val state by player.playbackState.collectAsState()
-    LaunchedEffect(state) {
-        if (state in listOf(PlaybackState.READY, PlaybackState.PAUSED) && autoPlay) {
-            player.features[AudioLevelController.Key]?.setMute(muted)
-            player.resume()
-        }
-    }
-    LaunchedEffect(muted) {
-        player.features[AudioLevelController.Key]?.setMute(muted)
-    }
-    DisposableEffect(Unit) {
+    DisposableEffect(uri) {
         onDispose {
             playerPool.release(uri)
         }
     }
-    val properties by player.mediaProperties.collectAsState()
-    val position by player.currentPositionMillis.collectAsState()
+    var remainingTime by remember { mutableLongStateOf(0L) }
     val density = LocalDensity.current
     val size =
-        remember(state) {
-            val dimension = player.player.video().videoDimension()
-            if (dimension != null) {
+        remember(player.metadata) {
+            val height = player.metadata.height
+            val width = player.metadata.width
+            if (height != null && width != null) {
                 with(density) {
                     Size(
-                        width = dimension.width.toFloat(),
-                        height = dimension.height.toFloat(),
+                        width = width.toFloat(),
+                        height = height.toFloat(),
                     )
                 }
             } else {
                 null
             }
         }
-    val remainingTime by remember {
-        derivedStateOf {
-            properties?.durationMillis?.let { duration ->
-                if (duration > 0) {
-                    duration - position
-                } else {
-                    0
-                }
-            } ?: 0
+    LaunchedEffect(player) {
+        while (true) {
+            val duration = player.metadata.duration
+            if (remainingTimeContent != null && duration != null) {
+                val position = player.sliderPos / 1000f
+                remainingTime = (duration * 1000 * (1f - position)).toLong()
+            }
+            delay(500)
         }
     }
 
     Box(modifier) {
-        VlcMediampPlayerSurface(
-            mediampPlayer = player,
+        VideoPlayerSurface(
+            playerState = player,
             modifier =
                 Modifier
                     .clipToBounds()
@@ -133,7 +121,7 @@ internal actual fun PlatformVideoPlayer(
                         }
                     }.matchParentSize(),
         )
-        if (state != PlaybackState.PLAYING || position <= 0) {
+        if (player.isLoading) {
             loadingPlaceholder()
         } else {
             remainingTimeContent?.invoke(this, remainingTime)
@@ -173,28 +161,23 @@ private fun Modifier.resizeWithContentScale(
             ),
     )
 
-public class VideoPlayerPool(
-    private val scope: CoroutineScope,
-    private val context: CoroutineContext = EmptyCoroutineContext,
-) {
-    private val positionPool = mutableMapOf<String, Long>()
+public class VideoPlayerPool {
+    private val positionPool = mutableMapOf<String, Float>()
     private val lockCount = linkedMapOf<String, Long>()
     private val pool =
-        lruCache<String, VlcMediampPlayer>(
+        lruCache<String, VideoPlayerState>(
             maxSize = 10,
             create = { uri ->
-                VlcMediampPlayer(context)
+                VideoPlayerState()
                     .apply {
-                        player.controls().repeat = true
-                        scope.launch {
-                            playUri(uri)
-                        }
+                        loop = true
+                        openUri(uri)
                     }
             },
             onEntryRemoved = { evicted, key, oldValue, newValue ->
                 if (evicted) {
-                    positionPool.put(key, oldValue.getCurrentPositionMillis())
-                    oldValue.close()
+                    positionPool.put(key, oldValue.sliderPos)
+                    oldValue.dispose()
                 } else if (newValue != null) {
                     val position = positionPool.get(key)
                     if (position != null) {
@@ -209,14 +192,14 @@ public class VideoPlayerPool(
         timer(period = 1.minutes.inWholeMilliseconds) {
             pool.snapshot().forEach { (uri, _) ->
                 if (lockCount.getOrElse(uri) { 0 } == 0L) {
-                    pool.remove(uri)?.close()
+                    pool.remove(uri)?.dispose()
                 }
             }
         }
 
-    public fun peek(uri: String): VlcMediampPlayer? = pool.get(uri)
+    public fun peek(uri: String): VideoPlayerState? = pool.get(uri)
 
-    public fun get(uri: String): VlcMediampPlayer {
+    public fun get(uri: String): VideoPlayerState {
         lock(uri)
         return pool.get(uri)!!
     }

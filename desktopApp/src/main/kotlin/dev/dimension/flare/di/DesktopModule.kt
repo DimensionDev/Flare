@@ -3,6 +3,7 @@ package dev.dimension.flare.di
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.ui.component.platform.VideoPlayerPool
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.binds
 import org.koin.dsl.module
 
@@ -27,9 +28,5 @@ val desktopModule =
                 }
             }
         } binds arrayOf(InAppNotification::class)
-        single {
-            VideoPlayerPool(
-                get(),
-            )
-        }
+        singleOf(::VideoPlayerPool)
     }

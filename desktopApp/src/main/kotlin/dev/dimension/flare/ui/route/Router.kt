@@ -89,8 +89,8 @@ internal fun Router(
                 it.arguments
                     ?.getString("accountKey")
                     ?.let(MicroBlogKey::valueOf)
-                    ?.let(AccountType::Specific)
-            if (userKey != null && accountKey != null) {
+                    ?.let(AccountType::Specific) ?: AccountType.Guest
+            if (userKey != null) {
                 ProfileScreen(
                     accountType = accountKey,
                     userKey = userKey,

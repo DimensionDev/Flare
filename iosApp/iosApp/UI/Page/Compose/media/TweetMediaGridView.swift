@@ -86,7 +86,7 @@ public struct TweetMediaGridView: View {
             case 0:
                 EmptyView()
             case 1:
-                singleMediaView(of: viewModels[0])
+                oneMediaView(of: viewModels[0])
                     .frame(maxWidth: .infinity)
                     .frame(height: idealHeight)
                     .padding(.horizontal, option.horizontalPadding)
@@ -134,7 +134,7 @@ public struct TweetMediaGridView: View {
     }
 
     // tweet 单张图片
-    private func singleMediaView(of viewModel: FeedMediaViewModel) -> some View {
+    private func oneMediaView(of viewModel: FeedMediaViewModel) -> some View {
         SingleMediaView(
             viewModel: viewModel,
             isSingleVideo: true,

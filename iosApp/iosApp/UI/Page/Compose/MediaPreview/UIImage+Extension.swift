@@ -9,7 +9,7 @@ import func AVFoundation.AVMakeRect
 import CoreImage
 import CoreImage.CIFilterBuiltins
 import UIKit
- 
+
 public extension UIImage {
     static func placeholder(size: CGSize = CGSize(width: 1, height: 1), color: UIColor) -> UIImage {
         let render = UIGraphicsImageRenderer(size: size)
@@ -20,4 +20,3 @@ public extension UIImage {
         }
     }
 }
- 

@@ -22,12 +22,12 @@ class AppDelegate: NSObject, ApplicationDelegate {
             _ = DownloadManager.shared
             return true
         }
-        
-        // 处理后台下载
-        func application(_ application: UIApplication, 
-                        handleEventsForBackgroundURLSession identifier: String, 
-                        completionHandler: @escaping () -> Void) {
 
+        // 处理后台下载
+        func application(_: UIApplication,
+                         handleEventsForBackgroundURLSession identifier: String,
+                         completionHandler: @escaping () -> Void)
+        {
             if identifier == DownloadManager.shared.sessionManager.identifier {
                 DownloadManager.shared.setCompletionHandler(completionHandler)
             }

@@ -3,7 +3,7 @@ import SwiftUI
 
 struct MessageScreen: View {
     let accountType: AccountType
-    
+
     @EnvironmentObject private var router: FlareRouter
 
     var body: some View {

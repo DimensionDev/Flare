@@ -116,7 +116,7 @@ struct FlareDestinationView: View {
 
         case let .deleteStatus(accountType, statusKey):
             DeleteStatusView(accountType: accountType, statusKey: statusKey)
-            
+
         case let .messages(accountType):
             MessageScreen(accountType: accountType)
                 .environmentObject(router)

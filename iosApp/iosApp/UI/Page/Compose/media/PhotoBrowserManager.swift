@@ -8,11 +8,19 @@ import UIKit
 class PhotoBrowserManager {
     static let shared = PhotoBrowserManager()
     private var currentVideoCell: MediaBrowserVideoCell?
+    private var currentHeaders: [String: String]?
 
     private init() {}
 
     @MainActor
-    func showPhotoBrowser(media _: UiMedia, images: [UiMedia], initialIndex: Int, onDismiss: (() -> Void)? = nil) {
+    func showPhotoBrowser(
+        media _: UiMedia,
+        images: [UiMedia],
+        initialIndex: Int,
+        headers: [String: String] = [:],
+        onDismiss: (() -> Void)? = nil
+    ) {
+        currentHeaders = headers
         let browser = JXPhotoBrowser()
         browser.scrollDirection = .horizontal
         browser.numberOfItems = { images.count }
@@ -36,22 +44,37 @@ class PhotoBrowserManager {
             }
         }
 
-        browser.reloadCellAtIndex = { context in
-            guard context.index >= 0, context.index < images.count else { return }
+        browser.reloadCellAtIndex = { [weak self] context in
+            guard let self,
+                  context.index >= 0,
+                  context.index < images.count
+            else { return }
+
             let media = images[context.index]
+            let headers = currentHeaders ?? [:]
 
             switch onEnum(of: media) {
             case let .video(data):
                 if let url = URL(string: data.url),
                    let cell = context.cell as? MediaBrowserVideoCell
                 {
-                    cell.load(url: url, previewUrl: URL(string: data.thumbnailUrl), isGIF: false)
+                    cell.load(
+                        url: url,
+                        previewUrl: URL(string: data.thumbnailUrl),
+                        isGIF: false,
+                        headers: headers
+                    )
                 }
             case let .gif(data):
                 if let url = URL(string: data.url),
                    let cell = context.cell as? MediaBrowserVideoCell
                 {
-                    cell.load(url: url, previewUrl: URL(string: data.previewUrl), isGIF: true)
+                    cell.load(
+                        url: url,
+                        previewUrl: URL(string: data.previewUrl),
+                        isGIF: true,
+                        headers: headers
+                    )
                 }
             case let .image(data):
                 if let url = URL(string: data.url),
@@ -65,6 +88,15 @@ class PhotoBrowserManager {
                         }
                     }
 
+                    // 创建headers修改器
+                    let modifier = AnyModifier { request in
+                        var r = request
+                        for (key, value) in headers {
+                            r.setValue(value, forHTTPHeaderField: key)
+                        }
+                        return r
+                    }
+
                     // 加载预览图
                     cell.imageView.kf.setImage(
                         with: previewUrl,
@@ -72,6 +104,7 @@ class PhotoBrowserManager {
                         options: [
                             .transition(.fade(0.25)),
                             .processor(DownsamplingImageProcessor(size: UIScreen.main.bounds.size)),
+                            .requestModifier(modifier),
                         ]
                     ) { result in
                         switch result {
@@ -84,11 +117,11 @@ class PhotoBrowserManager {
                                     .transition(.fade(0.5)),
                                     .loadDiskFileSynchronously,
                                     .cacheOriginalImage,
+                                    .requestModifier(modifier),
                                 ]
                             ) { result in
                                 switch result {
                                 case let .success(value):
-
                                     // 添加原图标记，并显示图片大小
                                     DispatchQueue.main.async {
                                         let imageSize = value.image.jpegData(compressionQuality: 1.0)?.count

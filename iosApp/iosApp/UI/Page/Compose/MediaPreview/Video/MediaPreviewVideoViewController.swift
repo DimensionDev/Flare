@@ -128,9 +128,23 @@ extension MediaPreviewVideoViewController {
 
         if let previewURL = viewModel.item.previewURL {
             previewImageView.contentMode = .scaleAspectFit
+
+            // 创建headers修改器
+            let headers = viewModel.item.headers // 在闭包外获取headers
+            let modifier = AnyModifier { request in
+                var r = request
+                for (key, value) in headers {
+                    r.setValue(value, forHTTPHeaderField: key)
+                }
+                return r
+            }
+
             previewImageView.kf.setImage(
                 with: previewURL,
-                placeholder: UIImage.placeholder(color: .systemFill)
+                placeholder: UIImage.placeholder(color: .systemFill),
+                options: [
+                    .requestModifier(modifier),
+                ]
             )
 
             playerViewController.publisher(for: \.isReadyForDisplay)
@@ -143,7 +157,6 @@ extension MediaPreviewVideoViewController {
         }
     }
 }
- 
 
 // - AVPlayerViewControllerDelegate
 

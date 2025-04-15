@@ -1,19 +1,18 @@
+import Kingfisher
 import SwiftUI
 import Tiercel
-import Kingfisher
 
 struct DownloadTaskCell: View {
     let task: Tiercel.DownloadTask
     let onTapAction: () -> Void
     let onShareAction: () -> Void
-    
+
     @State private var progress: Double = 0
     @State private var statusText: String = ""
     @State private var previewImageUrl: String? = nil
-    
+
     var body: some View {
         HStack(spacing: 12) {
-        
             if let imageUrl = previewImageUrl, let url = URL(string: imageUrl) {
                 KFImage(url)
                     .placeholder {
@@ -25,38 +24,33 @@ struct DownloadTaskCell: View {
                     .frame(width: 60, height: 60)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .overlay(
-                        task.status != .succeeded ? 
+                        task.status != .succeeded ?
                             Rectangle()
-                                .foregroundColor(Color.black.opacity(0.3))
-                                .clipShape(RoundedRectangle(cornerRadius: 8)) : nil
+                            .foregroundColor(Color.black.opacity(0.3))
+                            .clipShape(RoundedRectangle(cornerRadius: 8)) : nil
                     )
             } else {
-                 
                 Rectangle()
                     .foregroundColor(Colors.Background.swiftUISecondary)
                     .frame(width: 60, height: 60)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             }
-            
-          
+
             VStack(alignment: .leading, spacing: 4) {
-               
                 Text(fileName)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(Colors.Text.swiftUIPrimary)
                     .lineLimit(1)
-                
-              
+
                 ProgressView(value: progress)
                     .progressViewStyle(LinearProgressViewStyle(tint: Colors.State.swiftUIActive))
                     .frame(height: 2)
-               
+
                 Text(statusText)
                     .font(.system(size: 14))
                     .foregroundColor(Colors.Text.swiftUISecondary)
                     .lineLimit(1)
-                
-               
+
                 if task.status == .running || task.status == .suspended || task.status == .succeeded {
                     Text("\(formattedDownloadSize) / \(formattedTotalSize)")
                         .font(.system(size: 12))
@@ -65,8 +59,7 @@ struct DownloadTaskCell: View {
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            
-           
+
             Group {
                 switch task.status {
                 case .waiting, .failed:
@@ -96,7 +89,6 @@ struct DownloadTaskCell: View {
                             .font(.system(size: 20))
                             .foregroundColor(Colors.State.swiftUIActive)
                     }
-                 
                 case .removed:
                     EmptyView()
                 @unknown default:
@@ -110,7 +102,7 @@ struct DownloadTaskCell: View {
         .onAppear {
             updateUI()
             previewImageUrl = DownloadHelper.shared.getPreviewImageUrl(for: task.url.absoluteString)
-            
+
             task.progress { _ in
                 updateUI()
             }
@@ -119,15 +111,15 @@ struct DownloadTaskCell: View {
             }
         }
     }
-    
+
     private var fileName: String {
         let defaultName = URL(string: task.url.absoluteString)?.lastPathComponent ?? "File"
         return task.fileName.isEmpty ? defaultName : task.fileName
     }
-    
+
     private func updateUI() {
         progress = task.progress.fractionCompleted
-        
+
         switch task.status {
         case .waiting:
             statusText = "Waiting..."
@@ -145,18 +137,18 @@ struct DownloadTaskCell: View {
             statusText = "Unknown status"
         }
     }
-    
+
     private var formattedTotalSize: String {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useKB, .useMB, .useGB]
         formatter.countStyle = .file
         return formatter.string(fromByteCount: Int64(task.progress.totalUnitCount))
     }
-    
+
     private var formattedDownloadSize: String {
         let formatter = ByteCountFormatter()
         formatter.allowedUnits = [.useKB, .useMB, .useGB]
         formatter.countStyle = .file
         return formatter.string(fromByteCount: Int64(task.progress.completedUnitCount))
     }
-} 
+}

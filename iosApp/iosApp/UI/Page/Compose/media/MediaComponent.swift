@@ -60,5 +60,3 @@ struct MediaComponent: View {
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
-
- 

@@ -1,16 +1,16 @@
-import SwiftUI
 import shared
+import SwiftUI
 
 /// DM对话列表视图
 struct DMListView: View {
     let accountType: AccountType
     @State private var presenter: DMListPresenter
-    
+
     init(accountType: AccountType) {
         self.accountType = accountType
-        self._presenter = State(initialValue: DMListPresenter(accountType: accountType))
+        _presenter = State(initialValue: DMListPresenter(accountType: accountType))
     }
-    
+
     var body: some View {
         ObservePresenter(presenter: presenter) { anyState in
             if let state = anyState as? DMListState {
@@ -20,7 +20,7 @@ struct DMListView: View {
             }
         }
     }
-    
+
     @ViewBuilder
     private func listContent(state: DMListState) -> some View {
         List {
@@ -73,13 +73,13 @@ struct DMRoomPlaceholderView: View {
             Circle()
                 .fill(Color.gray.opacity(0.3))
                 .frame(width: 50, height: 50)
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(height: 18)
                     .frame(maxWidth: 120)
-                
+
                 Rectangle()
                     .fill(Color.gray.opacity(0.3))
                     .frame(height: 14)
@@ -89,4 +89,4 @@ struct DMRoomPlaceholderView: View {
         }
         .redacted(reason: .placeholder)
     }
-} 
+}

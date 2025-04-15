@@ -45,6 +45,8 @@
 	<string>需要访问相册权限以保存图片</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>需要访问相册权限以保存图片</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>需要访问麦克风权限以录制语音消息</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

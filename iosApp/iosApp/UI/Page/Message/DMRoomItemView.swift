@@ -2,10 +2,11 @@ import shared
 import SwiftUI
 
 // MARK: - 组件定义
+
 // 房间项视图
 struct DMRoomItemView: View {
     let room: UiDMRoom
-    
+
     var body: some View {
         HStack(spacing: 12) {
             // 对话头像部分
@@ -16,7 +17,7 @@ struct DMRoomItemView: View {
                         switch phase {
                         case .empty:
                             Circle().fill(Color.accentColor.opacity(0.2))
-                        case .success(let image):
+                        case let .success(image):
                             image.resizable().scaledToFill()
                         case .failure:
                             Circle()
@@ -56,7 +57,7 @@ struct DMRoomItemView: View {
                             switch phase {
                             case .empty:
                                 Circle().fill(Color.gray.opacity(0.3))
-                            case .success(let image):
+                            case let .success(image):
                                 image.resizable().scaledToFill()
                             case .failure:
                                 Circle().fill(Color.gray.opacity(0.3))
@@ -75,12 +76,12 @@ struct DMRoomItemView: View {
                         .clipShape(Circle())
                     } else {
                         // 多个用户时显示叠加的头像（最多显示前两个）
-                        ForEach(0..<min(2, room.users.count), id: \.self) { index in
+                        ForEach(0 ..< min(2, room.users.count), id: \.self) { index in
                             AsyncImage(url: URL(string: room.users[index].avatar)) { phase in
                                 switch phase {
                                 case .empty:
                                     Circle().fill(Color.gray.opacity(0.3))
-                                case .success(let image):
+                                case let .success(image):
                                     image.resizable().scaledToFill()
                                 case .failure:
                                     Circle().fill(Color.gray.opacity(0.3))
@@ -92,7 +93,7 @@ struct DMRoomItemView: View {
                             .clipShape(Circle())
                             .offset(x: CGFloat(index * 12), y: CGFloat(index * 12))
                         }
-                        
+
                         // 如果用户数超过1个，显示用户数量
                         if room.users.count > 1 {
                             Text("\(room.users.count)")
@@ -106,7 +107,7 @@ struct DMRoomItemView: View {
                 }
                 .frame(width: 50, height: 50)
             }
-            
+
             // 对话信息
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
@@ -118,7 +119,7 @@ struct DMRoomItemView: View {
                                 Text(room.users[0].name.raw)
                                     .font(.headline)
                                     .lineLimit(1)
-                                
+
                                 Text(room.users[0].handle)
                                     .font(.caption)
                                     .foregroundColor(.gray)
@@ -142,9 +143,9 @@ struct DMRoomItemView: View {
                                 .lineLimit(1)
                         }
                     }
-                    
+
                     Spacer()
-                    
+
                     // 显示时间戳
                     if let lastMessage = room.lastMessage {
                         Text(formatTime(lastMessage.timestamp))
@@ -152,14 +153,14 @@ struct DMRoomItemView: View {
                             .foregroundColor(.gray)
                     }
                 }
-                
+
                 // 最后一条消息
                 Text(room.lastMessageText.isEmpty ? "没有消息" : room.lastMessageText)
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .lineLimit(1)
             }
-            
+
             // 未读数
             if room.unreadCount > 0 {
                 Spacer()
@@ -173,7 +174,7 @@ struct DMRoomItemView: View {
             }
         }
     }
-    
+
     // 格式化时间显示
     private func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
@@ -183,6 +184,7 @@ struct DMRoomItemView: View {
 }
 
 // MARK: - UiDMRoom扩展
+
 extension UiDMRoom {
     /// 获取格式化的对话标题
     func getFormattedTitle() -> String {
@@ -198,12 +200,12 @@ extension UiDMRoom {
                 // 多个用户时组合名称
                 let firstUser = users[0].name.raw
                 let secondUser = users[1].name.raw
-                return users.count > 2 
-                    ? "\(firstUser), \(secondUser)..." 
+                return users.count > 2
+                    ? "\(firstUser), \(secondUser)..."
                     : "\(firstUser), \(secondUser)"
             }
         }
-        
+
         // 默认标题
         return "私信对话"
     }

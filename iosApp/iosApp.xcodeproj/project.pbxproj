@@ -24,6 +24,7 @@
 		644C84F82D535D0B00E92D0D /* JXPagingView in Frameworks */ = {isa = PBXBuildFile; productRef = 644C84F72D535D0B00E92D0D /* JXPagingView */; };
 		64541A902DA3CE5A001208C7 /* Tiercel in Frameworks */ = {isa = PBXBuildFile; productRef = 64541A8F2DA3CE5A001208C7 /* Tiercel */; };
 		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
+		646CABC52DAE876C00B9EA6F /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 646CABC42DAE876C00B9EA6F /* ExyteChat */; };
 		6488800B2D1AD43E00EFE72C /* JXSegmentedView in Frameworks */ = {isa = PBXBuildFile; productRef = 6488800A2D1AD43E00EFE72C /* JXSegmentedView */; };
 		6489B3312D68D50800D8AEBB /* SVGView in Frameworks */ = {isa = PBXBuildFile; productRef = 6489B3302D68D50800D8AEBB /* SVGView */; };
 		648EE5BD2D8D71EA00A457AA /* SwiftfulRouting in Frameworks */ = {isa = PBXBuildFile; productRef = 648EE5BC2D8D71EA00A457AA /* SwiftfulRouting */; };
@@ -79,6 +80,7 @@
 			files = (
 				64541A902DA3CE5A001208C7 /* Tiercel in Frameworks */,
 				64E877CC2D0842C5003559B9 /* Fuzi in Frameworks */,
+				646CABC52DAE876C00B9EA6F /* ExyteChat in Frameworks */,
 				64E208712CF8458A001C64EF /* FLAnimatedImage in Frameworks */,
 				0690507B2CAE634C007FC957 /* Awesome in Frameworks */,
 				066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */,
@@ -259,6 +261,7 @@
 				64541A8F2DA3CE5A001208C7 /* Tiercel */,
 				64C17B582DA3E683000291EA /* GRDB */,
 				64A2DC652DAD21BF008EF8C2 /* ExyteChat */,
+				646CABC42DAE876C00B9EA6F /* ExyteChat */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
@@ -314,7 +317,7 @@
 				64B780522D9D3B7F00955C56 /* XCRemoteSwiftPackageReference "TagCloud" */,
 				64541A8E2DA3CE5A001208C7 /* XCRemoteSwiftPackageReference "Tiercel" */,
 				64C17B572DA3E683000291EA /* XCRemoteSwiftPackageReference "GRDB.swift" */,
-				64A2DC642DAD21BF008EF8C2 /* XCLocalSwiftPackageReference "../package_source/Chat" */,
+				646CABC32DAE876C00B9EA6F /* XCRemoteSwiftPackageReference "Chat" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -665,10 +668,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		64A2DC642DAD21BF008EF8C2 /* XCLocalSwiftPackageReference "../package_source/Chat" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../package_source/Chat;
-		};
 		64FF2E112D2BC4E80046A32B /* XCLocalSwiftPackageReference "Generated" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Generated;
@@ -730,6 +729,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 3.2.6;
+			};
+		};
+		646CABC32DAE876C00B9EA6F /* XCRemoteSwiftPackageReference "Chat" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/exyte/Chat.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.6.0;
 			};
 		};
 		648880092D1AD43E00EFE72C /* XCRemoteSwiftPackageReference "JXSegmentedView" */ = {
@@ -899,6 +906,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 64541A8E2DA3CE5A001208C7 /* XCRemoteSwiftPackageReference "Tiercel" */;
 			productName = Tiercel;
+		};
+		646CABC42DAE876C00B9EA6F /* ExyteChat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 646CABC32DAE876C00B9EA6F /* XCRemoteSwiftPackageReference "Chat" */;
+			productName = ExyteChat;
 		};
 		6488800A2D1AD43E00EFE72C /* JXSegmentedView */ = {
 			isa = XCSwiftPackageProductDependency;

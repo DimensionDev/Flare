@@ -38,7 +38,7 @@ allprojects {
     configurations.all {
         resolutionStrategy.eachDependency {
             if (requested.group == "net.java.dev.jna" && requested.name == "jna") {
-                useTarget("net.java.dev.jna:jna:5.12.1") // 或其他已知存在的版本
+                useTarget("net.java.dev.jna:jna:5.12.1")
             }
         }
     }

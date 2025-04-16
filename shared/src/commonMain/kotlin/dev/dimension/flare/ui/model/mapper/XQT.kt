@@ -895,26 +895,52 @@ private fun MessageContent.XQT.Message.render(
             .isNullOrEmpty() &&
         credential is UiAccount.XQT.Credential
     ) {
-        return UiDMItem.Message.Media(
-            UiMedia.Video(
-                url = data.attachment.video.mediaUrlHttps,
-                thumbnailUrl = data.attachment.video.mediaUrlHttps,
-                height =
-                    data.attachment.video.originalInfo
-                        ?.height
-                        ?.toFloat() ?: 0f,
-                width =
-                    data.attachment.video.originalInfo
-                        ?.width
-                        ?.toFloat() ?: 0f,
-                description = data.attachment.video.extAltText,
-                customHeaders =
-                    persistentMapOf(
-                        "Cookie" to credential.chocolate,
-                        "Referer" to "https://$xqtHost/",
+        val url =
+            data.attachment.video.videoInfo
+                ?.variants
+                ?.firstOrNull()
+                ?.url
+        if (url != null) {
+            if (data.attachment.video.audioOnly == true) {
+                return UiDMItem.Message.Media(
+                    UiMedia.Audio(
+                        url = url,
+                        previewUrl = data.attachment.video.url,
+                        description = data.attachment.video.extAltText,
+                        customHeaders =
+                            persistentMapOf(
+                                "Cookie" to credential.chocolate,
+                                "Referer" to "https://$xqtHost/",
+                            ),
                     ),
-            ),
-        )
+                )
+            } else {
+                return UiDMItem.Message.Media(
+                    UiMedia.Video(
+                        url = url,
+                        thumbnailUrl = data.attachment.video.mediaUrlHttps,
+                        height =
+                            data.attachment.video.originalInfo
+                                ?.height
+                                ?.toFloat() ?: 0f,
+                        width =
+                            data.attachment.video.originalInfo
+                                ?.width
+                                ?.toFloat() ?: 0f,
+                        description = data.attachment.video.extAltText,
+                        customHeaders =
+                            persistentMapOf(
+                                "Cookie" to credential.chocolate,
+                                "Referer" to "https://$xqtHost/",
+                            ),
+                    ),
+                )
+            }
+        } else {
+            return UiDMItem.Message.Text(
+                twitterParser.parse(this.data.text.orEmpty()).toHtml(accountKey).toUi(),
+            )
+        }
     } else if (!data.attachment
             ?.tweet
             ?.url

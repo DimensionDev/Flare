@@ -61,7 +61,7 @@ public class DMConversationPresenter(
             require(it is DirectMessageDataSource)
             LaunchedEffect(Unit) {
                 while (true) {
-                    delay(5.seconds)
+                    delay(10.seconds)
                     runCatching {
                         it.fetchNewDirectMessageForConversation(roomKey)
                     }

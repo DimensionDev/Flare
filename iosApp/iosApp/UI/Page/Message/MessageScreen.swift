@@ -8,7 +8,7 @@ struct MessageScreen: View {
 
     var body: some View {
         DMListView(accountType: accountType)
-            .navigationTitle("消息")
+            .navigationTitle("Message")
             .navigationBarTitleDisplayMode(.inline)
     }
 }

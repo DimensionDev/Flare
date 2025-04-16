@@ -1,9 +1,7 @@
 import shared
 import SwiftUI
 
-// MARK: - 组件定义
-
-// 房间项视图
+ 
 struct DMRoomItemView: View {
     let room: UiDMRoom
 
@@ -155,7 +153,7 @@ struct DMRoomItemView: View {
                 }
 
                 // 最后一条消息
-                Text(room.lastMessageText.isEmpty ? "没有消息" : room.lastMessageText)
+                Text(room.lastMessageText.isEmpty ? "" : room.lastMessageText)
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .lineLimit(1)
@@ -183,7 +181,7 @@ struct DMRoomItemView: View {
     }
 }
 
-// MARK: - UiDMRoom扩展
+ 
 
 extension UiDMRoom {
     /// 获取格式化的对话标题
@@ -207,6 +205,6 @@ extension UiDMRoom {
         }
 
         // 默认标题
-        return "私信对话"
+        return "Chat"
     }
 }

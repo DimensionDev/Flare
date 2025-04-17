@@ -2,7 +2,7 @@ import Kingfisher
 import SwiftUI
 
 // tweet 方格 单个 Media View ，最底层的了
-public struct LensMediaView: View {
+public struct SingleMediaView: View {
     let viewModel: FeedMediaViewModel
     let isSingleVideo: Bool
     let fixedAspectRatio: CGFloat?

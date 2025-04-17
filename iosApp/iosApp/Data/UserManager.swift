@@ -25,6 +25,15 @@ class UserManager {
         return AccountTypeGuest()
     }
 
+    /// 判断给定用户是否是当前登录用户
+    func isCurrentUser(user: UiUserV2) -> Bool {
+        if let currentUser = getCurrentUser() {
+            // 比较用户ID
+            return user.key.id == currentUser.key.id
+        }
+        return false
+    }
+
     func initialize() {
         guard !isInitialized else { return }
 

@@ -200,9 +200,9 @@ struct ShareButton: View {
                 for media in content.images {
                     if let image = media as? UiMediaImage {
                         var imageUrl = image.url
-                        
+
                         if content.card?.url == imageUrl {
-                            //article image
+                            // article image
                             imageUrl = image.previewUrl
                         }
                         print("Starting download for Image: \(imageUrl)")

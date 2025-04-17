@@ -32,7 +32,7 @@ struct MediaComponent: View {
             }
 
             // build tweet medias layout
-            FeedMediaGridView(
+            TweetMediaGridView(
                 action: { ctx in
                     let media = medias[ctx.index]
                     onMediaClick(ctx.index, media)
@@ -60,40 +60,3 @@ struct MediaComponent: View {
         .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
-
-// 这个地方要合并，重构掉 todo:
-struct MediaItemComponent: View {
-    let media: UiMedia
-
-    var body: some View {
-        let viewModel = FeedMediaViewModel(media: media)
-        LensMediaView(
-            viewModel: viewModel,
-            isSingleVideo: true,
-            fixedAspectRatio: nil,
-            action: {}
-        )
-    }
-}
-
-// struct MutedVideoPlayer: View {
-//   let player: AVPlayer
-//   let autoPlay: Bool
-//   init(url: String, autoPlay: Bool = true) {
-//       self.player = AVPlayer(url: URL(string: url)!)
-//       self.player.isMuted = true
-//       self.autoPlay = autoPlay
-//   }
-//   var body: some View {
-//       VideoPlayer(player: player)
-//           .if(autoPlay) { view in
-//               view
-//                   .onAppear {
-//                       player.play()
-//                   }
-//                   .onDisappear {
-//                       player.pause()
-//                   }
-//           }
-//   }
-// }

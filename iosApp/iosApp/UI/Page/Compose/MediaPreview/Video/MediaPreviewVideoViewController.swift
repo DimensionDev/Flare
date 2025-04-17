@@ -128,9 +128,23 @@ extension MediaPreviewVideoViewController {
 
         if let previewURL = viewModel.item.previewURL {
             previewImageView.contentMode = .scaleAspectFit
+
+            // 创建headers修改器
+            let headers = viewModel.item.headers // 在闭包外获取headers
+            let modifier = AnyModifier { request in
+                var r = request
+                for (key, value) in headers {
+                    r.setValue(value, forHTTPHeaderField: key)
+                }
+                return r
+            }
+
             previewImageView.kf.setImage(
                 with: previewURL,
-                placeholder: UIImage.placeholder(color: .systemFill)
+                placeholder: UIImage.placeholder(color: .systemFill),
+                options: [
+                    .requestModifier(modifier),
+                ]
             )
 
             playerViewController.publisher(for: \.isReadyForDisplay)
@@ -143,64 +157,6 @@ extension MediaPreviewVideoViewController {
         }
     }
 }
-
-// - ShareActivityProvider
-
-extension MediaPreviewVideoViewController: ShareActivityProvider {
-    var activities: [Any] {
-        []
-    }
-
-    var applicationActivities: [UIActivity] {
-        switch viewModel.item {
-        case let .gif(mediaContext):
-            guard let url = mediaContext.assetURL else { return [] }
-            // TODO: 实现自定义的 SavePhotoActivity
-            return []
-        default:
-            return []
-        }
-    }
-}
-
-// - MediaPreviewTransitionViewController
-
-// extension MediaPreviewVideoViewController: MediaPreviewTransitionViewController {
-//   var mediaPreviewTransitionContext: MediaPreviewTransitionContext? {
-//       guard let playerView = playerViewController.view else { return nil }
-//       let _currentFrame: UIImage? = {
-//           guard let player = playerViewController.player else { return nil }
-//           guard let asset = player.currentItem?.asset else { return nil }
-//           let assetImageGenerator = AVAssetImageGenerator(asset: asset)
-//           assetImageGenerator.appliesPreferredTrackTransform = true   // fix orientation
-//           do {
-//               let cgImage = try assetImageGenerator.copyCGImage(at: player.currentTime(), actualTime: nil)
-//               let image = UIImage(cgImage: cgImage)
-//               return image
-//           } catch {
-//               return previewImageView.image
-//           }
-//       }()
-//       let _snapshot: UIView? = {
-//           guard let currentFrame = _currentFrame ?? previewImageView.image else { return nil }
-//           let size = AVMakeRect(aspectRatio: currentFrame.size, insideRect: view.frame).size
-//           let imageView = UIImageView(frame: CGRect(origin: .zero, size: size))
-//           imageView.image = currentFrame
-//           return imageView
-//       }()
-//       guard let snapshot = _snapshot else {
-//           assertionFailure()
-//           return nil
-//       }
-//
-//       return MediaPreviewTransitionContext(
-//           transitionView: playerView,
-//           supplementaryViews: [],
-//           snapshot: snapshot,
-//           snapshotTransitioning: snapshot
-//       )
-//   }
-// }
 
 // - AVPlayerViewControllerDelegate
 

@@ -32,7 +32,7 @@ struct StorageScreen: View {
         let tasks = DownloadManager.shared.tasks
         let taskCount = tasks.count
         let totalSize = tasks.reduce(0) { total, task in
-            return total + Int(task.progress.totalUnitCount)
+            total + Int(task.progress.totalUnitCount)
         }
         downloadFilesInfo = StorageFormatter.formatDownloadInfo(fileCount: taskCount, totalSize: Int64(totalSize))
     }
@@ -49,11 +49,9 @@ struct StorageScreen: View {
 
     private func clearDownloadFiles() {
         isCleaningDownloadFiles = true
-        
-     
+
         DownloadManager.shared.clearAllTasks(completely: true)
-        
-       
+
         updateDownloadSizes()
         isCleaningDownloadFiles = false
         showSuccessAlert(message: "download files cleaned")

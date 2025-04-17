@@ -1,7 +1,7 @@
 import Foundation
+import shared
 import SwiftUI
 import Tiercel
-import shared
 
 extension Notification.Name {
     static let downloadProgressUpdated = Notification.Name("downloadProgressUpdated")
@@ -90,11 +90,11 @@ struct DownloadManagerScreen: View {
 
     private func deleteTasks(at offsets: IndexSet) {
         let tasksToDelete = offsets.map { downloadTasks[$0] }
-        
+
         for task in tasksToDelete {
             DownloadManager.shared.remove(url: task.url.absoluteString)
         }
-        
+
         // 立即从本地数组中移除这些任务
         var indexSet = IndexSet()
         for (index, task) in downloadTasks.enumerated() {
@@ -105,10 +105,10 @@ struct DownloadManagerScreen: View {
         if !indexSet.isEmpty {
             downloadTasks.remove(atOffsets: indexSet)
         }
-        
+
         // 异步刷新列表，确保删除操作在UI上完全生效
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            self.loadDownloadTasks()
+            loadDownloadTasks()
         }
     }
 

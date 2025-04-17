@@ -4,15 +4,11 @@ import SwiftUI
 struct MessageScreen: View {
     let accountType: AccountType
 
-    var body: some View {
-        VStack {
-            Text("Messages")
-                .font(.largeTitle)
-                .padding()
+    @EnvironmentObject private var router: FlareRouter
 
-            Text("Coming soon...")
-                .foregroundColor(.gray)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    var body: some View {
+        DMListView(accountType: accountType)
+            .navigationTitle("Message")
+            .navigationBarTitleDisplayMode(.inline)
     }
 }

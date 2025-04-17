@@ -35,13 +35,19 @@ final class MediaPreviewVideoViewModel {
         switch item {
         case let .video(mediaContext):
             guard let assertURL = mediaContext.assetURL else { return }
-            let playerItem = AVPlayerItem(url: assertURL)
+            let asset = AVURLAsset(url: assertURL, options: [
+                "AVURLAssetHTTPHeaderFieldsKey": mediaContext.headers,
+            ])
+            let playerItem = AVPlayerItem(asset: asset)
             let _player = AVPlayer(playerItem: playerItem)
             self.player = _player
 
         case let .gif(mediaContext):
             guard let assertURL = mediaContext.assetURL else { return }
-            let playerItem = AVPlayerItem(url: assertURL)
+            let asset = AVURLAsset(url: assertURL, options: [
+                "AVURLAssetHTTPHeaderFieldsKey": mediaContext.headers,
+            ])
+            let playerItem = AVPlayerItem(asset: asset)
             let _player = AVQueuePlayer(playerItem: playerItem)
             _player.isMuted = true
             self.player = _player
@@ -52,7 +58,10 @@ final class MediaPreviewVideoViewModel {
 
         case let .audio(mediaContext):
             guard let assertURL = mediaContext.assetURL else { return }
-            let playerItem = AVPlayerItem(url: assertURL)
+            let asset = AVURLAsset(url: assertURL, options: [
+                "AVURLAssetHTTPHeaderFieldsKey": mediaContext.headers,
+            ])
+            let playerItem = AVPlayerItem(asset: asset)
             let _player = AVPlayer(playerItem: playerItem)
             self.player = _player
         }
@@ -138,21 +147,49 @@ extension MediaPreviewVideoViewModel {
             case let .audio(context): context.previewURL
             }
         }
+
+        var headers: [String: String] {
+            switch self {
+            case let .video(context): context.headers
+            case let .gif(context): context.headers
+            case let .audio(context): context.headers
+            }
+        }
     }
 
     struct RemoteVideoContext {
         let assetURL: URL?
         let previewURL: URL?
-        // let thumbnail: UIImage?
+        let headers: [String: String]
+
+        init(assetURL: URL?, previewURL: URL?, headers: [String: String] = [:]) {
+            self.assetURL = assetURL
+            self.previewURL = previewURL
+            self.headers = headers
+        }
     }
 
     struct RemoteGIFContext {
         let assetURL: URL?
         let previewURL: URL?
+        let headers: [String: String]
+
+        init(assetURL: URL?, previewURL: URL?, headers: [String: String] = [:]) {
+            self.assetURL = assetURL
+            self.previewURL = previewURL
+            self.headers = headers
+        }
     }
 
     struct RemoteAudioContext {
         let assetURL: URL?
         let previewURL: URL?
+        let headers: [String: String]
+
+        init(assetURL: URL?, previewURL: URL?, headers: [String: String] = [:]) {
+            self.assetURL = assetURL
+            self.previewURL = previewURL
+            self.headers = headers
+        }
     }
 }

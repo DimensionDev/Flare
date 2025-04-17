@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct FeedMediaPlayButton: View {
+public struct TweetMediaPlayButton: View {
     let duration: String?
     let tapAction: (() -> Void)?
 

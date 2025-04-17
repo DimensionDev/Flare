@@ -19,7 +19,7 @@ struct FlareApp: SwiftUI.App {
         // 初始化AppBarTabSettingStore（使用游客模式）
         // UserManager初始化完成后会自动更新为正确的账号
         AppBarTabSettingStore.shared.initialize(with: AccountTypeGuest(), user: nil)
-        
+
         // DownloadManager初始化
         _ = DownloadManager.shared
     }

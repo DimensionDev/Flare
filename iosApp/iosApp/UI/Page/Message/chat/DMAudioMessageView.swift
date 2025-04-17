@@ -8,45 +8,46 @@ import CoreMedia
 
 
 /// 音频波形数据缓存
-  var waveformCache: [String: [CGFloat]] = [:]
+// var waveformCache: [String: [CGFloat]] = [:] // Consider if cache is needed with pre-calculated data
 
 /// 音频播放器状态
 private class AudioPlayerState: ObservableObject {
     @Published var isPlaying = false
     @Published var progress: Double = 0
     @Published var duration: Double = 0
+    @Published var currentTime: Double = 0 // Added current time
     
     private var player: AVPlayer?
     private var timeObserver: Any?
     
     func play(url: URL, headers: [String: String]? = nil) {
-        stop()
+        stop() // Ensure clean state
         let asset = AVURLAsset(url: url, options: headers.map { ["AVURLAssetHTTPHeaderFieldsKey": $0] })
         let item = AVPlayerItem(asset: asset)
         player = AVPlayer(playerItem: item)
         
-        // 监听播放进度
-        timeObserver = player?.addPeriodicTimeObserver(
-            forInterval: CMTime(seconds: 0.1, preferredTimescale: 10),
-            queue: .main
-        ) { [weak self] time in
-            guard let self = self,
-                  let duration = self.player?.currentItem?.duration.seconds,
-                  !duration.isNaN
-            else { return }
+        timeObserver = player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 10), queue: .main) { [weak self] time in
+            guard let self = self, let currentItem = self.player?.currentItem else { return }
+            let durationSec = currentItem.duration.seconds
+            let currentTimeSec = time.seconds
             
-            self.duration = duration
-            self.progress = time.seconds / duration
+            // Update duration if valid and changed
+            if !durationSec.isNaN, durationSec > 0, self.duration != durationSec {
+                self.duration = durationSec
+            }
+            
+            // Update current time and progress
+            if !currentTimeSec.isNaN {
+                 self.currentTime = currentTimeSec
+                 if self.duration > 0 { // Avoid division by zero
+                     self.progress = currentTimeSec / self.duration
+                 } else {
+                     self.progress = 0
+                 }
+            }
         }
         
-        // 监听播放完成
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(playerDidFinishPlaying),
-            name: .AVPlayerItemDidPlayToEndTime,
-            object: item
-        )
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(playerDidFinishPlaying), name: .AVPlayerItemDidPlayToEndTime, object: item)
         player?.play()
         isPlaying = true
     }
@@ -55,11 +56,13 @@ private class AudioPlayerState: ObservableObject {
         player?.pause()
         player = nil
         if let observer = timeObserver {
-            player?.removeTimeObserver(observer)
-            timeObserver = nil
+            timeObserver = nil // Just nullify, let player dealloc handle removal if needed
         }
+        NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: nil)
         isPlaying = false
         progress = 0
+        duration = 0
+        currentTime = 0 // Reset current time
     }
     
     func togglePlay(url: URL, headers: [String: String]? = nil) {
@@ -70,9 +73,11 @@ private class AudioPlayerState: ObservableObject {
         }
     }
     
-    @objc private func playerDidFinishPlaying() {
-        stop()
-    }
+    @objc private func playerDidFinishPlaying(notification: NSNotification) {
+         DispatchQueue.main.async { [weak self] in
+             self?.stop()
+         }
+     }
     
     deinit {
         stop()
@@ -100,118 +105,64 @@ private struct WaveformView: View {
 }
 
 /// 音频消息视图
-  struct DMAudioMessageView: View {
+struct DMAudioMessageView: View {
     let url: URL
     let media: UiMedia
     let isCurrentUser: Bool
     @StateObject private var playerState = AudioPlayerState()
-    @State private var waveformSamples: [CGFloat] = []
-    @State private var isLoading = true
+    @State private var waveformSamples: [CGFloat] = Array(repeating: 0.05, count: 50)
     
     var body: some View {
-        VStack {
-            if isLoading {
-                ProgressView()
-            } else {
-                HStack(spacing: 8) {
-                    Button(action: {
-                        playerState.togglePlay(url: url, headers: media.customHeaders)
-                    }) {
-                        Image(systemName: playerState.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                            .foregroundColor(isCurrentUser ? .white : .primary)
-                    }
-                    
-                    WaveformView(
-                        samples: waveformSamples,
-                        progress: playerState.progress,
-                        color: isCurrentUser ? .white : .primary
-                    )
-                    .frame(height: 24)
-                }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
-                .background(isCurrentUser ? Color.accentColor : Color.gray.opacity(0.1))
-                .cornerRadius(12)
+        HStack(spacing: 8) {
+            Button(action: {
+                playerState.togglePlay(url: url, headers: media.customHeaders)
+            }) {
+                Image(systemName: playerState.isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                    .resizable()
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(isCurrentUser ? .white : .primary)
             }
-        }
-        .task {
-            do {
-                waveformSamples = try await generateWaveformSamples(from: url, headers: media.customHeaders)
-                isLoading = false
-            } catch {
-                print("Error generating waveform: \(error)")
-                isLoading = false
-            }
-        }
-    }
-    
-    private func generateWaveformSamples(from url: URL, headers: [String: String]?) async throws -> [CGFloat] {
-        let asset = AVURLAsset(url: url, options: headers.map { ["AVURLAssetHTTPHeaderFieldsKey": $0] })
-        let audioTrack = try await asset.loadTracks(withMediaType: .audio).first
-        guard let audioTrack = audioTrack else {
-            throw NSError(domain: "AudioMessageView", code: -1, userInfo: [NSLocalizedDescriptionKey: "No audio track found"])
-        }
-        
-        let reader = try AVAssetReader(asset: asset)
-        let output = AVAssetReaderTrackOutput(
-            track: audioTrack,
-            outputSettings: [
-                AVFormatIDKey: kAudioFormatLinearPCM,
-                AVLinearPCMBitDepthKey: 16,
-                AVLinearPCMIsBigEndianKey: false,
-                AVLinearPCMIsFloatKey: false,
-                AVLinearPCMIsNonInterleaved: false
-            ]
-        )
-        
-        reader.add(output)
-        reader.startReading()
-        
-        var samples: [CGFloat] = []
-        let sampleCount = 50 // 采样点数量
-        var audioSamples: [Float] = []
-        
-        while let sampleBuffer = output.copyNextSampleBuffer(),
-              let blockBuffer = CMSampleBufferGetDataBuffer(sampleBuffer) {
-            var length = 0
-            var dataPointer: UnsafeMutablePointer<Int8>?
+            .layoutPriority(1) // Give button higher priority to keep its size
             
-            guard CMBlockBufferGetDataPointer(
-                blockBuffer,
-                atOffset: 0,
-                lengthAtOffsetOut: &length,
-                totalLengthOut: nil,
-                dataPointerOut: &dataPointer
-            ) == noErr else { continue }
-            
-            let samples16bit = UnsafeBufferPointer<Int16>(
-                start: UnsafeRawPointer(dataPointer)?.assumingMemoryBound(to: Int16.self),
-                count: length / 2
+            WaveformView(
+                samples: waveformSamples,
+                progress: playerState.progress,
+                color: isCurrentUser ? .white : .primary
             )
+            .frame(height: 24)
+            // Limit WaveformView's maximum width to prevent overlap
+            // Experiment with this value based on typical bubble widths
+            .frame(maxWidth: 150) // Example maximum width
+            .clipped() // Ensure capsules don't draw outside the frame
+            .layoutPriority(0) // Give waveform lower priority than button/text
+
+            Spacer(minLength: 4) // Ensure at least some space
             
-            let maxAmplitude = Float(Int16.max)
-            for sample in samples16bit {
-                let normalizedSample = Float(abs(sample)) / maxAmplitude
-                audioSamples.append(normalizedSample)
-            }
+            // Display Current Time / Total Duration
+            Text("\(formatDuration(playerState.currentTime)) / \(formatDuration(playerState.duration))")
+                .font(.caption)
+                .foregroundColor(isCurrentUser ? .white.opacity(0.7) : .gray)
+                .lineLimit(1)
+                .fixedSize()
+                .layoutPriority(1)
+                .padding(.trailing, 4)
         }
-        
-        // 将采样数据平均分配到50个点
-        let samplesPerPoint = max(1, audioSamples.count / sampleCount)
-        for i in 0..<sampleCount {
-            let start = i * samplesPerPoint
-            let end = min(start + samplesPerPoint, audioSamples.count)
-            if start < audioSamples.count {
-                let sum = audioSamples[start..<end].reduce(0, +)
-                let average = sum / Float(end - start)
-                samples.append(CGFloat(average))
-            } else {
-                samples.append(0)
-            }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+    }
+
+    /// Formats duration in seconds to MM:SS or HH:MM:SS
+    private func formatDuration(_ duration: Double) -> String {
+        guard duration > 0, !duration.isNaN else {
+            return "--:--"
         }
-        
-        return samples
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.unitsStyle = .positional
+        formatter.zeroFormattingBehavior = .pad
+        if duration < 3600 {
+            formatter.allowedUnits = [.minute, .second]
+        }
+        return formatter.string(from: TimeInterval(duration)) ?? "--:--"
     }
 }

@@ -7,7 +7,7 @@ struct DMRoomItemView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            // 对话头像部分
+            // MARK: Avatar Section
             if !room.hasUser {
                 // 没有用户时显示当前用户的头像
                 if let currentUser = UserManager.shared.getCurrentUser() {
@@ -35,6 +35,7 @@ struct DMRoomItemView: View {
                     .clipShape(Circle())
                 } else {
                     // 备选方案：如果无法获取当前用户
+                    // Fallback if current user is unavailable
                     Circle()
                         .fill(Color.accentColor.opacity(0.2))
                         .frame(width: 50, height: 50)
@@ -47,10 +48,11 @@ struct DMRoomItemView: View {
                         )
                 }
             } else {
-                // 用户头像处理：单个用户或多个用户
+                // MARK: User Avatars (Single or Stacked)
                 ZStack {
                     if room.users.count == 1 {
                         // 单个用户头像
+                        // Single user avatar
                         AsyncImage(url: URL(string: room.users[0].avatar)) { phase in
                             switch phase {
                             case .empty:
@@ -74,6 +76,7 @@ struct DMRoomItemView: View {
                         .clipShape(Circle())
                     } else {
                         // 多个用户时显示叠加的头像（最多显示前两个）
+                        // Stacked avatars for multiple users (max 2 displayed)
                         ForEach(0 ..< min(2, room.users.count), id: \.self) { index in
                             AsyncImage(url: URL(string: room.users[index].avatar)) { phase in
                                 switch phase {
@@ -93,6 +96,7 @@ struct DMRoomItemView: View {
                         }
 
                         // 如果用户数超过1个，显示用户数量
+                        // Show count badge if more than 1 user
                         if room.users.count > 1 {
                             Text("\(room.users.count)")
                                 .font(.caption2)
@@ -106,13 +110,14 @@ struct DMRoomItemView: View {
                 .frame(width: 50, height: 50)
             }
 
-            // 对话信息
+            // MARK: Conversation Info Section
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
+                    // MARK: Title & Timestamp
                     // 对话名称 - 显示真实用户名或当前用户名
                     if room.hasUser {
                         if room.users.count == 1 {
-                            // 一个用户时显示名称和用户名
+                            // Single user: Display name and handle
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(room.users[0].name.raw)
                                     .font(.headline)
@@ -124,13 +129,13 @@ struct DMRoomItemView: View {
                                     .lineLimit(1)
                             }
                         } else {
-                            // 多个用户时只显示名称列表
+                            // Multiple users: Display formatted title
                             Text(room.getFormattedTitle())
                                 .font(.headline)
                                 .lineLimit(1)
                         }
                     } else {
-                        // 没有参与者时显示当前用户信息
+                        // No other users: Display current user's info
                         if let currentUser = UserManager.shared.getCurrentUser() {
                             Text(currentUser.name.raw)
                                 .font(.headline)
@@ -144,6 +149,7 @@ struct DMRoomItemView: View {
 
                     Spacer()
 
+                    // Timestamp of the last message
                     // 显示时间戳
                     if let lastMessage = room.lastMessage {
                         Text(formatTime(lastMessage.timestamp))
@@ -152,6 +158,7 @@ struct DMRoomItemView: View {
                     }
                 }
 
+                // MARK: Last Message Preview
                 // 最后一条消息
                 Text(room.lastMessageText.isEmpty ? "" : room.lastMessageText)
                     .font(.subheadline)
@@ -159,6 +166,7 @@ struct DMRoomItemView: View {
                     .lineLimit(1)
             }
 
+            // MARK: Unread Count Badge
             // 未读数
             if room.unreadCount > 0 {
                 Spacer()
@@ -173,6 +181,7 @@ struct DMRoomItemView: View {
         }
     }
 
+    /// Formats a Date into a short time string.
     // 格式化时间显示
     private func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
@@ -185,6 +194,7 @@ struct DMRoomItemView: View {
 
 extension UiDMRoom {
     /// 获取格式化的对话标题
+    /// Computes a display title for the DM room based on participants.
     func getFormattedTitle() -> String {
         if hasUser {
             if users.count == 1 {

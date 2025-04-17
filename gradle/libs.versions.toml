@@ -49,7 +49,6 @@ materialKolor = "2.1.1"
 room = "2.7.0"
 sqlite = "2.5.0"
 compose-multiplatform = "1.7.3"
-mediamp = "0.0.25"
 
 [libraries]
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
@@ -193,10 +192,6 @@ jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector"
 
 jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.8.0-alpha10" }
 
-mediamp-vlc-loader = { module = "org.openani.mediamp:mediamp-vlc-loader", version.ref = "mediamp" }
-mediamp-vlc = { module = "org.openani.mediamp:mediamp-vlc", version.ref = "mediamp" }
-mediamp-vlc-compose = { module = "org.openani.mediamp:mediamp-vlc-compose", version.ref = "mediamp" }
-
 [bundles]
 compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3", "material3WindowSizeClass", "material3-adaptive-navigation-suite", "material3-adaptive", "material3-adaptive-navigation", "material3-adaptive-layout"]
 navigation = ["navigation-compose"]
@@ -210,7 +205,6 @@ compose-destinations = ["compose-destinations", "material3-navigation"]
 media3 = ["media3-exoplayer", "media3-ui", "media3-hls"]
 firebase = ["firebase-analytics-ktx", "firebase-crashlytics-ktx"]
 ktorfit = ["ktorfit-lib", "ktorfit-converters-response", "ktorfit-converters-flow", "ktorfit-converters-call"]
-mediamp = ["mediamp-vlc-loader", "mediamp-vlc", "mediamp-vlc-compose"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

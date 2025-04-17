@@ -118,7 +118,7 @@ public fun VideoPlayer(
                 delay(500)
             }
         }
-        DisposableEffect(Unit) {
+        DisposableEffect(uri) {
             onDispose {
                 playerPool.release(uri)
             }

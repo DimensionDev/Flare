@@ -9,6 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.FaceFrown
+import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 
 @Composable
@@ -26,6 +30,21 @@ internal expect fun PlatformVideoPlayer(
     onLongClick: (() -> Unit)? = null,
     autoPlay: Boolean = true,
     remainingTimeContent: @Composable (BoxScope.(Long) -> Unit)? = null,
+    errorContent: @Composable BoxScope.() -> Unit = {
+        if (previewUri != null) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                FAIcon(
+                    FontAwesomeIcons.Solid.FaceFrown,
+                    contentDescription = null,
+                )
+            }
+        }
+    },
     loadingPlaceholder: @Composable BoxScope.() -> Unit = {
         if (previewUri != null) {
             Box(

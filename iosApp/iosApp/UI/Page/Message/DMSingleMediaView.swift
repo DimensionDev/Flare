@@ -5,7 +5,7 @@ import ObjectiveC
 import shared
 import SwiftUI
 
-// DM单个媒体视图
+/// Displays a single media item (image, video, gif) in a DM context.
 struct DMSingleMediaView: View {
     let viewModel: DMMediaViewModel
     let media: UiMedia
@@ -57,6 +57,7 @@ struct DMSingleMediaView: View {
             }
             .onAppear {
                 // 在视图出现时设置headers
+                // Configure Kingfisher request modifier with custom headers
                 let modifier = AnyModifier { request in
                     var r = request
                     for (key, value) in media.customHeaders ?? [:] {
@@ -65,7 +66,7 @@ struct DMSingleMediaView: View {
                     return r
                 }
 
-                // 设置全局选项
+                // Apply modifier globally for this view's appearance duration
                 KingfisherManager.shared.defaultOptions = [
                     .requestModifier(modifier),
                     .forceRefresh,
@@ -75,7 +76,7 @@ struct DMSingleMediaView: View {
     }
 }
 
-// DM媒体ViewModel
+/// ViewModel holding data necessary to display a media item.
 struct DMMediaViewModel {
     let previewUrl: URL?
     let mediaKind: DMMediaKind
@@ -116,7 +117,7 @@ struct DMMediaViewModel {
     }
 }
 
-// 媒体类型枚举
+/// Represents the kind of media being displayed.
 enum DMMediaKind {
     case image
     case video

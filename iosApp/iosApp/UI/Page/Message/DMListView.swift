@@ -37,7 +37,7 @@ struct DMListView: View {
                             DMRoomItemView(room: room)
                         }
                         .onAppear {
-                            // 当单元格出现时，请求加载该项目数据
+                            // Trigger loading data for this item when it appears
                             success.get(index: index)
                         }
                     } else {
@@ -66,7 +66,7 @@ struct DMListView: View {
     }
 }
 
-// 占位视图
+// Placeholder view for DM room items while loading
 struct DMRoomPlaceholderView: View {
     var body: some View {
         HStack(spacing: 12) {

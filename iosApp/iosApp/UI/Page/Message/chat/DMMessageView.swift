@@ -6,6 +6,7 @@ import shared
 import SwiftUI
 import CoreMedia
  
+//old 
 struct DMMessageView: View {
     let message: ExyteChat.Message
     let positionInGroup: ExyteChat.PositionInUserGroup
@@ -28,7 +29,7 @@ struct DMMessageView: View {
 //                                showContextMenuClosure()
 //                            }
 
-                        // 纯文本消息的时间戳
+                        // Display timestamp for text-only messages
                         if message.attachments.isEmpty {
                             Text(formatTime(message.createdAt))
                                 .font(.caption2)
@@ -44,7 +45,7 @@ struct DMMessageView: View {
                     ForEach(message.attachments, id: \.id) { attachment in
                         VStack(alignment: message.user.isCurrentUser ? .trailing : .leading, spacing: 4) {
                             ZStack(alignment: .bottomTrailing) {
-                                // 媒体内容
+                                // Media Content
                                 if let media = getOriginalMedia(from: message) {
                                     DMSingleMediaView(
                                         viewModel: DMMediaViewModel.from(media),
@@ -59,7 +60,7 @@ struct DMMessageView: View {
 //                                        showAttachmentClosure(attachment)
 //                                    }
 
-                                    // 如果没有描述文本，时间戳显示在媒体右下角
+                                    // Timestamp overlay if no text description
                                     if message.text.isEmpty {
                                         Text(formatTime(message.createdAt))
                                             .font(.caption2)
@@ -73,7 +74,7 @@ struct DMMessageView: View {
                                 }
                             }
 
-                            // 如果有描述文本，时间戳跟在描述后面
+                            // Timestamp after description if text exists
                             if !message.text.isEmpty {
                                 HStack(alignment: .center, spacing: 8) {
                                     Text(message.text)
@@ -134,8 +135,8 @@ struct DMMessageView: View {
     }
     
     
-    private func getOriginalMedia(from message: ExyteChat.Message) -> UiMedia? {
-        // 从字典中获取原始媒体
-        originalMediaStore[message.id]
+    // Retrieve original media object associated with the message ID
+    private func getOriginalMedia(from message: ExyteChat.Message) -> UiMedia? { 
+        originalMediaStore[message.id] 
     }
 }

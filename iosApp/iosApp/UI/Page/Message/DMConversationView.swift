@@ -7,6 +7,7 @@ import SwiftUI
 import CoreMedia
 
 // 用于存储原始媒体的字典
+// Global store for original media objects, keyed by message ID
 var originalMediaStore: [String: UiMedia] = [:]
 
 
@@ -51,10 +52,10 @@ struct DMConversationView: View {
                     ) { draft in
                         // 暂时只实现UI部分，不处理发送逻辑
                         print("发送消息: \(draft.text)")
-                    }                    
+                    }
                     messageBuilder: { message, positionInGroup, positionInMessagesSection, positionInCommentsGroup,
                         showContextMenuClosure, messageActionClosure, showAttachmentClosure in
-                        DMMessageView(
+                        DMChatMessageView(
                             message: message,
                             positionInGroup: positionInGroup,
                             positionInMessagesSection: positionInMessagesSection,
@@ -82,7 +83,7 @@ struct DMConversationView: View {
                         }
 
                    } 
-                    .setAvailableInputs([AvailableInputType.text])
+                    .setAvailableInputs([.text]) // Only allow text input for now
                     .chatTheme(
                         ChatTheme(
                             colors: .init(
@@ -91,14 +92,14 @@ struct DMConversationView: View {
                         )
                     )
                 } else {
-                    // 没有消息时显示空状态
+                    // Empty state when no messages
                     VStack(spacing: 16) {
                         Spacer()
                         Text("")
                             .foregroundColor(.gray)
                         Button("刷新") {
                             refreshTrigger.toggle()
-                            // 通过创建新的Presenter触发刷新
+                            // Recreate presenter to trigger refresh
                             presenter = DMConversationPresenter(
                                 accountType: accountType,
                                 roomKey: roomKey
@@ -109,19 +110,19 @@ struct DMConversationView: View {
                     }
                 }
             } else if case .loading = onEnum(of: state.items) {
-                // 加载中状态
+                // Loading state
                 ProgressView()
                     .scaleEffect(1.5)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if case .error = onEnum(of: state.items) {
-                // 错误状态
+                // Error state
                 VStack(spacing: 16) {
                     Spacer()
                     Text("加载失败")
                         .foregroundColor(.red)
                     Button("重试") {
                         refreshTrigger.toggle()
-                        // 通过创建新的Presenter触发刷新
+                        // Recreate presenter to trigger refresh
                         presenter = DMConversationPresenter(
                             accountType: accountType,
                             roomKey: roomKey
@@ -134,11 +135,11 @@ struct DMConversationView: View {
         }
     } 
 
-    // 转换消息列表
+    /// Converts KMP `PagingStateSuccess<UiDMItem>` to `[ExyteChat.Message]`.
     private func convertMessages(_ success: PagingStateSuccess<UiDMItem>) -> [ExyteChat.Message] {
         var messages: [ExyteChat.Message] = []
 
-        // 创建当前用户
+        // Define the current user for ExyteChat
         let currentUser = ExyteChat.User(
             id: UUID().uuidString,
             name: "Me",
@@ -146,19 +147,19 @@ struct DMConversationView: View {
             isCurrentUser: true
         )
 
-        // 转换所有消息
+        // Iterate through KMP items and convert them
         for index in 0 ..< success.itemCount {
             if let message = success.peek(index: index) {
                 if let chatMessage = convertToChatMessage(message) {
                     messages.append(chatMessage)
                 }
 
-                // 加载当前消息
+                // Trigger loading of the actual item data
                 success.get(index: index)
             }
         }
 
-        // 如果没有消息但状态是成功，添加提示信息
+        // Debug print if the list is empty despite success state
         if messages.isEmpty {
             print("消息列表为空，但状态是成功")
         }
@@ -166,9 +167,9 @@ struct DMConversationView: View {
         return messages
     }
 
-    // 将UiDMItem转换为Chat库的Message
+    /// Converts a single `UiDMItem` from KMP to an `ExyteChat.Message`.
     private func convertToChatMessage(_ item: UiDMItem) -> ExyteChat.Message? {
-        // 创建用户
+        // Map KMP user to ExyteChat user
         let chatUser = ExyteChat.User(
             id: item.user.key.description,
             name: item.user.name.raw,
@@ -176,21 +177,21 @@ struct DMConversationView: View {
             isCurrentUser: item.isFromMe
         )
 
-        // 创建消息基本信息
+        // Create the basic ExyteChat message structure
         var message = ExyteChat.Message(
             id: item.id,
             user: chatUser,
             createdAt: item.timestamp
         )
 
-        // 设置消息状态
+        // Map KMP send state to ExyteChat message status
         if let sendState = item.sendState {
             let className = String(describing: type(of: sendState))
 
             if className.contains("Sending") {
                 message.status = .sending
             } else if className.contains("Failed") {
-                // 创建一个空的DraftMessage作为错误状态
+                // Use an empty draft message for the error state payload
                 let draftMessage = ExyteChat.DraftMessage(
                     text: "",
                     medias: [],
@@ -207,7 +208,7 @@ struct DMConversationView: View {
             message.status = .sent
         }
 
-        // 设置消息内容
+        // Map KMP message content to ExyteChat message properties
         switch item.content {
         case is UiDMItemMessageText:
             let textContent = item.content as! UiDMItemMessageText
@@ -215,7 +216,7 @@ struct DMConversationView: View {
 
         case is UiDMItemMessageMedia:
             let mediaContent = item.content as! UiDMItemMessageMedia
-            // 保存原始媒体到字典中
+            // Store the original KMP media object for later use (e.g., photo browser)
             originalMediaStore[item.id] = mediaContent.media
 
             switch mediaContent.media {
@@ -246,12 +247,12 @@ struct DMConversationView: View {
             case is UiMediaGif:
                 let gifMedia = mediaContent.media as! UiMediaGif
                 if let url = URL(string: gifMedia.url) {
-                    // 处理GIF类型，将其当作自动播放的视频处理
+                    // Treat GIFs as video attachments for display purposes
                     message.attachments = [
                         ExyteChat.Attachment(
                             id: UUID().uuidString,
                             url: url,
-                            type: .video // GIF作为视频处理，会自动播放
+                            type: .video // Treat GIFs as video for auto-play
                         ),
                     ]
                 }
@@ -259,10 +260,10 @@ struct DMConversationView: View {
             case is UiMediaAudio:
                 let audioMedia = mediaContent.media as! UiMediaAudio
                 if let url = URL(string: audioMedia.url) {
-                    // 创建Recording实例
+                 
                     let recording = ExyteChat.Recording(
-                        duration: 0, // 实际时长会在AudioMessageView中加载
-                        waveformSamples: [], // 波形数据会在AudioMessageView中生成
+                        duration: 0,
+                        waveformSamples: [],
                         url: url
                     )
                     message.recording = recording
@@ -270,7 +271,7 @@ struct DMConversationView: View {
 
             default:
                 // 其他未知媒体类型
-                message.text = "不支持的媒体类型: \(type(of: mediaContent.media))"
+                message.text = "Unsupported media type: \(type(of: mediaContent.media))"
             }
 
         case is UiDMItemMessageStatus:
@@ -287,16 +288,17 @@ struct DMConversationView: View {
         return message
     }
 
-    // 格式化时间显示
+    /// Formats a Date into a short time string (e.g., "10:30 AM").
     private func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
         return formatter.string(from: date)
     }
 
-    // 实现getOriginalMedia方法
+    /// Retrieves the original KMP `UiMedia` object associated with an `ExyteChat.Message` ID.
     private func getOriginalMedia(from message: ExyteChat.Message) -> UiMedia? {
         // 从字典中获取原始媒体
+        // Retrieve from the global store populated during message conversion
         originalMediaStore[message.id]
     }
 }

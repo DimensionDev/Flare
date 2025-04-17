@@ -46,6 +46,7 @@ internal actual fun PlatformVideoPlayer(
     onLongClick: (() -> Unit)?,
     autoPlay: Boolean,
     remainingTimeContent: @Composable (BoxScope.(Long) -> Unit)?,
+    errorContent: @Composable BoxScope.() -> Unit,
     loadingPlaceholder: @Composable BoxScope.() -> Unit,
 ) {
     val playerPool: VideoPlayerPool = org.koin.compose.koinInject()
@@ -121,7 +122,9 @@ internal actual fun PlatformVideoPlayer(
                         }
                     }.matchParentSize(),
         )
-        if (player.isLoading) {
+        if (player.error != null) {
+            errorContent.invoke(this)
+        } else if (player.isLoading) {
             loadingPlaceholder()
         } else {
             remainingTimeContent?.invoke(this, remainingTime)

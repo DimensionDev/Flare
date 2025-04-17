@@ -27,6 +27,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.CircleExclamation
 import compose.icons.fontawesomeicons.solid.CirclePlay
 import compose.icons.fontawesomeicons.solid.EyeSlash
 import dev.dimension.flare.common.AppDeepLink
@@ -288,6 +289,38 @@ public fun MediaItem(
                                     .padding(24.dp)
                                     .size(24.dp),
                             color = Color.White,
+                        )
+                    },
+                    errorContent = {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            NetworkImage(
+                                contentScale = contentScale,
+                                model = media.thumbnailUrl,
+                                contentDescription = media.description,
+                                modifier =
+                                    Modifier
+                                        .fillMaxSize(),
+                            )
+                        }
+                        FAIcon(
+                            FontAwesomeIcons.Solid.CircleExclamation,
+                            modifier =
+                                Modifier
+                                    .padding(16.dp)
+                                    .align(Alignment.BottomStart)
+                                    .background(
+                                        color = Color.Black.copy(alpha = 0.75f),
+                                        shape = PlatformTheme.shapes.medium,
+                                    ).padding(
+                                        8.dp,
+                                    ),
+                            tint = Color.White,
+                            contentDescription = null,
                         )
                     },
                     remainingTimeContent =

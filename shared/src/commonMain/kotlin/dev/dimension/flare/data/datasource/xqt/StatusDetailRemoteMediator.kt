@@ -8,6 +8,7 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
+import dev.dimension.flare.data.database.cache.mapper.isBottomEnd
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -15,6 +16,8 @@ import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.Tweet
+import dev.dimension.flare.data.network.xqt.model.TweetTombstone
+import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
@@ -189,6 +192,14 @@ internal class StatusDetailRemoteMediator(
                         } else {
                             it
                         }
+                    }.filter {
+                        when (val result = it.tweets.tweetResults.result) {
+                            is Tweet -> result.legacy?.conversationIdStr == statusKey.id
+                            is TweetTombstone -> false
+                            is TweetWithVisibilityResults ->
+                                result.tweet.legacy?.conversationIdStr == statusKey.id
+                            null -> false
+                        }
                     }
 
             cursor = actualResponse.cursor()
@@ -202,7 +213,7 @@ internal class StatusDetailRemoteMediator(
                 tweet = actualTweet,
             )
             return MediatorResult.Success(
-                endOfPaginationReached = cursor == null,
+                endOfPaginationReached = actualResponse.isBottomEnd(),
             )
         }
     }

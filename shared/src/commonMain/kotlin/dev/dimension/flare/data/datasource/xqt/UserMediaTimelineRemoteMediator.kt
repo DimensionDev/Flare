@@ -84,7 +84,7 @@ internal class UserMediaTimelineRemoteMediator(
             },
         )
         return MediatorResult.Success(
-            endOfPaginationReached = cursor == null,
+            endOfPaginationReached = tweet.isEmpty(),
         )
     }
 }

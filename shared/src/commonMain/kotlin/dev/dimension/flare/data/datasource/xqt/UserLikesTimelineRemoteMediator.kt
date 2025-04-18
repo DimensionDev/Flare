@@ -81,7 +81,7 @@ internal class UserLikesTimelineRemoteMediator(
             tweet = tweet,
         )
         return MediatorResult.Success(
-            endOfPaginationReached = cursor == null,
+            endOfPaginationReached = tweet.isEmpty(),
         )
     }
 }

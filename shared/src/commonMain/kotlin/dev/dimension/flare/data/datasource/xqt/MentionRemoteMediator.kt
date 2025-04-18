@@ -60,7 +60,7 @@ internal class MentionRemoteMediator(
         )
 
         return MediatorResult.Success(
-            endOfPaginationReached = cursor == null,
+            endOfPaginationReached = tweets.isEmpty(),
         )
     }
 }

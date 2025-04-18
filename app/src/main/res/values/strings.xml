@@ -292,4 +292,7 @@
 
     <string name="emoji_picker_recent">Recent</string>
     <string name="emoji_picker_search">Search</string>
+
+    <string name="changelog_title">Welcome back!</string>
+    <string name="changelog_message">We have made some changes since you last logged in. Here are the details:</string>
 </resources>

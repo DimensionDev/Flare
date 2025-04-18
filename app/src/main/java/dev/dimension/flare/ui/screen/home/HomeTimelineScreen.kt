@@ -5,6 +5,8 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,11 +18,13 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Button
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -67,6 +71,7 @@ import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiState
@@ -81,6 +86,7 @@ import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.TabTitle
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
@@ -274,6 +280,44 @@ internal fun TimelineItemContent(
                 contentPadding = contentPadding,
                 modifier = Modifier.fillMaxSize(),
             ) {
+                state.shouldShowChangeLog.onSuccess {
+                    state.changeLog?.let { changelog ->
+                        if (it) {
+                            item {
+                                AdaptiveCard {
+                                    Column(
+                                        modifier =
+                                            Modifier
+                                                .padding(
+                                                    horizontal = screenHorizontalPadding,
+                                                ).padding(top = 16.dp, bottom = 8.dp),
+                                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    ) {
+                                        Text(
+                                            stringResource(R.string.changelog_title),
+                                            style = MaterialTheme.typography.titleMedium,
+                                        )
+                                        Text(
+                                            stringResource(R.string.changelog_message),
+                                            style = MaterialTheme.typography.bodySmall,
+                                        )
+                                        Text(changelog)
+                                        Button(
+                                            onClick = {
+                                                state.dismissChangeLog()
+                                            },
+                                        ) {
+                                            Text(
+                                                stringResource(android.R.string.ok),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
                 status(state.listState)
             }
             state.listState.onSuccess {
@@ -358,6 +402,7 @@ private fun timelinePresenter(
 
 @Composable
 internal fun timelineItemPresenter(timelineTabItem: TimelineTabItem): TimelineItemState {
+    val changeLogState = changeLogPresenter()
     val timelinePresenter =
         remember(timelineTabItem) {
             timelineTabItem.createPresenter()
@@ -396,7 +441,7 @@ internal fun timelineItemPresenter(timelineTabItem: TimelineTabItem): TimelineIt
             showNewToots = false
         }
     }
-    return object : TimelineItemState {
+    return object : TimelineItemState, ChangeLogState by changeLogState {
         override val listState = state.listState
         override val showNewToots = showNewToots
         override val isRefreshing = state.listState.isRefreshing
@@ -417,7 +462,7 @@ internal fun timelineItemPresenter(timelineTabItem: TimelineTabItem): TimelineIt
 }
 
 @Immutable
-internal interface TimelineItemState {
+internal interface TimelineItemState : ChangeLogState {
     val listState: PagingState<UiTimeline>
     val showNewToots: Boolean
     val isRefreshing: Boolean

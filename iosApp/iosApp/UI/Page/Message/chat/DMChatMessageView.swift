@@ -168,7 +168,7 @@ struct DMChatMessageView: View {
     @ViewBuilder
     private func bubbleView(_ message: ExyteChat.Message) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            // --- Attachments --- 
+            
             if !message.attachments.isEmpty {
                  attachmentsView(message)
                  // Add padding similar to official implementation if needed
@@ -176,13 +176,13 @@ struct DMChatMessageView: View {
                     .padding(.horizontal, DMChatMessageView.horizontalAttachmentPadding)
             }
             
-            // --- Text and Time --- 
+             
             if !message.text.isEmpty {
                  textWithTimeView(message)
                     .font(Font(font)) // Apply the font
             }
 
-            // --- Recording / Audio --- 
+           
             if let recording = message.recording,
                let url = recording.url,
                // Attempt to get the corresponding UiMediaAudio object
@@ -192,11 +192,9 @@ struct DMChatMessageView: View {
                     media: media, // Already checked it's UiMediaAudio
                     isCurrentUser: message.user.isCurrentUser
                 )
-                // Add padding similar to MessageView's recordingView
-                .padding(.horizontal, horizontalTextPadding)
+                 .padding(.horizontal, horizontalTextPadding)
                 .padding(.top, 8)
-                // If there's no text or attachments, audio needs a timestamp separately
-                if message.text.isEmpty && message.attachments.isEmpty && showMessageTimeView {
+                 if message.text.isEmpty && message.attachments.isEmpty && showMessageTimeView {
                      HStack {
                          Spacer()
                          messageTimeView(date: message.createdAt)
@@ -207,15 +205,12 @@ struct DMChatMessageView: View {
             }
         }
         .bubbleBackground(message)
-        // TODO: Add reactions view later if needed
-    }
+     }
 
     @ViewBuilder
     private func attachmentsView(_ message: ExyteChat.Message) -> some View {
-        // Fetch our custom media object
-        if let media = getOriginalMedia(from: message),
-           // Get the corresponding ExyteChat.Attachment (assuming first for now)
-           let attachment = message.attachments.first { 
+         if let media = getOriginalMedia(from: message),
+            let attachment = message.attachments.first { 
 
             // Display Image or Video using DMSingleMediaView
             if media is UiMediaImage || media is UiMediaVideo || media is UiMediaGif {
@@ -223,30 +218,24 @@ struct DMChatMessageView: View {
                     viewModel: DMMediaViewModel.from(media),
                     media: media
                 )
-                // Apply sizing similar to old DMMessageView
-                .frame(
+                 .frame(
                     width: min(200, UIScreen.main.bounds.width * 0.7), // Use UIScreen carefully or replace
                     height: min(200, UIScreen.main.bounds.height * 0.4)
                 )
-                // Use a consistent corner radius (matching bubbleBackground's logic for attachments)
-                .cornerRadius(12) 
-                .clipped() // Ensure content stays within bounds
-//                .onTapGesture {
-//                    showAttachmentClosure(attachment) // Use the closure
-//                }
+                 .cornerRadius(12) 
+                .clipped() 
+ 
                 .overlay(alignment: .bottomTrailing) {
-                    // Show time overlay ONLY if text is empty
-                    if message.text.isEmpty && showMessageTimeView {
+                     if message.text.isEmpty && showMessageTimeView {
                         messageTimeView(date: message.createdAt)
-                             // Use capsule background similar to official MessageView
+                              
                             .modifier(MessageTimeCapsuleModifier())
-                            .padding(4) // Padding around the capsule
-                            .padding(8) // Padding from the corner
+                            .padding(4)  
+                            .padding(8) 
                     }
                 }
             } else {
-                 // Placeholder for other media types (e.g., audio, file)
-                 Text("[Unsupported Media: \(String(describing: type(of: media)))]")
+                  Text("[Unsupported Media: \(String(describing: type(of: media)))]")
                      .font(.caption)
                      .foregroundColor(.red)
                      .padding()
@@ -254,8 +243,7 @@ struct DMChatMessageView: View {
                      .cornerRadius(12)
              }
         } else {
-             // Placeholder if media or attachment not found
-             Text("[Media/Attachment Error for msg \(message.id.prefix(4))]")
+              Text("[Media/Attachment Error for msg \(message.id.prefix(4))]")
                  .font(.caption)
                  .foregroundColor(.red)
                  .padding()
@@ -267,33 +255,32 @@ struct DMChatMessageView: View {
     @ViewBuilder
     private func textWithTimeView(_ message: ExyteChat.Message) -> some View {
         let textView = Text(message.text)
-            .fixedSize(horizontal: false, vertical: true) // IMPORTANT: Added fixedSize
+            .fixedSize(horizontal: false, vertical: true)  
             .padding(.horizontal, horizontalTextPadding)
-            .padding(.vertical, 8) // Consolidated padding
+            .padding(.vertical, 8) 
         
         let timeView = messageTimeView(date: message.createdAt)
-            .padding(.horizontal, horizontalTextPadding) // Padding for time
-            .padding(.bottom, 8) // Padding for time
+            .padding(.horizontal, horizontalTextPadding) 
+            .padding(.bottom, 8) 
 
-        // Apply layout based on calculated arrangement
+ 
         switch dateArrangement {
         case .hstack:
             HStack(alignment: .lastTextBaseline, spacing: 12) {
                 textView
-                if !message.attachments.isEmpty { Spacer() } // Match official behavior
+                if !message.attachments.isEmpty { Spacer() }  
                 timeView
             }
         case .vstack:
-            VStack(alignment: .leading, spacing: 4) { // Use leading alignment for text
+            VStack(alignment: .leading, spacing: 4) {  
                 textView
-                HStack { // Push time to the right within the vstack
+                HStack { 
                      Spacer()
                      timeView
                  }
             }
         case .overlay:
-             // Basic overlay implementation (Might need adjustment)
-             textView
+              textView
                  .overlay(alignment: .bottomTrailing) {
                      timeView.padding(EdgeInsets(top: 0, leading: 0, bottom: 2, trailing: 5)) // Fine-tune padding
                  }
@@ -305,12 +292,9 @@ struct DMChatMessageView: View {
         Text(date, style: .time)
             .font(.caption)
             .foregroundColor(message.user.isCurrentUser ? .white.opacity(0.7) : .gray)
-            .sizeGetter($timeSize) // Measure time view
+            .sizeGetter($timeSize) 
     }
-    // --- End Helper View Builders ---
-    
-    // --- Helper Function for Placeholder Status --- 
-    private func statusIconName(for status: ExyteChat.Message.Status) -> String {
+     private func statusIconName(for status: ExyteChat.Message.Status) -> String {
         switch status {
         case .sending: return "arrow.up.circle"
         case .sent: return "checkmark.circle"
@@ -319,16 +303,12 @@ struct DMChatMessageView: View {
         }
     }
 
-    // --- Helper Functions ---
-    private func getOriginalMedia(from message: ExyteChat.Message) -> UiMedia? {
-         // Assuming originalMediaStore is accessible globally or passed in
-         // Need to ensure originalMediaStore is populated correctly elsewhere
-         originalMediaStore[message.id]
+     private func getOriginalMedia(from message: ExyteChat.Message) -> UiMedia? {
+          originalMediaStore[message.id]
      }
 }
 
-// --- ViewModifier to mimic .bubbleBackground ---
-struct BubbleBackgroundModifier: ViewModifier {
+ struct BubbleBackgroundModifier: ViewModifier {
     let message: ExyteChat.Message
     let radius: CGFloat
     let widthWithMedia: CGFloat
@@ -356,8 +336,7 @@ struct BubbleBackgroundModifier: ViewModifier {
     }
 }
 
-// Modifier for the capsule background on time overlay for media
-struct MessageTimeCapsuleModifier: ViewModifier {
+ struct MessageTimeCapsuleModifier: ViewModifier {
      func body(content: Content) -> some View {
          content
              .padding(.vertical, 4)

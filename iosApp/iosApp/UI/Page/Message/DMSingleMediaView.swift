@@ -5,7 +5,7 @@ import ObjectiveC
 import shared
 import SwiftUI
 
-/// Displays a single media item (image, video, gif) in a DM context.
+ 
 struct DMSingleMediaView: View {
     let viewModel: DMMediaViewModel
     let media: UiMedia
@@ -20,15 +20,6 @@ struct DMSingleMediaView: View {
                                 .foregroundColor(.gray.opacity(0.2))
                         }
                         .setProcessor(DefaultImageProcessor.default)
-                        .onProgress { _, _ in
-                            // 可以在这里处理加载进度
-                        }
-                        .onSuccess { _ in
-                            // 加载成功
-                        }
-                        .onFailure { _ in
-                            // 加载失败
-                        }
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(width: geometry.size.width, height: geometry.size.height)
@@ -56,8 +47,6 @@ struct DMSingleMediaView: View {
                 )
             }
             .onAppear {
-                // 在视图出现时设置headers
-                // Configure Kingfisher request modifier with custom headers
                 let modifier = AnyModifier { request in
                     var r = request
                     for (key, value) in media.customHeaders ?? [:] {
@@ -66,17 +55,16 @@ struct DMSingleMediaView: View {
                     return r
                 }
 
-                // Apply modifier globally for this view's appearance duration
+               
                 KingfisherManager.shared.defaultOptions = [
                     .requestModifier(modifier),
-                    .forceRefresh,
                 ]
             }
         }
     }
 }
 
-/// ViewModel holding data necessary to display a media item.
+ 
 struct DMMediaViewModel {
     let previewUrl: URL?
     let mediaKind: DMMediaKind
@@ -117,7 +105,7 @@ struct DMMediaViewModel {
     }
 }
 
-/// Represents the kind of media being displayed.
+ 
 enum DMMediaKind {
     case image
     case video

@@ -72,7 +72,7 @@ internal class SearchStatusPagingSource(
         )
 
         return MediatorResult.Success(
-            endOfPaginationReached = cursor == null,
+            endOfPaginationReached = tweets.isEmpty(),
         )
     }
 }

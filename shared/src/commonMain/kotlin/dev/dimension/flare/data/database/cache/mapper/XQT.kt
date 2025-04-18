@@ -22,6 +22,7 @@ import dev.dimension.flare.data.network.xqt.model.TimelineAddEntries
 import dev.dimension.flare.data.network.xqt.model.TimelineAddEntry
 import dev.dimension.flare.data.network.xqt.model.TimelineAddToModule
 import dev.dimension.flare.data.network.xqt.model.TimelinePinEntry
+import dev.dimension.flare.data.network.xqt.model.TimelineTerminateTimeline
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineCursor
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineItem
 import dev.dimension.flare.data.network.xqt.model.TimelineTimelineModule
@@ -404,6 +405,12 @@ internal fun List<InstructionUnion>.cursor() =
             else -> emptyList()
         }
     }.firstOrNull()
+
+internal fun List<InstructionUnion>.isBottomEnd() =
+    filterIsInstance<TimelineTerminateTimeline>()
+        .firstOrNull {
+            it.direction == TimelineTerminateTimeline.Direction.bottom
+        } != null
 
 internal fun TopLevel.tweets(): List<XQTTimeline> =
     timeline

@@ -78,7 +78,7 @@ internal class HomeTimelineRemoteMediator(
             tweet = tweet,
         )
         return MediatorResult.Success(
-            endOfPaginationReached = cursor == null,
+            endOfPaginationReached = tweet.isEmpty(),
         )
     }
 }
@@ -143,7 +143,7 @@ internal class FeaturedTimelineRemoteMediator(
             tweet = tweet,
         )
         return MediatorResult.Success(
-            endOfPaginationReached = cursor == null,
+            endOfPaginationReached = tweet.isEmpty(),
         )
     }
 }
@@ -208,7 +208,7 @@ internal class BookmarkTimelineRemoteMediator(
             tweet = tweet,
         )
         return MediatorResult.Success(
-            endOfPaginationReached = cursor == null,
+            endOfPaginationReached = tweet.isEmpty(),
         )
     }
 }

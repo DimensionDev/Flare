@@ -1,7 +1,6 @@
 import shared
 import SwiftUI
-
-/// DM对话列表视图
+ 
 struct DMListView: View {
     let accountType: AccountType
     @State private var presenter: DMListPresenter
@@ -37,8 +36,7 @@ struct DMListView: View {
                             DMRoomItemView(room: room)
                         }
                         .onAppear {
-                            // Trigger loading data for this item when it appears
-                            success.get(index: index)
+                             success.get(index: index)
                         }
                     } else {
                         DMRoomPlaceholderView()
@@ -49,7 +47,7 @@ struct DMListView: View {
                     .frame(maxWidth: .infinity)
                     .padding()
             } else if case .error = onEnum(of: state.items) {
-                Text("加载失败")
+                Text("Loading error")
                     .foregroundColor(.red)
                     .padding()
             }
@@ -66,7 +64,7 @@ struct DMListView: View {
     }
 }
 
-// Placeholder view for DM room items while loading
+ 
 struct DMRoomPlaceholderView: View {
     var body: some View {
         HStack(spacing: 12) {

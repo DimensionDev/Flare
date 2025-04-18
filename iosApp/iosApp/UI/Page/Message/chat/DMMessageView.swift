@@ -6,7 +6,7 @@ import shared
 import SwiftUI
 import CoreMedia
  
-//old 
+ 
 struct DMMessageView: View {
     let message: ExyteChat.Message
     let positionInGroup: ExyteChat.PositionInUserGroup
@@ -20,16 +20,14 @@ struct DMMessageView: View {
         VStack(alignment: message.user.isCurrentUser ? .trailing : .leading, spacing: 4) {
            
             VStack(alignment: message.user.isCurrentUser ? .trailing : .leading, spacing: 4) {
-                // 文本消息
+            
                 if !message.text.isEmpty {
                     HStack(alignment: .center, spacing: 8) {
                         Text(message.text)
                             .foregroundColor(message.user.isCurrentUser ? .white : .primary)
-//                            .onTapGesture {
-//                                showContextMenuClosure()
-//                            }
+ 
 
-                        // Display timestamp for text-only messages
+                        
                         if message.attachments.isEmpty {
                             Text(formatTime(message.createdAt))
                                 .font(.caption2)
@@ -40,12 +38,12 @@ struct DMMessageView: View {
                     .padding(.vertical, 8)
                 }
 
-                // 附件处理（图片、视频等）
+            
                 if !message.attachments.isEmpty {
                     ForEach(message.attachments, id: \.id) { attachment in
                         VStack(alignment: message.user.isCurrentUser ? .trailing : .leading, spacing: 4) {
                             ZStack(alignment: .bottomTrailing) {
-                                // Media Content
+                              
                                 if let media = getOriginalMedia(from: message) {
                                     DMSingleMediaView(
                                         viewModel: DMMediaViewModel.from(media),
@@ -60,7 +58,7 @@ struct DMMessageView: View {
 //                                        showAttachmentClosure(attachment)
 //                                    }
 
-                                    // Timestamp overlay if no text description
+                                  
                                     if message.text.isEmpty {
                                         Text(formatTime(message.createdAt))
                                             .font(.caption2)
@@ -74,15 +72,12 @@ struct DMMessageView: View {
                                 }
                             }
 
-                            // Timestamp after description if text exists
+                          
                             if !message.text.isEmpty {
                                 HStack(alignment: .center, spacing: 8) {
                                     Text(message.text)
                                         .foregroundColor(message.user.isCurrentUser ? .white : .primary)
-//                                        .onTapGesture {
-//                                            showContextMenuClosure()
-//                                        }
-
+ 
                                     Text(formatTime(message.createdAt))
                                         .font(.caption2)
                                         .foregroundColor(message.user.isCurrentUser ? .white.opacity(0.7) : .secondary)
@@ -93,8 +88,7 @@ struct DMMessageView: View {
                         }
                     }
                 }
-
-                // 录音消息
+ 
                 if let recording = message.recording,
                    let url = recording.url,
                    let media = getOriginalMedia(from: message) {
@@ -110,10 +104,7 @@ struct DMMessageView: View {
         .cornerRadius(16)
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
-//        .contentShape(Rectangle())
-//        .onTapGesture {
-//            showContextMenuClosure()
-//        }
+ 
         
         if let positionInCommentsGroup {
             if positionInCommentsGroup.isLastInCommentsGroup {
@@ -135,8 +126,7 @@ struct DMMessageView: View {
     }
     
     
-    // Retrieve original media object associated with the message ID
-    private func getOriginalMedia(from message: ExyteChat.Message) -> UiMedia? { 
-        originalMediaStore[message.id] 
+     private func getOriginalMedia(from message: ExyteChat.Message) -> UiMedia? {
+        originalMediaStore[message.id]
     }
 }

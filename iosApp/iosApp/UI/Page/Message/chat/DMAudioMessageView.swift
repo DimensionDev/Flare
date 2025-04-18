@@ -31,15 +31,15 @@ private class AudioPlayerState: ObservableObject {
             let durationSec = currentItem.duration.seconds
             let currentTimeSec = time.seconds
             
-            // Update duration if valid and changed
+            
             if !durationSec.isNaN, durationSec > 0, self.duration != durationSec {
                 self.duration = durationSec
             }
             
-            // Update current time and progress
+            
             if !currentTimeSec.isNaN {
                  self.currentTime = currentTimeSec
-                 if self.duration > 0 { // Avoid division by zero
+                 if self.duration > 0 {  
                      self.progress = currentTimeSec / self.duration
                  } else {
                      self.progress = 0
@@ -62,7 +62,7 @@ private class AudioPlayerState: ObservableObject {
         isPlaying = false
         progress = 0
         duration = 0
-        currentTime = 0 // Reset current time
+        currentTime = 0 
     }
     
     func togglePlay(url: URL, headers: [String: String]? = nil) {
@@ -84,7 +84,7 @@ private class AudioPlayerState: ObservableObject {
     }
 }
 
-/// 音频波形视图
+ 
 private struct WaveformView: View {
     let samples: [CGFloat]
     let progress: Double
@@ -104,7 +104,7 @@ private struct WaveformView: View {
     }
 }
 
-/// 音频消息视图
+ 
 struct DMAudioMessageView: View {
     let url: URL
     let media: UiMedia
@@ -130,15 +130,13 @@ struct DMAudioMessageView: View {
                 color: isCurrentUser ? .white : .primary
             )
             .frame(height: 24)
-            // Limit WaveformView's maximum width to prevent overlap
-            // Experiment with this value based on typical bubble widths
-            .frame(maxWidth: 150) // Example maximum width
-            .clipped() // Ensure capsules don't draw outside the frame
-            .layoutPriority(0) // Give waveform lower priority than button/text
+             .frame(maxWidth: 150)  
+            .clipped()  
+            .layoutPriority(0)  
 
-            Spacer(minLength: 4) // Ensure at least some space
+            Spacer(minLength: 4) 
             
-            // Display Current Time / Total Duration
+   
             Text("\(formatDuration(playerState.currentTime)) / \(formatDuration(playerState.duration))")
                 .font(.caption)
                 .foregroundColor(isCurrentUser ? .white.opacity(0.7) : .gray)
@@ -151,8 +149,7 @@ struct DMAudioMessageView: View {
         .padding(.vertical, 4)
     }
 
-    /// Formats duration in seconds to MM:SS or HH:MM:SS
-    private func formatDuration(_ duration: Double) -> String {
+     private func formatDuration(_ duration: Double) -> String {
         guard duration > 0, !duration.isNaN else {
             return "--:--"
         }

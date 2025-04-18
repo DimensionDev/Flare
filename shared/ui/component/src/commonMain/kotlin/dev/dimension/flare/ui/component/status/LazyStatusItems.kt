@@ -201,8 +201,8 @@ public fun LazyStaggeredGridScope.status(
 
 @Composable
 public fun AdaptiveCard(
-    content: @Composable () -> Unit,
     modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
 ) {
     val bigScreen = isBigScreen()
     if (bigScreen) {

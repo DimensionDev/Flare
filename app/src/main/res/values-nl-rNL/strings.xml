@@ -234,4 +234,6 @@
     <string name="rss_detail_share">Delen</string>
     <string name="emoji_picker_recent">Recentelijk</string>
     <string name="emoji_picker_search">Zoeken</string>
+    <string name="changelog_title">Welkom terug!</string>
+    <string name="changelog_message">We hebben enkele wijzigingen aangebracht sinds de laatste keer dat u bent ingelogd. Hier zijn de details:</string>
 </resources>

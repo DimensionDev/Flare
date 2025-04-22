@@ -233,4 +233,6 @@
     <string name="rss_detail_share">Поделиться</string>
     <string name="emoji_picker_recent">Недавние</string>
     <string name="emoji_picker_search">Искать</string>
+    <string name="changelog_title">С возвращением!</string>
+    <string name="changelog_message">Мы внесли некоторые изменения с момента последнего входа. Ниже приведены подробности:</string>
 </resources>

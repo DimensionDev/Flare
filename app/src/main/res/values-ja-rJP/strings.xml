@@ -237,4 +237,6 @@
     <string name="rss_detail_share">共有</string>
     <string name="emoji_picker_recent">最近のもの</string>
     <string name="emoji_picker_search">検索</string>
+    <string name="changelog_title">おかえりなさい！</string>
+    <string name="changelog_message">最後にログインしてからいくつかの変更がありました。詳細は次のとおりです:</string>
 </resources>

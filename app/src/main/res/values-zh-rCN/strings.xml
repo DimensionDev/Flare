@@ -237,4 +237,6 @@
     <string name="rss_detail_share">分享</string>
     <string name="emoji_picker_recent">最近的</string>
     <string name="emoji_picker_search">搜索</string>
+    <string name="changelog_title">欢迎回来！</string>
+    <string name="changelog_message">自您上次登录以来，我们已经做了一些更改。以下是详细信息：</string>
 </resources>

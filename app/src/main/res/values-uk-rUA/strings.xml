@@ -234,4 +234,6 @@
     <string name="rss_detail_share">Поділитись</string>
     <string name="emoji_picker_recent">Недавні</string>
     <string name="emoji_picker_search">Пошук</string>
+    <string name="changelog_title">З поверненням!</string>
+    <string name="changelog_message">Ми внесли деякі зміни після моменту, коли ви увійшли в систему. Детальніше:</string>
 </resources>

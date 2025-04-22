@@ -234,4 +234,6 @@
     <string name="rss_detail_share">Distribuie</string>
     <string name="emoji_picker_recent">Recente</string>
     <string name="emoji_picker_search">Caută</string>
+    <string name="changelog_title">Bine ai revenit!</string>
+    <string name="changelog_message">Am făcut unele modificări de când v-ați autentificat ultima dată. Iată detaliile:</string>
 </resources>

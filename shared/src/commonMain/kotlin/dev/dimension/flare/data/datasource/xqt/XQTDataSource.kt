@@ -78,6 +78,7 @@ import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -1876,4 +1877,42 @@ internal class XQTDataSource(
                 throw Exception("Cannot send DM")
             }
         }.isSuccess
+
+    suspend fun podcast(id: String): Result<UiPodcast> =
+        runCatching {
+            val data =
+                service
+                    .getAudioSpaceById(
+                        variables =
+                            """
+                            {
+                                "id": "$id",
+                                "isMetatagsQuery": false,
+                                "withReplays": true,
+                                "withListeners": true
+                            }
+                            """.trimIndent(),
+                    ).data
+                    ?.audioSpace
+            val mediaKey = data?.metadata?.mediaKey ?: throw Exception("Media key not found")
+            val mediaData = service.getLiveVideoStreamStatus(mediaKey = mediaKey)
+            UiPodcast(
+                id = id,
+                title = data.metadata.title.orEmpty(),
+                url = mediaData.source?.noRedirectPlaybackURL ?: throw Exception("No URL"),
+                creator =
+                    data.metadata.creatorResults
+                        ?.result
+                        ?.legacy
+                        ?.let { userLegacy ->
+                            User(
+                                legacy = userLegacy,
+                                isBlueVerified = userLegacy.verified,
+                                restId = data.metadata.creatorResults.result.id ?: throw Exception("No ID"),
+                            )
+                        }?.render(accountKey) ?: throw Exception("No creator"),
+                speakers = persistentListOf(),
+                listeners = persistentListOf(),
+            )
+        }
 }

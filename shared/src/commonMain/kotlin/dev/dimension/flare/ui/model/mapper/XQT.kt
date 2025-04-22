@@ -318,6 +318,31 @@ internal fun Tweet.renderStatus(
                     description = description,
                     url = cardUrl,
                 )
+            } else if (it.name.endsWith("audiospace", ignoreCase = true) == true) {
+                val displayUrl =
+                    it.url.let {
+                        legacy
+                            ?.entities
+                            ?.urls
+                            ?.firstOrNull { url -> url.url == it }
+                            ?.displayUrl
+                    }
+                val id = it.get("id")?.stringValue
+                if (displayUrl != null && id != null) {
+                    UiCard(
+                        title = displayUrl,
+                        media = null,
+                        description = null,
+                        url =
+                            AppDeepLink
+                                .Podcast(
+                                    accountKey = accountKey,
+                                    id = id,
+                                ).toString(),
+                    )
+                } else {
+                    null
+                }
             } else {
                 null
             }

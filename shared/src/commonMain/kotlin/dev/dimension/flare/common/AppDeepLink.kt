@@ -210,4 +210,13 @@ public object AppDeepLink {
 
         public operator fun invoke(text: String): String = "$APPSCHEMA://AltText/${text.encodeURLPathPart()}"
     }
+
+    public object Podcast {
+        public const val ROUTE: String = "$APPSCHEMA://Podcast/{accountKey}/{id}"
+
+        public operator fun invoke(
+            accountKey: MicroBlogKey,
+            id: String,
+        ): String = "$APPSCHEMA://Podcast/${accountKey.toString().encodeURLPathPart()}/${id.encodeURLPathPart()}"
+    }
 }

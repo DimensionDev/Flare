@@ -234,4 +234,6 @@
     <string name="rss_detail_share">Condividi</string>
     <string name="emoji_picker_recent">Recenti</string>
     <string name="emoji_picker_search">Cerca</string>
+    <string name="changelog_title">Bentornato!</string>
+    <string name="changelog_message">Abbiamo apportato alcune modifiche dall\'ultimo accesso. Ecco i dettagli:</string>
 </resources>

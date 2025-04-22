@@ -233,4 +233,6 @@
     <string name="rss_detail_share">Κοινοποίηση</string>
     <string name="emoji_picker_recent">Πρόσφατα</string>
     <string name="emoji_picker_search">Αναζήτηση</string>
+    <string name="changelog_title">Καλώς ήρθατε!</string>
+    <string name="changelog_message">Έχουμε κάνει κάποιες αλλαγές από τότε που συνδεθήκατε την τελευταία φορά. Εδώ είναι οι λεπτομέρειες:</string>
 </resources>

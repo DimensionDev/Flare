@@ -234,4 +234,6 @@
     <string name="rss_detail_share">Jaa</string>
     <string name="emoji_picker_recent">Viimeisimmät</string>
     <string name="emoji_picker_search">Etsi</string>
+    <string name="changelog_title">Tervetuloa takaisin!</string>
+    <string name="changelog_message">Olemme tehneet joitakin muutoksia, koska olet viimeksi kirjautunut sisään. Tässä on yksityiskohdat:</string>
 </resources>

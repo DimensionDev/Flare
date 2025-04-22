@@ -234,4 +234,6 @@
     <string name="rss_detail_share">Udostępnij</string>
     <string name="emoji_picker_recent">Najnowsze</string>
     <string name="emoji_picker_search">Szukaj</string>
+    <string name="changelog_title">Witaj ponownie!</string>
+    <string name="changelog_message">Wprowadziliśmy pewne zmiany od ostatniego logowania. Oto szczegóły:</string>
 </resources>

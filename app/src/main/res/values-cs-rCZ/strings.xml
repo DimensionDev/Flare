@@ -234,4 +234,6 @@
     <string name="rss_detail_share">Sdílet</string>
     <string name="emoji_picker_recent">Nedávné</string>
     <string name="emoji_picker_search">Hledat</string>
+    <string name="changelog_title">Vítejte zpět!</string>
+    <string name="changelog_message">Od posledního přihlášení jsme provedli nějaké změny. Zde jsou detaily:</string>
 </resources>

@@ -234,4 +234,6 @@
     <string name="rss_detail_share">Del</string>
     <string name="emoji_picker_recent">Seneste</string>
     <string name="emoji_picker_search">Søg</string>
+    <string name="changelog_title">Velkommen tilbage!</string>
+    <string name="changelog_message">Vi har foretaget nogle ændringer siden du sidst er logget ind. Her er detaljerne:</string>
 </resources>

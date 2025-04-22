@@ -233,4 +233,6 @@
     <string name="rss_detail_share">مشاركة</string>
     <string name="emoji_picker_recent">حديثاً</string>
     <string name="emoji_picker_search">البحث</string>
+    <string name="changelog_title">مرحبا بعودتك!</string>
+    <string name="changelog_message">لقد قمنا ببعض التغييرات منذ آخر تسجيل دخولك. وفيما يلي التفاصيل:</string>
 </resources>

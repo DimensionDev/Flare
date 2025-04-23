@@ -12,6 +12,7 @@ import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
+import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.XQT
@@ -48,6 +49,7 @@ import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequestVariables
 import dev.dimension.flare.data.network.xqt.model.CreateListRequest
 import dev.dimension.flare.data.network.xqt.model.DeleteBookmarkRequest
 import dev.dimension.flare.data.network.xqt.model.DeleteBookmarkRequestVariables
+import dev.dimension.flare.data.network.xqt.model.LiveVideoStreamStatusResponse
 import dev.dimension.flare.data.network.xqt.model.PostCreateRetweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostCreateRetweetRequestVariables
 import dev.dimension.flare.data.network.xqt.model.PostCreateTweetRequest
@@ -1879,7 +1881,7 @@ internal class XQTDataSource(
         }.isSuccess
 
     suspend fun podcast(id: String): Result<UiPodcast> =
-        runCatching {
+        tryRun {
             val data =
                 service
                     .getAudioSpaceById(
@@ -1895,24 +1897,10 @@ internal class XQTDataSource(
                     ).data
                     ?.audioSpace
             val mediaKey = data?.metadata?.mediaKey ?: throw Exception("Media key not found")
-            val mediaData = service.getLiveVideoStreamStatus(mediaKey = mediaKey)
-            UiPodcast(
-                id = id,
-                title = data.metadata.title.orEmpty(),
-                url = mediaData.source?.noRedirectPlaybackURL ?: throw Exception("No URL"),
-                creator =
-                    data.metadata.creatorResults
-                        ?.result
-                        ?.legacy
-                        ?.let { userLegacy ->
-                            User(
-                                legacy = userLegacy,
-                                isBlueVerified = userLegacy.verified,
-                                restId = data.metadata.creatorResults.result.id ?: throw Exception("No ID"),
-                            )
-                        }?.render(accountKey) ?: throw Exception("No creator"),
-                speakers = persistentListOf(),
-                listeners = persistentListOf(),
+            val mediaData = service.getLiveVideoStreamStatus(mediaKey = mediaKey).decodeJson<LiveVideoStreamStatusResponse>()
+            data.render(
+                accountKey = accountKey,
+                url = mediaData.source?.noRedirectPlaybackURL ?: throw Exception("Media data not found"),
             )
         }
 }

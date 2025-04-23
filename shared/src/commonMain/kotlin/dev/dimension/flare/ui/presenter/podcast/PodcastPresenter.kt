@@ -13,6 +13,7 @@ import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -33,23 +34,24 @@ public class PodcastPresenter(
     override fun body(): State {
         val service = accountServiceProvider(accountType, accountRepository)
         val result =
-            remember(id) {
-                service.map {
-                    require(it is XQTDataSource)
-                    flow {
-                        emit(
-                            it
-                                .podcast(id = id)
-                                .fold(
-                                    onSuccess = { UiState.Success(it) },
-                                    onFailure = { UiState.Error(it) },
-                                ),
-                        )
+            service
+                .map {
+                    remember<Flow<UiState<UiPodcast>>>(id) {
+                        require(it is XQTDataSource)
+                        flow {
+                            val result =
+                                it
+                                    .podcast(id = id)
+                                    .fold(
+                                        onSuccess = { UiState.Success(it) },
+                                        onFailure = { UiState.Error(it) },
+                                    )
+                            emit(result)
+                        }
                     }
+                }.flatMap {
+                    it.collectAsUiState().value.flatMap { it }
                 }
-            }.flatMap {
-                it.collectAsUiState().value.flatMap { it }
-            }
         return object : State {
             override val data: UiState<UiPodcast> = result
         }

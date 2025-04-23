@@ -1,5 +1,8 @@
 package dev.dimension.flare.data.network.xqt.model
 
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
 @Serializable
 internal data class AudioSpaceByIDResponse(
     val data: Data? = null,
@@ -69,47 +72,10 @@ internal data class Metadata(
     val maxAdminCapacity: Long? = null,
 )
 
-@Serializable
-internal data class RResults(
-    val result: CreatorResultsResult? = null,
-)
-
-@Serializable
-internal data class CreatorResultsResult(
-    @SerialName("__typename")
-    val typename: String? = null,
-    val id: String? = null,
-    @SerialName("rest_id")
-    val restID: String? = null,
-    @SerialName("affiliates_highlighted_label")
-    val affiliatesHighlightedLabel: SliceInfo? = null,
-    @SerialName("has_graduated_access")
-    val hasGraduatedAccess: Boolean? = null,
-    @SerialName("parody_commentary_fan_label")
-    val parodyCommentaryFanLabel: String? = null,
-    @SerialName("is_blue_verified")
-    val isBlueVerified: Boolean? = null,
-    @SerialName("profile_image_shape")
-    val profileImageShape: String? = null,
-    val legacy: UserLegacy? = null,
-    val professional: Professional? = null,
-    @SerialName("tipjar_settings")
-    val tipjarSettings: SliceInfo? = null,
-)
+internal typealias RResults = UserResults
 
 @Serializable
 internal class SliceInfo
-
-@Serializable
-internal data class PurpleEntities(
-    val description: Description? = null,
-    val url: Description? = null,
-)
-
-@Serializable
-internal data class Description(
-    val urls: List<URL>? = null,
-)
 
 @Serializable
 internal data class URL(
@@ -253,7 +219,7 @@ internal data class FluffyLegacy(
     val conversationIDStr: String? = null,
     @SerialName("display_text_range")
     val displayTextRange: List<Long>? = null,
-    val entities: FluffyEntities? = null,
+    val entities: Entities? = null,
     @SerialName("favorite_count")
     val favoriteCount: Long? = null,
     val favorited: Boolean? = null,
@@ -278,127 +244,6 @@ internal data class FluffyLegacy(
     @SerialName("id_str")
     val idStr: String? = null,
 )
-
-@Serializable
-internal data class FluffyEntities(
-    val hashtags: List<Hashtag>? = null,
-//    val symbols: JsonArray? = null,
-//    val timestamps: JsonArray? = null,
-    val urls: List<URL>? = null,
-//    @SerialName("user_mentions")
-//    val userMentions: JsonArray? = null,
-    val media: List<Media>? = null,
-)
-
-@Serializable
-internal data class Hashtag(
-    val indices: List<Long>? = null,
-    val text: String? = null,
-)
-
-@Serializable
-internal data class Media(
-    @SerialName("display_url")
-    val displayURL: String? = null,
-    @SerialName("expanded_url")
-    val expandedURL: String? = null,
-    @SerialName("id_str")
-    val idStr: String? = null,
-    val indices: List<Long>? = null,
-    @SerialName("media_key")
-    val mediaKey: String? = null,
-    @SerialName("media_url_https")
-    val mediaURLHTTPS: String? = null,
-    val type: String? = null,
-    val url: String? = null,
-    @SerialName("ext_media_availability")
-    val extMediaAvailability: EXTMediaAvailability? = null,
-    val features: Features? = null,
-    val sizes: Sizes? = null,
-    @SerialName("original_info")
-    val originalInfo: OriginalInfo? = null,
-    @SerialName("allow_download_status")
-    val allowDownloadStatus: AllowDownloadStatus? = null,
-    @SerialName("media_results")
-    val mediaResults: MediaResults? = null,
-)
-
-@Serializable
-internal data class AllowDownloadStatus(
-    @SerialName("allow_download")
-    val allowDownload: Boolean? = null,
-)
-
-@Serializable
-internal data class EXTMediaAvailability(
-    val status: String? = null,
-)
-
-@Serializable
-internal data class Features(
-    val large: OrigClass? = null,
-    val medium: OrigClass? = null,
-    val small: OrigClass? = null,
-    val orig: OrigClass? = null,
-)
-
-@Serializable
-internal data class OrigClass(
-    val faces: List<FocusRect>? = null,
-)
-
-@Serializable
-internal data class FocusRect(
-    val x: Long? = null,
-    val y: Long? = null,
-    val h: Long? = null,
-    val w: Long? = null,
-)
-
-@Serializable
-internal data class MediaResults(
-    val result: MediaResultsResult? = null,
-)
-
-@Serializable
-internal data class MediaResultsResult(
-    @SerialName("media_key")
-    val mediaKey: String? = null,
-)
-
-@Serializable
-internal data class OriginalInfo(
-    val height: Long? = null,
-    val width: Long? = null,
-    @SerialName("focus_rects")
-    val focusRects: List<FocusRect>? = null,
-)
-
-@Serializable
-internal data class Sizes(
-    val large: ThumbClass? = null,
-    val medium: ThumbClass? = null,
-    val small: ThumbClass? = null,
-    val thumb: ThumbClass? = null,
-)
-
-@Serializable
-internal data class ThumbClass(
-    val h: Long? = null,
-    val w: Long? = null,
-    val resize: Resize? = null,
-)
-
-@Serializable
-enum class Resize(
-    val value: String,
-) {
-    @SerialName("crop")
-    Crop("crop"),
-
-    @SerialName("fit")
-    Fit("fit"),
-}
 
 @Serializable
 internal data class Views(
@@ -432,11 +277,11 @@ internal data class Admin(
     @SerialName("is_muted_by_guest")
     val isMutedByGuest: Boolean? = null,
     @SerialName("user_results")
-    val userResults: UserResults? = null,
+    val userResults: AudioUserResults? = null,
 )
 
 @Serializable
-internal data class UserResults(
+internal data class AudioUserResults(
     @SerialName("rest_id")
     val restID: String? = null,
     val result: FluffyResult? = null,
@@ -518,7 +363,7 @@ internal data class TentacledLegacy(
     val conversationIDStr: String? = null,
     @SerialName("display_text_range")
     val displayTextRange: List<Long>? = null,
-    val entities: FluffyEntities? = null,
+    val entities: Entities? = null,
     @SerialName("extended_entities")
     val extendedEntities: ExtendedEntities? = null,
     @SerialName("favorite_count")
@@ -548,11 +393,6 @@ internal data class TentacledLegacy(
     val quotedStatusIDStr: String? = null,
     @SerialName("quoted_status_permalink")
     val quotedStatusPermalink: QuotedStatusPermalink? = null,
-)
-
-@Serializable
-internal data class ExtendedEntities(
-    val media: List<Media>? = null,
 )
 
 @Serializable
@@ -596,7 +436,7 @@ internal data class StickyLegacy(
     val conversationIDStr: String? = null,
     @SerialName("display_text_range")
     val displayTextRange: List<Long>? = null,
-    val entities: FluffyEntities? = null,
+    val entities: Entities? = null,
     @SerialName("extended_entities")
     val extendedEntities: ExtendedEntities? = null,
     @SerialName("favorite_count")

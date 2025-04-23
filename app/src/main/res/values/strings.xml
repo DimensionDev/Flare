@@ -295,4 +295,9 @@
 
     <string name="changelog_title">Welcome back!</string>
     <string name="changelog_message">We have made some changes since you last logged in. Here are the details:</string>
+
+    <string name="podcast_host">Host</string>
+    <string name="podcast_title">Podcast</string>
+    <string name="podcast_speaker">Speaker</string>
+    <string name="podcast_listen">Start listening</string>
 </resources>

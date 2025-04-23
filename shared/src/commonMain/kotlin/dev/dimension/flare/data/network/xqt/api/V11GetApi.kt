@@ -9,7 +9,6 @@ import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineRespo
 import dev.dimension.flare.data.network.xqt.model.InboxDMTrustedTimelineResponse
 import dev.dimension.flare.data.network.xqt.model.InboxDMUserUpdateResponse
 import dev.dimension.flare.data.network.xqt.model.ListsMembershipsResponse
-import dev.dimension.flare.data.network.xqt.model.LiveVideoStreamStatusResponse
 import dev.dimension.flare.data.network.xqt.model.UserRecommendationsItem
 import dev.dimension.flare.model.xqtHost
 
@@ -474,5 +473,5 @@ internal interface V11GetApi {
         @Query("client") client: String = "web",
         @Query("use_syndication_guest_id") useSyndicationGuestId: Boolean = false,
         @Query("cookie_set_host") cookieSetHost: String = xqtHost,
-    ): LiveVideoStreamStatusResponse
+    ): String
 }

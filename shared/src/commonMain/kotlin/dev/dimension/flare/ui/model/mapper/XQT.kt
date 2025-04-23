@@ -10,6 +10,8 @@ import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.network.xqt.model.Admin
+import dev.dimension.flare.data.network.xqt.model.AudioSpace
 import dev.dimension.flare.data.network.xqt.model.GetProfileSpotlightsQuery200Response
 import dev.dimension.flare.data.network.xqt.model.InstructionUnion
 import dev.dimension.flare.data.network.xqt.model.Media
@@ -35,10 +37,12 @@ import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
+import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiTimeline
+import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.toHtml
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
@@ -1004,4 +1008,71 @@ private fun MessageContent.XQT.Message.render(
             twitterParser.parse(this.data.text.orEmpty()).toHtml(accountKey).toUi(),
         )
     }
+}
+
+private fun UserResults.render(accountKey: MicroBlogKey): UiProfile? =
+    when (result) {
+        is User -> result.render(accountKey)
+        is UserUnavailable -> null
+        null -> null
+    }
+
+internal fun AudioSpace.render(
+    accountKey: MicroBlogKey,
+    url: String,
+) = UiPodcast(
+    id = metadata?.restID ?: throw Exception("No ID"),
+    title = metadata.title.orEmpty(),
+    url = url,
+    creator =
+        metadata.creatorResults
+            ?.render(accountKey) ?: throw Exception("No creator"),
+    hosts =
+        participants
+            ?.admins
+            ?.map {
+                it.render(accountKey)
+            }.orEmpty()
+            .toImmutableList(),
+    speakers =
+        participants
+            ?.speakers
+            ?.map {
+                it.render(accountKey)
+            }.orEmpty()
+            .toImmutableList(),
+    listeners =
+        participants
+            ?.listeners
+            ?.map {
+                it.render(accountKey)
+            }.orEmpty()
+            .toImmutableList(),
+)
+
+private fun Admin.render(accountKey: MicroBlogKey): UiUserV2 {
+    val key =
+        MicroBlogKey(
+            id = userResults?.restID ?: throw Exception("No ID"),
+            host = accountKey.host,
+        )
+    return UiProfile(
+        key = key,
+        avatar = avatarURL?.replaceWithOriginImageUrl().orEmpty(),
+        name =
+            Element("span")
+                .apply {
+                    addChildren(TextNode(displayName.orEmpty()))
+                }.toUi(),
+        handle = "@$twitterScreenName@$xqtHost",
+        platformType = PlatformType.xQt,
+        onClicked = {
+            launcher.launch(AppDeepLink.Profile(accountKey, key))
+        },
+        description = null,
+        banner = null,
+        matrices = UiProfile.Matrices(0, 0, 0),
+        mark = persistentListOf(),
+        bottomContent = null,
+    )
 }

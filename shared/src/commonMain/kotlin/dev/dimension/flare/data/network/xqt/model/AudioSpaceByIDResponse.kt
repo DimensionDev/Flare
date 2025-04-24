@@ -36,6 +36,8 @@ internal data class Metadata(
     val startedAt: Long? = null,
     @SerialName("updated_at")
     val updatedAt: Long? = null,
+    @SerialName("ended_at")
+    val endedAt: Long? = null,
     @SerialName("content_type")
     val contentType: String? = null,
     @SerialName("creator_results")

@@ -6,7 +6,6 @@ import dev.dimension.flare.data.datasource.xqt.XQTDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -19,11 +18,10 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 public class PodcastPresenter(
-    private val accountKey: MicroBlogKey,
+    private val accountType: AccountType,
     private val id: String,
 ) : PresenterBase<PodcastPresenter.State>(),
     KoinComponent {
-    private val accountType = AccountType.Specific(accountKey)
     private val accountRepository: AccountRepository by inject()
 
     public interface State {

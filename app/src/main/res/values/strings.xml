@@ -300,4 +300,7 @@
     <string name="podcast_title">Podcast</string>
     <string name="podcast_speaker">Speaker</string>
     <string name="podcast_listen">Start listening</string>
+    <string name="podcast_leave">Leave</string>
+    <string name="podcast_ended">Podcast ended</string>
+    <string name="podcast_living">Podcast live</string>
 </resources>

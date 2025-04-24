@@ -1019,11 +1019,11 @@ private fun UserResults.render(accountKey: MicroBlogKey): UiProfile? =
 
 internal fun AudioSpace.render(
     accountKey: MicroBlogKey,
-    url: String,
+    url: String?,
 ) = UiPodcast(
     id = metadata?.restID ?: throw Exception("No ID"),
     title = metadata.title.orEmpty(),
-    url = url,
+    playbackUrl = url,
     creator =
         metadata.creatorResults
             ?.render(accountKey) ?: throw Exception("No creator"),
@@ -1048,6 +1048,7 @@ internal fun AudioSpace.render(
                 it.render(accountKey)
             }.orEmpty()
             .toImmutableList(),
+    ended = metadata.state == "Ended" || metadata.endedAt != null,
 )
 
 private fun Admin.render(accountKey: MicroBlogKey): UiUserV2 {

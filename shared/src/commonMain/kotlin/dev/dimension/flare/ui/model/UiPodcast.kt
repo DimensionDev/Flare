@@ -7,7 +7,8 @@ import kotlinx.collections.immutable.ImmutableList
 public data class UiPodcast(
     val id: String,
     val title: String,
-    val url: String,
+    val playbackUrl: String?,
+    val ended: Boolean,
     val creator: UiUserV2,
     val hosts: ImmutableList<UiUserV2>,
     val speakers: ImmutableList<UiUserV2>,

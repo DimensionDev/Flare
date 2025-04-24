@@ -3,7 +3,9 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -48,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.PodcastRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.TabSettingRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -69,11 +72,13 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
+import dev.dimension.flare.ui.component.PodcastFAB
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -121,6 +126,14 @@ internal fun HomeTimelineRoute(
         toTabSettings = {
             navigator.navigate(TabSettingRouteDestination(accountType))
         },
+        toPodcast = {
+            navigator.navigate(
+                PodcastRouteDestination(
+                    accountType = accountType,
+                    id = it.id,
+                ),
+            )
+        },
     )
 }
 
@@ -132,6 +145,7 @@ private fun HomeTimelineScreen(
     toQuickMenu: () -> Unit,
     toLogin: () -> Unit,
     toTabSettings: () -> Unit,
+    toPodcast: (data: UiPodcast) -> Unit,
 ) {
     val state by producePresenter(key = "home_timeline_$accountType") {
         timelinePresenter(accountType)
@@ -216,20 +230,34 @@ private fun HomeTimelineScreen(
             )
         },
         floatingActionButton = {
-            state.user.onSuccess {
-                AnimatedVisibility(
-                    visible = topAppBarScrollBehavior.state.heightOffset == 0f && LocalBottomBarHeight.current != 0.dp,
-                    enter = scaleIn(),
-                    exit = scaleOut(),
-                ) {
-                    FloatingActionButton(
-                        onClick = toCompose,
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.End,
+            ) {
+                state.user.onSuccess {
+                    AnimatedVisibility(
+                        visible = topAppBarScrollBehavior.state.heightOffset == 0f && LocalBottomBarHeight.current != 0.dp,
+                        enter = scaleIn(),
+                        exit = scaleOut(),
                     ) {
-                        FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.Pen,
-                            contentDescription = stringResource(id = R.string.compose_title),
-                        )
+                        FloatingActionButton(
+                            onClick = toCompose,
+                        ) {
+                            FAIcon(
+                                imageVector = FontAwesomeIcons.Solid.Pen,
+                                contentDescription = stringResource(id = R.string.compose_title),
+                            )
+                        }
                     }
+                }
+                AnimatedVisibility(
+                    visible = topAppBarScrollBehavior.state.heightOffset == 0f,
+                    enter = slideInHorizontally { it },
+                    exit = slideOutHorizontally { it },
+                ) {
+                    PodcastFAB(
+                        toPodcast = toPodcast,
+                    )
                 }
             }
         },

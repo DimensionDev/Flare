@@ -1897,10 +1897,21 @@ internal class XQTDataSource(
                     ).data
                     ?.audioSpace
             val mediaKey = data?.metadata?.mediaKey ?: throw Exception("Media key not found")
-            val mediaData = service.getLiveVideoStreamStatus(mediaKey = mediaKey).decodeJson<LiveVideoStreamStatusResponse>()
+            val mediaData =
+                runCatching {
+                    if (data.metadata.state == "Ended") {
+                        null
+                    } else {
+                        service
+                            .getLiveVideoStreamStatus(mediaKey = mediaKey)
+                            .decodeJson<LiveVideoStreamStatusResponse>()
+                            .source
+                            ?.noRedirectPlaybackURL
+                    }
+                }.getOrNull()
             data.render(
                 accountKey = accountKey,
-                url = mediaData.source?.noRedirectPlaybackURL ?: throw Exception("Media data not found"),
+                url = mediaData,
             )
         }
 }

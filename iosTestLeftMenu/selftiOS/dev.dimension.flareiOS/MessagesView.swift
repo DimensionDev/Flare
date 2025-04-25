@@ -14,7 +14,6 @@ struct MessagesView: View {
              .navigationTitle("Messages")
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .standardMenuGestureHandler() // <<< 应用 Modifier
         .onAppear {
 //            appState.isHomeFirstTabActive = false
             appState.navigationDepth = 0

@@ -15,8 +15,6 @@ struct SearchView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
       
-        // --- 应用新的 Modifier ---
-        .standardMenuGestureHandler()  
         .onAppear {
 //            appState.isHomeFirstTabActive = false
             appState.navigationDepth = 0

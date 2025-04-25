@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6452FF212DBB3DBD00B5048E /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 6452FF202DBB3DBD00B5048E /* SwiftUIIntrospect */; };
+		64171C152DBC083F00AE6614 /* BubbleBar in Frameworks */ = {isa = PBXBuildFile; productRef = 64171C142DBC083F00AE6614 /* BubbleBar */; };
+		64171C1B2DBC09E400AE6614 /* BubbleBar in Frameworks */ = {isa = PBXBuildFile; productRef = 64171C1A2DBC09E400AE6614 /* BubbleBar */; };
+		64171C1E2DBC0A4300AE6614 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 64171C1D2DBC0A4300AE6614 /* SwiftUIIntrospect */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +29,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6452FF212DBB3DBD00B5048E /* SwiftUIIntrospect in Frameworks */,
+				64171C1E2DBC0A4300AE6614 /* SwiftUIIntrospect in Frameworks */,
+				64171C1B2DBC09E400AE6614 /* BubbleBar in Frameworks */,
+				64171C152DBC083F00AE6614 /* BubbleBar in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +74,9 @@
 			);
 			name = dev.dimension.flareiOS;
 			packageProductDependencies = (
-				6452FF202DBB3DBD00B5048E /* SwiftUIIntrospect */,
+				64171C142DBC083F00AE6614 /* BubbleBar */,
+				64171C1A2DBC09E400AE6614 /* BubbleBar */,
+				64171C1D2DBC0A4300AE6614 /* SwiftUIIntrospect */,
 			);
 			productName = dev.dimension.flareiOS;
 			productReference = 6452FD312DBA212900B5048E /* dev.dimension.flareiOS.app */;
@@ -101,7 +107,8 @@
 			mainGroup = 6452FD282DBA212900B5048E;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				6452FF1F2DBB3DBD00B5048E /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
+				64171C192DBC09E400AE6614 /* XCRemoteSwiftPackageReference "BubbleBar" */,
+				64171C1C2DBC0A4300AE6614 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 6452FD322DBA212900B5048E /* Products */;
@@ -348,7 +355,15 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		6452FF1F2DBB3DBD00B5048E /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
+		64171C192DBC09E400AE6614 /* XCRemoteSwiftPackageReference "BubbleBar" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/archetapp/BubbleBar.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+		64171C1C2DBC0A4300AE6614 /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/siteline/swiftui-introspect";
 			requirement = {
@@ -359,9 +374,18 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		6452FF202DBB3DBD00B5048E /* SwiftUIIntrospect */ = {
+		64171C142DBC083F00AE6614 /* BubbleBar */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 6452FF1F2DBB3DBD00B5048E /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
+			productName = BubbleBar;
+		};
+		64171C1A2DBC09E400AE6614 /* BubbleBar */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64171C192DBC09E400AE6614 /* XCRemoteSwiftPackageReference "BubbleBar" */;
+			productName = BubbleBar;
+		};
+		64171C1D2DBC0A4300AE6614 /* SwiftUIIntrospect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64171C1C2DBC0A4300AE6614 /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
 			productName = SwiftUIIntrospect;
 		};
 /* End XCSwiftPackageProductDependency section */

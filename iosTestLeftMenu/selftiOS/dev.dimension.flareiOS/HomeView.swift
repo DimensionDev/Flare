@@ -34,8 +34,6 @@ struct HomeView: View {
         }
         .contentShape(Rectangle()) // 确保 VStack 区域可接收手势
        
-        // --- 应用新的 Modifier ---
-        .appBarMenuGestureHandler(isFirstTopTab: isFirstTopTab) // 使用计算属性传递条件
         .onAppear {
             // 当 HomeView 出现时，更新 AppState
             // appState.isHomeFirstTabActive = isFirstTopTab // 不再需要 

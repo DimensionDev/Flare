@@ -1,12 +1,11 @@
 import SwiftUI
 
 struct MainView: View {
-    // 从环境中获取 AppState
     @EnvironmentObject private var appState: AppState
-    // 菜单宽度常量
+    @State private var selectedTab: Int = 0 // 添加选中 Tab 的状态
     private let menuWidth: CGFloat = 250
 
-    // --- 偏移量计算 (修改) ---
+    // --- 偏移量计算 (保持不变) ---
     private var currentMenuOffset: CGFloat {
         let baseOffset = appState.isMenuOpen ? 0 : -menuWidth
         let combinedOffset = baseOffset + appState.menuDragOffset
@@ -19,94 +18,98 @@ struct MainView: View {
         return min(max(combinedOffset, 0), menuWidth)
     }
 
-    // --- Helper for overlay opacity ---
+    // --- Helper for overlay opacity (保持不变) ---
     private func calculateOverlayOpacity() -> Double {
-        // Opacity increases as content moves right, max 0.4
         let progress = currentContentOffset / menuWidth
         return max(0, min(progress * 0.4, 0.4))
     }
 
     var body: some View {
-        // 使用 ZStack 叠放菜单和主内容
         ZStack(alignment: .leading) {
-            // --- Main Content (Tab View) ---
-            tabContentView
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color(.systemBackground))
-                .offset(x: currentContentOffset)
-                .zIndex(0) // Base layer
+            // --- Main Content Area (VStack with TabView and CustomTabBar) ---
+            VStack(spacing: 0) {
+                // --- Page TabView for Content ---
+                TabView(selection: $selectedTab) {
+                    // Keep original NavigationStack wrappers if needed
+                    NavigationStack { HomeView() }.tag(0)
+                    NavigationStack { SearchView() }.tag(1)
+                    NavigationStack { NotificationsView() }.tag(2)
+                    NavigationStack { MessagesView() }.tag(3)
+                    NavigationStack { ProfileView() }.tag(4)
+                }
+                .tabViewStyle(.page(indexDisplayMode: .never)) // Use page style, hide indicators
 
-            // --- Dimming Overlay (Enhanced) ---
-            // Show if menu is open OR if dragging is occurring from closed state
+                // --- Custom Bottom Tab Bar ---
+                CustomTabBarView(selectedTab: $selectedTab)
+                    // Inject AppState if CustomTabBar needs it, e.g., for menu toggle
+                    .environmentObject(appState)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color(.systemBackground)) // Apply background to the VStack
+            .offset(x: currentContentOffset)
+            .zIndex(0)
+
+            // --- Dimming Overlay (保持不变) ---
             if appState.isMenuOpen || appState.menuDragOffset > 0 {
                 Color.black.opacity(calculateOverlayOpacity())
-                    .contentShape(Rectangle()) // Ensure it catches taps
+                    .contentShape(Rectangle())
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .offset(x: currentContentOffset) // Follow content offset
+                    .offset(x: currentContentOffset)
                     .onTapGesture {
-                         print("[MainView Overlay] Tapped. Closing menu.")
+                        print("[MainView Overlay] Tapped. Closing menu.")
                         withAnimation(.interactiveSpring()) {
                             appState.isMenuOpen = false
                             // Offset reset will be handled by onChange
                         }
                     }
-                    .zIndex(1) // Above content, below menu
-                    .ignoresSafeArea() // Cover entire screen including safe areas
+                    .zIndex(1)
+                    .ignoresSafeArea()
             }
 
-            // --- Side Menu ---
+            // --- Side Menu (保持不变) ---
             MenuView()
                 .frame(width: menuWidth)
                 .offset(x: currentMenuOffset)
-                .zIndex(2) // Topmost layer
+                .zIndex(2)
         }
-        .contentShape(Rectangle()) // Allow ZStack to receive gestures
-        // --- Animations (seem correct) ---
+        .contentShape(Rectangle()) // Allow ZStack to receive gestures for the new drag gesture
+        // --- Animations (保持不变) ---
         .animation(.interactiveSpring(), value: appState.isMenuOpen)
         .animation(.interactiveSpring(), value: appState.menuDragOffset)
-        .ignoresSafeArea(edges: .bottom) // Keep bottom safe area ignored
-
-        // --- Global Drag Gesture (Reverted to Always-Attached with Internal Guards) ---
-        .simultaneousGesture( // Always attach the gesture
+        // --- New Drag Gesture for Closing Menu ---
+        .gesture(
             DragGesture(minimumDistance: 10)
                 .onChanged { value in
-                    // Use internal guard to only act when menu is open
+                    // Only act when the menu is open
                     guard appState.isMenuOpen else { return }
 
-                    // This onChanged only triggers if the gesture is attached (i.e., menu is open)
-                    // We are dragging from the open state (offset 0) towards closed (offset -menuWidth)
                     let horizontalTranslation = value.translation.width
-                    // Only consider leftward drag (negative translation)
+                    // Only consider leftward drag (negative translation) to close
                     if horizontalTranslation <= 0 {
-                        // Calculate the offset, clamped between -menuWidth and 0
-                        let dragOffset = min(max(horizontalTranslation, -menuWidth), 0)
-                        // Update the global state directly
-                        appState.menuDragOffset = dragOffset
-                        // print("[MainView Global Gesture] onChanged - Offset: \(dragOffset)")
+                        // Update the global drag offset directly
+                        appState.menuDragOffset = min(max(horizontalTranslation, -menuWidth), 0)
+                        // print("[MainView DragClose] onChanged - Offset: \(appState.menuDragOffset)")
                     }
-                    // Ignore rightward drags when menu is fully open
+                    // Ignore rightward drags when menu is already open
                 }
                 .onEnded { value in
-                    // Use internal guard to only act when menu is open
+                    // Only act when the menu is open
                     guard appState.isMenuOpen else { return }
 
-                    // Use the *current* drag offset (which was updated in onChanged)
-                    // and the predicted velocity to decide the final state.
-                    let currentDragOffset = appState.menuDragOffset // Get the latest value
+                    let currentDragOffset = appState.menuDragOffset // Use the latest value
                     let predictedEndTranslation = value.predictedEndTranslation.width
-
                     let quickSwipeThreshold: CGFloat = -100
-                    let dragCloseThreshold = -menuWidth * 0.4
+                    let dragCloseThreshold = -menuWidth * 0.4 // Close if dragged more than 40% left
 
                     // Decide whether to close or snap back open
                     if predictedEndTranslation < quickSwipeThreshold || currentDragOffset < dragCloseThreshold {
-                        print("[MainView Global Gesture] onEnded - Closing menu.")
+                        print("[MainView DragClose] onEnded - Closing menu.")
                         withAnimation(.interactiveSpring()) {
                             appState.isMenuOpen = false
                             // menuDragOffset reset is handled by .onChange(of: appState.isMenuOpen)
                         }
                     } else {
-                        print("[MainView Global Gesture] onEnded - Snapping back to open.")
+                        print("[MainView DragClose] onEnded - Snapping back to open.")
                         // If not closing, we need to animate menuDragOffset back to 0
                         // since isMenuOpen remains true. The .onChange won't trigger for offset reset.
                         withAnimation(.interactiveSpring()) {
@@ -115,36 +118,21 @@ struct MainView: View {
                     }
                 }
         )
-        // --- State Consistency ---
+        // --- State Consistency (保持不变) ---
         .onChange(of: appState.isMenuOpen) { _, isOpen in
-            // This still correctly resets the offset when the state *changes* to closed.
             if !isOpen && appState.menuDragOffset != 0 {
                 print("[MainView onChange] isMenuOpen changed to false. Resetting menuDragOffset.")
-                 appState.menuDragOffset = 0 // Reset without animation is fine here
+                appState.menuDragOffset = 0 // Reset directly
             }
-             // If it changed to 'open', we expect offset to be 0 anyway from the gesture end/snap back.
         }
+        // Ignore bottom safe area for the entire ZStack content
+        .ignoresSafeArea(edges: .bottom)
     }
 
-    // TabView structure (Wrapped content in NavigationStack)
-    private var tabContentView: some View {
-        TabView {
-            NavigationStack { HomeView() }
-            .tabItem { Label("Home", systemImage: "house") }.tag(0)
-
-            NavigationStack { SearchView() } // Wrap other views too if they navigate
-            .tabItem { Label("Search", systemImage: "magnifyingglass") }.tag(1)
-
-            NavigationStack { NotificationsView() }
-            .tabItem { Label("Notifications", systemImage: "bell") }.tag(2)
-
-            NavigationStack { MessagesView() }
-            .tabItem { Label("Messages", systemImage: "envelope") }.tag(3)
-
-            NavigationStack { ProfileView() }
-            .tabItem { Label("Profile", systemImage: "person") }.tag(4)
-        }
-    }
+    // Removed the old tabContentView computed property as its logic is now in the body
 }
+
+// Removed the duplicate placeholder struct CustomTabBarView { ... } from here.
+// The correct implementation is now in CustomTabBarView.swift
  
  

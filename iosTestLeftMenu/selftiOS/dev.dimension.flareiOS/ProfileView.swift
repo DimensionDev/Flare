@@ -32,7 +32,6 @@ struct ProfileView: View {
         }
         .contentShape(Rectangle())
         
-        .appBarMenuGestureHandler(isFirstTopTab: isFirstTopTab)  
         .onAppear {
         
             // appState.isHomeFirstTabActive = false // 不再需要

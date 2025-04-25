@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.PodcastRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.TabSettingRouteDestination
 import com.ramcosta.composedestinations.navigation.DestinationsNavigator
@@ -75,7 +74,6 @@ import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -123,14 +121,6 @@ internal fun HomeTimelineRoute(
         toTabSettings = {
             navigator.navigate(TabSettingRouteDestination(accountType))
         },
-        toPodcast = {
-            navigator.navigate(
-                PodcastRouteDestination(
-                    accountType = accountType,
-                    id = it.id,
-                ),
-            )
-        },
     )
 }
 
@@ -142,7 +132,6 @@ private fun HomeTimelineScreen(
     toQuickMenu: () -> Unit,
     toLogin: () -> Unit,
     toTabSettings: () -> Unit,
-    toPodcast: (data: UiPodcast) -> Unit,
 ) {
     val state by producePresenter(key = "home_timeline_$accountType") {
         timelinePresenter(accountType)

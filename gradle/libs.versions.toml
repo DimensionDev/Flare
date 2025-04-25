@@ -87,7 +87,7 @@ composeIcons-fontAwesome = { module = "moe.tlaster.compose.icons:font-awesome", 
 datastore = { group = "androidx.datastore", name = "datastore", version = "1.1.4" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 androidx-window = { group = "androidx.window", name = "window-core", version = "1.3.0" }
-androidx-splash = { group = "androidx.core", name = "core-splashscreen", version = "1.2.0-beta01" }
+androidx-splash = { group = "androidx.core", name = "core-splashscreen", version = "1.2.0-beta02" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }

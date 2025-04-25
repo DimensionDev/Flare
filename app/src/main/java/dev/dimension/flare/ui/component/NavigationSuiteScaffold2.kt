@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.component
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -10,7 +11,9 @@ import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,8 +21,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
@@ -62,7 +63,7 @@ import androidx.compose.runtime.collection.mutableVectorOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.movableContentOf
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
@@ -74,21 +75,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import kotlin.math.roundToInt
 
 private val bottomBarHeight = 56.dp
 
 val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { bottomBarHeight }
-
-internal data class BottomBarSettings(
-    val autoHide: Boolean = true,
-    val withDivider: Boolean = true,
-)
+val LocalBottomBarShowing = androidx.compose.runtime.staticCompositionLocalOf<Boolean> { false }
 
 @OptIn(ExperimentalFoundationApi::class)
 @ExperimentalMaterial3AdaptiveNavigationSuiteApi
@@ -112,24 +106,17 @@ fun NavigationSuiteScaffold2(
     content: @Composable () -> Unit = {},
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val bottomBarHeightPx =
-        with(LocalDensity.current) {
-            val navigationBar = WindowInsets.navigationBars
-            remember(navigationBar) {
-                bottomBarHeight.roundToPx().toFloat() + navigationBar.getBottom(this)
-            }
-        }
-    var bottomBarOffsetHeightPx by remember { mutableFloatStateOf(0f) }
+    var shouldHideBottomBar by remember { mutableStateOf(false) }
+    var isPodcastShowing by remember { mutableStateOf(false) }
     val nestedScrollConnection =
-        remember(bottomBarHeightPx) {
+        remember {
             object : NestedScrollConnection {
                 override fun onPreScroll(
                     available: Offset,
                     source: NestedScrollSource,
                 ): Offset {
                     val delta = available.y
-                    val newOffset = bottomBarOffsetHeightPx + delta
-                    bottomBarOffsetHeightPx = newOffset.coerceIn(-bottomBarHeightPx, 0f)
+                    shouldHideBottomBar = delta < 0
                     return Offset.Zero
                 }
             }
@@ -239,73 +226,109 @@ fun NavigationSuiteScaffold2(
                                 bottomBarHeight
                             } else {
                                 0.dp
+                            } +
+                            if (isPodcastShowing) {
+                                56.dp
+                            } else {
+                                0.dp
                             },
+                        LocalBottomBarShowing provides (layoutType == NavigationSuiteType.NavigationBar && !shouldHideBottomBar),
                     ) {
                         content.invoke()
                     }
-                    androidx.compose.animation.AnimatedVisibility(
-                        layoutType == NavigationSuiteType.NavigationBar,
-                        enter = slideInVertically { it },
-                        exit = slideOutVertically { it },
+                    Column(
                         modifier =
                             Modifier
+                                .fillMaxWidth()
                                 .align(Alignment.BottomCenter)
-                                .offset { IntOffset(x = 0, y = -bottomBarOffsetHeightPx.roundToInt()) },
+                                .animateContentSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Bottom,
                     ) {
-                        Surface(
-//                        color = navigationSuiteColors.navigationBarContainerColor,
-                            contentColor = navigationSuiteColors.navigationBarContentColor,
-                        ) {
-                            Box {
-                                if (bottomBarDividerEnabled) {
-                                    HorizontalDivider(
-                                        modifier =
-                                            Modifier
-                                                .align(Alignment.TopCenter)
-                                                .fillMaxWidth(),
-                                        color = FlareDividerDefaults.color,
-                                        thickness = FlareDividerDefaults.thickness,
-                                    )
-                                }
-                                Row(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .windowInsetsPadding(
+                        PodcastFAB(
+                            onVisibilityChanged = {
+                                isPodcastShowing = it
+                            },
+                            modifier =
+                                Modifier
+                                    .let {
+                                        if (layoutType == NavigationSuiteType.NavigationBar && !shouldHideBottomBar) {
+                                            it
+                                        } else {
+                                            it.windowInsetsPadding(
                                                 WindowInsets.systemBars.only(
                                                     WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
                                                 ),
-                                            ),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    scope.itemList.forEach {
-                                        Box(
-                                            modifier =
-                                                it.modifier
-                                                    .weight(1f)
-                                                    .combinedClickable(
-                                                        interactionSource = it.interactionSource,
-                                                        onClick = it.onClick,
-                                                        indication = LocalIndication.current,
-                                                        onLongClick = it.onLongClick,
-                                                    ).height(bottomBarHeight),
-                                            contentAlignment = Alignment.Center,
-                                        ) {
-                                            val colors = it.colors?.navigationBarItemColors ?: NavigationBarItemDefaults.colors()
-                                            val color =
-                                                with(colors) {
-                                                    when {
-                                                        !it.enabled -> disabledIconColor
-                                                        it.selected -> MaterialTheme.colorScheme.primary
-                                                        else -> unselectedIconColor
-                                                    }
-                                                }
-                                            val iconColor by animateColorAsState(
-                                                targetValue = color,
-                                                animationSpec = tween(100),
                                             )
-                                            CompositionLocalProvider(LocalContentColor provides iconColor) {
-                                                NavigationItemIcon(icon = it.icon, badge = it.badge)
+                                        }
+                                    },
+                        )
+                        androidx.compose.animation.AnimatedVisibility(
+                            layoutType == NavigationSuiteType.NavigationBar && !shouldHideBottomBar,
+                            enter = slideInVertically { it },
+                            exit = slideOutVertically { it },
+                            modifier =
+                            Modifier,
+                        ) {
+                            Surface(
+                                contentColor = navigationSuiteColors.navigationBarContentColor,
+                            ) {
+                                Box {
+                                    if (bottomBarDividerEnabled) {
+                                        HorizontalDivider(
+                                            modifier =
+                                                Modifier
+                                                    .align(Alignment.TopCenter)
+                                                    .fillMaxWidth(),
+                                            color = FlareDividerDefaults.color,
+                                            thickness = FlareDividerDefaults.thickness,
+                                        )
+                                    }
+                                    Row(
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .windowInsetsPadding(
+                                                    WindowInsets.systemBars.only(
+                                                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                                    ),
+                                                ),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        scope.itemList.forEach {
+                                            Box(
+                                                modifier =
+                                                    it.modifier
+                                                        .weight(1f)
+                                                        .combinedClickable(
+                                                            interactionSource = it.interactionSource,
+                                                            onClick = it.onClick,
+                                                            indication = LocalIndication.current,
+                                                            onLongClick = it.onLongClick,
+                                                        ).height(bottomBarHeight),
+                                                contentAlignment = Alignment.Center,
+                                            ) {
+                                                val colors =
+                                                    it.colors?.navigationBarItemColors
+                                                        ?: NavigationBarItemDefaults.colors()
+                                                val color =
+                                                    with(colors) {
+                                                        when {
+                                                            !it.enabled -> disabledIconColor
+                                                            it.selected -> MaterialTheme.colorScheme.primary
+                                                            else -> unselectedIconColor
+                                                        }
+                                                    }
+                                                val iconColor by animateColorAsState(
+                                                    targetValue = color,
+                                                    animationSpec = tween(100),
+                                                )
+                                                CompositionLocalProvider(LocalContentColor provides iconColor) {
+                                                    NavigationItemIcon(
+                                                        icon = it.icon,
+                                                        badge = it.badge,
+                                                    )
+                                                }
                                             }
                                         }
                                     }

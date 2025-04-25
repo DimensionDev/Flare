@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.media
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -35,6 +36,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.ThemeWrapper
+import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.map
@@ -128,70 +130,91 @@ private fun PodcastScreen(
     ) {
         state.data
             .onSuccess { data ->
-                Text(data.title, style = MaterialTheme.typography.titleSmall)
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(72.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(data.hosts) { item ->
-                        UserItem(
-                            item = item,
-                            modifier =
-                                Modifier.clickable {
-                                    toUser(item.key)
-                                },
-                        ) {
-                            Text(stringResource(R.string.podcast_host))
-                        }
-                    }
-                    items(data.speakers) { item ->
-                        UserItem(
-                            item = item,
-                            modifier =
-                                Modifier.clickable {
-                                    toUser(item.key)
-                                },
-                        ) {
-                            Text(stringResource(R.string.podcast_speaker))
-                        }
-                    }
-                }
-                if (data.ended) {
-                    Button(
-                        onClick = {
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        enabled = false,
-                    ) {
-                        Text(stringResource(R.string.podcast_ended))
-                    }
-                } else {
-                    state.isPlaying.onSuccess {
-                        if (it) {
-                            Button(
-                                onClick = {
-                                    state.leavePodcast()
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(stringResource(R.string.podcast_leave))
-                            }
-                        } else {
-                            FilledTonalButton(
-                                onClick = {
-                                    state.playPodcast()
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                            ) {
-                                Text(stringResource(R.string.podcast_listen))
-                            }
-                        }
-                    }
-                }
+                PodcastContent(
+                    data = data,
+                    toUser = toUser,
+                    onLeavePodcast = {
+                        state.leavePodcast()
+                    },
+                    onJoinPodcast = {
+                        state.playPodcast()
+                    },
+                    isPlaying = state.isPlaying,
+                )
             }.onLoading {
             }.onError {
             }
+    }
+}
+
+@Composable
+internal fun ColumnScope.PodcastContent(
+    data: UiPodcast,
+    toUser: (MicroBlogKey) -> Unit,
+    isPlaying: UiState<Boolean>,
+    onLeavePodcast: () -> Unit,
+    onJoinPodcast: () -> Unit,
+) {
+    Text(data.title, style = MaterialTheme.typography.titleSmall)
+    LazyVerticalGrid(
+        columns = GridCells.Adaptive(72.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(data.hosts) { item ->
+            UserItem(
+                item = item,
+                modifier =
+                    Modifier.clickable {
+                        toUser(item.key)
+                    },
+            ) {
+                Text(stringResource(R.string.podcast_host))
+            }
+        }
+        items(data.speakers) { item ->
+            UserItem(
+                item = item,
+                modifier =
+                    Modifier.clickable {
+                        toUser(item.key)
+                    },
+            ) {
+                Text(stringResource(R.string.podcast_speaker))
+            }
+        }
+    }
+    if (data.ended) {
+        Button(
+            onClick = {
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = false,
+        ) {
+            Text(stringResource(R.string.podcast_ended))
+        }
+    } else {
+        isPlaying.onSuccess {
+            if (it) {
+                Button(
+                    onClick = {
+                        onLeavePodcast()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.podcast_leave))
+                }
+            } else {
+                FilledTonalButton(
+                    onClick = {
+                        onJoinPodcast()
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(stringResource(R.string.podcast_listen))
+                }
+            }
+        }
     }
 }
 

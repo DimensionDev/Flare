@@ -31,7 +31,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.LocalBottomBarHeight
+import dev.dimension.flare.ui.component.LocalBottomBarShowing
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -98,7 +98,7 @@ private fun NotificationScreen(
                     }
                 },
                 navigationIcon = {
-                    if (LocalBottomBarHeight.current != 0.dp) {
+                    if (LocalBottomBarShowing.current) {
                         state.user.onSuccess {
                             IconButton(
                                 onClick = toQuickMenu,

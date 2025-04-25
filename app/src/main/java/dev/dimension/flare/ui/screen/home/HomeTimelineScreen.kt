@@ -3,9 +3,7 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -71,8 +69,7 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.LocalBottomBarHeight
-import dev.dimension.flare.ui.component.PodcastFAB
+import dev.dimension.flare.ui.component.LocalBottomBarShowing
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.AdaptiveCard
@@ -200,7 +197,7 @@ private fun HomeTimelineScreen(
                 },
                 scrollBehavior = topAppBarScrollBehavior,
                 navigationIcon = {
-                    if (LocalBottomBarHeight.current != 0.dp) {
+                    if (LocalBottomBarShowing.current) {
                         state.user.onSuccess {
                             IconButton(
                                 onClick = toQuickMenu,
@@ -230,34 +227,20 @@ private fun HomeTimelineScreen(
             )
         },
         floatingActionButton = {
-            Column(
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.End,
-            ) {
-                state.user.onSuccess {
-                    AnimatedVisibility(
-                        visible = topAppBarScrollBehavior.state.heightOffset == 0f && LocalBottomBarHeight.current != 0.dp,
-                        enter = scaleIn(),
-                        exit = scaleOut(),
-                    ) {
-                        FloatingActionButton(
-                            onClick = toCompose,
-                        ) {
-                            FAIcon(
-                                imageVector = FontAwesomeIcons.Solid.Pen,
-                                contentDescription = stringResource(id = R.string.compose_title),
-                            )
-                        }
-                    }
-                }
+            state.user.onSuccess {
                 AnimatedVisibility(
-                    visible = topAppBarScrollBehavior.state.heightOffset == 0f,
-                    enter = slideInHorizontally { it },
-                    exit = slideOutHorizontally { it },
+                    visible = topAppBarScrollBehavior.state.heightOffset == 0f && LocalBottomBarShowing.current,
+                    enter = scaleIn(),
+                    exit = scaleOut(),
                 ) {
-                    PodcastFAB(
-                        toPodcast = toPodcast,
-                    )
+                    FloatingActionButton(
+                        onClick = toCompose,
+                    ) {
+                        FAIcon(
+                            imageVector = FontAwesomeIcons.Solid.Pen,
+                            contentDescription = stringResource(id = R.string.compose_title),
+                        )
+                    }
                 }
             }
         },

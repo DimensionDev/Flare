@@ -145,6 +145,13 @@ public object AppDeepLinkHelper {
                 AppleRoute.StatusMedia(accountType, statusKey, index)
             }
 
+            "Podcast" -> {
+                val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
+                val id = data.segments.getOrNull(1) ?: return null
+                val accountType = accountKey.let { AccountType.Specific(it) }
+                AppleRoute.Podcast(accountType, id)
+            }
+
             else -> null
         }
     }
@@ -327,5 +334,13 @@ public sealed class AppleRoute {
     ) : AppleRoute() {
         override val routeType: RouteType
             get() = RouteType.FullScreen
+    }
+
+    public data class Podcast(
+        val accountType: AccountType,
+        val id: String,
+    ) : AppleRoute() {
+        override val routeType: RouteType
+            get() = RouteType.Sheet
     }
 }

@@ -68,7 +68,7 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.LocalBottomBarHeight
+import dev.dimension.flare.ui.component.LocalBottomBarShowing
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.AdaptiveCard
@@ -186,7 +186,7 @@ private fun HomeTimelineScreen(
                 },
                 scrollBehavior = topAppBarScrollBehavior,
                 navigationIcon = {
-                    if (LocalBottomBarHeight.current != 0.dp) {
+                    if (LocalBottomBarShowing.current) {
                         state.user.onSuccess {
                             IconButton(
                                 onClick = toQuickMenu,
@@ -218,7 +218,7 @@ private fun HomeTimelineScreen(
         floatingActionButton = {
             state.user.onSuccess {
                 AnimatedVisibility(
-                    visible = topAppBarScrollBehavior.state.heightOffset == 0f && LocalBottomBarHeight.current != 0.dp,
+                    visible = topAppBarScrollBehavior.state.heightOffset == 0f && LocalBottomBarShowing.current,
                     enter = scaleIn(),
                     exit = scaleOut(),
                 ) {

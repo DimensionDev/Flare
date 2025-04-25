@@ -96,8 +96,10 @@ nestedScrollView = { group = "com.github.Tlaster", name = "NestedScrollView", ve
 webkit = { group = "androidx.webkit", name = "webkit", version = "1.13.0" }
 
 media3-exoplayer = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "media3" }
-media3-ui = { group = "androidx.media3", name = "media3-ui-compose", version.ref = "media3" }
+media3-ui-compose = { group = "androidx.media3", name = "media3-ui-compose", version.ref = "media3" }
+media3-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "media3" }
 media3-hls = { group = "androidx.media3", name = "media3-exoplayer-hls", version.ref = "media3" }
+media3-session = { group = "androidx.media3", name = "media3-session", version.ref = "media3" }
 
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
@@ -202,7 +204,7 @@ coil3 = ["coil3-compose", "coil3-svg", "coil3-ktor3", "coil3-network"]
 coil3-extensions = ["apng", "awebp", "vectordrawable-animated", "zoomable-image", "coil3-gif"]
 accompanist = ["accompanist-permissions", "accompanist-drawablepainter"]
 compose-destinations = ["compose-destinations", "material3-navigation"]
-media3 = ["media3-exoplayer", "media3-ui", "media3-hls"]
+media3 = ["media3-exoplayer", "media3-ui", "media3-hls", "media3-session", "media3-ui-compose"]
 firebase = ["firebase-analytics-ktx", "firebase-crashlytics-ktx"]
 ktorfit = ["ktorfit-lib", "ktorfit-converters-response", "ktorfit-converters-flow", "ktorfit-converters-call"]
 

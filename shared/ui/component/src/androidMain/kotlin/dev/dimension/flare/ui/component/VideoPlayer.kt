@@ -25,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.ContentScale
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -96,19 +98,34 @@ public fun VideoPlayer(
 ) {
     var isLoaded by remember { mutableStateOf(true) }
     var remainingTime by remember { mutableLongStateOf(0L) }
+    val audioAttributes =
+        remember {
+            AudioAttributes
+                .Builder()
+                .setUsage(C.USAGE_MEDIA)
+                .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+                .build()
+        }
     Box(modifier = modifier) {
         val player =
             remember(uri) {
                 playerPool
                     .get(uri)
-                    .apply {
-                        if (autoPlay) {
-                            play()
-                        }
-                        volume = if (muted) 0f else 1f
-                    }
             }
         val state = rememberPresentationState(player)
+        LaunchedEffect(muted) {
+            player.volume = if (muted) 0f else 1f
+            if (muted) {
+                player.setAudioAttributes(audioAttributes, false)
+            } else {
+                player.setAudioAttributes(audioAttributes, true)
+            }
+        }
+        LaunchedEffect(autoPlay) {
+            if (autoPlay) {
+                player.play()
+            }
+        }
         LaunchedEffect(player) {
             while (true) {
                 isLoaded = !player.isLoading || player.duration > 0
@@ -120,6 +137,7 @@ public fun VideoPlayer(
         }
         DisposableEffect(uri) {
             onDispose {
+                player.setAudioAttributes(audioAttributes, false)
                 playerPool.release(uri)
             }
         }

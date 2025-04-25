@@ -12,6 +12,7 @@ import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
+import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.XQT
@@ -48,6 +49,7 @@ import dev.dimension.flare.data.network.xqt.model.CreateBookmarkRequestVariables
 import dev.dimension.flare.data.network.xqt.model.CreateListRequest
 import dev.dimension.flare.data.network.xqt.model.DeleteBookmarkRequest
 import dev.dimension.flare.data.network.xqt.model.DeleteBookmarkRequestVariables
+import dev.dimension.flare.data.network.xqt.model.LiveVideoStreamStatusResponse
 import dev.dimension.flare.data.network.xqt.model.PostCreateRetweetRequest
 import dev.dimension.flare.data.network.xqt.model.PostCreateRetweetRequestVariables
 import dev.dimension.flare.data.network.xqt.model.PostCreateTweetRequest
@@ -78,6 +80,7 @@ import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiList
+import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiRelation
 import dev.dimension.flare.ui.model.UiState
@@ -1876,4 +1879,39 @@ internal class XQTDataSource(
                 throw Exception("Cannot send DM")
             }
         }.isSuccess
+
+    suspend fun podcast(id: String): Result<UiPodcast> =
+        tryRun {
+            val data =
+                service
+                    .getAudioSpaceById(
+                        variables =
+                            """
+                            {
+                                "id": "$id",
+                                "isMetatagsQuery": false,
+                                "withReplays": true,
+                                "withListeners": true
+                            }
+                            """.trimIndent(),
+                    ).data
+                    ?.audioSpace
+            val mediaKey = data?.metadata?.mediaKey ?: throw Exception("Media key not found")
+            val mediaData =
+                runCatching {
+                    if (data.metadata.state == "Ended") {
+                        null
+                    } else {
+                        service
+                            .getLiveVideoStreamStatus(mediaKey = mediaKey)
+                            .decodeJson<LiveVideoStreamStatusResponse>()
+                            .source
+                            ?.noRedirectPlaybackURL
+                    }
+                }.getOrNull()
+            data.render(
+                accountKey = accountKey,
+                url = mediaData,
+            )
+        }
 }

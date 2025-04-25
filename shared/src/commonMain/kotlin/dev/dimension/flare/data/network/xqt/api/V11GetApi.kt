@@ -10,6 +10,7 @@ import dev.dimension.flare.data.network.xqt.model.InboxDMTrustedTimelineResponse
 import dev.dimension.flare.data.network.xqt.model.InboxDMUserUpdateResponse
 import dev.dimension.flare.data.network.xqt.model.ListsMembershipsResponse
 import dev.dimension.flare.data.network.xqt.model.UserRecommendationsItem
+import dev.dimension.flare.model.xqtHost
 
 internal interface V11GetApi {
     /**
@@ -465,4 +466,12 @@ internal interface V11GetApi {
                 "editControl,article",
         @Query("cursor") cursor: kotlin.String? = null,
     ): InboxDMUserUpdateResponse
+
+    @GET("1.1/live_video_stream/status/{mediaKey}")
+    suspend fun getLiveVideoStreamStatus(
+        @Path("mediaKey") mediaKey: String, // e.g., "28_1914178371401003008"
+        @Query("client") client: String = "web",
+        @Query("use_syndication_guest_id") useSyndicationGuestId: Boolean = false,
+        @Query("cookie_set_host") cookieSetHost: String = xqtHost,
+    ): String
 }

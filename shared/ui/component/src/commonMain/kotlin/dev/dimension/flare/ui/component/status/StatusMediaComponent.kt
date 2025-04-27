@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,11 +77,15 @@ internal fun StatusMediaComponent(
             content = {
                 data.forEach { media ->
                     Box {
-                        MediaItem(
-                            media = media,
-                            modifier =
-                                Modifier
-                                    .clipToBounds()
+                        CompositionLocalProvider(
+                            LocalComponentAppearance provides appearanceSettings
+                                .copy(videoAutoplay = if (hideSensitive) ComponentAppearance.VideoAutoplay.NEVER else appearanceSettings.videoAutoplay)
+                        ) {
+                            MediaItem(
+                                media = media,
+                                modifier =
+                                    Modifier
+                                        .clipToBounds()
 //                                .sharedElement(
 //                                    rememberSharedContentState(
 //                                        when (media) {
@@ -92,12 +97,13 @@ internal fun StatusMediaComponent(
 //                                    ),
 //                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                )
-                                    .pointerHoverIcon(PointerIcon.Hand)
-                                    .clickable {
-                                        onMediaClick(media)
-                                    },
-                            keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
-                        )
+                                        .pointerHoverIcon(PointerIcon.Hand)
+                                        .clickable {
+                                            onMediaClick(media)
+                                        },
+                                keepAspectRatio = data.size == 1 && appearanceSettings.expandMediaSize,
+                            )
+                        }
                         if (!media.description.isNullOrEmpty()) {
                             PlatformText(
                                 text = "ALT",
@@ -244,7 +250,7 @@ public fun MediaItem(
             val shouldPlay =
                 remember(appearanceSettings.videoAutoplay, wifiState) {
                     appearanceSettings.videoAutoplay == ComponentAppearance.VideoAutoplay.ALWAYS ||
-                        (appearanceSettings.videoAutoplay == ComponentAppearance.VideoAutoplay.WIFI && wifiState)
+                            (appearanceSettings.videoAutoplay == ComponentAppearance.VideoAutoplay.WIFI && wifiState)
                 }
             if (shouldPlay) {
                 PlatformVideoPlayer(

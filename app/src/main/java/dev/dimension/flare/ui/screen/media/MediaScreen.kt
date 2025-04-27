@@ -1,18 +1,12 @@
 package dev.dimension.flare.ui.screen.media
 
 import android.Manifest
-import android.app.Activity
 import android.content.ContentValues
 import android.content.Context
-import android.content.ContextWrapper
 import android.graphics.BitmapFactory
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import android.view.View
-import android.view.Window
-import android.view.WindowManager
-import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
@@ -33,7 +27,6 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -90,39 +83,9 @@ import java.io.IOException
 object FullScreenDialogStyle : DestinationStyle.Dialog() {
     override val properties =
         DialogProperties(
-            usePlatformDefaultWidth = true,
             decorFitsSystemWindows = false,
+            usePlatformDefaultWidth = false,
         )
-}
-
-@Composable
-fun getActivityWindow(): Window? = LocalView.current.context.getActivityWindow()
-
-private tailrec fun Context.getActivityWindow(): Window? =
-    when (this) {
-        is Activity -> window
-        is ContextWrapper -> baseContext.getActivityWindow()
-        else -> null
-    }
-
-@Composable
-fun SetDialogDestinationToEdgeToEdge() {
-    val activityWindow = getActivityWindow()
-    val dialogWindow = (LocalView.current.parent as? DialogWindowProvider)?.window
-    val parentView = LocalView.current.parent as View
-    SideEffect {
-        if (activityWindow != null && dialogWindow != null) {
-            val attributes = WindowManager.LayoutParams()
-            attributes.copyFrom(activityWindow.attributes)
-            attributes.type = dialogWindow.attributes.type
-            dialogWindow.attributes = attributes
-            parentView.layoutParams =
-                FrameLayout.LayoutParams(
-                    activityWindow.decorView.width,
-                    activityWindow.decorView.height,
-                )
-        }
-    }
 }
 
 @Composable
@@ -142,7 +105,10 @@ fun MediaRoute(
     navigator: DestinationsNavigator,
     previewUrl: String? = null,
 ) {
-    SetDialogDestinationToEdgeToEdge()
+    val view = LocalView.current
+    LaunchedEffect(view) {
+        (view.parent as DialogWindowProvider).window.setDimAmount(0f)
+    }
     MediaScreen(
         uri = uri,
         onDismiss = navigator::navigateUp,

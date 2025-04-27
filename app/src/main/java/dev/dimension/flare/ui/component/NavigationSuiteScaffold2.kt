@@ -232,7 +232,7 @@ fun NavigationSuiteScaffold2(
                             } else {
                                 0.dp
                             },
-                        LocalBottomBarShowing provides (layoutType == NavigationSuiteType.NavigationBar && !shouldHideBottomBar),
+                        LocalBottomBarShowing provides (layoutType == NavigationSuiteType.NavigationBar),
                     ) {
                         content.invoke()
                     }

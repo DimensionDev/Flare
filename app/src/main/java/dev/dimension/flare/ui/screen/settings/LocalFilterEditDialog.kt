@@ -39,7 +39,6 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.LocalFilterPresenter
 import dev.dimension.flare.ui.screen.media.FullScreenDialogStyle
-import dev.dimension.flare.ui.screen.media.SetDialogDestinationToEdgeToEdge
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Destination<RootGraph>(
@@ -66,7 +65,6 @@ private fun LocalFilterEditDialog(
     val state by producePresenter {
         presenter(keyword = keyword)
     }
-    SetDialogDestinationToEdgeToEdge()
     FlareScaffold(
         topBar = {
             FlareTopAppBar(

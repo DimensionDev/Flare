@@ -41,6 +41,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.compose.koinInject
+import java.util.UUID
 import kotlin.concurrent.timer
 import kotlin.time.Duration.Companion.minutes
 
@@ -141,34 +142,40 @@ public fun VideoPlayer(
                 playerPool.release(uri)
             }
         }
-        PlayerSurface(
-            player = player,
-            modifier =
-                Modifier
-                    .clipToBounds()
-                    .resizeWithContentScale(
-                        contentScale = contentScale,
-                        sourceSizeDp = state.videoSizeDp,
-                    ).let {
-                        if (aspectRatio != null) {
-                            it.aspectRatio(
-                                aspectRatio,
-                            )
-                        } else {
-                            it
-                        }
-                    }.let {
-                        if (onClick != null) {
-                            it.combinedClickable(
-                                onClick = onClick,
-                                onLongClick = onLongClick,
-                            )
-                        } else {
-                            it
-                        }
-                    }.matchParentSize(),
-            surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
-        )
+        val isActive = rememberSurfaceBinding(uri)
+        val playerModifier =
+            Modifier
+                .clipToBounds()
+                .resizeWithContentScale(
+                    contentScale = contentScale,
+                    sourceSizeDp = state.videoSizeDp,
+                ).let {
+                    if (aspectRatio != null) {
+                        it.aspectRatio(
+                            aspectRatio,
+                        )
+                    } else {
+                        it
+                    }
+                }.let {
+                    if (onClick != null) {
+                        it.combinedClickable(
+                            onClick = onClick,
+                            onLongClick = onLongClick,
+                        )
+                    } else {
+                        it
+                    }
+                }.matchParentSize()
+        if (isActive) {
+            PlayerSurface(
+                player = player,
+                modifier = playerModifier,
+                surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
+            )
+        } else {
+            loadingPlaceholder.invoke(this)
+        }
         if (!isLoaded) {
             loadingPlaceholder()
         } else {
@@ -246,5 +253,78 @@ public class VideoPlayerPool(
         }
 
         return count == 0L
+    }
+}
+
+@Composable
+private fun rememberSurfaceBinding(
+    uri: String,
+    autoRequest: Boolean = true,
+): Boolean {
+    val surfaceKey = remember { UUID.randomUUID().toString() }
+    var isActive by remember { mutableStateOf(false) }
+
+    LaunchedEffect(uri) {
+        SurfaceBindingManager.register(uri, surfaceKey) { active ->
+            isActive = active
+        }
+
+        if (autoRequest) {
+            SurfaceBindingManager.requestBind(uri, surfaceKey)
+        }
+    }
+
+    DisposableEffect(uri) {
+        onDispose {
+            SurfaceBindingManager.unregister(uri, surfaceKey)
+        }
+    }
+
+    return isActive
+}
+
+private object SurfaceBindingManager {
+    private val bindings = mutableMapOf<String, String>() // uri -> ownerKey
+    private val listeners = mutableMapOf<String, MutableMap<String, (Boolean) -> Unit>>() // uri -> (ownerKey -> callback)
+
+    fun register(
+        uri: String,
+        key: String,
+        onActiveChanged: (Boolean) -> Unit,
+    ) {
+        val uriListeners = listeners.getOrPut(uri) { mutableMapOf() }
+        uriListeners[key] = onActiveChanged
+
+        val current = bindings[uri]
+        if (current == null) {
+            bindings[uri] = key
+            onActiveChanged(true)
+        } else {
+            onActiveChanged(current == key)
+        }
+    }
+
+    fun unregister(
+        uri: String,
+        key: String,
+    ) {
+        listeners[uri]?.remove(key)
+        if (bindings[uri] == key) {
+            bindings.remove(uri)
+            listeners[uri]?.entries?.firstOrNull()?.let { (nextKey, callback) ->
+                bindings[uri] = nextKey
+                callback(true)
+            }
+        }
+    }
+
+    fun requestBind(
+        uri: String,
+        key: String,
+    ) {
+        if (bindings[uri] == key) return
+        listeners[uri]?.get(bindings[uri])?.invoke(false)
+        bindings[uri] = key
+        listeners[uri]?.get(key)?.invoke(true)
     }
 }

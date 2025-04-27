@@ -59,8 +59,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogWindowProvider
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
@@ -170,6 +172,10 @@ internal fun StatusMediaDeeplinkRoute(
     navigator: DestinationsNavigator,
     navigationState: NavigationState,
 ) {
+    val view = LocalView.current
+    LaunchedEffect(view) {
+        (view.parent as DialogWindowProvider).window.setDimAmount(0f)
+    }
     val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
     StatusMediaRoute(
         statusKey = statusKey,
@@ -200,7 +206,10 @@ internal fun StatusMediaRoute(
     accountType: AccountType,
     navigationState: NavigationState,
 ) {
-    SetDialogDestinationToEdgeToEdge()
+    val view = LocalView.current
+    LaunchedEffect(view) {
+        (view.parent as DialogWindowProvider).window.setDimAmount(0f)
+    }
 //    AnimatedVisibility(true) {
 //        SharedTransitionScope {
 //    DisposableEffect(Unit) {

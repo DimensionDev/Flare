@@ -78,12 +78,16 @@ internal fun StatusMediaComponent(
                 data.forEach { media ->
                     Box {
                         CompositionLocalProvider(
-                            LocalComponentAppearance provides appearanceSettings
-                                .copy(videoAutoplay = if (hideSensitive)
-                                    ComponentAppearance.VideoAutoplay.NEVER
-                                else
-                                    appearanceSettings.videoAutoplay
-                                ),
+                            LocalComponentAppearance provides
+                                appearanceSettings
+                                    .copy(
+                                        videoAutoplay =
+                                            if (hideSensitive) {
+                                                ComponentAppearance.VideoAutoplay.NEVER
+                                            } else {
+                                                appearanceSettings.videoAutoplay
+                                            },
+                                    ),
                         ) {
                             MediaItem(
                                 media = media,
@@ -254,7 +258,7 @@ public fun MediaItem(
             val shouldPlay =
                 remember(appearanceSettings.videoAutoplay, wifiState) {
                     appearanceSettings.videoAutoplay == ComponentAppearance.VideoAutoplay.ALWAYS ||
-                            (appearanceSettings.videoAutoplay == ComponentAppearance.VideoAutoplay.WIFI && wifiState)
+                        (appearanceSettings.videoAutoplay == ComponentAppearance.VideoAutoplay.WIFI && wifiState)
                 }
             if (shouldPlay) {
                 PlatformVideoPlayer(

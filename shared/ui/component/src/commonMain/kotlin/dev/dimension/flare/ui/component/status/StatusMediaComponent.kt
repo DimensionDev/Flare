@@ -79,7 +79,11 @@ internal fun StatusMediaComponent(
                     Box {
                         CompositionLocalProvider(
                             LocalComponentAppearance provides appearanceSettings
-                                .copy(videoAutoplay = if (hideSensitive) ComponentAppearance.VideoAutoplay.NEVER else appearanceSettings.videoAutoplay)
+                                .copy(videoAutoplay = if (hideSensitive)
+                                    ComponentAppearance.VideoAutoplay.NEVER
+                                else
+                                    appearanceSettings.videoAutoplay
+                                ),
                         ) {
                             MediaItem(
                                 media = media,

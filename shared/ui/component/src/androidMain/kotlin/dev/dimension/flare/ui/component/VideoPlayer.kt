@@ -270,7 +270,6 @@ private fun rememberSurfaceBinding(
         }
 
         if (autoRequest) {
-            // 注册后立即请求绑定权
             SurfaceBindingManager.requestBind(uri, surfaceKey)
         }
     }

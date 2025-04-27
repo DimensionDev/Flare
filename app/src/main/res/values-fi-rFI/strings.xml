@@ -236,4 +236,11 @@
     <string name="emoji_picker_search">Etsi</string>
     <string name="changelog_title">Tervetuloa takaisin!</string>
     <string name="changelog_message">Olemme tehneet joitakin muutoksia, koska olet viimeksi kirjautunut sisään. Tässä on yksityiskohdat:</string>
+    <string name="podcast_host">Isäntä</string>
+    <string name="podcast_title">Podcast</string>
+    <string name="podcast_speaker">Kaiutin</string>
+    <string name="podcast_listen">Aloita kuuntelu</string>
+    <string name="podcast_leave">Poistu</string>
+    <string name="podcast_ended">Podcast päättyi</string>
+    <string name="podcast_living">Elävä Podcast</string>
 </resources>

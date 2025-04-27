@@ -236,4 +236,11 @@
     <string name="emoji_picker_search">Hledat</string>
     <string name="changelog_title">Vítejte zpět!</string>
     <string name="changelog_message">Od posledního přihlášení jsme provedli nějaké změny. Zde jsou detaily:</string>
+    <string name="podcast_host">Hostitel</string>
+    <string name="podcast_title">Vysílání</string>
+    <string name="podcast_speaker">Reproduktor</string>
+    <string name="podcast_listen">Začít naslouchat</string>
+    <string name="podcast_leave">Opustit</string>
+    <string name="podcast_ended">Podcast ukončen</string>
+    <string name="podcast_living">Podcast živě</string>
 </resources>

@@ -239,4 +239,11 @@
     <string name="emoji_picker_search">検索</string>
     <string name="changelog_title">おかえりなさい！</string>
     <string name="changelog_message">最後にログインしてからいくつかの変更がありました。詳細は次のとおりです:</string>
+    <string name="podcast_host">ホスト</string>
+    <string name="podcast_title">ポッドキャスト</string>
+    <string name="podcast_speaker">スピーカー</string>
+    <string name="podcast_listen">聴き始めます</string>
+    <string name="podcast_leave">退出する</string>
+    <string name="podcast_ended">ポッドキャスト終了</string>
+    <string name="podcast_living">ポッドキャストライブ</string>
 </resources>

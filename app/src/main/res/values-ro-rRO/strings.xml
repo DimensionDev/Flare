@@ -236,4 +236,11 @@
     <string name="emoji_picker_search">Caută</string>
     <string name="changelog_title">Bine ai revenit!</string>
     <string name="changelog_message">Am făcut unele modificări de când v-ați autentificat ultima dată. Iată detaliile:</string>
+    <string name="podcast_host">Gazdă</string>
+    <string name="podcast_title">Podcast</string>
+    <string name="podcast_speaker">Difuzor</string>
+    <string name="podcast_listen">Începe ascultarea</string>
+    <string name="podcast_leave">Părăsește</string>
+    <string name="podcast_ended">Podcast terminat</string>
+    <string name="podcast_living">Podcast în direct</string>
 </resources>

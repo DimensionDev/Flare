@@ -239,4 +239,11 @@
     <string name="emoji_picker_search">搜索</string>
     <string name="changelog_title">欢迎回来！</string>
     <string name="changelog_message">自您上次登录以来，我们已经做了一些更改。以下是详细信息：</string>
+    <string name="podcast_host">主机</string>
+    <string name="podcast_title">播客</string>
+    <string name="podcast_speaker">扬声器</string>
+    <string name="podcast_listen">开始收听</string>
+    <string name="podcast_leave">退出</string>
+    <string name="podcast_ended">播客已结束</string>
+    <string name="podcast_living">实时播报</string>
 </resources>

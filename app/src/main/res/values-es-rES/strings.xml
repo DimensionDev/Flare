@@ -236,4 +236,11 @@
     <string name="emoji_picker_search">Buscar</string>
     <string name="changelog_title">¡Bienvenido de nuevo!</string>
     <string name="changelog_message">Hemos realizado algunos cambios desde la última vez que iniciaste sesión. Estos son los detalles:</string>
+    <string name="podcast_host">Anfitrión</string>
+    <string name="podcast_title">Podcast</string>
+    <string name="podcast_speaker">Altavoz</string>
+    <string name="podcast_listen">Empezar a escuchar</string>
+    <string name="podcast_leave">Abandonar</string>
+    <string name="podcast_ended">Podcast finalizado</string>
+    <string name="podcast_living">Podcast en vivo</string>
 </resources>

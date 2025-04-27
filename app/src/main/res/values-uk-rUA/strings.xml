@@ -236,4 +236,11 @@
     <string name="emoji_picker_search">Пошук</string>
     <string name="changelog_title">З поверненням!</string>
     <string name="changelog_message">Ми внесли деякі зміни після моменту, коли ви увійшли в систему. Детальніше:</string>
+    <string name="podcast_host">Хост</string>
+    <string name="podcast_title">Подкаст</string>
+    <string name="podcast_speaker">Динамік</string>
+    <string name="podcast_listen">Почати прослуховування</string>
+    <string name="podcast_leave">Залишити</string>
+    <string name="podcast_ended">Подкаст закінчився</string>
+    <string name="podcast_living">Подкаст в реальному часі</string>
 </resources>

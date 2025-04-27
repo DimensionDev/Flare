@@ -235,4 +235,11 @@
     <string name="emoji_picker_search">Искать</string>
     <string name="changelog_title">С возвращением!</string>
     <string name="changelog_message">Мы внесли некоторые изменения с момента последнего входа. Ниже приведены подробности:</string>
+    <string name="podcast_host">Хост</string>
+    <string name="podcast_title">Подкаст</string>
+    <string name="podcast_speaker">Динамик</string>
+    <string name="podcast_listen">Начать слушать</string>
+    <string name="podcast_leave">Покинуть</string>
+    <string name="podcast_ended">Подкаст завершен</string>
+    <string name="podcast_living">Подкаст живой</string>
 </resources>

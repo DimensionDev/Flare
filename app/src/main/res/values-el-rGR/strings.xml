@@ -235,4 +235,11 @@
     <string name="emoji_picker_search">Αναζήτηση</string>
     <string name="changelog_title">Καλώς ήρθατε!</string>
     <string name="changelog_message">Έχουμε κάνει κάποιες αλλαγές από τότε που συνδεθήκατε την τελευταία φορά. Εδώ είναι οι λεπτομέρειες:</string>
+    <string name="podcast_host">Διακομιστής</string>
+    <string name="podcast_title">Podcast</string>
+    <string name="podcast_speaker">Ηχείο</string>
+    <string name="podcast_listen">Έναρξη ακρόασης</string>
+    <string name="podcast_leave">Αποχώρηση</string>
+    <string name="podcast_ended">Το Podcast τελείωσε</string>
+    <string name="podcast_living">Podcast ζωντανά</string>
 </resources>

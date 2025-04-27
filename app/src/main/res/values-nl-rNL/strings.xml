@@ -236,4 +236,11 @@
     <string name="emoji_picker_search">Zoeken</string>
     <string name="changelog_title">Welkom terug!</string>
     <string name="changelog_message">We hebben enkele wijzigingen aangebracht sinds de laatste keer dat u bent ingelogd. Hier zijn de details:</string>
+    <string name="podcast_host">Hostnaam</string>
+    <string name="podcast_title">Potcast</string>
+    <string name="podcast_speaker">Spreker</string>
+    <string name="podcast_listen">Start luisteren</string>
+    <string name="podcast_leave">Verlaat</string>
+    <string name="podcast_ended">Podcast beëindigd</string>
+    <string name="podcast_living">Podcast live</string>
 </resources>

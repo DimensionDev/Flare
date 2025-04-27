@@ -236,4 +236,11 @@
     <string name="emoji_picker_search">Søk</string>
     <string name="changelog_title">Velkommen tilbake!</string>
     <string name="changelog_message">Vi har gjort noen endringer siden sist du logget inn. Her er detaljer:</string>
+    <string name="podcast_host">Vert</string>
+    <string name="podcast_title">Podcasten</string>
+    <string name="podcast_speaker">Høyttaler</string>
+    <string name="podcast_listen">Begynn å lytte</string>
+    <string name="podcast_leave">Forlat</string>
+    <string name="podcast_ended">Podcen er avsluttet</string>
+    <string name="podcast_living">Podcasten levende</string>
 </resources>

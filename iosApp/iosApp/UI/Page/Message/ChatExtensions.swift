@@ -1,23 +1,22 @@
 import SwiftUI
-import UIKit  
+import UIKit
 
- 
 extension AttributedString {
-      func height(withConstrainedWidth width: CGFloat, font: UIFont) -> CGFloat {
-         let attributedString = NSAttributedString(self)
-         let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
-         let boundingBox = attributedString.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, context: nil)
-         return ceil(boundingBox.height)
-     }
+    func height(withConstrainedWidth width: CGFloat, font _: UIFont) -> CGFloat {
+        let attributedString = NSAttributedString(self)
+        let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
+        let boundingBox = attributedString.boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, context: nil)
+        return ceil(boundingBox.height)
+    }
 }
 
- extension String {
-      func styled(using styler: (String) -> AttributedString) -> AttributedString {
-         return styler(self)
-     }
- }
+extension String {
+    func styled(using styler: (String) -> AttributedString) -> AttributedString {
+        styler(self)
+    }
+}
 
- struct SizeGetter: ViewModifier {
+struct SizeGetter: ViewModifier {
     @Binding var size: CGSize
 
     func body(content: Content) -> some View {
@@ -29,9 +28,9 @@ extension AttributedString {
                 }
             )
             .onPreferenceChange(SizePreferenceKey.self) { newSize in
-                  if size != newSize { 
-                    self.size = newSize
-                 }
+                if size != newSize {
+                    size = newSize
+                }
             }
     }
 }
@@ -45,12 +44,11 @@ struct SizePreferenceKey: PreferenceKey {
 
 extension View {
     func sizeGetter(_ size: Binding<CGSize>) -> some View {
-        self.modifier(SizeGetter(size: size))
+        modifier(SizeGetter(size: size))
     }
 
-   
     @ViewBuilder
-    func applyIf<T: View>(_ condition: Bool, transform: (Self) -> T) -> some View {
+    func applyIf(_ condition: Bool, transform: (Self) -> some View) -> some View {
         if condition {
             transform(self)
         } else {
@@ -58,7 +56,7 @@ extension View {
         }
     }
 
-      func viewSize(_ size: CGFloat) -> some View {
-         self.frame(width: size, height: size)
-     }
+    func viewSize(_ size: CGFloat) -> some View {
+        frame(width: size, height: size)
+    }
 }

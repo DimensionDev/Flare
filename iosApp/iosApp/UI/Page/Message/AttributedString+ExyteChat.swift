@@ -5,7 +5,6 @@ import UIKit
 // Source: package_source/Chat/Sources/ExyteChat/Extensions/AttributedString+Extensions.swift
 
 extension AttributedString {
-
     func width(withConstrainedWidth width: CGFloat, font: UIFont) -> CGFloat {
         let constraintRect = CGSize(width: width, height: .greatestFiniteMagnitude)
         let boundingBox = toAttrStringSimple(font: font).boundingRect(with: constraintRect, options: .usesLineFragmentOrigin, context: nil)
@@ -14,7 +13,7 @@ extension AttributedString {
     }
 
     func toAttrStringSimple(font: UIFont) -> NSAttributedString {
-        let plainString = String(self.characters)
+        let plainString = String(characters)
         return NSAttributedString(string: plainString, attributes: [.font: font])
     }
 
@@ -46,7 +45,8 @@ extension AttributedString {
 
         let lastLineFragmentRect = layoutManager.lineFragmentUsedRect(
             forGlyphAt: lastGlyphIndex,
-            effectiveRange: nil)
+            effectiveRange: nil
+        )
 
         return ceil(lastLineFragmentRect.maxX)
     }
@@ -59,12 +59,11 @@ extension AttributedString {
         guard lineHeight > 0 else { return 0 }
         return Int(ceil(textSize.height / lineHeight))
     }
-
 }
 
 public extension AttributedString {
     var urls: [URL] {
-        runs[\.link].map { (link, range) in
+        runs[\.link].map { link, _ in
             link?.absoluteURL
         }
         .compactMap { $0 }

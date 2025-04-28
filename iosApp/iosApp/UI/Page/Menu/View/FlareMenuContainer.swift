@@ -12,7 +12,7 @@ struct FlareMenuContainer: View {
 
     @State private var accountType: AccountType = AccountTypeGuest()
 
-//content: Content,
+    // content: Content,
 //    init( appState: FlareAppState, router: FlareRouter) {
 //        // self.content = content
 //        // self.appState = appState
@@ -21,13 +21,13 @@ struct FlareMenuContainer: View {
 
     var body: some View {
         FLNewMenuView(
-//            isOpen: $appState.isMenuOpen,
+            //            isOpen: $appState.isMenuOpen,
             accountType: accountType,
             user: currentUser
         )
         // .environmentObject(router)
 //        FLNewSideMenu(
-////            isOpen: $appState.isMenuOpen,
+        ////            isOpen: $appState.isMenuOpen,
 //            menu: menuView,
 //            content: content
 //        )
@@ -48,7 +48,7 @@ struct FlareMenuContainer: View {
 
 //    private var menuView: some View {
 //        FLNewMenuView(
-////            isOpen: $appState.isMenuOpen,
+    ////            isOpen: $appState.isMenuOpen,
 //            accountType: accountType,
 //            user: currentUser
 //        )

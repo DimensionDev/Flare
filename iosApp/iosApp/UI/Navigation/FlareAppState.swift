@@ -6,7 +6,7 @@ class FlareAppState: ObservableObject {
 //    @Published var isMenuOpen: Bool = false
 //    @Published var menuProgress: CGFloat = 0.0 // 0表示完全关闭，1表示完全打开
 
-@Published var isCustomTabBarHidden: Bool = false
+    @Published var isCustomTabBarHidden: Bool = false
 
     @Published var selectedTab: Int = 0
     @Published var previousTab: Int = 0

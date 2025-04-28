@@ -1,11 +1,10 @@
 import AVKit
+import CoreMedia
 import ExyteChat
 import Kingfisher
 import ObjectiveC
 import shared
 import SwiftUI
-import CoreMedia
-
 
 /// 音频波形数据缓存
 // var waveformCache: [String: [CGFloat]] = [:] // Consider if cache is needed with pre-calculated data
@@ -16,42 +15,40 @@ private class AudioPlayerState: ObservableObject {
     @Published var progress: Double = 0
     @Published var duration: Double = 0
     @Published var currentTime: Double = 0 // Added current time
-    
+
     private var player: AVPlayer?
     private var timeObserver: Any?
-    
+
     func play(url: URL, headers: [String: String]? = nil) {
         stop() // Ensure clean state
         let asset = AVURLAsset(url: url, options: headers.map { ["AVURLAssetHTTPHeaderFieldsKey": $0] })
         let item = AVPlayerItem(asset: asset)
         player = AVPlayer(playerItem: item)
-        
+
         timeObserver = player?.addPeriodicTimeObserver(forInterval: CMTime(seconds: 0.1, preferredTimescale: 10), queue: .main) { [weak self] time in
-            guard let self = self, let currentItem = self.player?.currentItem else { return }
+            guard let self, let currentItem = player?.currentItem else { return }
             let durationSec = currentItem.duration.seconds
             let currentTimeSec = time.seconds
-            
-            
-            if !durationSec.isNaN, durationSec > 0, self.duration != durationSec {
-                self.duration = durationSec
+
+            if !durationSec.isNaN, durationSec > 0, duration != durationSec {
+                duration = durationSec
             }
-            
-            
+
             if !currentTimeSec.isNaN {
-                 self.currentTime = currentTimeSec
-                 if self.duration > 0 {  
-                     self.progress = currentTimeSec / self.duration
-                 } else {
-                     self.progress = 0
-                 }
+                currentTime = currentTimeSec
+                if duration > 0 {
+                    progress = currentTimeSec / duration
+                } else {
+                    progress = 0
+                }
             }
         }
-        
+
         NotificationCenter.default.addObserver(self, selector: #selector(playerDidFinishPlaying), name: .AVPlayerItemDidPlayToEndTime, object: item)
         player?.play()
         isPlaying = true
     }
-    
+
     func stop() {
         player?.pause()
         player = nil
@@ -62,9 +59,9 @@ private class AudioPlayerState: ObservableObject {
         isPlaying = false
         progress = 0
         duration = 0
-        currentTime = 0 
+        currentTime = 0
     }
-    
+
     func togglePlay(url: URL, headers: [String: String]? = nil) {
         if isPlaying {
             stop()
@@ -72,24 +69,23 @@ private class AudioPlayerState: ObservableObject {
             play(url: url, headers: headers)
         }
     }
-    
-    @objc private func playerDidFinishPlaying(notification: NSNotification) {
-         DispatchQueue.main.async { [weak self] in
-             self?.stop()
-         }
-     }
-    
+
+    @objc private func playerDidFinishPlaying(notification _: NSNotification) {
+        DispatchQueue.main.async { [weak self] in
+            self?.stop()
+        }
+    }
+
     deinit {
         stop()
     }
 }
 
- 
 private struct WaveformView: View {
     let samples: [CGFloat]
     let progress: Double
     let color: Color
-    
+
     var body: some View {
         GeometryReader { geometry in
             HStack(alignment: .center, spacing: 2) {
@@ -104,14 +100,13 @@ private struct WaveformView: View {
     }
 }
 
- 
 struct DMAudioMessageView: View {
     let url: URL
     let media: UiMedia
     let isCurrentUser: Bool
     @StateObject private var playerState = AudioPlayerState()
     @State private var waveformSamples: [CGFloat] = Array(repeating: 0.05, count: 50)
-    
+
     var body: some View {
         HStack(spacing: 8) {
             Button(action: {
@@ -123,20 +118,19 @@ struct DMAudioMessageView: View {
                     .foregroundColor(isCurrentUser ? .white : .primary)
             }
             .layoutPriority(1) // Give button higher priority to keep its size
-            
+
             WaveformView(
                 samples: waveformSamples,
                 progress: playerState.progress,
                 color: isCurrentUser ? .white : .primary
             )
             .frame(height: 24)
-             .frame(maxWidth: 150)  
-            .clipped()  
-            .layoutPriority(0)  
+            .frame(maxWidth: 150)
+            .clipped()
+            .layoutPriority(0)
 
-            Spacer(minLength: 4) 
-            
-   
+            Spacer(minLength: 4)
+
             Text("\(formatDuration(playerState.currentTime)) / \(formatDuration(playerState.duration))")
                 .font(.caption)
                 .foregroundColor(isCurrentUser ? .white.opacity(0.7) : .gray)
@@ -149,7 +143,7 @@ struct DMAudioMessageView: View {
         .padding(.vertical, 4)
     }
 
-     private func formatDuration(_ duration: Double) -> String {
+    private func formatDuration(_ duration: Double) -> String {
         guard duration > 0, !duration.isNaN else {
             return "--:--"
         }

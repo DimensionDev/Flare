@@ -41,6 +41,7 @@ class FlareRouter: ObservableObject {
 
         return depth
     }
+
     @Published var menuNavigationPath = NavigationPath()
     @Published var timelineNavigationPath = NavigationPath()
     @Published var discoverNavigationPath = NavigationPath()

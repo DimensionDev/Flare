@@ -3,7 +3,7 @@ import SwiftUI
 
 /// 统一的导航手势修饰符
 //
-//struct FlareNavigationGestureModifier: ViewModifier {
+// struct FlareNavigationGestureModifier: ViewModifier {
 //    @ObservedObject var router: FlareRouter
 //
 //    @Environment(\.dismiss) private var dismiss
@@ -238,10 +238,10 @@ import SwiftUI
 //            }
 //        }
 //    }
-//}
+// }
 //
-//extension View {
+// extension View {
 //    func flareNavigationGesture(router: FlareRouter) -> some View {
 //        modifier(FlareNavigationGestureModifier(router: router))
 //    }
-//}
+// }

@@ -92,7 +92,7 @@ struct TabContentViewSwiftUI: View {
 //                    Spacer()
 //                }
 //                .frame(maxHeight: .infinity)
-////                .gesture(edgeSwipeGesture)
+            ////                .gesture(edgeSwipeGesture)
 //                .allowsHitTesting(true)
 //            }
         }

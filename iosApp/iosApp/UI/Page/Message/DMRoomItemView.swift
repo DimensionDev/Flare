@@ -1,15 +1,12 @@
 import shared
 import SwiftUI
 
- 
 struct DMRoomItemView: View {
     let room: UiDMRoom
 
     var body: some View {
         HStack(spacing: 12) {
-           
             if !room.hasUser {
-               
                 if let currentUser = UserManager.shared.getCurrentUser() {
                     AsyncImage(url: URL(string: currentUser.avatar)) { phase in
                         switch phase {
@@ -34,7 +31,6 @@ struct DMRoomItemView: View {
                     .frame(width: 50, height: 50)
                     .clipShape(Circle())
                 } else {
-                   
                     Circle()
                         .fill(Color.accentColor.opacity(0.2))
                         .frame(width: 50, height: 50)
@@ -47,10 +43,8 @@ struct DMRoomItemView: View {
                         )
                 }
             } else {
-           
                 ZStack {
                     if room.users.count == 1 {
-                      
                         AsyncImage(url: URL(string: room.users[0].avatar)) { phase in
                             switch phase {
                             case .empty:
@@ -73,7 +67,6 @@ struct DMRoomItemView: View {
                         .frame(width: 50, height: 50)
                         .clipShape(Circle())
                     } else {
-                       
                         ForEach(0 ..< min(2, room.users.count), id: \.self) { index in
                             AsyncImage(url: URL(string: room.users[index].avatar)) { phase in
                                 switch phase {
@@ -92,7 +85,6 @@ struct DMRoomItemView: View {
                             .offset(x: CGFloat(index * 12), y: CGFloat(index * 12))
                         }
 
-                      
                         if room.users.count > 1 {
                             Text("\(room.users.count)")
                                 .font(.caption2)
@@ -106,13 +98,10 @@ struct DMRoomItemView: View {
                 .frame(width: 50, height: 50)
             }
 
-             
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    
                     if room.hasUser {
                         if room.users.count == 1 {
-                         
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(room.users[0].name.raw)
                                     .font(.headline)
@@ -124,13 +113,11 @@ struct DMRoomItemView: View {
                                     .lineLimit(1)
                             }
                         } else {
-                             
                             Text(room.getFormattedTitle())
                                 .font(.headline)
                                 .lineLimit(1)
                         }
                     } else {
-                       
                         if let currentUser = UserManager.shared.getCurrentUser() {
                             Text(currentUser.name.raw)
                                 .font(.headline)
@@ -144,7 +131,6 @@ struct DMRoomItemView: View {
 
                     Spacer()
 
-                  
                     if let lastMessage = room.lastMessage {
                         Text(formatTime(lastMessage.timestamp))
                             .font(.caption)
@@ -152,14 +138,12 @@ struct DMRoomItemView: View {
                     }
                 }
 
-                
                 Text(room.lastMessageText.isEmpty ? "" : room.lastMessageText)
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .lineLimit(1)
             }
 
-          
             if room.unreadCount > 0 {
                 Spacer()
                 Text("\(room.unreadCount)")
@@ -172,7 +156,7 @@ struct DMRoomItemView: View {
             }
         }
     }
- 
+
     private func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.timeStyle = .short
@@ -180,19 +164,16 @@ struct DMRoomItemView: View {
     }
 }
 
- 
-
 extension UiDMRoom {
-     func getFormattedTitle() -> String {
+    func getFormattedTitle() -> String {
         if hasUser {
             if users.count == 1 {
-                 if UserManager.shared.isCurrentUser(user: users[0]) {
+                if UserManager.shared.isCurrentUser(user: users[0]) {
                     return "Me"
                 }
-                 
+
                 return users[0].name.raw
             } else if users.count > 1 {
-               
                 let firstUser = users[0].name.raw
                 let secondUser = users[1].name.raw
                 return users.count > 2
@@ -200,11 +181,11 @@ extension UiDMRoom {
                     : "\(firstUser), \(secondUser)"
             }
         }
- 
+
         return "Chat"
     }
 }
- 
+
 struct ForEachWithIndex<Content: View>: View {
     let startIndex: Int32
     let count: Int32

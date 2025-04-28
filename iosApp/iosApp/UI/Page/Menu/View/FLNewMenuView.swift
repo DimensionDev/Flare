@@ -135,12 +135,10 @@ struct FLNewMenuView: View {
             settingsButton
                 .padding(.horizontal, 20)
                 .padding(.bottom, 180)
-             
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(UIColor.systemBackground))
-      
-        .onAppear { 
+        .onAppear {
             appState.isCustomTabBarHidden = false
         }
         .sheet(isPresented: $showLogin) {
@@ -227,7 +225,7 @@ struct FLNewMenuView: View {
                 .padding(.top, 8)
                 .padding(.leading, 15)
             }
- 
+
             Divider()
                 .padding(.top, 8)
         }
@@ -235,7 +233,7 @@ struct FLNewMenuView: View {
 
     private var settingsButton: some View {
         Button(action: {
-             showSettings = true
+            showSettings = true
         }) {
             HStack {
                 Image(systemName: "gearshape.fill")

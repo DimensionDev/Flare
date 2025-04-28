@@ -1,3 +1,4 @@
+import FontAwesomeSwiftUI
 import shared
 import SwiftUI
 
@@ -11,6 +12,9 @@ struct FlareApp: SwiftUI.App {
     @StateObject private var router = FlareRouter()
 
     init() {
+        // Register FontAwesome fonts
+        FontAwesome.register()
+
         KoinHelper.shared.start(inAppNotification: SwitUIInAppNotification())
 
         // 初始化UserManager

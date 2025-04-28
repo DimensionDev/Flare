@@ -28,54 +28,55 @@ struct FlareRootView: View {
                                        log: .default, type: .debug,
                                        String(describing: ObjectIdentifier(router)))
 
-                        FlareMenuContainer(
-                            content: HomeContent(accountType: accountType),
-                            appState: appState,
-                            router: router
-                        )
-                        .environmentObject(appState)
-                        .environmentObject(router)
-                        .sheet(isPresented: $router.isSheetPresented) {
-                            if let destination = router.activeDestination {
-                                FlareDestinationView(
-                                    destination: destination,
-                                    router: router,
-                                    appState: appState
-                                )
-                            }
-                        }
-                        .fullScreenCover(isPresented: $router.isFullScreenPresented) {
-                            if let destination = router.activeDestination {
-                                FlareDestinationView(
-                                    destination: destination,
-                                    router: router,
-                                    appState: appState
-                                )
-                            }
-                        }
-                        .alert(isPresented: $router.isDialogPresented) {
-                            Alert(
-                                title: Text("OK"),
-                                message: Text("Are you sure ?"),
-                                primaryButton: .destructive(Text("OK")) {
-                                    // 处理确认操作
-                                },
-                                secondaryButton: .cancel(Text("Cancel"))
-                            )
-                        }
-                        .sheet(isPresented: $composeManager.showCompose) {
-                            if let accountType = composeManager.composeAccountType {
-                                NavigationView {
-                                    ComposeScreen(
-                                        onBack: {
-                                            composeManager.dismiss()
-                                        },
-                                        accountType: accountType,
-                                        status: convertToSharedComposeStatus(composeManager.composeStatus)
+                        // FlareMenuContainer(
+                        //     content:
+                        //     appState: appState,
+                        //     router: router
+                        // )
+                        HomeContent(accountType: accountType)
+                            .environmentObject(appState)
+                            .environmentObject(router)
+                            .sheet(isPresented: $router.isSheetPresented) {
+                                if let destination = router.activeDestination {
+                                    FlareDestinationView(
+                                        destination: destination,
+                                        router: router,
+                                        appState: appState
                                     )
                                 }
                             }
-                        }
+                            .fullScreenCover(isPresented: $router.isFullScreenPresented) {
+                                if let destination = router.activeDestination {
+                                    FlareDestinationView(
+                                        destination: destination,
+                                        router: router,
+                                        appState: appState
+                                    )
+                                }
+                            }
+                            .alert(isPresented: $router.isDialogPresented) {
+                                Alert(
+                                    title: Text("OK"),
+                                    message: Text("Are you sure ?"),
+                                    primaryButton: .destructive(Text("OK")) {
+                                        // 处理确认操作
+                                    },
+                                    secondaryButton: .cancel(Text("Cancel"))
+                                )
+                            }
+                            .sheet(isPresented: $composeManager.showCompose) {
+                                if let accountType = composeManager.composeAccountType {
+                                    NavigationView {
+                                        ComposeScreen(
+                                            onBack: {
+                                                composeManager.dismiss()
+                                            },
+                                            accountType: accountType,
+                                            status: convertToSharedComposeStatus(composeManager.composeStatus)
+                                        )
+                                    }
+                                }
+                            }
                     } else {
                         ProgressView()
                     }

@@ -1,6 +1,6 @@
 import shared
 import SwiftUI
- 
+
 struct DMListView: View {
     let accountType: AccountType
     @State private var presenter: DMListPresenter
@@ -36,7 +36,7 @@ struct DMListView: View {
                             DMRoomItemView(room: room)
                         }
                         .onAppear {
-                             success.get(index: index)
+                            success.get(index: index)
                         }
                     } else {
                         DMRoomPlaceholderView()
@@ -64,7 +64,6 @@ struct DMListView: View {
     }
 }
 
- 
 struct DMRoomPlaceholderView: View {
     var body: some View {
         HStack(spacing: 12) {

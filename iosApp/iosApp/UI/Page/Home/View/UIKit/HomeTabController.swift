@@ -311,7 +311,7 @@ extension HomeTabController: JXPagingViewDelegate {
 
     @objc private func avatarButtonTapped() {
         // 发送打开新菜单的通知
-        NotificationCenter.default.post(name: NSNotification.Name("flShowNewMenu"), object: nil)
+//        NotificationCenter.default.post(name: NSNotification.Name("flShowNewMenu"), object: nil)
         os_log("[📔][HomeNewViewController] avatarButtonTapped - 发送菜单通知", log: .default, type: .debug)
     }
 

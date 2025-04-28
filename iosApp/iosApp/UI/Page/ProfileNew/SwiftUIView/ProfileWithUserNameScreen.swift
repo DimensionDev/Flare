@@ -61,6 +61,6 @@ struct ProfileWithUserNameScreen: View {
                 }
             }
         }
-        .flareNavigationGesture(router: router)
+//        .flareNavigationGesture(router: router)
     }
 }

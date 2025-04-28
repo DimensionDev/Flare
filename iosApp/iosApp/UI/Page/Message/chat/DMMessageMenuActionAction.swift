@@ -1,10 +1,10 @@
 import AVKit
+import CoreMedia
 import ExyteChat
 import Kingfisher
 import ObjectiveC
 import shared
 import SwiftUI
-import CoreMedia
 
 enum DMMessageMenuActionAction: MessageMenuAction {
     case copy, reply, edit, delete, print
@@ -23,7 +23,7 @@ enum DMMessageMenuActionAction: MessageMenuAction {
             "Print"
         }
     }
-    
+
     func icon() -> Image {
         switch self {
         case .copy:
@@ -38,12 +38,12 @@ enum DMMessageMenuActionAction: MessageMenuAction {
             Image(systemName: "printer")
         }
     }
-    
+
     static func menuItems(for message: ExyteChat.Message) -> [DMMessageMenuActionAction] {
-        if message.user.isCurrentUser  {
-            return [.copy, .delete]
+        if message.user.isCurrentUser {
+            [.copy, .delete]
         } else {
-            return [.reply, .copy, .delete]
+            [.reply, .copy, .delete]
         }
     }
 }

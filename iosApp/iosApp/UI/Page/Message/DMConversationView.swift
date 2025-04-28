@@ -1,14 +1,12 @@
 import AVKit
+import CoreMedia
 import ExyteChat
 import Kingfisher
 import ObjectiveC
 import shared
 import SwiftUI
-import CoreMedia
 
- 
- var originalMediaStore: [String: UiMedia] = [:]
-
+var originalMediaStore: [String: UiMedia] = [:]
 
 struct DMConversationView: View {
     let accountType: AccountType
@@ -26,7 +24,7 @@ struct DMConversationView: View {
             roomKey: roomKey
         ))
     }
-    
+
     var body: some View {
         ObservePresenter(presenter: presenter) { anyState in
             if let state = anyState as? DMConversationState {
@@ -44,11 +42,10 @@ struct DMConversationView: View {
         VStack {
             if case let .success(success) = onEnum(of: state.items) {
                 if success.itemCount > 0 {
-                    
                     ChatView(
                         messages: convertMessages(success),
                         chatType: .conversation
-                    ) { draft in 
+                    ) { draft in
                         if !draft.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                             state.send(message: draft.text)
                         }
@@ -62,7 +59,7 @@ struct DMConversationView: View {
                             positionInCommentsGroup: positionInCommentsGroup,
                             showContextMenuClosure: showContextMenuClosure,
                             messageActionClosure: messageActionClosure,
-                            showAttachmentClosure: showAttachmentClosure 
+                            showAttachmentClosure: showAttachmentClosure
                         )
                     }
                     messageMenuAction: { (action: DMMessageMenuActionAction, defaultActionClosure, message) in
@@ -73,7 +70,7 @@ struct DMConversationView: View {
                             defaultActionClosure(message, .reply)
                         case .edit:
                             defaultActionClosure(message, .edit { editedText in
-                              
+
                                 print(editedText)
                             })
                         case .delete:
@@ -81,9 +78,8 @@ struct DMConversationView: View {
                         case .print:
                             print(message.text)
                         }
-
-                   } 
-                    .setAvailableInputs([.text]) 
+                    }
+                    .setAvailableInputs([.text])
                     .chatTheme(
                         ChatTheme(
                             colors: .init(
@@ -92,13 +88,11 @@ struct DMConversationView: View {
                         )
                     )
                 } else {
-                     
                     VStack(spacing: 16) {
                         Spacer()
                         Text("")
                             .foregroundColor(.gray)
                         Button("Refresh") {
-                            
                             refreshTrigger.toggle()
 
                             presenter = DMConversationPresenter(
@@ -111,19 +105,17 @@ struct DMConversationView: View {
                     }
                 }
             } else if case .loading = onEnum(of: state.items) {
-               
                 ProgressView()
                     .scaleEffect(1.5)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if case .error = onEnum(of: state.items) {
-               
                 VStack(spacing: 16) {
                     Spacer()
                     Text("Loading error")
                         .foregroundColor(.red)
                     Button("Refresh") {
                         refreshTrigger.toggle()
-                        
+
                         presenter = DMConversationPresenter(
                             accountType: accountType,
                             roomKey: roomKey
@@ -134,26 +126,23 @@ struct DMConversationView: View {
                 }
             }
         }
-    } 
+    }
 
-   
     private func convertMessages(_ success: PagingStateSuccess<UiDMItem>) -> [ExyteChat.Message] {
         var messages: [ExyteChat.Message] = []
- 
-       
+
         for index in 0 ..< success.itemCount {
             if let message = success.peek(index: index) {
                 if let chatMessage = convertToChatMessage(message) {
                     messages.append(chatMessage)
-                        print(chatMessage.text)
-                        print(chatMessage.status)
+                    print(chatMessage.text)
+                    print(chatMessage.status)
                 }
-        
+
                 success.get(index: index)
             }
         }
 
-         
         if messages.isEmpty {
             print("No Message")
         }
@@ -161,9 +150,7 @@ struct DMConversationView: View {
         return messages
     }
 
- 
     private func convertToChatMessage(_ item: UiDMItem) -> ExyteChat.Message? {
-        
         let chatUser = ExyteChat.User(
             id: item.user.key.description,
             name: item.user.name.raw,
@@ -171,7 +158,6 @@ struct DMConversationView: View {
             isCurrentUser: item.isFromMe
         )
 
-       
         var message = ExyteChat.Message(
             id: item.id,
             user: chatUser,
@@ -182,7 +168,6 @@ struct DMConversationView: View {
             if sendState == UiDMItem.SendState.sending {
                 message.status = .sending
             } else if sendState == UiDMItem.SendState.failed {
-                
                 let draftMessage = ExyteChat.DraftMessage(
                     text: "",
                     medias: [],
@@ -237,12 +222,11 @@ struct DMConversationView: View {
             case is UiMediaGif:
                 let gifMedia = mediaContent.media as! UiMediaGif
                 if let url = URL(string: gifMedia.url) {
-                    
                     message.attachments = [
                         ExyteChat.Attachment(
                             id: UUID().uuidString,
                             url: url,
-                            type: .video  
+                            type: .video
                         ),
                     ]
                 }
@@ -250,7 +234,6 @@ struct DMConversationView: View {
             case is UiMediaAudio:
                 let audioMedia = mediaContent.media as! UiMediaAudio
                 if let url = URL(string: audioMedia.url) {
-                 
                     let recording = ExyteChat.Recording(
                         duration: 0,
                         waveformSamples: [],
@@ -260,7 +243,7 @@ struct DMConversationView: View {
                 }
 
             default:
-        
+
                 message.text = "Unsupported media type: \(type(of: mediaContent.media))"
             }
 
@@ -277,11 +260,8 @@ struct DMConversationView: View {
 
         return message
     }
- 
 
-     private func getOriginalMedia(from message: ExyteChat.Message) -> UiMedia? {
-       
-         originalMediaStore[message.id]
+    private func getOriginalMedia(from message: ExyteChat.Message) -> UiMedia? {
+        originalMediaStore[message.id]
     }
 }
-

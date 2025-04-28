@@ -5,7 +5,6 @@ import ObjectiveC
 import shared
 import SwiftUI
 
- 
 struct DMSingleMediaView: View {
     let viewModel: DMMediaViewModel
     let media: UiMedia
@@ -55,7 +54,6 @@ struct DMSingleMediaView: View {
                     return r
                 }
 
-               
                 KingfisherManager.shared.defaultOptions = [
                     .requestModifier(modifier),
                 ]
@@ -64,7 +62,6 @@ struct DMSingleMediaView: View {
     }
 }
 
- 
 struct DMMediaViewModel {
     let previewUrl: URL?
     let mediaKind: DMMediaKind
@@ -105,7 +102,6 @@ struct DMMediaViewModel {
     }
 }
 
- 
 enum DMMediaKind {
     case image
     case video

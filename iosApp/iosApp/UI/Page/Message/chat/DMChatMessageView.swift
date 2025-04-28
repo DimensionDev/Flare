@@ -1,11 +1,10 @@
 import AVKit
+import CoreMedia
 import ExyteChat
 import Kingfisher
 import ObjectiveC
 import shared
 import SwiftUI
-import CoreMedia
- 
 
 struct DMChatMessageView: View {
     let message: ExyteChat.Message
@@ -20,8 +19,8 @@ struct DMChatMessageView: View {
     // Make constants static if they are truly constant for the view type
     static let widthWithMedia: CGFloat = 204
     static let horizontalAttachmentPadding: CGFloat = 1
-    
-    let font: UIFont = UIFont.systemFont(ofSize: 15)
+
+    let font: UIFont = .systemFont(ofSize: 15)
     let messageStyler: (String) -> AttributedString = AttributedString.init
     let avatarSize: CGFloat = 32
     let horizontalNoAvatarPadding: CGFloat = 8
@@ -56,29 +55,30 @@ struct DMChatMessageView: View {
             // Estimate text width (might need a proper AttributedString width calculation)
             let estimatedTextWidth = styledText.width(withConstrainedWidth: availableTextWidth, font: font)
             if estimatedTextWidth + timeWidth < availableTextWidth {
-                 print("[\(message.id.prefix(4))] DateArrangement: hstack (estimated)")
-                 return .hstack
+                print("[\(message.id.prefix(4))] DateArrangement: hstack (estimated)")
+                return .hstack
             }
         }
-        
-         print("[\(message.id.prefix(4))] DateArrangement: vstack (default/fallback)")
+
+        print("[\(message.id.prefix(4))] DateArrangement: vstack (default/fallback)")
         return .vstack
     }
-    
+
     func calculateAvailableTextWidth() -> CGFloat {
         let textPaddings = horizontalTextPadding * 2 // Define textPaddings here
         let bubblePadding = horizontalBubblePadding
-        let sidePadding = message.user.isCurrentUser ? 
+        let sidePadding = message.user.isCurrentUser ?
             (horizontalStatusPadding + statusViewSize + horizontalAvatarPadding) : // Corrected order/components on right
             (horizontalAvatarPadding + avatarSize + horizontalAvatarPadding)
-            
+
         let screenWidth = UIScreen.main.bounds.width
         let availableWidth = screenWidth - bubblePadding - sidePadding - textPaddings
-        
+
         let finalWidth = message.attachments.isEmpty ? availableWidth : DMChatMessageView.widthWithMedia - textPaddings
-         print("[\(message.id.prefix(4))] Calculated availableTextWidth: \(finalWidth)")
+        print("[\(message.id.prefix(4))] Calculated availableTextWidth: \(finalWidth)")
         return finalWidth
     }
+
     // --- End Date Arrangement Logic ---
 
     // --- Computed Properties (Padding/Avatar visibility - Adjusted slightly) ---
@@ -93,8 +93,9 @@ struct DMChatMessageView: View {
     }
 
     var bottomPadding: CGFloat {
-        return 0
+        0
     }
+
     // --- End Computed Properties ---
 
     var body: some View {
@@ -116,13 +117,13 @@ struct DMChatMessageView: View {
 
             // --- Status View (Right side for current user) ---
             if message.user.isCurrentUser, let status = message.status {
-                 Image(systemName: statusIconName(for: status))
-                     .resizable()
-                     .scaledToFit()
-                     .foregroundColor(.gray)
-                     .frame(width: statusViewSize, height: statusViewSize)
-                     .padding(.trailing, horizontalStatusPadding)
-                     .sizeGetter($statusSize)
+                Image(systemName: statusIconName(for: status))
+                    .resizable()
+                    .scaledToFit()
+                    .foregroundColor(.gray)
+                    .frame(width: statusViewSize, height: statusViewSize)
+                    .padding(.trailing, horizontalStatusPadding)
+                    .sizeGetter($statusSize)
             }
         }
         // Apply padding EXACTLY like official MessageView
@@ -140,150 +141,145 @@ struct DMChatMessageView: View {
     @ViewBuilder
     private var avatarView: some View {
         Group {
-             if showAvatar {
-                 KFImage(message.user.avatarURL)
-                     // Apply KFImage specific modifiers first
-                     .cacheOriginalImage()
-                     .appendProcessor(DownsamplingImageProcessor(size: CGSize(width: avatarSize * 2, height: avatarSize * 2)))
-                     .fade(duration: 0.25)
-                     .onFailure { error in
-                         print("KFImage failed for avatar: \(error.localizedDescription)")
-                     }
-                     // Then apply general SwiftUI modifiers
-                     .resizable()
-                     .scaledToFill()
-                     .frame(width: avatarSize, height: avatarSize)
-                     .clipShape(Circle())
-                     .background { // Use background for placeholder if needed
-                         Circle().fill(Color.gray.opacity(0.5))
+            if showAvatar {
+                KFImage(message.user.avatarURL)
+                    // Apply KFImage specific modifiers first
+                    .cacheOriginalImage()
+                    .appendProcessor(DownsamplingImageProcessor(size: CGSize(width: avatarSize * 2, height: avatarSize * 2)))
+                    .fade(duration: 0.25)
+                    .onFailure { error in
+                        print("KFImage failed for avatar: \(error.localizedDescription)")
+                    }
+                    // Then apply general SwiftUI modifiers
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: avatarSize, height: avatarSize)
+                    .clipShape(Circle())
+                    .background { // Use background for placeholder if needed
+                        Circle().fill(Color.gray.opacity(0.5))
                             .frame(width: avatarSize, height: avatarSize)
-                     }
-                     .padding(.horizontal, horizontalAvatarPadding)
-             } else {
-                 Spacer().frame(width: avatarSize + horizontalAvatarPadding * 2)
-             }
-         }
+                    }
+                    .padding(.horizontal, horizontalAvatarPadding)
+            } else {
+                Spacer().frame(width: avatarSize + horizontalAvatarPadding * 2)
+            }
+        }
     }
 
     @ViewBuilder
     private func bubbleView(_ message: ExyteChat.Message) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            
             if !message.attachments.isEmpty {
-                 attachmentsView(message)
-                 // Add padding similar to official implementation if needed
+                attachmentsView(message)
+                    // Add padding similar to official implementation if needed
                     .padding(.top, DMChatMessageView.horizontalAttachmentPadding)
                     .padding(.horizontal, DMChatMessageView.horizontalAttachmentPadding)
             }
-            
-             
+
             if !message.text.isEmpty {
-                 textWithTimeView(message)
+                textWithTimeView(message)
                     .font(Font(font)) // Apply the font
             }
 
-           
             if let recording = message.recording,
                let url = recording.url,
                // Attempt to get the corresponding UiMediaAudio object
-               let media = getOriginalMedia(from: message), media is UiMediaAudio {
+               let media = getOriginalMedia(from: message), media is UiMediaAudio
+            {
                 DMAudioMessageView(
                     url: url,
                     media: media, // Already checked it's UiMediaAudio
                     isCurrentUser: message.user.isCurrentUser
                 )
-                 .padding(.horizontal, horizontalTextPadding)
+                .padding(.horizontal, horizontalTextPadding)
                 .padding(.top, 8)
-                 if message.text.isEmpty && message.attachments.isEmpty && showMessageTimeView {
-                     HStack {
-                         Spacer()
-                         messageTimeView(date: message.createdAt)
-                     }
-                     .padding(.trailing, horizontalTextPadding)
-                     .padding(.bottom, 8)
-                 }
+                if message.text.isEmpty, message.attachments.isEmpty, showMessageTimeView {
+                    HStack {
+                        Spacer()
+                        messageTimeView(date: message.createdAt)
+                    }
+                    .padding(.trailing, horizontalTextPadding)
+                    .padding(.bottom, 8)
+                }
             }
         }
         .bubbleBackground(message)
-     }
+    }
 
     @ViewBuilder
     private func attachmentsView(_ message: ExyteChat.Message) -> some View {
-         if let media = getOriginalMedia(from: message),
-            let attachment = message.attachments.first { 
-
+        if let media = getOriginalMedia(from: message),
+           let attachment = message.attachments.first
+        {
             // Display Image or Video using DMSingleMediaView
             if media is UiMediaImage || media is UiMediaVideo || media is UiMediaGif {
                 DMSingleMediaView(
                     viewModel: DMMediaViewModel.from(media),
                     media: media
                 )
-                 .frame(
+                .frame(
                     width: min(200, UIScreen.main.bounds.width * 0.7), // Use UIScreen carefully or replace
                     height: min(200, UIScreen.main.bounds.height * 0.4)
                 )
-                 .cornerRadius(12) 
-                .clipped() 
- 
+                .cornerRadius(12)
+                .clipped()
                 .overlay(alignment: .bottomTrailing) {
-                     if message.text.isEmpty && showMessageTimeView {
+                    if message.text.isEmpty, showMessageTimeView {
                         messageTimeView(date: message.createdAt)
-                              
                             .modifier(MessageTimeCapsuleModifier())
-                            .padding(4)  
-                            .padding(8) 
+                            .padding(4)
+                            .padding(8)
                     }
                 }
             } else {
-                  Text("[Unsupported Media: \(String(describing: type(of: media)))]")
-                     .font(.caption)
-                     .foregroundColor(.red)
-                     .padding()
-                     .background(Color.gray.opacity(0.2))
-                     .cornerRadius(12)
-             }
+                Text("[Unsupported Media: \(String(describing: type(of: media)))]")
+                    .font(.caption)
+                    .foregroundColor(.red)
+                    .padding()
+                    .background(Color.gray.opacity(0.2))
+                    .cornerRadius(12)
+            }
         } else {
-              Text("[Media/Attachment Error for msg \(message.id.prefix(4))]")
-                 .font(.caption)
-                 .foregroundColor(.red)
-                 .padding()
-                 .background(Color.gray.opacity(0.1))
-                 .cornerRadius(12)
-         }
+            Text("[Media/Attachment Error for msg \(message.id.prefix(4))]")
+                .font(.caption)
+                .foregroundColor(.red)
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(12)
+        }
     }
 
     @ViewBuilder
     private func textWithTimeView(_ message: ExyteChat.Message) -> some View {
         let textView = Text(message.text)
-            .fixedSize(horizontal: false, vertical: true)  
+            .fixedSize(horizontal: false, vertical: true)
             .padding(.horizontal, horizontalTextPadding)
-            .padding(.vertical, 8) 
-        
-        let timeView = messageTimeView(date: message.createdAt)
-            .padding(.horizontal, horizontalTextPadding) 
-            .padding(.bottom, 8) 
+            .padding(.vertical, 8)
 
- 
+        let timeView = messageTimeView(date: message.createdAt)
+            .padding(.horizontal, horizontalTextPadding)
+            .padding(.bottom, 8)
+
         switch dateArrangement {
         case .hstack:
             HStack(alignment: .lastTextBaseline, spacing: 12) {
                 textView
-                if !message.attachments.isEmpty { Spacer() }  
+                if !message.attachments.isEmpty { Spacer() }
                 timeView
             }
         case .vstack:
-            VStack(alignment: .leading, spacing: 4) {  
+            VStack(alignment: .leading, spacing: 4) {
                 textView
-                HStack { 
-                     Spacer()
-                     timeView
-                 }
+                HStack {
+                    Spacer()
+                    timeView
+                }
             }
         case .overlay:
-              textView
-                 .overlay(alignment: .bottomTrailing) {
-                     timeView.padding(EdgeInsets(top: 0, leading: 0, bottom: 2, trailing: 5)) // Fine-tune padding
-                 }
+            textView
+                .overlay(alignment: .bottomTrailing) {
+                    timeView.padding(EdgeInsets(top: 0, leading: 0, bottom: 2, trailing: 5)) // Fine-tune padding
+                }
         }
     }
 
@@ -292,23 +288,24 @@ struct DMChatMessageView: View {
         Text(date, style: .time)
             .font(.caption)
             .foregroundColor(message.user.isCurrentUser ? .white.opacity(0.7) : .gray)
-            .sizeGetter($timeSize) 
+            .sizeGetter($timeSize)
     }
-     private func statusIconName(for status: ExyteChat.Message.Status) -> String {
+
+    private func statusIconName(for status: ExyteChat.Message.Status) -> String {
         switch status {
-        case .sending: return "arrow.up.circle"
-        case .sent: return "checkmark.circle"
-        case .read: return "checkmark.circle.fill"
-        case .error: return "exclamationmark.circle"
+        case .sending: "arrow.up.circle"
+        case .sent: "checkmark.circle"
+        case .read: "checkmark.circle.fill"
+        case .error: "exclamationmark.circle"
         }
     }
 
-     private func getOriginalMedia(from message: ExyteChat.Message) -> UiMedia? {
-          originalMediaStore[message.id]
-     }
+    private func getOriginalMedia(from message: ExyteChat.Message) -> UiMedia? {
+        originalMediaStore[message.id]
+    }
 }
 
- struct BubbleBackgroundModifier: ViewModifier {
+struct BubbleBackgroundModifier: ViewModifier {
     let message: ExyteChat.Message
     let radius: CGFloat
     let widthWithMedia: CGFloat
@@ -316,14 +313,14 @@ struct DMChatMessageView: View {
 
     init(message: ExyteChat.Message, widthWithMedia: CGFloat, horizontalAttachmentPadding: CGFloat) {
         self.message = message
-        self.radius = !message.attachments.isEmpty ? 12 : 20
+        radius = !message.attachments.isEmpty ? 12 : 20
         self.widthWithMedia = widthWithMedia
         self.horizontalAttachmentPadding = horizontalAttachmentPadding
     }
 
     func body(content: Content) -> some View {
         content
-            .frame(width: message.attachments.isEmpty ? nil : self.widthWithMedia + (message.attachments.count > 1 ? self.horizontalAttachmentPadding * 2 : 0))
+            .frame(width: message.attachments.isEmpty ? nil : widthWithMedia + (message.attachments.count > 1 ? horizontalAttachmentPadding * 2 : 0))
             .foregroundColor(message.user.isCurrentUser ? .white : .primary)
             .background {
                 // Apply background if text OR recording exists (match official logic)
@@ -336,19 +333,19 @@ struct DMChatMessageView: View {
     }
 }
 
- struct MessageTimeCapsuleModifier: ViewModifier {
-     func body(content: Content) -> some View {
-         content
-             .padding(.vertical, 4)
-             .padding(.horizontal, 8)
-             .background(Capsule().fill(Color.black.opacity(0.4)))
-     }
- }
+struct MessageTimeCapsuleModifier: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding(.vertical, 4)
+            .padding(.horizontal, 8)
+            .background(Capsule().fill(Color.black.opacity(0.4)))
+    }
+}
 
 extension View {
     func bubbleBackground(_ message: ExyteChat.Message) -> some View {
-        self.modifier(BubbleBackgroundModifier(message: message, 
-                                             widthWithMedia: DMChatMessageView.widthWithMedia, 
-                                             horizontalAttachmentPadding: DMChatMessageView.horizontalAttachmentPadding))
+        modifier(BubbleBackgroundModifier(message: message,
+                                          widthWithMedia: DMChatMessageView.widthWithMedia,
+                                          horizontalAttachmentPadding: DMChatMessageView.horizontalAttachmentPadding))
     }
 }

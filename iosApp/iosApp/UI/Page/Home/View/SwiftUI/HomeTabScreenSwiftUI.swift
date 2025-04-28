@@ -3,6 +3,9 @@ import SwiftUI
 
 struct HomeTabScreenSwiftUI: View {
     let accountType: AccountType
+
+    var onSwitchToMenuTab: (() -> Void)?
+
     @StateObject private var tabStore = AppBarTabSettingStore.shared
     @State private var selectedTabKey: String = ""
     @State private var showAppbarSettings = false
@@ -16,7 +19,7 @@ struct HomeTabScreenSwiftUI: View {
                 user: tabStore.currentUser,
                 accountType: accountType,
                 onAvatarTap: {
-                    NotificationCenter.default.post(name: NSNotification.Name("flShowNewMenu"), object: nil)
+                    onSwitchToMenuTab?()
                 },
                 onSettingsTap: {
                     showAppbarSettings = true

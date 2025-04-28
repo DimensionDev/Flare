@@ -84,7 +84,7 @@ struct ProfileTabScreen: View {
                     mediaPresenterWrapper: mediaPresenterWrapper
                 )
                 .ignoresSafeArea(edges: .top)
-                .flareNavigationGesture(router: router)
+//                .flareNavigationGesture(router: router)
 
             } else {
                 ProfileNewRefreshViewControllerWrapper(
@@ -108,7 +108,7 @@ struct ProfileTabScreen: View {
                     mediaPresenterWrapper: mediaPresenterWrapper
                 )
                 .ignoresSafeArea(edges: .top)
-                .flareNavigationGesture(router: router)
+//                .flareNavigationGesture(router: router)
             }
         }
     }

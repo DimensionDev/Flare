@@ -28,11 +28,12 @@ struct FlareRootView: View {
                                        log: .default, type: .debug,
                                        String(describing: ObjectIdentifier(router)))
 
-                        FlareMenuContainer(
-                            content: HomeContent(accountType: accountType),
-                            appState: appState,
-                            router: router
-                        )
+                        // FlareMenuContainer(
+                        //     content: 
+                        //     appState: appState,
+                        //     router: router
+                        // )
+                        HomeContent(accountType: accountType)
                         .environmentObject(appState)
                         .environmentObject(router)
                         .sheet(isPresented: $router.isSheetPresented) {

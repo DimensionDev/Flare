@@ -26,6 +26,7 @@ class FlareRouter: ObservableObject {
 
     var navigationDepth: Int {
         let depth = switch activeTab {
+        case .menu: menuNavigationPath.count
         case .timeline: timelineNavigationPath.count
         case .discover: discoverNavigationPath.count
         case .notification: notificationNavigationPath.count
@@ -40,7 +41,7 @@ class FlareRouter: ObservableObject {
 
         return depth
     }
-
+    @Published var menuNavigationPath = NavigationPath()
     @Published var timelineNavigationPath = NavigationPath()
     @Published var discoverNavigationPath = NavigationPath()
     @Published var notificationNavigationPath = NavigationPath()
@@ -55,6 +56,7 @@ class FlareRouter: ObservableObject {
 
     private var currentNavigationPath: NavigationPath {
         switch activeTab {
+        case .menu: menuNavigationPath
         case .timeline: timelineNavigationPath
         case .discover: discoverNavigationPath
         case .notification: notificationNavigationPath
@@ -65,6 +67,7 @@ class FlareRouter: ObservableObject {
 
     private func updateCurrentNavigationPath(_ newPath: NavigationPath) {
         switch activeTab {
+        case .menu: menuNavigationPath = newPath
         case .timeline: timelineNavigationPath = newPath
         case .discover: discoverNavigationPath = newPath
         case .notification: notificationNavigationPath = newPath
@@ -75,6 +78,7 @@ class FlareRouter: ObservableObject {
 
     func navigationPathFor(_ tab: FlareHomeTabs) -> Binding<NavigationPath> {
         switch tab {
+        case .menu: Binding(get: { self.menuNavigationPath }, set: { self.menuNavigationPath = $0 })
         case .timeline: Binding(get: { self.timelineNavigationPath }, set: { self.timelineNavigationPath = $0 })
         case .discover: Binding(get: { self.discoverNavigationPath }, set: { self.discoverNavigationPath = $0 })
         case .notification: Binding(get: { self.notificationNavigationPath }, set: { self.notificationNavigationPath = $0 })
@@ -166,6 +170,8 @@ class FlareRouter: ObservableObject {
                String(describing: activeTab))
 
         switch activeTab {
+        case .menu:
+            menuNavigationPath.append(destination)
         case .timeline:
             timelineNavigationPath.append(destination)
         case .discover:
@@ -199,6 +205,10 @@ class FlareRouter: ObservableObject {
         case .push:
 
             switch activeTab {
+            case .menu:
+                if !menuNavigationPath.isEmpty {
+                    menuNavigationPath.removeLast()
+                }
             case .timeline:
                 if !timelineNavigationPath.isEmpty {
                     timelineNavigationPath.removeLast()

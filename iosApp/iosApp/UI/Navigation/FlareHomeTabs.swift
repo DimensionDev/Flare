@@ -5,7 +5,7 @@ enum FlareHomeTabs: Int, Equatable, Hashable, Identifiable {
     case compose = 2
     case discover = 3
     case profile = 4
-//    case menu = 5
+     case menu = 5
 
     var customizationID: String {
         switch self {
@@ -14,7 +14,7 @@ enum FlareHomeTabs: Int, Equatable, Hashable, Identifiable {
         case .compose: "home_compose"
         case .discover: "home_discover"
         case .profile: "home_profile"
-//        case .menu: "home_menu"
+         case .menu: "home_menu"
         }
     }
 }

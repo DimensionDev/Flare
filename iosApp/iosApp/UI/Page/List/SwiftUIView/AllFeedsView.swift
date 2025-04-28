@@ -12,6 +12,7 @@ struct AllFeedsView: View {
     @State private var presenter: PinnableTimelineTabPresenter
     @EnvironmentObject private var router: FlareRouter
     @Environment(\.appSettings) private var appSettings
+    @EnvironmentObject private var appState: FlareAppState
     @State private var lastKnownItemCount: Int = 0
     @State private var currentUser: UiUserV2?
     @State private var isMissingFeedData: Bool = false

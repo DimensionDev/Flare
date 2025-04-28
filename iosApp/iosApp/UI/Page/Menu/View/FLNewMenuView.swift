@@ -5,7 +5,7 @@ import SwiftUI
 import UIKit
 
 struct FLNewMenuView: View {
-    @Binding var isOpen: Bool
+//    @Binding var isOpen: Bool
     @State private var showLogin = false
     @State private var showAccounts = false
     @State private var showLists = false
@@ -15,16 +15,18 @@ struct FLNewMenuView: View {
     let user: UiUserV2?
 
     @EnvironmentObject private var router: FlareRouter
+    @EnvironmentObject private var appState: FlareAppState
 
-    init(isOpen: Binding<Bool>, accountType: AccountType, user: UiUserV2? = nil) {
-        _isOpen = isOpen
+    // isOpen: Binding<Bool>,
+    init(accountType: AccountType, user: UiUserV2? = nil) {
+//        _isOpen = isOpen
         self.accountType = accountType
         self.user = user
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            userAreaView
+            userInfoView
                 .padding(.top, 80)
                 .padding(.horizontal, 20)
 
@@ -32,8 +34,7 @@ struct FLNewMenuView: View {
                 // 仅在登录状态下显示List按钮
                 if !(accountType is AccountTypeGuest) {
                     Button(action: {
-                        isOpen = false
-
+                        appState.isCustomTabBarHidden = true
                         router.navigate(to: .lists(accountType: accountType))
                     }) {
                         HStack {
@@ -52,8 +53,7 @@ struct FLNewMenuView: View {
                     // 仅在登录状态且平台为Bluesky时显示Feeds按钮
                     if user?.isBluesky == true {
                         Button(action: {
-                            isOpen = false
-
+                            appState.isCustomTabBarHidden = true
                             router.navigate(to: .feeds(accountType: accountType))
                         }) {
                             HStack {
@@ -72,8 +72,7 @@ struct FLNewMenuView: View {
 
                     // Message
                     Button(action: {
-                        isOpen = false
-
+                        appState.isCustomTabBarHidden = true
                         router.navigate(to: .messages(accountType: accountType))
                     }) {
                         HStack {
@@ -92,8 +91,7 @@ struct FLNewMenuView: View {
                     // X Spaces
                     if user?.isXQt == true {
                         Button(action: {
-                            isOpen = false
-
+                            appState.isCustomTabBarHidden = true
                             router.navigate(to: .spaces(accountType: accountType))
                         }) {
                             HStack {
@@ -112,7 +110,7 @@ struct FLNewMenuView: View {
 
                     // download manager
                     Button(action: {
-                        isOpen = false
+                        appState.isCustomTabBarHidden = true
                         router.navigate(to: .download(accountType: accountType))
                     }) {
                         HStack {
@@ -136,10 +134,15 @@ struct FLNewMenuView: View {
 
             settingsButton
                 .padding(.horizontal, 20)
-                .padding(.bottom, 80)
+                .padding(.bottom, 180)
+             
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .background(Color(UIColor.systemBackground))
+      
+        .onAppear { 
+            appState.isCustomTabBarHidden = false
+        }
         .sheet(isPresented: $showLogin) {
             ServiceSelectScreen(toHome: {
                 showLogin = false
@@ -157,7 +160,7 @@ struct FLNewMenuView: View {
         }
     }
 
-    private var userAreaView: some View {
+    private var userInfoView: some View {
         VStack(alignment: .leading, spacing: 12) {
             Button(action: {
                 if user != nil {
@@ -224,8 +227,7 @@ struct FLNewMenuView: View {
                 .padding(.top, 8)
                 .padding(.leading, 15)
             }
-
-            // 添加分隔线
+ 
             Divider()
                 .padding(.top, 8)
         }
@@ -233,8 +235,7 @@ struct FLNewMenuView: View {
 
     private var settingsButton: some View {
         Button(action: {
-            isOpen = false
-            showSettings = true
+             showSettings = true
         }) {
             HStack {
                 Image(systemName: "gearshape.fill")

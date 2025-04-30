@@ -147,7 +147,7 @@ class FlareRouter: ObservableObject {
     func dismissSheet() {
         if isSheetPresented {
             isSheetPresented = false
-            activeDestination = nil
+            activeDestination = nil // Clear destination when sheet is dismissed
         }
     }
 
@@ -296,6 +296,9 @@ class FlareRouter: ObservableObject {
         case let route as AppleRoute.StatusMedia:
             return .statusMedia(accountType: route.accountType, statusKey: route.statusKey, index: Int(route.index))
 
+        case let route as AppleRoute.Podcast:
+            return .podcastSheet(accountType: route.accountType, podcastId: route.id)
+
         case let route as AppleRoute.DeleteStatus:
             // SharedAppleRouteDeleteStatus 删除推文
             return .deleteStatus(accountType: route.accountType, statusKey: route.statusKey)
@@ -326,7 +329,7 @@ class FlareRouter: ObservableObject {
             return .search(accountType: AccountTypeGuest(), keyword: "")
 
         default:
-            print("未处理的路由类型: \(type(of: route))")
+            print("FlareRouter: Unhandled AppleRoute type: \(type(of: route)) - Route Value: \(route)")
             return .search(accountType: AccountTypeGuest(), keyword: "")
         }
     }

@@ -97,7 +97,7 @@ struct FLNewMenuView: View {
                             HStack {
                                 Image(systemName: "person.3")
                                     .frame(width: 28, height: 28)
-                                Text("Spaces")
+                                Text("XSpace")
                                     .font(.body)
                                 Spacer()
                             }

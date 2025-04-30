@@ -1899,15 +1899,16 @@ internal class XQTDataSource(
             val mediaKey = data?.metadata?.mediaKey ?: throw Exception("Media key not found")
             val mediaData =
                 runCatching {
-                    if (data.metadata.state == "Ended") {
-                        null
-                    } else {
-                        service
-                            .getLiveVideoStreamStatus(mediaKey = mediaKey)
-                            .decodeJson<LiveVideoStreamStatusResponse>()
-                            .source
-                            ?.noRedirectPlaybackURL
-                    }
+                    // when podcast.state == ended , then podcast type is replay, so need return podcast info.
+                    // if (data.metadata.state == "Ended") {
+                    //     null
+                    // } else {
+                    service
+                        .getLiveVideoStreamStatus(mediaKey = mediaKey)
+                        .decodeJson<LiveVideoStreamStatusResponse>()
+                        .source
+                        ?.noRedirectPlaybackURL
+                    // }
                 }.getOrNull()
             data.render(
                 accountKey = accountKey,

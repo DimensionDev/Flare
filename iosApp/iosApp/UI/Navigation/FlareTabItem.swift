@@ -45,25 +45,26 @@ struct FlareTabItem<Content: View>: View {
                    oldCount,
                    newCount)
         }
-        .sheet(isPresented: $router.isSheetPresented) {
-            if let destination = router.activeDestination {
-                NavigationStack {
-                    FlareDestinationView(destination: destination, router: router, appState: appState)
-                }
-            }
-        }
-        .fullScreenCover(isPresented: $router.isFullScreenPresented) {
-            if let destination = router.activeDestination {
-                NavigationStack {
-                    FlareDestinationView(destination: destination, router: router, appState: appState)
-                }
-                .modifier(SwipeToDismissModifier(onDismiss: {
-                    router.dismissFullScreenCover()
-                }))
-                .presentationBackground(.black)
-                .environment(\.colorScheme, .dark)
-            }
-        }
+        // move to FlareRootView
+        // .sheet(isPresented: $router.isSheetPresented) {
+        //     if let destination = router.activeDestination {
+        //         NavigationStack {
+        //             FlareDestinationView(destination: destination, router: router, appState: appState)
+        //         }
+        //     }
+        // }
+        // .fullScreenCover(isPresented: $router.isFullScreenPresented) {
+        //     if let destination = router.activeDestination {
+        //         NavigationStack {
+        //             FlareDestinationView(destination: destination, router: router, appState: appState)
+        //         }
+        //         .modifier(SwipeToDismissModifier(onDismiss: {
+        //             router.dismissFullScreenCover()
+        //         }))
+        //         .presentationBackground(.black)
+        //         .environment(\.colorScheme, .dark)
+        //     }
+        // }
         .environment(\.openURL, OpenURLAction { url in
             if router.handleDeepLink(url) {
                 .handled

@@ -10,6 +10,7 @@ struct FlareApp: SwiftUI.App {
         @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     #endif
     @StateObject private var router = FlareRouter()
+    @StateObject private var podcastManager = IOSPodcastManager.shared
 
     init() {
         // Register FontAwesome fonts
@@ -30,25 +31,34 @@ struct FlareApp: SwiftUI.App {
 
     var body: some Scene {
         WindowGroup {
-            #if os(macOS)
-                ProvideWindowSizeClass {
-                    FlareRootView()
-//                    .enableInjection()
-                        .preferredColorScheme(.light) // 强制使用浅色模式
-                }
-                .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
-                .onOpenURL { url in
-                    router.handleDeepLink(url)
-                }
-            #else
-                FlareRootView()
-//                .enableInjection()
-                    // .preferredColorScheme(.light)  // 强制使用浅色模式
+            
+            ZStack(alignment: .bottom) {
+                #if os(macOS)
+                    ProvideWindowSizeClass {
+                        FlareRootView()
+//                        .enableInjection()
+                            .preferredColorScheme(.light)  
+                    }
+                    .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
                     .onOpenURL { url in
                         router.handleDeepLink(url)
                     }
-                    .environmentObject(router)
-            #endif
+                #else
+                    FlareRootView()
+//                    .enableInjection()
+                        // .preferredColorScheme(.light)  
+                        .onOpenURL { url in
+                            router.handleDeepLink(url)
+                        }
+                        .environmentObject(router)
+                #endif
+
+                // --- Global Floating Player Overlay ---
+                if podcastManager.currentPodcast != nil { 
+                    DraggablePlayerOverlay().animation(.spring(), value: podcastManager.currentPodcast?.id)
+                }
+                
+            }
         }
         #if os(macOS)
             WindowGroup(id: "image-view", for: String.self) { $url in

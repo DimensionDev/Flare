@@ -9,6 +9,7 @@ struct AppearanceSettings: Codable, Changeable {
     var showMedia: Bool = true
     var showSensitiveContent: Bool = false
     var swipeGestures: Bool = false
+    var enableFullSwipePop: Bool = true
     var autoTranslate: Bool = false
     var mastodon: Mastodon = .init()
     var misskey: Misskey = .init()

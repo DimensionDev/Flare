@@ -1495,6 +1495,9 @@
         }
       }
     },
+    "Allow swiping back from anywhere on the screen" : {
+
+    },
     "app_name" : {
       "comment" : "",
       "extractionState" : "stale",
@@ -25410,6 +25413,9 @@
           }
         }
       }
+    },
+    "Full Swipe Back" : {
+
     },
     "GIF" : {
       "localizations" : {
@@ -93419,6 +93425,9 @@
           }
         }
       }
+    },
+    "Spaces list comming soon" : {
+
     },
     "Speaker" : {
 

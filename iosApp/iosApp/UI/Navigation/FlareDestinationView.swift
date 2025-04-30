@@ -9,6 +9,7 @@ struct FlareDestinationView: View {
     let router: FlareRouter
 
     @ObservedObject var appState: FlareAppState
+    @Environment(\.appSettings) private var appSettings
 
     var body: some View {
         let _ = os_log("[FlareDestinationView] Rendering destination: %{public}@, router: %{public}@, depth: %{public}d",
@@ -17,78 +18,79 @@ struct FlareDestinationView: View {
                        String(describing: ObjectIdentifier(router)),
                        router.navigationDepth)
 
-        switch destination {
-        case let .profile(accountType, userKey):
-            ProfileTabScreen(
-                accountType: accountType,
-                userKey: userKey,
-                toProfileMedia: { _ in
-//                    print("查看用户媒体: \(userKey.description)")
-                }
-            )
-            .environmentObject(router)
+        Group {
+            switch destination {
+            case let .profile(accountType, userKey):
+                ProfileTabScreen(
+                    accountType: accountType,
+                    userKey: userKey,
+                    toProfileMedia: { _ in
+//                        print("查看用户媒体: \(userKey.description)")
+                    }
+                )
+                .environmentObject(router)
 
-        case let .profileWithNameAndHost(accountType, userName, host):
-            ProfileWithUserNameScreen(
-                accountType: accountType,
-                userName: userName,
-                host: host,
-                toProfileMedia: { _ in
-                    // 在这里处理媒体查看导航
-//                    print("查看用户媒体: \(userKey.description)")
-                }
-            )
-            .environmentObject(router)
+            case let .profileWithNameAndHost(accountType, userName, host):
+                ProfileWithUserNameScreen(
+                    accountType: accountType,
+                    userName: userName,
+                    host: host,
+                    toProfileMedia: { _ in
+                        // 在这里处理媒体查看导航
+//                        print("查看用户媒体: \(userKey.description)")
+                    }
+                )
+                .environmentObject(router)
 
-        case let .statusDetail(accountType, statusKey):
-            StatusDetailScreen(accountType: accountType, statusKey: statusKey, router: router)
+            case let .statusDetail(accountType, statusKey):
+                StatusDetailScreen(accountType: accountType, statusKey: statusKey, router: router)
 
-        case let .search(accountType, keyword):
-            SearchScreen(
-                accountType: accountType,
-                initialQuery: keyword
-            )
+            case let .search(accountType, keyword):
+                SearchScreen(
+                    accountType: accountType,
+                    initialQuery: keyword
+                )
 
-        case let .statusMedia(accountType, statusKey, index):
-            StatusMediaScreen(
-                accountType: accountType,
-                statusKey: statusKey,
-                index: Int32(index),
-                dismiss: {}
-            )
-        // case let .compose(accountType, status):
-            // 这段代码不会被执行，因为路由会被FlareRouter拦截
+            case let .statusMedia(accountType, statusKey, index):
+                StatusMediaScreen(
+                    accountType: accountType,
+                    statusKey: statusKey,
+                    index: Int32(index),
+                    dismiss: {}
+                )
+            // case let .compose(accountType, status):
+                // 这段代码不会被执行，因为路由会被FlareRouter拦截
 
-        case let .lists(accountType):
-            AllListsView(accountType: accountType)
-                .navigationTitle("Lists")
+            case let .lists(accountType):
+                AllListsView(accountType: accountType)
+                    .navigationTitle("Lists")
+                    .navigationBarTitleDisplayMode(.inline)
+
+            case let .feeds(accountType):
+                AllFeedsView(accountType: accountType)
+                    .navigationTitle("Feeds")
+                    .navigationBarTitleDisplayMode(.inline)
+
+            case let .feedDetail(accountType, list, defaultUser):
+                FeedDetailView(
+                    list: list,
+                    accountType: accountType,
+                    defaultUser: defaultUser
+                )
+                .navigationTitle(list.title)
                 .navigationBarTitleDisplayMode(.inline)
 
-        case let .feeds(accountType):
-            AllFeedsView(accountType: accountType)
-                .navigationTitle("Feeds")
+            case let .listDetail(accountType, list, defaultUser):
+                ListDetailView(
+                    list: list,
+                    accountType: accountType,
+                    defaultUser: defaultUser
+                )
+                .navigationTitle(list.title)
                 .navigationBarTitleDisplayMode(.inline)
 
-        case let .feedDetail(accountType, list, defaultUser):
-            FeedDetailView(
-                list: list,
-                accountType: accountType,
-                defaultUser: defaultUser
-            )
-            .navigationTitle(list.title)
-            .navigationBarTitleDisplayMode(.inline)
-
-        case let .listDetail(accountType, list, defaultUser):
-            ListDetailView(
-                list: list,
-                accountType: accountType,
-                defaultUser: defaultUser
-            )
-            .navigationTitle(list.title)
-            .navigationBarTitleDisplayMode(.inline)
-
-        case let .addReaction(accountType, statusKey):
-            AddReactionView(accountType: accountType, statusKey: statusKey)
+            case let .addReaction(accountType, statusKey):
+                AddReactionView(accountType: accountType, statusKey: statusKey)
 
  //        case .blueskyReportStatus(let accountType, let statusKey):
 //            BlueskyReportStatusView(accountType: accountType, statusKey: statusKey)
@@ -99,11 +101,11 @@ struct FlareDestinationView: View {
 //        case .misskeyReportStatus(let accountType, let statusKey, let userKey):
 //            MisskeyReportStatusView(accountType: accountType, statusKey: statusKey, userKey: userKey)
 
-        case let .vvoStatusDetail(accountType, statusKey):
-            VVOStatusDetailView(accountType: accountType, statusKey: statusKey)
+            case let .vvoStatusDetail(accountType, statusKey):
+                VVOStatusDetailView(accountType: accountType, statusKey: statusKey)
 
-        case let .vvoCommentDetail(accountType, statusKey):
-            VVOCommentDetailView(accountType: accountType, statusKey: statusKey)
+            case let .vvoCommentDetail(accountType, statusKey):
+                VVOCommentDetailView(accountType: accountType, statusKey: statusKey)
 
 //        case .vvoReplyToComment(let accountType, let replyTo, let rootId):
 //            VVOReplyToCommentView(accountType: accountType, replyTo: replyTo, rootId: rootId)
@@ -111,25 +113,39 @@ struct FlareDestinationView: View {
 //        case let .rawImage(url):
 //            RawImageView(url: url)
 
-        case let .callback(type):
-            CallbackView(type: type)
+            case let .callback(type):
+                CallbackView(type: type)
 
-        case let .deleteStatus(accountType, statusKey):
-            DeleteStatusView(accountType: accountType, statusKey: statusKey)
+            case let .deleteStatus(accountType, statusKey):
+                DeleteStatusView(accountType: accountType, statusKey: statusKey)
 
-        case let .messages(accountType):
-            MessageScreen(accountType: accountType)
-                .environmentObject(router)
+            case let .messages(accountType):
+                MessageScreen(accountType: accountType)
+                    .environmentObject(router)
 
-        case let .download(accountType):
-            DownloadManagerScreen(accountType: accountType, router: router)
-                .environmentObject(router)
-                .environmentObject(appState)
+            case let .download(accountType):
+                DownloadManagerScreen(accountType: accountType, router: router)
+                    .environmentObject(router)
+                    .environmentObject(appState)
 
-        default:
-            Text("页面未找到")
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            case let .podcastSheet(accountType, podcastId):
+                PodcastSheetView(accountType: accountType, podcastId: podcastId)
+                    .environmentObject(router)
+                    .environmentObject(appState)
+                    .environment(\.appSettings, appSettings)
+
+            case let .spaces(accountType):
+                SpaceScreen(accountType: accountType)
+                    .environmentObject(router)
+                    .environmentObject(appState)
+
+            default:
+                Text("页面未找到 for destination: \(String(describing: destination))")
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
         }
+        .environmentObject(router)
+        .environmentObject(appState)
     }
 }
 

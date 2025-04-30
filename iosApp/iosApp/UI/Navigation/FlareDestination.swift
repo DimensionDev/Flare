@@ -34,6 +34,8 @@ enum FlareDestination: Identifiable, Hashable {
     case callback(type: CallbackType)
     case deleteStatus(accountType: AccountType, statusKey: MicroBlogKey)
 
+    case podcastSheet(accountType: AccountType, podcastId: String)
+
     enum CallbackType: Hashable {
         case mastodon
         case misskey
@@ -89,12 +91,14 @@ enum FlareDestination: Identifiable, Hashable {
             "messages_\(String(describing: accountType))"
         case let .download(accountType):
             "download_\(String(describing: accountType))"
+        case let .podcastSheet(accountType, podcastId):
+            "podcastSheet_\(String(describing: accountType))_\(podcastId)"
         }
     }
 
     var navigationType: FlarePresentationType {
         switch self {
-        case .compose, .addReaction, .callback:
+        case .compose, .addReaction, .callback, .podcastSheet:
             .sheet
         case .statusMedia, .rawImage:
             .fullScreen

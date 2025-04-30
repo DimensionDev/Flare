@@ -289,9 +289,18 @@ struct CommonTimelineStatusComponent: View {
                 //    .buttonStyle(.borderless)
                 // }
             }
-            // link preview
-            if let card = data.card, appSettings.appearanceSettings.showLinkPreview {
-                LinkPreview(card: card)
+
+            if let card = data.card {
+                if let url = URL(string: card.url), url.scheme == "flare", url.host?.lowercased() == "podcast" {
+                    // podcast preview
+                    PodcastPreview(card: card)
+                        .onTapGesture {
+                            handlePodcastCardTap(card: card)
+                        }
+                } else if appSettings.appearanceSettings.showLinkPreview { // Original LinkPreview condition
+                    // link preview
+                    LinkPreview(card: card)
+                }
             }
             // quote tweet
             if !data.quote.isEmpty {
@@ -467,14 +476,14 @@ struct CommonTimelineStatusComponent: View {
                                 StatusActionLabel(item: group.displayItem)
                             }
                             .frame(maxWidth: .infinity)
-                            .padding(.horizontal, 10) // 添加水平内边距
+                            .padding(.horizontal, 10)
                         }
                     }
 
                     // 使用新的 ShareButton
                     ShareButton(content: data, view: self)
                         .frame(maxWidth: .infinity)
-                        .padding(.horizontal, 0) // 添加水平内边距
+                        .padding(.horizontal, 0)
                 }
                 .labelStyle(CenteredLabelStyle())
                 .buttonStyle(.borderless)
@@ -517,6 +526,18 @@ struct CommonTimelineStatusComponent: View {
             images: data.images,
             initialIndex: index
         )
+    }
+
+    //  Podcast Card Tap
+    private func handlePodcastCardTap(card: UiCard) {
+        if let route = AppDeepLinkHelper().parse(url: card.url) as? AppleRoute.Podcast {
+            print("Podcast Card Tapped, navigating via router to: podcastSheet(accountType: \(route.accountType), podcastId: \(route.id))")
+
+            router.navigate(to: .podcastSheet(accountType: route.accountType, podcastId: route.id))
+        } else {
+            let parsedRoute = AppDeepLinkHelper().parse(url: card.url)
+            print("Error: Could not parse Podcast URL from card: \(card.url). Parsed type: \(type(of: parsedRoute)) Optional value: \(parsedRoute)")
+        }
     }
 }
 

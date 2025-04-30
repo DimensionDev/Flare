@@ -7,6 +7,7 @@ struct FlareRootView: View {
     @StateObject private var router = FlareRouter()
     @StateObject private var composeManager = ComposeManager.shared
     @State private var presenter = ActiveAccountPresenter()
+    @Environment(\.appSettings) private var appSettings
 
     var body: some View {
         ObservePresenter<UserState, ActiveAccountPresenter, AnyView>(presenter: presenter) { userState in
@@ -28,11 +29,6 @@ struct FlareRootView: View {
                                        log: .default, type: .debug,
                                        String(describing: ObjectIdentifier(router)))
 
-                        // FlareMenuContainer(
-                        //     content:
-                        //     appState: appState,
-                        //     router: router
-                        // )
                         HomeContent(accountType: accountType)
                             .environmentObject(appState)
                             .environmentObject(router)
@@ -47,33 +43,32 @@ struct FlareRootView: View {
                             }
                             .fullScreenCover(isPresented: $router.isFullScreenPresented) {
                                 if let destination = router.activeDestination {
-                                    FlareDestinationView(
-                                        destination: destination,
-                                        router: router,
-                                        appState: appState
-                                    )
+                                    FlareDestinationView(destination: destination, router: router, appState: appState)
+                                        .modifier(SwipeToDismissModifier(onDismiss: {
+                                            router.dismissFullScreenCover()
+                                        }))
+                                        .environment(\.appSettings, appSettings)
                                 }
                             }
                             .alert(isPresented: $router.isDialogPresented) {
                                 Alert(
-                                    title: Text("OK"),
-                                    message: Text("Are you sure ?"),
-                                    primaryButton: .destructive(Text("OK")) {
-                                        // 处理确认操作
-                                    },
-                                    secondaryButton: .cancel(Text("Cancel"))
+                                    title: Text("Confirmation"),
+                                    message: Text("Are you sure?"),
+                                    primaryButton: .destructive(Text("OK")) { /* Handle OK */ },
+                                    secondaryButton: .cancel()
                                 )
                             }
                             .sheet(isPresented: $composeManager.showCompose) {
-                                if let accountType = composeManager.composeAccountType {
+                                if let composeAccountType = composeManager.composeAccountType {
                                     NavigationView {
                                         ComposeScreen(
-                                            onBack: {
-                                                composeManager.dismiss()
-                                            },
-                                            accountType: accountType,
+                                            onBack: { composeManager.dismiss() },
+                                            accountType: composeAccountType,
                                             status: convertToSharedComposeStatus(composeManager.composeStatus)
                                         )
+                                        .environmentObject(router)
+                                        .environmentObject(appState)
+                                        .environment(\.appSettings, appSettings)
                                     }
                                 }
                             }
@@ -84,9 +79,9 @@ struct FlareRootView: View {
                 .navigationViewStyle(StackNavigationViewStyle())
                 .onAppear {
                     setupInitialState()
-
                     router.appState = appState
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             )
         }
     }

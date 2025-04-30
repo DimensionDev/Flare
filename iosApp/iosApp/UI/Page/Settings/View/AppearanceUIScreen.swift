@@ -88,6 +88,14 @@ struct AppearanceUIScreen: View {
                             Text("settings_appearance_show_cw_img_description")
                         }
                     }
+                    Toggle(isOn: Binding(get: {
+                        appSettings.appearanceSettings.enableFullSwipePop
+                    }, set: { value in
+                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.enableFullSwipePop, to: value))
+                    })) {
+                        Text("Full Swipe Back")
+                        Text("Allow swiping back from anywhere on the screen")
+                    }
                 }
                 .buttonStyle(.plain)
                 .navigationTitle("settings_appearance_title")

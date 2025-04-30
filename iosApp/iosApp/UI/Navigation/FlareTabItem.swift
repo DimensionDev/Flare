@@ -23,7 +23,7 @@ struct FlareTabItem<Content: View>: View {
     }
 
     var body: some View {
-        NavigationStack(path: router.navigationPathFor(tabType)) {
+        NavigationStackWrapper(path: router.navigationPathFor(tabType)) {
             content(router)
                 .navigationDestination(for: FlareDestination.self) { destination in
                     FlareDestinationView(destination: destination, router: router, appState: appState)

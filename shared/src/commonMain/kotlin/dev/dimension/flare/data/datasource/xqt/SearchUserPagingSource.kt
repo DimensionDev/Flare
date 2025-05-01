@@ -7,8 +7,10 @@ import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.users
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
+import io.ktor.http.encodeURLQueryComponent
 
 internal class SearchUserPagingSource(
     private val service: XQTService,
@@ -28,6 +30,7 @@ internal class SearchUserPagingSource(
                             cursor = params.key,
                             product = "People",
                         ).encodeJson(),
+                    referer = "https://$xqtHost/search?q=${query.encodeURLQueryComponent()}",
                 ).body()
                 ?.data
                 ?.searchByRawQuery

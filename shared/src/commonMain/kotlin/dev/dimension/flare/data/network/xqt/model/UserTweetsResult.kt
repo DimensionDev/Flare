@@ -29,6 +29,11 @@ import kotlinx.serialization.Serializable
 internal data class UserTweetsResult(
     @Contextual @SerialName(value = "__typename")
     val typename: TypeName,
+    @SerialName(value = "timeline")
+    val timeline: TimelineV2? = null,
     @SerialName(value = "timeline_v2")
-    val timelineV2: TimelineV2,
-)
+    val timeline_v2: TimelineV2? = null,
+) {
+    val timelineV2: TimelineV2?
+        get() = timeline ?: timeline_v2
+}

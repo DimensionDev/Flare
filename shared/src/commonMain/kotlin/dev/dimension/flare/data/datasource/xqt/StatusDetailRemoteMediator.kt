@@ -213,7 +213,7 @@ internal class StatusDetailRemoteMediator(
                 tweet = actualTweet,
             )
             return MediatorResult.Success(
-                endOfPaginationReached = actualResponse.isBottomEnd(),
+                endOfPaginationReached = actualResponse.isBottomEnd() || actualTweet.size == 1 || cursor == null,
             )
         }
     }

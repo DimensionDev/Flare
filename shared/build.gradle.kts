@@ -73,6 +73,7 @@ kotlin {
                 implementation(libs.datastore)
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(libs.xmlUtil)
+                implementation(libs.krypto)
             }
         }
         val commonTest by getting {

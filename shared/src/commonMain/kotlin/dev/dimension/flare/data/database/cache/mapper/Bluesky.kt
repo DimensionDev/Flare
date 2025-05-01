@@ -5,8 +5,10 @@ import app.bsky.actor.ProfileViewBasic
 import app.bsky.actor.ProfileViewDetailed
 import app.bsky.feed.FeedViewPost
 import app.bsky.feed.FeedViewPostReasonUnion
+import app.bsky.feed.Like
 import app.bsky.feed.PostView
 import app.bsky.feed.ReplyRefParentUnion
+import app.bsky.feed.Repost
 import app.bsky.notification.ListNotificationsNotification
 import app.bsky.notification.ListNotificationsReason
 import chat.bsky.convo.ConvoView
@@ -23,6 +25,8 @@ import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.MessageContent
 import dev.dimension.flare.data.database.cache.model.StatusContent
+import dev.dimension.flare.data.database.cache.model.StatusContent.BlueskyNotification.Post
+import dev.dimension.flare.data.database.cache.model.StatusContent.BlueskyNotification.UserList
 import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -194,7 +198,11 @@ internal fun List<ListNotificationsNotification>.toDb(
     val grouped = this.groupBy { it.reason }.filter { it.value.any() }
     return grouped.flatMap { (reason, items) ->
         when (reason) {
-            is ListNotificationsReason.Unknown, ListNotificationsReason.StarterpackJoined ->
+            is ListNotificationsReason.Unknown,
+            ListNotificationsReason.StarterpackJoined,
+            ListNotificationsReason.Verified,
+            ListNotificationsReason.Unverified,
+            ->
                 items.map {
                     createDbPagingTimelineWithStatus(
                         accountKey = accountKey,
@@ -212,8 +220,8 @@ internal fun List<ListNotificationsNotification>.toDb(
                         .record
                         .let {
                             when (reason) {
-                                ListNotificationsReason.Repost -> it.decodeAs<app.bsky.feed.Repost>().subject
-                                ListNotificationsReason.Like -> it.decodeAs<app.bsky.feed.Like>().subject
+                                ListNotificationsReason.Repost -> it.decodeAs<Repost>().subject
+                                ListNotificationsReason.Like -> it.decodeAs<Like>().subject
                                 else -> null
                             }
                         }?.uri
@@ -221,7 +229,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                             references[it]
                         }
                 val content =
-                    StatusContent.BlueskyNotification.UserList(
+                    UserList(
                         data = items,
                         post = post,
                     )
@@ -264,7 +272,7 @@ internal fun List<ListNotificationsNotification>.toDb(
             }
 
             ListNotificationsReason.Follow -> {
-                val content = StatusContent.BlueskyNotification.UserList(data = items, post = null)
+                val content = UserList(data = items, post = null)
                 val data =
                     DbStatusWithUser(
                         user = null,
@@ -295,7 +303,7 @@ internal fun List<ListNotificationsNotification>.toDb(
             ListNotificationsReason.Mention, ListNotificationsReason.Reply, ListNotificationsReason.Quote -> {
                 items.mapNotNull {
                     val post = references[it.uri] ?: return@mapNotNull null
-                    val content = StatusContent.BlueskyNotification.Post(post = post)
+                    val content = Post(post = post)
                     val user = post.author.toDbUser(accountKey.host)
                     val data =
                         DbStatusWithUser(

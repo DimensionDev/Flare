@@ -4,6 +4,8 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import app.bsky.feed.GetPostsQueryParams
+import app.bsky.feed.Like
+import app.bsky.feed.Repost
 import app.bsky.notification.ListNotificationsQueryParams
 import app.bsky.notification.ListNotificationsReason
 import app.bsky.notification.UpdateSeenRequest
@@ -72,17 +74,19 @@ internal class NotificationRemoteMediator(
                         is ListNotificationsReason.Unknown -> null
                         ListNotificationsReason.Like ->
                             it.record
-                                .decodeAs<app.bsky.feed.Like>()
+                                .decodeAs<Like>()
                                 .subject.uri
                         ListNotificationsReason.Repost ->
                             it.record
-                                .decodeAs<app.bsky.feed.Repost>()
+                                .decodeAs<Repost>()
                                 .subject.uri
                         ListNotificationsReason.Follow -> null
                         ListNotificationsReason.Mention -> it.uri
                         ListNotificationsReason.Reply -> it.uri
                         ListNotificationsReason.Quote -> it.uri
                         ListNotificationsReason.StarterpackJoined -> null
+                        ListNotificationsReason.Unverified -> null
+                        ListNotificationsReason.Verified -> null
                     }
                 }.distinct()
                 .toImmutableList()

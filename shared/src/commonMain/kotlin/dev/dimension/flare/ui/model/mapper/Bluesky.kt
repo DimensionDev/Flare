@@ -327,6 +327,8 @@ private val ListNotificationsReason.icon: UiTimeline.TopMessage.Icon
             ListNotificationsReason.Quote -> UiTimeline.TopMessage.Icon.Reply
             is ListNotificationsReason.Unknown -> UiTimeline.TopMessage.Icon.Info
             ListNotificationsReason.StarterpackJoined -> UiTimeline.TopMessage.Icon.Info
+            ListNotificationsReason.Unverified -> UiTimeline.TopMessage.Icon.Info
+            ListNotificationsReason.Verified -> UiTimeline.TopMessage.Icon.Info
         }
 
 private val ListNotificationsReason.type: UiTimeline.TopMessage.MessageType
@@ -340,6 +342,8 @@ private val ListNotificationsReason.type: UiTimeline.TopMessage.MessageType
             ListNotificationsReason.Quote -> UiTimeline.TopMessage.MessageType.Bluesky.Quote
             is ListNotificationsReason.Unknown -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
             ListNotificationsReason.StarterpackJoined -> UiTimeline.TopMessage.MessageType.Bluesky.StarterpackJoined
+            ListNotificationsReason.Unverified -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
+            ListNotificationsReason.Verified -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
         }
 
 internal fun PostView.render(

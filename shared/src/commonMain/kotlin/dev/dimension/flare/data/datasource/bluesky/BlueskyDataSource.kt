@@ -2075,11 +2075,7 @@ internal class BlueskyDataSource(
                         is LogDeleteMessageMessageUnion.Unknown -> Unit
                     }
                 }
-
-                is GetLogResponseLogUnion.BeginConvo -> Unit
-                is GetLogResponseLogUnion.LeaveConvo -> Unit
-                is GetLogResponseLogUnion.Unknown -> Unit
-                is GetLogResponseLogUnion.AcceptConvo -> Unit
+                else -> Unit
             }
         }
     }

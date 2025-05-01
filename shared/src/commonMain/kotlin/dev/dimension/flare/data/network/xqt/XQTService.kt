@@ -34,6 +34,7 @@ import dev.dimension.flare.data.network.xqt.api.createV11GetApi
 import dev.dimension.flare.data.network.xqt.api.createV11PostApi
 import dev.dimension.flare.data.network.xqt.api.createV20GetApi
 import dev.dimension.flare.data.network.xqt.api.createVDmPostJsonPostApi
+import dev.dimension.flare.data.network.xqt.elonmusk114514.ElonMusk1145141919810
 import dev.dimension.flare.model.xqtHost
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -45,11 +46,13 @@ import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.ContentType
+import io.ktor.http.encodedPath
 import io.ktor.util.AttributeKey
 import io.ktor.utils.io.KtorDsl
 
-private val baseUrl = "https://$xqtHost/i/api/"
+// private val baseUrl = "https://$xqtHost/i/api/"
 private val guestApiUrl = "https://api.$xqtHost/"
+private val baseUrl = "https://api.$xqtHost/"
 private val uploadUrl = "https://upload.$xqtHost/i/"
 private val token =
     "AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA"
@@ -144,6 +147,7 @@ internal class XQTService(
 
 internal class XQTHeaderPlugin(
     private val chocolate: String? = null,
+//    private val elonMusk114514: ElonMusk114514 = ElonMusk114514(),
 ) {
     @KtorDsl
     class Config(
@@ -172,6 +176,15 @@ internal class XQTHeaderPlugin(
 
     private fun setHeader(client: HttpClient) {
         client.requestPipeline.intercept(HttpRequestPipeline.State) {
+            val elonMusk1145141919810 =
+                runCatching {
+                    ElonMusk1145141919810.senpaiSukissu(
+                        method = context.method.value,
+                        path = context.url.encodedPath,
+                    )
+                }.onFailure {
+                    it.printStackTrace()
+                }.getOrNull()
             context.headers {
                 append("x-twitter-client-language", "en")
                 append(
@@ -188,6 +201,12 @@ internal class XQTHeaderPlugin(
                     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
                 )
                 if (chocolate != null) {
+                    if (elonMusk1145141919810 != null) {
+                        append(
+                            "x-client-transaction-id",
+                            elonMusk1145141919810,
+                        )
+                    }
                     val guestToken =
                         chocolate
                             .split("; ")

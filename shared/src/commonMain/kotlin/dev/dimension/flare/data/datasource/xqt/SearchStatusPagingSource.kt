@@ -12,6 +12,8 @@ import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.xqtHost
+import io.ktor.http.encodeURLQueryComponent
 import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
 
@@ -40,6 +42,7 @@ internal class SearchStatusPagingSource(
                                     rawQuery = query,
                                     count = state.config.pageSize.toLong(),
                                 ).encodeJson(),
+                            referer = "https://$xqtHost/search?q=${query.encodeURLQueryComponent()}",
                         ).also {
                             database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
                         }
@@ -58,6 +61,7 @@ internal class SearchStatusPagingSource(
                                 count = state.config.pageSize.toLong(),
                                 cursor = cursor,
                             ).encodeJson(),
+                        referer = "https://$xqtHost/search?q=${query.encodeURLQueryComponent()}",
                     )
                 }
             }.body()?.data?.searchByRawQuery?.searchTimeline?.timeline?.instructions.orEmpty()

@@ -24,6 +24,7 @@
 		642DED2D2DBF6965006B944C /* FontAwesomeSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 642DED2C2DBF6965006B944C /* FontAwesomeSwiftUI */; };
 		644C84F82D535D0B00E92D0D /* JXPagingView in Frameworks */ = {isa = PBXBuildFile; productRef = 644C84F72D535D0B00E92D0D /* JXPagingView */; };
 		64541A902DA3CE5A001208C7 /* Tiercel in Frameworks */ = {isa = PBXBuildFile; productRef = 64541A8F2DA3CE5A001208C7 /* Tiercel */; };
+		645CC8672DC9FEF600B8CBF6 /* WishKit in Frameworks */ = {isa = PBXBuildFile; productRef = 645CC8662DC9FEF600B8CBF6 /* WishKit */; };
 		64655C2D2CFD6CA000255488 /* Debug.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64655C2C2CFD6CA000255488 /* Debug.xcconfig */; };
 		6467B2AE2DB109500045DA9A /* SFSymbolKit in Frameworks */ = {isa = PBXBuildFile; productRef = 6467B2AD2DB109500045DA9A /* SFSymbolKit */; };
 		646CABC52DAE876C00B9EA6F /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 646CABC42DAE876C00B9EA6F /* ExyteChat */; };
@@ -89,6 +90,7 @@
 				0690507B2CAE634C007FC957 /* Awesome in Frameworks */,
 				066AD0452B3ACDC1006F28F4 /* Collections in Frameworks */,
 				067D89772AD25C1700F8F932 /* MarkdownUI in Frameworks */,
+				645CC8672DC9FEF600B8CBF6 /* WishKit in Frameworks */,
 				64E208742CF845C2001C64EF /* Kingfisher in Frameworks */,
 				64FF2E132D2BC4E80046A32B /* Generated in Frameworks */,
 				066AD0492B3ACDC1006F28F4 /* OrderedCollections in Frameworks */,
@@ -268,6 +270,7 @@
 				646CABC42DAE876C00B9EA6F /* ExyteChat */,
 				6467B2AD2DB109500045DA9A /* SFSymbolKit */,
 				642DED2C2DBF6965006B944C /* FontAwesomeSwiftUI */,
+				645CC8662DC9FEF600B8CBF6 /* WishKit */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
@@ -326,6 +329,7 @@
 				646CABC32DAE876C00B9EA6F /* XCRemoteSwiftPackageReference "Chat" */,
 				6467B2AC2DB109500045DA9A /* XCRemoteSwiftPackageReference "SFSymbolKit" */,
 				642DED2B2DBF6965006B944C /* XCRemoteSwiftPackageReference "FontAwesomeSwiftUI" */,
+				645CC8652DC9FEF600B8CBF6 /* XCRemoteSwiftPackageReference "wishkit-ios" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -747,6 +751,14 @@
 				minimumVersion = 3.2.6;
 			};
 		};
+		645CC8652DC9FEF600B8CBF6 /* XCRemoteSwiftPackageReference "wishkit-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/wishkit/wishkit-ios.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.7.0;
+			};
+		};
 		6467B2AC2DB109500045DA9A /* XCRemoteSwiftPackageReference "SFSymbolKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Sedlacek-Solutions/SFSymbolKit.git";
@@ -935,6 +947,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 64541A8E2DA3CE5A001208C7 /* XCRemoteSwiftPackageReference "Tiercel" */;
 			productName = Tiercel;
+		};
+		645CC8662DC9FEF600B8CBF6 /* WishKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 645CC8652DC9FEF600B8CBF6 /* XCRemoteSwiftPackageReference "wishkit-ios" */;
+			productName = WishKit;
 		};
 		6467B2AD2DB109500045DA9A /* SFSymbolKit */ = {
 			isa = XCSwiftPackageProductDependency;

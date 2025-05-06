@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +37,7 @@ import dev.dimension.flare.settings_about_localization_description
 import dev.dimension.flare.settings_about_source_code
 import dev.dimension.flare.settings_about_telegram
 import dev.dimension.flare.settings_about_telegram_description
+import dev.dimension.flare.settings_privacy_policy
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -152,6 +155,27 @@ public fun AboutScreenContent(
                 Icon(
                     imageVector = FontAwesomeIcons.Solid.Language,
                     contentDescription = stringResource(resource = Res.string.settings_about_localization),
+                    modifier = Modifier.size(24.dp),
+                )
+            },
+        )
+        ListItem(
+            headlineContent = {
+                Text(text = stringResource(resource = Res.string.settings_privacy_policy))
+            },
+            supportingContent = {
+                Text(
+                    text = "https://legal.mask.io/maskbook",
+                )
+            },
+            modifier =
+                Modifier.clickable {
+                    uriHandler.openUri("https://legal.mask.io/maskbook/")
+                },
+            leadingContent = {
+                Icon(
+                    imageVector = Icons.Filled.Lock,
+                    contentDescription = stringResource(resource = Res.string.settings_privacy_policy),
                     modifier = Modifier.size(24.dp),
                 )
             },

@@ -34,7 +34,7 @@ struct ListIconView: View {
         self.imageUrl = imageUrl
         self.size = size
         self.listId = listId
-        // 如果没有指定圆角大小，则默认为尺寸的1/5
+
         self.cornerRadius = cornerRadius ?? size / 5
     }
 
@@ -46,7 +46,6 @@ struct ListIconView: View {
                         .frame(width: size, height: size)
                 }
                 .onFailure { _ in
-                    // 加载失败时什么也不做，会显示默认图像
                 }
                 .resizable()
                 .aspectRatio(contentMode: .fill)

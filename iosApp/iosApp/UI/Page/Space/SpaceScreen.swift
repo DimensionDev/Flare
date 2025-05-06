@@ -8,13 +8,11 @@ struct SpaceScreen: View {
 
     var body: some View {
         VStack(spacing: 20) {
-            Text("XSpace Test")
+            Text("XSpaces list comming soon")
                 .font(.largeTitle)
                 .padding(.top)
 
             HStack {
-                Text("Spaces list comming soon")
-                Spacer()
                 TextField("Enter Podcast/Space ID", text: $podcastIdInput)
                     .textFieldStyle(.roundedBorder)
                     .autocapitalization(.none)

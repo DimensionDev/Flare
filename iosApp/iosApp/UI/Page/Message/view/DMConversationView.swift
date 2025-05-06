@@ -35,6 +35,7 @@ struct DMConversationView: View {
             }
         }
         .navigationTitle(title)
+        .safeAreaPadding(.bottom, 50)
     }
 
     @ViewBuilder

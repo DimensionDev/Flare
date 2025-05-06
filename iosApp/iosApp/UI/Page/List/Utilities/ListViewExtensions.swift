@@ -7,7 +7,6 @@ extension View {
         modifier(ShimmeringModifier())
     }
 
-    /// 条件性修饰符
     @ViewBuilder
     func `if`(_ condition: Bool, transform: (Self) -> some View) -> some View {
         if condition {

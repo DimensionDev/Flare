@@ -4,8 +4,6 @@ import os
 import shared
 import SwiftUI
 
-// 导入FeedDetailView所在模块，如果需要的话
-
 private let logger = Logger(subsystem: "com.flare.app", category: "AllFeedsView")
 
 struct AllFeedsView: View {
@@ -27,13 +25,13 @@ struct AllFeedsView: View {
         let user = UserManager.shared.getCurrentUser()
         _currentUser = State(initialValue: user)
 
-        // 检查当前平台是否是Bluesky (只有Bluesky有Feeds)
+        // check if the current platform is Bluesky (only Bluesky has Feeds)
         var missingFeedData = true
         if let user {
             let platformTypeString = String(describing: user.platformType).lowercased()
             if platformTypeString == "bluesky" {
                 missingFeedData = false
-                logger.debug("当前用户平台类型: \(platformTypeString), 支持Feeds")
+                logger.debug("current user platform: \(platformTypeString), supports Feeds")
             }
         }
         _isMissingFeedData = State(initialValue: missingFeedData)
@@ -73,7 +71,7 @@ struct AllFeedsView: View {
         case .loading:
             loadingFeedsView
         case let .success(tabsData):
-            // 查找Feed类型的Tab
+
             let feedTab = findFeedTab(in: tabsData.data)
             if let feedTab {
                 switch onEnum(of: feedTab.data) {
@@ -90,12 +88,11 @@ struct AllFeedsView: View {
                                         isPinned: tabSettingStore.pinnedListIds.contains(feed.id)
                                     )
                                     .onAppear {
-                                        // 获取数据并触发加载
-                                        print("🟢 Feed加载: itemCount=\(feedsData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
+                                        print("🟢 Feed loading: itemCount=\(feedsData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
                                         feedsData.get(index: Int32(index))
 
                                         lastKnownItemCount = Int(feedsData.itemCount)
-                                        print("🟡 Feed更新后: itemCount=\(feedsData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
+                                        print("🟡 Feed updated: itemCount=\(feedsData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
                                     }
                                 }
                             }
@@ -151,7 +148,7 @@ struct AllFeedsView: View {
         }
     }
 
-    // 从Tabs中找到Feed类型的Tab
+    // find the Feed type tab in Tabs
     private func findFeedTab(in tabs: ImmutableListWrapper<PinnableTimelineTabPresenterStateTab>) -> PinnableTimelineTabPresenterStateTab? {
         for i in 0 ..< tabs.size {
             if let tab = tabs.get(index: Int32(i)) as? PinnableTimelineTabPresenterStateTab {
@@ -163,7 +160,7 @@ struct AllFeedsView: View {
         return nil
     }
 
-    // 加载状态视图
+    // loading feeds view
     private var loadingFeedsView: some View {
         VStack {
             ForEach(0 ..< 5, id: \.self) { _ in

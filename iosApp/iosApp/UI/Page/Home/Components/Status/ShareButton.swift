@@ -190,7 +190,7 @@ struct ShareButton: View {
 
             Button(action: {
                 print("Save Media tapped")
-                // 先显示加载中的 Toast
+                // show toast
                 let toastView = ToastView(
                     icon: UIImage(systemName: "download.fill"),
                     message: String(localized: "download") + " success"
@@ -213,14 +213,22 @@ struct ShareButton: View {
                         )
                     } else if let video = media as? UiMediaVideo {
                         let videoUrl = video.url
-                        // todo 这个地方要用mp4，现在返回的是 m3u8 地址
                         print("Starting download for Video: \(videoUrl)")
 
-//                        DownloadHelper.shared.startMediaDownload(
-//                            url: "https://video.twimg.com/amplify_video/1899444944089083904/vid/avc1/720x720/QyUhpaYIvB7rSiow.mp4?tag=14",
-//                            mediaType: .video,
-//                            previewImageUrl: video.thumbnailUrl
-//                        )
+                        if videoUrl.contains(".mp4") {
+                            DownloadHelper.shared.startMediaDownload(
+                                url: videoUrl,
+                                mediaType: .video,
+                                previewImageUrl: video.thumbnailUrl
+                            )
+                        } else {
+                            let toastView = ToastView(
+                                icon: UIImage(systemName: "flag.fill"),
+                                message: String(localized: "only support mp4")
+                            )
+                            toastView.show()
+                        }
+
                     } else if let gif = media as? UiMediaGif {
                         let gifUrl = gif.url
                         print("Starting download for GIF: \(gifUrl)")

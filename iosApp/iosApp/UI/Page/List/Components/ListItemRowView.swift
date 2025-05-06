@@ -2,7 +2,6 @@ import Kingfisher
 import shared
 import SwiftUI
 
-//  list 行
 public struct ListItemRowView: View {
     let list: UiList
     let isPinned: Bool
@@ -38,14 +37,12 @@ public struct ListItemRowView: View {
             HStack(spacing: 12) {
                 ListIconView(imageUrl: list.avatar ?? "", size: 50, listId: list.id)
 
-                // 列表信息
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 4) {
                         Text(list.title)
                             .font(.headline)
                             .lineLimit(1)
 
-                        // 成员数量（可选）
                         if showMemberCount, Int(list.likedCount) > 0 {
                             Text("·\(list.likedCount) members")
                                 .font(.subheadline)

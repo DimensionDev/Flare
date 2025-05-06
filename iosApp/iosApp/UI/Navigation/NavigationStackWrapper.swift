@@ -1,22 +1,22 @@
 import SwiftUI
 
-
 struct NavigationStackWrapper<Content: View>: View {
     @Environment(\.appSettings) private var appSettings
-    @Binding var navigationPath: NavigationPath  
+    @Binding var navigationPath: NavigationPath
     var content: () -> Content
-    
+
     @State private var swipeGesture: UIPanGestureRecognizer = {
         let gesture = UIPanGestureRecognizer()
         gesture.name = UUID().uuidString
         gesture.isEnabled = false
         return gesture
     }()
+
     init(path: Binding<NavigationPath>, @ViewBuilder content: @escaping () -> Content) { // Modified init
-        self._navigationPath = path 
+        _navigationPath = path
         self.content = content
     }
-    
+
     var body: some View {
         NavigationStack(path: $navigationPath) {
             content()
@@ -24,7 +24,7 @@ struct NavigationStackWrapper<Content: View>: View {
                     AttachGestureView(gesture: $swipeGesture, navigationDepth: navigationPath.count) // Use path count
                 }
         }
-        .enabledFullSwipePop(appSettings.appearanceSettings.enableFullSwipePop)  
+        .enabledFullSwipePop(appSettings.appearanceSettings.enableFullSwipePop)
         .environment(\.popGestureID, swipeGesture.name)
         .onReceive(NotificationCenter.default.publisher(for: .init(swipeGesture.name ?? "")), perform: { info in
             if let userInfo = info.userInfo, let status = userInfo["status"] as? Bool {
@@ -34,16 +34,16 @@ struct NavigationStackWrapper<Content: View>: View {
     }
 }
 
-fileprivate struct PopNotificationID: EnvironmentKey {
+private struct PopNotificationID: EnvironmentKey {
     static var defaultValue: String?
 }
 
-fileprivate extension EnvironmentValues {
+private extension EnvironmentValues {
     var popGestureID: String? {
         get {
             self[PopNotificationID.self]
         }
-        
+
         set {
             self[PopNotificationID.self] = newValue
         }
@@ -53,49 +53,48 @@ fileprivate extension EnvironmentValues {
 extension View {
     @ViewBuilder
     func enabledFullSwipePop(_ isEnabled: Bool) -> some View {
-        self
-            .modifier(FullSwipeModifier(isEnabled: isEnabled))
+        modifier(FullSwipeModifier(isEnabled: isEnabled))
     }
 }
 
-fileprivate struct FullSwipeModifier: ViewModifier {
+private struct FullSwipeModifier: ViewModifier {
     var isEnabled: Bool
     @Environment(\.popGestureID) private var gestureID
     func body(content: Content) -> some View {
         content
             .onChange(of: isEnabled, initial: true) { _, new in
-                guard let gestureID = gestureID else { return }
+                guard let gestureID else { return }
                 NotificationCenter.default.post(name: .init(gestureID), object: nil, userInfo: [
-                    "status": new
+                    "status": new,
                 ])
             }
             .onDisappear {
-                guard let gestureID = gestureID else { return }
+                guard let gestureID else { return }
                 NotificationCenter.default.post(name: .init(gestureID), object: nil, userInfo: [
-                    "status": false
+                    "status": false,
                 ])
             }
     }
 }
 
-fileprivate struct AttachGestureView: UIViewRepresentable {
+private struct AttachGestureView: UIViewRepresentable {
     @Binding var gesture: UIPanGestureRecognizer
     let navigationDepth: Int
-    
-    func makeUIView(context: Context) -> some UIView {
-        return UIView()
+
+    func makeUIView(context _: Context) -> some UIView {
+        UIView()
     }
-    
-    func updateUIView(_ uiView: UIViewType, context: Context) {
+
+    func updateUIView(_ uiView: UIViewType, context _: Context) {
         DispatchQueue.main.async {
             if let parentViewController = uiView.parentViewController {
                 if let navigationController = parentViewController.navigationController {
                     // Check if the navigation stack has more than one view controller
-                    if self.navigationDepth > 0 {
+                    if navigationDepth > 0 {
                         if let _ = navigationController.view.gestureRecognizers?.first(where: { $0.name == self.gesture.name }) {
                             print("Already attached")
                         } else {
-                            navigationController.addFullSwipeGesture(self.gesture)
+                            navigationController.addFullSwipeGesture(gesture)
                             print("Attached")
                         }
                     } else {
@@ -111,16 +110,16 @@ fileprivate struct AttachGestureView: UIViewRepresentable {
     }
 }
 
-fileprivate extension UINavigationController {
+private extension UINavigationController {
     func addFullSwipeGesture(_ gesture: UIPanGestureRecognizer) {
         guard let gestureSelector = interactivePopGestureRecognizer?.value(forKey: "targets") else { return }
-        
+
         gesture.setValue(gestureSelector, forKey: "targets")
         view.addGestureRecognizer(gesture)
     }
 }
 
-fileprivate extension UIView {
+private extension UIView {
     var parentViewController: UIViewController? {
         sequence(first: self) {
             $0.next

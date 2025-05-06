@@ -2,6 +2,7 @@ import FontAwesomeSwiftUI
 import shared
 import SwiftUI
 
+
 @main
 struct FlareApp: SwiftUI.App {
     #if os(macOS)
@@ -31,13 +32,12 @@ struct FlareApp: SwiftUI.App {
 
     var body: some Scene {
         WindowGroup {
-            
             ZStack(alignment: .bottom) {
                 #if os(macOS)
                     ProvideWindowSizeClass {
                         FlareRootView()
 //                        .enableInjection()
-                            .preferredColorScheme(.light)  
+                            .preferredColorScheme(.light)
                     }
                     .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
                     .onOpenURL { url in
@@ -46,7 +46,7 @@ struct FlareApp: SwiftUI.App {
                 #else
                     FlareRootView()
 //                    .enableInjection()
-                        // .preferredColorScheme(.light)  
+                        // .preferredColorScheme(.light)
                         .onOpenURL { url in
                             router.handleDeepLink(url)
                         }
@@ -54,10 +54,9 @@ struct FlareApp: SwiftUI.App {
                 #endif
 
                 // --- Global Floating Player Overlay ---
-                if podcastManager.currentPodcast != nil { 
+                if podcastManager.currentPodcast != nil {
                     DraggablePlayerOverlay().animation(.spring(), value: podcastManager.currentPodcast?.id)
                 }
-                
             }
         }
         #if os(macOS)

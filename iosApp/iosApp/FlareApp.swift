@@ -2,6 +2,7 @@ import FontAwesomeSwiftUI
 import shared
 import SwiftUI
 
+
 @main
 struct FlareApp: SwiftUI.App {
     #if os(macOS)

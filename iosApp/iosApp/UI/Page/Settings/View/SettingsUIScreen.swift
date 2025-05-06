@@ -34,13 +34,18 @@ struct SettingsUIScreen: View {
 
                             Label("settings_storage_title", systemImage: "externaldrive")
                                 .tag(SettingsDestination.storage)
-
+                            
+                            Label("Feature Requests", systemImage: "list.bullet.rectangle.portrait")
+                                .tag(SettingsDestination.wishlist)
+                            
                             Label("settings_about_subtitle", systemImage: "exclamationmark.circle")
                                 .tag(SettingsDestination.about)
+
+                            
                         }
                     }
                     .navigationTitle("settings_title")
-                    .environment(\.defaultMinListRowHeight, 50)
+                    .environment(\.defaultMinListRowHeight, 60)
                 } detail: {
                     if let detail = selectedDetail {
                         switch detail {
@@ -54,6 +59,8 @@ struct SettingsUIScreen: View {
                             StorageScreen()
                         case .about:
                             AboutScreen()
+                        case .wishlist:
+                            WishlistView()
                         }
                     } else {
                         Text("settings_welcome")
@@ -85,6 +92,7 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
     case other
     case storage
     case about
+    case wishlist
     public var id: String {
         rawValue
     }

@@ -123,7 +123,7 @@ struct DMRoomItemView: View {
                                 .font(.headline)
                                 .lineLimit(1)
                         } else {
-                            Text("我的私信")
+                            Text("My DM")
                                 .font(.headline)
                                 .lineLimit(1)
                         }

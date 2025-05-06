@@ -5,7 +5,6 @@ import SwiftUI
 import UIKit
 
 struct FLNewMenuView: View {
-//    @Binding var isOpen: Bool
     @State private var showLogin = false
     @State private var showAccounts = false
     @State private var showLists = false
@@ -17,9 +16,7 @@ struct FLNewMenuView: View {
     @EnvironmentObject private var router: FlareRouter
     @EnvironmentObject private var appState: FlareAppState
 
-    // isOpen: Binding<Bool>,
     init(accountType: AccountType, user: UiUserV2? = nil) {
-//        _isOpen = isOpen
         self.accountType = accountType
         self.user = user
     }
@@ -31,7 +28,7 @@ struct FLNewMenuView: View {
                 .padding(.horizontal, 20)
 
             VStack(spacing: 16) {
-                // 仅在登录状态下显示List按钮
+                // only show list button when user login
                 if !(accountType is AccountTypeGuest) {
                     Button(action: {
                         appState.isCustomTabBarHidden = true
@@ -50,7 +47,7 @@ struct FLNewMenuView: View {
                     }
                     .buttonStyle(MenuButtonStyle())
 
-                    // 仅在登录状态且平台为Bluesky时显示Feeds按钮
+                    // only show feeds button when user login and platform is Bluesky
                     if user?.isBluesky == true {
                         Button(action: {
                             appState.isCustomTabBarHidden = true
@@ -168,14 +165,12 @@ struct FLNewMenuView: View {
                 }
             }) {
                 HStack(spacing: 12) {
-                    // 头像
                     if let user {
                         HStack(spacing: 12) {
                             UserAvatar(data: user.avatar, size: 60)
                                 .clipShape(Circle())
                                 .offset(x: 0)
 
-                            // 用户信息
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(user.name.raw)
                                     .font(.headline)
@@ -190,9 +185,8 @@ struct FLNewMenuView: View {
                                 .clipShape(Circle())
                                 .offset(x: 0)
 
-                            // 用户信息
                             VStack(alignment: .leading, spacing: 4) {
-                                Text("未登录")
+                                Text("No Login")
                                     .font(.headline)
                                     .foregroundColor(.gray)
                                     .offset(x: 10)
@@ -203,7 +197,7 @@ struct FLNewMenuView: View {
             }
             .buttonStyle(PlainButtonStyle())
 
-            // 关注/粉丝数
+            // Followers/Following count
             if let profile = user as? UiProfile {
                 HStack(spacing: 20) {
                     HStack(spacing: 4) {

@@ -2,40 +2,19 @@ import shared
 import SwiftUI
 
 struct FlareMenuContainer: View {
-    // let content: Content
-
-    // @ObservedObject var appState: FlareAppState
-
-    // @ObservedObject var router: FlareRouter
-
     @State private var currentUser: UiUserV2? = nil
 
     @State private var accountType: AccountType = AccountTypeGuest()
 
-    // content: Content,
-//    init( appState: FlareAppState, router: FlareRouter) {
-//        // self.content = content
-//        // self.appState = appState
-//        // self.router = router
-//    }
-
     var body: some View {
         FLNewMenuView(
-            //            isOpen: $appState.isMenuOpen,
             accountType: accountType,
             user: currentUser
         )
-        // .environmentObject(router)
-//        FLNewSideMenu(
-        ////            isOpen: $appState.isMenuOpen,
-//            menu: menuView,
-//            content: content
-//        )
         .onAppear {
             checkAndUpdateUserState()
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("UserAccountDidChange"))) { _ in
-
             checkAndUpdateUserState()
         }
         .onReceive(NotificationCenter.default.publisher(for: .userDidUpdate)) { notification in
@@ -46,26 +25,12 @@ struct FlareMenuContainer: View {
         }
     }
 
-//    private var menuView: some View {
-//        FLNewMenuView(
-    ////            isOpen: $appState.isMenuOpen,
-//            accountType: accountType,
-//            user: currentUser
-//        )
-//        .environmentObject(router)
-//    }
-
-//    private var contentView: some View {
-//        content
-//            .flareNavigationGesture(router: router)
-//    }
-
     private func checkAndUpdateUserState() {
         if let user = UserManager.shared.getCurrentUser() {
             currentUser = user
             accountType = AccountTypeSpecific(accountKey: user.key)
         } else {
-            // 未登录状态
+            // No login
             accountType = AccountTypeGuest()
             currentUser = nil
         }

@@ -32,7 +32,7 @@ struct DraggablePlayerOverlay: View {
                     }
                 }
         )
-        .onChange(of: manager.currentPodcast) { newValue in 
+        .onChange(of: manager.currentPodcast) { newValue in
             if newValue == nil {
                 withAnimation(.spring()) {
                     accumulatedOffset = .zero

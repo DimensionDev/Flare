@@ -15,11 +15,11 @@ enum PodcastPlaybackState: Equatable {
     static func == (lhs: PodcastPlaybackState, rhs: PodcastPlaybackState) -> Bool {
         switch (lhs, rhs) {
         case (.stopped, .stopped), (.loading, .loading), (.playing, .playing), (.paused, .paused):
-            return true
+            true
         case (.failed, .failed):
-            return true
+            true
         default:
-            return false
+            false
         }
     }
 }
@@ -172,11 +172,11 @@ class IOSPodcastManager: ObservableObject {
             print("[iOSPodcastManager] Seek ignored: Item not seekable.")
             return
         }
-        guard let player = player else {
+        guard let player else {
             print("[iOSPodcastManager] Seek ignored: Player not available.")
             return
         }
-        guard time >= 0 && (duration == nil || time <= duration!) else {
+        guard time >= 0, duration == nil || time <= duration! else {
             print("[iOSPodcastManager] Seek ignored: Target time out of bounds (0 - \(duration ?? -1)).")
             return
         }
@@ -187,7 +187,7 @@ class IOSPodcastManager: ObservableObject {
 
         let targetTime = CMTime(seconds: time, preferredTimescale: 600)
         player.seek(to: targetTime, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] completed in
-            guard let self = self else { return }
+            guard let self else { return }
 
             DispatchQueue.main.async {
                 self.isSeeking = false
@@ -227,7 +227,7 @@ class IOSPodcastManager: ObservableObject {
         removeObservers()
 
         playerItemStatusObserver = item.observe(\.status, options: [.new, .initial]) { [weak self] playerItem, _ in
-            guard let self = self else { return }
+            guard let self else { return }
             DispatchQueue.main.async {
                 print("-----------------------------------------")
                 print("[iOSPodcastManager] PlayerItem Status Changed")
@@ -255,15 +255,15 @@ class IOSPodcastManager: ObservableObject {
                 case .unknown:
                     print("  - Status: Unknown")
 
-                    if self.playbackState != .paused && self.playbackState != .stopped && self.playbackState == .loading {
-                    } else if self.playbackState != .failed(nil) && self.playbackState != .paused && self.playbackState != .stopped {
+                    if self.playbackState != .paused, self.playbackState != .stopped, self.playbackState == .loading {
+                    } else if self.playbackState != .failed(nil), self.playbackState != .paused, self.playbackState != .stopped {
                         self.playbackState = .loading
                         self.isPlaying = false
                     }
 
                 @unknown default:
                     print("  - Status: Unknown (default case)")
-                    if self.playbackState != .paused && self.playbackState != .failed(nil) && self.playbackState != .stopped {
+                    if self.playbackState != .paused, self.playbackState != .failed(nil), self.playbackState != .stopped {
                         self.playbackState = .loading
                         self.isPlaying = false
                     }
@@ -285,10 +285,10 @@ class IOSPodcastManager: ObservableObject {
 
         // *** Add DidPlayToEndTime Observer ***
         removePlayerItemDidPlayToEndObserver()
-        
+
         playerItemDidPlayToEndObserver = NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
-            object: item,  
+            object: item,
             queue: .main
         ) { [weak self] _ in
             print("[iOSPodcastManager] Notification: AVPlayerItemDidPlayToEndTime received.")
@@ -304,20 +304,18 @@ class IOSPodcastManager: ObservableObject {
         playerItemStatusObserver = nil
         playerItemDurationObserver = nil
         playerItemSeekableObserver = nil
-        
-        removePlayerItemDidPlayToEndObserver() 
-        
+
+        removePlayerItemDidPlayToEndObserver()
+
         print("[iOSPodcastManager] All observers removed.")
     }
 
-   
     private func handlePlaybackDidEnd() {
         print("[iOSPodcastManager] Handling playback end.")
-        DispatchQueue.main.async   {
+        DispatchQueue.main.async {
             self.playbackState = .paused
             self.isPlaying = false
 
-            
             // self.currentTime = 0.0
             // self.currentTimeSubject.send(0.0)
 
@@ -325,7 +323,6 @@ class IOSPodcastManager: ObservableObject {
             self.updateNowPlayingInfo()
         }
     }
-
 
     private func removePlayerItemDidPlayToEndObserver() {
         if let observer = playerItemDidPlayToEndObserver {
@@ -339,20 +336,20 @@ class IOSPodcastManager: ObservableObject {
     private func addTimeObserver() {
         // Avoid adding multiple observers
         guard timeObserverToken == nil else { return }
-        guard let player = player else { return } // Ensure player exists
+        guard let player else { return } // Ensure player exists
 
         // Observe time every 1 second
         let interval = CMTime(seconds: 1.0, preferredTimescale: 600)
         timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
-            guard let self = self else { return }
+            guard let self else { return }
             let currentTimeSeconds = CMTimeGetSeconds(time)
 
             // Only update if time has actually changed significantly and not during seeking
-            if abs(currentTimeSeconds - self.currentTime) > 0.01 && !self.isSeeking {
-                self.currentTime = currentTimeSeconds
-                self.currentTimeSubject.send(currentTimeSeconds)
+            if abs(currentTimeSeconds - currentTime) > 0.01, !isSeeking {
+                currentTime = currentTimeSeconds
+                currentTimeSubject.send(currentTimeSeconds)
 
-                self.updateNowPlayingInfo()
+                updateNowPlayingInfo()
             }
         }
         print("[iOSPodcastManager] Periodic time observer added (interval: 1.0s)")
@@ -372,16 +369,16 @@ class IOSPodcastManager: ObservableObject {
         let commandCenter = MPRemoteCommandCenter.shared()
 
         // Add handler for Play Command
-        commandCenter.playCommand.addTarget { [unowned self] event -> MPRemoteCommandHandlerStatus in
+        commandCenter.playCommand.addTarget { [unowned self] _ -> MPRemoteCommandHandlerStatus in
             print("[RemoteCommand] Play command received")
-            self.resume()
+            resume()
             return .success
         }
 
         // Add handler for Pause Command
-        commandCenter.pauseCommand.addTarget { [unowned self] event -> MPRemoteCommandHandlerStatus in
+        commandCenter.pauseCommand.addTarget { [unowned self] _ -> MPRemoteCommandHandlerStatus in
             print("[RemoteCommand] Pause command received")
-            self.pause()
+            pause()
             return .success
         }
 
@@ -413,16 +410,15 @@ class IOSPodcastManager: ObservableObject {
         nowPlayingInfo[MPMediaItemPropertyTitle] = podcast.title
         nowPlayingInfo[MPMediaItemPropertyArtist] = podcast.creator.name.raw
 
-        if let duration = self.duration {
+        if let duration {
             nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
         }
-        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = self.currentTime
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
 
         // Determine playback rate based on state (important for lock screen controls)
-        let playbackRate: Float
-        switch self.playbackState {
-        case .playing: playbackRate = 1.0
-        case .paused, .stopped, .loading, .failed: playbackRate = 0.0
+        let playbackRate: Float = switch playbackState {
+        case .playing: 1.0
+        case .paused, .stopped, .loading, .failed: 0.0
         }
         nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = playbackRate
 

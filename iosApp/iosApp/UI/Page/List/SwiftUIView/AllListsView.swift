@@ -25,14 +25,14 @@ struct AllListsView: View {
         let user = UserManager.shared.getCurrentUser()
         _currentUser = State(initialValue: user)
 
-        // 检查是否为Mastodon账户
+        // check if the user is a Mastodon account
         var isMastodon = false
         if let user {
             let platformTypeString = String(describing: user.platformType).lowercased()
 
             if platformTypeString == "mastodon" {
                 isMastodon = true
-                logger.debug("当前用户平台类型: \(platformTypeString), 是否Mastodon: \(isMastodon)")
+                logger.debug("current user platform: \(platformTypeString), is Mastodon: \(isMastodon)")
             }
         }
         _isMastodonUser = State(initialValue: isMastodon)
@@ -53,16 +53,15 @@ struct AllListsView: View {
                                 EnhancedListRowView(
                                     list: list,
                                     accountType: accountType,
-                                    isPinned: tabSettingStore.pinnedListIds.contains(list.id), // 从 Store 获取 pin 状态
+                                    isPinned: tabSettingStore.pinnedListIds.contains(list.id), // get pin status from Store
                                     defaultUser: isMastodonUser ? currentUser : nil
                                 )
                                 .onAppear {
-                                    // 获取数据并触发加载
-                                    print("🟢 列表加载: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
+                                    print("🟢 loading: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
                                     successData.get(index: Int32(index))
 
                                     lastKnownItemCount = Int(successData.itemCount)
-                                    print("🟡 列表更新后: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
+                                    print("🟡 list updated: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
                                 }
                             }
                         }
@@ -98,7 +97,7 @@ struct AllListsView: View {
         }
     }
 
-    // 加载状态视图
+    // loading lists view
     private var loadingListsView: some View {
         VStack {
             ForEach(0 ..< 5, id: \.self) { _ in
@@ -131,7 +130,6 @@ private struct EnhancedListRowView: View {
             showMemberCount: true,
             defaultUser: defaultUser,
             onTap: {
-                // 使用FlareRouter导航到List详情页
                 router.navigate(to: .listDetail(
                     accountType: accountType,
                     list: list,

@@ -95,7 +95,6 @@ struct DownloadManagerScreen: View {
             DownloadManager.shared.remove(url: task.url.absoluteString)
         }
 
-        // 立即从本地数组中移除这些任务
         var indexSet = IndexSet()
         for (index, task) in downloadTasks.enumerated() {
             if tasksToDelete.contains(where: { $0.url.absoluteString == task.url.absoluteString }) {
@@ -106,7 +105,6 @@ struct DownloadManagerScreen: View {
             downloadTasks.remove(atOffsets: indexSet)
         }
 
-        // 异步刷新列表，确保删除操作在UI上完全生效
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             loadDownloadTasks()
         }
@@ -126,7 +124,7 @@ struct DownloadManagerScreen: View {
         case .failed:
             DownloadManager.shared.resume(url: task.url.absoluteString)
         case .removed:
-            // 已删除，无操作
+
             break
         @unknown default:
             break

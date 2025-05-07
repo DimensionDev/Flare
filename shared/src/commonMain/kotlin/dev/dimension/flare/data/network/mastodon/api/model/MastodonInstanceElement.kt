@@ -38,21 +38,84 @@ internal data class InstanceData(
     val configuration: Configuration? = null,
     val registrations: Registrations? = null,
     val contact: Contact? = null,
+    val icon: List<Icon>? = null,
+    @SerialName("api_versions")
+    val apiVersions: APIVersions? = null,
+    val rules: List<Rule>? = null,
+)
+
+@Serializable
+internal data class Rule(
+    val id: String? = null,
+    val text: String? = null,
+    val hint: String? = null,
+)
+
+@Serializable
+internal data class Icon(
+    val src: String? = null,
+    val size: String? = null,
+)
+
+@Serializable
+internal data class APIVersions(
+    val mastodon: Long? = null,
 )
 
 @Serializable
 internal data class Configuration(
     val urls: Urls? = null,
+    val vapid: Vapid? = null,
     val accounts: Accounts? = null,
     val statuses: Statuses? = null,
     @SerialName("media_attachments")
+    val mediaAttachments: MediaAttachments? = null,
+    val polls: Polls? = null,
     val translation: Translation? = null,
+)
+
+@Serializable
+internal data class MediaAttachments(
+    @SerialName("description_limit")
+    val descriptionLimit: Long? = null,
+    @SerialName("image_matrix_limit")
+    val imageMatrixLimit: Long? = null,
+    @SerialName("image_size_limit")
+    val imageSizeLimit: Long? = null,
+    @SerialName("supported_mime_types")
+    val supportedMIMETypes: List<String>? = null,
+    @SerialName("video_frame_rate_limit")
+    val videoFrameRateLimit: Long? = null,
+    @SerialName("video_matrix_limit")
+    val videoMatrixLimit: Long? = null,
+    @SerialName("video_size_limit")
+    val videoSizeLimit: Long? = null,
+)
+
+@Serializable
+internal data class Polls(
+    @SerialName("max_options")
+    val maxOptions: Long? = null,
+    @SerialName("max_characters_per_option")
+    val maxCharactersPerOption: Long? = null,
+    @SerialName("min_expiration")
+    val minExpiration: Long? = null,
+    @SerialName("max_expiration")
+    val maxExpiration: Long? = null,
+)
+
+@Serializable
+internal data class Vapid(
+    @SerialName("public_key")
+    val publicKey: String? = null,
 )
 
 @Serializable
 internal data class Accounts(
     @SerialName("max_featured_tags")
     val maxFeaturedTags: Long? = null,
+    @SerialName("max_pinned_statuses")
+    val maxPinnedStatuses: Long? = null,
 )
 
 @Serializable
@@ -77,6 +140,11 @@ internal data class Translation(
 internal data class Urls(
     val streaming: String? = null,
     val status: String? = null,
+    val about: String? = null,
+    @SerialName("privacy_policy")
+    val privacyPolicy: String? = null,
+    @SerialName("terms_of_service")
+    val termsOfService: String? = null,
 )
 
 @Serializable
@@ -100,6 +168,12 @@ internal data class Registrations(
     val enabled: Boolean? = null,
     @SerialName("approval_required")
     val approvalRequired: Boolean? = null,
+    @SerialName("reason_required")
+    val reasonRequired: Boolean? = null,
+    val message: String? = null,
+    @SerialName("min_age")
+    val minAge: String? = null,
+    val url: String? = null,
 )
 
 @Serializable

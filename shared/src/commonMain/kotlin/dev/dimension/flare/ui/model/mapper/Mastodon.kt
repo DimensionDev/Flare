@@ -10,6 +10,7 @@ import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Attachment
+import dev.dimension.flare.data.network.mastodon.api.model.InstanceData
 import dev.dimension.flare.data.network.mastodon.api.model.MediaType
 import dev.dimension.flare.data.network.mastodon.api.model.Mention
 import dev.dimension.flare.data.network.mastodon.api.model.Notification
@@ -22,6 +23,8 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiInstance
+import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
@@ -699,4 +702,59 @@ private fun replaceMentionAndHashtag(
         }
         node.childNodes().forEach { replaceMentionAndHashtag(mentions, it, accountKey, host) }
     }
+}
+
+internal fun InstanceData.render(): UiInstanceMetadata {
+    val configuration =
+        UiInstanceMetadata.Configuration(
+            registration =
+                UiInstanceMetadata.Configuration.Registration(
+                    enabled = this.registrations?.enabled == true,
+                ),
+            statuses =
+                UiInstanceMetadata.Configuration.Statuses(
+                    maxCharacters = this.configuration?.statuses?.maxCharacters ?: 500,
+                    maxMediaAttachments = this.configuration?.statuses?.maxMediaAttachments ?: 4,
+                ),
+            mediaAttachment =
+                UiInstanceMetadata.Configuration.MediaAttachment(
+                    imageSizeLimit = this.configuration?.mediaAttachments?.imageSizeLimit ?: -1,
+                    descriptionLimit = this.configuration?.mediaAttachments?.descriptionLimit ?: 1500,
+                    supportedMimeTypes =
+                        this.configuration
+                            ?.mediaAttachments
+                            ?.supportedMIMETypes
+                            .orEmpty()
+                            .toImmutableList(),
+                ),
+            poll =
+                UiInstanceMetadata.Configuration.Poll(
+                    maxOptions = this.configuration?.polls?.maxOptions ?: 4,
+                    maxCharactersPerOption = this.configuration?.polls?.maxCharactersPerOption ?: 50,
+                    minExpiration = this.configuration?.polls?.minExpiration ?: 300,
+                    maxExpiration = this.configuration?.polls?.maxExpiration ?: 2592000,
+                ),
+        )
+
+    val rules =
+        this.rules
+            .orEmpty()
+            .associate { rule ->
+                (rule.text ?: "") to (rule.hint ?: "")
+            }.toImmutableMap()
+
+    return UiInstanceMetadata(
+        instance =
+            UiInstance(
+                name = this.title ?: "Unknown",
+                description = this.description,
+                iconUrl = this.icon?.lastOrNull()?.src,
+                domain = this.domain ?: "Unknown",
+                type = PlatformType.Mastodon,
+                bannerUrl = this.thumbnail?.url,
+                usersCount = this.usage?.users?.activeMonth ?: 0,
+            ),
+        rules = rules,
+        configuration = configuration,
+    )
 }

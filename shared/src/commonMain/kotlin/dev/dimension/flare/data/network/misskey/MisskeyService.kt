@@ -31,12 +31,14 @@ import io.ktor.http.contentLength
 
 private fun config(
     baseUrl: String,
-    accessToken: String,
+    accessToken: String?,
 ) = ktorfit(
     baseUrl = baseUrl,
     config = {
-        install(MisskeyAuthorizationPlugin) {
-            token = accessToken
+        if (accessToken != null) {
+            install(MisskeyAuthorizationPlugin) {
+                token = accessToken
+            }
         }
         install(DefaultRequest) {
             if (contentLength() != 0L) {
@@ -48,7 +50,7 @@ private fun config(
 
 internal class MisskeyService(
     private val baseUrl: String,
-    private val token: String,
+    private val token: String?,
 ) : UsersApi by config(baseUrl, token).createUsersApi(),
     MetaApi by config(baseUrl, token).createMetaApi(),
     NotesApi by config(baseUrl, token).createNotesApi(),
@@ -74,7 +76,9 @@ internal class MisskeyService(
                         },
                     )
                     append("isSensitive", sensitive)
-                    append("i", token)
+                    if (token != null) {
+                        append("i", token)
+                    }
                 },
             )
         return driveFilesCreate(

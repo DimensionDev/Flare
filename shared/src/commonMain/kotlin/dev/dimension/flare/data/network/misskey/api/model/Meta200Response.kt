@@ -18,47 +18,133 @@ package dev.dimension.flare.data.network.misskey.api.model
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-/**
- * *
- * @param maintainerName * @param maintainerEmail * @param version * @param name * @param uri * @param description * @param langs * @param tosUrl * @param repositoryUrl * @param feedbackUrl * @param defaultDarkTheme * @param defaultLightTheme * @param disableRegistration * @param cacheRemoteFiles * @param cacheRemoteSensitiveFiles * @param emailRequiredForSignup * @param enableHcaptcha * @param hcaptchaSiteKey * @param enableRecaptcha * @param recaptchaSiteKey * @param enableTurnstile * @param turnstileSiteKey * @param swPublickey * @param mascotImageUrl * @param bannerUrl * @param serverErrorImageUrl * @param infoImageUrl * @param notFoundImageUrl * @param iconUrl * @param maxNoteTextLength * @param ads * @param requireSetup * @param enableEmail * @param enableServiceWorker * @param translatorAvailable * @param proxyAccountName * @param mediaProxy * @param features */
 @Serializable
 internal data class Meta200Response(
-    @SerialName(value = "maintainerName") val maintainerName: kotlin.String? = null,
-    @SerialName(value = "maintainerEmail") val maintainerEmail: kotlin.String? = null,
-    @SerialName(value = "version") val version: kotlin.String,
-    @SerialName(value = "name") val name: kotlin.String,
-    @SerialName(value = "uri") val uri: kotlin.String,
-    @SerialName(value = "description") val description: kotlin.String? = null,
-    @SerialName(value = "langs") val langs: kotlin.collections.List<kotlin.String>,
-    @SerialName(value = "tosUrl") val tosUrl: kotlin.String? = null,
-    @SerialName(value = "repositoryUrl") val repositoryUrl: kotlin.String = "https://github.com/misskey-dev/misskey",
-    @SerialName(value = "feedbackUrl") val feedbackUrl: kotlin.String = "https://github.com/misskey-dev/misskey/issues/new",
-    @SerialName(value = "defaultDarkTheme") val defaultDarkTheme: kotlin.String? = null,
-    @SerialName(value = "defaultLightTheme") val defaultLightTheme: kotlin.String? = null,
-    @SerialName(value = "disableRegistration") val disableRegistration: kotlin.Boolean,
-    @SerialName(value = "cacheRemoteFiles") val cacheRemoteFiles: kotlin.Boolean,
-    @SerialName(value = "cacheRemoteSensitiveFiles") val cacheRemoteSensitiveFiles: kotlin.Boolean,
-    @SerialName(value = "emailRequiredForSignup") val emailRequiredForSignup: kotlin.Boolean,
-    @SerialName(value = "enableHcaptcha") val enableHcaptcha: kotlin.Boolean,
-    @SerialName(value = "hcaptchaSiteKey") val hcaptchaSiteKey: kotlin.String? = null,
-    @SerialName(value = "enableRecaptcha") val enableRecaptcha: kotlin.Boolean? = null,
-    @SerialName(value = "recaptchaSiteKey") val recaptchaSiteKey: kotlin.String? = null,
-    @SerialName(value = "enableTurnstile") val enableTurnstile: kotlin.Boolean,
-    @SerialName(value = "turnstileSiteKey") val turnstileSiteKey: kotlin.String? = null,
-    @SerialName(value = "swPublickey") val swPublickey: kotlin.String? = null,
-    @SerialName(value = "mascotImageUrl") val mascotImageUrl: kotlin.String = "/assets/ai.png",
-    @SerialName(value = "bannerUrl") val bannerUrl: kotlin.String,
-    @SerialName(value = "serverErrorImageUrl") val serverErrorImageUrl: kotlin.String? = null,
-    @SerialName(value = "infoImageUrl") val infoImageUrl: kotlin.String? = null,
-    @SerialName(value = "notFoundImageUrl") val notFoundImageUrl: kotlin.String? = null,
-    @SerialName(value = "iconUrl") val iconUrl: kotlin.String? = null,
-    @SerialName(value = "maxNoteTextLength") val maxNoteTextLength: kotlin.Double,
-    @SerialName(value = "ads") val ads: kotlin.collections.List<Meta200ResponseAdsInner>,
-    @SerialName(value = "requireSetup") val requireSetup: kotlin.Boolean,
-    @SerialName(value = "enableEmail") val enableEmail: kotlin.Boolean,
-    @SerialName(value = "enableServiceWorker") val enableServiceWorker: kotlin.Boolean,
-    @SerialName(value = "translatorAvailable") val translatorAvailable: kotlin.Boolean,
-    @SerialName(value = "proxyAccountName") val proxyAccountName: kotlin.String? = null,
-    @SerialName(value = "mediaProxy") val mediaProxy: kotlin.String,
-    @SerialName(value = "features") val features: Meta200ResponseFeatures? = null,
+    val maintainerName: String? = null,
+    val maintainerEmail: String? = null,
+    val version: String? = null,
+    val name: String? = null,
+    val shortName: String? = null,
+    val uri: String? = null,
+    val description: String? = null,
+    val langs: List<String>? = null,
+    @SerialName("tosUrl")
+    val tosURL: String? = null,
+    @SerialName("repositoryUrl")
+    val repositoryURL: String? = null,
+    @SerialName("feedbackUrl")
+    val feedbackURL: String? = null,
+    @SerialName("impressumUrl")
+    val impressumURL: String? = null,
+    @SerialName("privacyPolicyUrl")
+    val privacyPolicyURL: String? = null,
+    val disableRegistration: Boolean? = null,
+    val emailRequiredForSignup: Boolean? = null,
+    val enableHcaptcha: Boolean? = null,
+    val hcaptchaSiteKey: String? = null,
+    val enableMcaptcha: Boolean? = null,
+    val mcaptchaSiteKey: String? = null,
+    @SerialName("mcaptchaInstanceUrl")
+    val mcaptchaInstanceURL: String? = null,
+    val enableRecaptcha: Boolean? = null,
+    val recaptchaSiteKey: String? = null,
+    val enableTurnstile: Boolean? = null,
+    val turnstileSiteKey: String? = null,
+    @SerialName("googleAnalyticsId")
+    val googleAnalyticsID: String? = null,
+    val swPublickey: String? = null,
+    val themeColor: String? = null,
+    @SerialName("mascotImageUrl")
+    val mascotImageURL: String? = null,
+    @SerialName("bannerUrl")
+    val bannerURL: String? = null,
+    @SerialName("infoImageUrl")
+    val infoImageURL: String? = null,
+    @SerialName("serverErrorImageUrl")
+    val serverErrorImageURL: String? = null,
+    @SerialName("notFoundImageUrl")
+    val notFoundImageURL: String? = null,
+    @SerialName("iconUrl")
+    val iconURL: String? = null,
+    @SerialName("backgroundImageUrl")
+    val backgroundImageURL: String? = null,
+    @SerialName("logoImageUrl")
+    val logoImageURL: String? = null,
+    val maxNoteTextLength: Long? = null,
+    val defaultLightTheme: String? = null,
+    val defaultDarkTheme: String? = null,
+    val ads: List<Ad>? = null,
+    val wellKnownWebsites: List<String>? = null,
+    val notesPerOneAd: Long? = null,
+    val enableEmail: Boolean? = null,
+    val enableServiceWorker: Boolean? = null,
+    val translatorAvailable: Boolean? = null,
+    val serverRules: List<String>? = null,
+    val policies: Policies? = null,
+    val mediaProxy: String? = null,
+    @SerialName("enableUrlPreview")
+    val enableURLPreview: Boolean? = null,
+    val enableSkebStatus: Boolean? = null,
+    val cacheRemoteFiles: Boolean? = null,
+    val cacheRemoteSensitiveFiles: Boolean? = null,
+    val requireSetup: Boolean? = null,
+    val proxyAccountName: String? = null,
+    val features: Map<String, Boolean>? = null,
+)
+
+@Serializable
+internal data class Ad(
+    val id: String? = null,
+    val url: String? = null,
+    val place: String? = null,
+    val ratio: Long? = null,
+    @SerialName("imageUrl")
+    val imageURL: String? = null,
+    val dayOfWeek: Long? = null,
+)
+
+@Serializable
+internal data class Policies(
+    val gtlAvailable: Boolean? = null,
+    val ltlAvailable: Boolean? = null,
+    val canPublicNote: Boolean? = null,
+    val canScheduleNote: Boolean? = null,
+    val scheduleNoteLimit: Long? = null,
+    val scheduleNoteMaxDays: Long? = null,
+    val canInitiateConversation: Boolean? = null,
+    val canCreateContent: Boolean? = null,
+    val canUpdateContent: Boolean? = null,
+    val canDeleteContent: Boolean? = null,
+    val canPurgeAccount: Boolean? = null,
+    val canUpdateAvatar: Boolean? = null,
+    val canUpdateBanner: Boolean? = null,
+    val mentionLimit: Long? = null,
+    val canInvite: Boolean? = null,
+    val inviteLimit: Long? = null,
+    val inviteLimitCycle: Long? = null,
+    val inviteExpirationTime: Long? = null,
+    val canManageCustomEmojis: Boolean? = null,
+    val canManageAvatarDecorations: Boolean? = null,
+    val canSearchNotes: Boolean? = null,
+    val canUseTranslator: Boolean? = null,
+    val canUseDriveFileInSoundSettings: Boolean? = null,
+    val canUseReaction: Boolean? = null,
+    val canHideAds: Boolean? = null,
+    @SerialName("driveCapacityMb")
+    val driveCapacityMB: Long? = null,
+    val alwaysMarkNsfw: Boolean? = null,
+    val skipNsfwDetection: Boolean? = null,
+    val pinLimit: Long? = null,
+    val antennaLimit: Long? = null,
+    val antennaNotesLimit: Long? = null,
+    val wordMuteLimit: Long? = null,
+    val webhookLimit: Long? = null,
+    val clipLimit: Long? = null,
+    val noteEachClipsLimit: Long? = null,
+    val userListLimit: Long? = null,
+    val userEachUserListsLimit: Long? = null,
+    val rateLimitFactor: Long? = null,
+    val avatarDecorationLimit: Long? = null,
+    val mutualLinkSectionLimit: Long? = null,
+    val mutualLinkLimit: Long? = null,
 )

@@ -8,6 +8,7 @@ import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.EmojiSimple
+import dev.dimension.flare.data.network.misskey.api.model.Meta200Response
 import dev.dimension.flare.data.network.misskey.api.model.Note
 import dev.dimension.flare.data.network.misskey.api.model.Notification
 import dev.dimension.flare.data.network.misskey.api.model.NotificationType
@@ -19,12 +20,13 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.UiEmoji
+import dev.dimension.flare.ui.model.UiInstance
+import dev.dimension.flare.ui.model.UiInstanceMetadata
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.mapper.MisskeyAchievement.entries
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -939,3 +941,53 @@ internal fun UserList.render(): UiList =
         title = name,
         platformType = PlatformType.Misskey,
     )
+
+internal fun Meta200Response.render(): UiInstanceMetadata {
+    val configuration =
+        UiInstanceMetadata.Configuration(
+            registration =
+                UiInstanceMetadata.Configuration.Registration(
+                    enabled = this.disableRegistration != true,
+                ),
+            statuses =
+                UiInstanceMetadata.Configuration.Statuses(
+                    maxCharacters = this.maxNoteTextLength ?: 3000,
+                    maxMediaAttachments = 4,
+                ),
+            mediaAttachment =
+                UiInstanceMetadata.Configuration.MediaAttachment(
+                    imageSizeLimit = -1,
+                    descriptionLimit = 1500,
+                    supportedMimeTypes = persistentListOf(),
+                ),
+            poll =
+                UiInstanceMetadata.Configuration.Poll(
+                    maxOptions = 4,
+                    maxCharactersPerOption = 50,
+                    minExpiration = 300,
+                    maxExpiration = 2592000,
+                ),
+        )
+
+    val rules =
+        this.serverRules
+            .orEmpty()
+            .associate {
+                it to ""
+            }.toImmutableMap()
+
+    return UiInstanceMetadata(
+        instance =
+            UiInstance(
+                name = this.name ?: "Unknown",
+                description = this.description,
+                iconUrl = this.iconURL,
+                domain = this.uri ?: "Unknown",
+                type = PlatformType.Misskey,
+                bannerUrl = this.bannerURL,
+                usersCount = 0, // Default to 0 as users count isn't provided in Meta200Response
+            ),
+        rules = rules,
+        configuration = configuration,
+    )
+}

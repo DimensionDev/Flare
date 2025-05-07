@@ -1,6 +1,5 @@
 import Combine
 import Foundation
-import KMPNativeCoroutinesAsync
 import os
 import shared
 import SwiftUI
@@ -20,8 +19,7 @@ class UserManager: ObservableObject {
 
     @Published var currentUser: UiUserV2? {
         didSet {
-            currentInstanceMetadataPresenter?.cancelScope()
-            currentMetadataObservationTask?.cancel()
+             currentMetadataObservationTask?.cancel()
 
             if currentUser == nil, instanceMetadata != nil {
                 resetMetadataState()
@@ -94,7 +92,7 @@ class UserManager: ObservableObject {
     }
 
     private func fetchAndStoreInstanceMetadata(host: String, platformType: PlatformType) {
-        print("UserManager (KMPNativeCoroutines Async): 初始化 \(host) 的元数据获取...")
+        print("UserManager (PresenterBase Model): 初始化 \(host) 的元数据获取...")
         instanceMetadata = nil
         instanceMetadataError = nil
         isLoadingInstanceMetadata = true
@@ -103,20 +101,18 @@ class UserManager: ObservableObject {
         currentInstanceMetadataPresenter = presenter
 
         currentMetadataObservationTask = Task { @MainActor in
-            print("UserManager (KMPNativeCoroutines Async): Task started for \(host)")
+            print("UserManager (PresenterBase Model): Task started for \(host)")
 
             do {
-                let sequence = asyncSequence(for: presenter.uiInstanceMetadataFlowFlow)
-
-                for try await uiStateSwift in sequence {
+                for try await stateContainer in presenter.models {
                     if Task.isCancelled {
-                        print("UserManager (KMPNativeCoroutines Async): Observation task cancelled for \(host).")
+                        print("UserManager (PresenterBase Model): Observation task cancelled for \(host).")
                         self.isLoadingInstanceMetadata = false
                         break
                     }
 
-                    let uiState = uiStateSwift
-                    print("UserManager (KMPNativeCoroutines Async): Received state for \(host): \(uiState)")
+                    let uiState = stateContainer.data
+                    print("UserManager (PresenterBase Model): Received state for \(host): \(uiState)")
 
                     self.isLoadingInstanceMetadata = uiState is UiStateLoading<UiInstanceMetadata>
 
@@ -124,25 +120,25 @@ class UserManager: ObservableObject {
                         self.instanceMetadata = successState.data
                         self.instanceMetadataError = nil
                         self.isLoadingInstanceMetadata = false
-                        print("UserManager (KMPNativeCoroutines Async): Success for \(host).")
+                        print("UserManager (PresenterBase Model): Success for \(host).")
                         break
                     } else if let errorState = uiState as? UiStateError<UiInstanceMetadata> {
                         self.instanceMetadata = nil
                         let errorMessage = errorState.throwable.message ?? "An unknown error occurred."
                         self.instanceMetadataError = errorMessage
                         self.isLoadingInstanceMetadata = false
-                        print("UserManager (KMPNativeCoroutines Async): Error for \(host) - \(errorMessage).")
+                        print("UserManager (PresenterBase Model): Error for \(host) - \(errorMessage).")
                         break
                     } else if uiState is UiStateLoading<UiInstanceMetadata> {
-                        print("UserManager (KMPNativeCoroutines Async): Still loading for \(host).")
+                        print("UserManager (PresenterBase Model): Still loading for \(host).")
                     }
                 }
             } catch {
                 if Task.isCancelled {
-                    print("UserManager (KMPNativeCoroutines Async): Observation task for \(host) caught cancellation error.")
+                    print("UserManager (PresenterBase Model): Observation task for \(host) caught cancellation error.")
                 } else {
                     self.instanceMetadataError = error.localizedDescription
-                    print("UserManager (KMPNativeCoroutines Async): Error observing \(host) metadata flow - \(error.localizedDescription)")
+                    print("UserManager (PresenterBase Model): Error observing \(host) metadata flow - \(error.localizedDescription)")
                 }
                 self.isLoadingInstanceMetadata = false
                 self.instanceMetadata = nil
@@ -161,7 +157,6 @@ class UserManager: ObservableObject {
 
     deinit {
         print("UserManager deinit")
-        currentInstanceMetadataPresenter?.cancelScope()
         currentMetadataObservationTask?.cancel()
     }
 }

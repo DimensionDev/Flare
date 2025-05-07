@@ -49,7 +49,6 @@ materialKolor = "2.1.1"
 room = "2.7.1"
 sqlite = "2.5.0"
 compose-multiplatform = "1.7.3"
-kmpNativeCoroutines = "1.0.0-ALPHA-42"
 
 [libraries]
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
@@ -227,4 +226,3 @@ firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 room = { id = "androidx.room", version.ref = "room" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
-kmp-nativecoroutines = { id = "com.rickclephas.kmp.nativecoroutines", version.ref = "kmpNativeCoroutines" }

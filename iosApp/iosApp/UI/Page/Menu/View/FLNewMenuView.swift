@@ -114,7 +114,7 @@ struct FLNewMenuView: View {
                         HStack {
                             Image(systemName: "arrow.down.circle")
                                 .frame(width: 28, height: 28)
-                            Text("Donwload")
+                            Text("Donwload Manager")
                                 .font(.body)
                             Spacer()
                         }

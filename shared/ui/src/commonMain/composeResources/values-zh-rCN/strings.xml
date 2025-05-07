@@ -7,4 +7,5 @@
     <string name="settings_about_line_description">加入我们的Line组</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">帮助我们翻译Flare</string>
+    <string name="settings_privacy_policy">隐私政策</string>
 </resources>

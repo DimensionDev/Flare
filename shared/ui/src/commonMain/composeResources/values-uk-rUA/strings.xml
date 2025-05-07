@@ -7,4 +7,5 @@
     <string name="settings_about_line_description">Приєднатися до нашої групи ліній</string>
     <string name="settings_about_localization">Кравдін</string>
     <string name="settings_about_localization_description">Допоможіть нам перекласти Flare</string>
+    <string name="settings_privacy_policy">Політика конфіденційності</string>
 </resources>

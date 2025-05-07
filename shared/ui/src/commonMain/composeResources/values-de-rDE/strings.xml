@@ -7,4 +7,5 @@
     <string name="settings_about_line_description">Trete unserer Liniengruppe bei</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Hilf uns, Flare zu übersetzen</string>
+    <string name="settings_privacy_policy">Datenschutzerklärung</string>
 </resources>

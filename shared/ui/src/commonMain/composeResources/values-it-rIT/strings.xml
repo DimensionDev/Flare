@@ -7,4 +7,5 @@
     <string name="settings_about_line_description">Unisciti al nostro gruppo Linea</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Aiutaci a tradurre il chiarore</string>
+    <string name="settings_privacy_policy">Politica Sulla Privacy</string>
 </resources>

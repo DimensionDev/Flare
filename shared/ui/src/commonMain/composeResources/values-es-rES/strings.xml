@@ -7,4 +7,5 @@
     <string name="settings_about_line_description">Únete a nuestro grupo de línea</string>
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Ayúdanos a traducir bengala</string>
+    <string name="settings_privacy_policy">Política de privacidad</string>
 </resources>

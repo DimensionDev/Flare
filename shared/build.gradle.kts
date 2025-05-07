@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.room)
+    alias(libs.plugins.kmp.nativecoroutines)
 }
 
 kotlin {
@@ -49,6 +50,7 @@ kotlin {
         all {
             languageSettings {
                 optIn("kotlin.uuid.ExperimentalUuidApi")
+                optIn("kotlin.experimental.ExperimentalObjCName")
             }
         }
         val commonMain by getting {
@@ -158,6 +160,10 @@ skie {
     features {
         enableSwiftUIObservingPreview = true
     }
+}
+
+nativeCoroutines {
+    exposedSeverity = com.rickclephas.kmp.nativecoroutines.gradle.ExposedSeverity.NONE
 }
 
 afterEvaluate {

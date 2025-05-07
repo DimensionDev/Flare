@@ -21243,6 +21243,7 @@
       }
     },
     "Donwload" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -21365,6 +21366,9 @@
           }
         }
       }
+    },
+    "Donwload Manager" : {
+
     },
     "download" : {
       "localizations" : {
@@ -29607,6 +29611,9 @@
       }
     },
     "Instance Information" : {
+
+    },
+    "Instance information is not available." : {
 
     },
     "Instance Rules" : {
@@ -102714,6 +102721,9 @@
         }
       }
     },
+    "This might be because the current user is not set, the instance host is not configured, or data is still loading." : {
+
+    },
     "This podcast url not available." : {
       "localizations" : {
         "ar" : {
@@ -103695,9 +103705,6 @@
           }
         }
       }
-    },
-    "Unhandled state" : {
-
     },
     "unlike" : {
       "comment" : "",

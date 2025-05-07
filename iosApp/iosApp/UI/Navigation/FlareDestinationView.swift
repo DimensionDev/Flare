@@ -129,8 +129,8 @@ struct FlareDestinationView: View {
                     .environmentObject(appState)
 
             case let .instanceScreen(host, platformType):
-                InstanceScreen(host: host, platformType: platformType)
-                .environmentObject(router)
+                InstanceScreen(host: host)
+                    .environmentObject(router)
                     .environmentObject(appState)
 
             case let .podcastSheet(accountType, podcastId):

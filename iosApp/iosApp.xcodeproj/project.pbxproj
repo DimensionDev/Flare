@@ -37,6 +37,9 @@
 		64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */ = {isa = PBXBuildFile; productRef = 64BBDA712CFDD8420052E599 /* SwiftDate */; };
 		64BFB16D2D549F50002793C0 /* SideMenu in Frameworks */ = {isa = PBXBuildFile; productRef = 64BFB16C2D549F50002793C0 /* SideMenu */; };
 		64C17B592DA3E683000291EA /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 64C17B582DA3E683000291EA /* GRDB */; };
+		64C19C8A2DCB6643006E39B3 /* KMPNativeCoroutinesAsync in Frameworks */ = {isa = PBXBuildFile; productRef = 64C19C892DCB6643006E39B3 /* KMPNativeCoroutinesAsync */; };
+		64C19C8C2DCB6643006E39B3 /* KMPNativeCoroutinesCombine in Frameworks */ = {isa = PBXBuildFile; productRef = 64C19C8B2DCB6643006E39B3 /* KMPNativeCoroutinesCombine */; };
+		64C19C8E2DCB6643006E39B3 /* KMPNativeCoroutinesCore in Frameworks */ = {isa = PBXBuildFile; productRef = 64C19C8D2DCB6643006E39B3 /* KMPNativeCoroutinesCore */; };
 		64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */; };
 		64E208712CF8458A001C64EF /* FLAnimatedImage in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208702CF8458A001C64EF /* FLAnimatedImage */; };
 		64E208742CF845C2001C64EF /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208732CF845C2001C64EF /* Kingfisher */; };
@@ -92,6 +95,7 @@
 				067D89772AD25C1700F8F932 /* MarkdownUI in Frameworks */,
 				645CC8672DC9FEF600B8CBF6 /* WishKit in Frameworks */,
 				64E208742CF845C2001C64EF /* Kingfisher in Frameworks */,
+				64C19C8C2DCB6643006E39B3 /* KMPNativeCoroutinesCombine in Frameworks */,
 				64FF2E132D2BC4E80046A32B /* Generated in Frameworks */,
 				066AD0492B3ACDC1006F28F4 /* OrderedCollections in Frameworks */,
 				06B8514D2B6B228600DFA075 /* FirebaseCrashlytics in Frameworks */,
@@ -106,6 +110,7 @@
 				06B8514B2B6B228600DFA075 /* FirebaseAnalytics in Frameworks */,
 				64A2DC662DAD21BF008EF8C2 /* ExyteChat in Frameworks */,
 				64C17B592DA3E683000291EA /* GRDB in Frameworks */,
+				64C19C8E2DCB6643006E39B3 /* KMPNativeCoroutinesCore in Frameworks */,
 				64E890742D2D28400001B93D /* MJRefresh in Frameworks */,
 				6489B3312D68D50800D8AEBB /* SVGView in Frameworks */,
 				64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */,
@@ -113,6 +118,7 @@
 				64E877C92D0842AA003559B9 /* SwiftSoup in Frameworks */,
 				64E208772CF84612001C64EF /* JXPhotoBrowser in Frameworks */,
 				066AD0472B3ACDC1006F28F4 /* DequeModule in Frameworks */,
+				64C19C8A2DCB6643006E39B3 /* KMPNativeCoroutinesAsync in Frameworks */,
 				648EE5BD2D8D71EA00A457AA /* SwiftfulRouting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -271,6 +277,9 @@
 				6467B2AD2DB109500045DA9A /* SFSymbolKit */,
 				642DED2C2DBF6965006B944C /* FontAwesomeSwiftUI */,
 				645CC8662DC9FEF600B8CBF6 /* WishKit */,
+				64C19C892DCB6643006E39B3 /* KMPNativeCoroutinesAsync */,
+				64C19C8B2DCB6643006E39B3 /* KMPNativeCoroutinesCombine */,
+				64C19C8D2DCB6643006E39B3 /* KMPNativeCoroutinesCore */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
@@ -330,6 +339,7 @@
 				6467B2AC2DB109500045DA9A /* XCRemoteSwiftPackageReference "SFSymbolKit" */,
 				642DED2B2DBF6965006B944C /* XCRemoteSwiftPackageReference "FontAwesomeSwiftUI" */,
 				645CC8652DC9FEF600B8CBF6 /* XCRemoteSwiftPackageReference "wishkit-ios" */,
+				64C19C882DCB6643006E39B3 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -839,6 +849,14 @@
 				kind = branch;
 			};
 		};
+		64C19C882DCB6643006E39B3 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/rickclephas/KMP-NativeCoroutines.git";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		64E2086F2CF8458A001C64EF /* XCRemoteSwiftPackageReference "FLAnimatedImage" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Flipboard/FLAnimatedImage.git";
@@ -1006,6 +1024,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 64C17B572DA3E683000291EA /* XCRemoteSwiftPackageReference "GRDB.swift" */;
 			productName = GRDB;
+		};
+		64C19C892DCB6643006E39B3 /* KMPNativeCoroutinesAsync */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64C19C882DCB6643006E39B3 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */;
+			productName = KMPNativeCoroutinesAsync;
+		};
+		64C19C8B2DCB6643006E39B3 /* KMPNativeCoroutinesCombine */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64C19C882DCB6643006E39B3 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */;
+			productName = KMPNativeCoroutinesCombine;
+		};
+		64C19C8D2DCB6643006E39B3 /* KMPNativeCoroutinesCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 64C19C882DCB6643006E39B3 /* XCRemoteSwiftPackageReference "KMP-NativeCoroutines" */;
+			productName = KMPNativeCoroutinesCore;
 		};
 		64E208702CF8458A001C64EF /* FLAnimatedImage */ = {
 			isa = XCSwiftPackageProductDependency;

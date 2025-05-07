@@ -1,4 +1,5 @@
 import Foundation
+import Kingfisher
 import os.log
 import shared
 import SwiftUI
@@ -15,6 +16,7 @@ struct FLNewMenuView: View {
 
     @EnvironmentObject private var router: FlareRouter
     @EnvironmentObject private var appState: FlareAppState
+    @ObservedObject var userManager = UserManager.shared
 
     init(accountType: AccountType, user: UiUserV2? = nil) {
         self.accountType = accountType
@@ -125,20 +127,39 @@ struct FLNewMenuView: View {
                     .buttonStyle(MenuButtonStyle())
 
                     if user?.isMastodon == true || user?.isMisskey == true {
+                        Spacer()
                         Button(action: {
                             appState.isCustomTabBarHidden = true
-                            router.navigate(to: .instanceScreen(host: user?.key.host ?? "", platformType: user?.platformType ?? PlatformType.mastodon))
+                            let host = userManager.instanceMetadata?.instance.domain ?? user?.key.host ?? ""
+                            let platformType = user?.platformType ?? PlatformType.mastodon
+                            router.navigate(to: .instanceScreen(host: host, platformType: platformType))
                         }) {
-                            HStack {
-                                Image(systemName: "server.rack")
-                                    .frame(width: 28, height: 28)
-                                Text("Server Info")
-                                    .font(.body)
-                                Spacer()
+                            if let bannerUrlString = userManager.instanceMetadata?.instance.bannerUrl,
+                               !bannerUrlString.isEmpty,
+                               let bannerUrl = URL(string: bannerUrlString)
+                            {
+                                KFImage(bannerUrl)
+                                    .placeholder {
+                                        Color.gray.opacity(0.3)
+                                    }
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(height: 120)
+                                    .clipped()
+                                    .cornerRadius(8)
+                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 0)
+                            } else {
+                                HStack {
+                                    Image(systemName: "server.rack")
+                                        .frame(width: 28, height: 28)
+                                    Text("Server Info")
+                                        .font(.body)
+                                    Spacer()
+                                }
+                                .padding(.vertical, 12)
+                                .padding(.horizontal, 10)
                             }
-                            .padding(.vertical, 12)
-                            .padding(.horizontal, 10)
-                            .contentShape(Rectangle())
                         }
                         .buttonStyle(MenuButtonStyle())
                     }

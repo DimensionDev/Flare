@@ -3,49 +3,48 @@ import shared
 import SwiftUI
 
 struct InstanceScreen: View {
-    private let presenter: InstanceMetadataPresenter
-    private let instanceHost: String
+    private let expectedHost: String
+    @ObservedObject var userManager = UserManager.shared
 
-    init(host: String, platformType: PlatformType) {
-        instanceHost = host
-
-        presenter = InstanceMetadataPresenter(host: host, platformType: platformType)
+    init(host: String) {
+        expectedHost = host
     }
 
     var body: some View {
-        ObservePresenter(presenter: presenter) { state in
-            content(for: state.data)
-                .navigationTitle(instanceHost)
-        }
+        contentView
+            .navigationTitle(expectedHost)
     }
 
     @ViewBuilder
-    func content(for uiState: UiState<UiInstanceMetadata>?) -> some View {
-        if let currentUiState = uiState {
-            switch currentUiState {
-            case is UiStateLoading<UiInstanceMetadata>:
-                ProgressView()
-            case let successState as UiStateSuccess<UiInstanceMetadata>:
-                InstanceDetailView(metadata: successState.data)
-            case let errorState as UiStateError<UiInstanceMetadata>:
-                VStack(spacing: 10) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 50, height: 50)
-                        .foregroundColor(.red)
-                    Text("Error loading instance info:", bundle: .main)
-                        .font(.headline)
-                    Text(verbatim: errorState.throwable.message ?? "Unknown error")
-                        .font(.callout)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-            default:
-                Text("Unhandled state", bundle: .main)
-            }
-        } else {
+    private var contentView: some View {
+        if userManager.isLoadingInstanceMetadata {
             ProgressView()
+        } else if let errorMsg = userManager.instanceMetadataError {
+            VStack(spacing: 10) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 50, height: 50)
+                    .foregroundColor(.red)
+                Text("Error loading instance info:", bundle: .main)
+                    .font(.headline)
+                Text(verbatim: errorMsg)
+                    .font(.callout)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
+        } else if let metadata = userManager.instanceMetadata {
+            InstanceDetailView(metadata: metadata)
+        } else {
+            VStack {
+                Text("Instance information is not available.", bundle: .main)
+                    .font(.headline)
+                Text("This might be because the current user is not set, the instance host is not configured, or data is still loading.")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .multilineTextAlignment(.center)
+                    .padding()
+            }
         }
     }
 }

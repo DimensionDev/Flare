@@ -7,4 +7,5 @@
     <string name="settings_about_line_description">انضم إلى مجموعة الخط</string>
     <string name="settings_about_localization">كرودن</string>
     <string name="settings_about_localization_description">ساعدنا في ترجمة الشفق</string>
+    <string name="settings_privacy_policy">سياسة الخصوصية</string>
 </resources>

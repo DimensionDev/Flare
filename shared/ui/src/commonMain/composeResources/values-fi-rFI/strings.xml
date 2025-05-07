@@ -7,4 +7,5 @@
     <string name="settings_about_line_description">Liity Riviryhmäämme</string>
     <string name="settings_about_localization">Crowdiini</string>
     <string name="settings_about_localization_description">Auta meitä kääntämään Flare</string>
+    <string name="settings_privacy_policy">Yksityisyyden Suoja</string>
 </resources>

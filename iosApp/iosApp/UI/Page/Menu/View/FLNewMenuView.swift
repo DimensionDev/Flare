@@ -68,23 +68,24 @@ struct FLNewMenuView: View {
                     }
 
                     // Message
-                    Button(action: {
-                        appState.isCustomTabBarHidden = true
-                        router.navigate(to: .messages(accountType: accountType))
-                    }) {
-                        HStack {
-                            Image(systemName: "bubble.left.and.bubble.right")
-                                .frame(width: 28, height: 28)
-                            Text("Message")
-                                .font(.body)
-                            Spacer()
+                    if user?.isXQt == true || user?.isBluesky == true {
+                        Button(action: {
+                            appState.isCustomTabBarHidden = true
+                            router.navigate(to: .messages(accountType: accountType))
+                        }) {
+                            HStack {
+                                Image(systemName: "bubble.left.and.bubble.right")
+                                    .frame(width: 28, height: 28)
+                                Text("Message")
+                                    .font(.body)
+                                Spacer()
+                            }
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 10)
+                            .contentShape(Rectangle())
                         }
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 10)
-                        .contentShape(Rectangle())
+                        .buttonStyle(MenuButtonStyle())
                     }
-                    .buttonStyle(MenuButtonStyle())
-
                     // X Spaces
                     if user?.isXQt == true {
                         Button(action: {
@@ -122,6 +123,25 @@ struct FLNewMenuView: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(MenuButtonStyle())
+
+                    if user?.isMastodon == true || user?.isMisskey == true {
+                        Button(action: {
+                            appState.isCustomTabBarHidden = true
+                            router.navigate(to: .instanceScreen(host: user?.key.host ?? "", platformType: user?.platformType ?? PlatformType.mastodon))
+                        }) {
+                            HStack {
+                                Image(systemName: "server.rack")
+                                    .frame(width: 28, height: 28)
+                                Text("Server Info")
+                                    .font(.body)
+                                Spacer()
+                            }
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 10)
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(MenuButtonStyle())
+                    }
                 }
             }
             .padding(.horizontal, 20)

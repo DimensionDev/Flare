@@ -55,6 +55,4 @@ class UserManager {
             }
         }
     }
-}
-
-// 添加通知名称
+} 

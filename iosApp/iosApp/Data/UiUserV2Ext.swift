@@ -18,4 +18,5 @@ extension UiUserV2 {
     var isVVo: Bool {
         platformType == .vvo
     }
+ 
 }

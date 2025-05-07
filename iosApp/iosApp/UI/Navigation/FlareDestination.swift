@@ -10,6 +10,7 @@ enum FlareDestination: Identifiable, Hashable {
     case search(accountType: AccountType, keyword: String)
     case statusMedia(accountType: AccountType, statusKey: MicroBlogKey, index: Int)
     case download(accountType: AccountType)
+    case instanceScreen(host: String, platformType: PlatformType)
 
     case compose(accountType: AccountType, status: FlareComposeStatus?)
     case addReaction(accountType: AccountType, statusKey: MicroBlogKey)
@@ -93,6 +94,8 @@ enum FlareDestination: Identifiable, Hashable {
             "download_\(String(describing: accountType))"
         case let .podcastSheet(accountType, podcastId):
             "podcastSheet_\(String(describing: accountType))_\(podcastId)"
+        case let .instanceScreen(host, platformType):
+            "instanceScreen_\(host)_\(platformType.name)"
         }
     }
 
@@ -104,7 +107,7 @@ enum FlareDestination: Identifiable, Hashable {
             .fullScreen
         case .blueskyReportStatus, .mastodonReportStatus, .misskeyReportStatus, .deleteStatus:
             .dialog
-        case .download:
+        case .download, .instanceScreen:
             .push
         default:
             .push

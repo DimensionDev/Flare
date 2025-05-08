@@ -1010,7 +1010,7 @@ private fun MessageContent.XQT.Message.render(
     }
 }
 
-private fun UserResults.render(accountKey: MicroBlogKey): UiProfile? =
+internal fun UserResults.render(accountKey: MicroBlogKey): UiProfile? =
     when (result) {
         is User -> result.render(accountKey)
         is UserUnavailable -> null

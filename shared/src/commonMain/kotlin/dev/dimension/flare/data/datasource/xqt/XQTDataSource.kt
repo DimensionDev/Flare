@@ -1915,4 +1915,69 @@ internal class XQTDataSource(
                 url = mediaData,
             )
         }
+
+    suspend fun getFleets(): Result<ImmutableList<UiPodcast>> {
+        return tryRun {
+            val fleet = service.getFleets()
+            fleet.threads
+                .orEmpty()
+                .mapNotNull {
+                    val title = it.liveContent?.audiospace?.title
+                    val id = it.liveContent?.audiospace?.broadcastID ?: return@mapNotNull null
+                    val ended = it.liveContent.audiospace.endedAt != null
+                    val creator =
+                        it.liveContent.audiospace.creatorTwitterUserID?.let {
+                            service
+                                .userById(it.toString())
+                                .body()
+                                ?.data
+                                ?.user
+                                ?.render(accountKey = accountKey)
+                        } ?: return@mapNotNull null
+                    val hosts =
+                        it.liveContent.audiospace.adminTwitterUserIDS
+                            .orEmpty()
+                            .mapNotNull { host ->
+                                service
+                                    .userById(host.toString())
+                                    .body()
+                                    ?.data
+                                    ?.user
+                                    ?.render(accountKey = accountKey)
+                            }.toImmutableList()
+                    val speakers =
+                        it.liveContent.audiospace.guests
+                            .orEmpty()
+                            .mapNotNull { speaker ->
+                                service
+                                    .userById(speaker.toString())
+                                    .body()
+                                    ?.data
+                                    ?.user
+                                    ?.render(accountKey = accountKey)
+                            }.toImmutableList()
+                    val listeners =
+                        it.liveContent.audiospace.listeners
+                            .orEmpty()
+                            .mapNotNull { listener ->
+                                service
+                                    .userById(listener.toString())
+                                    .body()
+                                    ?.data
+                                    ?.user
+                                    ?.render(accountKey = accountKey)
+                            }.toImmutableList()
+                    UiPodcast(
+                        id = id,
+                        title = title ?: "",
+                        playbackUrl = null,
+                        ended = ended,
+                        creator = creator,
+                        hosts = hosts,
+                        speakers = speakers,
+                        listeners = listeners,
+                    )
+                }.toImmutableList()
+        }
+    }
 }

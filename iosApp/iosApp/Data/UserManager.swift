@@ -1,32 +1,17 @@
-import Combine
 import Foundation
 import os
 import shared
-import SwiftUI
 
-class UserManager: ObservableObject {
+class UserManager {
     static let shared = UserManager()
-    @Published private(set) var instanceMetadata: UiInstanceMetadata?
-    @Published var isLoadingInstanceMetadata: Bool = false
-    @Published var instanceMetadataError: String?
 
-    private var currentInstanceMetadataPresenter: InstanceMetadataPresenter?
-    private var currentMetadataObservationTask: Task<Void, Error>?
-    private var isInitialized: Bool = false
-    private let accountsPresenter = ActiveAccountPresenter()
+    private var currentUser: UiUserV2?
+    private(set) var instanceMetadata: UiInstanceMetadata?
+
+    private var presenter = ActiveAccountPresenter()
+    private var isInitialized = false
 
     private init() {}
-
-    @Published var currentUser: UiUserV2? {
-        didSet {
-             currentMetadataObservationTask?.cancel()
-
-            if currentUser == nil, instanceMetadata != nil {
-                resetMetadataState()
-                print("UserManager: currentUser is nil, metadata reset.")
-            }
-        }
-    }
 
     func getCurrentUser() -> UiUserV2? {
         if !isInitialized {
@@ -55,15 +40,10 @@ class UserManager: ObservableObject {
         guard !isInitialized else { return }
 
         Task { @MainActor in
-            for await state in accountsPresenter.models {
-                if self.isInitialized {
-                    print("UserManager.initialize: Already initialized, ignoring further user states.")
-                    break
-                }
-
+            for await state in presenter.models {
                 if case let .success(data) = onEnum(of: state.user) {
                     self.currentUser = data.data
-                    self.isInitialized = true
+                    isInitialized = true
 
                     // 初始化AppBarTabSettingStore
                     let account = AccountTypeSpecific(accountKey: data.data.key)
@@ -72,20 +52,11 @@ class UserManager: ObservableObject {
                     // 发送通知
                     NotificationCenter.default.post(name: .userDidUpdate, object: data.data)
                     os_log("[UserManager] 初始化完成，用户: %{public}@", log: .default, type: .debug, data.data.name.raw)
+                    // 获取到用户后就退出循环
 
-                    if let user = self.currentUser {
-                        if !user.key.host.isEmpty {
-                            fetchAndStoreInstanceMetadata(host: user.key.host, platformType: user.platformType)
-                        } else {
-                            resetMetadataState()
-                            print("UserManager.initialize: User confirmed, but host is empty. Metadata reset.")
-                        }
-                    } else {
-                        resetMetadataState()
-                        print("UserManager.initialize: currentUser is unexpectedly nil after assignment. Metadata reset.")
+                    if self.currentUser?.isMastodon == true || self.currentUser?.isMisskey == true {
+                        fetchAndStoreInstanceMetadata(host: data.data.key.host, platformType: data.data.platformType)
                     }
-
-                    break
                 }
             }
         }
@@ -94,39 +65,31 @@ class UserManager: ObservableObject {
     private func fetchAndStoreInstanceMetadata(host: String, platformType: PlatformType) {
         print("UserManager (PresenterBase Model): 初始化 \(host) 的元数据获取...")
         instanceMetadata = nil
-        instanceMetadataError = nil
-        isLoadingInstanceMetadata = true
 
         let presenter = InstanceMetadataPresenter(host: host, platformType: platformType)
-        currentInstanceMetadataPresenter = presenter
-
-        currentMetadataObservationTask = Task { @MainActor in
+        Task { @MainActor in
             print("UserManager (PresenterBase Model): Task started for \(host)")
 
             do {
                 for try await stateContainer in presenter.models {
                     if Task.isCancelled {
                         print("UserManager (PresenterBase Model): Observation task cancelled for \(host).")
-                        self.isLoadingInstanceMetadata = false
+
                         break
                     }
 
                     let uiState = stateContainer.data
                     print("UserManager (PresenterBase Model): Received state for \(host): \(uiState)")
 
-                    self.isLoadingInstanceMetadata = uiState is UiStateLoading<UiInstanceMetadata>
+                    // self.isLoadingInstanceMetadata = uiState is UiStateLoading<UiInstanceMetadata>
 
                     if let successState = uiState as? UiStateSuccess<UiInstanceMetadata> {
                         self.instanceMetadata = successState.data
-                        self.instanceMetadataError = nil
-                        self.isLoadingInstanceMetadata = false
                         print("UserManager (PresenterBase Model): Success for \(host).")
                         break
                     } else if let errorState = uiState as? UiStateError<UiInstanceMetadata> {
                         self.instanceMetadata = nil
                         let errorMessage = errorState.throwable.message ?? "An unknown error occurred."
-                        self.instanceMetadataError = errorMessage
-                        self.isLoadingInstanceMetadata = false
                         print("UserManager (PresenterBase Model): Error for \(host) - \(errorMessage).")
                         break
                     } else if uiState is UiStateLoading<UiInstanceMetadata> {
@@ -137,26 +100,10 @@ class UserManager: ObservableObject {
                 if Task.isCancelled {
                     print("UserManager (PresenterBase Model): Observation task for \(host) caught cancellation error.")
                 } else {
-                    self.instanceMetadataError = error.localizedDescription
                     print("UserManager (PresenterBase Model): Error observing \(host) metadata flow - \(error.localizedDescription)")
                 }
-                self.isLoadingInstanceMetadata = false
                 self.instanceMetadata = nil
             }
         }
-    }
-
-    private func resetMetadataState() {
-        DispatchQueue.main.async {
-            self.instanceMetadata = nil
-            self.isLoadingInstanceMetadata = false
-            self.instanceMetadataError = nil
-            print("UserManager: Metadata state reset.")
-        }
-    }
-
-    deinit {
-        print("UserManager deinit")
-        currentMetadataObservationTask?.cancel()
     }
 }

@@ -16,8 +16,7 @@ struct FLNewMenuView: View {
 
     @EnvironmentObject private var router: FlareRouter
     @EnvironmentObject private var appState: FlareAppState
-    @ObservedObject var userManager = UserManager.shared
-
+ 
     init(accountType: AccountType, user: UiUserV2? = nil) {
         self.accountType = accountType
         self.user = user
@@ -130,11 +129,11 @@ struct FLNewMenuView: View {
                         Spacer()
                         Button(action: {
                             appState.isCustomTabBarHidden = true
-                            let host = userManager.instanceMetadata?.instance.domain ?? user?.key.host ?? ""
+                            let host = UserManager.shared.instanceMetadata?.instance.domain ?? user?.key.host ?? ""
                             let platformType = user?.platformType ?? PlatformType.mastodon
                             router.navigate(to: .instanceScreen(host: host, platformType: platformType))
                         }) {
-                            if let bannerUrlString = userManager.instanceMetadata?.instance.bannerUrl,
+                            if let bannerUrlString = UserManager.shared.instanceMetadata?.instance.bannerUrl,
                                !bannerUrlString.isEmpty,
                                let bannerUrl = URL(string: bannerUrlString)
                             {

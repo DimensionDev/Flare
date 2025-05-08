@@ -4,8 +4,7 @@ import SwiftUI
 
 struct InstanceScreen: View {
     private let expectedHost: String
-    @ObservedObject var userManager = UserManager.shared
-
+ 
     init(host: String) {
         expectedHost = host
     }
@@ -17,23 +16,10 @@ struct InstanceScreen: View {
 
     @ViewBuilder
     private var contentView: some View {
-        if userManager.isLoadingInstanceMetadata {
+        if UserManager.shared.instanceMetadata == nil {
             ProgressView()
-        } else if let errorMsg = userManager.instanceMetadataError {
-            VStack(spacing: 10) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 50, height: 50)
-                    .foregroundColor(.red)
-                Text("Error loading instance info:", bundle: .main)
-                    .font(.headline)
-                Text(verbatim: errorMsg)
-                    .font(.callout)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-            }
-        } else if let metadata = userManager.instanceMetadata {
+        
+        } else if let metadata = UserManager.shared.instanceMetadata {
             InstanceDetailView(metadata: metadata)
         } else {
             VStack {

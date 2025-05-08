@@ -49,6 +49,7 @@ materialKolor = "2.1.1"
 room = "2.7.1"
 sqlite = "2.5.1"
 compose-multiplatform = "1.8.0"
+logback = "1.4.14"
 
 [libraries]
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
@@ -195,6 +196,17 @@ jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector"
 jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.8.0-alpha10" }
 krypto = { module = "com.soywiz.korlibs.krypto:krypto", version = "4.0.10" }
 
+### Server ###
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+ktor-server-resources = { module = "io.ktor:ktor-server-resources", version.ref = "ktor" }
+ktor-client-resources = { module = "io.ktor:ktor-client-resources", version.ref = "ktor" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
+ktor-server-hsts = { module = "io.ktor:ktor-server-hsts", version.ref = "ktor" }
+ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
+
+
 [bundles]
 compose = ["ui", "ui-util", "ui-graphics", "ui-tooling", "ui-tooling-preview", "material3", "material3WindowSizeClass", "material3-adaptive-navigation-suite", "material3-adaptive", "material3-adaptive-navigation", "material3-adaptive-layout"]
 navigation = ["navigation-compose"]
@@ -208,6 +220,9 @@ compose-destinations = ["compose-destinations", "material3-navigation"]
 media3 = ["media3-exoplayer", "media3-ui", "media3-hls", "media3-session", "media3-ui-compose"]
 firebase = ["firebase-analytics-ktx", "firebase-crashlytics-ktx"]
 ktorfit = ["ktorfit-lib", "ktorfit-converters-response", "ktorfit-converters-flow", "ktorfit-converters-call"]
+
+### Server ###
+ktor-server = ["ktor-server-core", "ktor-server-resources", "ktor-server-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-server-hsts", "ktor-server-cio"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

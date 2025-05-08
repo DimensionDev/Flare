@@ -16832,6 +16832,7 @@
       }
     },
     "Confirm" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -24103,6 +24104,7 @@
       }
     },
     "Enter Podcast/Space ID" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -24598,6 +24600,9 @@
           }
         }
       }
+    },
+    "Error Loading Spaces" : {
+
     },
     "fans_title" : {
       "comment" : "",
@@ -29616,6 +29621,9 @@
     "Instance Rules" : {
 
     },
+    "Invalid item at index \\(index)" : {
+
+    },
     "like" : {
       "comment" : "",
       "extractionState" : "stale",
@@ -32342,6 +32350,9 @@
         }
       }
     },
+    "Live" : {
+
+    },
     "LIVE" : {
       "localizations" : {
         "ar" : {
@@ -32955,6 +32966,9 @@
           }
         }
       }
+    },
+    "Loading Spaces..." : {
+
     },
     "local_filter_add" : {
       "comment" : "",
@@ -73367,6 +73381,9 @@
         }
       }
     },
+    "No Spaces Available" : {
+
+    },
     "no_accounts" : {
       "localizations" : {
         "ar" : {
@@ -85422,6 +85439,7 @@
       }
     },
     "Set Test Replay ID" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -102718,6 +102736,9 @@
         }
       }
     },
+    "There are currently no live or recorded Spaces to show." : {
+
+    },
     "This might be because the current user is not set, the instance host is not configured, or data is still loading." : {
 
     },
@@ -107831,6 +107852,7 @@
       }
     },
     "XSpace Test" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -107955,6 +107977,7 @@
       }
     },
     "XSpaces list comming soon" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -108077,6 +108100,9 @@
           }
         }
       }
+    },
+    "You follow the X Spaces" : {
+
     },
     "Your account doesn't have any feeds" : {
       "localizations" : {

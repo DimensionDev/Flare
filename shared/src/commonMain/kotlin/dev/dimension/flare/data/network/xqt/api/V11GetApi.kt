@@ -5,6 +5,7 @@ import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.xqt.model.DMPermissionsCreateGroupConversationResponse
+import dev.dimension.flare.data.network.xqt.model.FleetlineResponse
 import dev.dimension.flare.data.network.xqt.model.InboxConversationTimelineResponse
 import dev.dimension.flare.data.network.xqt.model.InboxDMTrustedTimelineResponse
 import dev.dimension.flare.data.network.xqt.model.InboxDMUserUpdateResponse
@@ -474,4 +475,9 @@ internal interface V11GetApi {
         @Query("use_syndication_guest_id") useSyndicationGuestId: Boolean = false,
         @Query("cookie_set_host") cookieSetHost: String = xqtHost,
     ): String
+
+    @GET("fleets/v1/fleetline")
+    suspend fun getFleets(
+        @Query("only_spaces") onlySpaces: Boolean = true,
+    ): FleetlineResponse
 }

@@ -6,6 +6,8 @@ class UserManager {
     static let shared = UserManager()
 
     private var currentUser: UiUserV2?
+    private(set) var instanceMetadata: UiInstanceMetadata?
+
     private var presenter = ActiveAccountPresenter()
     private var isInitialized = false
 
@@ -51,10 +53,57 @@ class UserManager {
                     NotificationCenter.default.post(name: .userDidUpdate, object: data.data)
                     os_log("[UserManager] 初始化完成，用户: %{public}@", log: .default, type: .debug, data.data.name.raw)
                     // 获取到用户后就退出循环
+
+                    if self.currentUser?.isMastodon == true || self.currentUser?.isMisskey == true {
+                        fetchAndStoreInstanceMetadata(host: data.data.key.host, platformType: data.data.platformType)
+                    }
                 }
             }
         }
     }
-}
 
-// 添加通知名称
+    private func fetchAndStoreInstanceMetadata(host: String, platformType: PlatformType) {
+        print("UserManager (PresenterBase Model): 初始化 \(host) 的元数据获取...")
+        instanceMetadata = nil
+
+        let presenter = InstanceMetadataPresenter(host: host, platformType: platformType)
+        Task { @MainActor in
+            print("UserManager (PresenterBase Model): Task started for \(host)")
+
+            do {
+                for try await stateContainer in presenter.models {
+                    if Task.isCancelled {
+                        print("UserManager (PresenterBase Model): Observation task cancelled for \(host).")
+
+                        break
+                    }
+
+                    let uiState = stateContainer.data
+                    print("UserManager (PresenterBase Model): Received state for \(host): \(uiState)")
+
+                    // self.isLoadingInstanceMetadata = uiState is UiStateLoading<UiInstanceMetadata>
+
+                    if let successState = uiState as? UiStateSuccess<UiInstanceMetadata> {
+                        self.instanceMetadata = successState.data
+                        print("UserManager (PresenterBase Model): Success for \(host).")
+                        break
+                    } else if let errorState = uiState as? UiStateError<UiInstanceMetadata> {
+                        self.instanceMetadata = nil
+                        let errorMessage = errorState.throwable.message ?? "An unknown error occurred."
+                        print("UserManager (PresenterBase Model): Error for \(host) - \(errorMessage).")
+                        break
+                    } else if uiState is UiStateLoading<UiInstanceMetadata> {
+                        print("UserManager (PresenterBase Model): Still loading for \(host).")
+                    }
+                }
+            } catch {
+                if Task.isCancelled {
+                    print("UserManager (PresenterBase Model): Observation task for \(host) caught cancellation error.")
+                } else {
+                    print("UserManager (PresenterBase Model): Error observing \(host) metadata flow - \(error.localizedDescription)")
+                }
+                self.instanceMetadata = nil
+            }
+        }
+    }
+}

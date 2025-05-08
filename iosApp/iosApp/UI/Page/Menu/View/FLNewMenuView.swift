@@ -1,4 +1,5 @@
 import Foundation
+import Kingfisher
 import os.log
 import shared
 import SwiftUI
@@ -15,7 +16,7 @@ struct FLNewMenuView: View {
 
     @EnvironmentObject private var router: FlareRouter
     @EnvironmentObject private var appState: FlareAppState
-
+ 
     init(accountType: AccountType, user: UiUserV2? = nil) {
         self.accountType = accountType
         self.user = user
@@ -68,23 +69,24 @@ struct FLNewMenuView: View {
                     }
 
                     // Message
-                    Button(action: {
-                        appState.isCustomTabBarHidden = true
-                        router.navigate(to: .messages(accountType: accountType))
-                    }) {
-                        HStack {
-                            Image(systemName: "bubble.left.and.bubble.right")
-                                .frame(width: 28, height: 28)
-                            Text("Message")
-                                .font(.body)
-                            Spacer()
+                    if user?.isXQt == true || user?.isBluesky == true {
+                        Button(action: {
+                            appState.isCustomTabBarHidden = true
+                            router.navigate(to: .messages(accountType: accountType))
+                        }) {
+                            HStack {
+                                Image(systemName: "bubble.left.and.bubble.right")
+                                    .frame(width: 28, height: 28)
+                                Text("Message")
+                                    .font(.body)
+                                Spacer()
+                            }
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 10)
+                            .contentShape(Rectangle())
                         }
-                        .padding(.vertical, 12)
-                        .padding(.horizontal, 10)
-                        .contentShape(Rectangle())
+                        .buttonStyle(MenuButtonStyle())
                     }
-                    .buttonStyle(MenuButtonStyle())
-
                     // X Spaces
                     if user?.isXQt == true {
                         Button(action: {
@@ -113,7 +115,7 @@ struct FLNewMenuView: View {
                         HStack {
                             Image(systemName: "arrow.down.circle")
                                 .frame(width: 28, height: 28)
-                            Text("Donwload")
+                            Text("Donwload Manager")
                                 .font(.body)
                             Spacer()
                         }
@@ -122,6 +124,44 @@ struct FLNewMenuView: View {
                         .contentShape(Rectangle())
                     }
                     .buttonStyle(MenuButtonStyle())
+
+                    if user?.isMastodon == true || user?.isMisskey == true {
+                        Spacer()
+                        Button(action: {
+                            appState.isCustomTabBarHidden = true
+                            let host = UserManager.shared.instanceMetadata?.instance.domain ?? user?.key.host ?? ""
+                            let platformType = user?.platformType ?? PlatformType.mastodon
+                            router.navigate(to: .instanceScreen(host: host, platformType: platformType))
+                        }) {
+                            if let bannerUrlString = UserManager.shared.instanceMetadata?.instance.bannerUrl,
+                               !bannerUrlString.isEmpty,
+                               let bannerUrl = URL(string: bannerUrlString)
+                            {
+                                KFImage(bannerUrl)
+                                    .placeholder {
+                                        Color.gray.opacity(0.3)
+                                    }
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(height: 120)
+                                    .clipped()
+                                    .cornerRadius(8)
+                                    .padding(.vertical, 6)
+                                    .padding(.horizontal, 0)
+                            } else {
+                                HStack {
+                                    Image(systemName: "server.rack")
+                                        .frame(width: 28, height: 28)
+                                    Text("Server Info")
+                                        .font(.body)
+                                    Spacer()
+                                }
+                                .padding(.vertical, 12)
+                                .padding(.horizontal, 10)
+                            }
+                        }
+                        .buttonStyle(MenuButtonStyle())
+                    }
                 }
             }
             .padding(.horizontal, 20)

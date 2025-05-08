@@ -34,14 +34,15 @@ struct SettingsUIScreen: View {
 
                             Label("settings_storage_title", systemImage: "externaldrive")
                                 .tag(SettingsDestination.storage)
-                            
+
+                            // Label("Server Info", systemImage: "server.rack")
+                            //     .tag(SettingsDestination.serverInfo)
+
                             Label("Feature Requests", systemImage: "list.bullet.rectangle.portrait")
                                 .tag(SettingsDestination.wishlist)
-                            
+
                             Label("settings_about_subtitle", systemImage: "exclamationmark.circle")
                                 .tag(SettingsDestination.about)
-
-                            
                         }
                     }
                     .navigationTitle("settings_title")
@@ -61,6 +62,8 @@ struct SettingsUIScreen: View {
                             AboutScreen()
                         case .wishlist:
                             WishlistView()
+                            // case .serverInfo:
+                            //     InstanceScreen(host: "mastodon.social", platformType: PlatformType.mastodon)
                         }
                     } else {
                         Text("settings_welcome")
@@ -93,6 +96,7 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
     case storage
     case about
     case wishlist
+    // case serverInfo
     public var id: String {
         rawValue
     }

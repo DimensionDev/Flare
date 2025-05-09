@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +24,7 @@ import compose.icons.fontawesomeicons.brands.Github
 import compose.icons.fontawesomeicons.brands.Line
 import compose.icons.fontawesomeicons.brands.Telegram
 import compose.icons.fontawesomeicons.solid.Language
+import compose.icons.fontawesomeicons.solid.Lock
 import dev.dimension.flare.Res
 import dev.dimension.flare.app_name
 import dev.dimension.flare.ic_launcher_foreground
@@ -174,7 +173,7 @@ public fun AboutScreenContent(
                 },
             leadingContent = {
                 Icon(
-                    imageVector = Icons.Filled.Lock,
+                    imageVector = FontAwesomeIcons.Solid.Lock,
                     contentDescription = stringResource(resource = Res.string.settings_privacy_policy),
                     modifier = Modifier.size(24.dp),
                 )

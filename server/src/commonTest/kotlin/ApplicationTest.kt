@@ -2,10 +2,11 @@ package dev.dimension.flare
 
 import dev.dimension.flare.server.V1
 import dev.dimension.flare.server.modules
+import dev.dimension.flare.server.service.ai.LocalOllamaAIService
+import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.resources.Resources
 import io.ktor.client.plugins.resources.post
-import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.testing.testApplication
@@ -15,9 +16,11 @@ import kotlin.test.assertEquals
 class ApplicationTest {
 
     @Test
-    fun testRoot() = testApplication {
+    fun testTranslation() = testApplication {
         application {
-            modules()
+            with(LocalOllamaAIService()) {
+                modules()
+            }
         }
         val client = createClient {
             install(Resources)
@@ -25,11 +28,11 @@ class ApplicationTest {
                 json()
             }
         }
-        client.post(V1.Translate(text = "Hello World", targetLanguage = "en_US")).apply {
+        client.post(V1.Translate(text = "Hello world", targetLanguage = "zh_CN")).apply {
             assertEquals(HttpStatusCode.OK, status)
             assertEquals(
-                expected = "Hello World",
-                actual = bodyAsText(),
+                expected = "你好，世界",
+                actual = body<V1.Translate.Response>().result,
             )
         }
     }

@@ -15,18 +15,28 @@ kotlin {
         nativeTarget.apply {
             binaries {
                 executable {
-                    entryPoint = "main"
+                    entryPoint = "dev.dimension.flare.server.main"
                 }
             }
         }
     }
 
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-parameters")
+    }
     sourceSets {
         val commonMain by getting {
             dependencies {
+                implementation(libs.clikt)
                 implementation(libs.bundles.ktor.server)
+                implementation(libs.ktor.client.cio)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.client.logging)
                 implementation(libs.logback.classic)
+                implementation(projects.shared.api)
+                implementation(libs.kotlinx.serialization.json)
             }
+
         }
         val commonTest by getting {
             dependencies {

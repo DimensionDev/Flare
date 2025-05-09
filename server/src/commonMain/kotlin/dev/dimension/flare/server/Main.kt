@@ -1,46 +1,47 @@
 package dev.dimension.flare.server
 
-import io.ktor.resources.Resource
-import io.ktor.serialization.kotlinx.json.json
-import io.ktor.server.application.Application
-import io.ktor.server.application.install
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.main
+import com.github.ajalt.clikt.parameters.options.help
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
+import dev.dimension.flare.server.service.TranslatorService
+import dev.dimension.flare.server.service.ai.AIService
+import dev.dimension.flare.server.service.ai.LocalOllamaAIService
 import io.ktor.server.cio.CIO
+import io.ktor.server.config.yaml.YamlConfig
 import io.ktor.server.engine.embeddedServer
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.plugins.hsts.HSTS
-import io.ktor.server.resources.Resources
-import io.ktor.server.resources.post
-import io.ktor.server.response.respond
-import io.ktor.server.routing.routing
-import kotlinx.serialization.Serializable
 
 public fun main(args: Array<String>) {
-    embeddedServer(
-        factory = CIO,
-        port = 8080,
-        module = Application::modules
-    ).start(wait = true)
+    Server().main(args)
 }
 
-internal fun Application.modules() {
-    install(ContentNegotiation) {
-        json()
-    }
-    install(HSTS) {
-        includeSubDomains = true
-    }
-    install(Resources)
-    routing {
-        post<V1.Translate> { translate ->
-            call.respond(translate.text)
-        }
+internal class Server : CliktCommand() {
+    val configPath: String by option().required().help("Path to the configuration file")
+
+    override fun run() {
+        val config = YamlConfig(configPath) ?:
+        throw IllegalStateException("Failed to load configuration")
+        val aiService = LocalOllamaAIService(config)
+        val translatorService = TranslatorService(aiService)
+        val context = Context(
+            aiService = aiService,
+            translatorService = translatorService,
+        )
+        embeddedServer(
+            factory = CIO,
+            port = 8080,
+            host = "localhost",
+            module = {
+                modules(
+                    context = context,
+                )
+            }
+        ).start(wait = true)
     }
 }
 
-@Serializable
-@Resource("/v1")
-internal class V1 {
-    @Serializable
-    @Resource("translate")
-    internal data class Translate(val text: String, val targetLanguage: String)
-}
+internal data class Context(
+    val aiService: AIService,
+    val translatorService: TranslatorService,
+)

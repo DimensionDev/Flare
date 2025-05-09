@@ -1,4 +1,5 @@
 [versions]
+clikt = "5.0.3"
 collection = "1.5.0"
 compileSdk = "35"
 lifecycleViewmodelCompose = "2.8.4"
@@ -54,6 +55,7 @@ logback = "1.4.14"
 [libraries]
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
 bluesky = { module = "sh.christian.ozone:bluesky", version.ref = "bluesky" }
+clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
@@ -142,6 +144,7 @@ ktor-client-logging = { group = "io.ktor", name = "ktor-client-logging", version
 ktor-client-darwin = { group = "io.ktor", name = "ktor-client-darwin", version.ref = "ktor" }
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-curl = { group = "io.ktor", name = "ktor-client-curl", version.ref = "ktor" }
+ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktor" }
 
 twitter-parser = { group = "moe.tlaster", name = "twitter-parser", version.ref = "twitter-parser" }
 swiper = { group = "com.github.tlaster", name = "swiper", version = "0.7.1" }
@@ -198,11 +201,13 @@ krypto = { module = "com.soywiz.korlibs.krypto:krypto", version = "4.0.10" }
 
 ### Server ###
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+ktor-resources = { module = "io.ktor:ktor-resources", version.ref = "ktor" }
 ktor-server-resources = { module = "io.ktor:ktor-server-resources", version.ref = "ktor" }
 ktor-client-resources = { module = "io.ktor:ktor-client-resources", version.ref = "ktor" }
 ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
 ktor-server-hsts = { module = "io.ktor:ktor-server-hsts", version.ref = "ktor" }
 ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
+ktor-server-config-yaml = { module = "io.ktor:ktor-server-config-yaml", version.ref = "ktor" }
 logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
 ktor-server-test-host = { module = "io.ktor:ktor-server-test-host", version.ref = "ktor" }
 
@@ -222,7 +227,7 @@ firebase = ["firebase-analytics-ktx", "firebase-crashlytics-ktx"]
 ktorfit = ["ktorfit-lib", "ktorfit-converters-response", "ktorfit-converters-flow", "ktorfit-converters-call"]
 
 ### Server ###
-ktor-server = ["ktor-server-core", "ktor-server-resources", "ktor-server-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-server-hsts", "ktor-server-cio"]
+ktor-server = ["ktor-server-core", "ktor-server-resources", "ktor-server-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-server-hsts", "ktor-server-cio", "ktor-server-config-yaml"]
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

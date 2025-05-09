@@ -74,6 +74,7 @@ kotlin {
                 implementation(libs.kotlinx.serialization.protobuf)
                 implementation(libs.xmlUtil)
                 implementation(libs.krypto)
+                implementation(projects.shared.api)
             }
         }
         val commonTest by getting {

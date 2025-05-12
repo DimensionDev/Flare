@@ -31,7 +31,7 @@ kotlin {
 }
 android {
     compileSdk = libs.versions.compileSdk.get().toInt()
-    namespace = "dev.dimension.flare.shared"
+    namespace = "dev.dimension.flare.shared.api"
 
     defaultConfig {
         minSdk = libs.versions.minSdk.get().toInt()

@@ -30,7 +30,16 @@ internal class LocalOllamaAIService(
             setBody(request)
         }.bodyAsText()
         val json = response.decodeJson<OllamaResponse>()
-        return json.response.replace(Regex("<think>[\\s\\S]*?</think>"), "").trim()
+        return json.response.replace(Regex("<think>[\\s\\S]*?</think>"), "").trim().let {
+            if (it.startsWith("```json")) {
+                // incase the response is in code block format
+                it.removePrefix("```json")
+                    .removeSuffix("```")
+                    .trim()
+            } else {
+                it
+            }
+        }
     }
 
     @Serializable

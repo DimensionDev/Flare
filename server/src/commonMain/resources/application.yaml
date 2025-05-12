@@ -1,4 +1,4 @@
 ai:
   ollama:
-    url: "http://localhost:11434"
+    url: "http://localhost:11434/api"
     model: "deepseek-r1:70b"

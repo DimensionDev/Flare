@@ -31,6 +31,7 @@ kotlin {
                 implementation(libs.logback.classic)
                 implementation(projects.shared.api)
                 implementation(libs.kotlinx.serialization.json)
+                implementation(libs.openai.client)
             }
 
         }

@@ -22,7 +22,7 @@ internal fun ktorClient(
     install(Logging) {
         logger = object : Logger {
             override fun log(message: String) {
-                println(message)
+                Log.d("KtorClient", message)
             }
         }
         level = LogLevel.ALL

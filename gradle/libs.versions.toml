@@ -15,6 +15,7 @@ lifecycle-runtime-ktx = "2.9.0"
 activity-compose = "1.10.1"
 compose-bom = "2025.05.00"
 ksp = "2.1.20-1.0.31"
+openaiClient = "4.0.1"
 paging = "3.3.6"
 navigation = "2.9.0"
 kotlinx-datetime = "0.6.2"
@@ -66,6 +67,7 @@ lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-ru
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelCompose" }
+openai-client = { module = "com.aallam.openai:openai-client", version.ref = "openaiClient" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "stately" }

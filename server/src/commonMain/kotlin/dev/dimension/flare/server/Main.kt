@@ -5,7 +5,7 @@ import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
-import dev.dimension.flare.server.service.ai.LocalOllamaAIService
+import dev.dimension.flare.server.service.ai.AIService
 import io.ktor.server.cio.CIO
 import io.ktor.server.config.yaml.YamlConfig
 import io.ktor.server.engine.embeddedServer
@@ -20,7 +20,7 @@ internal class Server : CliktCommand() {
     override fun run() {
         val config = YamlConfig(configPath) ?:
         throw IllegalStateException("Failed to load configuration")
-        val aiService = LocalOllamaAIService(config)
+        val aiService = AIService.create(config)
         val context = ServerContext(
             aiService = aiService,
         )

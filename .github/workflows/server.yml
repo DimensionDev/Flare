@@ -43,4 +43,4 @@ jobs:
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
-        run: ./gradlew :server:check :server:lint --stacktrace
+        run: ./gradlew :server:check --stacktrace

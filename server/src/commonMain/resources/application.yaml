@@ -1,4 +1,9 @@
 ai:
+  type: "ollama" # "ollama" or "openai"
   ollama:
     url: "http://localhost:11434/api"
     model: "deepseek-r1:70b"
+  openai:
+    baseUrl: "https://api.openai.com/v1/chat/completions"
+    token: "sk-..."
+    model: "gpt-3.5-turbo"

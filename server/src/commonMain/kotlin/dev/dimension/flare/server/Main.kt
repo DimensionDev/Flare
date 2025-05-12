@@ -21,7 +21,7 @@ internal class Server : CliktCommand() {
         val config = YamlConfig(configPath) ?:
         throw IllegalStateException("Failed to load configuration")
         val aiService = LocalOllamaAIService(config)
-        val context = Context(
+        val context = ServerContext(
             aiService = aiService,
         )
         embeddedServer(

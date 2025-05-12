@@ -1,6 +1,6 @@
 package dev.dimension.flare
 
-import dev.dimension.flare.server.Context
+import dev.dimension.flare.server.ServerContext
 import dev.dimension.flare.server.V1
 import dev.dimension.flare.server.modules
 import io.ktor.client.call.body
@@ -23,7 +23,7 @@ class ApplicationTest {
             val aiService = TestAiService(
                 response = "你好，世界",
             )
-            val context = Context(
+            val context = ServerContext(
                 aiService = aiService
             )
             modules(context)
@@ -49,7 +49,7 @@ class ApplicationTest {
     @Test
     fun testTLDR() = testApplication {
         application {
-            val context = Context(
+            val context = ServerContext(
                 aiService = TestAiService("Hello world"),
             )
             modules(context)

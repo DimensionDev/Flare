@@ -9,7 +9,7 @@ import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.hsts.HSTS
 
 internal fun Application.modules(
-    context: Context,
+    context: ServerContext,
 ) {
     install(ContentNegotiation) {
         json(JSON)

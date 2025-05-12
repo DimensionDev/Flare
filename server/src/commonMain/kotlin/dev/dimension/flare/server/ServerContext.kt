@@ -4,7 +4,7 @@ import dev.dimension.flare.server.service.TLDRService
 import dev.dimension.flare.server.service.TranslatorService
 import dev.dimension.flare.server.service.ai.AIService
 
-internal data class Context private constructor(
+internal data class ServerContext private constructor(
     val aiService: AIService,
     val translatorService: TranslatorService,
     val tldrService: TLDRService,

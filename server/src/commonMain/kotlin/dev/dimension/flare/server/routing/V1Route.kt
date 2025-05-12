@@ -1,13 +1,13 @@
 package dev.dimension.flare.server.routing
 
-import dev.dimension.flare.server.Context
+import dev.dimension.flare.server.ServerContext
 import dev.dimension.flare.server.V1
 import io.ktor.server.resources.post
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 
 internal fun Route.v1Route(
-    context: Context,
+    context: ServerContext,
 ) {
     post<V1.Tldr, V1.Tldr.Request> { _, request ->
         val result = context.tldrService.summarize(request.text, request.targetLanguage)

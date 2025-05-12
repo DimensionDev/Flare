@@ -1,0 +1,46 @@
+name: Server CI
+
+on:
+  push:
+    branches:
+      - master
+      - release
+      - develop
+    tags:
+      - '**'
+    paths-ignore:
+      - '**.md'
+      - '**.yml'
+  pull_request:
+    branches:
+      - master
+      - release
+      - develop
+
+jobs:
+  build:
+    runs-on: [ubuntu-latest]
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 21
+
+      - name: Build
+        env:
+          BUILD_NUMBER: ${{github.run_number}}
+          BUILD_VERSION: ${{github.ref_name}}
+        run: ./gradlew :server:build --stacktrace
+
+      - name: Test
+        env:
+          BUILD_NUMBER: ${{github.run_number}}
+          BUILD_VERSION: ${{github.ref_name}}
+        run: ./gradlew :server:check :server:lint --stacktrace

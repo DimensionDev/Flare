@@ -11,6 +11,7 @@ struct FlareApp: SwiftUI.App {
     #endif
     @StateObject private var router = FlareRouter()
     @StateObject private var podcastManager = IOSPodcastManager.shared
+    @State private var appSettings = AppSettings()
 
     init() {
         // Register FontAwesome fonts
@@ -27,6 +28,10 @@ struct FlareApp: SwiftUI.App {
 
         // DownloadManager初始化
         _ = DownloadManager.shared
+
+        // 初始化Theme（新的统一主题系统）
+        Theme.initialize(appSettings: appSettings)
+        Theme.shared.applyGlobalUIElements()
     }
 
     var body: some Scene {
@@ -45,17 +50,26 @@ struct FlareApp: SwiftUI.App {
                 #else
                     FlareRootView()
 //                    .enableInjection()
-                        // .preferredColorScheme(.light)
                         .onOpenURL { url in
                             router.handleDeepLink(url)
                         }
+                        .applyTheme() // 应用新的主题系统
                         .environmentObject(router)
+                        .environment(\.appSettings, appSettings)
                 #endif
 
                 // --- Global Floating Player Overlay ---
                 if podcastManager.currentPodcast != nil {
                     DraggablePlayerOverlay().animation(.spring(), value: podcastManager.currentPodcast?.id)
                 }
+            }
+            .onAppear {
+                // 应用全局UI主题
+                Theme.shared.applyGlobalUIElements()
+            }
+            .onChange(of: Theme.shared.appDisplayMode) { _, _ in
+                // 当主题变化时同步更新UI
+                Theme.shared.applyGlobalUIElements()
             }
         }
         #if os(macOS)

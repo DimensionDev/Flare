@@ -4,7 +4,7 @@ import SwiftUI
 
 struct InstanceScreen: View {
     private let expectedHost: String
- 
+
     init(host: String) {
         expectedHost = host
     }
@@ -18,7 +18,7 @@ struct InstanceScreen: View {
     private var contentView: some View {
         if UserManager.shared.instanceMetadata == nil {
             ProgressView()
-        
+
         } else if let metadata = UserManager.shared.instanceMetadata {
             InstanceDetailView(metadata: metadata)
         } else {

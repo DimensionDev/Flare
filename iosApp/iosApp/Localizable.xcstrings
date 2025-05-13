@@ -828,6 +828,9 @@
         }
       }
     },
+    "Aa" : {
+
+    },
     "about_description" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1617,6 +1620,7 @@
       }
     },
     "Allow swiping back from anywhere on the screen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -26395,6 +26399,7 @@
       }
     },
     "Full Swipe Back" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -75184,6 +75189,7 @@
       }
     },
     "Other Settings" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -86481,6 +86487,12 @@
         }
       }
     },
+    "settings_appearance_auto_translate" : {
+
+    },
+    "settings_appearance_avatar" : {
+
+    },
     "settings_appearance_avatar_shape" : {
       "comment" : "",
       "localizations" : {
@@ -86614,6 +86626,7 @@
     },
     "settings_appearance_avatar_shape_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -87268,6 +87281,9 @@
           }
         }
       }
+    },
+    "settings_appearance_content" : {
+
     },
     "settings_appearance_dynamic_theme" : {
       "comment" : "",
@@ -88061,6 +88077,24 @@
         }
       }
     },
+    "settings_appearance_font" : {
+
+    },
+    "settings_appearance_font_size" : {
+
+    },
+    "settings_appearance_font_system" : {
+
+    },
+    "settings_appearance_font_title" : {
+
+    },
+    "settings_appearance_force_dark_mode" : {
+
+    },
+    "settings_appearance_full_swipe_back" : {
+
+    },
     "settings_appearance_generic" : {
       "comment" : "",
       "localizations" : {
@@ -88191,6 +88225,9 @@
           }
         }
       }
+    },
+    "settings_appearance_line_spacing" : {
+
     },
     "settings_appearance_mastodon_show_visibility" : {
       "comment" : "",
@@ -88984,6 +89021,9 @@
         }
       }
     },
+    "settings_appearance_other" : {
+
+    },
     "settings_appearance_show_actions" : {
       "comment" : "",
       "localizations" : {
@@ -89117,6 +89157,7 @@
     },
     "settings_appearance_show_actions_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -89379,6 +89420,7 @@
     },
     "settings_appearance_show_cw_img_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -89641,6 +89683,7 @@
     },
     "settings_appearance_show_link_previews_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -89903,6 +89946,7 @@
     },
     "settings_appearance_show_media_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -90165,6 +90209,7 @@
     },
     "settings_appearance_show_numbers_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -90956,7 +91001,6 @@
     },
     "settings_appearance_theme" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -91350,6 +91394,7 @@
     },
     "settings_appearance_theme_color_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -91872,6 +91917,9 @@
           }
         }
       }
+    },
+    "settings_appearance_theme_mode" : {
+
     },
     "settings_appearance_theme_pure_color" : {
       "comment" : "",
@@ -108477,6 +108525,12 @@
         }
       }
     },
+    "主题" : {
+
+    },
+    "主题与外观" : {
+
+    },
     "书签页面" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -109349,6 +109403,27 @@
         }
       }
     },
+    "取消" : {
+
+    },
+    "字体" : {
+
+    },
+    "字体大小" : {
+
+    },
+    "字体大小：%lld%%" : {
+
+    },
+    "字体类型" : {
+
+    },
+    "字体粗细" : {
+
+    },
+    "字体设置" : {
+
+    },
     "完成" : {
       "localizations" : {
         "ar" : {
@@ -109472,6 +109547,9 @@
           }
         }
       }
+    },
+    "小标题文本" : {
+
     },
     "已加载成员: %lld" : {
       "extractionState" : "stale",
@@ -109721,6 +109799,9 @@
           }
         }
       }
+    },
+    "强调色" : {
+
     },
     "当前列表中没有任何成员" : {
       "extractionState" : "stale",
@@ -110718,6 +110799,15 @@
         }
       }
     },
+    "文本描述" : {
+
+    },
+    "文本标题" : {
+
+    },
+    "文本设置" : {
+
+    },
     "显示更多" : {
       "localizations" : {
         "ar" : {
@@ -110841,6 +110931,9 @@
           }
         }
       }
+    },
+    "显示模式" : {
+
     },
     "暂无消息" : {
       "extractionState" : "stale",
@@ -111466,6 +111559,9 @@
           }
         }
       }
+    },
+    "标题文本" : {
+
     },
     "正在关注" : {
       "localizations" : {
@@ -112209,6 +112305,9 @@
         }
       }
     },
+    "确定" : {
+
+    },
     "确认删除" : {
       "localizations" : {
         "ar" : {
@@ -112582,6 +112681,9 @@
         }
       }
     },
+    "脚注文本" : {
+
+    },
     "自动翻译" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -112832,6 +112934,12 @@
         }
       }
     },
+    "自定义颜色" : {
+
+    },
+    "行距" : {
+
+    },
     "转发:" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -113080,6 +113188,21 @@
           }
         }
       }
+    },
+    "这是一段使用当前字体设置的示例文本。" : {
+
+    },
+    "选择字体" : {
+
+    },
+    "选择颜色" : {
+
+    },
+    "重置为默认设置" : {
+
+    },
+    "重置为默认颜色" : {
+
     },
     "重试" : {
       "extractionState" : "stale",
@@ -113448,6 +113571,9 @@
           }
         }
       }
+    },
+    "预览" : {
+
     }
   },
   "version" : "1.0"

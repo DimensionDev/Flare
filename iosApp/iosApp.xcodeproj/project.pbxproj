@@ -72,7 +72,6 @@
 		647078602D76F0A100551073 /* UI */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = UI; sourceTree = "<group>"; };
 		647078DE2D76F0A400551073 /* Extension */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Extension; sourceTree = "<group>"; };
 		647078E32D76F0A600551073 /* Common */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Common; sourceTree = "<group>"; };
-		647078E82D76F0B500551073 /* Resources */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Resources; sourceTree = "<group>"; };
 		647078EC2D76F0B900551073 /* Data */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Data; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -160,7 +159,6 @@
 			isa = PBXGroup;
 			children = (
 				647078EC2D76F0B900551073 /* Data */,
-				647078E82D76F0B500551073 /* Resources */,
 				647078602D76F0A100551073 /* UI */,
 				647078DE2D76F0A400551073 /* Extension */,
 				647078E32D76F0A600551073 /* Common */,
@@ -234,7 +232,6 @@
 				647078602D76F0A100551073 /* UI */,
 				647078DE2D76F0A400551073 /* Extension */,
 				647078E32D76F0A600551073 /* Common */,
-				647078E82D76F0B500551073 /* Resources */,
 				647078EC2D76F0B900551073 /* Data */,
 			);
 			name = iosApp;

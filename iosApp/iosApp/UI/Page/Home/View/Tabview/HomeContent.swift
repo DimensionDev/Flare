@@ -36,7 +36,7 @@ struct HomeContent: View {
                String(describing: routerId),
                String(describing: selectedTab))
 
-        return FlareTheme {
+        return FlareThemeView {
             // 使用 ZStack 将自定义 TabBar 覆盖在功能性的 TabView 之上
             ZStack(alignment: .bottom) {
                 // 第1层: 功能性的 TabView (处理状态保持和导航)

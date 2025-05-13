@@ -16,7 +16,7 @@ struct FLNewMenuView: View {
 
     @EnvironmentObject private var router: FlareRouter
     @EnvironmentObject private var appState: FlareAppState
- 
+
     init(accountType: AccountType, user: UiUserV2? = nil) {
         self.accountType = accountType
         self.user = user

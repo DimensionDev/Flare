@@ -1,6 +1,6 @@
+import Kingfisher
 import shared
 import SwiftUI
-import Kingfisher
 
 struct SpaceScreen: View {
     let accountType: AccountType
@@ -24,7 +24,7 @@ struct SpaceScreen: View {
         case .loading:
             loadingView
         case let .success(successData):
-            if  successData.data.count == 0 {
+            if successData.data.count == 0 {
                 emptyView()
             } else {
                 podcastsListView(podcastsList: successData.data)
@@ -103,7 +103,7 @@ private struct PodcastRowView: View {
                 if !podcast.ended {
                     LiveIndicatorView()
                 }
-               Spacer()
+                Spacer()
 //                Image(systemName: "ellipsis")
 //                    .foregroundColor(.secondary)
             }
@@ -119,7 +119,7 @@ private struct PodcastRowView: View {
 //            .font(.subheadline)
 //            .foregroundColor(.secondary)
 //            .padding(.bottom, 4)
-            
+
             HStack(spacing: 8) {
                 KFImage(URL(string: podcast.creator.avatar))
                     .resizable()
@@ -127,7 +127,7 @@ private struct PodcastRowView: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 24, height: 24)
                     .clipShape(Circle())
-                
+
                 Text(podcast.creator.name.raw)
                     .font(.subheadline.weight(.medium))
                     .lineLimit(1)

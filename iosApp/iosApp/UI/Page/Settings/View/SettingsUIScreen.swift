@@ -8,7 +8,7 @@ struct SettingsUIScreen: View {
 
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
-            FlareTheme {
+            FlareThemeView {
                 NavigationSplitView {
                     List(selection: $selectedDetail) {
                         Section {

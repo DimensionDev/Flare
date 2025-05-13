@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct FlareTheme<Child>: View where Child: View {
+struct FlareThemeView<Child>: View where Child: View {
     @Environment(\.appSettings) private var appSettings
     let content: () -> Child
     var body: some View {

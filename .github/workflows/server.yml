@@ -10,7 +10,7 @@ on:
       - '**'
     paths-ignore:
       - '**.md'
-      - '**.yml'
+      - 'docs/**/*.yml'
   pull_request:
     branches:
       - master

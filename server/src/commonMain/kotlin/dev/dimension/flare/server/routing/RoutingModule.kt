@@ -11,6 +11,7 @@ internal fun Application.configureRouting(
 ) {
     install(Resources)
     routing {
+        aboutRoute(context = context)
         v1Route(context = context)
     }
 }

@@ -51,7 +51,7 @@ jobs:
         env:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
-        run: ./gradlew assembleRelease bundleRelease check lint --stacktrace
+        run: ./gradlew :app:assembleRelease :app:bundleRelease :app:check :app:lint --stacktrace
 
       # Archive android artifacts
       - name: Archive android artifacts Product

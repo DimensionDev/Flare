@@ -8,10 +8,15 @@ struct BaseSettingScreen: View {
     @Environment(\.appSettings) private var appSettings
     @State private var isTranslating: Bool = false
     @State private var translationConfig: TranslationSession.Configuration?
+    var title: String
+    
+    init(title: String) {
+        self.title = title
+    }
 
     var body: some View {
         List {
-            Section("Browser Settings") {
+            Section {
                 HStack {
                     Label("Default Browser", systemImage: "network")
                     Spacer()
@@ -30,9 +35,11 @@ struct BaseSettingScreen: View {
                     .labelsHidden()
                     .pickerStyle(.menu)
                 }
+            } header: {
+                Text("Browser Settings")
             }
 
-            Section("Translation Settings") {
+            Section {
                 HStack {
                     Label("Translation Engine", systemImage: "character.bubble")
                     Spacer()
@@ -100,9 +107,9 @@ struct BaseSettingScreen: View {
                     Text("Auto Translate")
                     Text("Auto translate non-current language content")
                 }
+            } header: {
+                Text("Translation Settings")
             }
-            .buttonStyle(.plain)
-            .navigationTitle("Other Settings")
         }
         #if os(macOS)
         .toggleStyle(.switch)
@@ -110,6 +117,7 @@ struct BaseSettingScreen: View {
         .translationTask(translationConfig) { _ in
             isTranslating = false
         }
+        .navigationTitle(title)
     }
 }
 

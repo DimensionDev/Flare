@@ -828,6 +828,9 @@
         }
       }
     },
+    "Aa" : {
+
+    },
     "about_description" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1617,6 +1620,7 @@
       }
     },
     "Allow swiping back from anywhere on the screen" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -26395,6 +26399,7 @@
       }
     },
     "Full Swipe Back" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -75184,6 +75189,7 @@
       }
     },
     "Other Settings" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -86481,6 +86487,9 @@
         }
       }
     },
+    "settings_appearance_auto_translate" : {
+
+    },
     "settings_appearance_avatar_shape" : {
       "comment" : "",
       "localizations" : {
@@ -86614,6 +86623,7 @@
     },
     "settings_appearance_avatar_shape_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -88061,6 +88071,15 @@
         }
       }
     },
+    "settings_appearance_font" : {
+
+    },
+    "settings_appearance_force_dark_mode" : {
+
+    },
+    "settings_appearance_full_swipe_back" : {
+
+    },
     "settings_appearance_generic" : {
       "comment" : "",
       "localizations" : {
@@ -89117,6 +89136,7 @@
     },
     "settings_appearance_show_actions_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -89379,6 +89399,7 @@
     },
     "settings_appearance_show_cw_img_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -89641,6 +89662,7 @@
     },
     "settings_appearance_show_link_previews_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -89903,6 +89925,7 @@
     },
     "settings_appearance_show_media_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -90165,6 +90188,7 @@
     },
     "settings_appearance_show_numbers_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -91350,6 +91374,7 @@
     },
     "settings_appearance_theme_color_description" : {
       "comment" : "",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -91872,6 +91897,9 @@
           }
         }
       }
+    },
+    "settings_appearance_theme_mode" : {
+
     },
     "settings_appearance_theme_pure_color" : {
       "comment" : "",
@@ -108477,6 +108505,12 @@
         }
       }
     },
+    "主题" : {
+
+    },
+    "主题设置" : {
+
+    },
     "书签页面" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -109349,6 +109383,21 @@
         }
       }
     },
+    "字体大小" : {
+
+    },
+    "字体大小：%lld%%" : {
+
+    },
+    "字体类型" : {
+
+    },
+    "字体粗细" : {
+
+    },
+    "字体设置" : {
+
+    },
     "完成" : {
       "localizations" : {
         "ar" : {
@@ -109472,6 +109521,9 @@
           }
         }
       }
+    },
+    "小标题文本" : {
+
     },
     "已加载成员: %lld" : {
       "extractionState" : "stale",
@@ -111467,6 +111519,9 @@
         }
       }
     },
+    "标题文本" : {
+
+    },
     "正在关注" : {
       "localizations" : {
         "ar" : {
@@ -112582,6 +112637,9 @@
         }
       }
     },
+    "脚注文本" : {
+
+    },
     "自动翻译" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -113081,6 +113139,9 @@
         }
       }
     },
+    "这是一段使用当前字体设置的示例文本。" : {
+
+    },
     "重试" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -113448,6 +113509,9 @@
           }
         }
       }
+    },
+    "预览" : {
+
     }
   },
   "version" : "1.0"

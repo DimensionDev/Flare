@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import shared
 
 enum PreferredBrowser: String, CaseIterable, Codable {
     case inAppSafari
@@ -106,5 +107,35 @@ extension EnvironmentValues {
     var appSettings: AppSettings {
         get { self[AppSettingsKey.self] }
         set { self[AppSettingsKey.self] = newValue }
+    }
+}
+
+class SettingsRepository: ObservableObject {
+    static let shared = SettingsRepository()
+    
+    @AppStorage("flare-appearance-settings") private var appearanceSettingsData: Data = encodeDefaultSettings()
+    
+    private init() {}
+    
+    func getAppearanceSettings() -> AppearanceSettings {
+        if let settings = try? JSONDecoder().decode(AppearanceSettings.self, from: appearanceSettingsData) {
+            return settings
+        }
+        return AppearanceSettings()
+    }
+    
+    func updateAppearanceSettings(settings: AppearanceSettings) {
+        if let encoded = try? JSONEncoder().encode(settings) {
+            appearanceSettingsData = encoded
+            // 如果有必要，也可以在这里通知其他对象设置已更改
+        }
+    }
+    
+    private static func encodeDefaultSettings() -> Data {
+        let defaultSettings = AppearanceSettings()
+        if let encoded = try? JSONEncoder().encode(defaultSettings) {
+            return encoded
+        }
+        return Data()
     }
 }

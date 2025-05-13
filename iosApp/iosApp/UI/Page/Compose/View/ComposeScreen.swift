@@ -41,7 +41,7 @@ struct ComposeScreen: View {
     }
 
     var body: some View {
-        FlareTheme {
+        FlareThemeView {
             HStack(alignment: .top) {
                 VStack(alignment: .leading) {
                     ScrollView(.vertical) {

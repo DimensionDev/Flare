@@ -16,7 +16,7 @@ internal val JSON get() = json
 
 internal inline fun <reified T> T.encodeJson(): String = JSON.encodeToString(this)
 
-public fun <T> T.encodeJson(serializer: KSerializer<T>): String = JSON.encodeToString(serializer, this)
+internal fun <T> T.encodeJson(serializer: KSerializer<T>): String = JSON.encodeToString(serializer, this)
 
 internal inline fun <reified T> String.decodeJson(): T = JSON.decodeFromString(this)
 

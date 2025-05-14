@@ -82,7 +82,7 @@ internal data class User(
     @SerialName(value = "hasUnreadAntenna") val hasUnreadAntenna: kotlin.Boolean? = null,
     @SerialName(value = "hasUnreadNotification") val hasUnreadNotification: kotlin.Boolean? = null,
     @SerialName(value = "hasPendingReceivedFollowRequest") val hasPendingReceivedFollowRequest: kotlin.Boolean? = null,
-    @SerialName(value = "mutedWords") val mutedWords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>? = null,
+    // @SerialName(value = "mutedWords") val mutedWords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>? = null,
     @SerialName(value = "mutedInstances") val mutedInstances: kotlin.collections.List<kotlin.String>? = null,
     @SerialName(value = "mutingNotificationTypes") val mutingNotificationTypes: kotlin.collections.List<kotlin.String>? = null,
     @SerialName(value = "emailNotificationTypes") val emailNotificationTypes: kotlin.collections.List<kotlin.String>? = null,

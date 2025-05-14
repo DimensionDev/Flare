@@ -43,7 +43,7 @@ internal data class MeDetailedOnly(
     @SerialName(value = "hasUnreadAntenna") val hasUnreadAntenna: kotlin.Boolean,
     @SerialName(value = "hasUnreadNotification") val hasUnreadNotification: kotlin.Boolean,
     @SerialName(value = "hasPendingReceivedFollowRequest") val hasPendingReceivedFollowRequest: kotlin.Boolean,
-    @SerialName(value = "mutedWords") val mutedWords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>,
+    // @SerialName(value = "mutedWords") val mutedWords: kotlin.collections.List<kotlin.collections.List<kotlin.String>>,
     @SerialName(value = "mutedInstances") val mutedInstances: kotlin.collections.List<kotlin.String>? = null,
     @SerialName(value = "mutingNotificationTypes") val mutingNotificationTypes: kotlin.collections.List<kotlin.String>? = null,
     @SerialName(value = "emailNotificationTypes") val emailNotificationTypes: kotlin.collections.List<kotlin.String>? = null,

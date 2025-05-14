@@ -47,7 +47,7 @@ internal data class IUpdateRequest(
     @SerialName(value = "autoSensitive") val autoSensitive: kotlin.Boolean? = null,
     @SerialName(value = "ffVisibility") val ffVisibility: IUpdateRequest.FfVisibility? = null,
     @SerialName(value = "pinnedPageId") val pinnedPageId: kotlin.String? = null,
-    @SerialName(value = "mutedWords") val mutedWords: kotlin.collections.List<kotlin.String>? = null,
+    // @SerialName(value = "mutedWords") val mutedWords: kotlin.collections.List<kotlin.String>? = null,
     @SerialName(value = "mutedInstances") val mutedInstances: kotlin.collections.List<kotlin.String>? = null,
     @SerialName(value = "mutingNotificationTypes") val mutingNotificationTypes:
         kotlin.collections.List<IUpdateRequest.MutingNotificationTypes>? = null,

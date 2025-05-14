@@ -5,6 +5,7 @@ import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.server.Api
 import io.ktor.client.call.body
 import io.ktor.client.plugins.DefaultRequest
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.resources.Resources
 import io.ktor.client.plugins.resources.get
@@ -14,6 +15,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.kotlinx.json.json
+import kotlin.time.Duration.Companion.minutes
 
 internal class FlareDataSource(
     private val baseUrl: String,
@@ -27,6 +29,11 @@ internal class FlareDataSource(
             install(DefaultRequest) {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
                 url(baseUrl)
+            }
+            install(HttpTimeout) {
+                connectTimeoutMillis = 2.minutes.inWholeMilliseconds
+                requestTimeoutMillis = 2.minutes.inWholeMilliseconds
+                socketTimeoutMillis = 2.minutes.inWholeMilliseconds
             }
         }
 

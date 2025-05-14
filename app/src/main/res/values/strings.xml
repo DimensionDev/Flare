@@ -55,6 +55,15 @@
     <string name="settings_app_logging_save">Save log</string>
     <string name="settings_app_logging_clear">Clear log</string>
     <string name="settings_app_logging_enable_network_logging">Enable network logging</string>
+    <string name="settings_ai_config_title">AI Configuration</string>
+    <string name="settings_ai_config_description">Configure AI settings</string>
+    <string name="settings_ai_config_server">Server URL</string>
+    <string name="settings_ai_config_server_hint">Enter the server URL</string>
+    <string name="settings_ai_config_server_self_host_description">You can use the official server or self-host your own server</string>
+    <string name="settings_ai_config_entable_translation">Enable AI translation</string>
+    <string name="settings_ai_config_translation_description">Replace Google Translate with AI translation, might take longer time</string>
+    <string name="settings_ai_config_enable_tldr">Enable AI Summarization</string>
+    <string name="settings_ai_config_tldr_description">Enable AI summarization for long posts</string>
 
     <string name="status_loadmore_error_retry">Retry</string>
     <string name="login_expired">Login session expired</string>

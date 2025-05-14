@@ -17,7 +17,14 @@ import java.io.OutputStream
 @Serializable
 internal data class AppSettings(
     val version: String,
-)
+    val aiConfig: AiConfig = AiConfig(),
+) {
+    @Serializable
+    data class AiConfig(
+        val translation: Boolean = false,
+        val tldr: Boolean = true,
+    )
+}
 
 @OptIn(ExperimentalSerializationApi::class)
 private object PreferencesSerializer : Serializer<AppSettings> {

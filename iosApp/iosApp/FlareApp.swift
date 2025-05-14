@@ -35,8 +35,9 @@ struct FlareApp: SwiftUI.App {
                 #if os(macOS)
                     ProvideWindowSizeClass {
                         FlareRootView()
+                            .withFlareTheme()
 //                        .enableInjection()
-                            .preferredColorScheme(.light)
+                            // .preferredColorScheme(.light)
                     }
                     .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
                     .onOpenURL { url in
@@ -44,6 +45,7 @@ struct FlareApp: SwiftUI.App {
                     }
                 #else
                     FlareRootView()
+                        .withFlareTheme()
 //                    .enableInjection()
                         // .preferredColorScheme(.light)
                         .onOpenURL { url in

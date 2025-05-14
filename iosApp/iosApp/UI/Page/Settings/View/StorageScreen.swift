@@ -132,6 +132,7 @@ struct StorageScreen: View {
                 }
             }
             .navigationTitle("settings_storage_clear_database")
+            .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 calculateImageCacheSize()
                 updateDownloadSizes()

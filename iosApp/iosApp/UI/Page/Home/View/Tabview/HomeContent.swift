@@ -36,9 +36,7 @@ struct HomeContent: View {
                String(describing: routerId),
                String(describing: selectedTab))
 
-        return FlareThemeView {
-            // 使用 ZStack 将自定义 TabBar 覆盖在功能性的 TabView 之上
-            ZStack(alignment: .bottom) {
+        return ZStack(alignment: .bottom) {
                 // 第1层: 功能性的 TabView (处理状态保持和导航)
                 TabView(selection: $selectedTab) {
                     Tab(value: .menu) {
@@ -108,9 +106,7 @@ struct HomeContent: View {
             .background(Colors.Background.swiftUIPrimary.edgesIgnoringSafeArea(.all))
             .onAppear {
                 // checkAndUpdateUserState()
-            }
-        }
-        // 登录 Sheet
+            } 
         .sheet(isPresented: $showLogin) { ServiceSelectScreen(toHome: { showLogin = false }) }
         // 设置 Sheet
         .sheet(isPresented: $showSettings) { SettingsUIScreen() }

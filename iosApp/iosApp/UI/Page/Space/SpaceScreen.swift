@@ -15,6 +15,8 @@ struct SpaceScreen: View {
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
             feedsListView(state)
+            .navigationTitle("You follow the X Spaces")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 
@@ -55,8 +57,7 @@ struct SpaceScreen: View {
             }
         }
         .listStyle(.plain)
-        .navigationTitle("You follow the X Spaces")
-        .navigationBarTitleDisplayMode(.inline)
+        
     }
 
     private func emptyView() -> some View {

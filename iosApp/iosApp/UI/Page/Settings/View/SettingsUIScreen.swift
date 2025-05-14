@@ -8,8 +8,7 @@ struct SettingsUIScreen: View {
 
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
-            FlareThemeView {
-                NavigationSplitView {
+            NavigationSplitView {
                     List(selection: $selectedDetail) {
                         Section {
                             AccountItem(
@@ -53,7 +52,9 @@ struct SettingsUIScreen: View {
                         case .account:
                             AccountsScreen()
                         case .appearance:
-                            AppearanceUIScreen()
+                            NavigationStack {
+                                AppearanceUIScreen()
+                            }
                         case .other:
                             BaseSettingScreen()
                         case .storage:
@@ -75,7 +76,7 @@ struct SettingsUIScreen: View {
             }
         }
     }
-}
+
 
 struct ListItem: View {
     let systemIconName: String

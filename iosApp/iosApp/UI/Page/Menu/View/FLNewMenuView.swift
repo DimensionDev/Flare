@@ -189,9 +189,7 @@ struct FLNewMenuView: View {
             }
         }
         .sheet(isPresented: $showSettings) {
-            NavigationView {
-                SettingsUIScreen()
-            }
+            SettingsUIScreen()
         }
     }
 

@@ -3,7 +3,10 @@ import SwiftUI
 
 struct AppearanceUIScreen: View {
     @Environment(\.appSettings) private var appSettings
+    @Environment(FlareTheme.self) private var theme
     @State private var presenter = AppearancePresenter()
+    @State private var localValues = DisplaySettingsLocalValues()
+    @State private var isFontSelectorPresented = false
 
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
@@ -14,7 +17,16 @@ struct AppearanceUIScreen: View {
                         detailKey: nil
                     )
                 }
+                
+                // Theme部分
+                themeSection
+                
+                // Font部分
+                fontSection
+                
                 Section("settings_appearance_generic") {
+                    // 注释原主题选择
+                    /*
                     Picker(selection: Binding(get: {
                         appSettings.appearanceSettings.theme
                     }, set: { value in
@@ -30,7 +42,9 @@ struct AppearanceUIScreen: View {
                         Text("settings_appearance_theme_color")
                         Text("settings_appearance_theme_color_description")
                     })
+                    */
 
+                    // 保留其他设置
                     Picker(selection: Binding(get: {
                         appSettings.appearanceSettings.avatarShape
                     }, set: { value in
@@ -44,6 +58,8 @@ struct AppearanceUIScreen: View {
                         Text("settings_appearance_avatar_shape")
                         Text("settings_appearance_avatar_shape_description")
                     })
+                    
+                    // 保留其他设置项
                     Toggle(isOn: Binding(get: {
                         appSettings.appearanceSettings.showActions
                     }, set: { value in
@@ -98,7 +114,32 @@ struct AppearanceUIScreen: View {
                     }
                 }
                 .buttonStyle(.plain)
-                .navigationTitle("settings_appearance_title")
+            }
+            .navigationTitle("settings_appearance_title")
+            .navigationBarTitleDisplayMode(.inline)
+            .task(id: localValues.tintColor) {
+                do { try await Task.sleep(for: .microseconds(500)) } catch {}
+                theme.tintColor = localValues.tintColor
+            }
+            .task(id: localValues.primaryBackgroundColor) {
+                do { try await Task.sleep(for: .microseconds(500)) } catch {}
+                theme.primaryBackgroundColor = localValues.primaryBackgroundColor
+            }
+            .task(id: localValues.secondaryBackgroundColor) {
+                do { try await Task.sleep(for: .microseconds(500)) } catch {}
+                theme.secondaryBackgroundColor = localValues.secondaryBackgroundColor
+            }
+            .task(id: localValues.labelColor) {
+                do { try await Task.sleep(for: .microseconds(500)) } catch {}
+                theme.labelColor = localValues.labelColor
+            }
+            .task(id: localValues.lineSpacing) {
+                do { try await Task.sleep(for: .microseconds(500)) } catch {}
+                theme.lineSpacing = localValues.lineSpacing
+            }
+            .task(id: localValues.fontSizeScale) {
+                do { try await Task.sleep(for: .microseconds(500)) } catch {}
+                theme.fontSizeScale = localValues.fontSizeScale
             }
             #if os(macOS)
             .toggleStyle(.switch)
@@ -106,4 +147,107 @@ struct AppearanceUIScreen: View {
             #endif
         }
     }
+    
+    private var themeSection: some View {
+        Section {
+            Toggle("System Color", isOn: Binding(
+                get: { theme.followSystemColorScheme },
+                set: { theme.followSystemColorScheme = $0 }
+            ))
+            themeSelectorButton
+            Group {
+                ColorPicker("Tint Color", selection: $localValues.tintColor)
+                ColorPicker("Background", selection: $localValues.primaryBackgroundColor)
+                ColorPicker("Secondary Background", selection: $localValues.secondaryBackgroundColor)
+                ColorPicker("Text Color", selection: $localValues.labelColor)
+            }
+            .disabled(theme.followSystemColorScheme)
+            .opacity(theme.followSystemColorScheme ? 0.5 : 1.0)
+            .onChange(of: theme.selectedSet) { _, newValue in
+                localValues.tintColor = theme.tintColor
+                localValues.primaryBackgroundColor = theme.primaryBackgroundColor
+                localValues.secondaryBackgroundColor = theme.secondaryBackgroundColor
+                localValues.labelColor = theme.labelColor
+            }
+        } header: {
+            Text("Theme")
+        } footer: {
+            if theme.followSystemColorScheme {
+                Text("Theme will follow system appearance")
+            }
+        }
+    }
+    
+    private var fontSection: some View {
+        Section("Font") {
+          Picker(
+            "Font",
+            selection: .init(
+              get: { () -> FlareTheme.FontState in
+                if theme.chosenFont?.fontName == "OpenDyslexic-Regular" {
+                  return FlareTheme.FontState.openDyslexic
+                } else if theme.chosenFont?.fontName == "AtkinsonHyperlegible-Regular" {
+                  return FlareTheme.FontState.hyperLegible
+                } else if theme.chosenFont?.fontName == ".AppleSystemUIFontRounded-Regular" {
+                  return FlareTheme.FontState.SFRounded
+                }
+                return theme.chosenFontData != nil ? FlareTheme.FontState.custom : FlareTheme.FontState.system
+              },
+              set: { newValue in
+                switch newValue {
+                case .system:
+                  theme.chosenFont = nil
+                case .openDyslexic:
+                  theme.chosenFont = UIFont(name: "OpenDyslexic", size: 1)
+                case .hyperLegible:
+                  theme.chosenFont = UIFont(name: "Atkinson Hyperlegible", size: 1)
+                case .SFRounded:
+                  theme.chosenFont = UIFont.systemFont(ofSize: 1).rounded()
+                case .custom:
+                  isFontSelectorPresented = true
+                }
+              })
+          ) {
+            ForEach(FlareTheme.FontState.allCases, id: \.rawValue) { fontState in
+              Text(fontState.title).tag(fontState)
+            }
+          }
+          .navigationDestination(isPresented: $isFontSelectorPresented, destination: { FontPicker() })
+
+          VStack {
+            Slider(value: $localValues.fontSizeScale, in: 0.5...1.5, step: 0.1)
+            Text("Font Size Scale: \(String(format: "%.1f", localValues.fontSizeScale))")
+              .font(.scaledBody)
+          }
+
+          VStack {
+            Slider(value: $localValues.lineSpacing, in: 0.4...10.0, step: 0.2)
+            Text(
+              "Line Spacing: \(String(format: "%.1f", localValues.lineSpacing))"
+            )
+            .font(.scaledBody)
+          }
+        }
+    }
+    
+    private var themeSelectorButton: some View {
+        NavigationLink(destination: ThemePreviewView()) {
+            HStack {
+                Text("Theme")
+                Spacer()
+                Text(theme.selectedSet.rawValue)
+            }
+        }
+    }
+}
+
+// 辅助类，用于存储设置值
+@MainActor
+class DisplaySettingsLocalValues {
+  var tintColor = FlareTheme.shared.tintColor
+  var primaryBackgroundColor = FlareTheme.shared.primaryBackgroundColor
+  var secondaryBackgroundColor = FlareTheme.shared.secondaryBackgroundColor
+  var labelColor = FlareTheme.shared.labelColor
+  var lineSpacing = FlareTheme.shared.lineSpacing
+  var fontSizeScale = FlareTheme.shared.fontSizeScale
 }

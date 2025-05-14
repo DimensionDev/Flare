@@ -41,7 +41,7 @@ struct ComposeScreen: View {
     }
 
     var body: some View {
-        FlareThemeView {
+     
             HStack(alignment: .top) {
                 VStack(alignment: .leading) {
                     ScrollView(.vertical) {
@@ -293,7 +293,6 @@ struct ComposeScreen: View {
                     .buttonStyle(.bordered)
                 }
             }
-        }
         .activateViewModel(viewModel: viewModel)
         .toolbarTitleDisplayMode(.inline)
         .toolbar {
@@ -318,5 +317,6 @@ struct ComposeScreen: View {
                 Text("compose_title")
             }
         }
-    }
+        }
+   
 }

@@ -15,5 +15,6 @@ struct AboutScreen: View {
             )
         )
         .navigationTitle("settings_about_title")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }

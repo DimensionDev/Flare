@@ -71,12 +71,15 @@ struct AccountsScreen: View {
                 }
             }
             .navigationTitle("settings_accounts_title")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                Button(action: {
-                    showServiceSelectSheet = true
-                }, label: {
-                    Image(systemName: "plus")
-                })
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        showServiceSelectSheet = true
+                    }, label: {
+                        Image(systemName: "plus")
+                    })
+                }
             }
             .sheet(isPresented: $showServiceSelectSheet, content: {
                 ServiceSelectScreen {

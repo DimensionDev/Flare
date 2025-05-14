@@ -103,6 +103,7 @@ struct BaseSettingScreen: View {
             }
             .buttonStyle(.plain)
             .navigationTitle("Other Settings")
+            .navigationBarTitleDisplayMode(.inline)
         }
         #if os(macOS)
         .toggleStyle(.switch)

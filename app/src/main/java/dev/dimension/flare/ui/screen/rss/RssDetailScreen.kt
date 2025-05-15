@@ -172,10 +172,10 @@ internal fun RssDetailScreen(
             state.data
                 .onSuccess { data ->
                     if (state.showTldr) {
-                        state.tldrState?.apply {
+                        state.tldrState?.let { tldrState ->
                             ElevatedCard(
                                 onClick = {
-                                    onError {
+                                    tldrState.onError {
                                         state.refreshTldr()
                                     }
                                 },

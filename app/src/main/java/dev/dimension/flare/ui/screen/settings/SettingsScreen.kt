@@ -29,6 +29,7 @@ import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.NavGraphs
 import com.ramcosta.composedestinations.generated.destinations.AboutRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.AccountsRouteDestination
+import com.ramcosta.composedestinations.generated.destinations.AiConfigRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.AppearanceRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.GuestSettingRouteDestination
 import com.ramcosta.composedestinations.generated.destinations.LocalCacheSearchRouteDestination
@@ -47,6 +48,7 @@ import compose.icons.fontawesomeicons.solid.Database
 import compose.icons.fontawesomeicons.solid.Filter
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Palette
+import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.Table
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.FAIcon
@@ -141,6 +143,14 @@ internal fun SettingsRoute(
                             )
                         }
                     },
+                    toAiConfig = {
+                        scope.launch {
+                            scaffoldNavigator.navigateTo(
+                                ListDetailPaneScaffoldRole.Detail,
+                                SettingsDetailDestination.AiConfig,
+                            )
+                        }
+                    },
                 )
             }
         },
@@ -178,6 +188,7 @@ internal enum class SettingsDetailDestination : Parcelable {
     TabCustomization,
     LocalFilter,
     LocalHistory,
+    AiConfig,
     ;
 
     fun toDestination(): Direction =
@@ -189,6 +200,7 @@ internal enum class SettingsDetailDestination : Parcelable {
             TabCustomization -> TabCustomizeRouteDestination
             LocalFilter -> LocalFilterRouteDestination
             LocalHistory -> LocalCacheSearchRouteDestination
+            AiConfig -> AiConfigRouteDestination
         }
 }
 
@@ -232,6 +244,7 @@ internal fun SettingsScreen(
     toLocalFilter: () -> Unit,
     toGuestSettings: () -> Unit,
     toLocalHistory: () -> Unit,
+    toAiConfig: () -> Unit,
 ) {
     val state by producePresenter { settingsPresenter() }
     FlareScaffold(
@@ -416,6 +429,24 @@ internal fun SettingsScreen(
                 modifier =
                     Modifier.clickable {
                         toStorage.invoke()
+                    },
+            )
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(id = R.string.settings_ai_config_title))
+                },
+                leadingContent = {
+                    FAIcon(
+                        imageVector = FontAwesomeIcons.Solid.Robot,
+                        contentDescription = stringResource(id = R.string.settings_ai_config_title),
+                    )
+                },
+                supportingContent = {
+                    Text(text = stringResource(id = R.string.settings_ai_config_description))
+                },
+                modifier =
+                    Modifier.clickable {
+                        toAiConfig.invoke()
                     },
             )
             ListItem(

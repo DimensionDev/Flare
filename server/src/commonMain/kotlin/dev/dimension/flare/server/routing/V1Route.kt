@@ -1,7 +1,7 @@
 package dev.dimension.flare.server.routing
 
+import dev.dimension.flare.server.Api.V1
 import dev.dimension.flare.server.ServerContext
-import dev.dimension.flare.server.V1
 import io.ktor.server.resources.post
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route

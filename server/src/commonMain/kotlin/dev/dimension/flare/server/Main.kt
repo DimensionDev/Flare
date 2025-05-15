@@ -23,6 +23,7 @@ internal class Server : CliktCommand() {
         val aiService = AIService.create(config)
         val context = ServerContext(
             aiService = aiService,
+            config = config,
         )
         embeddedServer(
             factory = CIO,

@@ -75,6 +75,7 @@ kotlin {
                 implementation(libs.xmlUtil)
                 implementation(libs.krypto)
                 implementation(projects.shared.api)
+                implementation(libs.ktor.client.resources)
             }
         }
         val commonTest by getting {

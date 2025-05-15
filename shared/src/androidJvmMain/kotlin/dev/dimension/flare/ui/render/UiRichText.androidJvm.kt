@@ -12,6 +12,7 @@ public actual data class UiRichText(
     actual val raw: String = data.text()
     val html: String = data.html()
     public val isEmpty: Boolean = raw.isEmpty() && data.getAllElements().size <= 1
+    public val isLongText: Boolean = innerText.length > 480
 }
 
 internal actual fun Element.toUi(): UiRichText =

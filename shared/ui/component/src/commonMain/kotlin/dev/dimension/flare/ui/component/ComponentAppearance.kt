@@ -3,7 +3,10 @@ package dev.dimension.flare.ui.component
 import androidx.compose.runtime.ProvidableCompositionLocal
 import androidx.compose.runtime.staticCompositionLocalOf
 
-public val LocalComponentAppearance: ProvidableCompositionLocal<ComponentAppearance> = staticCompositionLocalOf { ComponentAppearance() }
+public val LocalComponentAppearance: ProvidableCompositionLocal<ComponentAppearance> =
+    staticCompositionLocalOf {
+        error("No ComponentAppearance provided")
+    }
 
 public data class ComponentAppearance(
     val dynamicTheme: Boolean = true,
@@ -16,7 +19,13 @@ public data class ComponentAppearance(
     val videoAutoplay: VideoAutoplay = VideoAutoplay.WIFI,
     val expandMediaSize: Boolean = false,
     val compatLinkPreview: Boolean = false,
+    val aiConfig: AiConfig = AiConfig(),
 ) {
+    public data class AiConfig(
+        val translation: Boolean = false,
+        val tldr: Boolean = false,
+    )
+
     public enum class AvatarShape {
         CIRCLE,
         SQUARE,

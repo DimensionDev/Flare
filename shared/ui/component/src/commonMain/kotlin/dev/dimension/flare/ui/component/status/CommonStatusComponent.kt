@@ -46,7 +46,6 @@ import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.LocalPlatformContext
-import com.fleeksoft.ksoup.nodes.Element
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Regular
 import compose.icons.fontawesomeicons.Solid
@@ -113,6 +112,7 @@ import dev.dimension.flare.ui.component.retweet
 import dev.dimension.flare.ui.component.retweet_remove
 import dev.dimension.flare.ui.component.share
 import dev.dimension.flare.ui.component.show_media
+import dev.dimension.flare.ui.component.status_detail_tldr
 import dev.dimension.flare.ui.component.status_detail_translate
 import dev.dimension.flare.ui.component.unlike
 import dev.dimension.flare.ui.component.vote
@@ -231,12 +231,12 @@ public fun CommonStatusComponent(
             )
         }
 
-        if (isDetail) {
+        if (isDetail && !item.content.isEmpty) {
             TranslationComponent(
                 statusKey = item.statusKey,
                 contentWarning = item.contentWarning,
                 rawContent = item.content.innerText,
-                content = item.content.data,
+                content = item.content,
             )
         }
 
@@ -479,32 +479,82 @@ private fun TranslationComponent(
     statusKey: MicroBlogKey,
     contentWarning: UiRichText?,
     rawContent: String,
-    content: Element,
+    content: UiRichText,
 ) {
+    val componentAppearance = LocalComponentAppearance.current
     var enabledTranslate by rememberSaveable("translate-$statusKey") {
         mutableStateOf(false)
     }
-    PlatformTextButton(
-        onClick = {
-            if (!enabledTranslate) {
-                enabledTranslate = true
+    var enabledTldr by rememberSaveable("tldr-$statusKey") {
+        mutableStateOf(false)
+    }
+    Row {
+        PlatformTextButton(
+            onClick = {
+                if (!enabledTranslate) {
+                    enabledTranslate = true
+                }
+            },
+        ) {
+            PlatformText(
+                text =
+                    stringResource(
+                        resource = Res.string.status_detail_translate,
+                        Locale.current.platformLocale.displayLanguage,
+                    ),
+            )
+        }
+        if (componentAppearance.aiConfig.tldr && content.isLongText) {
+            PlatformTextButton(
+                onClick = {
+                    if (!enabledTldr) {
+                        enabledTldr = true
+                    }
+                },
+            ) {
+                PlatformText(
+                    text =
+                        stringResource(
+                            resource = Res.string.status_detail_tldr,
+                        ),
+                )
             }
-        },
-    ) {
-        PlatformText(
-            text =
-                stringResource(
-                    resource = Res.string.status_detail_translate,
-                    Locale.current.platformLocale.displayLanguage,
-                ),
-        )
+        }
+    }
+    if (enabledTldr) {
+        Spacer(modifier = Modifier.height(4.dp))
+        val state by producePresenter(
+            "tldr_${contentWarning}_${rawContent}_${Locale.current.platformLocale.language}",
+        ) {
+            statusTldrPresenter(
+                contentWarning = contentWarning,
+                content = content,
+                targetLanguage = Locale.current.platformLocale.language,
+            )
+        }
+        state
+            .onSuccess {
+                PlatformText(text = it)
+            }.onLoading {
+                PlatformText(
+                    text = "Lores ipsum dolor sit amet",
+                    modifier = Modifier.placeholder(true),
+                )
+            }.onError {
+                PlatformText(text = it.message ?: "Error")
+            }
     }
     if (enabledTranslate) {
         Spacer(modifier = Modifier.height(4.dp))
         val state by producePresenter(
-            "translate_${contentWarning}_$rawContent",
+            "translate_${contentWarning}_${rawContent}_${Locale.current.platformLocale.language}_${componentAppearance.aiConfig.translation}",
         ) {
-            statusTranslatePresenter(contentWarning = contentWarning, content = content)
+            statusTranslatePresenter(
+                contentWarning = contentWarning,
+                content = content,
+                targetLanguage = Locale.current.platformLocale.language,
+                useAi = componentAppearance.aiConfig.translation,
+            )
         }
         state.contentWarning
             ?.onSuccess {

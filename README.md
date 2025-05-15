@@ -3,6 +3,7 @@
 [![Crowdin](https://badges.crowdin.net/flareapp/localized.svg)](https://crowdin.com/project/flareapp)
 [![Telegram](https://img.shields.io/badge/-telegram-blue?logo=telegram&color=white)](https://t.me/+0UtcP6_qcDoyOWE1)
 [![Line](https://img.shields.io/badge/-Line_Group-green?logo=line&color=white)](https://line.me/ti/g/hf95HyGJ9k)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/DimensionDev/Flare)
 
 ![badge-Platform](https://img.shields.io/badge/Supported%20Platform-Mastodon%20|%20Misskey%20|%20Bluesky%20-black)
 
@@ -10,8 +11,8 @@
 ![badge-iOS](https://img.shields.io/badge/iOS-18.0-black)
 
 
-The ultimate next generation* open-sourced AI powered** decentralized social network client for Android/iOS, still in development.  
-*: _Just a joke_  
+The ultimate next generation* open-sourced AI powered** decentralized social network client for Android/iOS, still in development.
+*: _Just a joke_
 **: _Not yet implemented_
 
 
@@ -47,6 +48,12 @@ Here're some features we're planning to implement in the future.
  - Make sure you have a Mac with Xcode 16 installed
  - open `iosApp/iosApp.xcodeproj` in Xcode
  - Build and run the app
+
+### Server
+ - Flare Server uses Ktor with Kotlin Native, which only works on Linux X64 and MacOS X64/ARM64
+ - Make sure you have JDK 21 installed
+ - Run `./gradlew :server:runDebugExecutableMacosArm64 -PrunArgs="--config-path=path/to/server/src/commonMain/resources/application.yaml"` to build and run the server, remember to replace `path/to/server/src/commonMain/resources/application.yaml` with the path to your config file
+ - The server will run on `http://localhost:8080` by default
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.

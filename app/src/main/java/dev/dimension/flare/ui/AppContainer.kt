@@ -5,6 +5,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import dev.dimension.flare.data.model.AppSettings
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
@@ -45,10 +46,11 @@ fun FlareApp(content: @Composable () -> Unit) {
     val appearanceSettings by settingsRepository.appearanceSettings.collectAsState(
         AppearanceSettings(),
     )
+    val appSettings by settingsRepository.appSettings.collectAsState(AppSettings(""))
     CompositionLocalProvider(
         LocalAppearanceSettings provides appearanceSettings,
         LocalComponentAppearance provides
-            remember(appearanceSettings) {
+            remember(appearanceSettings, appSettings.aiConfig) {
                 ComponentAppearance(
                     dynamicTheme = appearanceSettings.dynamicTheme,
                     avatarShape =
@@ -69,6 +71,11 @@ fun FlareApp(content: @Composable () -> Unit) {
                         },
                     expandMediaSize = appearanceSettings.expandMediaSize,
                     compatLinkPreview = appearanceSettings.compatLinkPreview,
+                    aiConfig =
+                        ComponentAppearance.AiConfig(
+                            translation = appSettings.aiConfig.translation,
+                            tldr = appSettings.aiConfig.tldr,
+                        ),
                 )
             },
         content = content,

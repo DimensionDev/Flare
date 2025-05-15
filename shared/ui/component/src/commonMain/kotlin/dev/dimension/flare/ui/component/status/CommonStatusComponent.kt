@@ -504,7 +504,7 @@ private fun TranslationComponent(
                     ),
             )
         }
-        if (componentAppearance.aiConfig.tldr) {
+        if (componentAppearance.aiConfig.tldr && content.isLongText) {
             PlatformTextButton(
                 onClick = {
                     if (!enabledTldr) {

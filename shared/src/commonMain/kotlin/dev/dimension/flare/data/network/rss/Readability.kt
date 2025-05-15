@@ -21,7 +21,6 @@ internal class Readability(
                     scriptToInject = ReadabilityJS,
                     callback = {
                         try {
-                            println(it)
                             trySend(Result.success(it.decodeJson()))
                         } catch (e: Throwable) {
                             trySend(Result.failure(e))

@@ -63,7 +63,7 @@
     <string name="settings_ai_config_entable_translation">Enable AI translation</string>
     <string name="settings_ai_config_translation_description">Replace Google Translate with AI translation, might take longer time</string>
     <string name="settings_ai_config_enable_tldr">Enable AI Summarization</string>
-    <string name="settings_ai_config_tldr_description">Enable AI summarization for long posts</string>
+    <string name="settings_ai_config_tldr_description">Enable AI summarization for long posts, only available in post that longer than 500 characters</string>
 
     <string name="status_loadmore_error_retry">Retry</string>
     <string name="login_expired">Login session expired</string>
@@ -298,6 +298,10 @@
 
     <string name="rss_detail_open_in_browser">Open in browser</string>
     <string name="rss_detail_share">Share</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Failed to summarize</string>
+    <string name="rss_detail_tldr_loading">Summarizing…</string>
 
     <string name="emoji_picker_recent">Recent</string>
     <string name="emoji_picker_search">Search</string>

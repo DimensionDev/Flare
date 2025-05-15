@@ -5,13 +5,16 @@ import android.graphics.Color
 import android.webkit.WebView
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -21,12 +24,18 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.webkit.WebSettingsCompat
@@ -36,19 +45,28 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.ShareNodes
 import dev.dimension.flare.R
+import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.data.network.rss.DocumentData
+import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.localizedFullTime
+import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.rss.RssDetailPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.server.AiTLDRPresenter
 import dev.dimension.flare.ui.theme.isLight
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
+import kotlinx.coroutines.flow.map
 import moe.tlaster.precompose.molecule.producePresenter
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -122,11 +140,27 @@ internal fun RssDetailScreen(
                         text = it.title,
                         style = MaterialTheme.typography.titleLarge,
                     )
-                    it.publishDateTime?.let {
-                        Text(
-                            text = it.value.localizedFullTime,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                    ) {
+                        it.publishDateTime?.let {
+                            Text(
+                                text = it.value.localizedFullTime,
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        Spacer(modifier = Modifier.weight(1f))
+                        state.enableTldr.onSuccess {
+                            if (it) {
+                                FilledTonalButton(
+                                    onClick = {
+                                        state.setShowTldr(true)
+                                    },
+                                ) {
+                                    Text(stringResource(R.string.rss_detail_tldr))
+                                }
+                            }
+                        }
                     }
                 }.onLoading {
                     Text(
@@ -137,7 +171,56 @@ internal fun RssDetailScreen(
             HorizontalDivider()
             state.data
                 .onSuccess { data ->
-                    val contentColor = LocalContentColor.current
+                    if (state.showTldr) {
+                        state.tldrState?.apply {
+                            ElevatedCard(
+                                onClick = {
+                                    onError {
+                                        state.refreshTldr()
+                                    }
+                                },
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ) {
+                                    onSuccess {
+                                        Text(
+                                            text = stringResource(R.string.rss_detail_tldr_title),
+                                            style = MaterialTheme.typography.titleMedium,
+                                        )
+                                        HorizontalDivider()
+                                        Text(
+                                            text = it,
+                                        )
+                                    }.onLoading {
+                                        Text(
+                                            text = stringResource(R.string.rss_detail_tldr_loading),
+                                            style = MaterialTheme.typography.titleMedium,
+                                        )
+                                        HorizontalDivider()
+                                        Text(
+                                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                            modifier = Modifier.placeholder(true),
+                                        )
+                                    }.onError {
+                                        Text(
+                                            text = stringResource(R.string.rss_detail_tldr_error),
+                                            color = MaterialTheme.colorScheme.error,
+                                            style = MaterialTheme.typography.titleMedium,
+                                        )
+                                        HorizontalDivider()
+                                        Text(
+                                            text = it.message.orEmpty(),
+                                            color = MaterialTheme.colorScheme.error,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     AndroidView(
                         factory = {
                             WebView(it).apply {
@@ -157,7 +240,10 @@ internal fun RssDetailScreen(
                         update = {
                             if (!isLightMode) {
                                 if (WebViewFeature.isFeatureSupported(WebViewFeature.ALGORITHMIC_DARKENING)) {
-                                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(it.settings, true)
+                                    WebSettingsCompat.setAlgorithmicDarkeningAllowed(
+                                        it.settings,
+                                        true,
+                                    )
                                 }
                             }
                         },
@@ -194,9 +280,43 @@ private fun getHtmlData(bodyHTML: String): String =
     """.trimIndent()
 
 @Composable
-private fun presenter(url: String) =
-    run {
+private fun presenter(
+    url: String,
+    settingsRepository: SettingsRepository = koinInject(),
+) = run {
+    val state =
         remember(url) {
             RssDetailPresenter(url)
         }.invoke()
+    val enableTldr by remember {
+        settingsRepository.appSettings.map { it.aiConfig.tldr }
+    }.collectAsUiState()
+    var showTldr by remember { mutableStateOf(false) }
+    var tldrRefreshKey by remember { mutableIntStateOf(0) }
+    val tldrState =
+        if (showTldr) {
+            key(tldrRefreshKey, state.data) {
+                state.data.flatMap {
+                    AiTLDRPresenter(
+                        it.encodeJson(DocumentData.serializer()),
+                        Locale.current.toLanguageTag(),
+                    ).invoke()
+                }
+            }
+        } else {
+            null
+        }
+    object : RssDetailPresenter.State by state {
+        val enableTldr = enableTldr
+        val tldrState = tldrState
+        val showTldr = showTldr
+
+        fun setShowTldr(value: Boolean) {
+            showTldr = value
+        }
+
+        fun refreshTldr() {
+            tldrRefreshKey++
+        }
     }
+}

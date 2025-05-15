@@ -185,37 +185,38 @@ internal fun RssDetailScreen(
                                     verticalArrangement = Arrangement.spacedBy(4.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                 ) {
-                                    onSuccess {
-                                        Text(
-                                            text = stringResource(R.string.rss_detail_tldr_title),
-                                            style = MaterialTheme.typography.titleMedium,
-                                        )
-                                        HorizontalDivider()
-                                        Text(
-                                            text = it,
-                                        )
-                                    }.onLoading {
-                                        Text(
-                                            text = stringResource(R.string.rss_detail_tldr_loading),
-                                            style = MaterialTheme.typography.titleMedium,
-                                        )
-                                        HorizontalDivider()
-                                        Text(
-                                            "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                                            modifier = Modifier.placeholder(true),
-                                        )
-                                    }.onError {
-                                        Text(
-                                            text = stringResource(R.string.rss_detail_tldr_error),
-                                            color = MaterialTheme.colorScheme.error,
-                                            style = MaterialTheme.typography.titleMedium,
-                                        )
-                                        HorizontalDivider()
-                                        Text(
-                                            text = it.message.orEmpty(),
-                                            color = MaterialTheme.colorScheme.error,
-                                        )
-                                    }
+                                    tldrState
+                                        .onSuccess {
+                                            Text(
+                                                text = stringResource(R.string.rss_detail_tldr_title),
+                                                style = MaterialTheme.typography.titleMedium,
+                                            )
+                                            HorizontalDivider()
+                                            Text(
+                                                text = it,
+                                            )
+                                        }.onLoading {
+                                            Text(
+                                                text = stringResource(R.string.rss_detail_tldr_loading),
+                                                style = MaterialTheme.typography.titleMedium,
+                                            )
+                                            HorizontalDivider()
+                                            Text(
+                                                "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                                                modifier = Modifier.placeholder(true),
+                                            )
+                                        }.onError {
+                                            Text(
+                                                text = stringResource(R.string.rss_detail_tldr_error),
+                                                color = MaterialTheme.colorScheme.error,
+                                                style = MaterialTheme.typography.titleMedium,
+                                            )
+                                            HorizontalDivider()
+                                            Text(
+                                                text = it.message.orEmpty(),
+                                                color = MaterialTheme.colorScheme.error,
+                                            )
+                                        }
                                 }
                             }
                         }

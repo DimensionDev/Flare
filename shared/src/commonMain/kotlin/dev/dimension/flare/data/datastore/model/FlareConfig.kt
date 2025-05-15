@@ -10,6 +10,7 @@ import okio.BufferedSource
 
 private const val DEFAULT_SERVER_URL = "https://api.flare.moe"
 
+@Serializable
 internal data class FlareConfig(
     val serverUrl: String,
 )

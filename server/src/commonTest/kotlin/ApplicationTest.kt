@@ -25,8 +25,9 @@ class ApplicationTest {
                 response = "你好，世界",
             )
             val config = MapApplicationConfig(
-                listOf(
-
+                mapOf(
+                    "ai.type" to "test",
+                    "ai.ollama.path" to "/path/to/ollama"
                 )
             )
             val context = ServerContext(

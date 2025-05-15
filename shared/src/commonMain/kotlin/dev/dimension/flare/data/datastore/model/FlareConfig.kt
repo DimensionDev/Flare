@@ -2,6 +2,7 @@ package dev.dimension.flare.data.datastore.model
 
 import androidx.datastore.core.okio.OkioSerializer
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
 import kotlinx.serialization.protobuf.ProtoBuf

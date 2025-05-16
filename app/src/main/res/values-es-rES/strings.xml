@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Guardar log</string>
     <string name="settings_app_logging_clear">Limpiar registro</string>
     <string name="settings_app_logging_enable_network_logging">Habilitar registro de red</string>
+    <string name="settings_ai_config_title">Configuración IA</string>
+    <string name="settings_ai_config_description">Configurar ajustes de IA</string>
+    <string name="settings_ai_config_server">URL del servidor</string>
+    <string name="settings_ai_config_server_hint">Introduzca la URL del servidor</string>
+    <string name="settings_ai_config_server_self_host_description">Puede utilizar el servidor oficial o el autohost de su propio servidor</string>
+    <string name="settings_ai_config_entable_translation">Activar traducción IA</string>
+    <string name="settings_ai_config_translation_description">Reemplazar Google Translate con una traducción de IA, puede llevar más tiempo</string>
+    <string name="settings_ai_config_enable_tldr">Activar resumen de IA</string>
+    <string name="settings_ai_config_tldr_description">Habilitar resumen de IA para mensajes largos, sólo disponible en post de más de 500 caracteres</string>
     <string name="status_loadmore_error_retry">Reintentar</string>
     <string name="login_expired_message">Haga clic para volver a iniciar sesión</string>
     <string name="login_expired_relogin">Iniciar sesión de nuevo</string>
@@ -232,6 +241,10 @@
     <string name="empty_rss_sources">Sin fuentes rast</string>
     <string name="rss_detail_open_in_browser">Abrir en el navegador</string>
     <string name="rss_detail_share">Compartir</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Error al resumir</string>
+    <string name="rss_detail_tldr_loading">Resumiendo…</string>
     <string name="emoji_picker_recent">Recientes</string>
     <string name="emoji_picker_search">Buscar</string>
     <string name="changelog_title">¡Bienvenido de nuevo!</string>

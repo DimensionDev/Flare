@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">保存日志</string>
     <string name="settings_app_logging_clear">清除日志</string>
     <string name="settings_app_logging_enable_network_logging">启用网络日志</string>
+    <string name="settings_ai_config_title">AI 配置</string>
+    <string name="settings_ai_config_description">配置 AI 设置</string>
+    <string name="settings_ai_config_server">服务器 URL</string>
+    <string name="settings_ai_config_server_hint">输入服务器 URL</string>
+    <string name="settings_ai_config_server_self_host_description">您可以使用官方服务器或自己的服务器</string>
+    <string name="settings_ai_config_entable_translation">启用 AI 翻译</string>
+    <string name="settings_ai_config_translation_description">将 Google 翻译替换为 AI 翻译，可能需要更长的时间</string>
+    <string name="settings_ai_config_enable_tldr">启用 AI 摘要</string>
+    <string name="settings_ai_config_tldr_description">对长篇文章启用 AI 摘要，仅在超过 500 个字符的帖子中可用</string>
     <string name="status_loadmore_error_retry">重试</string>
     <string name="login_expired">登录会话已过期</string>
     <string name="login_expired_message">点击重新登录</string>
@@ -235,6 +244,9 @@
     <string name="empty_rss_sources">无 rss 源</string>
     <string name="rss_detail_open_in_browser">在浏览器中打开</string>
     <string name="rss_detail_share">分享</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">摘要失败</string>
     <string name="emoji_picker_recent">最近的</string>
     <string name="emoji_picker_search">搜索</string>
     <string name="changelog_title">欢迎回来！</string>

@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Αποθήκευση αρχείου καταγραφής</string>
     <string name="settings_app_logging_clear">Εκκαθάριση καταγραφής</string>
     <string name="settings_app_logging_enable_network_logging">Ενεργοποίηση καταγραφής δικτύου</string>
+    <string name="settings_ai_config_title">Ρύθμιση Τεχνητής Νοημοσύνης</string>
+    <string name="settings_ai_config_description">Ρύθμιση ρυθμίσεων τεχνητής νοημοσύνης</string>
+    <string name="settings_ai_config_server">Url Διακομιστή</string>
+    <string name="settings_ai_config_server_hint">Εισάγετε το URL του διακομιστή</string>
+    <string name="settings_ai_config_server_self_host_description">Μπορείτε να χρησιμοποιήσετε τον επίσημο διακομιστή ή αυτο-φιλοξενία του δικού σας διακομιστή</string>
+    <string name="settings_ai_config_entable_translation">Ενεργοποίηση μετάφρασης τεχνητής νοημοσύνης</string>
+    <string name="settings_ai_config_translation_description">Αντικαταστήστε το Google Translate με τη μετάφραση τεχνητής νοημοσύνης, μπορεί να πάρει περισσότερο χρόνο</string>
+    <string name="settings_ai_config_enable_tldr">Ενεργοποίηση Περίληψης Τεχνητής Νοημοσύνης</string>
+    <string name="settings_ai_config_tldr_description">Ενεργοποίηση περιλήψεων τεχνητής νοημοσύνης για μεγάλες δημοσιεύσεις, μόνο διαθέσιμη σε ανάρτηση που υπερβαίνει τους 500 χαρακτήρες</string>
     <string name="status_loadmore_error_retry">Επανάληψη</string>
     <string name="login_expired_message">Κάντε κλικ για να συνδεθείτε ξανά</string>
     <string name="login_expired_relogin">Είσοδος ξανά</string>
@@ -231,6 +240,10 @@
     <string name="empty_rss_sources">Δεν υπάρχουν πηγές rss</string>
     <string name="rss_detail_open_in_browser">Άνοιγμα σε πρόγραμμα περιήγησης</string>
     <string name="rss_detail_share">Κοινοποίηση</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Αποτυχία συνοψισμού</string>
+    <string name="rss_detail_tldr_loading">Σύνοψη…</string>
     <string name="emoji_picker_recent">Πρόσφατα</string>
     <string name="emoji_picker_search">Αναζήτηση</string>
     <string name="changelog_title">Καλώς ήρθατε!</string>

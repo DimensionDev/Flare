@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Uložit log</string>
     <string name="settings_app_logging_clear">Vymazat záznam</string>
     <string name="settings_app_logging_enable_network_logging">Povolit protokolování do sítě</string>
+    <string name="settings_ai_config_title">Nastavení AI</string>
+    <string name="settings_ai_config_description">Konfigurace nastavení AI</string>
+    <string name="settings_ai_config_server">URL serveru</string>
+    <string name="settings_ai_config_server_hint">Zadejte URL serveru</string>
+    <string name="settings_ai_config_server_self_host_description">Můžete použít oficiální server nebo hostit vlastní server</string>
+    <string name="settings_ai_config_entable_translation">Povolit překlad AI</string>
+    <string name="settings_ai_config_translation_description">Nahradit Google překlad AI překladem, může trvat déle</string>
+    <string name="settings_ai_config_enable_tldr">Povolit souhrn AI</string>
+    <string name="settings_ai_config_tldr_description">Povolit AI shrnutí pro dlouhé příspěvky, dostupné pouze v příspěvku, který je delší než 500 znaků</string>
     <string name="status_loadmore_error_retry">Opakovat</string>
     <string name="login_expired_message">Klikněte pro přihlášení znovu</string>
     <string name="login_expired_relogin">Přihlásit se znovu</string>
@@ -232,6 +241,10 @@
     <string name="empty_rss_sources">Žádné rss zdroje</string>
     <string name="rss_detail_open_in_browser">Otevřít v prohlížeči</string>
     <string name="rss_detail_share">Sdílet</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Nepodařilo se shrnout</string>
+    <string name="rss_detail_tldr_loading">Shrnutí…</string>
     <string name="emoji_picker_recent">Nedávné</string>
     <string name="emoji_picker_search">Hledat</string>
     <string name="changelog_title">Vítejte zpět!</string>

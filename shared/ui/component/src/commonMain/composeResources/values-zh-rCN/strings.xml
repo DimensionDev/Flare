@@ -104,6 +104,7 @@
     <string name="mastodon_item_content_warning">内容警告</string>
     <string name="reply_to">回复 %1$s</string>
     <string name="status_detail_translate">翻译为 %1$s</string>
+    <string name="status_detail_tldr">Summary</string>
     <string name="date_format_year_month_day">yyyy年MMMdd日</string>
     <string name="date_format_month_day">MMMdd日</string>
     <string name="date_format_full">yyyy年MMMdd日 HH:mm</string>

@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Gem log</string>
     <string name="settings_app_logging_clear">Ryd log</string>
     <string name="settings_app_logging_enable_network_logging">Aktiver logning af netværk</string>
+    <string name="settings_ai_config_title">Ai Konfiguration</string>
+    <string name="settings_ai_config_description">Konfigurer AI-indstillinger</string>
+    <string name="settings_ai_config_server">Server URL</string>
+    <string name="settings_ai_config_server_hint">Angiv serverens URL</string>
+    <string name="settings_ai_config_server_self_host_description">Du kan bruge den officielle server eller selv-vært din egen server</string>
+    <string name="settings_ai_config_entable_translation">Aktiver AI-oversættelse</string>
+    <string name="settings_ai_config_translation_description">Erstat Google Translate med AI oversættelse, kan tage længere tid</string>
+    <string name="settings_ai_config_enable_tldr">Aktiver AI Opsummering</string>
+    <string name="settings_ai_config_tldr_description">Aktiver AI opsummering for lange indlæg, kun tilgængelig i indlæg, der er længere end 500 tegn</string>
     <string name="status_loadmore_error_retry">Forsøg igen</string>
     <string name="login_expired_message">Klik for at logge ind igen</string>
     <string name="login_expired_relogin">Log ind igen</string>
@@ -232,6 +241,10 @@
     <string name="empty_rss_sources">Ingen rss kilder</string>
     <string name="rss_detail_open_in_browser">Åbn i browser</string>
     <string name="rss_detail_share">Del</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Opsummering mislykkedes</string>
+    <string name="rss_detail_tldr_loading">Sammenfattende…</string>
     <string name="emoji_picker_recent">Seneste</string>
     <string name="emoji_picker_search">Søg</string>
     <string name="changelog_title">Velkommen tilbage!</string>

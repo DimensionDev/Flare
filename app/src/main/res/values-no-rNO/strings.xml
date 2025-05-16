@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Lagre logg</string>
     <string name="settings_app_logging_clear">Tøm logg</string>
     <string name="settings_app_logging_enable_network_logging">Aktiver nettverkslogging</string>
+    <string name="settings_ai_config_title">AI Konfigurasjon</string>
+    <string name="settings_ai_config_description">Konfigurer AI-innstillinger</string>
+    <string name="settings_ai_config_server">URL til server</string>
+    <string name="settings_ai_config_server_hint">Skriv inn nettadressen til serveren</string>
+    <string name="settings_ai_config_server_self_host_description">Du kan bruke den offisielle serveren eller selv verne din egen server</string>
+    <string name="settings_ai_config_entable_translation">Aktiver AI oversettelse</string>
+    <string name="settings_ai_config_translation_description">Erstatt Google Translate med AI oversettelse, kan det ta lengre tid</string>
+    <string name="settings_ai_config_enable_tldr">Aktiver AI sammendrag</string>
+    <string name="settings_ai_config_tldr_description">Aktiver oppsummering av AI for lange innlegg, kun tilgjengelig i innlegg som er lengre enn 500 tegn</string>
     <string name="status_loadmore_error_retry">Prøv igjen</string>
     <string name="login_expired_message">Trykk for å logge inn igjen</string>
     <string name="login_expired_relogin">Logg inn på nytt</string>
@@ -232,6 +241,10 @@
     <string name="empty_rss_sources">Ingen rss kilder</string>
     <string name="rss_detail_open_in_browser">Åpne i nettleser</string>
     <string name="rss_detail_share">Del</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Kan ikke oppsummere</string>
+    <string name="rss_detail_tldr_loading">oppsummerer…</string>
     <string name="emoji_picker_recent">Siste</string>
     <string name="emoji_picker_search">Søk</string>
     <string name="changelog_title">Velkommen tilbake!</string>

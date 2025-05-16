@@ -104,6 +104,7 @@
     <string name="mastodon_item_content_warning">Varning för innehåll</string>
     <string name="reply_to">Svara %1$s</string>
     <string name="status_detail_translate">Översätt till %1$s</string>
+    <string name="status_detail_tldr">Summary</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM åå HH:mm</string>

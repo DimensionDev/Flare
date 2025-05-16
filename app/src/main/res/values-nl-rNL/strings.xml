@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Logboek opslaan</string>
     <string name="settings_app_logging_clear">Logboek wissen</string>
     <string name="settings_app_logging_enable_network_logging">Netwerk loggen inschakelen</string>
+    <string name="settings_ai_config_title">AI configuratie</string>
+    <string name="settings_ai_config_description">Configureer AI instellingen</string>
+    <string name="settings_ai_config_server">Server URL</string>
+    <string name="settings_ai_config_server_hint">Voer de server-URL in</string>
+    <string name="settings_ai_config_server_self_host_description">U kunt de officiële server gebruiken of zelf uw eigen server organiseren</string>
+    <string name="settings_ai_config_entable_translation">AI vertaling inschakelen</string>
+    <string name="settings_ai_config_translation_description">Vervang Google Translate door AI vertaling, dit kan langer duren</string>
+    <string name="settings_ai_config_enable_tldr">AI samenvatting inschakelen</string>
+    <string name="settings_ai_config_tldr_description">AI samenvatting inschakelen voor lange berichten, alleen beschikbaar in post van meer dan 500 tekens</string>
     <string name="status_loadmore_error_retry">Opnieuw</string>
     <string name="login_expired_message">Klik om opnieuw in te loggen</string>
     <string name="login_expired_relogin">Opnieuw inloggen</string>
@@ -232,6 +241,9 @@
     <string name="empty_rss_sources">Geen rss bronnen</string>
     <string name="rss_detail_open_in_browser">Openen in browser</string>
     <string name="rss_detail_share">Delen</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Samenvatten mislukt</string>
     <string name="emoji_picker_recent">Recentelijk</string>
     <string name="emoji_picker_search">Zoeken</string>
     <string name="changelog_title">Welkom terug!</string>

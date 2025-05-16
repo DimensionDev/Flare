@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Salvare jurnal</string>
     <string name="settings_app_logging_clear">Curăță jurnalul</string>
     <string name="settings_app_logging_enable_network_logging">Activați înregistrarea în rețea</string>
+    <string name="settings_ai_config_title">Configurare AI</string>
+    <string name="settings_ai_config_description">Configurare setări AI</string>
+    <string name="settings_ai_config_server">URL Server</string>
+    <string name="settings_ai_config_server_hint">Introduceți URL-ul serverului</string>
+    <string name="settings_ai_config_server_self_host_description">Puteţi utiliza serverul oficial sau vă puteţi gazdui propriul server</string>
+    <string name="settings_ai_config_entable_translation">Activează traducerea AI</string>
+    <string name="settings_ai_config_translation_description">Înlocuiți traducerea Google cu AI traducere, ar putea dura mai mult timp</string>
+    <string name="settings_ai_config_enable_tldr">Activează rezumarea AI</string>
+    <string name="settings_ai_config_tldr_description">Activează sumarizarea AI pentru postările lungi, disponibile doar în postarea care depășește 500 de caractere</string>
     <string name="status_loadmore_error_retry">Reîncercați</string>
     <string name="login_expired_message">Faceți clic pentru a vă reconecta</string>
     <string name="login_expired_relogin">Conectează-te din nou</string>
@@ -232,6 +241,10 @@
     <string name="empty_rss_sources">Fără surse rss</string>
     <string name="rss_detail_open_in_browser">Deschide în browser</string>
     <string name="rss_detail_share">Distribuie</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Sumar eșuat</string>
+    <string name="rss_detail_tldr_loading">Rezumat…</string>
     <string name="emoji_picker_recent">Recente</string>
     <string name="emoji_picker_search">Caută</string>
     <string name="changelog_title">Bine ai revenit!</string>

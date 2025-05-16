@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Log speichern</string>
     <string name="settings_app_logging_clear">Log löschen</string>
     <string name="settings_app_logging_enable_network_logging">Netzwerkprotokollierung aktivieren</string>
+    <string name="settings_ai_config_title">AI-Konfiguration</string>
+    <string name="settings_ai_config_description">KI-Einstellungen konfigurieren</string>
+    <string name="settings_ai_config_server">Server-URL</string>
+    <string name="settings_ai_config_server_hint">Server-URL eingeben</string>
+    <string name="settings_ai_config_server_self_host_description">Du kannst den offiziellen Server oder den eigenen Server verwenden</string>
+    <string name="settings_ai_config_entable_translation">KI-Übersetzung aktivieren</string>
+    <string name="settings_ai_config_translation_description">Google Translate durch KI-Übersetzung ersetzen, kann länger dauern</string>
+    <string name="settings_ai_config_enable_tldr">KI-Zusammenfassung aktivieren</string>
+    <string name="settings_ai_config_tldr_description">KI-Zusammenfassung für lange Beiträge aktivieren, nur verfügbar in Beiträgen, die länger als 500 Zeichen sind</string>
     <string name="status_loadmore_error_retry">Wiederholen</string>
     <string name="login_expired_message">Zum erneuten Anmelden klicken</string>
     <string name="login_expired_relogin">Erneut anmelden</string>
@@ -232,6 +241,10 @@
     <string name="empty_rss_sources">Keine rss Quellen</string>
     <string name="rss_detail_open_in_browser">Im Browser öffnen</string>
     <string name="rss_detail_share">Teilen</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Zusammenfassung fehlgeschlagen</string>
+    <string name="rss_detail_tldr_loading">Zusammenfassung…</string>
     <string name="emoji_picker_recent">Neueste</string>
     <string name="emoji_picker_search">Suchen</string>
     <string name="changelog_title">Willkommen zurück!</string>

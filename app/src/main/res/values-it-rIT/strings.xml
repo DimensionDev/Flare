@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Salva log</string>
     <string name="settings_app_logging_clear">Cancella log</string>
     <string name="settings_app_logging_enable_network_logging">Abilita registrazione di rete</string>
+    <string name="settings_ai_config_title">Configurazione AI</string>
+    <string name="settings_ai_config_description">Configura le impostazioni AI</string>
+    <string name="settings_ai_config_server">Url Del Server</string>
+    <string name="settings_ai_config_server_hint">Inserisci l\'URL del server</string>
+    <string name="settings_ai_config_server_self_host_description">È possibile utilizzare il server ufficiale o self-host il proprio server</string>
+    <string name="settings_ai_config_entable_translation">Abilita traduzione AI</string>
+    <string name="settings_ai_config_translation_description">Sostituire Google Translate con la traduzione AI, potrebbe richiedere più tempo</string>
+    <string name="settings_ai_config_enable_tldr">Abilita Riepilogo AI</string>
+    <string name="settings_ai_config_tldr_description">Abilita il riepilogo IA per i post lunghi, disponibile solo in post con più di 500 caratteri</string>
     <string name="status_loadmore_error_retry">Riprova</string>
     <string name="login_expired_message">Clicca di nuovo per effettuare il login</string>
     <string name="login_expired_relogin">Accedi di nuovo</string>
@@ -232,6 +241,10 @@
     <string name="empty_rss_sources">Nessuna sorgente rss</string>
     <string name="rss_detail_open_in_browser">Apri nel browser</string>
     <string name="rss_detail_share">Condividi</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Riepilogo non riuscito</string>
+    <string name="rss_detail_tldr_loading">Riepilogo…</string>
     <string name="emoji_picker_recent">Recenti</string>
     <string name="emoji_picker_search">Cerca</string>
     <string name="changelog_title">Bentornato!</string>

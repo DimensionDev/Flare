@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">ログを保存</string>
     <string name="settings_app_logging_clear">ログをクリア</string>
     <string name="settings_app_logging_enable_network_logging">ネットワークログを有効にする</string>
+    <string name="settings_ai_config_title">AI設定</string>
+    <string name="settings_ai_config_description">AI の設定を構成する</string>
+    <string name="settings_ai_config_server">サーバー URL</string>
+    <string name="settings_ai_config_server_hint">サーバー URL を入力してください</string>
+    <string name="settings_ai_config_server_self_host_description">公式サーバーまたは自己ホストサーバーを使用できます。</string>
+    <string name="settings_ai_config_entable_translation">AI 翻訳を有効にする</string>
+    <string name="settings_ai_config_translation_description">Google 翻訳を AI 翻訳に置き換えるには時間がかかる場合があります</string>
+    <string name="settings_ai_config_enable_tldr">AIサマリー化を有効にする</string>
+    <string name="settings_ai_config_tldr_description">長い投稿のAIサマリー化を有効にします。500文字以上の投稿でのみ利用できます</string>
     <string name="status_loadmore_error_retry">再試行する</string>
     <string name="login_expired">ログインセッションの有効期限が切れました</string>
     <string name="login_expired_message">クリックして再度ログインする</string>
@@ -235,6 +244,9 @@
     <string name="empty_rss_sources">RSSソースがありません</string>
     <string name="rss_detail_open_in_browser">ブラウザで開く</string>
     <string name="rss_detail_share">共有</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">要約に失敗しました</string>
     <string name="emoji_picker_recent">最近のもの</string>
     <string name="emoji_picker_search">検索</string>
     <string name="changelog_title">おかえりなさい！</string>

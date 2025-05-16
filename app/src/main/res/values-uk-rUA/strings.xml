@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Зберегти журнал</string>
     <string name="settings_app_logging_clear">Очистити журнал</string>
     <string name="settings_app_logging_enable_network_logging">Увімкнути ведення журналу мережі</string>
+    <string name="settings_ai_config_title">Конфігурація ШІ</string>
+    <string name="settings_ai_config_description">Налаштування параметрів ШІ</string>
+    <string name="settings_ai_config_server">URL-адреса сервера</string>
+    <string name="settings_ai_config_server_hint">Введіть URL-адресу сервера</string>
+    <string name="settings_ai_config_server_self_host_description">Ви можете використовувати офіційний сервер або власний сервер</string>
+    <string name="settings_ai_config_entable_translation">Увімкнути AI переклад</string>
+    <string name="settings_ai_config_translation_description">Заміна перекладу від Google AI може зайняти більше часу</string>
+    <string name="settings_ai_config_enable_tldr">Увімкнути підсумок ШІ</string>
+    <string name="settings_ai_config_tldr_description">Увімкнути підсумок ШІ для довгих постів, доступних тільки в повідомленнях, більше ніж 500 символів</string>
     <string name="status_loadmore_error_retry">Повторити спробу</string>
     <string name="login_expired_message">Нажміть кнопку для входу знову</string>
     <string name="login_expired_relogin">Знову увійти в систему</string>
@@ -232,6 +241,9 @@
     <string name="empty_rss_sources">Відсутні вихідні коди для запитів</string>
     <string name="rss_detail_open_in_browser">Відкрити у браузері</string>
     <string name="rss_detail_share">Поділитись</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Не вдалося узагальнити</string>
     <string name="emoji_picker_recent">Недавні</string>
     <string name="emoji_picker_search">Пошук</string>
     <string name="changelog_title">З поверненням!</string>

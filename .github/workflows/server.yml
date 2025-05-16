@@ -72,7 +72,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ github.repository_owner }}/${{ github.repository }}
+          images: ${{ github.repository }}
 
       - name: Build & Push image
         uses: docker/build-push-action@v6

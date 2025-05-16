@@ -2,11 +2,11 @@ about:
   name: "Flare Official Server"
   version: "0.1.0"
 ai:
-  type: "ollama" # "ollama" or "openai"
+  type: $AI_TYPE  # "ollama" or "openai"
   ollama:
     url: "http://localhost:11434/api"
     model: "deepseek-r1:70b"
   openai:
-    baseUrl: "https://api.openai.com/v1/chat/completions"
-    token: "sk-..."
-    model: "gpt-3.5-turbo"
+    baseUrl: $OPENAI_API_BASE
+    token: $OPENAI_API_KEY
+    model: $OPENAI_MODEL

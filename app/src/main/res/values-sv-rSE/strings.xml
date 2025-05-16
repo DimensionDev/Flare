@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Spara logg</string>
     <string name="settings_app_logging_clear">Rensa logg</string>
     <string name="settings_app_logging_enable_network_logging">Aktivera nätverksloggning</string>
+    <string name="settings_ai_config_title">AI konfiguration</string>
+    <string name="settings_ai_config_description">Konfigurera AI-inställningar</string>
+    <string name="settings_ai_config_server">Server URL</string>
+    <string name="settings_ai_config_server_hint">Ange serverns URL</string>
+    <string name="settings_ai_config_server_self_host_description">Du kan använda den officiella servern eller själv värd din egen server</string>
+    <string name="settings_ai_config_entable_translation">Aktivera AI-översättning</string>
+    <string name="settings_ai_config_translation_description">Ersätt Google Translate med AI-översättning, kan ta längre tid</string>
+    <string name="settings_ai_config_enable_tldr">Aktivera AI-sammanfattning</string>
+    <string name="settings_ai_config_tldr_description">Aktivera AI-sammanfattning för långa inlägg, endast tillgängligt i inlägg som är längre än 500 tecken</string>
     <string name="status_loadmore_error_retry">Försök igen</string>
     <string name="login_expired_message">Klicka för att logga in igen</string>
     <string name="login_expired_relogin">Logga in igen</string>
@@ -232,6 +241,10 @@
     <string name="empty_rss_sources">Inga rss källor</string>
     <string name="rss_detail_open_in_browser">Öppna i webbläsare</string>
     <string name="rss_detail_share">Dela</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Det gick inte att sammanfatta</string>
+    <string name="rss_detail_tldr_loading">Sammanfattar…</string>
     <string name="emoji_picker_recent">Senaste</string>
     <string name="emoji_picker_search">Sök</string>
     <string name="changelog_title">Välkommen tillbaka!</string>

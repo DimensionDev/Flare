@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Сохранить журнал</string>
     <string name="settings_app_logging_clear">Очистить журнал</string>
     <string name="settings_app_logging_enable_network_logging">Включить сетевое журналирование</string>
+    <string name="settings_ai_config_title">Конфигурация ИИ</string>
+    <string name="settings_ai_config_description">Настройка AI</string>
+    <string name="settings_ai_config_server">URL сервера</string>
+    <string name="settings_ai_config_server_hint">Введите URL сервера</string>
+    <string name="settings_ai_config_server_self_host_description">Вы можете использовать официальный сервер или собственный сервер</string>
+    <string name="settings_ai_config_entable_translation">Включить перевод ИИ</string>
+    <string name="settings_ai_config_translation_description">Замена перевода Google с помощью ИИ перевода, может занять больше времени</string>
+    <string name="settings_ai_config_enable_tldr">Включить ИИ сворачивание</string>
+    <string name="settings_ai_config_tldr_description">Включить ИИ резюме для длинных записей, доступных только в сообщении, длиннее 500 символов</string>
     <string name="status_loadmore_error_retry">Повторить</string>
     <string name="login_expired_message">Нажмите, чтобы войти снова</string>
     <string name="login_expired_relogin">Войти снова</string>
@@ -231,6 +240,10 @@
     <string name="empty_rss_sources">Нет источников rss</string>
     <string name="rss_detail_open_in_browser">Открыть в браузере</string>
     <string name="rss_detail_share">Поделиться</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Не удалось подвести итог</string>
+    <string name="rss_detail_tldr_loading">Суммирование…</string>
     <string name="emoji_picker_recent">Недавние</string>
     <string name="emoji_picker_search">Искать</string>
     <string name="changelog_title">С возвращением!</string>

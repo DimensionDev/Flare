@@ -103,6 +103,7 @@
     <string name="mastodon_item_content_warning">Advarsel for innhold</string>
     <string name="reply_to">Svar til %1$s</string>
     <string name="status_detail_translate">Oversett til %1$s</string>
+    <string name="status_detail_tldr">Summary</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy H:mm</string>

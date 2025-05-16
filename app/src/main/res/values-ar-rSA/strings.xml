@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">حفظ السجل</string>
     <string name="settings_app_logging_clear">مسح السجل</string>
     <string name="settings_app_logging_enable_network_logging">تمكين تسجيل الشبكة</string>
+    <string name="settings_ai_config_title">إعدادات الذكاء الاصطناعي</string>
+    <string name="settings_ai_config_description">تهيئة إعدادات الذكاء الاصطناعي</string>
+    <string name="settings_ai_config_server">رابط الخادم</string>
+    <string name="settings_ai_config_server_hint">أدخل رابط الخادم</string>
+    <string name="settings_ai_config_server_self_host_description">يمكنك استخدام الخادم الرسمي أو استضافة الخادم الخاص بك</string>
+    <string name="settings_ai_config_entable_translation">تمكين ترجمة الذاكرة</string>
+    <string name="settings_ai_config_translation_description">استبدال ترجمة جوجل بترجمة الذكاء الاصطناعي، قد يستغرق وقتاً أطول</string>
+    <string name="settings_ai_config_enable_tldr">تمكين ملخص الذكاء الاصطناعي</string>
+    <string name="settings_ai_config_tldr_description">تمكين تلخيص الذكاء الاصطناعي لمشاركات طويلة، فقط متاح في المشاركة التي تزيد عن 500 حرف</string>
     <string name="status_loadmore_error_retry">إعادة المحاولة</string>
     <string name="login_expired_message">انقر لتسجيل الدخول مرة أخرى</string>
     <string name="login_expired_relogin">تسجيل الدخول مرة أخرى</string>
@@ -231,6 +240,10 @@
     <string name="empty_rss_sources">لا توجد مصادر Rss</string>
     <string name="rss_detail_open_in_browser">فتح في المتصفح</string>
     <string name="rss_detail_share">مشاركة</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">فشل في تلخيص</string>
+    <string name="rss_detail_tldr_loading">تلخيص…</string>
     <string name="emoji_picker_recent">حديثاً</string>
     <string name="emoji_picker_search">البحث</string>
     <string name="changelog_title">مرحبا بعودتك!</string>

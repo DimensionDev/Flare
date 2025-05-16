@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Tallenna loki</string>
     <string name="settings_app_logging_clear">Tyhjennä loki</string>
     <string name="settings_app_logging_enable_network_logging">Salli verkon kirjaaminen</string>
+    <string name="settings_ai_config_title">AI Asetukset</string>
+    <string name="settings_ai_config_description">Muokkaa AI asetuksia</string>
+    <string name="settings_ai_config_server">Palvelimen URL</string>
+    <string name="settings_ai_config_server_hint">Syötä palvelimen URL</string>
+    <string name="settings_ai_config_server_self_host_description">Voit käyttää virallista palvelinta tai itse isäntä oma palvelin</string>
+    <string name="settings_ai_config_entable_translation">Ota käyttöön tekoälyn käännös</string>
+    <string name="settings_ai_config_translation_description">Korvaa Google Translate kanssa AI käännös, saattaa kestää pidempään aikaa</string>
+    <string name="settings_ai_config_enable_tldr">Ota Käyttöön tekoälyn Yhteenveto</string>
+    <string name="settings_ai_config_tldr_description">Ota käyttöön tekoälyn yhteenveto pitkiä viestejä, saatavilla vain post että yli 500 merkkiä</string>
     <string name="status_loadmore_error_retry">Yritä Uudelleen</string>
     <string name="login_expired_message">Klikkaa kirjautuaksesi uudelleen</string>
     <string name="login_expired_relogin">Kirjaudu uudelleen</string>
@@ -232,6 +241,10 @@
     <string name="empty_rss_sources">Ei RSS-lähteitä</string>
     <string name="rss_detail_open_in_browser">Avaa selaimessa</string>
     <string name="rss_detail_share">Jaa</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Yhteenveto epäonnistui</string>
+    <string name="rss_detail_tldr_loading">Yhteenveto…</string>
     <string name="emoji_picker_recent">Viimeisimmät</string>
     <string name="emoji_picker_search">Etsi</string>
     <string name="changelog_title">Tervetuloa takaisin!</string>

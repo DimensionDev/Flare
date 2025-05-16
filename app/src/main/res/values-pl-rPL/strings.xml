@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Zapisz dziennik</string>
     <string name="settings_app_logging_clear">Wyczyść log</string>
     <string name="settings_app_logging_enable_network_logging">Włącz rejestrowanie w sieci</string>
+    <string name="settings_ai_config_title">Konfiguracja SI</string>
+    <string name="settings_ai_config_description">Skonfiguruj ustawienia AI</string>
+    <string name="settings_ai_config_server">Adres URL serwera</string>
+    <string name="settings_ai_config_server_hint">Wprowadź adres URL serwera</string>
+    <string name="settings_ai_config_server_self_host_description">Możesz użyć oficjalnego serwera lub własnego serwera</string>
+    <string name="settings_ai_config_entable_translation">Włącz tłumaczenie AI</string>
+    <string name="settings_ai_config_translation_description">Zastąp Google Translate tłumaczeniem AI może zająć więcej czasu</string>
+    <string name="settings_ai_config_enable_tldr">Włącz podsumowanie AI</string>
+    <string name="settings_ai_config_tldr_description">Włącz podsumowanie AI dla długich postów, dostępne tylko w postach dłuższych niż 500 znaków</string>
     <string name="status_loadmore_error_retry">Ponów próbę</string>
     <string name="login_expired_message">Kliknij, aby zalogować się ponownie</string>
     <string name="login_expired_relogin">Zaloguj się ponownie</string>
@@ -232,6 +241,10 @@
     <string name="empty_rss_sources">Brak źródeł rss</string>
     <string name="rss_detail_open_in_browser">Otwórz w przeglądarce</string>
     <string name="rss_detail_share">Udostępnij</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Nie udało się podsumować</string>
+    <string name="rss_detail_tldr_loading">Podsumowanie…</string>
     <string name="emoji_picker_recent">Najnowsze</string>
     <string name="emoji_picker_search">Szukaj</string>
     <string name="changelog_title">Witaj ponownie!</string>

@@ -100,6 +100,7 @@
     <string name="mastodon_item_content_warning">Προειδοποίηση περιεχομένου</string>
     <string name="reply_to">Απάντηση σε %1$s</string>
     <string name="status_detail_translate">Μετάφραση σε %1$s</string>
+    <string name="status_detail_tldr">Summary</string>
     <string name="date_format_year_month_day">dd MMM yy</string>
     <string name="date_format_month_day">dd MMM</string>
     <string name="date_format_full">dd MMM yy HH:mm</string>

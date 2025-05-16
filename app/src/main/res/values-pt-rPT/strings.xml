@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Salvar log</string>
     <string name="settings_app_logging_clear">Limpar Log</string>
     <string name="settings_app_logging_enable_network_logging">Habilitar registro de rede</string>
+    <string name="settings_ai_config_title">Configuração de IA</string>
+    <string name="settings_ai_config_description">Configurar AI</string>
+    <string name="settings_ai_config_server">URL do servidor</string>
+    <string name="settings_ai_config_server_hint">Digite a URL do servidor</string>
+    <string name="settings_ai_config_server_self_host_description">Você pode usar o servidor oficial ou auto-hospedar seu próprio servidor</string>
+    <string name="settings_ai_config_entable_translation">Habilitar tradução AI</string>
+    <string name="settings_ai_config_translation_description">Substituir o Google Tradutor pela tradução IA pode demorar mais tempo</string>
+    <string name="settings_ai_config_enable_tldr">Habilitar resumo de IA</string>
+    <string name="settings_ai_config_tldr_description">Ativar o resumo de IA para publicações longas, somente disponíveis na publicação com mais de 500 caracteres</string>
     <string name="status_loadmore_error_retry">Repetir</string>
     <string name="login_expired_message">Clique para entrar novamente</string>
     <string name="login_expired_relogin">Entrar novamente</string>
@@ -232,6 +241,10 @@
     <string name="empty_rss_sources">Sem fontes de RSS</string>
     <string name="rss_detail_open_in_browser">Abrir no navegador</string>
     <string name="rss_detail_share">Compartilhar</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Falha ao resumir</string>
+    <string name="rss_detail_tldr_loading">Resumindo…</string>
     <string name="emoji_picker_recent">Recente</string>
     <string name="emoji_picker_search">Pesquisa</string>
     <string name="changelog_title">Bem-vindo de volta!</string>

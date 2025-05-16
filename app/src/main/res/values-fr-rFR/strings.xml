@@ -48,6 +48,15 @@
     <string name="settings_app_logging_save">Enregistrer le journal</string>
     <string name="settings_app_logging_clear">Effacer le journal</string>
     <string name="settings_app_logging_enable_network_logging">Activer la journalisation du réseau</string>
+    <string name="settings_ai_config_title">Configuration IA</string>
+    <string name="settings_ai_config_description">Configurer les paramètres IA</string>
+    <string name="settings_ai_config_server">URL du serveur</string>
+    <string name="settings_ai_config_server_hint">Entrez l\'URL du serveur</string>
+    <string name="settings_ai_config_server_self_host_description">Vous pouvez utiliser le serveur officiel ou l\'auto-hôte de votre propre serveur</string>
+    <string name="settings_ai_config_entable_translation">Activer la traduction IA</string>
+    <string name="settings_ai_config_translation_description">Remplacer Google Translate par la traduction IA, peut prendre plus de temps</string>
+    <string name="settings_ai_config_enable_tldr">Activer le résumé de l\'IA</string>
+    <string name="settings_ai_config_tldr_description">Activer le résumé de l\'IA pour les publications longues, uniquement disponible pour les publications de plus de 500 caractères</string>
     <string name="status_loadmore_error_retry">Réessayer</string>
     <string name="login_expired_message">Cliquez pour vous connecter à nouveau</string>
     <string name="login_expired_relogin">Reconnectez-vous</string>
@@ -232,6 +241,10 @@
     <string name="empty_rss_sources">Aucune source rss</string>
     <string name="rss_detail_open_in_browser">Ouvrir dans le navigateur</string>
     <string name="rss_detail_share">Partager</string>
+    <string name="rss_detail_tldr">Summarize</string>
+    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr_error">Impossible de résumer</string>
+    <string name="rss_detail_tldr_loading">Résumer…</string>
     <string name="emoji_picker_recent">Récentes</string>
     <string name="emoji_picker_search">Chercher</string>
     <string name="changelog_title">Bienvenue!</string>

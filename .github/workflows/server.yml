@@ -7,15 +7,19 @@ on:
       - release
       - develop
     tags:
-      - '**'
+      - "**"
     paths-ignore:
-      - '**.md'
-      - 'docs/**/*.yml'
+      - "**.md"
+      - "docs/**/*.yml"
   pull_request:
     branches:
       - master
       - release
       - develop
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   build:
@@ -30,7 +34,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          distribution: 'zulu'
+          distribution: "zulu"
           java-version: 21
 
       - name: Build
@@ -44,3 +48,36 @@ jobs:
           BUILD_NUMBER: ${{github.run_number}}
           BUILD_VERSION: ${{github.ref_name}}
         run: ./gradlew :server:check --stacktrace
+
+      - name: Generate Dockerfile
+        run: |
+          cat > Dockerfile <<'EOF'
+          FROM ubuntu:24.04
+          WORKDIR /app
+          COPY server/build/bin/linuxX64/releaseExecutable/server.kexe /app/server.kexe
+          COPY server/src/commonMain/resources/application.yaml /app/application.yaml
+          EXPOSE 8080
+          ENTRYPOINT ["./server.kexe", "--config-path", "/app/application.yaml"]
+          EOF
+
+      - name: Login to GitHub Container Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ github.repository_owner }}/${{ github.repository }}
+
+      - name: Build & Push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

@@ -159,7 +159,7 @@ accompanist-drawablepainter = { group = "com.google.accompanist", name = "accomp
 compose-destinations = { group = "io.github.raamcosta.compose-destinations", name = "core", version.ref = "compose-destinations" }
 compose-destinations-bottom-sheet = { group = "io.github.raamcosta.compose-destinations", name = "bottom-sheet", version.ref = "compose-destinations" }
 compose-destinations-ksp = { group = "io.github.raamcosta.compose-destinations", name = "ksp", version.ref = "compose-destinations" }
-material3-navigation = { group = "io.github.stefanoq21", name = "material3-navigation", version = "1.0.2" }
+material3-navigation = { group = "io.github.stefanoq21", name = "material3-navigation", version = "1.0.3" }
 
 compose-lint-checks = { group = "com.slack.lint.compose", name = "compose-lint-checks", version.ref = "compose-lint-checks" }
 

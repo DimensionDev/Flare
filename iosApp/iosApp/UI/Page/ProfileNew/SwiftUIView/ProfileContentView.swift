@@ -37,7 +37,7 @@ struct ProfileTimelineView: View {
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-               if let presenter {
+                if let presenter {
                     ObservePresenter(presenter: presenter) { state in
                         if let timelineState = state as? TimelineState,
                            case let .success(success) = onEnum(of: timelineState.listState)
@@ -52,7 +52,7 @@ struct ProfileTimelineView: View {
                                         .onAppear {
                                             success.get(index: index)
                                         }
-                                         
+
                                 } else {
                                     StatusPlaceHolder()
                                         .padding(.vertical, 8)

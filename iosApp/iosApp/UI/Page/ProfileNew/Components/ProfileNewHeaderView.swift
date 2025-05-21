@@ -212,7 +212,7 @@ class ProfileNewHeaderView: UIView {
         self.userInfo = userInfo // 需要保存 userInfo 以便在点击时使用
         self.state = state
         self.theme = theme
-        
+
         // 设置用户名
         nameLabel.text = userInfo.profile.name.markdown
 

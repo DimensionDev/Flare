@@ -42,7 +42,7 @@ struct ProfileMediaListScreen: View {
     @Environment(\.appSettings) private var appSettings
     @Environment(\.dismiss) private var dismiss
 
-    //, tabStore: ProfileTabSettingStore
+    // , tabStore: ProfileTabSettingStore
     init(accountType _: AccountType, userKey _: MicroBlogKey?, currentMediaPresenter _: ProfileMediaPresenter) {
 //        self.tabStore = tabStore
     }

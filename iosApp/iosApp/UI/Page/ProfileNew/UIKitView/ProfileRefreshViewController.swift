@@ -90,10 +90,10 @@ class ProfileNewRefreshViewController: UIViewController {
         self.tabStore = tabStore
         self.mediaPresenterWrapper = mediaPresenterWrapper
         self.theme = theme
-        
+
         // 设置主题监听
         setupThemeObserver()
-        
+
         // 根据是否是自己的 profile 来控制导航栏显示
         let isOwnProfile = userKey == nil
 
@@ -182,7 +182,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 新的配置代码
         if let userInfo {
-            userHeaderView?.configure(with: userInfo, state: state,theme: self.theme)
+            userHeaderView?.configure(with: userInfo, state: state, theme: theme)
         }
 
         // 配置分段控制器
@@ -464,9 +464,9 @@ class ProfileNewRefreshViewController: UIViewController {
 
     deinit {
         cleanupListViewControllers()
-        
+
         // 移除主题观察者
-        if let themeObserver = themeObserver {
+        if let themeObserver {
             NotificationCenter.default.removeObserver(themeObserver)
         }
     }
@@ -519,7 +519,7 @@ class ProfileNewRefreshViewController: UIViewController {
         if let existingObserver = themeObserver {
             NotificationCenter.default.removeObserver(existingObserver)
         }
-        
+
         // 添加新的观察者
         themeObserver = NotificationCenter.default.addObserver(
             forName: NSNotification.Name("FlareThemeDidChange"),
@@ -528,18 +528,18 @@ class ProfileNewRefreshViewController: UIViewController {
         ) { [weak self] _ in
             self?.applyCurrentTheme()
         }
-        
+
         // 立即应用当前主题
         applyCurrentTheme()
     }
-    
+
     // 新增方法: 应用当前主题到所有子视图
     private func applyCurrentTheme() {
-        guard let theme = self.theme else { return }
-        
+        guard let theme else { return }
+
         // 应用主题到视图控制器的主视图
         view.backgroundColor = UIColor(theme.primaryBackgroundColor)
-        
+
         // 应用主题到所有列表视图控制器
         for (_, listVC) in listViewControllers {
             if let timelineVC = listVC as? TimelineViewController {
@@ -548,7 +548,7 @@ class ProfileNewRefreshViewController: UIViewController {
                 mediaVC.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
             }
         }
-        
+
         // 如果需要应用到其他UI元素，也可以在这里添加
     }
 }
@@ -646,7 +646,7 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
                 mediaVC.configure(with: appSettings)
             }
             // 应用主题背景色
-            if let theme = self.theme {
+            if let theme {
                 mediaVC.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
             }
             // 保存到字典中
@@ -661,7 +661,7 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
                 timelineVC.updatePresenter(presenter)
             }
             // 应用主题背景色
-            if let theme = self.theme {
+            if let theme {
                 timelineVC.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
             }
             // 保存到字典中

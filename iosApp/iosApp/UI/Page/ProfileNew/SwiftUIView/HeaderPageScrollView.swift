@@ -79,7 +79,7 @@ struct HeaderPageScrollView<Header: View, Pages: View>: View {
                 .scrollTargetLayout()
             }
             .scrollTargetBehavior(.paging)
-            .ignoresSafeArea(edges: .top)  
+            .ignoresSafeArea(edges: .top)
             .scrollPosition(id: $activeTab)
             .scrollIndicators(.hidden)
             .scrollDisabled(mainScrollDisabled)
@@ -274,9 +274,7 @@ struct HeaderPageScrollView<Header: View, Pages: View>: View {
                 scrollPositions[index].scrollTo(y: to)
             }
         }
-
     }
-
 }
 
 private extension ScrollGeometry {

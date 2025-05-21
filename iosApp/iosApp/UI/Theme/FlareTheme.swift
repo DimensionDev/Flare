@@ -395,7 +395,7 @@ public final class FlareTheme {
         secondaryBackgroundColor = colorSet.secondaryBackgroundColor
         labelColor = colorSet.labelColor
         storedSet = name
-        
+
         notifyThemeChanged()
     }
 

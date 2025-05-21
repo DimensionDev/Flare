@@ -14,7 +14,7 @@ public struct FlareText: View {
         twitterTextProvider: TwitterTextProvider = SwiftTwitterTextProvider(),
         style: FlareMarkdownText.Style = FlareMarkdownText.Style(
             font: .systemFont(ofSize: 16),
-            textColor: UIColor.black,  
+            textColor: UIColor.black,
             linkColor: UIColor.black,
             mentionColor: UIColor.black,
             hashtagColor: UIColor.black,
@@ -48,16 +48,14 @@ public struct FlareText: View {
         let (attributedString, _, _) = FlareMarkdownText.attributeString(
             of: text,
             style: FlareMarkdownText.Style(
-            font: .systemFont(ofSize: 16),
-            textColor: UIColor(theme.labelColor),
-            linkColor: UIColor(theme.tintColor),
-            mentionColor: UIColor(theme.tintColor),
-            hashtagColor: UIColor(theme.tintColor),
-            cashtagColor: UIColor(theme.tintColor)
-        )
+                font: .systemFont(ofSize: 16),
+                textColor: UIColor(theme.labelColor),
+                linkColor: UIColor(theme.tintColor),
+                mentionColor: UIColor(theme.tintColor),
+                hashtagColor: UIColor(theme.tintColor),
+                cashtagColor: UIColor(theme.tintColor)
+            )
         )
         return NSAttributedString(attributedString)
     }
 }
-
- 

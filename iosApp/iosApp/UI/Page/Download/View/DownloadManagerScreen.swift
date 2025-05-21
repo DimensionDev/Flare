@@ -49,13 +49,13 @@ struct DownloadManagerScreen: View {
         }.listRowBackground(theme.primaryBackgroundColor)
             // .listStyle(.plain)
             .scrollContentBackground(.hidden)
-           .background(theme.secondaryBackgroundColor)
+            .background(theme.secondaryBackgroundColor)
             .navigationTitle("Download Manager")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     EditButton().foregroundColor(theme.tintColor)
-                } 
+                }
             }
 //        .toolbarBackground(FColors.Background.swiftUIPrimary, for: .navigationBar)
 //        .toolbarBackground(.visible, for: .navigationBar)

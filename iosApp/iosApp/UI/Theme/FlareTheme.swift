@@ -187,6 +187,7 @@ public final class FlareTheme {
         didSet {
             themeStorage.tintColor = tintColor
             computeContrastingTintColor()
+            notifyThemeChanged()
         }
     }
 
@@ -194,12 +195,14 @@ public final class FlareTheme {
         didSet {
             themeStorage.primaryBackgroundColor = primaryBackgroundColor
             computeContrastingTintColor()
+            notifyThemeChanged()
         }
     }
 
     public var secondaryBackgroundColor: Color {
         didSet {
             themeStorage.secondaryBackgroundColor = secondaryBackgroundColor
+            notifyThemeChanged()
         }
     }
 
@@ -207,6 +210,7 @@ public final class FlareTheme {
         didSet {
             themeStorage.labelColor = labelColor
             computeContrastingTintColor()
+            notifyThemeChanged()
         }
     }
 
@@ -391,5 +395,13 @@ public final class FlareTheme {
         secondaryBackgroundColor = colorSet.secondaryBackgroundColor
         labelColor = colorSet.labelColor
         storedSet = name
+        
+        notifyThemeChanged()
+    }
+
+    private func notifyThemeChanged() {
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: NSNotification.Name("FlareThemeDidChange"), object: self)
+        }
     }
 }

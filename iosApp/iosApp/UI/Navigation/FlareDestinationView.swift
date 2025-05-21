@@ -22,7 +22,7 @@ struct FlareDestinationView: View {
         Group {
             switch destination {
             case let .profile(accountType, userKey):
-                ProfileTabScreen(
+                ProfileTabScreenUikit(
                     accountType: accountType,
                     userKey: userKey,
                     toProfileMedia: { _ in

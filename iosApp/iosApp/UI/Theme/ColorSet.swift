@@ -86,10 +86,10 @@ public struct IceCubeNeonDark: ColorSet {
 public struct IceCubeNeonLight: ColorSet {
     public var name: ColorSetName = .iceCubeNeonLight
     public var scheme: ColorScheme = .light
-    public var tintColor: Color = .init(red: 213 / 255, green: 46 / 255, blue: 245 / 255)// 图标
-    public var primaryBackgroundColor: Color = .white                                     // 主背景色
-    public var secondaryBackgroundColor: Color = .init(hex: 0xF0F1F2)                     //  次背景色
-    public var labelColor: Color = .black                                                 // 文字
+    public var tintColor: Color = .init(red: 213 / 255, green: 46 / 255, blue: 245 / 255) // 图标
+    public var primaryBackgroundColor: Color = .white // 主背景色
+    public var secondaryBackgroundColor: Color = .init(hex: 0xF0F1F2) //  次背景色
+    public var labelColor: Color = .black // 文字
 
     public init() {}
 }

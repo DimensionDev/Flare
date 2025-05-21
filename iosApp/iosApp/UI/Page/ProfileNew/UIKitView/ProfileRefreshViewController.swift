@@ -13,7 +13,7 @@ extension JXPagingListContainerView: JXSegmentedViewListContainer {}
 
 class ProfileNewRefreshViewController: UIViewController {
     // - Properties
-
+    private var theme: FlareTheme?
     private var userInfo: ProfileUserInfo?
     private var state: ProfileNewState?
     private var selectedTab: Binding<Int>?
@@ -27,6 +27,7 @@ class ProfileNewRefreshViewController: UIViewController {
     private var tabStore: ProfileTabSettingStore?
     private var mediaPresenterWrapper: ProfileMediaPresenterWrapper?
     private var listViewControllers: [Int: JXPagingViewListViewDelegate] = [:]
+    private var themeObserver: NSObjectProtocol?
 
     // UI Components
     var pagingView: JXPagingView!
@@ -73,7 +74,8 @@ class ProfileNewRefreshViewController: UIViewController {
         accountType: AccountType,
         userKey: MicroBlogKey?,
         tabStore: ProfileTabSettingStore,
-        mediaPresenterWrapper: ProfileMediaPresenterWrapper
+        mediaPresenterWrapper: ProfileMediaPresenterWrapper,
+        theme: FlareTheme
     ) {
         self.userInfo = userInfo
         self.state = state
@@ -87,7 +89,11 @@ class ProfileNewRefreshViewController: UIViewController {
         self.userKey = userKey
         self.tabStore = tabStore
         self.mediaPresenterWrapper = mediaPresenterWrapper
-
+        self.theme = theme
+        
+        // 设置主题监听
+        setupThemeObserver()
+        
         // 根据是否是自己的 profile 来控制导航栏显示
         let isOwnProfile = userKey == nil
 
@@ -176,7 +182,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 新的配置代码
         if let userInfo {
-            userHeaderView?.configure(with: userInfo, state: state)
+            userHeaderView?.configure(with: userInfo, state: state,theme: self.theme)
         }
 
         // 配置分段控制器
@@ -458,6 +464,11 @@ class ProfileNewRefreshViewController: UIViewController {
 
     deinit {
         cleanupListViewControllers()
+        
+        // 移除主题观察者
+        if let themeObserver = themeObserver {
+            NotificationCenter.default.removeObserver(themeObserver)
+        }
     }
 
     private func cleanupListViewControllers() {
@@ -500,6 +511,45 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 执行返回操作
         navigationController?.popViewController(animated: true)
+    }
+
+    // 新增方法: 设置主题观察者
+    private func setupThemeObserver() {
+        // 移除旧的观察者（如果存在）
+        if let existingObserver = themeObserver {
+            NotificationCenter.default.removeObserver(existingObserver)
+        }
+        
+        // 添加新的观察者
+        themeObserver = NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("FlareThemeDidChange"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.applyCurrentTheme()
+        }
+        
+        // 立即应用当前主题
+        applyCurrentTheme()
+    }
+    
+    // 新增方法: 应用当前主题到所有子视图
+    private func applyCurrentTheme() {
+        guard let theme = self.theme else { return }
+        
+        // 应用主题到视图控制器的主视图
+        view.backgroundColor = UIColor(theme.primaryBackgroundColor)
+        
+        // 应用主题到所有列表视图控制器
+        for (_, listVC) in listViewControllers {
+            if let timelineVC = listVC as? TimelineViewController {
+                timelineVC.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
+            } else if let mediaVC = listVC as? ProfileMediaViewController {
+                mediaVC.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
+            }
+        }
+        
+        // 如果需要应用到其他UI元素，也可以在这里添加
     }
 }
 
@@ -595,6 +645,10 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
             if let appSettings {
                 mediaVC.configure(with: appSettings)
             }
+            // 应用主题背景色
+            if let theme = self.theme {
+                mediaVC.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
+            }
             // 保存到字典中
             listViewControllers[index] = mediaVC
             return mediaVC
@@ -605,6 +659,10 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
                 os_log("[📔][ProfileNewRefreshViewController] updatePresenter start", log: .default, type: .debug)
 
                 timelineVC.updatePresenter(presenter)
+            }
+            // 应用主题背景色
+            if let theme = self.theme {
+                timelineVC.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
             }
             // 保存到字典中
             listViewControllers[index] = timelineVC

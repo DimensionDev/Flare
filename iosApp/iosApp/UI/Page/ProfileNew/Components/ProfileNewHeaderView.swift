@@ -18,6 +18,7 @@ import UIKit
 // 头部视图
 class ProfileNewHeaderView: UIView {
     private var state: ProfileNewState?
+    private var theme: FlareTheme?
 
     // 添加关注按钮回调
     var onFollowClick: ((UiRelation) -> Void)?
@@ -207,10 +208,11 @@ class ProfileNewHeaderView: UIView {
         frame.height
     }
 
-    func configure(with userInfo: ProfileUserInfo, state: ProfileNewState? = nil) {
+    func configure(with userInfo: ProfileUserInfo, state: ProfileNewState? = nil, theme: FlareTheme? = nil) {
         self.userInfo = userInfo // 需要保存 userInfo 以便在点击时使用
         self.state = state
-
+        self.theme = theme
+        
         // 设置用户名
         nameLabel.text = userInfo.profile.name.markdown
 

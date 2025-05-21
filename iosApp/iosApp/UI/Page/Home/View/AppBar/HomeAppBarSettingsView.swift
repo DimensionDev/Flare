@@ -271,7 +271,7 @@ struct HomeAppBarSettingsView: View {
         .background(theme.secondaryBackgroundColor)
         .environment(\.editMode, .constant(.active))
         .sheet(isPresented: $isEditingTitle, onDismiss: {
-            editingList = nil 
+            editingList = nil
             editingListId = nil
             editingListTitle = ""
         }) {

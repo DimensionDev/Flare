@@ -9,7 +9,7 @@ struct SettingsUIScreen: View {
 
     var body: some View {
         ZStack {
-            ObservePresenter(presenter: presenter) { state in
+            ObservePresenter(presenter: presenter) { _ in
                 NavigationSplitView {
                     List(selection: $selectedDetail) {
                         // Section {
@@ -26,7 +26,7 @@ struct SettingsUIScreen: View {
                         //     )
                         //     .tag(SettingsDestination.account)
                         // }.listRowBackground(theme.primaryBackgroundColor)
-                        
+
                         Section {
                             Label {
                                 Text("settings_appearance_generic")
@@ -36,7 +36,6 @@ struct SettingsUIScreen: View {
                                     .foregroundColor(theme.tintColor)
                             }
                             .tag(SettingsDestination.appearance)
-                                
 
                             Label {
                                 Text("base settings")
@@ -55,7 +54,6 @@ struct SettingsUIScreen: View {
                                     .foregroundColor(theme.tintColor)
                             }
                             .tag(SettingsDestination.storage)
- 
 
                             Label {
                                 Text("Feature Requests")
@@ -75,7 +73,7 @@ struct SettingsUIScreen: View {
                             }
                             .tag(SettingsDestination.about)
                         }.listRowBackground(theme.primaryBackgroundColor)
-                    } 
+                    }
                     .background(theme.secondaryBackgroundColor)
                     .navigationTitle("settings_title")
                     .environment(\.defaultMinListRowHeight, 60)
@@ -93,7 +91,7 @@ struct SettingsUIScreen: View {
                         case .about:
                             AboutScreen()
                         case .wishlist:
-                            WishlistView()    
+                            WishlistView()
                         }
                     } else {
                         Text("settings_welcome")
@@ -108,7 +106,7 @@ struct SettingsUIScreen: View {
         .listRowBackground(theme.secondaryBackgroundColor)
     }
 }
- 
+
 public enum SettingsDestination: String, CaseIterable, Identifiable {
     // case account
     case appearance

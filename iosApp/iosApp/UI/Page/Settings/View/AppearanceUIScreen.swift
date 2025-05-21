@@ -15,7 +15,7 @@ struct AppearanceUIScreen: View {
                     StatusItemView(
                         data: success.data,
                         detailKey: nil
-                    ) 
+                    )
                 }
 
                 // Theme部分
@@ -234,7 +234,7 @@ struct AppearanceUIScreen: View {
     }
 
     private var themeSelectorButton: some View {
-        //router.navigate(to: .messages(accountType: accountType))
+        // router.navigate(to: .messages(accountType: accountType))
         NavigationLink(destination: ThemePreviewView()) {
             HStack {
                 Text("Theme")

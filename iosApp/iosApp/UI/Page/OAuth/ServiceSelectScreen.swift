@@ -34,7 +34,7 @@ struct ServiceSelectScreen: View {
                     Text(verbatim: NSLocalizedString("service_select_welcome_message", comment: "")
                         .replacingOccurrences(of: "\\n", with: "\n")
                         .replacingOccurrences(of: "Android", with: "iOS"))
-                        .font(.subheadline) 
+                        .font(.subheadline)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity, alignment: .center)
 
@@ -105,7 +105,7 @@ struct ServiceSelectScreen: View {
                                     InstancePlaceHolder()
                                 }
                             }.scrollContentBackground(.hidden)
-                            .listRowBackground(theme.primaryBackgroundColor)
+                                .listRowBackground(theme.primaryBackgroundColor)
                         } else if state.instances.isLoading {
                             ForEach(0 ... 5, id: \.self) { _ in // 减少占位符数量
                                 InstancePlaceHolder()
@@ -264,7 +264,7 @@ struct ServiceSelectScreen: View {
                             .frame(height: 80, alignment: .center)
                             .clipped()
                             .blur(radius: 3)
-                            .overlay( Rectangle() .fill(theme.primaryBackgroundColor.opacity(0.2)) )
+                            .overlay(Rectangle().fill(theme.primaryBackgroundColor.opacity(0.2)))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .frame(height: 80)
@@ -323,7 +323,7 @@ struct ServiceSelectScreen: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 8)
-         .background(theme.primaryBackgroundColor)
+        .background(theme.primaryBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 6))
         .frame(maxWidth: min(UIScreen.main.bounds.width - 32, 600))
         .frame(maxWidth: .infinity)

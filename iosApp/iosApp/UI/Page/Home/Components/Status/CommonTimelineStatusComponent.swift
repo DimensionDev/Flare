@@ -222,8 +222,8 @@ struct CommonTimelineStatusComponent: View {
                     },
                     label: {
                         Image(systemName: "exclamationmark.triangle")
-                        .foregroundColor(theme.labelColor)
-                        
+                            .foregroundColor(theme.labelColor)
+
                         Markdown(cwText.markdown)
                             .font(.body)
                             .markdownInlineImageProvider(.emoji)

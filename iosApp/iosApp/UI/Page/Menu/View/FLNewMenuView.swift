@@ -27,7 +27,7 @@ struct FLNewMenuView: View {
         VStack(spacing: 0) {
             userInfoView
                 .padding(.top, 40)
-                .padding(.horizontal, 20) 
+                .padding(.horizontal, 20)
 
             VStack(spacing: 16) {
                 // only show list button when user login
@@ -220,7 +220,7 @@ struct FLNewMenuView: View {
                                     .font(.headline)
                                 Text("\(user.handle)")
                                     .font(.caption)
-                                    // .foregroundColor(.gray)
+                                // .foregroundColor(.gray)
                             }
                         }
                     } else {
@@ -238,8 +238,8 @@ struct FLNewMenuView: View {
                         }
                     }
                 }
-            }  .padding(.top, 15) .padding(.leading, 15)
-            .buttonStyle(PlainButtonStyle())
+            }.padding(.top, 15).padding(.leading, 15)
+                .buttonStyle(PlainButtonStyle())
 
             // Followers/Following count
             if let profile = user as? UiProfile {
@@ -249,7 +249,7 @@ struct FLNewMenuView: View {
                             .font(.subheadline)
                         Text("fans_title")
                             .font(.subheadline)
-                            // .foregroundColor(.gray)
+                        // .foregroundColor(.gray)
                     }
 
                     HStack(spacing: 4) {
@@ -257,19 +257,18 @@ struct FLNewMenuView: View {
                             .font(.subheadline)
                         Text("following_title")
                             .font(.subheadline)
-                            // .foregroundColor(.gray)
+                        // .foregroundColor(.gray)
                     }
                 }
                 .padding(.top, 8)
                 .padding(.leading, 25)
-                
             }
 
             Divider()
                 .padding(.top, 8)
         }.foregroundColor(theme.labelColor)
-                .background( RoundedRectangle(cornerRadius: 10)
-                    .fill(theme.secondaryBackgroundColor))
+            .background(RoundedRectangle(cornerRadius: 10)
+                .fill(theme.secondaryBackgroundColor))
     }
 
     private var settingsButton: some View {
@@ -281,7 +280,7 @@ struct FLNewMenuView: View {
                 Text("settings_title")
                 Spacer()
             }
-            
+
             .padding()
             .background(Color(theme.secondaryBackgroundColor))
             .cornerRadius(10)

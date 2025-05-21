@@ -51,12 +51,11 @@ struct QuotedStatus: View {
                     mentionColor: UIColor(theme.tintColor),
                     hashtagColor: UIColor(theme.tintColor),
                     cashtagColor: UIColor(theme.tintColor)
-                )
-                )
-                    .onLinkTap { url in
-                        openURL(url)
-                    }
-                    .font(.system(size: 16))
+                ))
+                .onLinkTap { url in
+                    openURL(url)
+                }
+                .font(.system(size: 16))
 
                 if appSettings.appearanceSettings.autoTranslate {
                     TranslatableText(originalText: data.content.raw)

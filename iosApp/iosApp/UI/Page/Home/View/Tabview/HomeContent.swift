@@ -84,7 +84,7 @@ struct HomeContent: View {
                 // 个人资料 Tab (仅登录用户可见)
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: .profile) {
-                        FlareTabItem(router: router, tabType: .profile) { _ in ProfileTabScreen(accountType: accountType, userKey: nil, toProfileMedia: { _ in print("媒体标签已集成") }) }
+                        FlareTabItem(router: router, tabType: .profile) { _ in ProfileTabScreenUikit(accountType: accountType, userKey: nil, toProfileMedia: { _ in print("媒体标签已集成") }) }
                             .environmentObject(appState)
                     }
                 }

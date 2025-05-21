@@ -6,7 +6,7 @@ import os.log
 import shared
 import SwiftUI
 
-struct ProfileTabScreen: View {
+struct ProfileTabScreenUikit: View {
     // MicroBlogKey host+id
     let toProfileMedia: (MicroBlogKey) -> Void
     let accountType: AccountType
@@ -19,6 +19,7 @@ struct ProfileTabScreen: View {
     @StateObject private var tabStore: ProfileTabSettingStore
     @State private var selectedTab: Int = 0
     @State private var userInfo: ProfileUserInfo?
+    @Environment(FlareTheme.self) private var theme: FlareTheme
 
     // 横屏 竖屏
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -81,7 +82,8 @@ struct ProfileTabScreen: View {
                     accountType: accountType,
                     userKey: userKey,
                     tabStore: tabStore,
-                    mediaPresenterWrapper: mediaPresenterWrapper
+                    mediaPresenterWrapper: mediaPresenterWrapper,
+                    theme: theme
                 )
                 .ignoresSafeArea(edges: .top)
 //                .flareNavigationGesture(router: router)
@@ -105,7 +107,8 @@ struct ProfileTabScreen: View {
                     accountType: accountType,
                     userKey: userKey,
                     tabStore: tabStore,
-                    mediaPresenterWrapper: mediaPresenterWrapper
+                    mediaPresenterWrapper: mediaPresenterWrapper,
+                    theme: theme
                 )
                 .ignoresSafeArea(edges: .top)
 //                .flareNavigationGesture(router: router)
@@ -127,6 +130,7 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
     let userKey: MicroBlogKey?
     let tabStore: ProfileTabSettingStore
     let mediaPresenterWrapper: ProfileMediaPresenterWrapper
+    let theme: FlareTheme
 
     func makeUIViewController(context _: Context) -> ProfileNewRefreshViewController {
         let controller = ProfileNewRefreshViewController()
@@ -143,7 +147,8 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
             accountType: accountType,
             userKey: userKey,
             tabStore: tabStore,
-            mediaPresenterWrapper: mediaPresenterWrapper
+            mediaPresenterWrapper: mediaPresenterWrapper,
+            theme: theme
         )
         return controller
     }
@@ -164,7 +169,8 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
             accountType: accountType,
             userKey: userKey,
             tabStore: tabStore,
-            mediaPresenterWrapper: mediaPresenterWrapper
+            mediaPresenterWrapper: mediaPresenterWrapper,
+            theme: theme
         )
     }
 }

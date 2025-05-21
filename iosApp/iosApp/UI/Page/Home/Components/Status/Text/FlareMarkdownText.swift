@@ -98,7 +98,7 @@ public enum FlareMarkdownText {
         of originalText: String?,
         prependLinks _: [String: URL] = [:],
         embeds: [String] = [],
-        style: Style  ,
+        style: Style,
         previewLinkValidator: @escaping (String) -> Bool = { _ in false }
     ) -> (
         markdown: AttributedString,

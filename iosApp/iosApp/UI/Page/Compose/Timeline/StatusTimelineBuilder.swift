@@ -22,7 +22,14 @@ struct StatusTimelineComponent: View {
             }
         case let .success(success):
             ForEach(0 ..< success.itemCount, id: \.self) { index in
-                let data = success.peek(index: index)
+                let data: UiTimeline? = {
+                    do {
+                        return try success.peek(index: index)
+                    } catch {
+                        print("Error peeking timeline data: \(error)")
+                        return nil
+                    }
+                }()
                 VStack(spacing: 0) {
                     if let status = data {
                         StatusItemView(
@@ -35,7 +42,7 @@ struct StatusTimelineComponent: View {
                     }
                 }
                 .onAppear {
-                    success.get(index: index)
+                    // success.get(index: index)
                 }
                 .if(horizontalSizeClass != .compact) { view in
                     view.padding([.horizontal])
@@ -49,7 +56,6 @@ struct StatusItemView: View {
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var router: FlareRouter
     @Environment(FlareTheme.self) private var theme
-
 
     let data: UiTimeline
     let detailKey: MicroBlogKey?
@@ -98,7 +104,7 @@ struct StatusItemView: View {
                         },
                         isDetail: detailKey == data.statusKey,
                         enableTranslation: enableTranslation
-                    )  
+                    )
                 })
                 .buttonStyle(.plain)
             case let .user(data):

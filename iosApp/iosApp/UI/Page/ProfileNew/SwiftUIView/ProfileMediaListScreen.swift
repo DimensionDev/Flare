@@ -33,19 +33,22 @@ extension ProfileMediaState {
 
 // - ProfileMediaListScreen
 struct ProfileMediaListScreen: View {
-    @ObservedObject var tabStore: ProfileTabSettingStore
+//    @ObservedObject var tabStore: ProfileTabSettingStore
+    @State private var currentMediaPresenter: ProfileMediaPresenter?
+
     @State private var refreshing = false
     @State private var selectedMedia: (media: UiMedia, index: Int)?
     @State private var showingMediaPreview = false
     @Environment(\.appSettings) private var appSettings
     @Environment(\.dismiss) private var dismiss
 
-    init(accountType _: AccountType, userKey _: MicroBlogKey?, tabStore: ProfileTabSettingStore) {
-        self.tabStore = tabStore
+    //, tabStore: ProfileTabSettingStore
+    init(accountType _: AccountType, userKey _: MicroBlogKey?, currentMediaPresenter _: ProfileMediaPresenter) {
+//        self.tabStore = tabStore
     }
 
     var body: some View {
-        if let presenter = tabStore.currentMediaPresenter {
+        if let presenter = currentMediaPresenter {
             ObservePresenter<ProfileMediaState, ProfileMediaPresenter, AnyView>(presenter: presenter) { state in
                 AnyView(
                     WaterfallCollectionView(state: state) { item in

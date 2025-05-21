@@ -115,7 +115,7 @@ class ProfileNewHeaderView: UIView {
     }
 
     private func setupUI() {
-        backgroundColor = .systemBackground
+        //  backgroundColor = .systemBackground
 
         // Banner with tap gesture
         addSubview(bannerImageView)

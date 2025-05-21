@@ -299,8 +299,6 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 
         // 使用配置服务加载配置
         appBarItems = configService.loadAppBarConfig(for: user)
-
-        logger.debug("加载到\(self.appBarItems.count)个配置项")
     }
 
     // 保存AppBar配置
@@ -312,8 +310,6 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 
         // 使用配置服务保存配置
         configService.saveAppBarConfig(appBarItems, for: user)
-
-        logger.debug("保存\(self.appBarItems.count)个配置项")
     }
 
     // 强制从存储重新加载以确保一致性

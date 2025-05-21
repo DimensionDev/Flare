@@ -13,6 +13,7 @@ struct ServiceSelectScreen: View {
     @State private var blueskyInputViewModel = BlueskyInputViewModel()
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     let toHome: () -> Void
+    @Environment(FlareTheme.self) private var theme
 
     init(toHome: @escaping () -> Void) {
         presenter = .init(toHome: toHome)
@@ -33,8 +34,7 @@ struct ServiceSelectScreen: View {
                     Text(verbatim: NSLocalizedString("service_select_welcome_message", comment: "")
                         .replacingOccurrences(of: "\\n", with: "\n")
                         .replacingOccurrences(of: "Android", with: "iOS"))
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .font(.subheadline) 
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity, alignment: .center)
 
@@ -104,7 +104,8 @@ struct ServiceSelectScreen: View {
                                 } else {
                                     InstancePlaceHolder()
                                 }
-                            }
+                            }.scrollContentBackground(.hidden)
+                            .listRowBackground(theme.primaryBackgroundColor)
                         } else if state.instances.isLoading {
                             ForEach(0 ... 5, id: \.self) { _ in // 减少占位符数量
                                 InstancePlaceHolder()
@@ -116,6 +117,8 @@ struct ServiceSelectScreen: View {
                     .padding(.horizontal)
                 }
             }
+            .background(theme.secondaryBackgroundColor)
+            // .foregroundColor(theme.labelColor)
             .frame(maxHeight: .infinity, alignment: .top)
             .sheet(isPresented: $showXQT) {
                 XQTLoginScreen(toHome: {
@@ -261,10 +264,7 @@ struct ServiceSelectScreen: View {
                             .frame(height: 80, alignment: .center)
                             .clipped()
                             .blur(radius: 3)
-                            .overlay(
-                                Rectangle()
-                                    .fill(Color.black.opacity(0.2))
-                            )
+                            .overlay( Rectangle() .fill(theme.primaryBackgroundColor.opacity(0.2)) )
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .frame(height: 80)
@@ -291,15 +291,15 @@ struct ServiceSelectScreen: View {
                             .font(.headline)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color(.systemBackground))
+                            // .background(Color(.systemBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 6))
 
                         Text(instance.domain)
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            // .foregroundColor(.secondary)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color(.systemBackground))
+                            //  .background(Color(.systemBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 6))
                     }
                     .allowsHitTesting(false)
@@ -323,7 +323,7 @@ struct ServiceSelectScreen: View {
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 8)
-        .background(Color(.systemBackground))
+         .background(theme.primaryBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 6))
         .frame(maxWidth: min(UIScreen.main.bounds.width - 32, 600))
         .frame(maxWidth: .infinity)

@@ -8,6 +8,7 @@ struct FlareRootView: View {
     @StateObject private var composeManager = ComposeManager.shared
     @State private var presenter = ActiveAccountPresenter()
     @Environment(\.appSettings) private var appSettings
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         ObservePresenter<UserState, ActiveAccountPresenter, AnyView>(presenter: presenter) { userState in
@@ -30,6 +31,7 @@ struct FlareRootView: View {
                                        String(describing: ObjectIdentifier(router)))
 
                         HomeContent(accountType: accountType)
+                            .environment(theme).applyTheme(theme)
                             .environmentObject(appState)
                             .environmentObject(router)
                             .sheet(isPresented: $router.isSheetPresented) {
@@ -38,7 +40,7 @@ struct FlareRootView: View {
                                         destination: destination,
                                         router: router,
                                         appState: appState
-                                    )
+                                    ).environment(theme).applyTheme(theme)
                                 }
                             }
                             .fullScreenCover(isPresented: $router.isFullScreenPresented) {
@@ -47,6 +49,7 @@ struct FlareRootView: View {
                                         .modifier(SwipeToDismissModifier(onDismiss: {
                                             router.dismissFullScreenCover()
                                         }))
+                                        .environment(theme).applyTheme(theme)
                                         .environment(\.appSettings, appSettings)
                                 }
                             }
@@ -66,6 +69,7 @@ struct FlareRootView: View {
                                             accountType: composeAccountType,
                                             status: convertToSharedComposeStatus(composeManager.composeStatus)
                                         )
+                                        .environment(theme).applyTheme(theme)
                                         .environmentObject(router)
                                         .environmentObject(appState)
                                         .environment(\.appSettings, appSettings)
@@ -76,6 +80,8 @@ struct FlareRootView: View {
                         ProgressView()
                     }
                 }
+                .environment(theme)
+                .applyTheme(theme)
                 .navigationViewStyle(StackNavigationViewStyle())
                 .onAppear {
                     setupInitialState()

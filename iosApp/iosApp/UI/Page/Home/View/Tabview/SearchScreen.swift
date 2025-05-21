@@ -3,12 +3,11 @@ import SwiftUI
 
 struct SearchScreen: View {
     var searchText: String = ""
-//    private let onUserClicked: (UiUserV2) -> Void
     @State private var presenter: SearchPresenter
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @Environment(FlareTheme.self) private var theme
 
     init(accountType: AccountType, initialQuery: String) {
-//        self.onUserClicked = onUserClicked
         presenter = .init(accountType: accountType, initialQuery: initialQuery)
     }
 
@@ -25,9 +24,6 @@ struct SearchScreen: View {
                                         UserComponent(
                                             user: item,
                                             topEndContent: nil
-//                                            onUserClicked: {
-//                                                onUserClicked(item)
-//                                            }
                                         )
                                         .frame(width: 200, alignment: .leading)
                                         .onAppear {
@@ -40,7 +36,7 @@ struct SearchScreen: View {
                                 view.padding(.horizontal)
                             }
                         }
-                    }
+                    }.listRowBackground(theme.primaryBackgroundColor)
                 default:
                     EmptyView()
                         .listRowSeparator(.hidden)
@@ -49,8 +45,8 @@ struct SearchScreen: View {
                     StatusTimelineComponent(
                         data: state.status,
                         detailKey: nil
-                    )
-                }
+                    ).listRowBackground(theme.primaryBackgroundColor)
+                }.listRowBackground(theme.primaryBackgroundColor)
             }
         }
     }

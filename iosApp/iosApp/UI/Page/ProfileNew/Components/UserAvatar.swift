@@ -25,5 +25,5 @@ func userAvatarPlaceholder(size: CGFloat = 28) -> some View {
         .resizable()
         .aspectRatio(contentMode: .fit)
         .frame(width: size, height: size)
-        .foregroundColor(Color(Asset.Color.State.deactive.name))
+//        .foregroundColor(FColors.State.swiftUIDeactive)
 }

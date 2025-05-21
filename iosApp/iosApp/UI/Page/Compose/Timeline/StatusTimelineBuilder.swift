@@ -5,6 +5,8 @@ struct StatusTimelineComponent: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let data: PagingState<UiTimeline>
     let detailKey: MicroBlogKey?
+    @Environment(FlareTheme.self) private var theme
+
     var body: some View {
         switch onEnum(of: data) {
         case .empty: Text("timeline_load_empty", comment: "Timeline is empty")
@@ -46,6 +48,9 @@ struct StatusTimelineComponent: View {
 struct StatusItemView: View {
     @Environment(\.openURL) private var openURL
     @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareTheme.self) private var theme
+
+
     let data: UiTimeline
     let detailKey: MicroBlogKey?
     let enableTranslation: Bool
@@ -93,7 +98,7 @@ struct StatusItemView: View {
                         },
                         isDetail: detailKey == data.statusKey,
                         enableTranslation: enableTranslation
-                    )
+                    )  
                 })
                 .buttonStyle(.plain)
             case let .user(data):

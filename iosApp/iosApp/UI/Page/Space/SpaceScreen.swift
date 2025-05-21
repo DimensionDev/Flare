@@ -1,11 +1,12 @@
+import Kingfisher
 import shared
 import SwiftUI
-import Kingfisher
 
 struct SpaceScreen: View {
     let accountType: AccountType
     @EnvironmentObject private var router: FlareRouter
     @State private var presenter: PodcastListPresenter
+    @Environment(FlareTheme.self) private var theme
 
     init(accountType: AccountType) {
         self.accountType = accountType
@@ -15,8 +16,9 @@ struct SpaceScreen: View {
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
             feedsListView(state)
-            .navigationTitle("You follow the X Spaces")
-            .navigationBarTitleDisplayMode(.inline)
+                .navigationTitle("You follow the X Spaces")
+                .navigationBarTitleDisplayMode(.inline)
+                .listRowBackground(theme.primaryBackgroundColor)
         }
     }
 
@@ -26,7 +28,7 @@ struct SpaceScreen: View {
         case .loading:
             loadingView
         case let .success(successData):
-            if  successData.data.count == 0 {
+            if successData.data.count == 0 {
                 emptyView()
             } else {
                 podcastsListView(podcastsList: successData.data)
@@ -57,7 +59,6 @@ struct SpaceScreen: View {
             }
         }
         .listStyle(.plain)
-        
     }
 
     private func emptyView() -> some View {
@@ -104,7 +105,7 @@ private struct PodcastRowView: View {
                 if !podcast.ended {
                     LiveIndicatorView()
                 }
-               Spacer()
+                Spacer()
 //                Image(systemName: "ellipsis")
 //                    .foregroundColor(.secondary)
             }
@@ -120,7 +121,7 @@ private struct PodcastRowView: View {
 //            .font(.subheadline)
 //            .foregroundColor(.secondary)
 //            .padding(.bottom, 4)
-            
+
             HStack(spacing: 8) {
                 KFImage(URL(string: podcast.creator.avatar))
                     .resizable()
@@ -128,7 +129,7 @@ private struct PodcastRowView: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 24, height: 24)
                     .clipShape(Circle())
-                
+
                 Text(podcast.creator.name.raw)
                     .font(.subheadline.weight(.medium))
                     .lineLimit(1)

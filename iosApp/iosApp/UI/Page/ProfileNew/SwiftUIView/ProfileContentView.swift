@@ -21,12 +21,12 @@ struct ProfileContentView: View {
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Colors.Background.swiftUIPrimary)
+//                    .background(FColors.Background.swiftUIPrimary)
             }
         } else {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Colors.Background.swiftUIPrimary)
+//                .background(FColors.Background.swiftUIPrimary)
         }
     }
 }
@@ -44,7 +44,7 @@ private struct TimelineView: View {
                             data: timelineState.listState,
                             detailKey: nil
                         )
-                        .listRowBackground(Colors.Background.swiftUIPrimary)
+//                        .listRowBackground(FColors.Background.swiftUIPrimary)
                     }
                     .listStyle(.plain)
                     .scrollContentBackground(.hidden)
@@ -56,7 +56,7 @@ private struct TimelineView: View {
         } else {
             ProgressView()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Colors.Background.swiftUIPrimary)
+//                .background(FColors.Background.swiftUIPrimary)
         }
     }
 }

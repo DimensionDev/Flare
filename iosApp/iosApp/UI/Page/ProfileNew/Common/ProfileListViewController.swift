@@ -13,7 +13,7 @@ class ProfileNewListViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        tableView.backgroundColor = .systemBackground
+        //  tableView.backgroundColor = .systemBackground
         tableView.tableFooterView = UIView()
         tableView.dataSource = self
         tableView.delegate = self

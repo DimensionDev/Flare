@@ -1,6 +1,6 @@
 import SwiftUI
 
-//struct ComposeThemeView<Child>: View where Child: View {
+// struct ComposeThemeView<Child>: View where Child: View {
 //    @Environment(\.appSettings) private var appSettings
 //    let content: () -> Child
 //    var body: some View {
@@ -15,4 +15,4 @@ import SwiftUI
 //        }
 ////        .preferredColorScheme(schema)
 //    }
-//}
+// }

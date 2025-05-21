@@ -10,6 +10,7 @@ struct FlareTabItem<Content: View>: View {
     let content: (FlareRouter) -> Content
 
     @EnvironmentObject private var appState: FlareAppState
+    @Environment(FlareTheme.self) private var theme
 
     init(router: FlareRouter, tabType: FlareHomeTabs, @ViewBuilder content: @escaping (FlareRouter) -> Content) {
         self.router = router
@@ -23,11 +24,15 @@ struct FlareTabItem<Content: View>: View {
     }
 
     var body: some View {
+        //  Full Swipe pop Warpper
         NavigationStackWrapper(path: router.navigationPathFor(tabType)) {
             content(router)
                 .navigationDestination(for: FlareDestination.self) { destination in
                     FlareDestinationView(destination: destination, router: router, appState: appState)
                 }
+                .background(theme.primaryBackgroundColor)
+                .foregroundColor(theme.labelColor)
+            // .background(theme.primaryBackgroundColor.edgesIgnoringSafeArea(.all))
         }
         .onAppear {
             router.activeTab = tabType
@@ -72,6 +77,7 @@ struct FlareTabItem<Content: View>: View {
                 .systemAction
             }
         })
+
         .environmentObject(router)
     }
 }

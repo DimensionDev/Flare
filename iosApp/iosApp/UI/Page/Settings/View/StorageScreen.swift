@@ -7,6 +7,7 @@ struct StorageScreen: View {
     @State private var presenter = StoragePresenter()
     @State private var imageCacheSize: String = "Calculating..."
     @State private var isCleaningCache = false
+    @Environment(FlareTheme.self) private var theme
 
     // 下载相关状态
     @State private var downloadFilesInfo: String = "Calculating..."
@@ -73,6 +74,7 @@ struct StorageScreen: View {
                         HStack(alignment: .center) {
                             Image(systemName: "trash")
                                 .font(.title)
+                                .foregroundColor(theme.tintColor)
                             Spacer()
                                 .frame(width: 16)
                             VStack(alignment: .leading) {
@@ -81,7 +83,7 @@ struct StorageScreen: View {
                         }
                     }
                     .buttonStyle(.borderless)
-                }
+                }.listRowBackground(FlareTheme.shared.primaryBackgroundColor)
 
                 // Image Cache Section
                 Section("settings_storage_clear_image_cache") {
@@ -91,6 +93,7 @@ struct StorageScreen: View {
                         HStack {
                             Image(systemName: "photo.circle")
                                 .font(.title)
+                                .foregroundColor(theme.tintColor)
                             Spacer()
                                 .frame(width: 16)
                             VStack(alignment: .leading) {
@@ -104,7 +107,7 @@ struct StorageScreen: View {
                     }
                     .buttonStyle(.borderless)
                     .disabled(isCleaningCache)
-                }
+                }.listRowBackground(FlareTheme.shared.primaryBackgroundColor)
 
                 Section("Download Cache") {
                     Button(role: .destructive) {
@@ -113,6 +116,7 @@ struct StorageScreen: View {
                         HStack {
                             Image(systemName: "folder")
                                 .font(.title)
+                                .foregroundColor(theme.tintColor)
                             Spacer()
                                 .frame(width: 16)
                             VStack(alignment: .leading) {
@@ -129,8 +133,9 @@ struct StorageScreen: View {
                     }
                     .buttonStyle(.borderless)
                     .disabled(isCleaningDownloadFiles)
-                }
+                }.listRowBackground(FlareTheme.shared.primaryBackgroundColor)
             }
+            .background(theme.secondaryBackgroundColor)
             .navigationTitle("settings_storage_clear_database")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {

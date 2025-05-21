@@ -57,14 +57,14 @@ struct TabItemsViewSwiftUI: View {
                     ForEach(components.indices, id: \.self) { index in
                         let component = components[index]
                         if component.isEmoji {
-                            EmojiText(
-                                text: component.text,
-                                color: selection == item.key ? Color.textPrimary : Color.textSecondary
-                            )
+//                            EmojiText(
+//                                text: component.text,
+//                                color: selection == item.key ? FColors.Text.swiftUIPrimary  : FColors.Text.swiftUISecondary
+//                            )
                         } else {
                             Text(component.text)
                                 .font(.system(size: 14))
-                                .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
+//                                .foregroundColor(selection == item.key ? FColors.Text.swiftUIPrimary  : FColors.Text.swiftUISecondary)
                                 .fontWeight(selection == item.key ? .medium : .regular)
                         }
                     }
@@ -72,7 +72,7 @@ struct TabItemsViewSwiftUI: View {
             } else {
                 Text(title)
                     .font(.system(size: 14))
-                    .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
+//                    .foregroundColor(selection == item.key ? FColors.Text.swiftUIPrimary  : FColors.Text.swiftUISecondary)
                     .fontWeight(selection == item.key ? .medium : .regular)
             }
         case let .localized(key):
@@ -83,14 +83,14 @@ struct TabItemsViewSwiftUI: View {
                     ForEach(components.indices, id: \.self) { index in
                         let component = components[index]
                         if component.isEmoji {
-                            EmojiText(
-                                text: component.text,
-                                color: selection == item.key ? Color.textPrimary : Color.textSecondary
-                            )
+//                            EmojiText(
+//                                text: component.text,
+//                                color: selection == item.key ? FColors.Text.swiftUIPrimary  : FColors.Text.swiftUISecondary
+//                            )
                         } else {
                             Text(component.text)
                                 .font(.system(size: 14))
-                                .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
+//                                .foregroundColor(selection == item.key ? FColors.Text.swiftUIPrimary  : FColors.Text.swiftUISecondary)
                                 .fontWeight(selection == item.key ? .medium : .regular)
                         }
                     }
@@ -98,7 +98,7 @@ struct TabItemsViewSwiftUI: View {
             } else {
                 Text(title)
                     .font(.system(size: 14))
-                    .foregroundColor(selection == item.key ? Color.textPrimary : Color.textSecondary)
+//                    .foregroundColor(selection == item.key ? FColors.Text.swiftUIPrimary  : FColors.Text.swiftUISecondary)
                     .fontWeight(selection == item.key ? .medium : .regular)
             }
         }

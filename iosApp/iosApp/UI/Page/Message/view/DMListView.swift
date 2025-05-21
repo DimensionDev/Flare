@@ -4,6 +4,7 @@ import SwiftUI
 struct DMListView: View {
     let accountType: AccountType
     @State private var presenter: DMListPresenter
+    @Environment(FlareTheme.self) private var theme
 
     init(accountType: AccountType) {
         self.accountType = accountType
@@ -52,7 +53,10 @@ struct DMListView: View {
                     .padding()
             }
         }
-        .listStyle(PlainListStyle())
+        .background(theme.primaryBackgroundColor)
+        .scrollContentBackground(.hidden)
+        .listRowBackground(theme.primaryBackgroundColor)
+        .listStyle(.plain)
         .refreshable {
             try? await state.refreshSuspend()
         }

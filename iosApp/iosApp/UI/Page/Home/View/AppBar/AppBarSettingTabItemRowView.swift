@@ -35,27 +35,27 @@ struct TabItemRow: View {
             case let .material(iconName):
                 if let materialIcon = FLMaterialIcon(rawValue: iconName) {
                     materialIcon.icon
-                        .foregroundColor(Color.interactiveActive)
+//                        .foregroundColor(FColors.State.swiftUIActive)//.interactiveActive
                 }
             case let .mixed(icons):
                 if let firstIcon = icons.first,
                    let materialIcon = FLMaterialIcon(rawValue: firstIcon)
                 {
                     materialIcon.icon
-                        .foregroundColor(Color.interactiveActive)
+//                        .foregroundColor(FColors.State.swiftUIActive)//interactiveActive
                 }
             case .avatar:
                 Image(systemName: "person.circle")
-                    .foregroundColor(Color.interactiveActive)
+//                    .foregroundColor(FColors.State.swiftUIActive)
             }
 
             switch tab.metaData.title {
             case let .text(title):
                 Text(title)
-                    .foregroundColor(Color.textPrimary)
+//                    .foregroundColor(FColors.State.swiftUIActive)
             case let .localized(key):
                 Text(NSLocalizedString(key, comment: ""))
-                    .foregroundColor(Color.textPrimary)
+//                    .foregroundColor(FColors.Text.swiftUIPrimary)
             }
 
             Spacer()
@@ -80,7 +80,7 @@ struct TabItemRow: View {
                         }
                     }
                 ))
-                .tint(Color.interactiveActive)
+//                .tint(FColors.State.swiftUIActive)
                 .disabled(isProcessing)
             }
         }
@@ -143,7 +143,7 @@ struct ListTabItemRowRow: View {
             }
 
             Text(store.listTitles[listId] ?? currentTitle)
-                .foregroundColor(Color.textPrimary)
+                //     .foregroundColor(FColors.Text.swiftUIPrimary)
                 .lineLimit(1)
 
             Spacer()
@@ -184,7 +184,7 @@ struct ListTabItemRowRow: View {
                         }
                     }
                 ))
-                .tint(Color.interactiveActive)
+//                .tint(FColors.State.swiftUIActive)
                 .disabled(isProcessing)
                 .frame(width: 44)
             }

@@ -142,17 +142,6 @@ struct SVGIconView: View {
     }
 }
 
-private extension View {
-    @ViewBuilder
-    func modifyIf(_ condition: Bool, transform: (Self) -> some View) -> some View {
-        if condition {
-            transform(self)
-        } else {
-            self
-        }
-    }
-}
-
 // 用于背景的扩展版本
 struct ServiceIconBackground: View {
     let url: String

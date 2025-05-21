@@ -1,5 +1,6 @@
 import SwiftUI
 
+// Full Swipe pop Warpper
 struct NavigationStackWrapper<Content: View>: View {
     @Environment(\.appSettings) private var appSettings
     @Binding var navigationPath: NavigationPath
@@ -12,7 +13,7 @@ struct NavigationStackWrapper<Content: View>: View {
         return gesture
     }()
 
-    init(path: Binding<NavigationPath>, @ViewBuilder content: @escaping () -> Content) { // Modified init
+    init(path: Binding<NavigationPath>, @ViewBuilder content: @escaping () -> Content) {
         _navigationPath = path
         self.content = content
     }
@@ -21,7 +22,7 @@ struct NavigationStackWrapper<Content: View>: View {
         NavigationStack(path: $navigationPath) {
             content()
                 .background {
-                    AttachGestureView(gesture: $swipeGesture, navigationDepth: navigationPath.count) // Use path count
+                    AttachGestureView(gesture: $swipeGesture, navigationDepth: navigationPath.count)
                 }
         }
         .enabledFullSwipePop(appSettings.appearanceSettings.enableFullSwipePop)

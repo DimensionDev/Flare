@@ -8,6 +8,7 @@ struct DiscoverTabScreen: View {
     @State private var presenter: DiscoverPresenter
     @State var searchText = ""
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @Environment(FlareTheme.self) private var theme
 
     init(accountType: AccountType, onUserClicked: @escaping (UiUserV2) -> Void) {
         self.onUserClicked = onUserClicked
@@ -46,7 +47,7 @@ struct DiscoverTabScreen: View {
                                         view.padding(.horizontal)
                                     }
                                 }
-                            }
+                            }.listRowBackground(theme.primaryBackgroundColor)
                         default:
                             EmptyView()
                                 .listRowSeparator(.hidden)
@@ -55,8 +56,8 @@ struct DiscoverTabScreen: View {
                             StatusTimelineComponent(
                                 data: searchState.status,
                                 detailKey: nil
-                            )
-                        }
+                            ).listRowBackground(theme.primaryBackgroundColor)
+                        }.listRowBackground(theme.primaryBackgroundColor)
                     } else {
                         switch onEnum(of: state.users) {
                         case let .success(data):
@@ -84,8 +85,8 @@ struct DiscoverTabScreen: View {
                                         view.padding(.horizontal)
                                     }
                                 }
-                            }
-                            .listRowSeparator(.hidden)
+                            }.listRowBackground(theme.primaryBackgroundColor)
+                                .listRowSeparator(.hidden)
                         default:
                             EmptyView()
                                 .listRowSeparator(.hidden)
@@ -99,11 +100,6 @@ struct DiscoverTabScreen: View {
                                             if let item = data.peek(index: index) {
                                                 Text(item.hashtag)
                                                     .padding()
-                                                #if os(iOS)
-                                                    .background(Color(UIColor.secondarySystemBackground))
-                                                #else
-                                                    .background(Color(NSColor.windowBackgroundColor))
-                                                #endif
                                                     .clipShape(RoundedRectangle(cornerRadius: 8))
                                                     .onTapGesture {
                                                         searchText = "#" + item.hashtag
@@ -119,8 +115,8 @@ struct DiscoverTabScreen: View {
                                         view.padding(.horizontal)
                                     }
                                 }
-                            }
-                            .listRowSeparator(.hidden)
+                            }.listRowBackground(theme.primaryBackgroundColor)
+
                         default:
                             EmptyView()
                                 .listRowSeparator(.hidden)
@@ -130,8 +126,8 @@ struct DiscoverTabScreen: View {
                                 StatusTimelineComponent(
                                     data: state.status,
                                     detailKey: nil
-                                )
-                            }
+                                ).listRowBackground(theme.primaryBackgroundColor)
+                            }.listRowBackground(theme.primaryBackgroundColor)
                         }
                     }
                 }

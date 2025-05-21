@@ -30,12 +30,20 @@ internal fun ComposeViewController(
     onOpenLink: (String) -> Unit,
     darkMode: Boolean,
     secondary: Boolean = false,
+    backgroundColor: Color,
     content: @Composable () -> Unit,
 ): UIViewController =
     ComposeUIViewController {
         val colorScheme = if (darkMode) iOSDarkColorScheme(secondary) else iOSLightColorScheme(secondary)
+
+        val finalColorScheme =
+            colorScheme.copy(
+                background = backgroundColor,
+                surface = backgroundColor,
+            )
+
         MaterialTheme(
-            colorScheme = colorScheme,
+            colorScheme = finalColorScheme,
         ) {
             CompositionLocalProvider(
                 LocalUriHandler provides
@@ -46,7 +54,7 @@ internal fun ComposeViewController(
                             }
                         }
                     },
-                LocalIndication provides remember { IOSIndication(color = colorScheme.onBackground) },
+                LocalIndication provides remember { IOSIndication(color = finalColorScheme.onBackground) },
             ) {
                 Scaffold {
                     content.invoke()

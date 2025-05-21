@@ -40,7 +40,7 @@ class ProfileNewRefreshViewController: UIViewController {
     // Navigation Components
     private var navigationBar: UINavigationBar = {
         let nav = UINavigationBar()
-        nav.backgroundColor = .systemBackground
+        //  nav.backgroundColor = .systemBackground
         return nav
     }()
 
@@ -157,7 +157,7 @@ class ProfileNewRefreshViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .systemBackground
+        // view.backgroundColor = .systemBackground
 
         // 设置导航栏
         setupNavigationBar()
@@ -538,7 +538,7 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
     func viewForPinSectionHeader(in _: JXPagingView) -> UIView {
         // 创建一个容器视图，包含安全区域的空白和 segmentedView
         let containerView = UIView()
-        containerView.backgroundColor = .systemBackground
+        //  containerView.backgroundColor = .systemBackground
         containerView.isUserInteractionEnabled = true
 
         // 获取安全区域高度

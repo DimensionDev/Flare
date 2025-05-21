@@ -10,6 +10,7 @@ struct HomeTabScreenSwiftUI: View {
     @State private var selectedTabKey: String = ""
     @State private var showAppbarSettings = false
     @State private var showLogin = false
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         VStack(spacing: 0) {

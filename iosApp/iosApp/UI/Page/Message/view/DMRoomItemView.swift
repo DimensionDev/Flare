@@ -89,7 +89,7 @@ struct DMRoomItemView: View {
                             Text("\(room.users.count)")
                                 .font(.caption2)
                                 .padding(4)
-                                .background(Color(UIColor.systemBackground))
+                                // .background(Color(UIColor.systemBackground))
                                 .clipShape(Circle())
                                 .offset(x: 20, y: 20)
                         }

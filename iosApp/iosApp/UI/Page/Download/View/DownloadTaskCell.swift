@@ -6,6 +6,7 @@ struct DownloadTaskCell: View {
     let task: Tiercel.DownloadTask
     let onTapAction: () -> Void
     let onShareAction: () -> Void
+    @Environment(FlareTheme.self) private var theme
 
     @State private var progress: Double = 0
     @State private var statusText: String = ""
@@ -17,7 +18,6 @@ struct DownloadTaskCell: View {
                 KFImage(url)
                     .placeholder {
                         Rectangle()
-                            .foregroundColor(Colors.Background.swiftUISecondary)
                     }
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -26,12 +26,11 @@ struct DownloadTaskCell: View {
                     .overlay(
                         task.status != .succeeded ?
                             Rectangle()
-                            .foregroundColor(Color.black.opacity(0.3))
+                            .foregroundColor(theme.tintColor)
                             .clipShape(RoundedRectangle(cornerRadius: 8)) : nil
                     )
             } else {
                 Rectangle()
-                    .foregroundColor(Colors.Background.swiftUISecondary)
                     .frame(width: 60, height: 60)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             }
@@ -39,22 +38,22 @@ struct DownloadTaskCell: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(fileName)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(Colors.Text.swiftUIPrimary)
+//                    .foregroundColor(FColors.Text.swiftUIPrimary)
                     .lineLimit(1)
 
                 ProgressView(value: progress)
-                    .progressViewStyle(LinearProgressViewStyle(tint: Colors.State.swiftUIActive))
+//                    .progressViewStyle(LinearProgressViewStyle(tint: FColors.State.swiftUIActive))
                     .frame(height: 2)
 
                 Text(statusText)
                     .font(.system(size: 14))
-                    .foregroundColor(Colors.Text.swiftUISecondary)
+//                    .foregroundColor(FColors.Text.swiftUISecondary)
                     .lineLimit(1)
 
                 if task.status == .running || task.status == .suspended || task.status == .succeeded {
                     Text("\(formattedDownloadSize) / \(formattedTotalSize)")
                         .font(.system(size: 12))
-                        .foregroundColor(Colors.Text.swiftUITertiary)
+//                        .foregroundColor(FColors.Text.swiftUITertiary)
                         .lineLimit(1)
                 }
             }
@@ -67,27 +66,31 @@ struct DownloadTaskCell: View {
                         Image(systemName: "arrow.down.circle")
                             .resizable()
                             .frame(width: 24, height: 24)
-                            .foregroundColor(Colors.State.swiftUIActive)
+                            .foregroundColor(theme.tintColor)
+//                            .foregroundColor(FColors.State.swiftUIActive)
                     }
                 case .running:
                     Button(action: onTapAction) {
                         Image(systemName: "pause.circle")
                             .resizable()
                             .frame(width: 24, height: 24)
-                            .foregroundColor(Colors.State.swiftUIActive)
+                            .foregroundColor(theme.tintColor)
+                        //                     .foregroundColor(FColors.State.swiftUIActive)
                     }
                 case .suspended:
                     Button(action: onTapAction) {
                         Image(systemName: "play.circle")
                             .resizable()
                             .frame(width: 24, height: 24)
-                            .foregroundColor(Colors.State.swiftUIActive)
+                            .foregroundColor(theme.tintColor)
+                        //                .foregroundColor(FColors.State.swiftUIActive)
                     }
                 case .succeeded:
                     Button(action: onShareAction) {
                         Image(systemName: "square.and.arrow.up")
                             .font(.system(size: 20))
-                            .foregroundColor(Colors.State.swiftUIActive)
+                            .foregroundColor(theme.tintColor)
+                        //                .foregroundColor(FColors.State.swiftUIActive)
                     }
                 case .removed:
                     EmptyView()

@@ -4,7 +4,8 @@ import SwiftUI
 
 struct InstanceScreen: View {
     private let expectedHost: String
- 
+    @Environment(FlareTheme.self) private var theme
+
     init(host: String) {
         expectedHost = host
     }
@@ -12,15 +13,17 @@ struct InstanceScreen: View {
     var body: some View {
         contentView
             .navigationTitle(expectedHost)
+            .navigationBarTitleDisplayMode(.inline)
+            .scrollContentBackground(.hidden)
+            .background(theme.secondaryBackgroundColor)
     }
 
     @ViewBuilder
     private var contentView: some View {
         if UserManager.shared.instanceMetadata == nil {
             ProgressView()
-        
         } else if let metadata = UserManager.shared.instanceMetadata {
-            InstanceDetailView(metadata: metadata)
+            InstanceDetailView(metadata: metadata).background(theme.secondaryBackgroundColor).foregroundColor(theme.labelColor)
         } else {
             VStack {
                 Text("Instance information is not available.", bundle: .main)
@@ -37,6 +40,7 @@ struct InstanceScreen: View {
 
 private struct InstanceDetailView: View {
     let metadata: UiInstanceMetadata
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         Form {
@@ -80,7 +84,7 @@ private struct InstanceDetailView: View {
                 LabeledContent("Users", value: "\(metadata.instance.usersCount)")
             } header: {
                 Text("Instance Information", bundle: .main)
-            }
+            }.listRowBackground(theme.primaryBackgroundColor)
 
             Section {
                 LabeledContent("Max Post Characters", value: "\(metadata.configuration.statuses.maxCharacters)")
@@ -102,7 +106,7 @@ private struct InstanceDetailView: View {
                 LabeledContent("Registration Enabled", value: metadata.configuration.registration.enabled ? "Yes" : "No")
             } header: {
                 Text("Server Configuration", bundle: .main)
-            }
+            }.listRowBackground(theme.primaryBackgroundColor)
 
             if let rules = metadata.rules as? [String: String], !rules.isEmpty {
                 Section {
@@ -114,7 +118,7 @@ private struct InstanceDetailView: View {
                     }
                 } header: {
                     Text("Instance Rules", bundle: .main)
-                }
+                }.listRowBackground(theme.primaryBackgroundColor)
             }
         }
     }

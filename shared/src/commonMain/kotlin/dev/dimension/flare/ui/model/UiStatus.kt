@@ -93,7 +93,7 @@ public fun createSampleStatus(user: UiUserV2): UiTimeline =
                         .apply {
                             appendChild(
                                 TextNode(
-                                    "Sample content for ${user.name.raw} on ${user.key.host}",
+                                    "Sample content for ${user.name.raw} on ${user.key.host} 😊 \n https://github.com/dimensiondev/flare \n @realMaskNetwork #flare ",
                                 ),
                             )
                         }.toUi(),

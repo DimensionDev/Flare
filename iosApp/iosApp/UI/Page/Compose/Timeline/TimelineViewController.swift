@@ -28,7 +28,7 @@ class TimelineViewController: UIViewController {
 
     private func setupUI() {
         // 设置主view的背景色
-        view.backgroundColor = .systemBackground
+        // view.backgroundColor = .systemBackground
 
         // 配置 tableView
         tableView = UITableView()

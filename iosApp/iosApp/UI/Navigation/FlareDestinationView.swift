@@ -10,6 +10,7 @@ struct FlareDestinationView: View {
 
     @ObservedObject var appState: FlareAppState
     @Environment(\.appSettings) private var appSettings
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         let _ = os_log("[FlareDestinationView] Rendering destination: %{public}@, router: %{public}@, depth: %{public}d",
@@ -29,6 +30,7 @@ struct FlareDestinationView: View {
                     }
                 )
                 .environmentObject(router)
+                .environment(theme).applyTheme(theme)
 
             case let .profileWithNameAndHost(accountType, userName, host):
                 ProfileWithUserNameScreen(
@@ -40,7 +42,7 @@ struct FlareDestinationView: View {
 //                        print("查看用户媒体: \(userKey.description)")
                     }
                 )
-                .environmentObject(router)
+                .environmentObject(router).environment(theme).applyTheme(theme)
 
             case let .statusDetail(accountType, statusKey):
                 StatusDetailScreen(accountType: accountType, statusKey: statusKey, router: router)
@@ -68,6 +70,7 @@ struct FlareDestinationView: View {
 
             case let .feeds(accountType):
                 AllFeedsView(accountType: accountType)
+                    .environment(theme).applyTheme(theme)
                     .navigationTitle("Feeds")
                     .navigationBarTitleDisplayMode(.inline)
 
@@ -151,6 +154,8 @@ struct FlareDestinationView: View {
         }
         .environmentObject(router)
         .environmentObject(appState)
+        .background(theme.primaryBackgroundColor)
+        .foregroundColor(theme.labelColor)
     }
 }
 
@@ -259,7 +264,7 @@ struct CallbackView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color(UIColor.systemBackground))
+        //  .background(Color(UIColor.systemBackground))
     }
 }
 
@@ -357,7 +362,7 @@ struct DeleteStatusView: View {
             }
             .frame(maxWidth: 300)
             .padding()
-            .background(Color(UIColor.systemBackground))
+            // .background(Color(UIColor.systemBackground))
             .cornerRadius(16)
             .shadow(radius: 10)
         }

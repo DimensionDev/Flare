@@ -4,6 +4,7 @@ import SwiftUI
 struct AccountsScreen: View {
     @State private var presenter = AccountsPresenter()
     @State var showServiceSelectSheet = false
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
@@ -60,7 +61,7 @@ struct AccountsScreen: View {
                             case .none:
                                 EmptyView()
                             }
-                        }
+                        }.scrollContentBackground(.hidden).listRowBackground(theme.primaryBackgroundColor)
                     } else {
                         Text("no_accounts")
                     }
@@ -70,6 +71,7 @@ struct AccountsScreen: View {
                     Text("loading")
                 }
             }
+            .listStyle(.insetGrouped)
             .navigationTitle("settings_accounts_title")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -89,6 +91,7 @@ struct AccountsScreen: View {
                 .frame(minWidth: 600, minHeight: 400)
                 #endif
             })
-        }
+        }.scrollContentBackground(.hidden)
+            .background(theme.secondaryBackgroundColor)
     }
 }

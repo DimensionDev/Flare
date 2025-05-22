@@ -121,7 +121,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 配置头部视图
         if let userInfo {
-            userHeaderView?.configure(with: userInfo, state: state)
+            userHeaderView?.configure(with: userInfo, state: state, theme: theme)
 
             // 设置关注按钮回调
             userHeaderView?.onFollowClick = { [weak self] relation in
@@ -200,7 +200,7 @@ class ProfileNewRefreshViewController: UIViewController {
         segmentedView.delegate = self
 
         let indicator = JXSegmentedIndicatorLineView()
-        indicator.indicatorColor = .systemBlue
+        indicator.indicatorColor = theme != nil ? UIColor(theme!.tintColor) : .systemBlue
         indicator.indicatorWidth = 30
         segmentedView.indicators = [indicator]
 
@@ -539,6 +539,19 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 应用主题到视图控制器的主视图
         view.backgroundColor = UIColor(theme.primaryBackgroundColor)
+        
+        // 应用主题到 headerView
+        userHeaderView?.theme = theme
+        userHeaderView?.applyTheme()
+        
+        // 应用主题到 segmentedView
+        segmentedDataSource.titleSelectedColor = UIColor(theme.labelColor)
+        if let indicators = segmentedView.indicators as? [JXSegmentedIndicatorLineView] {
+            for indicator in indicators {
+                indicator.indicatorColor = UIColor(theme.tintColor)
+            }
+        }
+        segmentedView.backgroundColor = UIColor(theme.primaryBackgroundColor)
 
         // 应用主题到所有列表视图控制器
         for (_, listVC) in listViewControllers {
@@ -601,7 +614,7 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
         // 创建一个按钮容器，确保它在 segmentedView 之上
         let buttonContainer = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 50 + safeAreaTop)) // 增加容器宽度
         buttonContainer.isUserInteractionEnabled = true
-        buttonContainer.backgroundColor = .clear
+        // buttonContainer.backgroundColor = .clear
 
         // 设置返回按钮的位置和大小 - 增加点击区域
         segmentedBackButton.frame = CGRect(x: 8, y: safeAreaTop + 5, width: 44, height: 44) // 增加按钮区域
@@ -614,7 +627,9 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
         containerView.addSubview(buttonContainer)
 
         os_log("[📔][ProfileRefreshViewController]设置返回按钮: frame=%{public}@", log: .default, type: .debug, NSCoder.string(for: segmentedBackButton.frame))
-
+        if let theme {
+            containerView.backgroundColor = UIColor(theme.primaryBackgroundColor)
+        }
         return containerView
     }
 

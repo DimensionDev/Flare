@@ -365,20 +365,20 @@ public final class FlareTheme {
 
     public static var allColorSet: [ColorSet] {
         [
-            IceCubeDark(),
-            IceCubeLight(),
-            IceCubeNeonDark(),
-            IceCubeNeonLight(),
-            DesertDark(),
-            DesertLight(),
-            NemesisDark(),
-            NemesisLight(),
-            MediumLight(),
-            MediumDark(),
-            ConstellationLight(),
-            ConstellationDark(),
-            ThreadsLight(),
-            ThreadsDark(),
+            ThemeDark(),
+            ThemeLight(),
+            ThemeNeonDark(),
+            ThemeNeonLight(),
+            ThemeDesertDark(),
+            ThemeDesertLight(),
+            ThemeNemesisDark(),
+            ThemeNemesisLight(),
+            ThemeMediumLight(),
+            ThemeMediumDark(),
+            ThemeConstellationLight(),
+            ThemeConstellationDark(),
+            ThemeThreadsLight(),
+            ThemeThreadsDark(),
         ]
     }
 
@@ -388,7 +388,7 @@ public final class FlareTheme {
     }
 
     public func setColor(withName name: ColorSetName) {
-        let colorSet = FlareTheme.allColorSet.filter { $0.name == name }.first ?? IceCubeDark()
+        let colorSet = FlareTheme.allColorSet.filter { $0.name == name }.first ?? ThemeDark()
         selectedScheme = colorSet.scheme
         tintColor = colorSet.tintColor
         primaryBackgroundColor = colorSet.primaryBackgroundColor

@@ -174,7 +174,7 @@ compose-placeholder-foundation = { group = "io.github.fornewid", name = "placeho
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
 kermit = { group = "co.touchlab", name = "kermit", version = "2.0.5" }
-kotlin-codepoints-deluxe = { group = "de.cketti.unicode", name = "kotlin-codepoints-deluxe", version = "0.9.0" }
+kotlin-codepoints-deluxe = { group = "de.cketti.unicode", name = "kotlin-codepoints-deluxe", version = "0.10.0" }
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }

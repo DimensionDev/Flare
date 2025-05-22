@@ -4,6 +4,7 @@ import SwiftUI
 
 struct UserAvatar: View {
     @Environment(\.appSettings) private var appSettings
+
     let data: String
     var size: CGFloat = 48
 
@@ -20,10 +21,15 @@ struct UserAvatar: View {
     }
 }
 
-func userAvatarPlaceholder(size: CGFloat = 28) -> some View {
-    Image(systemName: "person.circle.fill")
-        .resizable()
-        .aspectRatio(contentMode: .fit)
-        .frame(width: size, height: size)
-//        .foregroundColor(FColors.State.swiftUIDeactive)
+struct UserAvatarPlaceholder: View { 
+    @Environment(FlareTheme.self) private var theme
+    
+    var size: CGFloat = 28
+    var body: some View {
+        Image(systemName: "person.circle.fill")
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: size, height: size)
+            .foregroundColor(theme.tintColor)
+    }
 }

@@ -266,7 +266,7 @@ extension HomeTabController: JXPagingViewDelegate {
         } else {
             // 设置默认头像
             let hostingController = UIHostingController(rootView:
-                userAvatarPlaceholder(size: avatarButtonSize)
+                UserAvatarPlaceholder(size: avatarButtonSize)
                     .clipShape(Circle())
             )
             hostingController.view.frame = avatarButton.bounds

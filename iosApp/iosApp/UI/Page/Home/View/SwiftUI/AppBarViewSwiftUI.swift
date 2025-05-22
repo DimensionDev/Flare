@@ -18,7 +18,7 @@ struct AppBarViewSwiftUI: View {
                         .clipShape(Circle())
                         .padding(.trailing, 6)
                 } else {
-                    userAvatarPlaceholder(size: 29)
+                    UserAvatarPlaceholder(size: 29)
                         .clipShape(Circle())
                         .padding(.trailing, 6)
                 }

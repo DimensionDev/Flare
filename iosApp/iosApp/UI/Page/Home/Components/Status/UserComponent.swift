@@ -77,7 +77,7 @@ struct AccountItem: View {
             EmptyView()
         case .loading:
             HStack {
-                userAvatarPlaceholder(size: 48)
+                UserAvatarPlaceholder(size: 48)
                 VStack(alignment: .leading) {
                     Markdown("loading")
                         .lineLimit(1)

@@ -28,7 +28,7 @@ public final class FlareTheme {
         @AppStorage(ThemeKey.label.rawValue) public var labelColor: Color = .black
         @AppStorage(ThemeKey.avatarPosition2.rawValue) var avatarPosition: AvatarPosition = .leading
         @AppStorage(ThemeKey.avatarShape2.rawValue) var avatarShape: AvatarShape = .circle
-        @AppStorage(ThemeKey.selectedSet.rawValue) var storedSet: ColorSetName = .iceCubeDark
+        @AppStorage(ThemeKey.selectedSet.rawValue) var storedSet: ColorSetName = .themeDark
         @AppStorage(ThemeKey.statusActionsDisplay.rawValue) public var statusActionsDisplay:
             StatusActionsDisplay = .full
         @AppStorage(ThemeKey.statusDisplayStyle.rawValue) public var statusDisplayStyle:
@@ -316,12 +316,12 @@ public final class FlareTheme {
         }
     }
 
-    public var selectedSet: ColorSetName = .iceCubeDark
+    public var selectedSet: ColorSetName = .themeDark
 
     public static let shared = FlareTheme()
 
     public func restoreDefault() {
-        applySet(set: themeStorage.selectedScheme == .dark ? .iceCubeDark : .iceCubeLight)
+        applySet(set: themeStorage.selectedScheme == .dark ? .themeDark : .themeLight)
         isThemePreviouslySet = true
         avatarPosition = .leading
         avatarShape = .circle

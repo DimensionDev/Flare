@@ -225,7 +225,7 @@ struct FLNewMenuView: View {
                         }
                     } else {
                         HStack(spacing: 12) {
-                            userAvatarPlaceholder(size: 60)
+                            UserAvatarPlaceholder(size: 60)
                                 .clipShape(Circle())
                                 .offset(x: 0)
 

@@ -706,6 +706,9 @@
         }
       }
     },
+    "%lld users" : {
+
+    },
     "%lld users, %lld statuses will be deleted" : {
       "extractionState" : "manual",
       "localizations" : {

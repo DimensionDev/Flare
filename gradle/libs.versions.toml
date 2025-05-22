@@ -130,7 +130,7 @@ coil3-network = { group = "io.coil-kt.coil3", name = "coil-network-core", versio
 apng = { group = "com.github.penfeizhou.android.animation", name = "apng", version.ref = "apng-android" }
 awebp = { group = "com.github.penfeizhou.android.animation", name = "awebp", version.ref = "apng-android" }
 vectordrawable-animated = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version = "1.2.0" }
-zoomable-image = { group = "me.saket.telephoto", name = "zoomable-image-coil3", version = "0.15.1" }
+zoomable-image = { group = "me.saket.telephoto", name = "zoomable-image-coil3", version = "0.16.0" }
 zoomable = { group = "me.saket.telephoto", name = "zoomable", version = "0.15.1" }
 
 ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }

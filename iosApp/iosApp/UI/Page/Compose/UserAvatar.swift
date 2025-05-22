@@ -21,9 +21,9 @@ struct UserAvatar: View {
     }
 }
 
-struct UserAvatarPlaceholder: View { 
+struct UserAvatarPlaceholder: View {
     @Environment(FlareTheme.self) private var theme
-    
+
     var size: CGFloat = 28
     var body: some View {
         Image(systemName: "person.circle.fill")

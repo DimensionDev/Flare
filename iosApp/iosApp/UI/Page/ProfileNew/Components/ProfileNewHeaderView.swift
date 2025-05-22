@@ -101,7 +101,7 @@ class ProfileNewHeaderView: UIView {
     var onFansCountTap: (() -> Void)?
     var onAvatarTap: (() -> Void)?
     var onBannerTap: (() -> Void)?
-    
+
     // 添加主题观察者
     private var themeObserver: NSObjectProtocol?
 
@@ -118,7 +118,7 @@ class ProfileNewHeaderView: UIView {
     required init?(coder _: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     deinit {
         // 移除主题观察者
         if let themeObserver {
@@ -177,10 +177,10 @@ class ProfileNewHeaderView: UIView {
 
         // Description Label
         addSubview(descriptionLabel)
-        
+
         descriptionLabel.frame = CGRect(x: 16, y: followsCountLabel.frame.maxY + 10, width: frame.width - 32, height: 0)
     }
-    
+
     // 设置主题观察者
     private func setupThemeObserver() {
         // 移除旧的观察者（如果存在）
@@ -196,22 +196,22 @@ class ProfileNewHeaderView: UIView {
         ) { [weak self] _ in
             self?.applyTheme()
         }
-        
+
         // 立即应用当前主题
         applyTheme()
     }
-    
+
     // 应用主题方法
     func applyTheme() {
-        guard let theme = self.theme else { return }
-        
+        guard let theme else { return }
+
         // 应用背景色
         backgroundColor = UIColor(theme.primaryBackgroundColor)
-        
+
         // 可以在这里应用其他与主题相关的样式
         nameLabel.textColor = UIColor(theme.labelColor)
         descriptionLabel.textColor = UIColor(theme.labelColor)
-        descriptionLabel.backgroundColor = UIColor(theme.primaryBackgroundColor)// 貌似没用
+        descriptionLabel.backgroundColor = UIColor(theme.primaryBackgroundColor) // 貌似没用
         // 应用按钮颜色
         followButton.backgroundColor = UIColor(theme.tintColor)
     }
@@ -259,7 +259,7 @@ class ProfileNewHeaderView: UIView {
         self.userInfo = userInfo // 需要保存 userInfo 以便在点击时使用
         self.state = state
         self.theme = theme
-        
+
         // 应用主题
         if theme != nil {
             applyTheme()
@@ -354,7 +354,7 @@ class ProfileNewHeaderView: UIView {
         // 设置描述文本
         if let description = userInfo.profile.description_?.markdown, !description.isEmpty {
             let descriptionView = UIHostingController(
-                rootView: Markdown(description) 
+                rootView: Markdown(description)
                     .markdownInlineImageProvider(.emoji)
             )
             if let theme {

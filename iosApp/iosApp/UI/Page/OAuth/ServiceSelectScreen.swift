@@ -263,9 +263,9 @@ struct ServiceSelectScreen: View {
                             // .frame(width: geometry.size.width)
                             .frame(height: 80, alignment: .center)
                             .clipped()
-                        // .blur(radius: 3)
-                        // .overlay(Rectangle().fill(theme.primaryBackgroundColor.opacity(0.2)))
-                          .clipShape(RoundedRectangle(cornerRadius: 12))
+                            // .blur(radius: 3)
+                            // .overlay(Rectangle().fill(theme.primaryBackgroundColor.opacity(0.2)))
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .frame(height: 80)
                 } else {

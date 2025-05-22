@@ -373,9 +373,6 @@
         }
       }
     },
-    "#flare, #mastodon" : {
-
-    },
     "%@" : {
       "localizations" : {
         "cs" : {
@@ -4869,6 +4866,9 @@
           }
         }
       }
+    },
+    "Auto Theme " : {
+
     },
     "Auto Translate" : {
       "localizations" : {
@@ -93787,7 +93787,6 @@
     },
     "settings_appearance_theme_color" : {
       "comment" : "",
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -104272,9 +104271,6 @@
         }
       }
     },
-    "System Color" : {
-
-    },
     "System Offline Translation" : {
       "localizations" : {
         "ar" : {
@@ -105451,15 +105447,6 @@
       }
     },
     "Theme" : {
-
-    },
-    "Theme Preview" : {
-
-    },
-    "Theme Preview Content Text Example" : {
-
-    },
-    "Theme will follow system appearance" : {
 
     },
     "There are currently no live or recorded Spaces to show." : {

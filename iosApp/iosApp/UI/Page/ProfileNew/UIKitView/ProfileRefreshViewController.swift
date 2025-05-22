@@ -539,11 +539,11 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 应用主题到视图控制器的主视图
         view.backgroundColor = UIColor(theme.primaryBackgroundColor)
-        
+
         // 应用主题到 headerView
         userHeaderView?.theme = theme
         userHeaderView?.applyTheme()
-        
+
         // 应用主题到 segmentedView
         segmentedDataSource.titleSelectedColor = UIColor(theme.labelColor)
         if let indicators = segmentedView.indicators as? [JXSegmentedIndicatorLineView] {

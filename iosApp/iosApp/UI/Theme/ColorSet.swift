@@ -38,8 +38,8 @@ public enum ColorSetName: String, Sendable {
     case themeMediumDark = "Medium - Dark"
     case themeConstellationLight = "Constellation - Light"
     case themeConstellationDark = "Constellation - Dark"
-    case themeThreadsLight = "Threads - Light"
-    case themeThreadsDark = "Threads - Dark"
+    case threadsLight = "Threads - Light"
+    case threadsDark = "Threads - Dark"
 }
 
 public struct ColorSetCouple: Identifiable, Sendable {
@@ -184,7 +184,7 @@ public struct ConstellationLight: ColorSet {
 }
 
 public struct ThreadsDark: ColorSet {
-    public var name: ColorSetName = .themeThreadsDark
+    public var name: ColorSetName = .threadsDark
     public var scheme: ColorScheme = .dark
     public var tintColor: Color = .init(hex: 0x0095F6)
     public var primaryBackgroundColor: Color = .init(hex: 0x101010)
@@ -195,7 +195,7 @@ public struct ThreadsDark: ColorSet {
 }
 
 public struct ThreadsLight: ColorSet {
-    public var name: ColorSetName = .themeThreadsLight
+    public var name: ColorSetName = .threadsLight
     public var scheme: ColorScheme = .light
     public var tintColor: Color = .init(hex: 0x0095F6)
     public var primaryBackgroundColor: Color = .init(hex: 0xFFFFFF)

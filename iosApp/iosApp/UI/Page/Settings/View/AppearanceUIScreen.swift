@@ -19,7 +19,7 @@ struct AppearanceUIScreen: View {
                 }
 
                 // Theme部分
-                themeSection
+                themeAutoSection
 
                 // Font部分
                 fontSection
@@ -150,9 +150,31 @@ struct AppearanceUIScreen: View {
         }
     }
 
-    private var themeSection: some View {
+    private var themeSelectorButton: some View {
+        Picker(selection: .init(get: {
+            theme.selectedSet.rawValue
+        }, set: { value in
+            let themeSet = ColorSetName(rawValue: value) ?? ColorSetName.themeLight
+            theme.selectedSet = themeSet
+
+            theme.followSystemColorScheme = false
+
+            theme.applySet(set: themeSet)
+        }), content: {
+            ForEach(availableColorsSets, id: \.id) { colorSet in
+                Text(colorSet.light.name.rawValue)
+                    .tag(colorSet.light.name.rawValue)
+                Text(colorSet.dark.name.rawValue)
+                    .tag(colorSet.dark.name.rawValue)
+            }
+        }, label: {
+            Text("settings_appearance_theme_color")
+        })
+    }
+
+    private var themeAutoSection: some View {
         Section {
-            Toggle("System Color", isOn: Binding(
+            Toggle("Auto Theme ", isOn: Binding(
                 get: { theme.followSystemColorScheme },
                 set: { theme.followSystemColorScheme = $0 }
             ))
@@ -174,9 +196,9 @@ struct AppearanceUIScreen: View {
         } header: {
             Text("Theme")
         } footer: {
-            if theme.followSystemColorScheme {
-                Text("Theme will follow system appearance")
-            }
+            // if theme.followSystemColorScheme {
+            //     Text("Theme will follow system appearance")
+            // }
         }.listRowBackground(theme.primaryBackgroundColor)
     }
 
@@ -233,16 +255,16 @@ struct AppearanceUIScreen: View {
         }.listRowBackground(theme.primaryBackgroundColor)
     }
 
-    private var themeSelectorButton: some View {
-        // router.navigate(to: .messages(accountType: accountType))
-        NavigationLink(destination: ThemePreviewView()) {
-            HStack {
-                Text("Theme")
-                Spacer()
-                Text(theme.selectedSet.rawValue)
-            }
-        }
-    }
+    // private var themeSelectorButton: some View {
+    //     // router.navigate(to: .messages(accountType: accountType))
+    //     NavigationLink(destination: ThemePreviewView()) {
+    //         HStack {
+    //             Text("Theme")
+    //             Spacer()
+    //             Text(theme.selectedSet.rawValue)
+    //         }
+    //     }
+    // }
 }
 
 // 辅助类，用于存储设置值

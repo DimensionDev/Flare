@@ -3,6 +3,7 @@ import SwiftUI
 
 struct DMRoomItemView: View {
     let room: UiDMRoom
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         HStack(spacing: 12) {

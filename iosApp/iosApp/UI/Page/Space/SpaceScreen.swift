@@ -56,7 +56,7 @@ struct SpaceScreen: View {
                     Text("Invalid item at index \\(index)")
                         .foregroundColor(.red)
                 }
-            }
+            }.listRowBackground(theme.primaryBackgroundColor)
         }
         .listStyle(.plain)
     }
@@ -65,12 +65,12 @@ struct SpaceScreen: View {
         VStack(spacing: 16) {
             Image(systemName: "mic.slash.fill")
                 .font(.largeTitle)
-                .foregroundColor(.secondary)
+            // .foregroundColor(.secondary)
             Text("No Spaces Available")
                 .font(.headline)
             Text("There are currently no live or recorded Spaces to show.")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+            // .foregroundColor(.gray)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -98,6 +98,7 @@ private struct PodcastRowView: View {
     let podcast: UiPodcast
     let accountType: AccountType
     @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -136,7 +137,7 @@ private struct PodcastRowView: View {
             }
         }
         .padding()
-        .background(Color.teal.opacity(0.1))
+        .background(theme.secondaryBackgroundColor)
         .cornerRadius(12)
         .contentShape(Rectangle())
         .onTapGesture {

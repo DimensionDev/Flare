@@ -57,7 +57,7 @@ struct DiscoverTabScreen: View {
                                 data: searchState.status,
                                 detailKey: nil
                             ).listRowBackground(theme.primaryBackgroundColor)
-                        }.listRowBackground(theme.primaryBackgroundColor)
+                        }
                     } else {
                         switch onEnum(of: state.users) {
                         case let .success(data):
@@ -74,10 +74,12 @@ struct DiscoverTabScreen: View {
 //                                                        onUserClicked(item)
 //                                                    }
                                                 )
+                                                .background(theme.secondaryBackgroundColor)
                                                 .frame(width: 200, alignment: .leading)
                                                 .onAppear {
                                                     data.get(index: index)
                                                 }
+                                                .clipShape(RoundedRectangle(cornerRadius: 8))
                                             }
                                         }
                                     }
@@ -100,11 +102,12 @@ struct DiscoverTabScreen: View {
                                             if let item = data.peek(index: index) {
                                                 Text(item.hashtag)
                                                     .padding()
-                                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                                    .clipShape(RoundedRectangle(cornerRadius: 13))
                                                     .onTapGesture {
                                                         searchText = "#" + item.hashtag
                                                         searchState.search(new: "#" + item.hashtag)
                                                     }
+                                                    .background(theme.secondaryBackgroundColor)
                                                     .onAppear {
                                                         data.get(index: index)
                                                     }
@@ -126,11 +129,13 @@ struct DiscoverTabScreen: View {
                                 StatusTimelineComponent(
                                     data: state.status,
                                     detailKey: nil
-                                ).listRowBackground(theme.primaryBackgroundColor)
-                            }.listRowBackground(theme.primaryBackgroundColor)
+                                )
+                                .listRowBackground(theme.primaryBackgroundColor)
+                            }
                         }
                     }
                 }
+
                 .searchable(text: $searchText)
                 .onSubmit(of: .search) {
                     searchState.search(new: searchText)

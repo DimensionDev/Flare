@@ -386,6 +386,9 @@ class ProfileNewHeaderView: UIView {
 
                 // 创建一个容器视图来包含所有内容
                 let containerView = UIView()
+                if let theme {
+                    stackView.backgroundColor = UIColor(theme.primaryBackgroundColor)
+                }
                 containerView.addSubview(stackView)
                 stackView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -403,6 +406,9 @@ class ProfileNewHeaderView: UIView {
                         icon: Asset.Image.Attributes.location.image,
                         text: locationValue.markdown
                     )
+                    if let theme {
+                        locationView.backgroundColor = UIColor(theme.primaryBackgroundColor)
+                    }
                     stackView.addArrangedSubview(locationView)
                 }
 
@@ -412,6 +418,9 @@ class ProfileNewHeaderView: UIView {
                         icon: Asset.Image.Attributes.globe.image,
                         text: urlValue.markdown
                     )
+                    if let theme {
+                        urlView.backgroundColor = UIColor(theme.primaryBackgroundColor)
+                    }
                     stackView.addArrangedSubview(urlView)
                 }
 
@@ -537,7 +546,6 @@ class ProfileNewHeaderView: UIView {
             .labelStyle(CompactLabelStyle())
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(Color(.systemGray6))
             .cornerRadius(6)
             .onLongPressGesture {
                 // 复制文本到剪贴板

@@ -14,7 +14,7 @@ struct DMConversationView: View {
     let title: String
     @State private var presenter: DMConversationPresenter
     @State private var refreshTrigger = false
-
+    @Environment(FlareTheme.self) private var theme
     init(accountType: AccountType, roomKey: MicroBlogKey, title: String) {
         self.accountType = accountType
         self.roomKey = roomKey
@@ -29,6 +29,7 @@ struct DMConversationView: View {
         ObservePresenter(presenter: presenter) { anyState in
             if let state = anyState as? DMConversationState {
                 conversationContent(state: state)
+                    .background(theme.primaryBackgroundColor)
             } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

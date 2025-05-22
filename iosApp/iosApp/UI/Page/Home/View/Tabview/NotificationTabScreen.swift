@@ -55,14 +55,16 @@ struct NotificationTabScreen: View {
                                         .tag(item)
                                 }
                             }
-                        }
-                        .pickerStyle(.segmented)
+                        }.background(theme.secondaryBackgroundColor)
+                            .pickerStyle(.segmented)
                     }
                 }
             }
             //  .listStyle(.plain)
             .navigationTitle("home_tab_notifications_title")
             .listRowBackground(theme.primaryBackgroundColor)
-        }.navigationBarTitleDisplayMode(.inline).scrollContentBackground(.hidden).background(theme.primaryBackgroundColor)
+        }.navigationBarTitleDisplayMode(.inline)
+            .scrollContentBackground(.hidden)
+            .background(theme.primaryBackgroundColor)
     }
 }

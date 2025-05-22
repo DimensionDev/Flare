@@ -8,6 +8,7 @@ struct AppBarViewSwiftUI: View {
     let accountType: AccountType
     let onAvatarTap: () -> Void
     let onSettingsTap: () -> Void
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         HStack(spacing: 0) {
@@ -36,7 +37,7 @@ struct AppBarViewSwiftUI: View {
             if !(accountType is AccountTypeGuest) {
                 Button(action: onSettingsTap) {
                     Image(systemName: "line.3.horizontal")
-                    //    .foregroundColor(FColors.Text.swiftUISecondary)
+                        .foregroundColor(theme.tintColor)
                 }
                 .frame(width: 44)
                 .padding(.trailing, 8)

@@ -9,6 +9,7 @@ struct ListMembersView: View {
     @State private var lastKnownItemCount: Int = 0
     private let title: String
     private let accountType: AccountType
+    @Environment(FlareTheme.self) private var theme
 
     init(accountType: AccountType, listId: String, title: String = "List Members") {
         presenter = .init(accountType: accountType, listId: listId)
@@ -38,7 +39,7 @@ struct ListMembersView: View {
                                     }
                             }
                         }
-                    }
+                    }.listRowBackground(theme.primaryBackgroundColor)
                 case .empty:
                     emptyStateView
                 case let .error(errorData):
@@ -52,6 +53,8 @@ struct ListMembersView: View {
                     emptyStateView
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(theme.secondaryBackgroundColor)
             .navigationTitle(title)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -112,13 +115,13 @@ struct ListMembersView: View {
     }
 
     // single member row
-    private func memberRow(index: Int, member: UiUserV2) -> some View {
+    private func memberRow(index _: Int, member: UiUserV2) -> some View {
         Button(action: {}) {
             HStack {
-                Text("#\(index + 1)")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.secondary)
-                    .frame(width: 40, alignment: .leading)
+                // Text("#\(index + 1)")
+                //     .font(.system(size: 14, weight: .bold))
+                //     .foregroundColor(.secondary)
+                //     .frame(width: 40, alignment: .leading)
 
                 UserAvatar(data: member.avatar, size: 48)
 

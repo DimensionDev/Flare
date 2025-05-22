@@ -13,7 +13,7 @@ extension JXPagingListContainerView: JXSegmentedViewListContainer {}
 
 class ProfileNewRefreshViewController: UIViewController {
     // - Properties
-
+    private var theme: FlareTheme?
     private var userInfo: ProfileUserInfo?
     private var state: ProfileNewState?
     private var selectedTab: Binding<Int>?
@@ -27,6 +27,7 @@ class ProfileNewRefreshViewController: UIViewController {
     private var tabStore: ProfileTabSettingStore?
     private var mediaPresenterWrapper: ProfileMediaPresenterWrapper?
     private var listViewControllers: [Int: JXPagingViewListViewDelegate] = [:]
+    private var themeObserver: NSObjectProtocol?
 
     // UI Components
     var pagingView: JXPagingView!
@@ -40,7 +41,7 @@ class ProfileNewRefreshViewController: UIViewController {
     // Navigation Components
     private var navigationBar: UINavigationBar = {
         let nav = UINavigationBar()
-        nav.backgroundColor = .systemBackground
+        //  nav.backgroundColor = .systemBackground
         return nav
     }()
 
@@ -73,7 +74,8 @@ class ProfileNewRefreshViewController: UIViewController {
         accountType: AccountType,
         userKey: MicroBlogKey?,
         tabStore: ProfileTabSettingStore,
-        mediaPresenterWrapper: ProfileMediaPresenterWrapper
+        mediaPresenterWrapper: ProfileMediaPresenterWrapper,
+        theme: FlareTheme
     ) {
         self.userInfo = userInfo
         self.state = state
@@ -87,6 +89,10 @@ class ProfileNewRefreshViewController: UIViewController {
         self.userKey = userKey
         self.tabStore = tabStore
         self.mediaPresenterWrapper = mediaPresenterWrapper
+        self.theme = theme
+
+        // 设置主题监听
+        setupThemeObserver()
 
         // 根据是否是自己的 profile 来控制导航栏显示
         let isOwnProfile = userKey == nil
@@ -115,7 +121,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 配置头部视图
         if let userInfo {
-            userHeaderView?.configure(with: userInfo, state: state)
+            userHeaderView?.configure(with: userInfo, state: state, theme: theme)
 
             // 设置关注按钮回调
             userHeaderView?.onFollowClick = { [weak self] relation in
@@ -157,7 +163,7 @@ class ProfileNewRefreshViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = .systemBackground
+        // view.backgroundColor = .systemBackground
 
         // 设置导航栏
         setupNavigationBar()
@@ -176,7 +182,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 新的配置代码
         if let userInfo {
-            userHeaderView?.configure(with: userInfo, state: state)
+            userHeaderView?.configure(with: userInfo, state: state, theme: theme)
         }
 
         // 配置分段控制器
@@ -194,7 +200,7 @@ class ProfileNewRefreshViewController: UIViewController {
         segmentedView.delegate = self
 
         let indicator = JXSegmentedIndicatorLineView()
-        indicator.indicatorColor = .systemBlue
+        indicator.indicatorColor = theme != nil ? UIColor(theme!.tintColor) : .systemBlue
         indicator.indicatorWidth = 30
         segmentedView.indicators = [indicator]
 
@@ -458,6 +464,11 @@ class ProfileNewRefreshViewController: UIViewController {
 
     deinit {
         cleanupListViewControllers()
+
+        // 移除主题观察者
+        if let themeObserver {
+            NotificationCenter.default.removeObserver(themeObserver)
+        }
     }
 
     private func cleanupListViewControllers() {
@@ -501,6 +512,58 @@ class ProfileNewRefreshViewController: UIViewController {
         // 执行返回操作
         navigationController?.popViewController(animated: true)
     }
+
+    // 新增方法: 设置主题观察者
+    private func setupThemeObserver() {
+        // 移除旧的观察者（如果存在）
+        if let existingObserver = themeObserver {
+            NotificationCenter.default.removeObserver(existingObserver)
+        }
+
+        // 添加新的观察者
+        themeObserver = NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("FlareThemeDidChange"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.applyCurrentTheme()
+        }
+
+        // 立即应用当前主题
+        applyCurrentTheme()
+    }
+
+    // 新增方法: 应用当前主题到所有子视图
+    private func applyCurrentTheme() {
+        guard let theme else { return }
+
+        // 应用主题到视图控制器的主视图
+        view.backgroundColor = UIColor(theme.primaryBackgroundColor)
+
+        // 应用主题到 headerView
+        userHeaderView?.theme = theme
+        userHeaderView?.applyTheme()
+
+        // 应用主题到 segmentedView
+        segmentedDataSource.titleSelectedColor = UIColor(theme.labelColor)
+        if let indicators = segmentedView.indicators as? [JXSegmentedIndicatorLineView] {
+            for indicator in indicators {
+                indicator.indicatorColor = UIColor(theme.tintColor)
+            }
+        }
+        segmentedView.backgroundColor = UIColor(theme.primaryBackgroundColor)
+
+        // 应用主题到所有列表视图控制器
+        for (_, listVC) in listViewControllers {
+            if let timelineVC = listVC as? TimelineViewController {
+                timelineVC.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
+            } else if let mediaVC = listVC as? ProfileMediaViewController {
+                mediaVC.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
+            }
+        }
+
+        // 如果需要应用到其他UI元素，也可以在这里添加
+    }
 }
 
 // - UIGestureRecognizerDelegate
@@ -538,7 +601,7 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
     func viewForPinSectionHeader(in _: JXPagingView) -> UIView {
         // 创建一个容器视图，包含安全区域的空白和 segmentedView
         let containerView = UIView()
-        containerView.backgroundColor = .systemBackground
+        //  containerView.backgroundColor = .systemBackground
         containerView.isUserInteractionEnabled = true
 
         // 获取安全区域高度
@@ -551,7 +614,7 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
         // 创建一个按钮容器，确保它在 segmentedView 之上
         let buttonContainer = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 50 + safeAreaTop)) // 增加容器宽度
         buttonContainer.isUserInteractionEnabled = true
-        buttonContainer.backgroundColor = .clear
+        // buttonContainer.backgroundColor = .clear
 
         // 设置返回按钮的位置和大小 - 增加点击区域
         segmentedBackButton.frame = CGRect(x: 8, y: safeAreaTop + 5, width: 44, height: 44) // 增加按钮区域
@@ -564,7 +627,9 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
         containerView.addSubview(buttonContainer)
 
         os_log("[📔][ProfileRefreshViewController]设置返回按钮: frame=%{public}@", log: .default, type: .debug, NSCoder.string(for: segmentedBackButton.frame))
-
+        if let theme {
+            containerView.backgroundColor = UIColor(theme.primaryBackgroundColor)
+        }
         return containerView
     }
 
@@ -595,6 +660,10 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
             if let appSettings {
                 mediaVC.configure(with: appSettings)
             }
+            // 应用主题背景色
+            if let theme {
+                mediaVC.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
+            }
             // 保存到字典中
             listViewControllers[index] = mediaVC
             return mediaVC
@@ -605,6 +674,10 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
                 os_log("[📔][ProfileNewRefreshViewController] updatePresenter start", log: .default, type: .debug)
 
                 timelineVC.updatePresenter(presenter)
+            }
+            // 应用主题背景色
+            if let theme {
+                timelineVC.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
             }
             // 保存到字典中
             listViewControllers[index] = timelineVC

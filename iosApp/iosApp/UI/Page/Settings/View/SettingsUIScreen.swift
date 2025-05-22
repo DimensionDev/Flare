@@ -5,53 +5,83 @@ struct SettingsUIScreen: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State private var selectedDetail: SettingsDestination?
     @State private var presenter = ActiveAccountPresenter()
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
-        ObservePresenter(presenter: presenter) { state in
-            FlareTheme {
+        ZStack {
+            ObservePresenter(presenter: presenter) { _ in
                 NavigationSplitView {
                     List(selection: $selectedDetail) {
+                        // Section {
+                        //     AccountItem(
+                        //         userState: state.user,
+                        //         supportingContent: { _ in
+                        //             AnyView(
+                        //                 Text("settings_accounts_title")
+                        //                     .lineLimit(1)
+                        //                     .font(.subheadline)
+                        //                     .opacity(0.5)
+                        //             )
+                        //         }
+                        //     )
+                        //     .tag(SettingsDestination.account)
+                        // }.listRowBackground(theme.primaryBackgroundColor)
+
                         Section {
-                            AccountItem(
-                                userState: state.user,
-                                supportingContent: { _ in
-                                    AnyView(
-                                        Text("settings_accounts_title")
-                                            .lineLimit(1)
-                                            .font(.subheadline)
-                                            .opacity(0.5)
-                                    )
-                                }
-                            )
-                            .tag(SettingsDestination.account)
-                        }
-                        Section {
-                            Label("settings_appearance_generic", systemImage: "paintpalette")
-                                .tag(SettingsDestination.appearance)
+                            Label {
+                                Text("settings_appearance_generic")
+                                    .foregroundColor(theme.labelColor)
+                            } icon: {
+                                Image(systemName: "paintpalette")
+                                    .foregroundColor(theme.tintColor)
+                            }
+                            .tag(SettingsDestination.appearance)
 
-                            Label("base settings", systemImage: "gear")
-                                .tag(SettingsDestination.other)
+                            Label {
+                                Text("base settings")
+                                    .foregroundColor(theme.labelColor)
+                            } icon: {
+                                Image(systemName: "gear")
+                                    .foregroundColor(theme.tintColor)
+                            }
+                            .tag(SettingsDestination.other)
 
-                            Label("settings_storage_title", systemImage: "externaldrive")
-                                .tag(SettingsDestination.storage)
+                            Label {
+                                Text("settings_storage_title")
+                                    .foregroundColor(theme.labelColor)
+                            } icon: {
+                                Image(systemName: "externaldrive")
+                                    .foregroundColor(theme.tintColor)
+                            }
+                            .tag(SettingsDestination.storage)
 
-                            // Label("Server Info", systemImage: "server.rack")
-                            //     .tag(SettingsDestination.serverInfo)
+                            Label {
+                                Text("Feature Requests")
+                                    .foregroundColor(theme.labelColor)
+                            } icon: {
+                                Image(systemName: "list.bullet.rectangle.portrait")
+                                    .foregroundColor(theme.tintColor)
+                            }
+                            .tag(SettingsDestination.wishlist)
 
-                            Label("Feature Requests", systemImage: "list.bullet.rectangle.portrait")
-                                .tag(SettingsDestination.wishlist)
-
-                            Label("settings_about_subtitle", systemImage: "exclamationmark.circle")
-                                .tag(SettingsDestination.about)
-                        }
+                            Label {
+                                Text("settings_about_subtitle")
+                                    .foregroundColor(theme.labelColor)
+                            } icon: {
+                                Image(systemName: "exclamationmark.circle")
+                                    .foregroundColor(theme.tintColor)
+                            }
+                            .tag(SettingsDestination.about)
+                        }.listRowBackground(theme.primaryBackgroundColor)
                     }
+                    .background(theme.secondaryBackgroundColor)
                     .navigationTitle("settings_title")
                     .environment(\.defaultMinListRowHeight, 60)
                 } detail: {
                     if let detail = selectedDetail {
                         switch detail {
-                        case .account:
-                            AccountsScreen()
+                        // case .account:
+                        //     AccountsScreen()
                         case .appearance:
                             AppearanceUIScreen()
                         case .other:
@@ -62,8 +92,6 @@ struct SettingsUIScreen: View {
                             AboutScreen()
                         case .wishlist:
                             WishlistView()
-                            // case .serverInfo:
-                            //     InstanceScreen(host: "mastodon.social", platformType: PlatformType.mastodon)
                         }
                     } else {
                         Text("settings_welcome")
@@ -74,23 +102,13 @@ struct SettingsUIScreen: View {
                 }
             }
         }
-    }
-}
-
-struct ListItem: View {
-    let systemIconName: String
-    let title: LocalizedStringKey
-    var body: some View {
-        HStack {
-            Image(systemName: systemIconName)
-                .frame(width: 24)
-            Text(title)
-        }
+        .scrollContentBackground(.hidden)
+        .listRowBackground(theme.secondaryBackgroundColor)
     }
 }
 
 public enum SettingsDestination: String, CaseIterable, Identifiable {
-    case account
+    // case account
     case appearance
     case other
     case storage

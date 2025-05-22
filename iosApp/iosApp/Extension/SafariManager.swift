@@ -30,7 +30,7 @@ public final class SafariManager: NSObject, SFSafariViewControllerDelegate {
         configuration.entersReaderIfAvailable = true // 默认启用阅读模式
 
         let safari = SFSafariViewController(url: url, configuration: configuration)
-        safari.preferredBarTintColor = .systemBackground
+        // safari.preferredBarTintColor = .systemBackground
         safari.preferredControlTintColor = .systemBlue
         safari.delegate = self
 

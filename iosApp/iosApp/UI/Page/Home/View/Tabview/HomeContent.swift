@@ -19,6 +19,8 @@ struct HomeContent: View {
     // State for Menu View user data (needed if Menu tab requires it)
     @State private var currentUser: UiUserV2? = nil // Assuming Menu might need user data
 
+    @Environment(FlareTheme.self) private var theme
+
     // 为自定义 TabBar 计算可见标签项
     private var visibleTabs: [FlareHomeTabs] {
         var tabs: [FlareHomeTabs] = [.menu, .timeline]
@@ -36,84 +38,89 @@ struct HomeContent: View {
                String(describing: routerId),
                String(describing: selectedTab))
 
-        return FlareTheme {
-            // 使用 ZStack 将自定义 TabBar 覆盖在功能性的 TabView 之上
-            ZStack(alignment: .bottom) {
-                // 第1层: 功能性的 TabView (处理状态保持和导航)
-                TabView(selection: $selectedTab) {
-                    Tab(value: .menu) {
-                        FlareTabItem(router: router, tabType: .menu) { _ in FlareMenuContainer() }
+        return ZStack(alignment: .bottom) {
+            // 第1层: 功能性的 TabView (处理状态保持和导航)
+            TabView(selection: $selectedTab) {
+                Tab(value: .menu) {
+                    FlareTabItem(router: router, tabType: .menu) { _ in FlareMenuContainer().environment(theme).applyTheme(theme)
+                    }
+                    .environmentObject(appState)
+                }
+                // .tag 在 selection 类型为 Hashable 时不需要
+
+                // 时间线 Tab
+                Tab(value: .timeline) {
+                    FlareTabItem(router: router, tabType: .timeline) { _ in
+                        HomeTabScreenSwiftUI(
+                            accountType: accountType,
+                            onSwitchToMenuTab: {
+                                withAnimation {
+                                    selectedTab = .menu
+                                }
+                            }
+                        )
+                    }.environment(theme).applyTheme(theme)
+                        .environmentObject(appState)
+                }
+
+                // 通知 Tab (仅登录用户可见)
+                if !(accountType is AccountTypeGuest) {
+                    Tab(value: .notification) {
+                        FlareTabItem(router: router, tabType: .notification) { _ in NotificationTabScreen(accountType: accountType) }
+                            .environment(theme).applyTheme(theme).environmentObject(appState)
+                    }
+                }
+
+                // 发现 Tab
+                Tab(value: .discover) {
+                    FlareTabItem(router: router, tabType: .discover) { tabRouter in
+                        DiscoverTabScreen(accountType: accountType, onUserClicked: { user in
+                            tabRouter.navigate(to: .profile(accountType: accountType, userKey: user.key))
+                        })
+                    }.environment(theme).applyTheme(theme)
+                        .environmentObject(appState)
+                }
+
+                // 个人资料 Tab (仅登录用户可见)
+                if !(accountType is AccountTypeGuest) {
+                    Tab(value: .profile) {
+                        FlareTabItem(router: router, tabType: .profile) { _ in ProfileTabScreenUikit(accountType: accountType, userKey: nil, toProfileMedia: { _ in print("媒体标签已集成") }) }
                             .environmentObject(appState)
                     }
-                    // .tag 在 selection 类型为 Hashable 时不需要
-
-                    // 时间线 Tab
-                    Tab(value: .timeline) {
-                        FlareTabItem(router: router, tabType: .timeline) { _ in
-                            HomeTabScreenSwiftUI(
-                                accountType: accountType,
-                                onSwitchToMenuTab: {
-                                    withAnimation {
-                                        selectedTab = .menu
-                                    }
-                                }
-                            )
-                        }
-                        .environmentObject(appState)
-                    }
-
-                    // 通知 Tab (仅登录用户可见)
-                    if !(accountType is AccountTypeGuest) {
-                        Tab(value: .notification) {
-                            FlareTabItem(router: router, tabType: .notification) { _ in NotificationTabScreen(accountType: accountType) }
-                                .environmentObject(appState)
-                        }
-                    }
-
-                    // 发现 Tab
-                    Tab(value: .discover) {
-                        FlareTabItem(router: router, tabType: .discover) { tabRouter in
-                            DiscoverTabScreen(accountType: accountType, onUserClicked: { user in
-                                tabRouter.navigate(to: .profile(accountType: accountType, userKey: user.key))
-                            })
-                        }
-                        .environmentObject(appState)
-                    }
-
-                    // 个人资料 Tab (仅登录用户可见)
-                    if !(accountType is AccountTypeGuest) {
-                        Tab(value: .profile) {
-                            FlareTabItem(router: router, tabType: .profile) { _ in ProfileTabScreen(accountType: accountType, userKey: nil, toProfileMedia: { _ in print("媒体标签已集成") }) }
-                                .environmentObject(appState)
-                        }
-                    }
-                    // --- Tab 结构结束 ---
                 }
-
-                .toolbar(.hidden, for: .tabBar)
-                .padding(.bottom, -130) // 底部白背景
-
-                // 第2层: 自定义的视觉 TabBar
-                // menu 需要 隐藏 tabbar
-                if !appState.isCustomTabBarHidden {
-                    customTabBar() // 包含自适应宽度和毛玻璃背景
-                        .padding(.horizontal) // 应用水平边距，营造悬浮感
-                        // 设置底部 padding 为 0，使其紧贴底部安全区域边缘
-                        .padding(.bottom, 0) // 根据需要调整此值
-                        // 添加过渡动画，使显示/隐藏更平滑
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
+                // --- Tab 结构结束 ---
             }
-            // 给整个 ZStack 区域应用背景色
-            .background(Colors.Background.swiftUIPrimary.edgesIgnoringSafeArea(.all))
-            .onAppear {
-                // checkAndUpdateUserState()
+
+            .toolbar(.hidden, for: .tabBar)
+            .padding(.bottom, -130) // 底部白背景
+
+            // 第2层: 自定义的视觉 TabBar
+            // menu 需要 隐藏 tabbar
+            if !appState.isCustomTabBarHidden {
+                customTabBar() // 包含自适应宽度和毛玻璃背景
+                    .padding(.horizontal) // 应用水平边距，营造悬浮感
+                    // 设置底部 padding 为 0，使其紧贴底部安全区域边缘
+                    .padding(.bottom, 0) // 根据需要调整此值
+                    // 添加过渡动画，使显示/隐藏更平滑
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
-        // 登录 Sheet
-        .sheet(isPresented: $showLogin) { ServiceSelectScreen(toHome: { showLogin = false }) }
+
+        .background(theme.primaryBackgroundColor)
+        .foregroundColor(theme.labelColor)
+//        .background(theme.primaryBackgroundColor.edgesIgnoringSafeArea(.all))
+        // 给整个 ZStack 区域应用背景色
+        // .background(FColors.Background.swiftUIPrimary.edgesIgnoringSafeArea(.all))
+        .onAppear {
+            // checkAndUpdateUserState()
+        }
+        .sheet(isPresented: $showLogin) { ServiceSelectScreen(toHome: { showLogin = false }).background(theme.primaryBackgroundColor)
+            .foregroundColor(theme.labelColor)
+        }
         // 设置 Sheet
-        .sheet(isPresented: $showSettings) { SettingsUIScreen() }
+        .sheet(isPresented: $showSettings) { SettingsUIScreen().environment(FlareTheme.shared)
+        }
+//        .foregroundColor(theme.labelColor)
     }
 
     // 自定义悬浮 Tab Bar 视图

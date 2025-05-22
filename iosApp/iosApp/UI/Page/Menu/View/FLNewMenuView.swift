@@ -16,7 +16,8 @@ struct FLNewMenuView: View {
 
     @EnvironmentObject private var router: FlareRouter
     @EnvironmentObject private var appState: FlareAppState
- 
+    @Environment(FlareTheme.self) private var theme
+
     init(accountType: AccountType, user: UiUserV2? = nil) {
         self.accountType = accountType
         self.user = user
@@ -25,7 +26,7 @@ struct FLNewMenuView: View {
     var body: some View {
         VStack(spacing: 0) {
             userInfoView
-                .padding(.top, 80)
+                .padding(.top, 40)
                 .padding(.horizontal, 20)
 
             VStack(spacing: 16) {
@@ -38,6 +39,7 @@ struct FLNewMenuView: View {
                         HStack {
                             Image(systemName: "list.bullet")
                                 .frame(width: 28, height: 28)
+                                .foregroundColor(theme.tintColor)
                             Text("List")
                                 .font(.body)
                             Spacer()
@@ -57,6 +59,7 @@ struct FLNewMenuView: View {
                             HStack {
                                 Image(systemName: "number")
                                     .frame(width: 28, height: 28)
+                                    .foregroundColor(theme.tintColor)
                                 Text("Feeds")
                                     .font(.body)
                                 Spacer()
@@ -77,6 +80,7 @@ struct FLNewMenuView: View {
                             HStack {
                                 Image(systemName: "bubble.left.and.bubble.right")
                                     .frame(width: 28, height: 28)
+                                    .foregroundColor(theme.tintColor)
                                 Text("Message")
                                     .font(.body)
                                 Spacer()
@@ -96,6 +100,7 @@ struct FLNewMenuView: View {
                             HStack {
                                 Image(systemName: "person.3")
                                     .frame(width: 28, height: 28)
+                                    .foregroundColor(theme.tintColor)
                                 Text("XSpace")
                                     .font(.body)
                                 Spacer()
@@ -115,6 +120,7 @@ struct FLNewMenuView: View {
                         HStack {
                             Image(systemName: "arrow.down.circle")
                                 .frame(width: 28, height: 28)
+                                .foregroundColor(theme.tintColor)
                             Text("Donwload Manager")
                                 .font(.body)
                             Spacer()
@@ -152,6 +158,7 @@ struct FLNewMenuView: View {
                                 HStack {
                                     Image(systemName: "server.rack")
                                         .frame(width: 28, height: 28)
+                                        .background(theme.secondaryBackgroundColor)
                                     Text("Server Info")
                                         .font(.body)
                                     Spacer()
@@ -174,7 +181,6 @@ struct FLNewMenuView: View {
                 .padding(.bottom, 180)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .background(Color(UIColor.systemBackground))
         .onAppear {
             appState.isCustomTabBarHidden = false
         }
@@ -185,13 +191,11 @@ struct FLNewMenuView: View {
         }
         .sheet(isPresented: $showAccounts) {
             NavigationView {
-                AccountsScreen()
+                AccountsScreen().environment(theme).applyTheme(theme)
             }
         }
         .sheet(isPresented: $showSettings) {
-            NavigationView {
-                SettingsUIScreen()
-            }
+            SettingsUIScreen().environment(theme).applyTheme(theme)
         }
     }
 
@@ -216,26 +220,26 @@ struct FLNewMenuView: View {
                                     .font(.headline)
                                 Text("\(user.handle)")
                                     .font(.caption)
-                                    .foregroundColor(.gray)
+                                // .foregroundColor(.gray)
                             }
                         }
                     } else {
                         HStack(spacing: 12) {
-                            userAvatarPlaceholder(size: 60)
+                            UserAvatarPlaceholder(size: 60)
                                 .clipShape(Circle())
                                 .offset(x: 0)
 
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("No Login")
                                     .font(.headline)
-                                    .foregroundColor(.gray)
+                                    // .foregroundColor(.gray)
                                     .offset(x: 10)
                             }
                         }
                     }
                 }
-            }
-            .buttonStyle(PlainButtonStyle())
+            }.padding(.top, 15).padding(.leading, 15)
+                .buttonStyle(PlainButtonStyle())
 
             // Followers/Following count
             if let profile = user as? UiProfile {
@@ -245,7 +249,7 @@ struct FLNewMenuView: View {
                             .font(.subheadline)
                         Text("fans_title")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                        // .foregroundColor(.gray)
                     }
 
                     HStack(spacing: 4) {
@@ -253,16 +257,18 @@ struct FLNewMenuView: View {
                             .font(.subheadline)
                         Text("following_title")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                        // .foregroundColor(.gray)
                     }
                 }
                 .padding(.top, 8)
-                .padding(.leading, 15)
+                .padding(.leading, 25)
             }
 
             Divider()
                 .padding(.top, 8)
-        }
+        }.foregroundColor(theme.labelColor)
+            .background(RoundedRectangle(cornerRadius: 10)
+                .fill(theme.secondaryBackgroundColor))
     }
 
     private var settingsButton: some View {
@@ -270,25 +276,27 @@ struct FLNewMenuView: View {
             showSettings = true
         }) {
             HStack {
-                Image(systemName: "gearshape.fill")
+                Image(systemName: "gearshape.fill").foregroundColor(theme.tintColor)
                 Text("settings_title")
                 Spacer()
             }
-            .foregroundColor(.primary)
+
             .padding()
-            .background(Color(UIColor.secondarySystemBackground))
+            .background(Color(theme.secondaryBackgroundColor))
             .cornerRadius(10)
         }
     }
 }
 
 struct MenuButtonStyle: ButtonStyle {
+    @Environment(FlareTheme.self) private var theme
+
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .foregroundColor(.primary)
+            .foregroundColor(theme.labelColor)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(configuration.isPressed ? Color(UIColor.secondarySystemBackground) : Color.clear)
+                    .fill(Color(theme.secondaryBackgroundColor))
             )
             .contentShape(Rectangle())
     }

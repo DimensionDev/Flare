@@ -9,6 +9,7 @@ struct StatusDetailScreen: View {
 
     @ObservedObject var router: FlareRouter
     @EnvironmentObject private var menuState: FlareAppState
+    @Environment(FlareTheme.self) private var theme
 
     init(accountType: AccountType, statusKey: MicroBlogKey, router: FlareRouter) {
         presenter = .init(accountType: accountType, statusKey: statusKey)
@@ -22,14 +23,12 @@ struct StatusDetailScreen: View {
                 StatusTimelineComponent(
                     data: state.listState,
                     detailKey: statusKey
-                )
-                // 列表项背景色：
-                .listRowBackground(Colors.Background.swiftUIPrimary)
+                ).listRowBackground(theme.primaryBackgroundColor)
             }
             .listStyle(.plain)
             // 列表背景色
             .scrollContentBackground(.hidden)
-            .background(Colors.Background.swiftUIPrimary)
+            .background(theme.primaryBackgroundColor)
             .refreshable {
                 try? await state.refresh()
             }

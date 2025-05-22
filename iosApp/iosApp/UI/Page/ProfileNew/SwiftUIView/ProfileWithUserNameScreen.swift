@@ -10,6 +10,7 @@ struct ProfileWithUserNameScreen: View {
     private let accountType: AccountType
     let toProfileMedia: (MicroBlogKey) -> Void
     @EnvironmentObject var router: FlareRouter
+    @Environment(FlareTheme.self) private var theme
 
     init(accountType: AccountType, userName: String, host: String, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
         self.accountType = accountType
@@ -46,11 +47,15 @@ struct ProfileWithUserNameScreen: View {
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
                     }
+                    .scrollContentBackground(.hidden)
+                    .listRowBackground(theme.primaryBackgroundColor)
                     .onAppear {
                         os_log("[📔][ProfileWithUserNameScreen]正在加载用户信息...", log: .default, type: .debug)
                     }
                 case let .success(data):
-                    ProfileTabScreen(
+                    let loadedUserInfo = ProfileUserInfo.from(state: state as! ProfileNewState)
+
+                    ProfileTabScreenUikit(
                         accountType: accountType,
                         userKey: data.data.key,
                         toProfileMedia: toProfileMedia
@@ -61,6 +66,5 @@ struct ProfileWithUserNameScreen: View {
                 }
             }
         }
-//        .flareNavigationGesture(router: router)
     }
 }

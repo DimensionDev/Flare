@@ -13,6 +13,7 @@ struct ServiceSelectScreen: View {
     @State private var blueskyInputViewModel = BlueskyInputViewModel()
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
     let toHome: () -> Void
+    @Environment(FlareTheme.self) private var theme
 
     init(toHome: @escaping () -> Void) {
         presenter = .init(toHome: toHome)
@@ -34,7 +35,6 @@ struct ServiceSelectScreen: View {
                         .replacingOccurrences(of: "\\n", with: "\n")
                         .replacingOccurrences(of: "Android", with: "iOS"))
                         .font(.subheadline)
-                        .foregroundColor(.gray)
                         .multilineTextAlignment(.center)
                         .frame(maxWidth: .infinity, alignment: .center)
 
@@ -104,7 +104,8 @@ struct ServiceSelectScreen: View {
                                 } else {
                                     InstancePlaceHolder()
                                 }
-                            }
+                            }.scrollContentBackground(.hidden)
+                                .listRowBackground(theme.primaryBackgroundColor)
                         } else if state.instances.isLoading {
                             ForEach(0 ... 5, id: \.self) { _ in // 减少占位符数量
                                 InstancePlaceHolder()
@@ -116,6 +117,8 @@ struct ServiceSelectScreen: View {
                     .padding(.horizontal)
                 }
             }
+            .background(theme.secondaryBackgroundColor)
+            // .foregroundColor(theme.labelColor)
             .frame(maxHeight: .infinity, alignment: .top)
             .sheet(isPresented: $showXQT) {
                 XQTLoginScreen(toHome: {
@@ -248,7 +251,7 @@ struct ServiceSelectScreen: View {
             ZStack {
                 // 背景层
                 if let bannerUrl = instance.bannerUrl {
-                    GeometryReader { geometry in
+                    GeometryReader { _ in
                         KFImage(URL(string: bannerUrl))
                             .placeholder { // 添加占位符
                                 ServiceIconBackground(url: instance.iconUrl ?? "", domain: instance.domain)
@@ -257,14 +260,11 @@ struct ServiceSelectScreen: View {
                             .fade(duration: 0.25)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(width: geometry.size.width)
+                            // .frame(width: geometry.size.width)
                             .frame(height: 80, alignment: .center)
                             .clipped()
-                            .blur(radius: 3)
-                            .overlay(
-                                Rectangle()
-                                    .fill(Color.black.opacity(0.2))
-                            )
+                            // .blur(radius: 3)
+                            // .overlay(Rectangle().fill(theme.primaryBackgroundColor.opacity(0.2)))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                     .frame(height: 80)
@@ -272,58 +272,52 @@ struct ServiceSelectScreen: View {
                     // 如果没有banner，使用icon作为背景
                     ServiceIconBackground(url: instance.iconUrl ?? "", domain: instance.domain)
                 }
-
-                HStack(spacing: 12) {
-                    // 头像或占位符
-                    Group {
-                        ServiceIcon(
-                            url: instance.iconUrl ?? "",
-                            domain: instance.domain,
-                            size: 48,
-                            clipShape: AnyShape(Circle())
-                        )
-                    }
-                    .allowsHitTesting(false)
-
-                    // 名字和网址
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(instance.name)
-                            .font(.headline)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color(.systemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-
-                        Text(instance.domain)
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color(.systemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                    }
-                    .allowsHitTesting(false)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding()
             }
             .frame(height: 80)
+
+            HStack(alignment: .top) {
+                ServiceIcon(
+                    url: instance.iconUrl ?? "",
+                    domain: instance.domain,
+                    size: 15,
+                    clipShape: AnyShape(Circle())
+                ).padding(.vertical, 8).clipShape(RoundedRectangle(cornerRadius: 6))
+
+                Text(instance.domain)
+                    .font(.subheadline)
+                    .foregroundColor(theme.labelColor)
+                    .padding(.horizontal, 0)
+                    .padding(.vertical, 4)
+                    //  .background(Color(.systemBackground))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
+
+                Spacer()
+
+                if instance.usersCount > 0 {
+                    Text("\(instance.usersCount) users")
+                        .font(.subheadline)
+                        .foregroundColor(theme.tintColor)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .clipShape(RoundedRectangle(cornerRadius: 6))
+                }
+            }.padding(.horizontal)
 
             // 第二部分：简介
             if let description = instance.description_ {
                 Text(parseHTML(description))
-                    .font(.body)
                     .lineLimit(3)
-                    .padding(12)
+                    .font(.footnote)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .allowsHitTesting(false)
+                    .foregroundStyle(Color.secondary)
             }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 8)
-        .background(Color(.systemBackground))
+        .background(theme.primaryBackgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: 6))
         .frame(maxWidth: min(UIScreen.main.bounds.width - 32, 600))
         .frame(maxWidth: .infinity)

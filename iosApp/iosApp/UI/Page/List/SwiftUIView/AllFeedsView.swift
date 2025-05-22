@@ -15,6 +15,7 @@ struct AllFeedsView: View {
     @State private var currentUser: UiUserV2?
     @State private var isMissingFeedData: Bool = false
     private let accountType: AccountType
+    @Environment(FlareTheme.self) private var theme
 
     @StateObject private var tabSettingStore: AppBarTabSettingStore
 
@@ -41,9 +42,9 @@ struct AllFeedsView: View {
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
             if isMissingFeedData {
-                notSupportedView
+                notSupportedView.background(theme.secondaryBackgroundColor)
             } else {
-                feedsListView(state)
+                feedsListView(state).background(theme.secondaryBackgroundColor)
             }
         }
     }
@@ -97,6 +98,8 @@ struct AllFeedsView: View {
                                 }
                             }
                         }
+                        .scrollContentBackground(.hidden)
+                        .listRowBackground(theme.primaryBackgroundColor)
                     }
                     .navigationTitle("Feeds")
                     .toolbar {

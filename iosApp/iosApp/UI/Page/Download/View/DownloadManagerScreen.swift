@@ -23,6 +23,7 @@ struct DownloadManagerScreen: View {
     let accountType: AccountType
     @State private var downloadTasks: [DownloadTask] = []
     @State private var itemToShare: ShareableFile? = nil
+    @Environment(FlareTheme.self) private var theme
 
     init(accountType: AccountType, router: FlareRouter) {
         self.accountType = accountType
@@ -40,48 +41,48 @@ struct DownloadManagerScreen: View {
                     onShareAction: {
                         handleTaskShare(task)
                     }
-                )
-                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                .listRowBackground(Colors.Background.swiftUIPrimary)
+                ).scrollContentBackground(.hidden).listRowBackground(theme.primaryBackgroundColor)
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+//                .listRowBackground(FColors.Background.swiftUIPrimary)
             }
             .onDelete(perform: deleteTasks)
-        }
-        .listStyle(.plain)
-        .scrollContentBackground(.hidden)
-        .background(Colors.Background.swiftUIPrimary)
-        .navigationTitle("Download Manager")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarTrailing) {
-                EditButton()
+        }.listRowBackground(theme.primaryBackgroundColor)
+            // .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .background(theme.secondaryBackgroundColor)
+            .navigationTitle("Download Manager")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton().foregroundColor(theme.tintColor)
+                }
             }
-        }
-        .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)
-        .toolbarBackground(.visible, for: .navigationBar)
-        .environmentObject(router)
-        .environmentObject(menuState)
-        .task {
-            loadDownloadTasks()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeRunning"))) { _ in
-            loadDownloadTasks()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeWaiting"))) { _ in
-            loadDownloadTasks()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeSucceeded"))) { _ in
-            loadDownloadTasks()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeSuspended"))) { _ in
-            loadDownloadTasks()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeFailed"))) { _ in
-            loadDownloadTasks()
-        }
-        .sheet(item: $itemToShare) { shareableFile in
-            ActivityView(activityItems: [shareableFile.url])
-                .ignoresSafeArea()
-        }
+//        .toolbarBackground(FColors.Background.swiftUIPrimary, for: .navigationBar)
+//        .toolbarBackground(.visible, for: .navigationBar)
+            .environmentObject(router)
+            .environmentObject(menuState)
+            .task {
+                loadDownloadTasks()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeRunning"))) { _ in
+                loadDownloadTasks()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeWaiting"))) { _ in
+                loadDownloadTasks()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeSucceeded"))) { _ in
+                loadDownloadTasks()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeSuspended"))) { _ in
+                loadDownloadTasks()
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .init("TR.DownloadTaskDidBecomeFailed"))) { _ in
+                loadDownloadTasks()
+            }
+            .sheet(item: $itemToShare) { shareableFile in
+                ActivityView(activityItems: [shareableFile.url])
+                    .ignoresSafeArea()
+            }
     }
 
     private func loadDownloadTasks() {

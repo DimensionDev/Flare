@@ -18,6 +18,7 @@ import UIKit
 // 头部视图
 class ProfileNewHeaderView: UIView {
     private var state: ProfileNewState?
+    var theme: FlareTheme?
 
     // 添加关注按钮回调
     var onFollowClick: ((UiRelation) -> Void)?
@@ -38,7 +39,7 @@ class ProfileNewHeaderView: UIView {
 
     private let avatarView: UIImageView = {
         let imageView = UIImageView()
-        imageView.backgroundColor = .gray.withAlphaComponent(0.3)
+        // imageView.backgroundColor = .gray.withAlphaComponent(0.3)
         imageView.layer.cornerRadius = 40
         imageView.clipsToBounds = true
         imageView.contentMode = .scaleAspectFill
@@ -49,7 +50,7 @@ class ProfileNewHeaderView: UIView {
         let button = UIButton(type: .system)
         button.setTitle("follow", for: .normal)
         button.setTitleColor(.white, for: .normal)
-        button.backgroundColor = .systemBlue
+        // button.backgroundColor = .systemBlue
         button.layer.cornerRadius = 15
         return button
     }()
@@ -101,12 +102,16 @@ class ProfileNewHeaderView: UIView {
     var onAvatarTap: (() -> Void)?
     var onBannerTap: (() -> Void)?
 
+    // 添加主题观察者
+    private var themeObserver: NSObjectProtocol?
+
     // 添加 userInfo 属性
     private var userInfo: ProfileUserInfo?
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        setupThemeObserver()
     }
 
     @available(*, unavailable)
@@ -114,8 +119,15 @@ class ProfileNewHeaderView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    deinit {
+        // 移除主题观察者
+        if let themeObserver {
+            NotificationCenter.default.removeObserver(themeObserver)
+        }
+    }
+
     private func setupUI() {
-        backgroundColor = .systemBackground
+        //  backgroundColor = .systemBackground
 
         // Banner with tap gesture
         addSubview(bannerImageView)
@@ -165,7 +177,43 @@ class ProfileNewHeaderView: UIView {
 
         // Description Label
         addSubview(descriptionLabel)
+
         descriptionLabel.frame = CGRect(x: 16, y: followsCountLabel.frame.maxY + 10, width: frame.width - 32, height: 0)
+    }
+
+    // 设置主题观察者
+    private func setupThemeObserver() {
+        // 移除旧的观察者（如果存在）
+        if let existingObserver = themeObserver {
+            NotificationCenter.default.removeObserver(existingObserver)
+        }
+
+        // 添加新的观察者
+        themeObserver = NotificationCenter.default.addObserver(
+            forName: NSNotification.Name("FlareThemeDidChange"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.applyTheme()
+        }
+
+        // 立即应用当前主题
+        applyTheme()
+    }
+
+    // 应用主题方法
+    func applyTheme() {
+        guard let theme else { return }
+
+        // 应用背景色
+        backgroundColor = UIColor(theme.primaryBackgroundColor)
+
+        // 可以在这里应用其他与主题相关的样式
+        nameLabel.textColor = UIColor(theme.labelColor)
+        descriptionLabel.textColor = UIColor(theme.labelColor)
+        descriptionLabel.backgroundColor = UIColor(theme.primaryBackgroundColor) // 貌似没用
+        // 应用按钮颜色
+        followButton.backgroundColor = UIColor(theme.tintColor)
     }
 
     private func layoutContent() {
@@ -207,9 +255,15 @@ class ProfileNewHeaderView: UIView {
         frame.height
     }
 
-    func configure(with userInfo: ProfileUserInfo, state: ProfileNewState? = nil) {
+    func configure(with userInfo: ProfileUserInfo, state: ProfileNewState? = nil, theme: FlareTheme? = nil) {
         self.userInfo = userInfo // 需要保存 userInfo 以便在点击时使用
         self.state = state
+        self.theme = theme
+
+        // 应用主题
+        if theme != nil {
+            applyTheme()
+        }
 
         // 设置用户名
         nameLabel.text = userInfo.profile.name.markdown
@@ -303,6 +357,9 @@ class ProfileNewHeaderView: UIView {
                 rootView: Markdown(description)
                     .markdownInlineImageProvider(.emoji)
             )
+            if let theme {
+                descriptionView.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
+            }
             addSubview(descriptionView.view)
             descriptionView.view.frame = CGRect(x: 16, y: currentY, width: frame.width - 32, height: 0)
             descriptionView.view.sizeToFit()
@@ -329,6 +386,9 @@ class ProfileNewHeaderView: UIView {
 
                 // 创建一个容器视图来包含所有内容
                 let containerView = UIView()
+                if let theme {
+                    stackView.backgroundColor = UIColor(theme.primaryBackgroundColor)
+                }
                 containerView.addSubview(stackView)
                 stackView.translatesAutoresizingMaskIntoConstraints = false
 
@@ -346,6 +406,9 @@ class ProfileNewHeaderView: UIView {
                         icon: Asset.Image.Attributes.location.image,
                         text: locationValue.markdown
                     )
+                    if let theme {
+                        locationView.backgroundColor = UIColor(theme.primaryBackgroundColor)
+                    }
                     stackView.addArrangedSubview(locationView)
                 }
 
@@ -355,6 +418,9 @@ class ProfileNewHeaderView: UIView {
                         icon: Asset.Image.Attributes.globe.image,
                         text: urlValue.markdown
                     )
+                    if let theme {
+                        urlView.backgroundColor = UIColor(theme.primaryBackgroundColor)
+                    }
                     stackView.addArrangedSubview(urlView)
                 }
 
@@ -406,7 +472,7 @@ class ProfileNewHeaderView: UIView {
                 followButton.setTitle(title, for: .normal)
 
                 // 保持蓝色背景
-                followButton.backgroundColor = .systemBlue
+                // followButton.backgroundColor = .systemBlue
             }
         }
     }
@@ -480,7 +546,6 @@ class ProfileNewHeaderView: UIView {
             .labelStyle(CompactLabelStyle())
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
-            .background(Color(.systemGray6))
             .cornerRadius(6)
             .onLongPressGesture {
                 // 复制文本到剪贴板
@@ -496,7 +561,7 @@ class ProfileNewHeaderView: UIView {
                 {
                     let toast = UILabel()
                     toast.text = "copy to clipboard"
-                    toast.backgroundColor = UIColor.black.withAlphaComponent(0.7)
+                    // toast.backgroundColor = UIColor.black.withAlphaComponent(0.7)
                     toast.textColor = .white
                     toast.textAlignment = .center
                     toast.font = UIFont.systemFont(ofSize: 14)

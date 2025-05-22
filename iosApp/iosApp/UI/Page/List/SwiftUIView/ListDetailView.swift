@@ -11,6 +11,7 @@ struct ListDetailView: View {
     @State private var presenter: ListTimelinePresenter
     @State private var showNavigationTitle: Bool = false
     @Environment(\.presentationMode) var presentationMode
+    @Environment(FlareTheme.self) private var theme
 
     private let gradientColors: [Color]
 
@@ -89,13 +90,13 @@ struct ListDetailView: View {
                         .padding(.top, 16)
                         .padding(.bottom, 8)
                         .listFeedContentStyle()
-                }
+                }.scrollContentBackground(.hidden).listRowBackground(theme.primaryBackgroundColor)
 
                 StatusTimelineComponent(
                     data: state.listState,
                     detailKey: nil
-                )
-                .listFeedContentStyle()
+                ).listRowBackground(theme.primaryBackgroundColor)
+                    .listFeedContentStyle()
             }
             .listStyle(PlainListStyle())
             .edgesIgnoringSafeArea(.top)

@@ -142,17 +142,6 @@ struct SVGIconView: View {
     }
 }
 
-private extension View {
-    @ViewBuilder
-    func modifyIf(_ condition: Bool, transform: (Self) -> some View) -> some View {
-        if condition {
-            transform(self)
-        } else {
-            self
-        }
-    }
-}
-
 // 用于背景的扩展版本
 struct ServiceIconBackground: View {
     let url: String
@@ -187,7 +176,7 @@ struct ServiceIconBackground: View {
                                         .foregroundColor(.gray.opacity(0.2))
                                 }
                                 .setProcessor(DownsamplingImageProcessor(size: CGSize(width: 150, height: 150)))
-                                .fade(duration: 0.25)
+                                // .fade(duration: 0.25)
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: geometry.size.width / 3)
@@ -197,39 +186,39 @@ struct ServiceIconBackground: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: height)
-                .blur(radius: blur)
+                // .blur(radius: blur)
 
                 // 渐变遮罩层
-                ZStack {
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color.black.opacity(0.3),
-                            Color.black.opacity(0.5),
-                            Color.black.opacity(0.3),
-                        ]),
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    )
+                // ZStack {
+                //     LinearGradient(
+                //         gradient: Gradient(colors: [
+                //             Color.black.opacity(0.3),
+                //             Color.black.opacity(0.5),
+                //             Color.black.opacity(0.3),
+                //         ]),
+                //         startPoint: .leading,
+                //         endPoint: .trailing
+                //     )
 
-                    LinearGradient(
-                        gradient: Gradient(colors: [
-                            Color.black.opacity(0.2),
-                            Color.black.opacity(0.6),
-                        ]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
+                //     LinearGradient(
+                //         gradient: Gradient(colors: [
+                //             Color.black.opacity(0.2),
+                //             Color.black.opacity(0.6),
+                //         ]),
+                //         startPoint: .top,
+                //         endPoint: .bottom
+                //     )
 
-                    RadialGradient(
-                        gradient: Gradient(colors: [
-                            Color.black.opacity(0.0),
-                            Color.black.opacity(0.3),
-                        ]),
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: height
-                    )
-                }
+                //     RadialGradient(
+                //         gradient: Gradient(colors: [
+                //             Color.black.opacity(0.0),
+                //             Color.black.opacity(0.3),
+                //         ]),
+                //         center: .center,
+                //         startRadius: 0,
+                //         endRadius: height
+                //     )
+                // }
             }
             .clipShape(RoundedRectangle(cornerRadius: 12))
             .overlay(

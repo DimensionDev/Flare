@@ -8,6 +8,7 @@ struct QuotedStatus: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
     @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareTheme.self) private var theme
 
     let data: UiTimelineItemContentStatus
     let onMediaClick: (Int, UiMedia) -> Void
@@ -43,11 +44,18 @@ struct QuotedStatus: View {
                 }
 
                 // 原文和翻译
-                FlareText(data.content.raw, style: .quote)
-                    .onLinkTap { url in
-                        openURL(url)
-                    }
-                    .font(.system(size: 16))
+                FlareText(data.content.raw, style: FlareMarkdownText.Style(
+                    font: .systemFont(ofSize: 16),
+                    textColor: UIColor(theme.labelColor),
+                    linkColor: UIColor(theme.tintColor),
+                    mentionColor: UIColor(theme.tintColor),
+                    hashtagColor: UIColor(theme.tintColor),
+                    cashtagColor: UIColor(theme.tintColor)
+                ))
+                .onLinkTap { url in
+                    openURL(url)
+                }
+                .font(.system(size: 16))
 
                 if appSettings.appearanceSettings.autoTranslate {
                     TranslatableText(originalText: data.content.raw)

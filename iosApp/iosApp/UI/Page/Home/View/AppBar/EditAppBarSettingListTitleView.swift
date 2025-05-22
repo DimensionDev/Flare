@@ -10,6 +10,7 @@ struct EditAppBarSettingListTitleView: View {
     let isBlueskyFeed: Bool
     var onSave: (String) -> Void
     var onCancel: () -> Void
+    @Environment(FlareTheme.self) private var theme
 
     init(title: Binding<String>, listId: String, iconUrl: String?, onSave: @escaping (String) -> Void, onCancel: @escaping () -> Void, isBlueskyFeed: Bool = false) {
         _title = title
@@ -53,19 +54,21 @@ struct EditAppBarSettingListTitleView: View {
                         }
                     }
                     .padding(.vertical, 8)
-                }
+                }.listRowBackground(theme.primaryBackgroundColor)
 
                 Section(header: Text(isBlueskyFeed ? "Feed Name" : "List Name")) {
                     TextField(isBlueskyFeed ? "Feed Name" : "List Name", text: $title)
                         .autocapitalization(.none)
-                }
+                }.listRowBackground(theme.primaryBackgroundColor)
 
                 Section {
                     Text("Note: This only modifies the local display title, not the server \(isBlueskyFeed ? "feed" : "list") name.")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                }
+                }.listRowBackground(theme.primaryBackgroundColor)
             }
+            .scrollContentBackground(.hidden)
+            .background(theme.secondaryBackgroundColor)
             .navigationTitle(isBlueskyFeed ? "Edit Feed Title" : "Edit List Title")
             .navigationBarItems(
                 leading: Button("Cancel") {

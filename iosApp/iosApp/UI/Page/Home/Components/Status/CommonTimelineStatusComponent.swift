@@ -19,6 +19,7 @@ struct CommonTimelineStatusComponent: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
     @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareTheme.self) private var theme
 
     let data: UiTimelineItemContentStatus
     let onMediaClick: (Int, UiMedia) -> Void
@@ -104,8 +105,8 @@ struct CommonTimelineStatusComponent: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Spacer()
-                .frame(height: 2)
+            Spacer().frame(height: 2)
+
             HStack(alignment: .top) {
                 if let user = data.user {
                     UserComponent(
@@ -182,7 +183,7 @@ struct CommonTimelineStatusComponent: View {
                             Image(asset: Asset.Image.Status.more)
                                 .renderingMode(.template)
                                 .rotationEffect(.degrees(0))
-                                .foregroundColor(.gray.opacity(0.6))
+                                .foregroundColor(theme.labelColor)
                                 .modifier(SmallIconModifier())
                         }
                         .padding(.top, 0)
@@ -221,6 +222,8 @@ struct CommonTimelineStatusComponent: View {
                     },
                     label: {
                         Image(systemName: "exclamationmark.triangle")
+                            .foregroundColor(theme.labelColor)
+
                         Markdown(cwText.markdown)
                             .font(.body)
                             .markdownInlineImageProvider(.emoji)
@@ -250,7 +253,7 @@ struct CommonTimelineStatusComponent: View {
                             openURL(url)
                         }
                         .font(.system(size: 16))
-                        .foregroundColor(Colors.Text.swiftUIPrimary)
+                        .foregroundColor(theme.labelColor)
 
                     // Add translation component
                     if appSettings.appearanceSettings.autoTranslate, enableTranslation {
@@ -260,7 +263,7 @@ struct CommonTimelineStatusComponent: View {
                     // 如果内容为空，显示一个空的 Text
                     Text("")
                         .font(.system(size: 16))
-                        .foregroundColor(Colors.Text.swiftUIPrimary)
+                        .foregroundColor(theme.labelColor)
                 }
             }
             // media
@@ -558,60 +561,60 @@ struct StatusActionItemIcon: View {
             if data.bookmarked {
                 Image(asset: Asset.Image.Status.Toolbar.bookmarkFilled)
                     .renderingMode(.template)
-                    .foregroundColor(Colors.State.swiftUIBookmarkActive)
+//                    .foregroundColor(FColors.State.swiftUIBookmarkActive)
             } else {
                 Image(asset: Asset.Image.Status.Toolbar.bookmark)
                     .renderingMode(.template)
-                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+//                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
             }
         case .delete:
             Image(asset: Asset.Image.Status.Toolbar.delete)
                 .renderingMode(.template)
-                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+//                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
         case let .like(data):
             if data.liked {
                 Image(asset: Asset.Image.Status.Toolbar.favorite)
                     .renderingMode(.template)
-                    .foregroundColor(Colors.State.swiftUILikeActive)
+//                    .foregroundColor(FColors.State.swiftUILikeActive)
             } else {
                 Image(asset: Asset.Image.Status.Toolbar.favoriteBorder)
                     .renderingMode(.template)
-                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+//                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
             }
         case .more:
             Image(asset: Asset.Image.Status.more)
                 .renderingMode(.template)
-                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+                //       .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
                 .rotationEffect(.degrees(90))
         case .quote:
             Image(asset: Asset.Image.Status.Toolbar.quote)
                 .renderingMode(.template)
-                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+        //     .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
         case let .reaction(data):
             if data.reacted {
                 Awesome.Classic.Solid.minus.image
-                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+                //         .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
             } else {
                 Awesome.Classic.Solid.plus.image
-                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+                //        .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
             }
         case .reply:
             Image(asset: Asset.Image.Status.Toolbar.chatBubbleOutline)
                 .renderingMode(.template)
-                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+        //      .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
         case .report:
             Image(asset: Asset.Image.Status.Toolbar.flag)
                 .renderingMode(.template)
-                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+        //   .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
         case let .retweet(data):
             if data.retweeted {
                 Image(asset: Asset.Image.Status.Toolbar.repeat)
                     .renderingMode(.template)
-                    .foregroundColor(Colors.State.swiftUIRetweetActive)
+//                    .foregroundColor(FColors.State.swiftUIRetweetActive)
             } else {
                 Image(asset: Asset.Image.Status.Toolbar.repeat)
                     .renderingMode(.template)
-                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+//                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
             }
         }
     }
@@ -621,6 +624,7 @@ struct StatusActionItemIcon: View {
 struct StatusActionLabel: View {
     let item: StatusActionItem
     @Environment(\.colorScheme) var colorScheme
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         let text =
@@ -638,30 +642,30 @@ struct StatusActionLabel: View {
             default: ""
             }
 
-        let color =
-            switch onEnum(of: item) {
-            case let .retweet(data):
-                data.retweeted
-                    ? Colors.State.swiftUIRetweetActive
-                    : (colorScheme == .dark ? Color.white : Color.black)
-            case let .bookmark(data):
-                data.bookmarked
-                    ? Colors.State.swiftUIBookmarkActive
-                    : (colorScheme == .dark ? Color.white : Color.black)
-            case let .like(data):
-                data.liked
-                    ? Colors.State.swiftUILikeActive
-                    : (colorScheme == .dark ? Color.white : Color.black)
-            default:
-                colorScheme == .dark ? Color.white : Color.black
-            }
+        // let color = Color.black
+//            switch onEnum(of: item) {
+//            case let .retweet(data):
+//                data.retweeted
+//                    ? FColors.State.swiftUIRetweetActive
+//                    : (colorScheme == .dark ? Color.white : Color.black)
+//            case let .bookmark(data):
+//                data.bookmarked
+//                    ? FColors.State.swiftUIBookmarkActive
+//                    : (colorScheme == .dark ? Color.white : Color.black)
+//            case let .like(data):
+//                data.liked
+//                    ? FColors.State.swiftUILikeActive
+//                    : (colorScheme == .dark ? Color.white : Color.black)
+//            default:
+//                colorScheme == .dark ? Color.white : Color.black
+//            }
 
         Label {
             Text(text)
         } icon: {
             StatusActionItemIcon(item: item)
         }
-        .foregroundStyle(color, color)
+        .foregroundStyle(theme.labelColor, theme.labelColor)
     }
 }
 
@@ -682,9 +686,11 @@ struct StatusVisibilityComponent: View {
 }
 
 struct CenteredLabelStyle: LabelStyle {
+    @Environment(FlareTheme.self) private var theme
+
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 4) {
-            configuration.icon
+            configuration.icon.foregroundColor(theme.labelColor)
             configuration.title
                 .font(.system(size: 12))
             // Spacer() // 添加 Spacer 让内容靠左

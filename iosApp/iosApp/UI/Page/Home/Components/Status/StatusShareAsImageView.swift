@@ -35,7 +35,7 @@ struct StatusCaptureWrapper: View {
         content
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(Color(.systemBackground))
+        //   .background(Color(.systemBackground))
     }
 }
 

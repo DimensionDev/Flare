@@ -36,6 +36,8 @@ struct HomeAppBarSettingsView: View {
     @State private var isAvailableFeedsExpanded: Bool = false
     @State private var availableListsLimit: Int = 5 // 默认显示数量限制
 
+    @Environment(FlareTheme.self) private var theme
+
     init() {
         let store = AppBarTabSettingStore.shared
         _listPresenter = State(initialValue: AllListPresenter(accountType: store.accountType))
@@ -95,7 +97,7 @@ struct HomeAppBarSettingsView: View {
 //                    .padding(.trailing, 16)
                 }
                 .padding(.vertical, 10)
-                .background(Color(UIColor.systemBackground))
+                // .background(Color(UIColor.systemBackground))
                 .overlay(
                     Rectangle()
                         .frame(height: 0.5)
@@ -109,7 +111,7 @@ struct HomeAppBarSettingsView: View {
                     if let primaryTab = store.primaryHomeItems.first {
                         Section(header: Text("main tab")) {
                             TabItemRow(tab: primaryTab, store: store, isPrimary: true)
-                        }
+                        }.listRowBackground(theme.primaryBackgroundColor)
                     }
 
                     // 次要标签
@@ -128,7 +130,7 @@ struct HomeAppBarSettingsView: View {
                             .onMove { source, destination in
                                 store.moveTab(from: source, to: destination)
                             }
-                        }
+                        }.listRowBackground(theme.primaryBackgroundColor)
                     }
 
                     // 未启用的标签
@@ -140,7 +142,7 @@ struct HomeAppBarSettingsView: View {
                             ForEach(unusedTabs, id: \.key) { tab in
                                 TabItemRow(tab: tab, store: store, isPrimary: false, defaultToggleValue: false)
                             }
-                        }
+                        }.listRowBackground(theme.primaryBackgroundColor)
                     }
 
                     // pinned lists
@@ -172,7 +174,7 @@ struct HomeAppBarSettingsView: View {
                             .onMove { source, destination in
                                 store.moveListTab(from: source, to: destination)
                             }
-                        }
+                        }.listRowBackground(theme.primaryBackgroundColor)
                     }
 
                     // pinned feeds
@@ -205,7 +207,7 @@ struct HomeAppBarSettingsView: View {
                             .onMove { source, destination in
                                 store.moveFeedTab(from: source, to: destination)
                             }
-                        }
+                        }.listRowBackground(theme.primaryBackgroundColor)
                     }
 
                     // available no pinned lists
@@ -265,9 +267,11 @@ struct HomeAppBarSettingsView: View {
             //     )
             // }
         }
+        .scrollContentBackground(.hidden)
+        .background(theme.secondaryBackgroundColor)
         .environment(\.editMode, .constant(.active))
         .sheet(isPresented: $isEditingTitle, onDismiss: {
-            editingList = nil // 清理编辑状态
+            editingList = nil
             editingListId = nil
             editingListTitle = ""
         }) {
@@ -377,7 +381,7 @@ struct HomeAppBarSettingsView: View {
                                 .padding(.vertical, 8)
                             }
                         }
-                    }
+                    }.listRowBackground(theme.primaryBackgroundColor)
                 }
             } else if state.items is PagingStateLoading {
                 Section(header: Text("")) {
@@ -385,7 +389,7 @@ struct HomeAppBarSettingsView: View {
                         ListRowSkeletonView()
                             .padding(.horizontal)
                     }
-                }
+                }.listRowBackground(theme.primaryBackgroundColor)
             }
         }
     }
@@ -432,7 +436,7 @@ struct HomeAppBarSettingsView: View {
                         ListRowSkeletonView()
                             .padding(.horizontal)
                     }
-                }
+                }.listRowBackground(theme.primaryBackgroundColor)
             case let .success(tabsData):
                 if let feedTab = findFeedTab(in: tabsData.data) {
                     switch onEnum(of: feedTab.data) {
@@ -442,7 +446,7 @@ struct HomeAppBarSettingsView: View {
                                 ListRowSkeletonView()
                                     .padding(.horizontal)
                             }
-                        }
+                        }.listRowBackground(theme.primaryBackgroundColor)
                     case let .success(feedsData):
                         let hasUnpinnedFeeds = checkForUnpinnedFeeds(feedsData)
                         if hasUnpinnedFeeds {
@@ -506,7 +510,7 @@ struct HomeAppBarSettingsView: View {
                                         .padding(.vertical, 8)
                                     }
                                 }
-                            }
+                            }.listRowBackground(theme.primaryBackgroundColor)
                         }
                     default:
                         EmptyView()
@@ -521,7 +525,7 @@ struct HomeAppBarSettingsView: View {
                     ListRowSkeletonView()
                         .padding(.horizontal)
                 }
-            }
+            }.listRowBackground(theme.primaryBackgroundColor)
         }
     }
 

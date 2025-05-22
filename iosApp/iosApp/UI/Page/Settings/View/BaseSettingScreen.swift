@@ -8,6 +8,7 @@ struct BaseSettingScreen: View {
     @Environment(\.appSettings) private var appSettings
     @State private var isTranslating: Bool = false
     @State private var translationConfig: TranslationSession.Configuration?
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         List {
@@ -30,7 +31,7 @@ struct BaseSettingScreen: View {
                     .labelsHidden()
                     .pickerStyle(.menu)
                 }
-            }
+            }.listRowBackground(theme.primaryBackgroundColor)
 
             Section("Translation Settings") {
                 HStack {
@@ -103,13 +104,16 @@ struct BaseSettingScreen: View {
             }
             .buttonStyle(.plain)
             .navigationTitle("Other Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .listRowBackground(theme.primaryBackgroundColor)
         }
+        .background(theme.secondaryBackgroundColor)
         #if os(macOS)
-        .toggleStyle(.switch)
+            .toggleStyle(.switch)
         #endif
-        .translationTask(translationConfig) { _ in
-            isTranslating = false
-        }
+            .translationTask(translationConfig) { _ in
+                isTranslating = false
+            }
     }
 }
 

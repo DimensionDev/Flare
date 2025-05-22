@@ -5,6 +5,7 @@ struct PodcastSheetView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var router: FlareRouter
     @Environment(\.appSettings) private var appSettings
+    @Environment(FlareTheme.self) private var theme
 
     private let presenter: PodcastPresenter
     let accountType: AccountType
@@ -31,6 +32,7 @@ struct PodcastSheetView: View {
                         ProgressView()
                     }
                 }
+                .background(theme.primaryBackgroundColor)
                 .navigationTitle("Podcast")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
@@ -49,6 +51,7 @@ struct PodcastDetailContent: View {
     let podcast: UiPodcast
     @EnvironmentObject private var router: FlareRouter
     let accountType: AccountType
+    @Environment(FlareTheme.self) private var theme
 
     let columns: [GridItem] = Array(repeating: .init(.flexible()), count: 4)
 
@@ -129,6 +132,7 @@ struct PodcastDetailContent: View {
                         .frame(maxWidth: .infinity, alignment: .center)
                 }
             }
+            .listRowBackground(theme.primaryBackgroundColor)
             .padding()
         }
     }

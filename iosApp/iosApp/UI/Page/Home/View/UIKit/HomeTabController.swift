@@ -61,7 +61,7 @@ class HomeTabController: UIViewController {
 
     private func setupUI() {
         os_log("[📔][HomeNewViewController] setupUI start", log: .default, type: .debug)
-        view.backgroundColor = .systemBackground
+//        view.backgroundColor = .systemBackground
 
         // 配置分段控制器
         setupSegmentedView()
@@ -266,7 +266,7 @@ extension HomeTabController: JXPagingViewDelegate {
         } else {
             // 设置默认头像
             let hostingController = UIHostingController(rootView:
-                userAvatarPlaceholder(size: avatarButtonSize)
+                UserAvatarPlaceholder(size: avatarButtonSize)
                     .clipShape(Circle())
             )
             hostingController.view.frame = avatarButton.bounds

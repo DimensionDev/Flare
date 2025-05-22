@@ -55,19 +55,21 @@ class TimelineLoadingState {
     func handleDataLoading(at row: Int, data: PagingState<UiTimeline>) -> UiTimeline? {
         guard case let .success(successData) = onEnum(of: data) else { return nil }
 
-        // 先尝试使用peek获取数据
-        if let item = successData.peek(index: Int32(row)) {
-            loadingRows.remove(row)
-            return item
-        }
-
-        // 如果peek返回nil，使用get触发加载
-        if !loadingRows.contains(row) {
-            loadingRows.insert(row)
-            os_log("[📔][TimelineLoadingState] cell显示触发get: row = %{public}d", log: .default, type: .debug, row)
-            if let item = successData.get(index: Int32(row)) {
+        do {
+            // 先尝试使用peek获取数据
+            if let item = successData.peek(index: Int32(row)) {
                 loadingRows.remove(row)
                 return item
+            }
+        } catch {
+            // 如果peek返回nil，使用get触发加载
+            if !loadingRows.contains(row) {
+                loadingRows.insert(row)
+                os_log("[📔][TimelineLoadingState] cell显示触发get: row = %{public}d", log: .default, type: .debug, row)
+                if let item = successData.get(index: Int32(row)) {
+                    loadingRows.remove(row)
+                    return item
+                }
             }
         }
 

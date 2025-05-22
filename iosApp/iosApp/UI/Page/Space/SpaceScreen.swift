@@ -1,11 +1,12 @@
+import Kingfisher
 import shared
 import SwiftUI
-import Kingfisher
 
 struct SpaceScreen: View {
     let accountType: AccountType
     @EnvironmentObject private var router: FlareRouter
     @State private var presenter: PodcastListPresenter
+    @Environment(FlareTheme.self) private var theme
 
     init(accountType: AccountType) {
         self.accountType = accountType
@@ -15,6 +16,9 @@ struct SpaceScreen: View {
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
             feedsListView(state)
+                .navigationTitle("You follow the X Spaces")
+                .navigationBarTitleDisplayMode(.inline)
+                .listRowBackground(theme.primaryBackgroundColor)
         }
     }
 
@@ -24,7 +28,7 @@ struct SpaceScreen: View {
         case .loading:
             loadingView
         case let .success(successData):
-            if  successData.data.count == 0 {
+            if successData.data.count == 0 {
                 emptyView()
             } else {
                 podcastsListView(podcastsList: successData.data)
@@ -52,23 +56,21 @@ struct SpaceScreen: View {
                     Text("Invalid item at index \\(index)")
                         .foregroundColor(.red)
                 }
-            }
+            }.listRowBackground(theme.primaryBackgroundColor)
         }
         .listStyle(.plain)
-        .navigationTitle("You follow the X Spaces")
-        .navigationBarTitleDisplayMode(.inline)
     }
 
     private func emptyView() -> some View {
         VStack(spacing: 16) {
             Image(systemName: "mic.slash.fill")
                 .font(.largeTitle)
-                .foregroundColor(.secondary)
+            // .foregroundColor(.secondary)
             Text("No Spaces Available")
                 .font(.headline)
             Text("There are currently no live or recorded Spaces to show.")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+            // .foregroundColor(.gray)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -96,6 +98,7 @@ private struct PodcastRowView: View {
     let podcast: UiPodcast
     let accountType: AccountType
     @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -103,7 +106,7 @@ private struct PodcastRowView: View {
                 if !podcast.ended {
                     LiveIndicatorView()
                 }
-               Spacer()
+                Spacer()
 //                Image(systemName: "ellipsis")
 //                    .foregroundColor(.secondary)
             }
@@ -119,7 +122,7 @@ private struct PodcastRowView: View {
 //            .font(.subheadline)
 //            .foregroundColor(.secondary)
 //            .padding(.bottom, 4)
-            
+
             HStack(spacing: 8) {
                 KFImage(URL(string: podcast.creator.avatar))
                     .resizable()
@@ -127,14 +130,14 @@ private struct PodcastRowView: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 24, height: 24)
                     .clipShape(Circle())
-                
+
                 Text(podcast.creator.name.raw)
                     .font(.subheadline.weight(.medium))
                     .lineLimit(1)
             }
         }
         .padding()
-        .background(Color.teal.opacity(0.1))
+        .background(theme.secondaryBackgroundColor)
         .cornerRadius(12)
         .contentShape(Rectangle())
         .onTapGesture {

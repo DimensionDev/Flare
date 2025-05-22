@@ -27,40 +27,40 @@ public enum FlareMarkdownText {
         public let hashtagColor: UIColor
         public let cashtagColor: UIColor
 
-        public static let `default` = Style(
-            font: .systemFont(ofSize: 16),
-            textColor: Colors.Text.primary,
-            linkColor: Colors.Link.hyperlink,
-            mentionColor: Colors.Link.mention,
-            hashtagColor: Colors.Link.hashtag,
-            cashtagColor: Colors.Link.cashtag
-        )
+        // public static let `default` = Style(
+        //     font: .systemFont(ofSize: 16),
+        //     textColor: UIColor.black, // .Text.primary,
+        //     linkColor: UIColor.black,
+        //     mentionColor: UIColor.black,
+        //     hashtagColor: UIColor.black,
+        //     cashtagColor: UIColor.black
+        // )
 
-        public static let timeline = Style(
-            font: .systemFont(ofSize: 16),
-            textColor: Colors.Text.primary,
-            linkColor: Colors.Link.hyperlink,
-            mentionColor: Colors.Link.mention,
-            hashtagColor: Colors.Link.hashtag,
-            cashtagColor: Colors.Link.cashtag
-        )
+        // public static let timeline = Style(
+        //     font: .systemFont(ofSize: 16),
+        //     textColor: UIColor.black,
+        //     linkColor: UIColor.black,
+        //     mentionColor: UIColor.black,
+        //     hashtagColor: UIColor.black,
+        //     cashtagColor: UIColor.black
+        // )
 
-        public static let quote = Style(
-            font: .systemFont(ofSize: 15),
-            textColor: Colors.Text.secondary,
-            linkColor: Colors.Link.hyperlink.withAlphaComponent(0.8),
-            mentionColor: Colors.Link.mention.withAlphaComponent(0.8),
-            hashtagColor: Colors.Link.hashtag.withAlphaComponent(0.8),
-            cashtagColor: Colors.Link.cashtag.withAlphaComponent(0.8)
-        )
+        // public static let quote = Style(
+        //     font: .systemFont(ofSize: 15),
+        //     textColor: UIColor.black,
+        //     linkColor: UIColor.black.withAlphaComponent(0.8),
+        //     mentionColor: UIColor.black.withAlphaComponent(0.8),
+        //     hashtagColor: UIColor.black.withAlphaComponent(0.8),
+        //     cashtagColor: UIColor.black.withAlphaComponent(0.8)
+        // )
 
         public init(
             font: UIFont = .systemFont(ofSize: 16),
-            textColor: UIColor = Colors.Text.primary,
-            linkColor: UIColor = Colors.Link.hyperlink,
-            mentionColor: UIColor = Colors.Link.mention,
-            hashtagColor: UIColor = Colors.Link.hashtag,
-            cashtagColor: UIColor = Colors.Link.cashtag
+            textColor: UIColor = UIColor.black,
+            linkColor: UIColor = UIColor.black,
+            mentionColor: UIColor = UIColor.black,
+            hashtagColor: UIColor = UIColor.black,
+            cashtagColor: UIColor = UIColor.black
         ) {
             self.font = font
             self.textColor = textColor
@@ -98,7 +98,7 @@ public enum FlareMarkdownText {
         of originalText: String?,
         prependLinks _: [String: URL] = [:],
         embeds: [String] = [],
-        style: Style = .default,
+        style: Style,
         previewLinkValidator: @escaping (String) -> Bool = { _ in false }
     ) -> (
         markdown: AttributedString,

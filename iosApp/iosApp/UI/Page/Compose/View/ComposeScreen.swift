@@ -40,57 +40,44 @@ struct ComposeScreen: View {
         _viewModel = .init(initialValue: .init(accountType: accountType, status: status))
     }
 
+    @Environment(FlareTheme.self) private var theme
+
     var body: some View {
-        FlareTheme {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading) {
-                    ScrollView(.vertical) {
-                        VStack(alignment: .leading) {
-                            if viewModel.enableCW {
-                                TextField(text: $viewModel.contentWarning) {
-                                    Text("compose_content_warning_hint")
-                                }
-                                .textFieldStyle(.plain)
-                                .focused($cwKeyboardFocused)
-                                Divider()
-                            }
-                            TextField(text: $viewModel.text) {
-                                Text("compose_hint")
+        HStack(alignment: .top) {
+            VStack(alignment: .leading) {
+                ScrollView(.vertical) {
+                    VStack(alignment: .leading) {
+                        if viewModel.enableCW {
+                            TextField(text: $viewModel.contentWarning) {
+                                Text("compose_content_warning_hint")
                             }
                             .textFieldStyle(.plain)
-                            .focused($keyboardFocused)
-                            .onAppear {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                    keyboardFocused = true
-                                }
+                            .focused($cwKeyboardFocused)
+                            Divider()
+                        }
+                        TextField(text: $viewModel.text) {
+                            Text("compose_hint")
+                        }
+                        .textFieldStyle(.plain)
+                        .focused($keyboardFocused)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                keyboardFocused = true
                             }
-                            if viewModel.mediaViewModel.items.count > 0 {
-                                ScrollView(.horizontal) {
-                                    HStack {
-                                        ForEach(viewModel.mediaViewModel.items.indices, id: \.self) { index in
-                                            let item = viewModel.mediaViewModel.items[index]
-                                            if let image = item.image {
-                                                #if os(macOS)
-                                                    Image(nsImage: image)
-                                                        .resizable()
-                                                        .scaledToFill()
-                                                        .frame(width: 128, height: 128)
-                                                        .cornerRadius(8)
-                                                        .contextMenu {
-                                                            Button(action: {
-                                                                withAnimation {
-                                                                    viewModel.mediaViewModel.remove(item: item)
-                                                                }
-                                                            }, label: {
-                                                                Label {
-                                                                    Text("delete")
-                                                                } icon: {
-                                                                    Awesome.Classic.Solid.trash.image
-                                                                }
-                                                            })
-                                                        }
-                                                #else
-                                                    Menu {
+                        }
+                        if viewModel.mediaViewModel.items.count > 0 {
+                            ScrollView(.horizontal) {
+                                HStack {
+                                    ForEach(viewModel.mediaViewModel.items.indices, id: \.self) { index in
+                                        let item = viewModel.mediaViewModel.items[index]
+                                        if let image = item.image {
+                                            #if os(macOS)
+                                                Image(nsImage: image)
+                                                    .resizable()
+                                                    .scaledToFill()
+                                                    .frame(width: 128, height: 128)
+                                                    .cornerRadius(8)
+                                                    .contextMenu {
                                                         Button(action: {
                                                             withAnimation {
                                                                 viewModel.mediaViewModel.remove(item: item)
@@ -102,196 +89,209 @@ struct ComposeScreen: View {
                                                                 Awesome.Classic.Solid.trash.image
                                                             }
                                                         })
-                                                    } label: {
-                                                        Image(uiImage: image)
-                                                            .resizable()
-                                                            .scaledToFill()
-                                                            .frame(width: 128, height: 128)
-                                                            .cornerRadius(8)
                                                     }
-                                                #endif
-                                            }
+                                            #else
+                                                Menu {
+                                                    Button(action: {
+                                                        withAnimation {
+                                                            viewModel.mediaViewModel.remove(item: item)
+                                                        }
+                                                    }, label: {
+                                                        Label {
+                                                            Text("delete")
+                                                        } icon: {
+                                                            Awesome.Classic.Solid.trash.image
+                                                        }
+                                                    })
+                                                } label: {
+                                                    Image(uiImage: image)
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: 128, height: 128)
+                                                        .cornerRadius(8)
+                                                }
+                                            #endif
                                         }
-                                    }
-                                }
-                                Toggle(isOn: $viewModel.mediaViewModel.sensitive, label: {
-                                    Text("compose_media_sensitive")
-                                })
-                            }
-                            if viewModel.pollViewModel.enabled {
-                                HStack {
-                                    Picker("compose_poll_type", selection: $viewModel.pollViewModel.pollType) {
-                                        Text("compose_poll_single_choice")
-                                            .tag(ComposePollType.single)
-                                        Text("compose_poll_multiple_choice")
-                                            .tag(ComposePollType.multiple)
-                                    }
-                                    .pickerStyle(.segmented)
-                                    Button {
-                                        withAnimation {
-                                            viewModel.pollViewModel.add()
-                                        }
-                                    } label: {
-                                        Awesome.Classic.Solid.plus.image
-                                    }.disabled(viewModel.pollViewModel.choices.count >= 4)
-                                }
-                                #if os(iOS)
-                                .padding(.vertical)
-                                #endif
-                                ForEach(Array(viewModel.pollViewModel.choices.enumerated()), id: \.element.id) { index, choice in
-                                    HStack {
-                                        TextField(text: $viewModel.pollViewModel.choices[index].text) {
-                                            Text(String(format: NSLocalizedString("compose_poll_option_hint", comment: ""), String(index + 1)))
-                                        }
-                                        .textFieldStyle(.roundedBorder)
-                                        Button {
-                                            withAnimation {
-                                                viewModel.pollViewModel.remove(choice: choice)
-                                            }
-                                        } label: {
-                                            Awesome.Classic.Solid.deleteLeft.image
-                                        }
-                                        .disabled(viewModel.pollViewModel.choices.count <= 2)
-                                    }
-                                    #if os(iOS)
-                                    .padding(.bottom)
-                                    #endif
-                                }
-                                HStack {
-                                    Spacer()
-                                    Menu {
-                                        ForEach(viewModel.pollViewModel.allExpiration, id: \.self) { expiration in
-                                            Button(action: {
-                                                viewModel.pollViewModel.expired = expiration
-                                            }, label: {
-                                                Text(NSLocalizedString(PollExpiration(rawValue: expiration.rawValue)?.localizedKey ?? "", comment: ""))
-                                            })
-                                        }
-                                    } label: {
-                                        Text(String(
-                                            format: NSLocalizedString("compose_poll_expiration_at", comment: ""),
-                                            NSLocalizedString(PollExpiration(rawValue: viewModel.pollViewModel.expired.rawValue)?.localizedKey ?? "", comment: "")
-                                        ))
                                     }
                                 }
                             }
-                            if let replyState = viewModel.model.replyState,
-                               case let .success(reply) = onEnum(of: replyState),
-                               let content = reply.data.content as? UiTimelineItemContentStatus
-                            {
-                                Spacer()
-                                    .frame(height: 8)
-                                QuotedStatus(
-                                    data: content,
-                                    onMediaClick: { _, _ in }
-                                )
-                            }
+                            Toggle(isOn: $viewModel.mediaViewModel.sensitive, label: {
+                                Text("compose_media_sensitive")
+                            })
                         }
-                        .padding()
-                    }
-                    let iconSize: CGFloat = 24
-                    Divider()
-                    ScrollView(.horizontal, content: {
-                        HStack {
-                            if !viewModel.pollViewModel.enabled {
-                                PhotosPicker(selection: Binding(get: {
-                                    viewModel.mediaViewModel.selectedItems
-                                }, set: { value in
-                                    viewModel.mediaViewModel.selectedItems = value
-                                    viewModel.mediaViewModel.update()
-                                }), matching: .any(of: [.images, .videos, .livePhotos])) {
-                                    Awesome.Classic.Solid.image.image
-                                        .frame(width: iconSize, height: iconSize)
+                        if viewModel.pollViewModel.enabled {
+                            HStack {
+                                Picker("compose_poll_type", selection: $viewModel.pollViewModel.pollType) {
+                                    Text("compose_poll_single_choice")
+                                        .tag(ComposePollType.single)
+                                    Text("compose_poll_multiple_choice")
+                                        .tag(ComposePollType.multiple)
                                 }
-                            }
-                            if viewModel.mediaViewModel.selectedItems.count == 0,
-                               case let .success(data) = onEnum(of: viewModel.model.composeConfig),
-                               let poll = data.data.poll
-                            {
-                                Button(action: {
+                                .pickerStyle(.segmented)
+                                Button {
                                     withAnimation {
-                                        viewModel.togglePoll()
-                                    }
-                                }, label: {
-                                    Awesome.Classic.Solid.squarePollHorizontal.image
-                                        .frame(width: iconSize, height: iconSize)
-                                })
-                            }
-                            if case let .success(visibilityState) = onEnum(of: viewModel.model.visibilityState) {
-                                Menu {
-                                    ForEach(visibilityState.data.allVisibilities, id: \.self) { visibility in
-                                        Button {
-                                            visibilityState.data.setVisibility(value: visibility)
-                                        } label: {
-                                            Text(visibility.name)
-                                        }
+                                        viewModel.pollViewModel.add()
                                     }
                                 } label: {
-                                    StatusVisibilityComponent(visibility: visibilityState.data.visibility)
-                                        .frame(width: iconSize, height: iconSize)
-                                }
+                                    Awesome.Classic.Solid.plus.image
+                                }.disabled(viewModel.pollViewModel.choices.count >= 4)
                             }
-                            if case let .success(data) = onEnum(of: viewModel.model.composeConfig),
-                               data.data.contentWarning != nil
-                            {
-                                Button(action: {
-                                    withAnimation {
-                                        viewModel.toggleCW()
-                                        if viewModel.enableCW {
-                                            cwKeyboardFocused = true
-                                        } else {
-                                            keyboardFocused = true
-                                        }
+                            #if os(iOS)
+                            .padding(.vertical)
+                            #endif
+                            ForEach(Array(viewModel.pollViewModel.choices.enumerated()), id: \.element.id) { index, choice in
+                                HStack {
+                                    TextField(text: $viewModel.pollViewModel.choices[index].text) {
+                                        Text(String(format: NSLocalizedString("compose_poll_option_hint", comment: ""), String(index + 1)))
                                     }
-                                }, label: {
-                                    Awesome.Classic.Solid.circleExclamation.image
-                                        .frame(width: iconSize, height: iconSize)
-                                })
-                            }
-                            if case .success = onEnum(of: viewModel.model.emojiState) {
-                                Button(action: {
-                                    viewModel.showEmojiPanel()
-                                }, label: {
-                                    Awesome.Classic.Solid.faceSmile.image
-                                        .frame(width: iconSize, height: iconSize)
-                                })
-                                .popover(isPresented: $viewModel.showEmoji) {
-                                    if case let .success(emojis) = onEnum(of: viewModel.model.emojiState) {
-                                        ScrollView {
-                                            LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
-                                                ForEach(0 ..< emojis.data.size, id: \.self) { index in
-                                                    let items = emojis.data.getValue(index: index)
-                                                    ForEach(0 ..< items.count, id: \.self) { iIndex in
-                                                        let item = items[iIndex]
-                                                        Button(action: {
-                                                            viewModel.addEmoji(emoji: item)
-                                                        }, label: {
-                                                            KFImage(URL(string: item.url))
-                                                                .resizable()
-                                                                .scaledToFit()
-
-                                                        })
-                                                        .buttonStyle(.plain)
-                                                    }
-                                                }
-                                            }
-                                            .if(horizontalSizeClass == .compact, transform: { view in
-                                                view
-                                                    .padding()
-                                            })
+                                    .textFieldStyle(.roundedBorder)
+                                    Button {
+                                        withAnimation {
+                                            viewModel.pollViewModel.remove(choice: choice)
                                         }
-                                        .if(horizontalSizeClass != .compact, transform: { view in
-                                            view
-                                                .frame(width: 384, height: 256)
+                                    } label: {
+                                        Awesome.Classic.Solid.deleteLeft.image
+                                    }
+                                    .disabled(viewModel.pollViewModel.choices.count <= 2)
+                                }
+                                #if os(iOS)
+                                .padding(.bottom)
+                                #endif
+                            }
+                            HStack {
+                                Spacer()
+                                Menu {
+                                    ForEach(viewModel.pollViewModel.allExpiration, id: \.self) { expiration in
+                                        Button(action: {
+                                            viewModel.pollViewModel.expired = expiration
+                                        }, label: {
+                                            Text(NSLocalizedString(PollExpiration(rawValue: expiration.rawValue)?.localizedKey ?? "", comment: ""))
                                         })
                                     }
+                                } label: {
+                                    Text(String(
+                                        format: NSLocalizedString("compose_poll_expiration_at", comment: ""),
+                                        NSLocalizedString(PollExpiration(rawValue: viewModel.pollViewModel.expired.rawValue)?.localizedKey ?? "", comment: "")
+                                    ))
                                 }
                             }
                         }
-                        .padding([.bottom, .horizontal])
-                    })
-                    .buttonStyle(.bordered)
+                        if let replyState = viewModel.model.replyState,
+                           case let .success(reply) = onEnum(of: replyState),
+                           let content = reply.data.content as? UiTimelineItemContentStatus
+                        {
+                            Spacer()
+                                .frame(height: 8)
+                            QuotedStatus(
+                                data: content,
+                                onMediaClick: { _, _ in }
+                            )
+                        }
+                    }
+                    .padding()
                 }
+                let iconSize: CGFloat = 24
+                Divider()
+                ScrollView(.horizontal, content: {
+                    HStack {
+                        if !viewModel.pollViewModel.enabled {
+                            PhotosPicker(selection: Binding(get: {
+                                viewModel.mediaViewModel.selectedItems
+                            }, set: { value in
+                                viewModel.mediaViewModel.selectedItems = value
+                                viewModel.mediaViewModel.update()
+                            }), matching: .any(of: [.images, .videos, .livePhotos])) {
+                                Awesome.Classic.Solid.image.image
+                                    .frame(width: iconSize, height: iconSize)
+                            }
+                        }
+                        if viewModel.mediaViewModel.selectedItems.count == 0,
+                           case let .success(data) = onEnum(of: viewModel.model.composeConfig),
+                           let poll = data.data.poll
+                        {
+                            Button(action: {
+                                withAnimation {
+                                    viewModel.togglePoll()
+                                }
+                            }, label: {
+                                Awesome.Classic.Solid.squarePollHorizontal.image
+                                    .frame(width: iconSize, height: iconSize)
+                            })
+                        }
+                        if case let .success(visibilityState) = onEnum(of: viewModel.model.visibilityState) {
+                            Menu {
+                                ForEach(visibilityState.data.allVisibilities, id: \.self) { visibility in
+                                    Button {
+                                        visibilityState.data.setVisibility(value: visibility)
+                                    } label: {
+                                        Text(visibility.name)
+                                    }
+                                }
+                            } label: {
+                                StatusVisibilityComponent(visibility: visibilityState.data.visibility)
+                                    .frame(width: iconSize, height: iconSize)
+                            }
+                        }
+                        if case let .success(data) = onEnum(of: viewModel.model.composeConfig),
+                           data.data.contentWarning != nil
+                        {
+                            Button(action: {
+                                withAnimation {
+                                    viewModel.toggleCW()
+                                    if viewModel.enableCW {
+                                        cwKeyboardFocused = true
+                                    } else {
+                                        keyboardFocused = true
+                                    }
+                                }
+                            }, label: {
+                                Awesome.Classic.Solid.circleExclamation.image
+                                    .frame(width: iconSize, height: iconSize)
+                            })
+                        }
+                        if case .success = onEnum(of: viewModel.model.emojiState) {
+                            Button(action: {
+                                viewModel.showEmojiPanel()
+                            }, label: {
+                                Awesome.Classic.Solid.faceSmile.image
+                                    .frame(width: iconSize, height: iconSize)
+                            })
+                            .popover(isPresented: $viewModel.showEmoji) {
+                                if case let .success(emojis) = onEnum(of: viewModel.model.emojiState) {
+                                    ScrollView {
+                                        LazyVGrid(columns: [GridItem(.adaptive(minimum: 48))], spacing: 8) {
+                                            ForEach(0 ..< emojis.data.size, id: \.self) { index in
+                                                let items = emojis.data.getValue(index: index)
+                                                ForEach(0 ..< items.count, id: \.self) { iIndex in
+                                                    let item = items[iIndex]
+                                                    Button(action: {
+                                                        viewModel.addEmoji(emoji: item)
+                                                    }, label: {
+                                                        KFImage(URL(string: item.url))
+                                                            .resizable()
+                                                            .scaledToFit()
+
+                                                    })
+                                                    .buttonStyle(.plain)
+                                                }
+                                            }
+                                        }
+                                        .if(horizontalSizeClass == .compact, transform: { view in
+                                            view
+                                                .padding()
+                                        })
+                                    }
+                                    .if(horizontalSizeClass != .compact, transform: { view in
+                                        view
+                                            .frame(width: 384, height: 256)
+                                    })
+                                }
+                            }
+                        }
+                    }
+                    .padding([.bottom, .horizontal])
+                })
+                .buttonStyle(.bordered)
             }
         }
         .activateViewModel(viewModel: viewModel)
@@ -303,7 +303,6 @@ struct ComposeScreen: View {
                     onBack()
                 }, label: {
                     Awesome.Classic.Solid.paperPlane.image
-                        .foregroundColor(.init(.accentColor))
                 })
             }
             ToolbarItem(placement: .cancellationAction) {
@@ -311,12 +310,13 @@ struct ComposeScreen: View {
                     onBack()
                 }, label: {
                     Awesome.Classic.Solid.xmark.image
-                        .foregroundColor(.init(.accentColor))
                 })
             }
             ToolbarItem(placement: .principal) {
                 Text("compose_title")
             }
-        }
+        }.scrollContentBackground(.hidden)
+        .background(theme.primaryBackgroundColor)
+        .foregroundColor(theme.labelColor)
     }
 }

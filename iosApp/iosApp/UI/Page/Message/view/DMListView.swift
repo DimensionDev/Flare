@@ -4,6 +4,7 @@ import SwiftUI
 struct DMListView: View {
     let accountType: AccountType
     @State private var presenter: DMListPresenter
+    @Environment(FlareTheme.self) private var theme
 
     init(accountType: AccountType) {
         self.accountType = accountType
@@ -41,18 +42,21 @@ struct DMListView: View {
                     } else {
                         DMRoomPlaceholderView()
                     }
-                }
+                }.listRowBackground(theme.primaryBackgroundColor)
             } else if case .loading = onEnum(of: state.items) {
                 ProgressView()
                     .frame(maxWidth: .infinity)
-                    .padding()
+                    .padding().background(theme.primaryBackgroundColor)
             } else if case .error = onEnum(of: state.items) {
                 Text("Loading error")
                     .foregroundColor(.red)
-                    .padding()
+                    .padding().background(theme.primaryBackgroundColor)
             }
         }
-        .listStyle(PlainListStyle())
+        .background(theme.primaryBackgroundColor)
+        .scrollContentBackground(.hidden)
+        .listRowBackground(theme.primaryBackgroundColor)
+        .listStyle(.plain)
         .refreshable {
             try? await state.refreshSuspend()
         }
@@ -65,20 +69,22 @@ struct DMListView: View {
 }
 
 struct DMRoomPlaceholderView: View {
+    @Environment(FlareTheme.self) private var theme
+
     var body: some View {
         HStack(spacing: 12) {
             Circle()
-                .fill(Color.gray.opacity(0.3))
+                .fill(theme.primaryBackgroundColor.opacity(0.3))
                 .frame(width: 50, height: 50)
 
             VStack(alignment: .leading, spacing: 4) {
                 Rectangle()
-                    .fill(Color.gray.opacity(0.3))
+                    .fill(theme.primaryBackgroundColor.opacity(0.3))
                     .frame(height: 18)
                     .frame(maxWidth: 120)
 
                 Rectangle()
-                    .fill(Color.gray.opacity(0.3))
+                    .fill(theme.primaryBackgroundColor.opacity(0.3))
                     .frame(height: 14)
                     .frame(maxWidth: 200)
             }

@@ -11,6 +11,7 @@ struct FlareApp: SwiftUI.App {
     #endif
     @StateObject private var router = FlareRouter()
     @StateObject private var podcastManager = IOSPodcastManager.shared
+    @State var theme = FlareTheme.shared
 
     init() {
         // Register FontAwesome fonts
@@ -35,20 +36,24 @@ struct FlareApp: SwiftUI.App {
                 #if os(macOS)
                     ProvideWindowSizeClass {
                         FlareRootView()
+                            .withFlareTheme()
 //                        .enableInjection()
-                            .preferredColorScheme(.light)
+                        // .preferredColorScheme(.light)
                     }
                     .handlesExternalEvents(preferring: ["flare"], allowing: ["flare"])
                     .onOpenURL { url in
                         router.handleDeepLink(url)
                     }
                 #else
+                    // AboutTestScreen().withFlareTheme().applyTheme(theme).environment(theme).applyRootTheme()
+
                     FlareRootView()
-//                    .enableInjection()
+                        .enableInjection()
                         // .preferredColorScheme(.light)
                         .onOpenURL { url in
                             router.handleDeepLink(url)
                         }
+                        .withFlareTheme()
                         .environmentObject(router)
                 #endif
 
@@ -56,8 +61,10 @@ struct FlareApp: SwiftUI.App {
                 if podcastManager.currentPodcast != nil {
                     DraggablePlayerOverlay().animation(.spring(), value: podcastManager.currentPodcast?.id)
                 }
-            }
+            }.environment(theme).withFlareTheme().applyTheme(theme).environment(theme)
         }
+        .environment(theme)
+
         #if os(macOS)
             WindowGroup(id: "image-view", for: String.self) { $url in
                 ImageViewWindow(url: url)

@@ -7,11 +7,19 @@ public struct FlareText: View {
     private let twitterTextProvider: TwitterTextProvider
     private let style: FlareMarkdownText.Style
     private var linkHandler: ((URL) -> Void)?
+    @Environment(FlareTheme.self) private var theme
 
     public init(
         _ text: String,
         twitterTextProvider: TwitterTextProvider = SwiftTwitterTextProvider(),
-        style: FlareMarkdownText.Style = .default
+        style: FlareMarkdownText.Style = FlareMarkdownText.Style(
+            font: .systemFont(ofSize: 16),
+            textColor: UIColor.black,
+            linkColor: UIColor.black,
+            mentionColor: UIColor.black,
+            hashtagColor: UIColor.black,
+            cashtagColor: UIColor.black
+        )
     ) {
         self.text = text
         self.twitterTextProvider = twitterTextProvider
@@ -39,33 +47,15 @@ public struct FlareText: View {
     private func processText(_ text: String) -> NSAttributedString {
         let (attributedString, _, _) = FlareMarkdownText.attributeString(
             of: text,
-            style: style
+            style: FlareMarkdownText.Style(
+                font: .systemFont(ofSize: 16),
+                textColor: UIColor(theme.labelColor),
+                linkColor: UIColor(theme.tintColor),
+                mentionColor: UIColor(theme.tintColor),
+                hashtagColor: UIColor(theme.tintColor),
+                cashtagColor: UIColor(theme.tintColor)
+            )
         )
         return NSAttributedString(attributedString)
     }
 }
-
-#if DEBUG
-    struct FlareText_Previews: PreviewProvider {
-        static var previews: some View {
-            VStack(alignment: .leading, spacing: 20) {
-                FlareText("Hello @user! Check out #swiftui and $AAPL")
-
-                FlareText(
-                    "Custom style example",
-                    style: .init(
-                        font: .systemFont(ofSize: 18, weight: .medium),
-                        textColor: .darkText,
-                        linkColor: .systemPurple,
-                        mentionColor: .systemGreen,
-                        hashtagColor: .systemOrange,
-                        cashtagColor: .systemRed
-                    )
-                )
-
-                FlareText("https://example.com and **bold** text")
-            }
-            .padding()
-        }
-    }
-#endif

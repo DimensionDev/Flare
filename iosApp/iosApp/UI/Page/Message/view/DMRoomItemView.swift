@@ -3,6 +3,7 @@ import SwiftUI
 
 struct DMRoomItemView: View {
     let room: UiDMRoom
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         HStack(spacing: 12) {
@@ -89,7 +90,7 @@ struct DMRoomItemView: View {
                             Text("\(room.users.count)")
                                 .font(.caption2)
                                 .padding(4)
-                                .background(Color(UIColor.systemBackground))
+                                // .background(Color(UIColor.systemBackground))
                                 .clipShape(Circle())
                                 .offset(x: 20, y: 20)
                         }

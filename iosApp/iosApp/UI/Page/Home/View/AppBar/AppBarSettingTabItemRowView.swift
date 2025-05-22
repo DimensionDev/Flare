@@ -15,6 +15,7 @@ struct TabItemRow: View {
 
     // 添加日志记录器
     private let logger = Logger(subsystem: "com.flare.app", category: "TabItemRow")
+    @Environment(FlareTheme.self) private var theme
 
     // 添加默认初始化器，默认值为true
     init(tab: FLTabItem, store: AppBarTabSettingStore, isPrimary: Bool, defaultToggleValue: Bool = true) {
@@ -35,27 +36,27 @@ struct TabItemRow: View {
             case let .material(iconName):
                 if let materialIcon = FLMaterialIcon(rawValue: iconName) {
                     materialIcon.icon
-                        .foregroundColor(Color.interactiveActive)
+                        .foregroundColor(theme.tintColor) // .interactiveActive
                 }
             case let .mixed(icons):
                 if let firstIcon = icons.first,
                    let materialIcon = FLMaterialIcon(rawValue: firstIcon)
                 {
-                    materialIcon.icon
-                        .foregroundColor(Color.interactiveActive)
+                    materialIcon.icon.foregroundColor(theme.tintColor)
+//                        .foregroundColor(FColors.State.swiftUIActive)//interactiveActive
                 }
             case .avatar:
                 Image(systemName: "person.circle")
-                    .foregroundColor(Color.interactiveActive)
+//                    .foregroundColor(FColors.State.swiftUIActive)
             }
 
             switch tab.metaData.title {
             case let .text(title):
                 Text(title)
-                    .foregroundColor(Color.textPrimary)
+//                    .foregroundColor(FColors.State.swiftUIActive)
             case let .localized(key):
                 Text(NSLocalizedString(key, comment: ""))
-                    .foregroundColor(Color.textPrimary)
+//                    .foregroundColor(FColors.Text.swiftUIPrimary)
             }
 
             Spacer()
@@ -80,7 +81,7 @@ struct TabItemRow: View {
                         }
                     }
                 ))
-                .tint(Color.interactiveActive)
+//                .tint(FColors.State.swiftUIActive)
                 .disabled(isProcessing)
             }
         }
@@ -96,6 +97,7 @@ struct ListTabItemRowRow: View {
     let isBlueskyFeed: Bool // 新增字段，标识是否为Bluesky Feed
     let defaultToggleValue: Bool // 添加默认值参数
 
+    @Environment(FlareTheme.self) private var theme
     @State private var isProcessing = false
     @State private var currentTitle: String
 
@@ -143,7 +145,7 @@ struct ListTabItemRowRow: View {
             }
 
             Text(store.listTitles[listId] ?? currentTitle)
-                .foregroundColor(Color.textPrimary)
+                //     .foregroundColor(FColors.Text.swiftUIPrimary)
                 .lineLimit(1)
 
             Spacer()
@@ -184,7 +186,7 @@ struct ListTabItemRowRow: View {
                         }
                     }
                 ))
-                .tint(Color.interactiveActive)
+                //  .tint(theme.tintColor)
                 .disabled(isProcessing)
                 .frame(width: 44)
             }

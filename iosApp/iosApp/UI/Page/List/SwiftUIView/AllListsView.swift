@@ -15,6 +15,7 @@ struct AllListsView: View {
     @State private var currentUser: UiUserV2?
     @State private var isMastodonUser: Bool = false
     private let accountType: AccountType
+    @Environment(FlareTheme.self) private var theme
 
     @StateObject private var tabSettingStore: AppBarTabSettingStore
 
@@ -65,7 +66,7 @@ struct AllListsView: View {
                                 }
                             }
                         }
-                    }
+                    }.scrollContentBackground(.hidden).listRowBackground(theme.primaryBackgroundColor)
                 case let .empty(emptyState):
                     VStack(spacing: 16) {
                         Text("NO LIST")
@@ -94,6 +95,10 @@ struct AllListsView: View {
                         .foregroundColor(.secondary)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .navigationBarTitleDisplayMode(.inline)
+            .background(theme.secondaryBackgroundColor)
+            .listRowBackground(theme.primaryBackgroundColor)
         }
     }
 
@@ -114,6 +119,7 @@ private struct EnhancedListRowView: View {
     @EnvironmentObject private var router: FlareRouter
     let accountType: AccountType
     let defaultUser: UiUserV2?
+    @Environment(FlareTheme.self) private var theme
 
     init(list: UiList, accountType: AccountType, isPinned: Bool, defaultUser: UiUserV2? = nil) {
         self.list = list

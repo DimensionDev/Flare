@@ -10,6 +10,7 @@ public struct ListItemRowView: View {
     let defaultUser: UiUserV2?
     let onTap: (() -> Void)?
     let onPinTap: (() -> Void)?
+    @Environment(FlareTheme.self) private var theme
 
     public init(
         list: UiList,
@@ -67,7 +68,7 @@ public struct ListItemRowView: View {
                     if let onPinTap {
                         Button(action: onPinTap) {
                             Image(systemName: isPinned ? "pin.fill" : "pin")
-                                .foregroundColor(.blue)
+                                .foregroundColor(theme.tintColor)
                                 .font(.system(size: 14))
                         }
                         .buttonStyle(BorderlessButtonStyle())

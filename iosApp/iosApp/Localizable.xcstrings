@@ -4871,6 +4871,9 @@
     "Auto Theme " : {
 
     },
+    "Auto Theme Settings" : {
+
+    },
     "Auto Translate" : {
       "localizations" : {
         "ar" : {
@@ -17838,6 +17841,12 @@
         }
       }
     },
+    "Custom" : {
+
+    },
+    "Custom  %@" : {
+
+    },
     "date_format_full" : {
       "comment" : "",
       "extractionState" : "stale",
@@ -26680,6 +26689,9 @@
       }
     },
     "Font" : {
+
+    },
+    "Font Settings" : {
 
     },
     "Font Size Scale: %@" : {
@@ -98118,12 +98130,6 @@
         }
       }
     },
-    "settings.display.font.custom" : {
-
-    },
-    "settings.display.font.system" : {
-
-    },
     "SF Rounded" : {
 
     },
@@ -104148,6 +104154,9 @@
         }
       }
     },
+    "System" : {
+
+    },
     "System Browser" : {
       "localizations" : {
         "ar" : {
@@ -105446,9 +105455,6 @@
           }
         }
       }
-    },
-    "Theme" : {
-
     },
     "There are currently no live or recorded Spaces to show." : {
       "localizations" : {

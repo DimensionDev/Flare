@@ -58,7 +58,7 @@ public final class FlareTheme {
         public var title: LocalizedStringKey {
             switch self {
             case .system:
-                "settings.display.font.system"
+                "System"
             case .openDyslexic:
                 "Open Dyslexic"
             case .hyperLegible:
@@ -66,7 +66,7 @@ public final class FlareTheme {
             case .SFRounded:
                 "SF Rounded"
             case .custom:
-                "settings.display.font.custom"
+                "Custom"
             }
         }
     }

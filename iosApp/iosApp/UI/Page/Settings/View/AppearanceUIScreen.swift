@@ -8,6 +8,9 @@ struct AppearanceUIScreen: View {
     @State private var localValues = DisplaySettingsLocalValues()
     @State private var isFontSelectorPresented = false
 
+    @State private var isThemeAutoSectionExpanded = true
+    @State private var isFontSectionExpanded = true
+
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
             List {
@@ -19,10 +22,11 @@ struct AppearanceUIScreen: View {
                 }
 
                 // Theme部分
-                themeAutoSection
-
+                Section {
+                    themeAutoSection
+                }.listRowBackground(theme.primaryBackgroundColor)
                 // Font部分
-                fontSection
+                Section { fontSection }.listRowBackground(theme.primaryBackgroundColor)
 
                 Section("settings_appearance_generic") {
                     // 注释原主题选择
@@ -173,7 +177,7 @@ struct AppearanceUIScreen: View {
     }
 
     private var themeAutoSection: some View {
-        Section {
+        DisclosureGroup("Auto Theme Settings", isExpanded: $isThemeAutoSectionExpanded) {
             Toggle("Auto Theme ", isOn: Binding(
                 get: { theme.followSystemColorScheme },
                 set: { theme.followSystemColorScheme = $0 }
@@ -193,17 +197,11 @@ struct AppearanceUIScreen: View {
             //     localValues.secondaryBackgroundColor = theme.secondaryBackgroundColor
             //     localValues.labelColor = theme.labelColor
             // }
-        } header: {
-            Text("Theme")
-        } footer: {
-            // if theme.followSystemColorScheme {
-            //     Text("Theme will follow system appearance")
-            // }
-        }.listRowBackground(theme.primaryBackgroundColor)
+        }
     }
 
     private var fontSection: some View {
-        Section("Font") {
+        DisclosureGroup("Font Settings", isExpanded: $isFontSectionExpanded) {
             Picker(
                 "Font",
                 selection: .init(
@@ -234,10 +232,22 @@ struct AppearanceUIScreen: View {
                 )
             ) {
                 ForEach(FlareTheme.FontState.allCases, id: \.rawValue) { fontState in
-                    Text(fontState.title).tag(fontState)
+                    if fontState == .custom {
+                        if let chosenFontName = theme.chosenFont?.familyName {
+                            Text("Custom: \(chosenFontName)")
+                                .font(.caption)
+                                .foregroundColor(.gray).tag(fontState)
+                        } else {
+                            Text("Custom")
+                                .font(.caption)
+                                .foregroundColor(.gray).tag(fontState)
+                        }
+                    } else {
+                        Text(fontState.title).tag(fontState)
+                    }
                 }
             }
-            .navigationDestination(isPresented: $isFontSelectorPresented, destination: { FontPicker() })
+            .sheet(isPresented: $isFontSelectorPresented, content: { FontPicker() })
 
             VStack {
                 Slider(value: $localValues.fontSizeScale, in: 0.5 ... 1.5, step: 0.1)
@@ -252,7 +262,7 @@ struct AppearanceUIScreen: View {
                 )
                 .font(.scaledBody)
             }
-        }.listRowBackground(theme.primaryBackgroundColor)
+        }
     }
 
     // private var themeSelectorButton: some View {

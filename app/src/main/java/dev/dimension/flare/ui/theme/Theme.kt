@@ -20,11 +20,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavBackStackEntry
-import androidx.window.core.layout.WindowWidthSizeClass
 import com.materialkolor.rememberDynamicColorScheme
 import com.ramcosta.composedestinations.animations.NavHostAnimatedDestinationStyle
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
+import dev.dimension.flare.ui.common.isExpanded
 import soup.compose.material.motion.animation.materialSharedAxisXIn
 import soup.compose.material.motion.animation.materialSharedAxisXOut
 import soup.compose.material.motion.animation.rememberSlideDistance
@@ -94,7 +94,7 @@ fun FlareTheme(
     val seed = Color(LocalAppearanceSettings.current.colorSeed)
     val pureColorMode = LocalAppearanceSettings.current.pureColorMode
     val windowInfo = currentWindowAdaptiveInfo()
-    val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
+    val bigScreen = windowInfo.windowSizeClass.isExpanded()
     val colorScheme =
         when {
             dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {

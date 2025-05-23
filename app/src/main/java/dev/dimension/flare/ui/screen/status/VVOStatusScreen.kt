@@ -33,7 +33,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import androidx.window.core.layout.WindowWidthSizeClass
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.annotation.parameters.DeepLink
@@ -47,6 +46,7 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.common.isExpanded
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
@@ -131,7 +131,7 @@ private fun VVOStatusScreen(
             currentWindowSize().toSize().toDpSize()
         }
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
-    val bigScreen = windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
+    val bigScreen = windowInfo.windowSizeClass.isExpanded()
     FlareScaffold(
         topBar = {
             FlareTopAppBar(

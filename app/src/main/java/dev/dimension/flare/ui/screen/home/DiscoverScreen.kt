@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowWidthSizeClass
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import com.ramcosta.composedestinations.generated.destinations.ProfileRouteDestination
@@ -40,6 +39,8 @@ import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.common.isCompat
+import dev.dimension.flare.ui.common.isNormal
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.SearchBar
@@ -227,18 +228,14 @@ private fun DiscoverScreen(
                                 span = StaggeredGridItemSpan.FullLine,
                             ) {
                                 val maxItemsInEachRow =
-                                    when (windowInfo.windowSizeClass.windowWidthSizeClass) {
-                                        WindowWidthSizeClass.COMPACT -> {
-                                            2
-                                        }
-
-                                        WindowWidthSizeClass.MEDIUM -> {
-                                            4
-                                        }
-
-                                        else -> {
-                                            8
-                                        }
+                                    if (windowInfo.windowSizeClass.isCompat()
+                                    ) {
+                                        2
+                                    } else if (windowInfo.windowSizeClass.isNormal()
+                                    ) {
+                                        4
+                                    } else {
+                                        8
                                     }
                                 FlowRow(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),

@@ -21,13 +21,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.window.core.layout.WindowWidthSizeClass
 import com.ramcosta.composedestinations.annotation.Destination
 import com.ramcosta.composedestinations.annotation.RootGraph
 import dev.dimension.flare.R
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.data.datasource.microblog.NotificationFilter
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.common.isCompat
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
@@ -89,7 +89,7 @@ private fun NotificationScreen(
                 },
                 scrollBehavior = topAppBarScrollBehavior,
                 actions = {
-                    if (windowInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
+                    if (!windowInfo.windowSizeClass.isCompat()) {
                         state.state.allTypes.onSuccess {
                             if (it.size > 1) {
                                 NotificationFilterSelector(it, state.state)
@@ -121,7 +121,7 @@ private fun NotificationScreen(
                     state = lazyListState,
                     contentPadding = contentPadding,
                 ) {
-                    if (windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.COMPACT) {
+                    if (windowInfo.windowSizeClass.isCompat()) {
                         state.state.allTypes.onSuccess {
                             if (it.size > 1) {
                                 item(

@@ -1,10 +1,8 @@
 import Foundation
 import SwiftUI
-import TwitterText
 import UIKit
 
-public enum FlareMarkdownText {
-    // - Constants
+public enum FlareTextStyle {
 
     public static let lensIDRegex: NSRegularExpression? = {
         guard let regex = try? NSRegularExpression(
@@ -16,8 +14,6 @@ public enum FlareMarkdownText {
         }
         return regex
     }()
-
-    // - Style Configuration
 
     public struct Style {
         public let font: UIFont
@@ -70,8 +66,6 @@ public enum FlareMarkdownText {
             self.cashtagColor = cashtagColor
         }
     }
-
-    // - Link Types
 
     public enum LinkType {
         case url(URL)
@@ -282,7 +276,7 @@ public enum FlareMarkdownText {
 
 // - Supporting Types
 
-extension FlareMarkdownText {
+extension FlareTextStyle {
     struct Entity {
         let type: LinkType
         let range: NSRange

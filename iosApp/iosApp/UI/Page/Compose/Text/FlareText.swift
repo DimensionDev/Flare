@@ -1,18 +1,16 @@
 import SwiftUI
 import TwitterText
 
-/// A SwiftUI view that displays processed text with Twitter-style formatting
+
 public struct FlareText: View {
     private let text: String
-    private let twitterTextProvider: TwitterTextProvider
-    private let style: FlareMarkdownText.Style
+    private let style: FlareTextStyle.Style
     private var linkHandler: ((URL) -> Void)?
     @Environment(FlareTheme.self) private var theme
 
     public init(
         _ text: String,
-        twitterTextProvider: TwitterTextProvider = SwiftTwitterTextProvider(),
-        style: FlareMarkdownText.Style = FlareMarkdownText.Style(
+        style: FlareTextStyle.Style = FlareTextStyle.Style(
             font: .systemFont(ofSize: 16),
             textColor: UIColor.black,
             linkColor: UIColor.black,
@@ -22,7 +20,6 @@ public struct FlareText: View {
         )
     ) {
         self.text = text
-        self.twitterTextProvider = twitterTextProvider
         self.style = style
     }
 
@@ -42,14 +39,15 @@ public struct FlareText: View {
                 }
                 return .handled
             })
+//            .environment(\.layoutDirection, isRTL() ? .rightToLeft : .leftToRight)
     }
 
     private func processText(_ text: String) -> NSAttributedString {
-        let (attributedString, _, _) = FlareMarkdownText.attributeString(
+        let (attributedString, _, _) = FlareTextStyle.attributeString(
             of: text,
-            style: FlareMarkdownText.Style(
-                font: .systemFont(ofSize: 16),
-                textColor: UIColor(theme.labelColor),
+            style: FlareTextStyle.Style(
+                font: Font.scaledBodyFont,
+                 textColor: UIColor(theme.labelColor),
                 linkColor: UIColor(theme.tintColor),
                 mentionColor: UIColor(theme.tintColor),
                 hashtagColor: UIColor(theme.tintColor),
@@ -58,4 +56,10 @@ public struct FlareText: View {
         )
         return NSAttributedString(attributedString)
     }
+    
+//    private func isRTL() -> Bool {
+//        // Arabic, Hebrew, Persian, Urdu, Kurdish, Azeri, Dhivehi
+//        ["ar", "he", "fa", "ur", "ku", "az", "dv"].contains(language)
+//      }
 }
+ 

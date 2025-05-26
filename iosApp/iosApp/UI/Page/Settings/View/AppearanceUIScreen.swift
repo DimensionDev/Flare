@@ -253,7 +253,9 @@ struct AppearanceUIScreen: View {
                 Slider(value: $localValues.fontSizeScale, in: 0.5 ... 1.5, step: 0.1)
                 Text("Font Size Scale: \(String(format: "%.1f", localValues.fontSizeScale))")
                     .font(.scaledBody)
-            }
+            }.alignmentGuide(.listRowSeparatorLeading) { d in
+                    d[.leading]
+      }
 
             VStack {
                 Slider(value: $localValues.lineSpacing, in: 0.4 ... 10.0, step: 0.2)
@@ -261,7 +263,9 @@ struct AppearanceUIScreen: View {
                     "Line Spacing: \(String(format: "%.1f", localValues.lineSpacing))"
                 )
                 .font(.scaledBody)
-            }
+            }.alignmentGuide(.listRowSeparatorLeading) { d in
+        d[.leading]
+      }
         }
     }
 
@@ -279,7 +283,7 @@ struct AppearanceUIScreen: View {
 
 // 辅助类，用于存储设置值
 @MainActor
-class DisplaySettingsLocalValues {
+@Observable class DisplaySettingsLocalValues {
     var tintColor = FlareTheme.shared.tintColor
     var primaryBackgroundColor = FlareTheme.shared.primaryBackgroundColor
     var secondaryBackgroundColor = FlareTheme.shared.secondaryBackgroundColor

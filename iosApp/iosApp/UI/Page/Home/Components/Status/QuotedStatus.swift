@@ -44,7 +44,7 @@ struct QuotedStatus: View {
                 }
 
                 // 原文和翻译
-                FlareText(data.content.raw, style: FlareMarkdownText.Style(
+                FlareText(data.content.raw, style: FlareTextStyle.Style(
                     font: .systemFont(ofSize: 16),
                     textColor: UIColor(theme.labelColor),
                     linkColor: UIColor(theme.tintColor),

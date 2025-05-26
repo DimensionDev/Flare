@@ -248,12 +248,19 @@ struct CommonTimelineStatusComponent: View {
                     .frame(height: 10)
 
                 if !data.content.raw.isEmpty {
+                    
+                    //UiRichText(markdown=Chudai<br />[@SexytoBaby](flare://ProfileWithNameAndHost/SexytoBaby/twitter.com?accountKey=426425493@twitter.com)
+                    //                    <br />[@SexytoLady](flare://ProfileWithNameAndHost/SexytoLady/twitter.com?accountKey=426425493@twitter.com)
+                    //                    <br />[@SexytoDoll](flare://ProfileWithNameAndHost/SexytoDoll/twitter.com?accountKey=426425493@twitter.com)
+                    //                    <br />[@SexytoGirl](flare://ProfileWithNameAndHost/SexytoGirl/twitter.com?accountKey=426425493@twitter.com)
+                    //                    , raw=Chudai @SexytoBaby @SexytoLady @SexytoDoll @SexytoGirl)
+
                     FlareText(data.content.raw)
                         .onLinkTap { url in
                             openURL(url)
                         }
-                        .font(.system(size: 16))
-                        .foregroundColor(theme.labelColor)
+                         .lineSpacing(CGFloat(theme.lineSpacing))
+                         .foregroundColor(theme.labelColor)
 
                     // Add translation component
                     if appSettings.appearanceSettings.autoTranslate, enableTranslation {

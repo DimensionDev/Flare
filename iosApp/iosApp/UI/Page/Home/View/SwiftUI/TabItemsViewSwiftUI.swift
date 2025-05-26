@@ -162,15 +162,3 @@ extension Character {
         return false
     }
 }
-
-struct EmojiText: View {
-    let text: String
-    let color: Color
-
-    var body: some View {
-        Text(text)
-            .font(.system(size: 12)) // emoji使用较小字体
-            .foregroundColor(color)
-            .scaleEffect(0.85) // 再稍微缩小一点
-    }
-}

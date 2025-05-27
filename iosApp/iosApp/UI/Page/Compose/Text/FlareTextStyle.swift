@@ -212,7 +212,7 @@ public enum FlareTextStyle {
 
     private static func parseMarkdownLinks(from markdownText: String) -> [String: URL] {
         var links: [String: URL] = [:]
-        // Regex to find markdown links like [@mention](flare://...) or [\#hashtag](flare://...)
+        // Regex     [@mention](flare://...) or [\#hashtag](flare://...)
         guard let regex = try? NSRegularExpression(pattern: "\\[(?:\\\\)?(@|#|\\$)([^\\]]+)\\]\\((flare:\\/\\/[^\\)]+)\\)", options: []) else {
             return links
         }

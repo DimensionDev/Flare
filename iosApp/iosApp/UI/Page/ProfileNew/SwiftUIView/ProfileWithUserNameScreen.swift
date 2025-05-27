@@ -53,7 +53,11 @@ struct ProfileWithUserNameScreen: View {
                         os_log("[📔][ProfileWithUserNameScreen]正在加载用户信息...", log: .default, type: .debug)
                     }
                 case let .success(data):
-                    let loadedUserInfo = ProfileUserInfo.from(state: state as! ProfileNewState)
+                    // (lldb) po state dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter$body$1@1d3717a0
+//                    (lldb) p state
+//                    (SharedUserState) 0x0000000000000000
+//
+//                    let loadedUserInfo = ProfileUserInfo.from(state: state as! ProfileNewState)
 
                     ProfileTabScreenUikit(
                         accountType: accountType,

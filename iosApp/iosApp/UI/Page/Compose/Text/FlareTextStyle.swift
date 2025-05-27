@@ -2,8 +2,14 @@ import Foundation
 import SwiftUI
 import UIKit
 
-public enum FlareTextStyle {
+extension FlareTextStyle {
+    struct Entity {
+        let type: LinkType
+        let range: NSRange
+    }
+}
 
+public enum FlareTextStyle {
     public static let lensIDRegex: NSRegularExpression? = {
         guard let regex = try? NSRegularExpression(
             pattern: "[@|#|/][a-zA-Z0-9-_./]+",
@@ -90,19 +96,20 @@ public enum FlareTextStyle {
     /// parse and combinate attributeString in markdown style
     public static func attributeString(
         of originalText: String?,
+        markdownText: String?, // Add markdownText parameter
         prependLinks _: [String: URL] = [:],
-        embeds: [String] = [],
+        embeds _: [String] = [],
         style: Style,
-        previewLinkValidator: @escaping (String) -> Bool = { _ in false }
+        previewLinkValidator _: @escaping (String) -> Bool = { _ in false }
     ) -> (
         markdown: AttributedString,
         previewLink: String?,
         luckyDropLink: String?
     ) {
-        let withOutMediaUrls = embeds.filter { !$0.isImageLink && !$0.isVideoLink }
+//        let withOutMediaUrls = embeds.filter { !$0.isImageLink && !$0.isVideoLink }
 
         guard let originalText, !originalText.isEmpty else {
-            return (AttributedString(), withOutMediaUrls.last, nil)
+            return (AttributedString(), nil, nil) // withOutMediaUrls.last, nil
         }
 
         let text = originalText
@@ -130,7 +137,7 @@ public enum FlareTextStyle {
         let length = nsAttrString.length
 
         // 确保文本长度有效
-        guard length > 0 else { return (AttributedString(), withOutMediaUrls.last, nil) }
+        guard length > 0 else { return (AttributedString(), nil, nil) } // withOutMediaUrls.last, nil
 
         // Apply default style
         let fullRange = NSRange(location: 0, length: length)
@@ -144,6 +151,8 @@ public enum FlareTextStyle {
 
         // Process different types of links
         let entities = parseEntities(from: text)
+        let markdownLinks = parseMarkdownLinks(from: markdownText ?? "") // Parse links from markdownText
+
         for entity in entities {
             // 验证范围是否有效
             let isValidRange = entity.range.location >= 0 &&
@@ -161,17 +170,26 @@ public enum FlareTextStyle {
                 attributes[.link] = url
                 attributes[.foregroundColor] = entity.type.color(style)
             case let .mention(username):
-                if let url = URL(string: "https://twitter.com/\(username.dropFirst())") {
+                // Try to find a flare link first
+                if let flareLink = markdownLinks[username] {
+                    attributes[.link] = flareLink
+                } else if let url = URL(string: "https://twitter.com/\(username.dropFirst())") {
                     attributes[.link] = url
                 }
                 attributes[.foregroundColor] = entity.type.color(style)
             case let .hashtag(tag):
-                if let url = URL(string: "https://twitter.com/hashtag/\(tag.dropFirst())") {
+                // Try to find a flare link first
+                if let flareLink = markdownLinks[tag] {
+                    attributes[.link] = flareLink
+                } else if let url = URL(string: "https://twitter.com/hashtag/\(tag.dropFirst())") {
                     attributes[.link] = url
                 }
                 attributes[.foregroundColor] = entity.type.color(style)
             case let .cashtag(symbol):
-                if let url = URL(string: "https://twitter.com/search?q=%24\(symbol.dropFirst())") {
+                // Try to find a flare link first
+                if let flareLink = markdownLinks[symbol] {
+                    attributes[.link] = flareLink
+                } else if let url = URL(string: "https://twitter.com/search?q=%24\(symbol.dropFirst())") {
                     attributes[.link] = url
                 }
                 attributes[.foregroundColor] = entity.type.color(style)
@@ -183,16 +201,45 @@ public enum FlareTextStyle {
         }
 
         // Handle preview and lucky drop links
-        let (previewLink, luckyDropLink) = processSpecialLinks(
-            entities: entities,
-            withOutMediaUrls: withOutMediaUrls,
-            previewLinkValidator: previewLinkValidator
-        )
+//        let (previewLink, luckyDropLink) = processSpecialLinks(
+//            entities: entities,
+//            withOutMediaUrls: withOutMediaUrls,
+//            previewLinkValidator: previewLinkValidator
+//        )
 
-        return (AttributedString(nsAttrString), previewLink, luckyDropLink)
+        return (AttributedString(nsAttrString), nil, nil)
     }
 
-    // - Private Methods
+    private static func parseMarkdownLinks(from markdownText: String) -> [String: URL] {
+        var links: [String: URL] = [:]
+        // Regex to find markdown links like [@mention](flare://...) or [\#hashtag](flare://...)
+        guard let regex = try? NSRegularExpression(pattern: "\\[(?:\\\\)?(@|#|\\$)([^\\]]+)\\]\\((flare:\\/\\/[^\\)]+)\\)", options: []) else {
+            return links
+        }
+        let nsRange = NSRange(markdownText.startIndex ..< markdownText.endIndex, in: markdownText)
+        regex.enumerateMatches(in: markdownText, options: [], range: nsRange) { match, _, _ in
+            guard let match else { return }
+
+            // Extract the entity name (e.g., @mention, #hashtag, $cashtag)
+            let entityTypeRange = match.range(at: 1)
+            let entityNameRange = match.range(at: 2)
+            // Extract the URL
+            let urlRange = match.range(at: 3)
+
+            if let entityTypeSwiftRange = Range(entityTypeRange, in: markdownText),
+               let entityNameSwiftRange = Range(entityNameRange, in: markdownText),
+               let urlSwiftRange = Range(urlRange, in: markdownText)
+            {
+                let entityType = String(markdownText[entityTypeSwiftRange])
+                let entityName = String(markdownText[entityNameSwiftRange])
+                let urlString = String(markdownText[urlSwiftRange])
+                if let url = URL(string: urlString) {
+                    links["\(entityType)\(entityName)"] = url
+                }
+            }
+        }
+        return links
+    }
 
     private static func parseEntities(from text: String) -> [Entity] {
         var entities: [Entity] = []
@@ -234,72 +281,63 @@ public enum FlareTextStyle {
         return entities.sorted { $0.range.location < $1.range.location }
     }
 
-    private static func processSpecialLinks(
-        entities: [Entity],
-        withOutMediaUrls: [String],
-        previewLinkValidator: (String) -> Bool
-    ) -> (previewLink: String?, luckyDropLink: String?) {
-        var previewLink: String?
-        var luckyDropLink: String?
-
-        // Process entities for lucky drop links
-        for entity in entities {
-            if case let .url(url) = entity.type {
-                let urlString = url.absoluteString
-                if urlString.isLuckDropLink {
-                    luckyDropLink = urlString
-                    break
-                }
-            }
-        }
-
-        // Process preview links if no lucky drop link found
-        if luckyDropLink == nil {
-            if entities.isEmpty {
-                previewLink = withOutMediaUrls.last
-            } else {
-                for entity in entities.reversed() {
-                    if case let .url(url) = entity.type {
-                        let urlString = url.absoluteString
-                        if previewLinkValidator(urlString) {
-                            previewLink = urlString
-                            break
-                        }
-                    }
-                }
-            }
-        }
-
-        return (previewLink, luckyDropLink)
-    }
-}
-
-// - Supporting Types
-
-extension FlareTextStyle {
-    struct Entity {
-        let type: LinkType
-        let range: NSRange
-    }
+//    private static func processSpecialLinks(
+//        entities: [Entity],
+//        withOutMediaUrls: [String],
+//        previewLinkValidator: (String) -> Bool
+//    ) -> (previewLink: String?, luckyDropLink: String?) {
+//        var previewLink: String?
+//        var luckyDropLink: String?
+//
+//        // Process entities for lucky drop links
+//        for entity in entities {
+//            if case let .url(url) = entity.type {
+//                let urlString = url.absoluteString
+//                if urlString.isLuckDropLink {
+//                    luckyDropLink = urlString
+//                    break
+//                }
+//            }
+//        }
+//
+//        // Process preview links if no lucky drop link found
+//        if luckyDropLink == nil {
+//            if entities.isEmpty {
+//                previewLink = withOutMediaUrls.last
+//            } else {
+//                for entity in entities.reversed() {
+//                    if case let .url(url) = entity.type {
+//                        let urlString = url.absoluteString
+//                        if previewLinkValidator(urlString) {
+//                            previewLink = urlString
+//                            break
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        return (previewLink, luckyDropLink)
+//    }
 }
 
 // - String Extensions
 
 private extension String {
-    var isImageLink: Bool {
-        let imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"]
-        return imageExtensions.contains { self.lowercased().hasSuffix($0) }
-    }
-
-    var isVideoLink: Bool {
-        let videoExtensions = [".mp4", ".mov", ".avi", ".webm"]
-        return videoExtensions.contains { self.lowercased().hasSuffix($0) }
-    }
-
-    var isLuckDropLink: Bool {
-        // Empty implementation as requested
-        false
-    }
+//    var isImageLink: Bool {
+//        let imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"]
+//        return imageExtensions.contains { self.lowercased().hasSuffix($0) }
+//    }
+//
+//    var isVideoLink: Bool {
+//        let videoExtensions = [".mp4", ".mov", ".avi", ".webm"]
+//        return videoExtensions.contains { self.lowercased().hasSuffix($0) }
+//    }
+//
+//    var isLuckDropLink: Bool {
+//        // Empty implementation as requested
+//        false
+//    }
 
     func squashingNewlines() -> String {
         replacingOccurrences(

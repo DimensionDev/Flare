@@ -254,8 +254,8 @@ struct AppearanceUIScreen: View {
                 Text("Font Size Scale: \(String(format: "%.1f", localValues.fontSizeScale))")
                     .font(.scaledBody)
             }.alignmentGuide(.listRowSeparatorLeading) { d in
-                    d[.leading]
-      }
+                d[.leading]
+            }
 
             VStack {
                 Slider(value: $localValues.lineSpacing, in: 0.4 ... 10.0, step: 0.2)
@@ -264,8 +264,8 @@ struct AppearanceUIScreen: View {
                 )
                 .font(.scaledBody)
             }.alignmentGuide(.listRowSeparatorLeading) { d in
-        d[.leading]
-      }
+                d[.leading]
+            }
         }
     }
 

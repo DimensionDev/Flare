@@ -12,21 +12,6 @@ struct SettingsUIScreen: View {
             ObservePresenter(presenter: presenter) { _ in
                 NavigationSplitView {
                     List(selection: $selectedDetail) {
-                        // Section {
-                        //     AccountItem(
-                        //         userState: state.user,
-                        //         supportingContent: { _ in
-                        //             AnyView(
-                        //                 Text("settings_accounts_title")
-                        //                     .lineLimit(1)
-                        //                     .font(.subheadline)
-                        //                     .opacity(0.5)
-                        //             )
-                        //         }
-                        //     )
-                        //     .tag(SettingsDestination.account)
-                        // }.listRowBackground(theme.primaryBackgroundColor)
-
                         Section {
                             Label {
                                 Text("settings_appearance_generic")

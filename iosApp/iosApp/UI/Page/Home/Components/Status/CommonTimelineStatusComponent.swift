@@ -74,16 +74,7 @@ struct CommonTimelineStatusComponent: View {
                                 // 其他操作添加到更多操作
                                 bottomMoreActions.append(item)
                             }
-                        } else if subAction is StatusActionAsyncActionItem {
-                            // flow=dev.dimension.flare.ui.model.mappe .combineUnsafe$$inlined$unsafeFlow$1@5cb14370
-                            // 处理异步操作项的flow
-                            // let collector = AsyncActionItemCollector(
-                            //     asyncItem: subAction as! StatusActionAsyncActionItem)
-                            // collector.collect { item in
-                            //     // item本身就是StatusAction的一个实现，可以直接添加
-                            //     bottomMoreActions.append(item)
-                            // }
-                        }
+                        } else if subAction is StatusActionAsyncActionItem {}
                     }
                 } else {
                     // 其他 group（比如转发组）保持原样
@@ -91,12 +82,6 @@ struct CommonTimelineStatusComponent: View {
                 }
             case let .asyncActionItem(asyncItem):
                 break
-                // 处理异步操作项的flow
-//                let collector = AsyncActionItemCollector(asyncItem: asyncItem)
-//                collector.collect { item in
-//                    // item本身就是StatusAction的一个实现，可以直接添加
-//                    bottomMoreActions.append(item)
-//                }
             }
         }
 
@@ -111,10 +96,9 @@ struct CommonTimelineStatusComponent: View {
                 if let user = data.user {
                     UserComponent(
                         user: user,
-                        topEndContent: data.topEndContent
-                            as? UiTimelineItemContentStatusTopEndContent
-
-                    ).environmentObject(router)
+                        topEndContent: data.topEndContent as? UiTimelineItemContentStatusTopEndContent
+                    ).id("UserComponent_\(user.key)")
+                        .environmentObject(router)
                 }
                 Spacer()
                 // icon + time
@@ -213,6 +197,7 @@ struct CommonTimelineStatusComponent: View {
                     .frame(height: 4)
             }
 
+            // NSFW warning content
             if let cwText = data.contentWarning, !cwText.raw.isEmpty {
                 Button(
                     action: {
@@ -225,7 +210,7 @@ struct CommonTimelineStatusComponent: View {
                             .foregroundColor(theme.labelColor)
 
                         Markdown(cwText.markdown)
-                            .font(.body)
+                            .font(.scaledBody)
                             .markdownInlineImageProvider(.emoji)
                         Spacer()
                         if expanded {
@@ -248,19 +233,19 @@ struct CommonTimelineStatusComponent: View {
                     .frame(height: 10)
 
                 if !data.content.raw.isEmpty {
-                    
-                    //UiRichText(markdown=Chudai<br />[@SexytoBaby](flare://ProfileWithNameAndHost/SexytoBaby/twitter.com?accountKey=426425493@twitter.com)
-                    //                    <br />[@SexytoLady](flare://ProfileWithNameAndHost/SexytoLady/twitter.com?accountKey=426425493@twitter.com)
-                    //                    <br />[@SexytoDoll](flare://ProfileWithNameAndHost/SexytoDoll/twitter.com?accountKey=426425493@twitter.com)
-                    //                    <br />[@SexytoGirl](flare://ProfileWithNameAndHost/SexytoGirl/twitter.com?accountKey=426425493@twitter.com)
-                    //                    , raw=Chudai @SexytoBaby @SexytoLady @SexytoDoll @SexytoGirl)
-
-                    FlareText(data.content.raw)
-                        .onLinkTap { url in
-                            openURL(url)
-                        }
-                         .lineSpacing(CGFloat(theme.lineSpacing))
-                         .foregroundColor(theme.labelColor)
+                    FlareText(data.content.raw, data.content.markdown, style: FlareTextStyle.Style(
+                        font: Font.scaledBodyFont,
+                        textColor: UIColor(theme.labelColor),
+                        linkColor: UIColor(theme.tintColor),
+                        mentionColor: UIColor(theme.tintColor),
+                        hashtagColor: UIColor(theme.tintColor),
+                        cashtagColor: UIColor(theme.tintColor)
+                    ))
+                    .onLinkTap { url in
+                        openURL(url)
+                    }
+                    .lineSpacing(CGFloat(theme.lineSpacing))
+                    .foregroundColor(theme.labelColor)
 
                     // Add translation component
                     if appSettings.appearanceSettings.autoTranslate, enableTranslation {
@@ -277,7 +262,6 @@ struct CommonTimelineStatusComponent: View {
             if !data.images.isEmpty {
                 Spacer().frame(height: 8)
 
-                // if appSettings.appearanceSettings.showMedia || showMedia {
                 MediaComponent(
                     hideSensitive: data.sensitive
                         && !appSettings.appearanceSettings.showSensitiveContent,
@@ -285,19 +269,6 @@ struct CommonTimelineStatusComponent: View {
                     onMediaClick: handleMediaClick, // 打开预览
                     sensitive: data.sensitive
                 )
-                // } else {
-                //    Button {
-                //        withAnimation {
-                //            showMedia = true
-                //        }
-                //    } label: {
-                //        Label(
-                //            title: { Text("status_display_media") },
-                //            icon: { Image(systemName: "photo") }
-                //        )
-                //    }
-                //    .buttonStyle(.borderless)
-                // }
             }
 
             if let card = data.card {
@@ -312,6 +283,7 @@ struct CommonTimelineStatusComponent: View {
                     LinkPreview(card: card)
                 }
             }
+
             // quote tweet
             if !data.quote.isEmpty {
                 Spacer()
@@ -339,6 +311,7 @@ struct CommonTimelineStatusComponent: View {
                 //               .background(Color(NSColor.windowBackgroundColor))
                 //               #endif
             }
+
             // misskey 的+ 的emojis
             if let bottomContent = data.bottomContent {
                 switch onEnum(of: bottomContent) {
@@ -372,6 +345,7 @@ struct CommonTimelineStatusComponent: View {
                     }
                 }
             }
+
             // if detail page
             if isDetail {
                 Spacer()
@@ -382,8 +356,8 @@ struct CommonTimelineStatusComponent: View {
                 }
                 .opacity(0.6)
             }
-            Spacer()
-                .frame(height: 10)
+
+            Spacer().frame(height: 10)
 
             // bottom action
             if appSettings.appearanceSettings.showActions || isDetail, !data.actions.isEmpty {
@@ -503,8 +477,7 @@ struct CommonTimelineStatusComponent: View {
                 }
                 .allowsHitTesting(true)
             }
-            Spacer()
-                .frame(height: 2)
+            Spacer().frame(height: 2)
         }.frame(alignment: .leading)
             .contentShape(Rectangle())
             .onTapGesture {
@@ -700,7 +673,6 @@ struct CenteredLabelStyle: LabelStyle {
             configuration.icon.foregroundColor(theme.labelColor)
             configuration.title
                 .font(.system(size: 12))
-            // Spacer() // 添加 Spacer 让内容靠左
         }
         .frame(maxWidth: .infinity, alignment: .center)
     }
@@ -712,33 +684,5 @@ struct SmallIconModifier: ViewModifier {
             .imageScale(.small)
             .scaleEffect(0.8)
             .frame(width: 24, height: 24)
-    }
-}
-
-// 用于收集StatusActionAsyncActionItem中Flow数据的类
-class AsyncActionItemCollector {
-    private let asyncItem: StatusActionAsyncActionItem
-    private var task: Task<Void, Never>?
-
-    init(asyncItem: StatusActionAsyncActionItem) {
-        self.asyncItem = asyncItem
-    }
-
-    func collect(onCollect: @escaping (StatusActionItem) -> Void) {
-        task = Task { @MainActor in
-            do {
-                for await value in asyncItem.flow {
-                    if let item = value as? StatusActionItem {
-                        onCollect(item)
-                    }
-                }
-            } catch {
-                print("Error collecting from flow: \(error)")
-            }
-        }
-    }
-
-    deinit {
-        task?.cancel()
     }
 }

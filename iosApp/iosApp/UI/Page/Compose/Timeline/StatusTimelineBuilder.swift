@@ -77,7 +77,7 @@ struct StatusItemView: View {
                     ))
                 }
             }, label: {
-                StatusRetweetHeaderComponent(topMessage: topMessage)
+                StatusRetweetHeaderComponent(topMessage: topMessage).id("StatusRetweetHeaderComponent_\(topMessage.statusKey)")
             })
             .buttonStyle(.plain)
         }
@@ -104,7 +104,7 @@ struct StatusItemView: View {
                         },
                         isDetail: detailKey == data.statusKey,
                         enableTranslation: enableTranslation
-                    )
+                    ).id("CommonTimelineStatusComponent_\(data.statusKey)")
                 })
                 .buttonStyle(.plain)
             case let .user(data):
@@ -112,13 +112,13 @@ struct StatusItemView: View {
                     UserComponent(
                         user: data.value,
                         topEndContent: nil
-                    )
+                    ).id("UserComponent_\(data.value.key)")
                     Spacer()
                 }
             case let .userList(data):
                 HStack {
                     ForEach(data.users, id: \.key) { user in
-                        UserAvatar(data: user.avatar, size: 48)
+                        UserAvatar(data: user.avatar, size: 48).id("UserAvatar_\(user.key)")
                     }
                 }
             case .feed: EmptyView()

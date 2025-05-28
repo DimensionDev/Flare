@@ -6,16 +6,12 @@ import SwiftUI
 struct UserComponent: View {
     let user: UiUserV2
     let topEndContent: UiTimelineItemContentStatusTopEndContent?
-    // let onUserClicked: () -> Void
 
-    // 添加路由器环境对象，使用可选类型
     @EnvironmentObject private var router: FlareRouter
 
     var body: some View {
         Button(
             action: {
-                print("📱 头像按钮被点击: \(user.handle)")
-                // 使用声明式导航替换KMP回调
                 router.navigate(to: .profile(
                     accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
                     userKey: user.key
@@ -26,7 +22,7 @@ struct UserComponent: View {
                     UserAvatar(data: user.avatar, size: 44)
                     VStack(alignment: .leading, spacing: 2) {
                         if user.name.markdown.isEmpty {
-                            Text(" ") // 使用空格占位
+                            Text(" ")
                                 .lineLimit(1)
                                 .font(.headline)
                         } else {
@@ -40,13 +36,14 @@ struct UserComponent: View {
                                 .lineLimit(1)
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
-                            // 设置 pawoo 用户的可见状态
-                            if topEndContent != nil {
+                            // 设置 pawoo 用户的可见状态 就是 后面的图标
+                            if  topEndContent != nil {
                                 if let topEndContent {
                                     switch onEnum(of: topEndContent) {
-                                    case let .visibility(data): StatusVisibilityComponent(visibility: data.visibility)
-                                        .foregroundColor(.gray)
-                                        .font(.caption)
+                                    case let .visibility(data):
+                                        StatusVisibilityComponent(visibility: data.visibility)
+                                            .foregroundColor(.gray)
+                                            .font(.caption)
                                     }
                                 }
                             }
@@ -57,57 +54,5 @@ struct UserComponent: View {
             }
         )
         .buttonStyle(.plain)
-    }
-}
-
-struct AccountItem: View {
-    let userState: UiState<UiUserV2>
-    var supportingContent: (UiUserV2) -> AnyView = { user in
-        AnyView(
-            Text(user.handle)
-                .lineLimit(1)
-                .font(.subheadline)
-                .opacity(0.5)
-        )
-    }
-
-    var body: some View {
-        switch onEnum(of: userState) {
-        case .error:
-            EmptyView()
-        case .loading:
-            HStack {
-                UserAvatarPlaceholder(size: 48)
-                VStack(alignment: .leading) {
-                    Markdown("loading")
-                        .lineLimit(1)
-                        .font(.headline)
-                        .markdownInlineImageProvider(.emoji)
-                    Text("loading")
-                        .lineLimit(1)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
-            }
-            .redacted(reason: .placeholder)
-        case let .success(success):
-            let user = success.data
-            HStack {
-                UserAvatar(data: user.avatar, size: 48)
-                VStack(alignment: .leading) {
-                    if user.name.markdown.isEmpty {
-                        Text(" ") // 使用空格占位，有的这个是空的，导致位置错乱
-                            .lineLimit(1)
-                            .font(.headline)
-                    } else {
-                        Markdown(user.name.markdown)
-                            .lineLimit(1)
-                            .font(.headline)
-                            .markdownInlineImageProvider(.emoji)
-                    }
-                    supportingContent(user)
-                }
-            }
-        }
     }
 }

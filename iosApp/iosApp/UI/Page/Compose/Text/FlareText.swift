@@ -11,14 +11,7 @@ public struct FlareText: View {
     public init(
         _ text: String,
         _ markdownText: String,
-        style: FlareTextStyle.Style = FlareTextStyle.Style(
-            font: .systemFont(ofSize: 16),
-            textColor: UIColor.black,
-            linkColor: UIColor.black,
-            mentionColor: UIColor.black,
-            hashtagColor: UIColor.black,
-            cashtagColor: UIColor.black
-        )
+        style: FlareTextStyle.Style 
     ) {
         self.text = text
         self.markdownText = markdownText
@@ -45,17 +38,10 @@ public struct FlareText: View {
     }
 
     private func processText(_ text: String, _ markdownText: String) -> NSAttributedString {
-        let (attributedString, _, _) = FlareTextStyle.attributeString(
+        let attributedString = FlareTextStyle.attributeString(
             of: text,
             markdownText: markdownText,
-            style: FlareTextStyle.Style(
-                font: Font.scaledBodyFont,
-                textColor: UIColor(theme.labelColor),
-                linkColor: UIColor(theme.tintColor),
-                mentionColor: UIColor(theme.tintColor),
-                hashtagColor: UIColor(theme.tintColor),
-                cashtagColor: UIColor(theme.tintColor)
-            )
+            style: style
         )
         return NSAttributedString(attributedString)
     }

@@ -61,7 +61,7 @@ struct AccountsScreen: View {
                             case .none:
                                 EmptyView()
                             }
-                        }.scrollContentBackground(.hidden).listRowBackground(theme.primaryBackgroundColor)
+                        }.scrollContentBackground(.hidden).listRowBackground(theme.primaryBackgroundColor).listSectionSpacing(50)
                     } else {
                         Text("no_accounts")
                     }
@@ -71,6 +71,7 @@ struct AccountsScreen: View {
                     Text("loading")
                 }
             }
+            
             .listStyle(.insetGrouped)
             .navigationTitle("settings_accounts_title")
             .navigationBarTitleDisplayMode(.inline)

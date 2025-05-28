@@ -8,20 +8,18 @@ extension FlareTextStyle {
         let range: NSRange
     }
 }
+private extension String { 
+    func squashingNewlines() -> String {
+        replacingOccurrences(
+            of: "\\n\\s*\\n",
+            with: "\n",
+            options: .regularExpression
+        )
+    }
+}
 
 public enum FlareTextStyle {
-    public static let lensIDRegex: NSRegularExpression? = {
-        guard let regex = try? NSRegularExpression(
-            pattern: "[@|#|/][a-zA-Z0-9-_./]+",
-            options: []
-        ) else {
-            print("Failed to create regex")
-            return nil
-        }
-        return regex
-    }()
-
-    public struct Style {
+      public struct Style {
         public let font: UIFont
         public let textColor: UIColor
         public let linkColor: UIColor
@@ -93,7 +91,7 @@ public enum FlareTextStyle {
         }
     }
 
-    /// parse and combinate attributeString in markdown style
+   
     public static func attributeString(
         of originalText: String?,
         markdownText: String?, // Add markdownText parameter
@@ -101,15 +99,11 @@ public enum FlareTextStyle {
         embeds _: [String] = [],
         style: Style,
         previewLinkValidator _: @escaping (String) -> Bool = { _ in false }
-    ) -> (
-        markdown: AttributedString,
-        previewLink: String?,
-        luckyDropLink: String?
-    ) {
-//        let withOutMediaUrls = embeds.filter { !$0.isImageLink && !$0.isVideoLink }
-
+    ) ->   AttributedString
+     {
+ 
         guard let originalText, !originalText.isEmpty else {
-            return (AttributedString(), nil, nil) // withOutMediaUrls.last, nil
+            return AttributedString() // withOutMediaUrls.last, nil
         }
 
         let text = originalText
@@ -117,7 +111,7 @@ public enum FlareTextStyle {
             .squashingNewlines()
             .replacingOccurrences(of: "~~", with: " ~~ ")
 
-        var attributedString = {
+        let attributedString = {
             do {
                 return try AttributedString(
                     markdown: text,
@@ -137,7 +131,7 @@ public enum FlareTextStyle {
         let length = nsAttrString.length
 
         // 确保文本长度有效
-        guard length > 0 else { return (AttributedString(), nil, nil) } // withOutMediaUrls.last, nil
+        guard length > 0 else { return AttributedString() } // withOutMediaUrls.last, nil
 
         // Apply default style
         let fullRange = NSRange(location: 0, length: length)
@@ -149,9 +143,9 @@ public enum FlareTextStyle {
             range: fullRange
         )
 
-        // Process different types of links
+       
         let entities = parseEntities(from: text)
-        let markdownLinks = parseMarkdownLinks(from: markdownText ?? "") // Parse links from markdownText
+        let markdownLinks = parseMarkdownLinks(from: markdownText ?? "")  
 
         for entity in entities {
             // 验证范围是否有效
@@ -170,7 +164,7 @@ public enum FlareTextStyle {
                 attributes[.link] = url
                 attributes[.foregroundColor] = entity.type.color(style)
             case let .mention(username):
-                // Try to find a flare link first
+                // @
                 if let flareLink = markdownLinks[username] {
                     attributes[.link] = flareLink
                 } else if let url = URL(string: "https://twitter.com/\(username.dropFirst())") {
@@ -178,7 +172,7 @@ public enum FlareTextStyle {
                 }
                 attributes[.foregroundColor] = entity.type.color(style)
             case let .hashtag(tag):
-                // Try to find a flare link first
+                // # 
                 if let flareLink = markdownLinks[tag] {
                     attributes[.link] = flareLink
                 } else if let url = URL(string: "https://twitter.com/hashtag/\(tag.dropFirst())") {
@@ -186,7 +180,7 @@ public enum FlareTextStyle {
                 }
                 attributes[.foregroundColor] = entity.type.color(style)
             case let .cashtag(symbol):
-                // Try to find a flare link first
+                // $ todo:
                 if let flareLink = markdownLinks[symbol] {
                     attributes[.link] = flareLink
                 } else if let url = URL(string: "https://twitter.com/search?q=%24\(symbol.dropFirst())") {
@@ -199,15 +193,8 @@ public enum FlareTextStyle {
 
             nsAttrString.addAttributes(attributes, range: entity.range)
         }
-
-        // Handle preview and lucky drop links
-//        let (previewLink, luckyDropLink) = processSpecialLinks(
-//            entities: entities,
-//            withOutMediaUrls: withOutMediaUrls,
-//            previewLinkValidator: previewLinkValidator
-//        )
-
-        return (AttributedString(nsAttrString), nil, nil)
+ 
+        return AttributedString(nsAttrString)
     }
 
     private static func parseMarkdownLinks(from markdownText: String) -> [String: URL] {
@@ -245,7 +232,7 @@ public enum FlareTextStyle {
         var entities: [Entity] = []
 
         // URLs
-        if let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) {
+        if let detector: NSDataDetector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) {
             let fullRange = NSRange(location: 0, length: text.utf16.count)
             let matches = detector.matches(in: text, options: [], range: fullRange)
             for match in matches {
@@ -280,70 +267,7 @@ public enum FlareTextStyle {
 
         return entities.sorted { $0.range.location < $1.range.location }
     }
-
-//    private static func processSpecialLinks(
-//        entities: [Entity],
-//        withOutMediaUrls: [String],
-//        previewLinkValidator: (String) -> Bool
-//    ) -> (previewLink: String?, luckyDropLink: String?) {
-//        var previewLink: String?
-//        var luckyDropLink: String?
-//
-//        // Process entities for lucky drop links
-//        for entity in entities {
-//            if case let .url(url) = entity.type {
-//                let urlString = url.absoluteString
-//                if urlString.isLuckDropLink {
-//                    luckyDropLink = urlString
-//                    break
-//                }
-//            }
-//        }
-//
-//        // Process preview links if no lucky drop link found
-//        if luckyDropLink == nil {
-//            if entities.isEmpty {
-//                previewLink = withOutMediaUrls.last
-//            } else {
-//                for entity in entities.reversed() {
-//                    if case let .url(url) = entity.type {
-//                        let urlString = url.absoluteString
-//                        if previewLinkValidator(urlString) {
-//                            previewLink = urlString
-//                            break
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//
-//        return (previewLink, luckyDropLink)
-//    }
+ 
 }
 
-// - String Extensions
-
-private extension String {
-//    var isImageLink: Bool {
-//        let imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"]
-//        return imageExtensions.contains { self.lowercased().hasSuffix($0) }
-//    }
-//
-//    var isVideoLink: Bool {
-//        let videoExtensions = [".mp4", ".mov", ".avi", ".webm"]
-//        return videoExtensions.contains { self.lowercased().hasSuffix($0) }
-//    }
-//
-//    var isLuckDropLink: Bool {
-//        // Empty implementation as requested
-//        false
-//    }
-
-    func squashingNewlines() -> String {
-        replacingOccurrences(
-            of: "\\n\\s*\\n",
-            with: "\n",
-            options: .regularExpression
-        )
-    }
-}
+ 

@@ -16,14 +16,17 @@ struct TimelineViewSwiftUI: View {
                            case let .success(success) = onEnum(of: timelineState.listState)
                         {
                             ForEach(0 ..< success.itemCount, id: \.self) { index in
-                                let statusID = "status_\(index)"
+
                                 if let status = success.peek(index: index) {
+                                    let statusID = status.itemKey
                                     StatusItemView(data: status, detailKey: nil)
                                         .padding(.vertical, 8)
                                         .padding(.horizontal, 16)
-                                        .id(statusID)
+                                        .id("StatusItemView_\(statusID)")
                                         .onAppear {
-                                            success.get(index: index)
+                                           if index > success.itemCount - 4 {
+                                                success.get(index: index)
+                                           }
                                         }
                                         .background(
                                             GeometryReader { _ in
@@ -37,9 +40,11 @@ struct TimelineViewSwiftUI: View {
                                         )
                                 } else {
                                     StatusPlaceHolder()
+                                        .onAppear {
+                                            success.get(index: index)
+                                        }
                                         .padding(.vertical, 8)
                                         .padding(.horizontal, 16)
-                                        .id(statusID)
                                 }
 
                                 if index < success.itemCount - 1 {

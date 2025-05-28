@@ -26,7 +26,7 @@ internal class Server : CliktCommand() {
             aiService = aiService,
             config = config,
         )
-        val port = config.propertyOrNull("server.port")?.getString()?.toInt() ?: 8080
+        val port = config.propertyOrNull("server.port")?.getString()?.toIntOrNull() ?: 8080
         val host = config.propertyOrNull("server.host")?.getString() ?: "localhost"
         Log.i("Server", "Starting server on $host:$port")
         embeddedServer(

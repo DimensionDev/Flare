@@ -2,6 +2,7 @@ package dev.dimension.flare.server.common
 
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
+import io.ktor.client.engine.HttpClientEngine
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -10,6 +11,7 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import kotlin.time.Duration.Companion.minutes
 
+internal expect fun createEngine(): HttpClientEngine
 
 internal fun ktorClient(
     config: HttpClientConfig<*>.() -> Unit = {
@@ -17,12 +19,12 @@ internal fun ktorClient(
             json(JSON)
         }
     },
-) = HttpClient {
+) = HttpClient(engine = createEngine()) {
     config.invoke(this)
     install(Logging) {
         logger = object : Logger {
             override fun log(message: String) {
-                Log.d("KtorClient", message)
+                Log.trace("KtorClient", message)
             }
         }
         level = LogLevel.ALL

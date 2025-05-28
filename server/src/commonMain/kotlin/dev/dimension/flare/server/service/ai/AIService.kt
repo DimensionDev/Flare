@@ -9,7 +9,7 @@ internal interface AIService {
     companion object {
         fun create(config: ApplicationConfig): AIService {
             val type = config.propertyOrNull("ai.type")?.getString()
-                ?: throw IllegalArgumentException("AI service type not configured")
+                ?: throw IllegalArgumentException("Property 'ai.type' is not configured")
             Log.trace("AIService", "Creating AI service instance with type: $type")
             return when (type) {
                 "openai" -> OpenAIAIService(config)

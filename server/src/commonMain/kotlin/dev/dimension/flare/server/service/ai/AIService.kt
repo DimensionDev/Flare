@@ -1,5 +1,6 @@
 package dev.dimension.flare.server.service.ai
 
+import dev.dimension.flare.server.common.Log
 import io.ktor.server.config.ApplicationConfig
 
 internal interface AIService {
@@ -7,7 +8,10 @@ internal interface AIService {
 
     companion object {
         fun create(config: ApplicationConfig): AIService {
-            return when (config.property("ai.type").getString()) {
+            val type = config.propertyOrNull("ai.type")?.getString()
+                ?: throw IllegalArgumentException("Property 'ai.type' is not configured")
+            Log.trace("AIService", "Creating AI service instance with type: $type")
+            return when (type) {
                 "openai" -> OpenAIAIService(config)
                 "ollama" -> LocalOllamaAIService(config)
                 else -> throw IllegalArgumentException("Unknown AI service type")

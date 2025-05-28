@@ -9,7 +9,7 @@ import kotlinx.serialization.protobuf.ProtoBuf
 import okio.BufferedSink
 import okio.BufferedSource
 
-private const val DEFAULT_SERVER_URL = "https://api.flare.moe"
+private const val DEFAULT_SERVER_URL = "https://api.flareapp.moe"
 
 @Serializable
 internal data class FlareConfig(

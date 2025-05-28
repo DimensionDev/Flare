@@ -1,3 +1,6 @@
+server:
+  port: 8080
+  host: "localhost"
 about:
   name: "Flare Official Server"
   version: "0.1.0"

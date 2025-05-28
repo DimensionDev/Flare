@@ -5,6 +5,7 @@ import com.github.ajalt.clikt.core.main
 import com.github.ajalt.clikt.parameters.options.help
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.required
+import dev.dimension.flare.server.common.Log
 import dev.dimension.flare.server.service.ai.AIService
 import io.ktor.server.cio.CIO
 import io.ktor.server.config.yaml.YamlConfig
@@ -25,10 +26,13 @@ internal class Server : CliktCommand() {
             aiService = aiService,
             config = config,
         )
+        val port = config.propertyOrNull("server.port")?.getString()?.toIntOrNull() ?: 8080
+        val host = config.propertyOrNull("server.host")?.getString() ?: "localhost"
+        Log.i("Server", "Starting server on $host:$port")
         embeddedServer(
             factory = CIO,
-            port = 8080,
-            host = "localhost",
+            port = port,
+            host = host,
             module = {
                 modules(
                     context = context,

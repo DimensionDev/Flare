@@ -10,7 +10,6 @@ kotlin {
         macosX64(),
         macosArm64(),
         linuxX64(),
-        mingwX64(),
     ).forEach { nativeTarget ->
         nativeTarget.apply {
             binaries {
@@ -31,7 +30,6 @@ kotlin {
             dependencies {
                 implementation(libs.clikt)
                 implementation(libs.bundles.ktor.server)
-                implementation(libs.ktor.client.cio)
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.client.logging)
                 implementation(libs.logback.classic)
@@ -40,6 +38,16 @@ kotlin {
                 implementation(libs.openai.client)
             }
 
+        }
+        val appleMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.darwin)
+            }
+        }
+        val linuxMain by getting {
+            dependencies {
+                implementation(libs.ktor.client.cio)
+            }
         }
         val commonTest by getting {
             dependencies {

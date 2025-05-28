@@ -8,6 +8,7 @@ import com.aallam.openai.client.OpenAI
 import com.aallam.openai.client.OpenAIConfig
 import com.aallam.openai.client.OpenAIHost
 import dev.dimension.flare.server.common.Log
+import dev.dimension.flare.server.common.createEngine
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
@@ -33,12 +34,13 @@ internal class OpenAIAIService(
         val config = OpenAIConfig(
             host = host,
             token = token,
+            engine = createEngine(),
             httpClientConfig = {
                 install(Logging) {
                     logger =
                         object : Logger {
                             override fun log(message: String) {
-                                Log.d("OpenAI", message)
+                                Log.trace("OpenAI", message)
                             }
                         }
                     level = LogLevel.ALL

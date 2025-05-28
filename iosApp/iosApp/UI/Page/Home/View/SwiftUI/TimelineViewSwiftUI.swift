@@ -24,9 +24,9 @@ struct TimelineViewSwiftUI: View {
                                         .padding(.horizontal, 16)
                                         .id("StatusItemView_\(statusID)")
                                         .onAppear {
-                                           if index > success.itemCount - 4 {
+                                            if index > success.itemCount - 4 {
                                                 success.get(index: index)
-                                           }
+                                            }
                                         }
                                         .background(
                                             GeometryReader { _ in

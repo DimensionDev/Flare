@@ -11,7 +11,7 @@ public struct FlareText: View {
     public init(
         _ text: String,
         _ markdownText: String,
-        style: FlareTextStyle.Style 
+        style: FlareTextStyle.Style
     ) {
         self.text = text
         self.markdownText = markdownText

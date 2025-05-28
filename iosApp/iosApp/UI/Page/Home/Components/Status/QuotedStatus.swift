@@ -44,15 +44,14 @@ struct QuotedStatus: View {
                 }
 
                 // 原文和翻译
-                FlareText(data.content.raw, data.content.markdown,style: FlareTextStyle.Style(
-                        font: Font.scaledBodyFont,
-                        textColor: UIColor(theme.labelColor),
-                        linkColor: UIColor(theme.tintColor),
-                        mentionColor: UIColor(theme.tintColor),
-                        hashtagColor: UIColor(theme.tintColor),
-                        cashtagColor: UIColor(theme.tintColor)
-                    )
-                )
+                FlareText(data.content.raw, data.content.markdown, style: FlareTextStyle.Style(
+                    font: Font.scaledBodyFont,
+                    textColor: UIColor(theme.labelColor),
+                    linkColor: UIColor(theme.tintColor),
+                    mentionColor: UIColor(theme.tintColor),
+                    hashtagColor: UIColor(theme.tintColor),
+                    cashtagColor: UIColor(theme.tintColor)
+                ))
                 .onLinkTap { url in
                     openURL(url)
                 }

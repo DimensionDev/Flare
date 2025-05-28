@@ -12,7 +12,6 @@ struct SettingsUIScreen: View {
             ObservePresenter(presenter: presenter) { _ in
                 NavigationSplitView {
                     List(selection: $selectedDetail) {
-                     
                         Section {
                             Label {
                                 Text("settings_appearance_generic")

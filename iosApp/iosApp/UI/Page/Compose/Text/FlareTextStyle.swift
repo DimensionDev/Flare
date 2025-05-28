@@ -8,7 +8,8 @@ extension FlareTextStyle {
         let range: NSRange
     }
 }
-private extension String { 
+
+private extension String {
     func squashingNewlines() -> String {
         replacingOccurrences(
             of: "\\n\\s*\\n",
@@ -19,7 +20,7 @@ private extension String {
 }
 
 public enum FlareTextStyle {
-      public struct Style {
+    public struct Style {
         public let font: UIFont
         public let textColor: UIColor
         public let linkColor: UIColor
@@ -91,7 +92,6 @@ public enum FlareTextStyle {
         }
     }
 
-   
     public static func attributeString(
         of originalText: String?,
         markdownText: String?, // Add markdownText parameter
@@ -99,9 +99,7 @@ public enum FlareTextStyle {
         embeds _: [String] = [],
         style: Style,
         previewLinkValidator _: @escaping (String) -> Bool = { _ in false }
-    ) ->   AttributedString
-     {
- 
+    ) -> AttributedString {
         guard let originalText, !originalText.isEmpty else {
             return AttributedString() // withOutMediaUrls.last, nil
         }
@@ -143,9 +141,8 @@ public enum FlareTextStyle {
             range: fullRange
         )
 
-       
         let entities = parseEntities(from: text)
-        let markdownLinks = parseMarkdownLinks(from: markdownText ?? "")  
+        let markdownLinks = parseMarkdownLinks(from: markdownText ?? "")
 
         for entity in entities {
             // 验证范围是否有效
@@ -172,7 +169,7 @@ public enum FlareTextStyle {
                 }
                 attributes[.foregroundColor] = entity.type.color(style)
             case let .hashtag(tag):
-                // # 
+                // #
                 if let flareLink = markdownLinks[tag] {
                     attributes[.link] = flareLink
                 } else if let url = URL(string: "https://twitter.com/hashtag/\(tag.dropFirst())") {
@@ -193,7 +190,7 @@ public enum FlareTextStyle {
 
             nsAttrString.addAttributes(attributes, range: entity.range)
         }
- 
+
         return AttributedString(nsAttrString)
     }
 
@@ -267,7 +264,4 @@ public enum FlareTextStyle {
 
         return entities.sorted { $0.range.location < $1.range.location }
     }
- 
 }
-
- 

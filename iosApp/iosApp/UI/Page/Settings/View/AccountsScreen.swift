@@ -71,7 +71,7 @@ struct AccountsScreen: View {
                     Text("loading")
                 }
             }
-            
+
             .listStyle(.insetGrouped)
             .navigationTitle("settings_accounts_title")
             .navigationBarTitleDisplayMode(.inline)

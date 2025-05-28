@@ -37,7 +37,7 @@ struct UserComponent: View {
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                             // 设置 pawoo 用户的可见状态 就是 后面的图标
-                            if  topEndContent != nil {
+                            if topEndContent != nil {
                                 if let topEndContent {
                                     switch onEnum(of: topEndContent) {
                                     case let .visibility(data):

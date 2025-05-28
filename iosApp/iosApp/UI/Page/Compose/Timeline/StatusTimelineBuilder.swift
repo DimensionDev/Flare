@@ -78,7 +78,7 @@ struct StatusItemView: View {
                 }
             }, label: {
                 StatusRetweetHeaderComponent(topMessage: topMessage).id("StatusRetweetHeaderComponent_\(topMessage.statusKey)")
-            }) 
+            })
             .buttonStyle(.plain)
         }
         if let content = data.content {

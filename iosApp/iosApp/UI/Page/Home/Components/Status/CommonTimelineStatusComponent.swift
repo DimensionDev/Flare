@@ -74,15 +74,14 @@ struct CommonTimelineStatusComponent: View {
                                 // 其他操作添加到更多操作
                                 bottomMoreActions.append(item)
                             }
-                        } else if subAction is StatusActionAsyncActionItem { 
-                        }
+                        } else if subAction is StatusActionAsyncActionItem {}
                     }
                 } else {
                     // 其他 group（比如转发组）保持原样
                     bottomMainActions.append(action)
                 }
             case let .asyncActionItem(asyncItem):
-                break 
+                break
             }
         }
 
@@ -97,9 +96,9 @@ struct CommonTimelineStatusComponent: View {
                 if let user = data.user {
                     UserComponent(
                         user: user,
-                        topEndContent: data.topEndContent as? UiTimelineItemContentStatusTopEndContent 
+                        topEndContent: data.topEndContent as? UiTimelineItemContentStatusTopEndContent
                     ).id("UserComponent_\(user.key)")
-                    .environmentObject(router)
+                        .environmentObject(router)
                 }
                 Spacer()
                 // icon + time
@@ -234,7 +233,6 @@ struct CommonTimelineStatusComponent: View {
                     .frame(height: 10)
 
                 if !data.content.raw.isEmpty {
- 
                     FlareText(data.content.raw, data.content.markdown, style: FlareTextStyle.Style(
                         font: Font.scaledBodyFont,
                         textColor: UIColor(theme.labelColor),
@@ -358,7 +356,7 @@ struct CommonTimelineStatusComponent: View {
                 }
                 .opacity(0.6)
             }
-            
+
             Spacer().frame(height: 10)
 
             // bottom action
@@ -674,7 +672,7 @@ struct CenteredLabelStyle: LabelStyle {
         HStack(spacing: 4) {
             configuration.icon.foregroundColor(theme.labelColor)
             configuration.title
-                .font(.system(size: 12)) 
+                .font(.system(size: 12))
         }
         .frame(maxWidth: .infinity, alignment: .center)
     }
@@ -688,5 +686,3 @@ struct SmallIconModifier: ViewModifier {
             .frame(width: 24, height: 24)
     }
 }
-
- 

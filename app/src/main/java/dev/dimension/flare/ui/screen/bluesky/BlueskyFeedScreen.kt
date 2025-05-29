@@ -27,9 +27,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Regular
 import compose.icons.fontawesomeicons.Solid
@@ -45,7 +42,6 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.ListComponent
 import dev.dimension.flare.ui.component.status.StatusActionButton
@@ -61,21 +57,21 @@ import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-internal fun BlueskyFeedRoute(
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-    uri: String,
-) {
-    BlueskyFeedScreen(
-        accountType = accountType,
-        uri = uri,
-        onBack = navigator::navigateUp,
-    )
-}
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+// )
+// @Composable
+// internal fun BlueskyFeedRoute(
+//    navigator: DestinationsNavigator,
+//    accountType: AccountType,
+//    uri: String,
+// ) {
+//    BlueskyFeedScreen(
+//        accountType = accountType,
+//        uri = uri,
+//        onBack = navigator::navigateUp,
+//    )
+// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -17,10 +17,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.DestinationStyle
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleQuestion
@@ -29,7 +25,6 @@ import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -38,20 +33,20 @@ import dev.dimension.flare.ui.presenter.settings.GuestConfigPresenter
 import kotlinx.coroutines.flow.distinctUntilChanged
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-    style = DestinationStyle.Dialog::class,
-)
-@Composable
-internal fun GuestSettingRoute(navigator: DestinationsNavigator) {
-    GuestSettingScreen(
-        onBack = navigator::navigateUp,
-    )
-}
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+//    style = DestinationStyle.Dialog::class,
+// )
+// @Composable
+// internal fun GuestSettingRoute(navigator: DestinationsNavigator) {
+//    GuestSettingScreen(
+//        onBack = navigator::navigateUp,
+//    )
+// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun GuestSettingScreen(onBack: () -> Unit) {
+internal fun GuestSettingScreen(onBack: () -> Unit) {
     val state by producePresenter {
         presenter()
     }

@@ -29,8 +29,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleCheck
@@ -43,7 +41,6 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.OutlinedTextField2
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -59,19 +56,19 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-@Composable
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
-internal fun AiConfigRoute(navigator: ProxyDestinationsNavigator) {
-    AccountsScreen(
-        onBack = navigator::navigateUp,
-    )
-}
+// @Composable
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+// )
+// internal fun AiConfigRoute(navigator: ProxyDestinationsNavigator) {
+//    AccountsScreen(
+//        onBack = navigator::navigateUp,
+//    )
+// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AccountsScreen(onBack: () -> Unit) {
+internal fun AiConfigScreen(onBack: () -> Unit) {
     val state by producePresenter { presenter() }
     FlareScaffold(
         topBar = {

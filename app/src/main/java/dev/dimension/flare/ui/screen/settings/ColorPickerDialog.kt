@@ -24,31 +24,27 @@ import com.github.skydoves.colorpicker.compose.BrightnessSlider
 import com.github.skydoves.colorpicker.compose.ColorEnvelope
 import com.github.skydoves.colorpicker.compose.HsvColorPicker
 import com.github.skydoves.colorpicker.compose.rememberColorPickerController
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.repository.SettingsRepository
-import dev.dimension.flare.ui.component.ThemeWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-    style = DestinationStyle.Dialog::class,
-)
-@Composable
-internal fun ColorPickerDialogRoute(navigator: ProxyDestinationsNavigator) {
-    ColorPickerDialog(
-        onBack = navigator::navigateUp,
-    )
-}
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+//    style = DestinationStyle.Dialog::class,
+// )
+// @Composable
+// internal fun ColorPickerDialogRoute(navigator: ProxyDestinationsNavigator) {
+//    ColorPickerDialog(
+//        onBack = navigator::navigateUp,
+//    )
+// }
 
 @Composable
-private fun ColorPickerDialog(onBack: () -> Unit) {
+internal fun ColorPickerDialog(onBack: () -> Unit) {
     val appearanceSettings = LocalAppearanceSettings.current
     val state by producePresenter {
         presenter(initialColor = appearanceSettings.colorSeed)

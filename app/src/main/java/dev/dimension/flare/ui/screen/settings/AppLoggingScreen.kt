@@ -22,8 +22,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FloppyDisk
@@ -33,26 +31,25 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.DevModePresenter
 import dev.dimension.flare.ui.screen.media.saveByteArrayToDownloads
 import kotlinx.datetime.Clock
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-internal fun AppLoggingRoute(navigator: ProxyDestinationsNavigator) {
-    AppLoggingScreen(
-        onBack = navigator::navigateUp,
-    )
-}
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+// )
+// @Composable
+// internal fun AppLoggingRoute(navigator: ProxyDestinationsNavigator) {
+//    AppLoggingScreen(
+//        onBack = navigator::navigateUp,
+//    )
+// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AppLoggingScreen(onBack: () -> Unit) {
+internal fun AppLoggingScreen(onBack: () -> Unit) {
     val state by producePresenter { presenter() }
     val context = LocalContext.current
     var selectedMessage by remember { mutableStateOf<String?>(null) }

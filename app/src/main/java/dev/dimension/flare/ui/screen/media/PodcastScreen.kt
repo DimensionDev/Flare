@@ -21,21 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.annotation.parameters.DeepLink
-import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
-import com.ramcosta.composedestinations.bottomsheet.spec.DestinationStyleBottomSheet
-import com.ramcosta.composedestinations.generated.destinations.ProfileRouteDestination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.PodcastManager
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.RichText
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiPodcast
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
@@ -49,69 +40,69 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-@Composable
-@Destination<RootGraph>(
-    style = DestinationStyleBottomSheet::class,
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-internal fun PodcastRoute(
-    accountType: AccountType,
-    id: String,
-    navigator: DestinationsNavigator,
-) {
-    PodcastScreen(
-        accountType = accountType,
-        id = id,
-        toUser = {
-            navigator.navigate(
-                ProfileRouteDestination(
-                    accountType = accountType,
-                    userKey = it,
-                ),
-            )
-        },
-    )
-}
+// @Composable
+// @Destination<RootGraph>(
+//    style = DestinationStyleBottomSheet::class,
+//    deepLinks = [
+//        DeepLink(
+//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+//        ),
+//    ],
+//    wrappers = [ThemeWrapper::class],
+// )
+// internal fun PodcastRoute(
+//    accountType: AccountType,
+//    id: String,
+//    navigator: DestinationsNavigator,
+// ) {
+//    PodcastScreen(
+//        accountType = accountType,
+//        id = id,
+//        toUser = {
+//            navigator.navigate(
+//                ProfileRouteDestination(
+//                    accountType = accountType,
+//                    userKey = it,
+//                ),
+//            )
+//        },
+//    )
+// }
+//
+// @Composable
+// @Destination<RootGraph>(
+//    style = DestinationStyleBottomSheet::class,
+//    deepLinks = [
+//        DeepLink(
+//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+//        ),
+//        DeepLink(
+//            uriPattern = AppDeepLink.Podcast.ROUTE,
+//        ),
+//    ],
+//    wrappers = [ThemeWrapper::class],
+// )
+// internal fun PodcastDeeplinkRoute(
+//    accountKey: MicroBlogKey,
+//    id: String,
+//    navigator: DestinationsNavigator,
+// ) {
+//    PodcastScreen(
+//        accountType = AccountType.Specific(accountKey),
+//        id = id,
+//        toUser = {
+//            navigator.navigate(
+//                ProfileRouteDestination(
+//                    accountType = AccountType.Specific(accountKey),
+//                    userKey = it,
+//                ),
+//            )
+//        },
+//    )
+// }
 
 @Composable
-@Destination<RootGraph>(
-    style = DestinationStyleBottomSheet::class,
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-        DeepLink(
-            uriPattern = AppDeepLink.Podcast.ROUTE,
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-internal fun PodcastDeeplinkRoute(
-    accountKey: MicroBlogKey,
-    id: String,
-    navigator: DestinationsNavigator,
-) {
-    PodcastScreen(
-        accountType = AccountType.Specific(accountKey),
-        id = id,
-        toUser = {
-            navigator.navigate(
-                ProfileRouteDestination(
-                    accountType = AccountType.Specific(accountKey),
-                    userKey = it,
-                ),
-            )
-        },
-    )
-}
-
-@Composable
-private fun PodcastScreen(
+internal fun PodcastScreen(
     accountType: AccountType,
     id: String,
     toUser: (MicroBlogKey) -> Unit,

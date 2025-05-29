@@ -28,9 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FileCircleExclamation
@@ -45,7 +42,6 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.RichText
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.isError
@@ -58,18 +54,18 @@ import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import io.github.fornewid.placeholder.material3.placeholder
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Composable
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
-internal fun AccountsRoute(navigator: ProxyDestinationsNavigator) {
-    AccountsScreen(
-        onBack = navigator::navigateUp,
-        toLogin = {
-            navigator.navigate(ServiceSelectRouteDestination)
-        },
-    )
-}
+// @Composable
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+// )
+// internal fun AccountsRoute(navigator: ProxyDestinationsNavigator) {
+//    AccountsScreen(
+//        onBack = navigator::navigateUp,
+//        toLogin = {
+//            navigator.navigate(ServiceSelectRouteDestination)
+//        },
+//    )
+// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

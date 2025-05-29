@@ -68,12 +68,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.annotation.parameters.DeepLink
-import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.DestinationStyle
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FaceSmile
@@ -84,12 +78,10 @@ import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
 import compose.icons.fontawesomeicons.solid.TriangleExclamation
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.data.datasource.microblog.ComposeConfig
 import dev.dimension.flare.data.datasource.microblog.ComposeData
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.FAIcon
@@ -97,7 +89,6 @@ import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.TextField2
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.QuotedStatus
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
 import dev.dimension.flare.ui.model.UiEmoji
@@ -143,110 +134,11 @@ fun ShortcutComposeRoute(
     }
 }
 
-@Destination<RootGraph>(
-    style = DestinationStyle.Dialog::class,
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-        DeepLink(
-            uriPattern = AppDeepLink.VVO.ReplyToComment.ROUTE,
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-fun VVoReplyCommentRoute(
-    navigator: DestinationsNavigator,
-    accountKey: MicroBlogKey,
-    replyTo: MicroBlogKey,
-    rootId: String,
-) {
-    ComposeScreen(
-        onBack = {
-            navigator.navigateUp()
-        },
-        accountType = AccountType.Specific(accountKey = accountKey),
-        status = ComposeStatus.VVOComment(replyTo, rootId),
-    )
-}
-
-@Destination<RootGraph>(
-    style = DestinationStyle.Dialog::class,
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-fun ComposeRoute(
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-) {
-    ComposeScreen(
-        onBack = {
-            navigator.navigateUp()
-        },
-        accountType = accountType,
-    )
-}
-
-@Destination<RootGraph>(
-    style = DestinationStyle.Dialog::class,
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-        DeepLink(
-            uriPattern = AppDeepLink.Compose.Reply.ROUTE,
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-fun ReplyRoute(
-    navigator: DestinationsNavigator,
-    accountKey: MicroBlogKey,
-    statusKey: MicroBlogKey,
-) {
-    ComposeScreen(
-        onBack = {
-            navigator.navigateUp()
-        },
-        status = ComposeStatus.Reply(statusKey),
-        accountType = AccountType.Specific(accountKey = accountKey),
-    )
-}
-
-@Destination<RootGraph>(
-    style = DestinationStyle.Dialog::class,
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-        DeepLink(
-            uriPattern = AppDeepLink.Compose.Quote.ROUTE,
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-fun Quote(
-    navigator: DestinationsNavigator,
-    accountKey: MicroBlogKey,
-    statusKey: MicroBlogKey,
-) {
-    ComposeScreen(
-        onBack = {
-            navigator.navigateUp()
-        },
-        status = ComposeStatus.Quote(statusKey),
-        accountType = AccountType.Specific(accountKey = accountKey),
-    )
-}
-
 @OptIn(
     ExperimentalMaterial3Api::class,
 )
 @Composable
-private fun ComposeScreen(
+internal fun ComposeScreen(
     onBack: () -> Unit,
     accountType: AccountType,
     modifier: Modifier = Modifier,

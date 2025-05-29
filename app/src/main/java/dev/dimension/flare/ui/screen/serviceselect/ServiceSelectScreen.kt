@@ -39,22 +39,12 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.annotation.parameters.DeepLink
-import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
-import com.ramcosta.composedestinations.generated.destinations.VVOLoginRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.XQTLoginRouteDestination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.result.NavResult
-import com.ramcosta.composedestinations.result.ResultRecipient
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleQuestion
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.onEmpty
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
@@ -69,7 +59,6 @@ import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedSecureTextField2
 import dev.dimension.flare.ui.component.OutlinedTextField2
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
@@ -86,46 +75,46 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.distinctUntilChanged
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Composable
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-        DeepLink(
-            uriPattern = AppDeepLink.LOGIN,
-        ),
-    ],
-)
-fun ServiceSelectRoute(
-    navigator: DestinationsNavigator,
-    resultRecipient: ResultRecipient<XQTLoginRouteDestination, Boolean>,
-) {
-    resultRecipient.onNavResult {
-        when (it) {
-            NavResult.Canceled -> Unit
-            is NavResult.Value -> {
-                if (it.value) {
-                    navigator.navigateUp()
-                }
-            }
-        }
-    }
-    ServiceSelectScreen(
-        onBack = navigator::navigateUp,
-        onXQT = {
-            navigator.navigate(XQTLoginRouteDestination)
-        },
-        onVVO = {
-            navigator.navigate(VVOLoginRouteDestination)
-        },
-    )
-}
+// @Composable
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+//    deepLinks = [
+//        DeepLink(
+//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+//        ),
+//        DeepLink(
+//            uriPattern = AppDeepLink.LOGIN,
+//        ),
+//    ],
+// )
+// fun ServiceSelectRoute(
+//    navigator: DestinationsNavigator,
+//    resultRecipient: ResultRecipient<XQTLoginRouteDestination, Boolean>,
+// ) {
+//    resultRecipient.onNavResult {
+//        when (it) {
+//            NavResult.Canceled -> Unit
+//            is NavResult.Value -> {
+//                if (it.value) {
+//                    navigator.navigateUp()
+//                }
+//            }
+//        }
+//    }
+//    ServiceSelectScreen(
+//        onBack = navigator::navigateUp,
+//        onXQT = {
+//            navigator.navigate(XQTLoginRouteDestination)
+//        },
+//        onVVO = {
+//            navigator.navigate(VVOLoginRouteDestination)
+//        },
+//    )
+// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ServiceSelectScreen(
+internal fun ServiceSelectScreen(
     onXQT: () -> Unit,
     onVVO: () -> Unit,
     onBack: (() -> Unit)?,

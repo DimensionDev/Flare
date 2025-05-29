@@ -18,9 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.MagnifyingGlass
@@ -37,7 +34,6 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.OutlinedTextField2
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.EditListMemberPresenter
@@ -46,25 +42,25 @@ import dev.dimension.flare.ui.presenter.list.EmptyQueryException
 import dev.dimension.flare.ui.screen.settings.AccountItem
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-internal fun EditListMemberRoute(
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-    listId: String,
-) {
-    EditListMemberScreen(
-        accountType = accountType,
-        listId = listId,
-        onBack = navigator::navigateUp,
-    )
-}
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+// )
+// @Composable
+// internal fun EditListMemberRoute(
+//    navigator: DestinationsNavigator,
+//    accountType: AccountType,
+//    listId: String,
+// ) {
+//    EditListMemberScreen(
+//        accountType = accountType,
+//        listId = listId,
+//        onBack = navigator::navigateUp,
+//    )
+// }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-private fun EditListMemberScreen(
+internal fun EditListMemberScreen(
     accountType: AccountType,
     listId: String,
     onBack: () -> Unit,

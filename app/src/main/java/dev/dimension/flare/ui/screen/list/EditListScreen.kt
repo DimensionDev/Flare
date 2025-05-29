@@ -38,10 +38,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.EditListMemberRouteDestination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Check
@@ -65,7 +61,6 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -78,31 +73,31 @@ import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-internal fun EditListRoute(
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-    listId: String,
-) {
-    EditListScreen(
-        accountType,
-        listId,
-        onBack = navigator::navigateUp,
-        toEditUser = {
-            navigator.navigate(EditListMemberRouteDestination(accountType, listId))
-        },
-    )
-}
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+// )
+// @Composable
+// internal fun EditListRoute(
+//    navigator: DestinationsNavigator,
+//    accountType: AccountType,
+//    listId: String,
+// ) {
+//    EditListScreen(
+//        accountType,
+//        listId,
+//        onBack = navigator::navigateUp,
+//        toEditUser = {
+//            navigator.navigate(EditListMemberRouteDestination(accountType, listId))
+//        },
+//    )
+// }
 
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class,
 )
 @Composable
-private fun EditListScreen(
+internal fun EditListScreen(
     accountType: AccountType,
     listId: String,
     onBack: () -> Unit,

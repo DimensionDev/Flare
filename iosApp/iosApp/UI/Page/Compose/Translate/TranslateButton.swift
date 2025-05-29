@@ -15,7 +15,7 @@ struct TranslateButton: View {
                 } else {
                     Image(systemName: isTranslated ? "globe.americas.fill" : "globe")
                 }
-                Text(isTranslated ? "已翻译" : "翻译")
+                Text(isTranslated ? "translated" : "translate")
                     .font(.footnote)
             }
             .foregroundColor(.accentColor)

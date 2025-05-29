@@ -373,7 +373,7 @@ struct HomeAppBarSettingsView: View {
                             }) {
                                 HStack {
                                     Spacer()
-                                    Text("显示更多")
+                                    Text("Load more")
                                         .font(.footnote)
                                         .foregroundColor(.blue)
                                     Spacer()
@@ -502,7 +502,7 @@ struct HomeAppBarSettingsView: View {
                                     }) {
                                         HStack {
                                             Spacer()
-                                            Text("显示更多")
+                                            Text("Load more")
                                                 .font(.footnote)
                                                 .foregroundColor(.blue)
                                             Spacer()

@@ -148,7 +148,7 @@ struct FlareDestinationView: View {
                     .environmentObject(appState)
 
             default:
-                Text("页面未找到 for destination: \(String(describing: destination))")
+                Text("page not found for destination: \(String(describing: destination))")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
@@ -235,10 +235,10 @@ struct CallbackView: View {
                 .foregroundColor(.green)
                 .padding()
 
-            Text("授权成功")
+            Text("authorize success")
                 .font(.headline)
 
-            Text("您的账号已成功授权")
+            Text("You can now close this window")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -247,7 +247,7 @@ struct CallbackView: View {
             Button(action: {
                 dismiss()
             }) {
-                Text("完成")
+                Text("Ok")
                     .frame(width: 120)
                     .padding()
                     .background(Color.accentColor)
@@ -256,7 +256,7 @@ struct CallbackView: View {
             }
             .padding(.top)
 
-            Text("您现在可以使用该账号在应用中发布内容和互动")
+            Text("Powered by Flare")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
@@ -287,17 +287,17 @@ struct DeleteStatusView: View {
             VStack(spacing: 16) {
                 if showConfirmation {
                     VStack(spacing: 16) {
-                        Text("确认删除")
+                        Text("Delete")
                             .font(.headline)
                             .padding(.top)
 
-                        Text("您确定要删除这条内容吗？")
+                        Text("Are you sure you want to delete ?")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
 
-                        Text("此操作无法撤销")
+                        Text("This action cannot be undone.")
                             .font(.caption)
                             .foregroundColor(.red)
 
@@ -330,7 +330,7 @@ struct DeleteStatusView: View {
                     }
                 } else {
                     VStack(spacing: 16) {
-                        Text("删除成功")
+                        Text("delete success")
                             .font(.headline)
                             .padding(.top)
 
@@ -339,7 +339,7 @@ struct DeleteStatusView: View {
                             .foregroundColor(.green)
                             .padding()
 
-                        Text("内容已成功删除")
+                        Text("deleted successfully")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -349,7 +349,7 @@ struct DeleteStatusView: View {
                             // 关闭对话框
                             router.dismissAll()
                         }) {
-                            Text("返回")
+                            Text("return")
                                 .frame(maxWidth: .infinity)
                                 .padding()
                                 .background(Color.accentColor)

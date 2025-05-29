@@ -1,3 +1,4 @@
+import MarkdownUI
 import SwiftUI
 import TwitterText
 
@@ -7,6 +8,7 @@ public struct FlareText: View {
     private let style: FlareTextStyle.Style
     private var linkHandler: ((URL) -> Void)?
     @Environment(FlareTheme.self) private var theme
+    @Environment(\.appSettings) private var appSettings
 
     public init(
         _ text: String,
@@ -25,16 +27,33 @@ public struct FlareText: View {
     }
 
     public var body: some View {
-        Text(AttributedString(processText(text, markdownText)))
-            .multilineTextAlignment(.leading)
-            .fixedSize(horizontal: false, vertical: true)
-            .environment(\.openURL, OpenURLAction { url in
-                if let handler = linkHandler {
-                    handler(url)
-                }
-                return .handled
-            })
-//            .environment(\.layoutDirection, isRTL() ? .rightToLeft : .leftToRight)
+        if appSettings.appearanceSettings.renderEngine == .markdown {
+            Markdown(markdownText)
+                .markdownTheme(.flareMarkdownStyle(using: style, fontScale: theme.fontSizeScale))
+                .markdownInlineImageProvider(.emoji)
+                .relativeLineSpacing(.em(theme.lineSpacing - 1.0)) // 转换为相对行高
+                .padding(.vertical, 4)
+                .environment(\.layoutDirection, isRTL() ? .rightToLeft : .leftToRight)
+                .environment(\.openURL, OpenURLAction { url in
+                    if let handler = linkHandler {
+                        handler(url)
+                        return .handled
+                    } else {
+                        return .systemAction
+                    }
+                })
+        } else {
+            Text(AttributedString(processText(text, markdownText)))
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
+                .environment(\.openURL, OpenURLAction { url in
+                    if let handler = linkHandler {
+                        handler(url)
+                    }
+                    return .handled
+                })
+                .environment(\.layoutDirection, isRTL() ? .rightToLeft : .leftToRight)
+        }
     }
 
     private func processText(_ text: String, _ markdownText: String) -> NSAttributedString {
@@ -46,8 +65,9 @@ public struct FlareText: View {
         return NSAttributedString(attributedString)
     }
 
-//    private func isRTL() -> Bool {
-//        // Arabic, Hebrew, Persian, Urdu, Kurdish, Azeri, Dhivehi
-//        ["ar", "he", "fa", "ur", "ku", "az", "dv"].contains(language)
-//      }
+    private func isRTL() -> Bool {
+        let language = Locale.current.language.languageCode?.identifier ?? ""
+        let isRTL: Bool = ["ar", "he", "fa", "ur", "ku", "az", "dv"].contains(language)
+        return isRTL
+    }
 }

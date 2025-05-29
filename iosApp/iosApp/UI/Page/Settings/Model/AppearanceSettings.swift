@@ -3,6 +3,7 @@ import Foundation
 struct AppearanceSettings: Codable, Changeable {
     var theme: Theme = .auto
     var avatarShape: AvatarShape = .circle
+    var renderEngine: RenderEngine = .markdown
     var showActions: Bool = true
     var showNumbers: Bool = true
     var showLinkPreview: Bool = true
@@ -48,6 +49,20 @@ struct AppearanceSettings: Codable, Changeable {
             case reply
             case reblog
             case favourite
+        }
+    }
+}
+
+enum RenderEngine: Codable, CaseIterable {
+    case markdown
+    case flareText
+
+    var title: String {
+        switch self {
+        case .markdown:
+            "Markdown"
+        case .flareText:
+            "FlareText"
         }
     }
 }

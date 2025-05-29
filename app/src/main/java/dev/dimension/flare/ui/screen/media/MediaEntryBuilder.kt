@@ -47,7 +47,6 @@ internal fun EntryProviderBuilder<NavKey>.mediaEntryBuilder(
             toAltText = { media ->
                 media.description?.let { navigate(Route.Status.AltText(it)) }
             },
-            playerPool = koinInject(),
         )
     }
 

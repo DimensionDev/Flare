@@ -490,7 +490,8 @@ internal sealed interface Route : NavKey {
                     val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
                     val index = data.segments.getOrNull(1)?.toIntOrNull() ?: return null
                     val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-                    Route.Media.StatusMedia(accountType = accountType, statusKey = statusKey, index = index, preview = null)
+                    val preview = data.parameters["preview"]
+                    Route.Media.StatusMedia(accountType = accountType, statusKey = statusKey, index = index, preview = preview)
                 }
 
                 "Podcast" -> {

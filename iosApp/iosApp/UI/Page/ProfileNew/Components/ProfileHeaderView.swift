@@ -24,13 +24,13 @@ struct UserFollowsFansCount: View {
         HStack {
             Text(followCount)
                 .fontWeight(.bold)
-            Text("正在关注")
+            Text("following")
                 .foregroundColor(.secondary)
                 .font(.footnote)
             Divider()
             Text(fansCount)
                 .fontWeight(.bold)
-            Text("关注者")
+            Text("fans")
                 .foregroundColor(.secondary)
                 .font(.footnote)
         }

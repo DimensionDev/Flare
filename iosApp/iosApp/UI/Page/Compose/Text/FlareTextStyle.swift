@@ -161,7 +161,7 @@ public enum FlareTextStyle {
                 attributes[.link] = url
                 attributes[.foregroundColor] = entity.type.color(style)
             case let .mention(username):
-                // @
+                // @ mention
                 if let flareLink = markdownLinks[username] {
                     attributes[.link] = flareLink
                 } else if let url = URL(string: "https://twitter.com/\(username.dropFirst())") {
@@ -169,7 +169,7 @@ public enum FlareTextStyle {
                 }
                 attributes[.foregroundColor] = entity.type.color(style)
             case let .hashtag(tag):
-                // #
+                // # tag
                 if let flareLink = markdownLinks[tag] {
                     attributes[.link] = flareLink
                 } else if let url = URL(string: "https://twitter.com/hashtag/\(tag.dropFirst())") {
@@ -177,7 +177,7 @@ public enum FlareTextStyle {
                 }
                 attributes[.foregroundColor] = entity.type.color(style)
             case let .cashtag(symbol):
-                // $ todo:
+                // $ search
                 if let flareLink = markdownLinks[symbol] {
                     attributes[.link] = flareLink
                 } else if let url = URL(string: "https://twitter.com/search?q=%24\(symbol.dropFirst())") {

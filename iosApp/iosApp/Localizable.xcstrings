@@ -40872,7 +40872,36 @@
           }
         }
       }
+    }, 
+   "Text Render Engine" : {
+    "localizations" : {
+      "ar" : { "stringUnit" : { "state" : "translated", "value" : "محرك عرض النصوص" } },
+      "cs" : { "stringUnit" : { "state" : "translated", "value" : "Renderovací jádro textu" } },
+      "da" : { "stringUnit" : { "state" : "translated", "value" : "Tekstgengivelsesmotor" } },
+      "de" : { "stringUnit" : { "state" : "translated", "value" : "Text-Rendering-Engine" } },
+      "el" : { "stringUnit" : { "state" : "translated", "value" : "Μηχανή Απόδοσης Κειμένου" } },
+      "es" : { "stringUnit" : { "state" : "translated", "value" : "Motor de renderizado de texto" } },
+      "fi" : { "stringUnit" : { "state" : "translated", "value" : "Tekstin renderöintimoottori" } },
+      "fr" : { "stringUnit" : { "state" : "translated", "value" : "Moteur de rendu de texte" } },
+      "it" : { "stringUnit" : { "state" : "translated", "value" : "Motore di rendering del testo" } },
+      "ja" : { "stringUnit" : { "state" : "translated", "value" : "テキストレンダリングエンジン" } },
+      "nl" : { "stringUnit" : { "state" : "translated", "value" : "Tekstweergave-engine" } },
+      "no" : { "stringUnit" : { "state" : "translated", "value" : "Tekstgjengivelsesmotor" } },
+      "pl" : { "stringUnit" : { "state" : "translated", "value" : "Silnik renderowania tekstu" } },
+      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Mecanismo de renderização de texto" } },
+      "pt-PT" : { "stringUnit" : { "state" : "translated", "value" : "Motor de renderização de texto" } },
+      "ro" : { "stringUnit" : { "state" : "translated", "value" : "Motor de randare text" } },
+      "ru" : { "stringUnit" : { "state" : "translated", "value" : "Система визуализации текста" } },
+      "sv" : { "stringUnit" : { "state" : "translated", "value" : "Textåtergivningsmotor" } },
+      "uk" : { "stringUnit" : { "state" : "translated", "value" : "Рушій візуалізації тексту" } },
+      "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "文本渲染引擎" } },
+      "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "文字渲染引擎" } }
     }
+  }
+ 
+
+
+
   },
   "version" : "1.0"
 }

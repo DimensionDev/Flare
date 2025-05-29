@@ -15,10 +15,12 @@ struct AppearanceUIScreen: View {
         ObservePresenter(presenter: presenter) { state in
             List {
                 if case let .success(success) = onEnum(of: state.sampleStatus) {
-                    StatusItemView(
-                        data: success.data,
-                        detailKey: nil
-                    )
+                    VStack {
+                        StatusItemView(
+                            data: success.data,
+                            detailKey: nil
+                        )
+                    }.allowsHitTesting(false)
                 }
 
                 // Theme部分
@@ -27,6 +29,21 @@ struct AppearanceUIScreen: View {
                 }.listRowBackground(theme.primaryBackgroundColor)
                 // Font部分
                 Section { fontSection }.listRowBackground(theme.primaryBackgroundColor)
+
+                // 渲染引擎选择部分
+                Section("Text Render Engine") {
+                    Picker(selection: Binding(get: {
+                        appSettings.appearanceSettings.renderEngine
+                    }, set: { value in
+                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.renderEngine, to: value))
+                    }), content: {
+                        ForEach(RenderEngine.allCases, id: \.self) { engine in
+                            Text(engine.title).tag(engine)
+                        }
+                    }, label: {
+                        Text("Text Render Engine")
+                    })
+                }.listRowBackground(theme.primaryBackgroundColor)
 
                 Section("settings_appearance_generic") {
                     // 注释原主题选择

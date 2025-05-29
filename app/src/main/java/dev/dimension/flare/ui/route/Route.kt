@@ -500,6 +500,11 @@ internal sealed interface Route : NavKey {
                     Route.Media.Podcast(accountType = accountType, id = id)
                 }
 
+                "AltText" -> {
+                    val text = data.segments.getOrNull(0) ?: return null
+                    Route.Status.AltText(text)
+                }
+
                 else -> null
             }
         }

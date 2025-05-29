@@ -1,9 +1,11 @@
 package dev.dimension.flare.ui.screen.status
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.ui.DialogSceneStrategy
+import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.status.action.AddReactionSheet
 import dev.dimension.flare.ui.screen.status.action.AltTextSheet
@@ -12,6 +14,7 @@ import dev.dimension.flare.ui.screen.status.action.DeleteStatusConfirmDialog
 import dev.dimension.flare.ui.screen.status.action.MastodonReportDialog
 import dev.dimension.flare.ui.screen.status.action.MisskeyReportDialog
 
+@OptIn(ExperimentalMaterial3Api::class)
 internal fun EntryProviderBuilder<NavKey>.statusEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit
@@ -40,7 +43,9 @@ internal fun EntryProviderBuilder<NavKey>.statusEntryBuilder(
         )
     }
 
-    entry<Route.Status.AddReaction> { args ->
+    entry<Route.Status.AddReaction>(
+        metadata = BottomSheetSceneStrategy.bottomSheet()
+    ) { args ->
         AddReactionSheet(
             statusKey = args.statusKey,
             accountType = args.accountType,
@@ -48,7 +53,9 @@ internal fun EntryProviderBuilder<NavKey>.statusEntryBuilder(
         )
     }
 
-    entry<Route.Status.AltText> { args ->
+    entry<Route.Status.AltText>(
+        metadata = BottomSheetSceneStrategy.bottomSheet()
+    ) { args ->
         AltTextSheet(
             text = args.text,
             onBack = onBack

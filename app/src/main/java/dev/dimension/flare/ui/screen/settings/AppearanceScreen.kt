@@ -33,9 +33,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.ColorPickerDialogRouteDestination
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
@@ -46,7 +43,6 @@ import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
@@ -58,22 +54,22 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-internal fun AppearanceRoute(navigator: ProxyDestinationsNavigator) {
-    AppearanceScreen(
-        onBack = navigator::navigateUp,
-        toColorPicker = {
-            navigator.navigate(ColorPickerDialogRouteDestination)
-        },
-    )
-}
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+// )
+// @Composable
+// internal fun AppearanceRoute(navigator: ProxyDestinationsNavigator) {
+//    AppearanceScreen(
+//        onBack = navigator::navigateUp,
+//        toColorPicker = {
+//            navigator.navigate(ColorPickerDialogRouteDestination)
+//        },
+//    )
+// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun AppearanceScreen(
+internal fun AppearanceScreen(
     onBack: () -> Unit,
     toColorPicker: () -> Unit,
 ) {

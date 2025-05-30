@@ -8,30 +8,89 @@ import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.element
+import kotlinx.serialization.descriptors.nullable
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonEncoder
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.floatOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.longOrNull
 
-@Serializable
+@Serializable(with = VVOResponseSerializer::class)
 internal data class VVOResponse<T>(
     val data: T? = null,
     val ok: Long? = null,
     @SerialName("http_code")
     val httpCode: Long? = null,
 )
+
+@OptIn(ExperimentalSerializationApi::class)
+private class VVOResponseSerializer<T>(
+    private val dataSer: KSerializer<T>,
+) : KSerializer<VVOResponse<T>> {
+    override val descriptor: SerialDescriptor =
+        buildClassSerialDescriptor("VVOResponse") {
+            element("data", dataSer.descriptor.nullable)
+            element<Long?>("ok")
+            element<Long?>("http_code")
+        }
+
+    override fun deserialize(decoder: Decoder): VVOResponse<T> {
+        val jsonDecoder =
+            decoder as? JsonDecoder
+                ?: error("VVOResponseSerializer works only with JSON")
+
+        val obj = jsonDecoder.decodeJsonElement().jsonObject
+
+        val dataElt = obj["data"]
+        val data =
+            dataElt?.let {
+                runCatching { jsonDecoder.json.decodeFromJsonElement(dataSer, it) }
+                    .getOrNull()
+            }
+
+        val ok = obj["ok"]?.jsonPrimitive?.longOrNull
+        val httpCode = obj["http_code"]?.jsonPrimitive?.longOrNull
+
+        return VVOResponse(data, ok, httpCode)
+    }
+
+    override fun serialize(
+        encoder: Encoder,
+        value: VVOResponse<T>,
+    ) {
+        val jsonEncoder =
+            encoder as? JsonEncoder
+                ?: error("VVOResponseSerializer works only with JSON")
+
+        val json = jsonEncoder.json
+        val obj =
+            buildJsonObject {
+                value.data?.let { put("data", json.encodeToJsonElement(dataSer, it)) }
+                value.ok?.let { put("ok", JsonPrimitive(it)) }
+                value.httpCode?.let { put("http_code", JsonPrimitive(it)) }
+            }
+        jsonEncoder.encodeJsonElement(obj)
+    }
+}
 
 @Serializable
 internal data class TimelineData(

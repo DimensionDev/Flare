@@ -32,7 +32,6 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -46,37 +45,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import com.ramcosta.composedestinations.DestinationsNavHost
-import com.ramcosta.composedestinations.generated.NavGraphs
-import com.ramcosta.composedestinations.generated.destinations.BlueskyFeedsRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.DMScreenRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.DiscoverRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.HomeTimelineRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.ListScreenRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.MeRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.NotificationRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.RssRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.SettingsRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.TimelineRouteDestination
-import com.ramcosta.composedestinations.navigation.DependenciesContainerBuilder
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.dependency
-import com.ramcosta.composedestinations.spec.Direction
-import com.ramcosta.composedestinations.spec.NavHostGraphSpec
-import com.ramcosta.composedestinations.utils.composable
-import com.ramcosta.composedestinations.utils.dialogComposable
-import com.ramcosta.composedestinations.utils.toDestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
@@ -97,12 +67,12 @@ import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.common.ProxyUriHandler
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.TopLevelBackStack
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -112,26 +82,18 @@ import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
-import dev.dimension.flare.ui.screen.compose.ComposeRoute
+import dev.dimension.flare.ui.route.Route
+import dev.dimension.flare.ui.route.Router
 import dev.dimension.flare.ui.screen.settings.AccountItem
 import dev.dimension.flare.ui.screen.settings.TabIcon
 import dev.dimension.flare.ui.screen.settings.TabTitle
 import dev.dimension.flare.ui.screen.splash.SplashScreen
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.MediumAlpha
-import dev.dimension.flare.ui.theme.rememberNavAnimX
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
-import soup.compose.material.motion.animation.materialSharedAxisYIn
-import soup.compose.material.motion.animation.materialSharedAxisYOut
-import soup.compose.material.motion.animation.rememberSlideDistance
-
-data class RootNavController(
-    val navController: NavController,
-    val navigator: DestinationsNavigator = navController.toDestinationsNavigator(),
-)
 
 @OptIn(
     ExperimentalMaterial3AdaptiveNavigationSuiteApi::class,
@@ -144,30 +106,40 @@ internal fun HomeScreen(
 ) {
     val scope = rememberCoroutineScope()
     val state by producePresenter { presenter() }
-    val navController = rememberNavController()
-    val rootNavController = remember(navController) { RootNavController(navController) }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentRoute by remember {
-        derivedStateOf {
-            navBackStackEntry?.destination?.route
-        }
-    }
     val hapticFeedback = LocalHapticFeedback.current
     state.tabs
         .onSuccess { tabs ->
+            val drawerState = rememberDrawerState(DrawerValue.Closed)
+            val topLevelBackStack by producePresenter(
+                key = "home_top_level_back_stack",
+                useImmediateClock = true,
+            ) {
+                TopLevelBackStack<Route>(
+                    getDirection(tabs.all.first().tabItem),
+                )
+            }
+
+            fun navigate(route: Route) {
+                topLevelBackStack.addTopLevel(route)
+            }
+
+            val currentRoute by remember {
+                derivedStateOf {
+                    topLevelBackStack.topLevelKey
+                }
+            }
             LaunchedEffect(Unit) {
                 afterInit.invoke()
             }
             val currentTab by remember {
                 derivedStateOf {
-                    tabs.all.firstOrNull { it.tabItem.key == currentRoute }?.tabItem
+                    tabs.all.firstOrNull { getDirection(it.tabItem) == currentRoute }?.tabItem
                 }
             }
 
             val accountTypeState by producePresenter(key = "home_account_type_${currentTab?.account}") {
                 accountTypePresenter(currentTab?.account ?: AccountType.Active)
             }
-            val drawerState = rememberDrawerState(DrawerValue.Closed)
             val layoutType =
                 NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
                     currentWindowAdaptiveInfo(),
@@ -191,29 +163,16 @@ internal fun HomeScreen(
                                 },
                                 showFab = actualLayoutType == NavigationSuiteType.NavigationDrawer,
                                 toCompose = {
-                                    navController.toDestinationsNavigator().navigate(
-                                        direction =
-                                            ComposeRouteDestination(
-                                                it,
-                                            ),
+                                    navigate(
+                                        Route.Compose.New(it),
                                     )
                                 },
                                 toProfile = {
-                                    state.tabs.onSuccess {
-                                        val key = it.extraProfileRoute?.tabItem?.key
-                                        if (key != null) {
-                                            navController.navigate(key) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
-                                            scope.launch {
-                                                drawerState.close()
-                                            }
-                                        }
-                                    }
+                                    navigate(
+                                        Route.Profile.Me(
+                                            accountType = AccountType.Specific(it),
+                                        ),
+                                    )
                                 },
                             )
                         },
@@ -234,11 +193,8 @@ internal fun HomeScreen(
                                 FloatingActionButton(
                                     onClick = {
                                         currentTab?.let {
-                                            navController.toDestinationsNavigator().navigate(
-                                                direction =
-                                                    ComposeRouteDestination(
-                                                        it.account,
-                                                    ),
+                                            navigate(
+                                                Route.Compose.New(it.account),
                                             )
                                         }
                                     },
@@ -257,18 +213,12 @@ internal fun HomeScreen(
                         navigationSuiteItems = {
                             tabs.primary.forEach { (tab, tabState, badgeState) ->
                                 item(
-                                    selected = currentRoute == tab.key,
+                                    selected = currentRoute == getDirection(tab),
                                     onClick = {
-                                        if (currentRoute == tab.key) {
+                                        if (currentRoute == getDirection(tab)) {
                                             tabState.onClick()
                                         } else {
-                                            navController.navigate(tab.key) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
+                                            navigate(getDirection(tab))
                                         }
                                     },
                                     icon = {
@@ -314,18 +264,12 @@ internal fun HomeScreen(
                         secondaryItems = {
                             tabs.secondary.forEach { (tab, tabState) ->
                                 item(
-                                    selected = currentRoute == tab.key,
+                                    selected = currentRoute == getDirection(tab),
                                     onClick = {
-                                        if (currentRoute == tab.key) {
+                                        if (currentRoute == getDirection(tab)) {
                                             tabState.onClick()
                                         } else {
-                                            navController.navigate(tab.key) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
+                                            navigate(getDirection(tab))
                                         }
                                     },
                                     icon = {
@@ -347,16 +291,9 @@ internal fun HomeScreen(
                         footerItems = {
                             accountTypeState.user.onSuccess {
                                 item(
-                                    selected = currentRoute == SettingsRouteDestination.route,
+                                    selected = currentRoute is Route.Settings.Main,
                                     onClick = {
-                                        navController
-                                            .navigate(SettingsRouteDestination.route) {
-                                                popUpTo(navController.graph.findStartDestination().id) {
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
+                                        navigate(Route.Settings.Main)
                                     },
                                     icon = {
                                         FAIcon(
@@ -375,76 +312,11 @@ internal fun HomeScreen(
                                 accountTypeState.user.isSuccess,
                         drawerState = drawerState,
                     ) {
-                        val slideDistance = rememberSlideDistance()
-                        NavHost(
-                            navController = navController,
-                            startDestination =
-                                tabs.primary
-                                    .first()
-                                    .tabItem.key,
-                            enterTransition = {
-                                materialSharedAxisYIn(true, slideDistance)
-                            },
-                            exitTransition = {
-                                materialSharedAxisYOut(true, slideDistance)
-                            },
-                            popEnterTransition = {
-                                materialSharedAxisYIn(true, slideDistance)
-                            },
-                            popExitTransition = {
-                                materialSharedAxisYOut(true, slideDistance)
-                            },
-                        ) {
-                            tabs.all.forEach { (tab, tabState) ->
-                                composable(tab.key) {
-                                    CompositionLocalProvider(
-                                        LocalTabState provides tabState,
-                                    ) {
-                                        Router(
-                                            modifier = Modifier.fillMaxSize(),
-                                            navGraph = NavGraphs.root,
-                                            direction =
-                                                getDirection(
-                                                    tab,
-                                                    tab.account,
-                                                ),
-                                        ) {
-                                            dependency(rootNavController)
-                                            dependency(drawerState)
-                                            dependency(state.navigationState)
-                                        }
-                                    }
-                                }
-                            }
-                            composable(SettingsRouteDestination) {
-                                Router(
-                                    modifier = Modifier.fillMaxSize(),
-                                    navGraph = NavGraphs.root,
-                                    direction = SettingsRouteDestination,
-                                ) {
-                                    dependency(rootNavController)
-                                    dependency(drawerState)
-                                    dependency(state.navigationState)
-                                }
-                            }
-                            dialogComposable(ComposeRouteDestination) {
-                                ComposeRoute(
-                                    navigator = destinationsNavigator(navController),
-                                    accountType = navArgs.accountType,
-                                )
-                            }
-                            composable(ServiceSelectRouteDestination) {
-                                Router(
-                                    modifier = Modifier.fillMaxSize(),
-                                    navGraph = NavGraphs.root,
-                                    direction = ServiceSelectRouteDestination,
-                                ) {
-                                    dependency(rootNavController)
-                                    dependency(drawerState)
-                                    dependency(state.navigationState)
-                                }
-                            }
-                        }
+                        Router(
+                            topLevelBackStack = topLevelBackStack,
+                            navigationState = state.navigationState,
+                            drawerState = drawerState,
+                        )
                     }
                     BackHandler(
                         enabled = drawerState.isOpen,
@@ -476,14 +348,16 @@ internal fun HomeScreen(
                                         state.setShowAccountSelection(false)
                                     },
                                     toLogin = {
-                                        navController.toDestinationsNavigator().navigate(ServiceSelectRouteDestination)
+                                        navigate(Route.ServiceSelect.Selection)
                                     },
                                     trailingContent = { user ->
                                         state.accountSelectionState.activeAccount.onSuccess {
                                             RadioButton(
                                                 selected = it.accountKey == user.key,
                                                 onClick = {
-                                                    state.accountSelectionState.setActiveAccount(user.key)
+                                                    state.accountSelectionState.setActiveAccount(
+                                                        user.key,
+                                                    )
                                                     state.setShowAccountSelection(false)
                                                 },
                                             )
@@ -498,7 +372,7 @@ internal fun HomeScreen(
                                 scope.launch {
                                     drawerState.close()
                                 }
-                                navController.toDestinationsNavigator().navigate(ServiceSelectRouteDestination)
+                                navigate(Route.ServiceSelect.Selection)
                             },
                             modifier =
                                 Modifier
@@ -522,7 +396,6 @@ internal fun HomeScreen(
 private fun ColumnScope.DrawerHeader(
     accountTypeState: UserState,
     currentTab: TabItem?,
-//    navController: NavHostController,
     toCompose: (accountType: AccountType) -> Unit,
     toProfile: (userKey: MicroBlogKey) -> Unit,
     toAccoutSwitcher: () -> Unit,
@@ -608,75 +481,38 @@ private fun ColumnScope.DrawerHeader(
 
 private fun getDirection(
     tab: TabItem,
-    accountType: AccountType,
-): Direction =
+    accountType: AccountType = tab.account,
+): Route =
     when (tab) {
         is DiscoverTabItem -> {
-            DiscoverRouteDestination(accountType)
+            Route.Discover(accountType)
         }
 
         is ProfileTabItem -> {
-            MeRouteDestination(accountType)
+            Route.Profile.Me(accountType)
         }
 
         is HomeTimelineTabItem -> {
-            HomeTimelineRouteDestination(accountType)
+            Route.Home(accountType)
         }
 
         is TimelineTabItem -> {
-            TimelineRouteDestination(tab)
+            Route.Timeline(accountType, tab)
         }
 
         is NotificationTabItem -> {
-            NotificationRouteDestination(accountType)
+            Route.Notification(accountType)
         }
 
         SettingsTabItem -> {
-            SettingsRouteDestination
+            Route.Settings.Main
         }
 
-        is AllListTabItem -> ListScreenRouteDestination(accountType)
-        is Bluesky.FeedsTabItem -> BlueskyFeedsRouteDestination(accountType)
-        is DirectMessageTabItem -> DMScreenRouteDestination(accountType)
-        is RssTabItem -> RssRouteDestination
+        is AllListTabItem -> Route.Lists.List(accountType)
+        is Bluesky.FeedsTabItem -> Route.Bluesky.Feed(accountType)
+        is DirectMessageTabItem -> Route.DM.List(accountType)
+        is RssTabItem -> Route.Rss.Sources
     }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun Router(
-    navGraph: NavHostGraphSpec,
-    direction: Direction,
-    modifier: Modifier = Modifier,
-    dependenciesContainerBuilder: @Composable DependenciesContainerBuilder<*>.() -> Unit = {},
-) {
-    val bottomSheetNavigator =
-        com.stefanoq21.material3.navigation
-            .rememberBottomSheetNavigator()
-    val innerNavController = rememberNavController(bottomSheetNavigator)
-    val uriHandler = LocalUriHandler.current
-    CompositionLocalProvider(
-        LocalUriHandler provides
-            remember {
-                ProxyUriHandler(
-                    navController = innerNavController,
-                    actualUriHandler = uriHandler,
-                )
-            },
-    ) {
-        com.stefanoq21.material3.navigation.ModalBottomSheetLayout(
-            bottomSheetNavigator = bottomSheetNavigator,
-        ) {
-            DestinationsNavHost(
-                modifier = modifier,
-                navController = innerNavController,
-                navGraph = navGraph,
-                defaultTransitions = rememberNavAnimX(),
-                start = direction,
-                dependenciesContainerBuilder = dependenciesContainerBuilder,
-            )
-        }
-    }
-}
 
 @Composable
 private fun presenter(settingsRepository: SettingsRepository = koinInject()) =

@@ -14,13 +14,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.annotation.parameters.DeepLink
-import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -28,7 +22,6 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.RefreshContainer
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.component.status.status
@@ -39,54 +32,54 @@ import dev.dimension.flare.ui.presenter.status.VVOCommentPresenter
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Destination<RootGraph>(
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-        DeepLink(
-            uriPattern = AppDeepLink.VVO.CommentDetail.ROUTE,
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-internal fun VVOCommentDeeplinkRoute(
-    navigator: DestinationsNavigator,
-    statusKey: MicroBlogKey,
-    accountKey: MicroBlogKey,
-) {
-    VVOCommentScreen(
-        commentKey = statusKey,
-        onBack = navigator::navigateUp,
-        accountType = AccountType.Specific(accountKey = accountKey),
-    )
-}
-
-@Destination<RootGraph>(
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-internal fun VVOCommentRoute(
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-    commentKey: MicroBlogKey,
-) {
-    VVOCommentScreen(
-        commentKey = commentKey,
-        onBack = navigator::navigateUp,
-        accountType = accountType,
-    )
-}
+// @Destination<RootGraph>(
+//    deepLinks = [
+//        DeepLink(
+//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+//        ),
+//        DeepLink(
+//            uriPattern = AppDeepLink.VVO.CommentDetail.ROUTE,
+//        ),
+//    ],
+//    wrappers = [ThemeWrapper::class],
+// )
+// @Composable
+// internal fun VVOCommentDeeplinkRoute(
+//    navigator: DestinationsNavigator,
+//    statusKey: MicroBlogKey,
+//    accountKey: MicroBlogKey,
+// ) {
+//    VVOCommentScreen(
+//        commentKey = statusKey,
+//        onBack = navigator::navigateUp,
+//        accountType = AccountType.Specific(accountKey = accountKey),
+//    )
+// }
+//
+// @Destination<RootGraph>(
+//    deepLinks = [
+//        DeepLink(
+//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+//        ),
+//    ],
+//    wrappers = [ThemeWrapper::class],
+// )
+// @Composable
+// internal fun VVOCommentRoute(
+//    navigator: DestinationsNavigator,
+//    accountType: AccountType,
+//    commentKey: MicroBlogKey,
+// ) {
+//    VVOCommentScreen(
+//        commentKey = commentKey,
+//        onBack = navigator::navigateUp,
+//        accountType = accountType,
+//    )
+// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun VVOCommentScreen(
+internal fun VVOCommentScreen(
     commentKey: MicroBlogKey,
     onBack: () -> Unit,
     accountType: AccountType,

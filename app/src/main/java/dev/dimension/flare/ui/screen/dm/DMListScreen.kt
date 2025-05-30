@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.screen.dm
 
-import android.os.Parcelable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,14 +17,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.AnimatedPane
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
-import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -36,10 +29,6 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.ProfileRouteDestination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleExclamation
@@ -57,117 +46,114 @@ import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.ItemPlaceHolder
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.RichText
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.ListComponent
 import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.presenter.dm.DMListPresenter
 import dev.dimension.flare.ui.presenter.dm.DMListState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.math.min
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-internal fun DMScreenRoute(
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-    navigationState: NavigationState,
-    initialUserKey: MicroBlogKey? = null,
-) {
-    val scope = rememberCoroutineScope()
-    val scaffoldNavigator =
-        rememberListDetailPaneScaffoldNavigator<DMPaneNavArgs>()
-    if (initialUserKey != null) {
-        LaunchedEffect(initialUserKey) {
-            scaffoldNavigator.navigateTo(
-                ListDetailPaneScaffoldRole.Detail,
-                DMPaneNavArgs(initialUserKey.toString(), isUserKey = true),
-            )
-        }
-    }
-
-    NavigableListDetailPaneScaffold(
-        navigator = scaffoldNavigator,
-        listPane = {
-            AnimatedPane {
-                DMListScreen(
-                    accountType = accountType,
-                    onItemClicked = { key ->
-                        scope.launch {
-                            scaffoldNavigator.navigateTo(
-                                ListDetailPaneScaffoldRole.Detail,
-                                DMPaneNavArgs(key.toString(), isUserKey = false),
-                            )
-                        }
-                    },
-                )
-            }
-        },
-        detailPane = {
-            AnimatedPane {
-                scaffoldNavigator.currentDestination?.contentKey?.let { args ->
-                    if (args.isUserKey) {
-                        UserDMConversationScreen(
-                            accountType = accountType,
-                            userKey = MicroBlogKey.valueOf(args.key),
-                            onBack = {
-                                scope.launch {
-                                    scaffoldNavigator.navigateBack()
-                                }
-                            },
-                            navigationState = navigationState,
-                            toProfile = {
-                                navigator.navigate(
-                                    ProfileRouteDestination(
-                                        userKey = it,
-                                        accountType = accountType,
-                                    ),
-                                )
-                            },
-                        )
-                    } else {
-                        DMConversationScreen(
-                            accountType = accountType,
-                            roomKey = MicroBlogKey.valueOf(args.key),
-                            onBack = {
-                                scope.launch {
-                                    scaffoldNavigator.navigateBack()
-                                }
-                            },
-                            navigationState = navigationState,
-                            toProfile = {
-                                navigator.navigate(
-                                    ProfileRouteDestination(
-                                        userKey = it,
-                                        accountType = accountType,
-                                    ),
-                                )
-                            },
-                        )
-                    }
-                }
-            }
-        },
-    )
-}
-
-@Parcelize
-private data class DMPaneNavArgs(
-    val key: String,
-    val isUserKey: Boolean,
-) : Parcelable
+// @OptIn(ExperimentalMaterial3AdaptiveApi::class)
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+// )
+// @Composable
+// internal fun DMScreenRoute(
+//    navigator: DestinationsNavigator,
+//    accountType: AccountType,
+//    navigationState: NavigationState,
+//    initialUserKey: MicroBlogKey? = null,
+// ) {
+//    val scope = rememberCoroutineScope()
+//    val scaffoldNavigator =
+//        rememberListDetailPaneScaffoldNavigator<DMPaneNavArgs>()
+//    if (initialUserKey != null) {
+//        LaunchedEffect(initialUserKey) {
+//            scaffoldNavigator.navigateTo(
+//                ListDetailPaneScaffoldRole.Detail,
+//                DMPaneNavArgs(initialUserKey.toString(), isUserKey = true),
+//            )
+//        }
+//    }
+//
+//    NavigableListDetailPaneScaffold(
+//        navigator = scaffoldNavigator,
+//        listPane = {
+//            AnimatedPane {
+//                DMListScreen(
+//                    accountType = accountType,
+//                    onItemClicked = { key ->
+//                        scope.launch {
+//                            scaffoldNavigator.navigateTo(
+//                                ListDetailPaneScaffoldRole.Detail,
+//                                DMPaneNavArgs(key.toString(), isUserKey = false),
+//                            )
+//                        }
+//                    },
+//                )
+//            }
+//        },
+//        detailPane = {
+//            AnimatedPane {
+//                scaffoldNavigator.currentDestination?.contentKey?.let { args ->
+//                    if (args.isUserKey) {
+//                        UserDMConversationScreen(
+//                            accountType = accountType,
+//                            userKey = MicroBlogKey.valueOf(args.key),
+//                            onBack = {
+//                                scope.launch {
+//                                    scaffoldNavigator.navigateBack()
+//                                }
+//                            },
+//                            navigationState = navigationState,
+//                            toProfile = {
+//                                navigator.navigate(
+//                                    ProfileRouteDestination(
+//                                        userKey = it,
+//                                        accountType = accountType,
+//                                    ),
+//                                )
+//                            },
+//                        )
+//                    } else {
+//                        DMConversationScreen(
+//                            accountType = accountType,
+//                            roomKey = MicroBlogKey.valueOf(args.key),
+//                            onBack = {
+//                                scope.launch {
+//                                    scaffoldNavigator.navigateBack()
+//                                }
+//                            },
+//                            navigationState = navigationState,
+//                            toProfile = {
+//                                navigator.navigate(
+//                                    ProfileRouteDestination(
+//                                        userKey = it,
+//                                        accountType = accountType,
+//                                    ),
+//                                )
+//                            },
+//                        )
+//                    }
+//                }
+//            }
+//        },
+//    )
+// }
+//
+// @Parcelize
+// private data class DMPaneNavArgs(
+//    val key: String,
+//    val isUserKey: Boolean,
+// ) : Parcelable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun DMListScreen(
+internal fun DMListScreen(
     accountType: AccountType,
     onItemClicked: (MicroBlogKey) -> Unit,
 ) {

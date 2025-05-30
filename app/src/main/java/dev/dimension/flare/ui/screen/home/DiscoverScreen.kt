@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.material3.Card
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -29,10 +28,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.ProfileRouteDestination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onLoading
@@ -45,7 +40,6 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.SearchBar
 import dev.dimension.flare.ui.component.SearchBarState
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.searchBarPresenter
 import dev.dimension.flare.ui.component.searchContent
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
@@ -61,30 +55,30 @@ import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-internal fun DiscoverRoute(
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-    drawerState: DrawerState,
-) {
-    val scope = rememberCoroutineScope()
-    DiscoverScreen(
-        accountType = accountType,
-        onUserClick = { navigator.navigate(ProfileRouteDestination(it, accountType)) },
-        onAccountClick = {
-            scope.launch {
-                drawerState.open()
-            }
-        },
-    )
-}
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+// )
+// @Composable
+// internal fun DiscoverRoute(
+//    navigator: DestinationsNavigator,
+//    accountType: AccountType,
+//    drawerState: DrawerState,
+// ) {
+//    val scope = rememberCoroutineScope()
+//    DiscoverScreen(
+//        accountType = accountType,
+//        onUserClick = { navigator.navigate(ProfileRouteDestination(it, accountType)) },
+//        onAccountClick = {
+//            scope.launch {
+//                drawerState.open()
+//            }
+//        },
+//    )
+// }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun DiscoverScreen(
+internal fun DiscoverScreen(
     accountType: AccountType,
     onUserClick: (MicroBlogKey) -> Unit,
     onAccountClick: () -> Unit,

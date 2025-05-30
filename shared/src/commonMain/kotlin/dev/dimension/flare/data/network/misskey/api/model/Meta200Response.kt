@@ -143,7 +143,7 @@ internal data class Policies(
     val noteEachClipsLimit: Long? = null,
     val userListLimit: Long? = null,
     val userEachUserListsLimit: Long? = null,
-    val rateLimitFactor: Long? = null,
+//    val rateLimitFactor: Long? = null,
     val avatarDecorationLimit: Long? = null,
     val mutualLinkSectionLimit: Long? = null,
     val mutualLinkLimit: Long? = null,

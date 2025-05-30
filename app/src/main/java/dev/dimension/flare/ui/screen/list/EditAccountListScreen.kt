@@ -10,9 +10,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
@@ -32,23 +29,23 @@ import dev.dimension.flare.ui.presenter.list.EditAccountListPresenter
 import io.github.fornewid.placeholder.material3.placeholder
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Destination<RootGraph>
-@Composable
-internal fun EditAccountListRoute(
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-    userKey: MicroBlogKey,
-) {
-    EditAccountListScreen(
-        accountType = accountType,
-        userKey = userKey,
-        onBack = navigator::navigateUp,
-    )
-}
+// @Destination<RootGraph>
+// @Composable
+// internal fun EditAccountListRoute(
+//    navigator: DestinationsNavigator,
+//    accountType: AccountType,
+//    userKey: MicroBlogKey,
+// ) {
+//    EditAccountListScreen(
+//        accountType = accountType,
+//        userKey = userKey,
+//        onBack = navigator::navigateUp,
+//    )
+// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun EditAccountListScreen(
+internal fun EditAccountListScreen(
     accountType: AccountType,
     userKey: MicroBlogKey,
     onBack: () -> Unit,

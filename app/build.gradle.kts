@@ -111,7 +111,6 @@ dependencies {
     implementation(libs.activity.compose)
     implementation(platform(libs.compose.bom))
     implementation(libs.bundles.compose)
-    implementation(libs.bundles.navigation)
     implementation(libs.bundles.kotlinx)
     implementation(platform(libs.koin.bom))
     implementation(libs.bundles.koin)
@@ -123,8 +122,6 @@ dependencies {
     implementation(libs.molecule.runtime)
     implementation(libs.ksoup)
     implementation(libs.bundles.accompanist)
-    implementation(libs.bundles.compose.destinations)
-    ksp(libs.compose.destinations.ksp)
     lintChecks(libs.compose.lint.checks)
     implementation(libs.composeIcons.fontAwesome)
     implementation(libs.datastore)
@@ -148,6 +145,7 @@ dependencies {
     implementation(libs.precompose.molecule)
     implementation(libs.compose.placeholder.material3)
     implementation(libs.webkit)
+    implementation(libs.bundles.navigation3)
 
     if (project.file("google-services.json").exists()) {
         implementation(platform(libs.firebase.bom))

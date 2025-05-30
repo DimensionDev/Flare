@@ -15,7 +15,6 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,8 +26,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Xmark
@@ -37,7 +34,6 @@ import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
@@ -49,23 +45,23 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-internal fun LocalCacheSearchRoute(navigator: ProxyDestinationsNavigator) {
-    CompositionLocalProvider(
-        LocalUriHandler provides navigator.uriHandler,
-    ) {
-        LocalCacheSearchScreen(
-            onBack = navigator::navigateUp,
-        )
-    }
-}
+// @Destination<RootGraph>(
+//    wrappers = [ThemeWrapper::class],
+// )
+// @Composable
+// internal fun LocalCacheSearchRoute(navigator: ProxyDestinationsNavigator) {
+//    CompositionLocalProvider(
+//        LocalUriHandler provides navigator.uriHandler,
+//    ) {
+//        LocalCacheSearchScreen(
+//            onBack = navigator::navigateUp,
+//        )
+//    }
+// }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LocalCacheSearchScreen(onBack: () -> Unit) {
+internal fun LocalCacheSearchScreen(onBack: () -> Unit) {
     val state by producePresenter {
         presenter()
     }

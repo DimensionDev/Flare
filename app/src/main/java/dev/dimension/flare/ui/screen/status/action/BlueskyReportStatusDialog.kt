@@ -13,52 +13,44 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.annotation.parameters.DeepLink
-import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusPresenter
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Composable
-@Destination<RootGraph>(
-    style = DestinationStyle.Dialog::class,
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-        DeepLink(
-            uriPattern = AppDeepLink.Bluesky.ReportStatus.ROUTE,
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-internal fun BlueskyReportStatusRoute(
-    navigator: DestinationsNavigator,
-    accountKey: MicroBlogKey,
-    statusKey: MicroBlogKey,
-) {
-    BlueskyReportStatusDialog(
-        statusKey = statusKey,
-        accountType = AccountType.Specific(accountKey),
-        onBack = {
-            navigator.navigateUp()
-        },
-    )
-}
+// @Composable
+// @Destination<RootGraph>(
+//    style = DestinationStyle.Dialog::class,
+//    deepLinks = [
+//        DeepLink(
+//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
+//        ),
+//        DeepLink(
+//            uriPattern = AppDeepLink.Bluesky.ReportStatus.ROUTE,
+//        ),
+//    ],
+//    wrappers = [ThemeWrapper::class],
+// )
+// internal fun BlueskyReportStatusRoute(
+//    navigator: DestinationsNavigator,
+//    accountKey: MicroBlogKey,
+//    statusKey: MicroBlogKey,
+// ) {
+//    BlueskyReportStatusDialog(
+//        statusKey = statusKey,
+//        accountType = AccountType.Specific(accountKey),
+//        onBack = {
+//            navigator.navigateUp()
+//        },
+//    )
+// }
 
 @Composable
-private fun BlueskyReportStatusDialog(
+internal fun BlueskyReportStatusDialog(
     statusKey: MicroBlogKey,
     accountType: AccountType,
     onBack: () -> Unit,

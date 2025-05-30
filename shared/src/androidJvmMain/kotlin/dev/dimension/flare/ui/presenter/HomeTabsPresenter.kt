@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import dev.dimension.flare.data.model.DirectMessageTabItem
 import dev.dimension.flare.data.model.NotificationTabItem
@@ -74,39 +75,73 @@ public class HomeTabsPresenter(
             remember {
                 ActiveAccountPresenter()
             }.invoke()
+        val settings by tabSettings.collectAsUiState()
 
         val tabs =
-            account.user
-                .flatMap(
-                    onError = {
-                        UiState.Success(
-                            State.HomeTabState(
-                                primary =
-                                    TimelineTabItem.guest
-                                        .map {
-                                            HomeTabItem(it)
-                                        }.toImmutableList(),
-                                secondary = persistentListOf(),
-                                extraProfileRoute = null,
-                                secondaryIconOnly = true,
-                            ),
-                        )
-                    },
-                ) { user ->
-                    tabSettings.collectAsUiState().value.flatMap(
+            remember(
+                account,
+                settings,
+            ) {
+                account.user
+                    .flatMap(
                         onError = {
                             UiState.Success(
                                 State.HomeTabState(
                                     primary =
-                                        TimelineTabItem
-                                            .defaultPrimary(user)
+                                        TimelineTabItem.guest
+                                            .map {
+                                                HomeTabItem(it)
+                                            }.toImmutableList(),
+                                    secondary = persistentListOf(),
+                                    extraProfileRoute = null,
+                                    secondaryIconOnly = true,
+                                ),
+                            )
+                        },
+                    ) { user ->
+                        settings.flatMap(
+                            onError = {
+                                UiState.Success(
+                                    State.HomeTabState(
+                                        primary =
+                                            TimelineTabItem
+                                                .defaultPrimary(user)
+                                                .map {
+                                                    HomeTabItem(it)
+                                                }.toImmutableList(),
+                                        secondary =
+                                            TimelineTabItem
+                                                .defaultSecondary(user)
+                                                .map {
+                                                    HomeTabItem(it)
+                                                }.toImmutableList(),
+                                        extraProfileRoute =
+                                            HomeTabItem(
+                                                tabItem =
+                                                    ProfileTabItem(
+                                                        accountKey = user.key,
+                                                        userKey = user.key,
+                                                    ),
+                                            ),
+                                        secondaryIconOnly = true,
+                                    ),
+                                )
+                            },
+                        ) { tabSettings ->
+                            val secondary =
+                                tabSettings.secondaryItems ?: TimelineTabItem.defaultSecondary(user)
+                            UiState.Success(
+                                State.HomeTabState(
+                                    primary =
+                                        tabSettings.items
                                             .map {
                                                 HomeTabItem(it)
                                             }.toImmutableList(),
                                     secondary =
-                                        TimelineTabItem
-                                            .defaultSecondary(user)
-                                            .map {
+                                        secondary
+                                            .filter {
+                                                tabSettings.items.none { item -> item.key == it.key }
+                                            }.map {
                                                 HomeTabItem(it)
                                             }.toImmutableList(),
                                     extraProfileRoute =
@@ -117,58 +152,36 @@ public class HomeTabsPresenter(
                                                     userKey = user.key,
                                                 ),
                                         ),
-                                    secondaryIconOnly = true,
+                                    secondaryIconOnly = tabSettings.secondaryItems == null,
                                 ),
                             )
-                        },
-                    ) { tabSettings ->
-                        val secondary =
-                            tabSettings.secondaryItems ?: TimelineTabItem.defaultSecondary(user)
-                        UiState.Success(
-                            State.HomeTabState(
-                                primary =
-                                    tabSettings.items
-                                        .map {
-                                            HomeTabItem(it)
-                                        }.toImmutableList(),
-                                secondary =
-                                    secondary
-                                        .filter {
-                                            tabSettings.items.none { item -> item.key == it.key }
-                                        }.map {
-                                            HomeTabItem(it)
-                                        }.toImmutableList(),
-                                extraProfileRoute =
-                                    HomeTabItem(
-                                        tabItem =
-                                            ProfileTabItem(
-                                                accountKey = user.key,
-                                                userKey = user.key,
-                                            ),
-                                    ),
-                                secondaryIconOnly = tabSettings.secondaryItems == null,
-                            ),
-                        )
+                        }
                     }
-                }.map {
-                    it.copy(
-                        primary =
-                            it.primary
-                                .map {
-                                    when (it.tabItem) {
-                                        is NotificationTabItem ->
-                                            it.copy(
-                                                badgeCountState = notificationBadgePresenter(it.tabItem.account),
-                                            )
-                                        is DirectMessageTabItem ->
-                                            it.copy(
-                                                badgeCountState = directMessageBadgePresenter(it.tabItem.account),
-                                            )
-                                        else -> it
-                                    }
-                                }.toImmutableList(),
-                    )
-                }
+            }.map {
+                it.copy(
+                    primary =
+                        it.primary
+                            .map { item ->
+                                when (item.tabItem) {
+                                    is NotificationTabItem ->
+                                        item.copy(
+                                            badgeCountState =
+                                                notificationBadgePresenter(
+                                                    item.tabItem.account,
+                                                ),
+                                        )
+                                    is DirectMessageTabItem ->
+                                        item.copy(
+                                            badgeCountState =
+                                                directMessageBadgePresenter(
+                                                    item.tabItem.account,
+                                                ),
+                                        )
+                                    else -> item
+                                }
+                            }.toImmutableList(),
+                )
+            }
 
         return object : State {
             override val tabs = tabs

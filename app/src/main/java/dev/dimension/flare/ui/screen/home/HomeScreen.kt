@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,7 +32,6 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -49,14 +47,6 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.entry
-import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
-import androidx.navigation3.ui.DialogSceneStrategy
-import androidx.navigation3.ui.NavDisplay
-import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
@@ -82,6 +72,7 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.TopLevelBackStack
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -103,13 +94,6 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
-import soup.compose.material.motion.animation.materialElevationScaleIn
-import soup.compose.material.motion.animation.materialElevationScaleOut
-import soup.compose.material.motion.animation.materialFadeIn
-import soup.compose.material.motion.animation.materialFadeOut
-import soup.compose.material.motion.animation.materialSharedAxisXIn
-import soup.compose.material.motion.animation.materialSharedAxisXOut
-import soup.compose.material.motion.animation.rememberSlideDistance
 
 @OptIn(
     ExperimentalMaterial3AdaptiveNavigationSuiteApi::class,
@@ -125,22 +109,23 @@ internal fun HomeScreen(
     val hapticFeedback = LocalHapticFeedback.current
     state.tabs
         .onSuccess { tabs ->
-            val backStack = rememberNavBackStack(getDirection(tabs.all.first().tabItem))
-
-            fun navigate(route: Route) {
-                if (backStack.contains(route)) {
-                    backStack.remove(route)
-                }
-                backStack.add(route)
+            val drawerState = rememberDrawerState(DrawerValue.Closed)
+            val topLevelBackStack by producePresenter(
+                key = "home_top_level_back_stack",
+                useImmediateClock = true,
+            ) {
+                TopLevelBackStack<Route>(
+                    getDirection(tabs.all.first().tabItem),
+                )
             }
 
-            fun onBack() {
-                backStack.removeAt(backStack.lastIndex)
+            fun navigate(route: Route) {
+                topLevelBackStack.addTopLevel(route)
             }
 
             val currentRoute by remember {
                 derivedStateOf {
-                    backStack.last()
+                    topLevelBackStack.topLevelKey
                 }
             }
             LaunchedEffect(Unit) {
@@ -155,7 +140,6 @@ internal fun HomeScreen(
             val accountTypeState by producePresenter(key = "home_account_type_${currentTab?.account}") {
                 accountTypePresenter(currentTab?.account ?: AccountType.Active)
             }
-            val drawerState = rememberDrawerState(DrawerValue.Closed)
             val layoutType =
                 NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
                     currentWindowAdaptiveInfo(),
@@ -328,68 +312,11 @@ internal fun HomeScreen(
                                 accountTypeState.user.isSuccess,
                         drawerState = drawerState,
                     ) {
-                        val slideDistance = rememberSlideDistance()
-                        with(drawerState) {
-                            with(state.navigationState) {
-                                NavDisplay(
-                                    sceneStrategy = remember { DialogSceneStrategy() },
-                                    backStack = backStack,
-                                    entryDecorators =
-                                        listOf(
-                                            rememberSceneSetupNavEntryDecorator(),
-                                            rememberSavedStateNavEntryDecorator(),
-                                            rememberViewModelStoreNavEntryDecorator(),
-                                        ),
-                                    transitionSpec = {
-                                        materialSharedAxisXIn(true, slideDistance) togetherWith
-                                            materialSharedAxisXOut(true, slideDistance)
-                                    },
-                                    popTransitionSpec = {
-                                        materialSharedAxisXIn(false, slideDistance) togetherWith
-                                            materialSharedAxisXOut(false, slideDistance)
-                                    },
-                                    predictivePopTransitionSpec = {
-                                        materialSharedAxisXIn(
-                                            false,
-                                            slideDistance,
-                                        ) + materialElevationScaleIn() + materialFadeIn() togetherWith
-                                            materialSharedAxisXOut(
-                                                false,
-                                                slideDistance,
-                                            ) + materialElevationScaleOut() + materialFadeOut()
-                                    },
-                                    entryProvider =
-                                        entryProvider {
-                                            tabs.all.forEach { (tab, tabState) ->
-                                                entry(
-                                                    getDirection(tab),
-                                                ) {
-                                                    CompositionLocalProvider(
-                                                        LocalTabState provides tabState,
-                                                    ) {
-                                                        Router(getDirection(tab), state.navigationState, drawerState)
-                                                    }
-                                                }
-                                            }
-                                            entry<Route.Settings.Main> {
-                                                Router(Route.Settings.Main, state.navigationState, drawerState)
-                                            }
-                                            entry<Route.ServiceSelect.Selection> {
-                                                Router(Route.ServiceSelect.Selection, state.navigationState, drawerState)
-                                            }
-                                            entry<Route.Compose.New>(
-                                                metadata = DialogSceneStrategy.dialog(),
-                                            ) { args ->
-                                                Router(
-                                                    Route.Compose.New(args.accountType),
-                                                    state.navigationState,
-                                                    drawerState,
-                                                )
-                                            }
-                                        },
-                                )
-                            }
-                        }
+                        Router(
+                            topLevelBackStack = topLevelBackStack,
+                            navigationState = state.navigationState,
+                            drawerState = drawerState,
+                        )
                     }
                     BackHandler(
                         enabled = drawerState.isOpen,
@@ -428,7 +355,9 @@ internal fun HomeScreen(
                                             RadioButton(
                                                 selected = it.accountKey == user.key,
                                                 onClick = {
-                                                    state.accountSelectionState.setActiveAccount(user.key)
+                                                    state.accountSelectionState.setActiveAccount(
+                                                        user.key,
+                                                    )
                                                     state.setShowAccountSelection(false)
                                                 },
                                             )

@@ -10,13 +10,13 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import dev.dimension.flare.ui.common.ProxyUriHandler
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
+import dev.dimension.flare.ui.component.TopLevelBackStack
 import dev.dimension.flare.ui.screen.bluesky.blueskyEntryBuilder
 import dev.dimension.flare.ui.screen.compose.composeEntryBuilder
 import dev.dimension.flare.ui.screen.dm.dmEntryBuilder
@@ -39,20 +39,19 @@ import soup.compose.material.motion.animation.rememberSlideDistance
 
 @Composable
 internal fun Router(
-    initialRoute: Route,
+    topLevelBackStack: TopLevelBackStack<Route>,
     navigationState: NavigationState,
     drawerState: DrawerState,
 ) {
     val scope = rememberCoroutineScope()
-    val backStack = rememberNavBackStack(initialRoute)
     val slideDistance = rememberSlideDistance()
 
     fun navigate(route: Route) {
-        backStack.add(route)
+        topLevelBackStack.add(route)
     }
 
     fun onBack() {
-        backStack.removeAt(backStack.lastIndex)
+        topLevelBackStack.removeLast()
     }
 
     val uriHandler = LocalUriHandler.current
@@ -78,7 +77,8 @@ internal fun Router(
                     rememberSavedStateNavEntryDecorator(),
                     rememberViewModelStoreNavEntryDecorator(),
                 ),
-            backStack = backStack,
+            backStack = topLevelBackStack.backStack,
+            onBack = { onBack() },
             transitionSpec = {
                 materialSharedAxisXIn(true, slideDistance) togetherWith
                     materialSharedAxisXOut(true, slideDistance)

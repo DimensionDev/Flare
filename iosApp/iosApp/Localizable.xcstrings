@@ -69,16 +69,16 @@
             "value" : "· %lld 名のメンバー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "· %lld medlemmer"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "· %lld leden"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "·%lld medlemmer"
           }
         },
         "pl" : {
@@ -199,16 +199,16 @@
             "value" : "[サポートされていないメディア: %@]"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "[Ustøttet media: %@]"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "[Niet-ondersteunde media: %@]"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "[Ustøttet Media: %@]"
           }
         },
         "pl" : {
@@ -269,9 +269,111 @@
     },
     "%@" : {
       "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "new",
+            "value" : "%@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "%@"
           }
         }
@@ -345,13 +447,13 @@
             "value" : "%1$@ / %2$@"
           }
         },
-        "nb" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ / %2$@"
           }
         },
-        "nl" : {
+        "no" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ / %2$@"
@@ -392,32 +494,116 @@
             "state" : "translated",
             "value" : "%1$@ / %2$@"
           }
-        },
-        "uk" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ / %2$@"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ / %2$@"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ / %2$@"
-          }
         }
       }
     },
     "%lld" : {
       "localizations" : {
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
         "en" : {
           "stringUnit" : {
             "state" : "new",
+            "value" : "%lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
             "value" : "%lld"
           }
         }
@@ -485,16 +671,16 @@
             "value" : "%lld 人のユーザー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld brukere"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld gebruikers"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld brukere"
           }
         },
         "pl" : {
@@ -615,16 +801,16 @@
             "value" : "概要"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Om"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Over"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Om"
           }
         },
         "pl" : {
@@ -745,16 +931,16 @@
             "value" : "テスト画面について"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Om testskjerm"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Over testscherm"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ForapTestskjerm"
           }
         },
         "pl" : {
@@ -875,16 +1061,16 @@
             "value" : "画面上のどこからでもスワイプして戻ることを許可"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tillat å sveipe tilbake fra hvor som helst på skjermen"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Overal op het scherm terugvegen toestaan"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tillat å sveipe tilbake fra hvor som helst på skjermen"
           }
         },
         "pl" : {
@@ -1005,16 +1191,16 @@
             "value" : "アプリバーの設定"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Innstillinger for app-linje"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "AppBar-instellingen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AppBar innstillinger"
           }
         },
         "pl" : {
@@ -1090,7 +1276,7 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple Translate UI"
+            "value" : "Apple Oversæt Brugerflade"
           }
         },
         "de" : {
@@ -1135,16 +1321,16 @@
             "value" : "Apple翻訳UI"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apple Translate-brukergrensesnitt"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apple Translate-gebruikersinterface"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Oversett UI"
           }
         },
         "pl" : {
@@ -1265,16 +1451,16 @@
             "value" : "本当に削除しますか？"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Er du sikker på at du vil slette?"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Weet u zeker dat u wilt verwijderen?"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Er du sikker på at du vil slette"
           }
         },
         "pl" : {
@@ -1395,16 +1581,16 @@
             "value" : "よろしいですか？"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Er du sikker?"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Weet u het zeker?"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Er du sikker?"
           }
         },
         "pl" : {
@@ -1525,16 +1711,16 @@
             "value" : "承認成功"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Autorisasjon vellykket"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Autorisatie geslaagd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fullmakt vellykket"
           }
         },
         "pl" : {
@@ -1655,16 +1841,16 @@
             "value" : "自動テーマ "
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Automatisk tema "
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Automatisch thema "
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auto Tema "
           }
         },
         "pl" : {
@@ -1785,16 +1971,16 @@
             "value" : "自動テーマ設定"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Innstillinger for automatisk tema"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Instellingen automatisch thema"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatiske tema innstillinger"
           }
         },
         "pl" : {
@@ -1915,16 +2101,16 @@
             "value" : "自動翻訳"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Automatisk oversettelse"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Automatisch vertalen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisk oversett"
           }
         },
         "pl" : {
@@ -2045,16 +2231,16 @@
             "value" : "現在の言語以外のコンテンツを自動翻訳"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oversett automatisk innhold på språk som ikke er gjeldende"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inhoud in niet-huidige taal automatisch vertalen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Automatisk oversett ikke-gjeldende språkinnhold"
           }
         },
         "pl" : {
@@ -2175,16 +2361,16 @@
             "value" : "利用可能なフィード"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tilgjengelige feeder"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Beschikbare feeds"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tilgjengelige fôr"
           }
         },
         "pl" : {
@@ -2305,16 +2491,16 @@
             "value" : "利用可能なリスト"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tilgjengelige lister"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Beschikbare lijsten"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tilgjengelige lister"
           }
         },
         "pl" : {
@@ -2435,16 +2621,16 @@
             "value" : "基本設定"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grunnleggende innstillinger"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Basisinstellingen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "base innstillinger"
           }
         },
         "pl" : {
@@ -2565,16 +2751,16 @@
             "value" : "ブロック"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blokker"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Blokkeren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "blokk"
           }
         },
         "pl" : {
@@ -2695,16 +2881,16 @@
             "value" : "あなたの投稿に「いいね！」しました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liket innlegget ditt"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vond je bericht leuk"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_favorisert_din_status"
           }
         },
         "pl" : {
@@ -2764,7 +2950,128 @@
       }
     },
     "bluesky_notification_item_followed_you" : {
-
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_تابع_أنت_"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notifikace_položka_followed_you"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_followed_you"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_follow you"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_followed_you"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "le siguieron las notificaciones"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_followed_you"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Elément de notification suivi"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_followed_you"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_followed_you"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_followed_jou"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_followed_you"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_followed_you"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesk_notificação_item_foi_seguido"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesk_notificação_item_foi_seguido"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_followed_you"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_followed_you"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Följ"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_following"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bruesky_notification_item_follow_you"
+          }
+        }
+      }
     },
     "bluesky_notification_item_mentioned_you" : {
       "localizations" : {
@@ -2828,16 +3135,16 @@
             "value" : "あなたについて言及しました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nevnte deg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Heeft je genoemd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_mentioned_deg"
           }
         },
         "pl" : {
@@ -2958,16 +3265,16 @@
             "value" : "ピン留め通知"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Varsel om festing"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vastzetmelding"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_pin"
           }
         },
         "pl" : {
@@ -3088,16 +3395,16 @@
             "value" : "あなたの投稿を引用しました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Siterte innlegget ditt"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Heeft je bericht geciteerd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_quoted_din_status"
           }
         },
         "pl" : {
@@ -3218,16 +3525,16 @@
             "value" : "あなたの投稿をリポストしました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repostet innlegget ditt"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Heeft je bericht opnieuw gepost"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_reblogged_din_status"
           }
         },
         "pl" : {
@@ -3348,16 +3655,16 @@
             "value" : "あなたに返信しました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Svarte deg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Heeft op je gereageerd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_replied_to_du"
           }
         },
         "pl" : {
@@ -3478,16 +3785,16 @@
             "value" : "スターターパックに参加しました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ble med i startpakken"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Deelgenomen aan starterpack"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_starterpack_er bundet sammen"
           }
         },
         "pl" : {
@@ -3608,16 +3915,16 @@
             "value" : "不明な通知"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ukjent varsel"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Onbekende melding"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bluesky_notification_item_unKnown"
           }
         },
         "pl" : {
@@ -3738,16 +4045,16 @@
             "value" : "ブラウザ設定"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nettleserinnstillinger"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Browserinstellingen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nettleser Innstillinger"
           }
         },
         "pl" : {
@@ -3868,16 +4175,16 @@
             "value" : "キャンセル"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avbryt"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuleren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "avbryt"
           }
         },
         "pl" : {
@@ -3998,16 +4305,16 @@
             "value" : "キャンセル"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avbryt"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuleren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avbryt"
           }
         },
         "pl" : {
@@ -4128,16 +4435,16 @@
             "value" : "ダウンロードファイルをクリーンアップ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rengjør nedlastede filer"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Downloadbestanden opschonen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rengjøre nedlastingsfiler"
           }
         },
         "pl" : {
@@ -4258,16 +4565,16 @@
             "value" : "閉じる"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lukk"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sluiten"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lukk"
           }
         },
         "pl" : {
@@ -4388,16 +4695,16 @@
             "value" : "内容の警告（任意）"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Innholdsadvarsel (valgfritt)"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Contentwaarschuwing (optioneel)"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kompone_content_warning_hint"
           }
         },
         "pl" : {
@@ -4518,16 +4825,16 @@
             "value" : "いまどうしてる？"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hva skjer?"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wat gebeurt er?"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kompone_hint"
           }
         },
         "pl" : {
@@ -4648,16 +4955,16 @@
             "value" : "メディアをセンシティブとしてマーク"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Merk media som sensitivt"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Media als gevoelig markeren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "compose_media_sensitiv"
           }
         },
         "pl" : {
@@ -4778,16 +5085,16 @@
             "value" : "投票終了日時: %1$@"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Utløper: %1$@"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verloopt op: %1$@"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "compose_poll_expiration_på"
           }
         },
         "pl" : {
@@ -4908,16 +5215,16 @@
             "value" : "複数選択"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Flervalg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meerkeuze"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "compose_poll_multiple_choice"
           }
         },
         "pl" : {
@@ -5038,16 +5345,16 @@
             "value" : "選択肢 %1$@"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alternativ %1$@"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Optie %1$@"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "kompone_poll_option_hint"
           }
         },
         "pl" : {
@@ -5168,16 +5475,16 @@
             "value" : "単一選択"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enkeltvalg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enkele keuze"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "compose_poll_single_choice"
           }
         },
         "pl" : {
@@ -5298,16 +5605,16 @@
             "value" : "投票の種類"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avstemningstype"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Polltype"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "compose_poll_type"
           }
         },
         "pl" : {
@@ -5428,16 +5735,16 @@
             "value" : "作成"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skriv"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opstellen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "komponist_tittel"
           }
         },
         "pl" : {
@@ -5558,16 +5865,16 @@
             "value" : "確認"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bekreft"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bevestigen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "bekreft"
           }
         },
         "pl" : {
@@ -5673,7 +5980,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Confirmation"
+            "value" : "Valider"
           }
         },
         "it" : {
@@ -5688,16 +5995,16 @@
             "value" : "確認"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bekreftelse"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bevestiging"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekreftelse"
           }
         },
         "pl" : {
@@ -5818,16 +6125,16 @@
             "value" : "リンクをコピー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopier lenke"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Link kopiëren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopier link"
           }
         },
         "pl" : {
@@ -5948,16 +6255,16 @@
             "value" : "選択範囲をコピー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopier valgte"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Selectie kopiëren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopier Valgte"
           }
         },
         "pl" : {
@@ -6078,16 +6385,16 @@
             "value" : "テキストをコピー "
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopier tekst "
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tekst kopiëren "
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopier tekst "
           }
         },
         "pl" : {
@@ -6208,16 +6515,16 @@
             "value" : "テキストをコピー (Markdown)"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kopier tekst (Markdown)"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tekst kopiëren (Markdown)"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopier tekst (MarkDown)"
           }
         },
         "pl" : {
@@ -6338,16 +6645,16 @@
             "value" : "カウント: %lld"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Antall: %lld"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aantal: %lld"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld"
           }
         },
         "pl" : {
@@ -6468,16 +6775,16 @@
             "value" : "カスタム"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egendefinert"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aangepast"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Egendefinert"
           }
         },
         "pl" : {
@@ -6598,16 +6905,16 @@
             "value" : "カスタム: %@"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Egendefinert: %@"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aangepast: %@"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tilpasset: %@"
           }
         },
         "pl" : {
@@ -6728,16 +7035,16 @@
             "value" : "デフォルトのブラウザ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Standardnettleser"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Standaardbrowser"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Standard nettleser"
           }
         },
         "pl" : {
@@ -6858,16 +7165,16 @@
             "value" : "削除"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Slett"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verwijderen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "slett"
           }
         },
         "pl" : {
@@ -6988,16 +7295,16 @@
             "value" : "削除"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Slett"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verwijderen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Slett"
           }
         },
         "pl" : {
@@ -7118,16 +7425,16 @@
             "value" : "削除成功"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sletting vellykket"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verwijderen geslaagd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sletting vellykket"
           }
         },
         "pl" : {
@@ -7248,16 +7555,16 @@
             "value" : "正常に削除されました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Slettet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Succesvol verwijderd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "slettet"
           }
         },
         "pl" : {
@@ -7378,16 +7685,16 @@
             "value" : "人気のハッシュタグ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Populære emneknagger"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Populaire hashtags"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "discover_hashtags"
           }
         },
         "pl" : {
@@ -7508,16 +7815,16 @@
             "value" : "人気の投稿"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Populære innlegg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Populaire berichten"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "oppdag_status"
           }
         },
         "pl" : {
@@ -7638,16 +7945,16 @@
             "value" : "おすすめユーザー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Foreslåtte brukere"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aanbevolen gebruikers"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "oppdag_brukere"
           }
         },
         "pl" : {
@@ -7769,16 +8076,16 @@
             "value" : "ダイレクトメッセージ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Direktemeldinger"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Privéberichten"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dm_list_title"
           }
         },
         "pl" : {
@@ -7899,16 +8206,16 @@
             "value" : "完了"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ferdig"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Klaar"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ferdig"
           }
         },
         "pl" : {
@@ -8029,16 +8336,16 @@
             "value" : "ダウンロードマネージャー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nedlastingsbehandling"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Downloadbeheer"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Donwload Manager"
           }
         },
         "pl" : {
@@ -8159,16 +8466,16 @@
             "value" : "ダウンロード"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last ned"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Downloaden"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nedlasting"
           }
         },
         "pl" : {
@@ -8289,16 +8596,16 @@
             "value" : "ダウンロードキャッシュ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nedlastingsbuffer"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Downloadcache"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last ned buffer"
           }
         },
         "pl" : {
@@ -8419,16 +8726,16 @@
             "value" : "ダウンロードマネージャー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nedlastingsbehandling"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Downloadbeheer"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nedlastingshjelper"
           }
         },
         "pl" : {
@@ -8549,16 +8856,16 @@
             "value" : "フィードのタイトルを編集"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rediger feedtittel"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Feedtitel bewerken"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redigér feedtittel"
           }
         },
         "pl" : {
@@ -8679,16 +8986,16 @@
             "value" : "リストのタイトルを編集"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rediger listetittel"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lijsttitel bewerken"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Redigeringslistens tittel"
           }
         },
         "pl" : {
@@ -8809,16 +9116,16 @@
             "value" : "先頭"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ledende"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voorloop"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "enum.avatar posisjon.dominerende"
           }
         },
         "pl" : {
@@ -8939,16 +9246,16 @@
             "value" : "上部"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Topp"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Boven"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "enum.avatar posisjon.topp"
           }
         },
         "pl" : {
@@ -9069,16 +9376,16 @@
             "value" : "円形"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sirkel"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cirkel"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "avatarform.sirkel"
           }
         },
         "pl" : {
@@ -9199,16 +9506,16 @@
             "value" : "角丸"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avrundet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Afgerond"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "avatarform.avrundet"
           }
         },
         "pl" : {
@@ -9329,16 +9636,16 @@
             "value" : "すべて"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alle"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alles"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Num.status-actions-display.alle"
           }
         },
         "pl" : {
@@ -9459,16 +9766,16 @@
             "value" : "ボタンなし"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen knapper"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geen knoppen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "enum.status-actions-display.no-knapper"
           }
         },
         "pl" : {
@@ -9589,16 +9896,16 @@
             "value" : "ボタンのみ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kun knapper"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Alleen knoppen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "enum.status-actions-display.only-knapper"
           }
         },
         "pl" : {
@@ -9719,16 +10026,16 @@
             "value" : "コンパクト"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kompakt"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Compact"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "enum.status-skjerm -style.kompakt"
           }
         },
         "pl" : {
@@ -9849,16 +10156,16 @@
             "value" : "大"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Stor"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Groot"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "enum.status-display-style.large"
           }
         },
         "pl" : {
@@ -9979,16 +10286,16 @@
             "value" : "中"
           }
         },
-        "nb" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Medium"
           }
         },
-        "nl" : {
+        "no" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Medium"
+            "value" : "enum.status-display-style.medium"
           }
         },
         "pl" : {
@@ -10109,16 +10416,16 @@
             "value" : "エラー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feil"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fout"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feil"
           }
         },
         "pl" : {
@@ -10239,16 +10546,16 @@
             "value" : "エラー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feil"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fout"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feil"
           }
         },
         "pl" : {
@@ -10369,16 +10676,16 @@
             "value" : "スペースの読み込みエラー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feil ved lasting av Spaces"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fout bij laden van Spaces"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feil ved lasting av fellesskap"
           }
         },
         "pl" : {
@@ -10499,16 +10806,16 @@
             "value" : "ファン"
           }
         },
-        "nb" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fans"
           }
         },
-        "nl" : {
+        "no" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fans"
+            "value" : "vifter"
           }
         },
         "pl" : {
@@ -10629,16 +10936,16 @@
             "value" : "フォロワー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Følgere"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Volgers"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fans_title"
           }
         },
         "pl" : {
@@ -10759,16 +11066,16 @@
             "value" : "機能リクエスト"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Funksjonsforespørsler"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Functieverzoeken"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etterspurt funksjonalitet"
           }
         },
         "pl" : {
@@ -10889,16 +11196,16 @@
             "value" : "フィード情報"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feedinformasjon"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Feedinformatie"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feed informasjon"
           }
         },
         "pl" : {
@@ -11019,16 +11326,16 @@
             "value" : "フィード名"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feednavn"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Feednaam"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Matingens navn"
           }
         },
         "pl" : {
@@ -11149,16 +11456,16 @@
             "value" : "フィードタイムライン"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feed-tidslinje"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Feedtijdlijn"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Feed tidslinje"
           }
         },
         "pl" : {
@@ -11252,7 +11559,7 @@
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Feeds"
+            "value" : "Alimentos"
           }
         },
         "fi" : {
@@ -11279,16 +11586,16 @@
             "value" : "フィード"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feeder"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Feeds"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Strøm"
           }
         },
         "pl" : {
@@ -11300,13 +11607,13 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Feeds"
+            "value" : "Conteúdos"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Feeds"
+            "value" : "Conteúdos"
           }
         },
         "ro" : {
@@ -11409,16 +11716,16 @@
             "value" : "フィードはBlueskyでのみサポートされています"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feeder støttes bare i Bluesky"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Feeds worden alleen ondersteund in Bluesky"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Innmatinger støttes bare i Bluesky"
           }
         },
         "pl" : {
@@ -11539,16 +11846,16 @@
             "value" : "最初にオフライン言語を初期化"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Initialiser først frakoblede språk"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Eerst offline talen initialiseren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Først initialiser offline-språk"
           }
         },
         "pl" : {
@@ -11669,16 +11976,16 @@
             "value" : "フォロー中"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Følger"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Volgend"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "følger"
           }
         },
         "pl" : {
@@ -11799,16 +12106,16 @@
             "value" : "フォロー中"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Følger"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Volgend"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "følger_tittel"
           }
         },
         "pl" : {
@@ -11929,16 +12236,16 @@
             "value" : "フォント"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skrifttype"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lettertype"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Font"
           }
         },
         "pl" : {
@@ -12059,16 +12366,16 @@
             "value" : "フォント設定"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skriftinnstillinger"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lettertype-instellingen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skrift Innstillinger"
           }
         },
         "pl" : {
@@ -12189,16 +12496,16 @@
             "value" : "フォントサイズスケール: %@"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skriftstørrelsesskala: %@"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lettergrootte schaal: %@"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Font Size Scale: %@"
           }
         },
         "pl" : {
@@ -12319,16 +12626,16 @@
             "value" : "フルスワイプで戻る"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Full sveip tilbake"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Volledig terugvegen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sveip tilbake"
           }
         },
         "pl" : {
@@ -12449,13 +12756,13 @@
             "value" : "GIF"
           }
         },
-        "nb" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "GIF"
           }
         },
-        "nl" : {
+        "no" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "GIF"
@@ -12504,12 +12811,6 @@
           }
         },
         "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GIF"
-          }
-        },
-        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "GIF"
@@ -12579,16 +12880,16 @@
             "value" : "Google翻訳"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Google Oversetter"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Google Vertalen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Google Oversett"
           }
         },
         "pl" : {
@@ -12709,16 +13010,16 @@
             "value" : "こんにちは世界！"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hallo verden!"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hallo wereld!"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hei verden!"
           }
         },
         "pl" : {
@@ -12840,16 +13141,16 @@
             "value" : "ブックマーク"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bokmerker"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bladwijzers"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "home_tab_bookmarks_title"
           }
         },
         "pl" : {
@@ -12970,16 +13271,16 @@
             "value" : "発見"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oppdag"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ontdekken"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "home_tab_discover_title"
           }
         },
         "pl" : {
@@ -13101,16 +13402,16 @@
             "value" : "お気に入り"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Favoritter"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Favorieten"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "home_tab_favorite_title"
           }
         },
         "pl" : {
@@ -13232,16 +13533,16 @@
             "value" : "おすすめ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fremhevet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uitgelicht"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hjem_tab_egenskap_tittel"
           }
         },
         "pl" : {
@@ -13363,16 +13664,16 @@
             "value" : "フィード"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feeder"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Feeds"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "home_tab_feeds_tittel"
           }
         },
         "pl" : {
@@ -13494,16 +13795,16 @@
             "value" : "ホーム"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hjem"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Startpagina"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "home_tab_home_title"
           }
         },
         "pl" : {
@@ -13625,16 +13926,16 @@
             "value" : "リスト"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lister"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lijsten"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "home_tab_list_title"
           }
         },
         "pl" : {
@@ -13756,16 +14057,16 @@
             "value" : "自分"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Meg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ik"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "home_tab_me_title"
           }
         },
         "pl" : {
@@ -13886,16 +14187,16 @@
             "value" : "通知"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Varsler"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meldingen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "home_tab_notifications_tittel"
           }
         },
         "pl" : {
@@ -14016,16 +14317,16 @@
             "value" : "ホスト"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vert"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Host"
+            "value" : "Hostnaam"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vert"
           }
         },
         "pl" : {
@@ -14037,7 +14338,7 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Host"
+            "value" : "Servidor"
           }
         },
         "pt-PT" : {
@@ -14146,16 +14447,16 @@
             "value" : "ホスト (%lld)"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Verter (%lld)"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hosts (%lld)"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verter (%lld)"
           }
         },
         "pl" : {
@@ -14276,16 +14577,16 @@
             "value" : "Hyper Legible (ディスレクシア対応フォント)"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hyper Legible (font for dyslektikere)"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hyper Legible (lettertype voor dyslectici)"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hyper Legert"
           }
         },
         "pl" : {
@@ -14406,13 +14707,13 @@
             "value" : "ID: %@"
           }
         },
-        "nb" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ID: %@"
           }
         },
-        "nl" : {
+        "no" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ID: %@"
@@ -14461,12 +14762,6 @@
           }
         },
         "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ID: %@"
-          }
-        },
-        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ID: %@"
@@ -14536,16 +14831,16 @@
             "value" : "画像サイズ上限"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grense for bildestørrelse"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Limiet afbeeldingsgrootte"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bilde Størrelsesgrense"
           }
         },
         "pl" : {
@@ -14666,16 +14961,16 @@
             "value" : "アプリ内ブラウザ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nettleser i appen"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "In-app browser"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "I app-nettleser"
           }
         },
         "pl" : {
@@ -14796,16 +15091,16 @@
             "value" : "インスタンス情報"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Instansinformasjon"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Instantie-informatie"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informasjon om forekomst"
           }
         },
         "pl" : {
@@ -14926,16 +15221,16 @@
             "value" : "インスタンス情報は利用できません。"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Instansinformasjon er ikke tilgjengelig."
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Instantie-informatie is niet beschikbaar."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informasjon om forekomst er ikke tilgjengelig."
           }
         },
         "pl" : {
@@ -15056,16 +15351,16 @@
             "value" : "インスタンスルール"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Instansregler"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Instantieregels"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forekomst Regler"
           }
         },
         "pl" : {
@@ -15186,16 +15481,16 @@
             "value" : "インデックス \\(index) の無効な項目"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ugyldig element på indeks \\(index)"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ongeldig item op index \\(index)"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ugyldig element ved indeks \\(index)"
           }
         },
         "pl" : {
@@ -15316,16 +15611,16 @@
             "value" : "行間: %@"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Linjeavstand: %@"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Regelafstand: %@"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linjeavstand: %@"
           }
         },
         "pl" : {
@@ -15446,16 +15741,16 @@
             "value" : "リスト"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liste"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lijst"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liste"
           }
         },
         "pl" : {
@@ -15576,16 +15871,16 @@
             "value" : "リスト情報"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Listeinformasjon"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lijstinformatie"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liste Info"
           }
         },
         "pl" : {
@@ -15706,16 +16001,16 @@
             "value" : "リスト名"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Listenavn"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lijstnaam"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navn på liste"
           }
         },
         "pl" : {
@@ -15836,16 +16131,16 @@
             "value" : "リストタイムライン"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Listetidslinje"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lijsttijdlijn"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis tidslinje"
           }
         },
         "pl" : {
@@ -15966,16 +16261,16 @@
             "value" : "リスト"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lister"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lijsten"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lister"
           }
         },
         "pl" : {
@@ -16051,7 +16346,7 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Live"
+            "value" : "Levende"
           }
         },
         "de" : {
@@ -16075,7 +16370,7 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Live"
+            "value" : "Suora"
           }
         },
         "fr" : {
@@ -16096,16 +16391,16 @@
             "value" : "ライブ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Direkte"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Live"
+            "value" : "Zichtbaar"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Direkte"
           }
         },
         "pl" : {
@@ -16205,7 +16500,7 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "LIVE"
+            "value" : "ELÄI"
           }
         },
         "fr" : {
@@ -16226,16 +16521,16 @@
             "value" : "ライブ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DIREKTE"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "LIVE"
+            "value" : "Live"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Direkte"
           }
         },
         "pl" : {
@@ -16259,7 +16554,7 @@
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "LIVE"
+            "value" : "IV-VA"
           }
         },
         "ru" : {
@@ -16356,16 +16651,16 @@
             "value" : "読み込みに失敗しました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lasting mislyktes"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laden mislukt"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lasting feilet"
           }
         },
         "pl" : {
@@ -16486,16 +16781,16 @@
             "value" : "もっと読み込む"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Last mer"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meer laden"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Last mer"
           }
         },
         "pl" : {
@@ -16616,16 +16911,16 @@
             "value" : "読み込み済みメンバー: %lld"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lastede medlemmer: %lld"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Leden geladen: %lld"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lastede medlemmer: %lld"
           }
         },
         "pl" : {
@@ -16746,16 +17041,16 @@
             "value" : "読み込み中"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Laster"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Laden"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "laster"
           }
         },
         "pl" : {
@@ -16876,16 +17171,16 @@
             "value" : "読み込みエラー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Innlastingsfeil"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fout bij laden"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lasting feil"
           }
         },
         "pl" : {
@@ -17006,16 +17301,16 @@
             "value" : "スペースを読み込み中..."
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Laster inn Spaces..."
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Spaces laden..."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laster inn områder..."
           }
         },
         "pl" : {
@@ -17136,13 +17431,13 @@
             "value" : "ロレム・イプサム ドロール シット アメット"
           }
         },
-        "nb" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lorem ipsum dolor sit amet"
           }
         },
-        "nl" : {
+        "no" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lorem ipsum dolor sit amet"
@@ -17191,12 +17486,6 @@
           }
         },
         "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lorem ipsum dolor sit amet"
-          }
-        },
-        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lorem ipsum dolor sit amet"
@@ -17266,13 +17555,13 @@
             "value" : "ロレム・イプサム ドロール シット アメット、コンセクテトゥール アディピシング エリット。セッド エウイismod、ニスル クイス アリクア"
           }
         },
-        "nb" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl quis aliqua"
           }
         },
-        "nl" : {
+        "no" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl quis aliqua"
@@ -17321,12 +17610,6 @@
           }
         },
         "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl quis aliqua"
-          }
-        },
-        "zh-Hant" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl quis aliqua"
@@ -17396,16 +17679,16 @@
             "value" : "メインタブ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Hovedfane"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Hoofdtabblad"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hovedfane"
           }
         },
         "pl" : {
@@ -17526,16 +17809,16 @@
             "value" : "ピン留め済み"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Festet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vastgespeld"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_item_sperret"
           }
         },
         "pl" : {
@@ -17656,16 +17939,16 @@
             "value" : "あなたの投稿をいいねしました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "likte statusen din"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "heeft je status favoriet gemaakt"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_varsling_item_favorisert_din_status"
           }
         },
         "pl" : {
@@ -17786,16 +18069,16 @@
             "value" : "あなたをフォローしました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "fulgte deg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "is je gaan volgen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_varsl_item_followed_deg"
           }
         },
         "pl" : {
@@ -17916,16 +18199,16 @@
             "value" : "あなたにメンションしました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "nevnte deg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "heeft je genoemd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_varsl_item_mentioned_deg"
           }
         },
         "pl" : {
@@ -18046,16 +18329,16 @@
             "value" : "投票が終了しました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avstemning avsluttet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Peiling beëindigd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_notification_item_poll_end"
           }
         },
         "pl" : {
@@ -18176,16 +18459,16 @@
             "value" : "投稿しました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "postet status"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "status geplaatst"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_notification_item_posted_status"
           }
         },
         "pl" : {
@@ -18306,16 +18589,16 @@
             "value" : "あなたの投稿をリブログしました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "reblogget statusen din"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "heeft je status gereblogd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_varsling_item_reblogged_din_status"
           }
         },
         "pl" : {
@@ -18436,16 +18719,16 @@
             "value" : "フォローをリクエストしました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ba om å følge"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "volgverzoek ontvangen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_notification_item_requested_follow"
           }
         },
         "pl" : {
@@ -18566,16 +18849,16 @@
             "value" : "投稿を編集しました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "oppdaterte en status"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "heeft een status bijgewerkt"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_notification_item_updated_status"
           }
         },
         "pl" : {
@@ -18697,16 +18980,16 @@
             "value" : "ローカル"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lokal"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lokaal"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_tab_local_tittel"
           }
         },
         "pl" : {
@@ -18828,16 +19111,16 @@
             "value" : "公開"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Offentlig"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Openbaar"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mastodon_tab_public_title"
           }
         },
         "pl" : {
@@ -18958,16 +19241,16 @@
             "value" : "メディアの最大添付数"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maks. antall medievedlegg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Maximaal aantal mediabijlagen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maks media vedlegg"
           }
         },
         "pl" : {
@@ -19088,16 +19371,16 @@
             "value" : "投稿の最大文字数"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Maks. tegn per innlegg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Maximaal aantal tekens per bericht"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maks antall tegn"
           }
         },
         "pl" : {
@@ -19218,16 +19501,16 @@
             "value" : "メディア説明の文字数制限"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grense for mediebeskrivelse"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Limiet mediabeschrijving"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Media beskrivelse grense"
           }
         },
         "pl" : {
@@ -19348,16 +19631,16 @@
             "value" : "メンバー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Medlemmer"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Leden"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "medlemmer"
           }
         },
         "pl" : {
@@ -19478,16 +19761,16 @@
             "value" : "メッセージ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Melding"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bericht"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Melding"
           }
         },
         "pl" : {
@@ -19608,16 +19891,16 @@
             "value" : "ピン留め済み"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Festet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vastgespeld"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "svie-_item_pinnet"
           }
         },
         "pl" : {
@@ -19738,16 +20021,16 @@
             "value" : "実績を獲得しました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prestasjon oppnådd"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Prestatie behaald"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "uforskyld_varsl_prestasjon_tjent"
           }
         },
         "pl" : {
@@ -19868,16 +20151,16 @@
             "value" : "アプリ通知"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App-varsel"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "App-melding"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feil_varsling_app"
           }
         },
         "pl" : {
@@ -19998,16 +20281,16 @@
             "value" : "フォロー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Følg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Volgen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feil_varsling_følg"
           }
         },
         "pl" : {
@@ -20128,16 +20411,16 @@
             "value" : "フォローリクエストが承認されました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Følgeforespørsel akseptert"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Volgverzoek geaccepteerd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "godtatt feil_notification_follow_request_"
           }
         },
         "pl" : {
@@ -20258,16 +20541,16 @@
             "value" : "メンション"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Omtale"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vermelding"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskøy_varsling_nevn"
           }
         },
         "pl" : {
@@ -20388,16 +20671,16 @@
             "value" : "投票終了"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avstemning avsluttet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Peiling beëindigd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uvisning_varsler_poll_stoppet"
           }
         },
         "pl" : {
@@ -20518,16 +20801,16 @@
             "value" : "引用"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sitat"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Citaat"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feil_melding_sitat"
           }
         },
         "pl" : {
@@ -20648,16 +20931,16 @@
             "value" : "リアクション"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reaksjon"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reactie"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feil_varsling_reaksjon"
           }
         },
         "pl" : {
@@ -20778,16 +21061,16 @@
             "value" : "フォローリクエストを受信"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Motta følgeforespørsel"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Volgverzoek ontvangen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_notification_receive_follow_forespørsel"
           }
         },
         "pl" : {
@@ -20908,16 +21191,16 @@
             "value" : "リノート"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reposte"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opnieuw posten"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feilskey_varsling_endre stemme"
           }
         },
         "pl" : {
@@ -21038,16 +21321,16 @@
             "value" : "返信"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Svar"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Antwoord"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feil_varsling_svar"
           }
         },
         "pl" : {
@@ -21168,16 +21451,16 @@
             "value" : "不明な通知"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ukjent varsel"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Onbekende melding"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "feil_melding_ukjent"
           }
         },
         "pl" : {
@@ -21298,16 +21581,16 @@
             "value" : "ミュート"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Demp"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dempen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "demp"
           }
         },
         "pl" : {
@@ -21428,16 +21711,16 @@
             "value" : "私のDM"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mine direktemeldinger"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mijn DM's"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Min beskjed"
           }
         },
         "pl" : {
@@ -21558,16 +21841,16 @@
             "value" : "次へ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Neste"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Volgende"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "neste"
           }
         },
         "pl" : {
@@ -21688,16 +21971,16 @@
             "value" : "フィードなし"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "INGEN FEEDS"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "GEEN FEEDS"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "INGEN TILBYTTER"
           }
         },
         "pl" : {
@@ -21818,16 +22101,16 @@
             "value" : "フィードが見つかりません"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "INGEN FEEDS FUNNET"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "GEEN FEEDS GEVONDEN"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "INGEN FUNNET TILBUD"
           }
         },
         "pl" : {
@@ -21948,16 +22231,16 @@
             "value" : "リストなし"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "INGEN LISTE"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "GEEN LIJST"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "NEI LIST"
           }
         },
         "pl" : {
@@ -22078,16 +22361,16 @@
             "value" : "未ログイン"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen pålogging"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Niet ingelogd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingen pålogging"
           }
         },
         "pl" : {
@@ -22208,16 +22491,16 @@
             "value" : "メンバーがいません"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen medlemmer"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geen leden"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingen medlemmer"
           }
         },
         "pl" : {
@@ -22338,16 +22621,16 @@
             "value" : "このリストにはメンバーがいません"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen medlemmer i denne listen"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geen leden in deze lijst"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingen medlemmer i denne listen"
           }
         },
         "pl" : {
@@ -22468,16 +22751,16 @@
             "value" : "利用可能なスペースはありません"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen Spaces tilgjengelig"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geen Spaces beschikbaar"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ingen Fellesskap tilgjengelig"
           }
         },
         "pl" : {
@@ -22598,16 +22881,16 @@
             "value" : "アカウントなし"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen kontoer"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geen accounts"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "nei_kontoer"
           }
         },
         "pl" : {
@@ -22728,16 +23011,16 @@
             "value" : "注意: これはローカルの表示タイトルのみを変更し、サーバーの%@名は変更しません。"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Merk: Dette endrer bare den lokale visningstittelen, ikke servernavnet %@."
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opmerking: Dit wijzigt alleen de lokale weergavetitel, niet de %@-servernaam."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merk: Dette endrer bare den lokale visningtittelen, ikke serveren %@ navn."
           }
         },
         "pl" : {
@@ -22858,16 +23141,16 @@
             "value" : "通知タイプ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Varseltype"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meldingstype"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "varsling_type"
           }
         },
         "pl" : {
@@ -22943,7 +23226,7 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ok"
+            "value" : "OK"
           }
         },
         "de" : {
@@ -22988,16 +23271,16 @@
             "value" : "OK"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Oké"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         },
         "pl" : {
@@ -23033,7 +23316,7 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ok"
+            "value" : "OK"
           }
         },
         "uk" : {
@@ -23073,13 +23356,13 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OK"
+            "value" : "Ok"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OK"
+            "value" : "Ok"
           }
         },
         "el" : {
@@ -23097,13 +23380,13 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OK"
+            "value" : "Ok"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OK"
+            "value" : "Ok"
           }
         },
         "it" : {
@@ -23118,16 +23401,16 @@
             "value" : "OK"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "OK"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OK"
+            "value" : "Ok"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ok"
           }
         },
         "pl" : {
@@ -23139,19 +23422,19 @@
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OK"
+            "value" : "Certo"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OK"
+            "value" : "Certo"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OK"
+            "value" : "Ok"
           }
         },
         "ru" : {
@@ -23163,13 +23446,13 @@
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OK"
+            "value" : "Ok"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OK"
+            "value" : "Гаразд"
           }
         },
         "zh-Hans" : {
@@ -23248,16 +23531,16 @@
             "value" : "mp4のみサポート"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Støtter bare mp4"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ondersteunt alleen mp4"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "støtter kun mp4"
           }
         },
         "pl" : {
@@ -23378,16 +23661,16 @@
             "value" : "OpenDyslexic"
           }
         },
-        "nb" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "OpenDyslexic"
           }
         },
-        "nl" : {
+        "no" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "OpenDyslexic"
+            "value" : "Åpne dyseflekker"
           }
         },
         "pl" : {
@@ -23508,16 +23791,16 @@
             "value" : "ブラウザで開く"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Åpne i nettleser"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Openen in browser"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Åpne i nettleser"
           }
         },
         "pl" : {
@@ -23638,16 +23921,16 @@
             "value" : "その他の設定"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Andre innstillinger"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Andere instellingen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Andre innstillinger"
           }
         },
         "pl" : {
@@ -23768,16 +24051,16 @@
             "value" : "宛先のページが見つかりません: %@"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Side ikke funnet for destinasjon: %@"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pagina niet gevonden voor bestemming: %@"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "siden ble ikke funnet for destinasjon: %@"
           }
         },
         "pl" : {
@@ -23898,16 +24181,16 @@
             "value" : "パスワード"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Passord"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wachtwoord"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "passord"
           }
         },
         "pl" : {
@@ -24028,16 +24311,16 @@
             "value" : "ピン留めされたフィード"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Festede feeder"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vastgezette feeds"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "festede fôr"
           }
         },
         "pl" : {
@@ -24158,16 +24441,16 @@
             "value" : "ピン留めされたリスト"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Festede lister"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vastgezette lijsten"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "festede lister"
           }
         },
         "pl" : {
@@ -24237,7 +24520,7 @@
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Podcast"
+            "value" : "Vysílání"
           }
         },
         "da" : {
@@ -24288,16 +24571,16 @@
             "value" : "ポッドキャスト"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Podkast"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Podcast"
+            "value" : "Potcast"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Podcasten"
           }
         },
         "pl" : {
@@ -24418,16 +24701,16 @@
             "value" : "投票: 最大文字数/選択肢"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avstemning: Maks tegn/alternativ"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Peiling: Max. tekens/optie"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avstemning: Maks tegn/alternativ"
           }
         },
         "pl" : {
@@ -24548,16 +24831,16 @@
             "value" : "投票: 最大有効期限"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avstemning: Maks. utløpstid"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Peiling: Maximale vervaldatum"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avstemning: Maks utløpsdato"
           }
         },
         "pl" : {
@@ -24678,16 +24961,16 @@
             "value" : "投票: 最大選択肢数"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avstemning: Maks. antall alternativer"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Peiling: Maximaal aantal opties"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avstemming: Maks alternativer"
           }
         },
         "pl" : {
@@ -24808,16 +25091,16 @@
             "value" : "投票: 最小有効期限"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avstemning: Min. utløpstid"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Peiling: Minimale vervaldatum"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avstemning: Min. utløp"
           }
         },
         "pl" : {
@@ -24938,16 +25221,16 @@
             "value" : "Powered by Flare"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drevet av Flare"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mogelijk gemaakt door Flare"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drevet av brennbare"
           }
         },
         "pl" : {
@@ -25068,16 +25351,16 @@
             "value" : "準備中..."
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forbereder..."
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voorbereiden..."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Forbereder..."
           }
         },
         "pl" : {
@@ -25198,16 +25481,16 @@
             "value" : "ブロック中"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blokkert"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geblokkeerd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "profil_header_button_blokkert"
           }
         },
         "pl" : {
@@ -25328,16 +25611,16 @@
             "value" : "相互ブロック"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gjensidig blokkert"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Wederzijds geblokkeerd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "profil_header_button_blockedblokkert"
           }
         },
         "pl" : {
@@ -25458,16 +25741,16 @@
             "value" : "フォロー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Følg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Volgen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "profil_header_button_follow"
           }
         },
         "pl" : {
@@ -25588,16 +25871,16 @@
             "value" : "フォロー中"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Følger"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Volgend"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "profil_header_button_following"
           }
         },
         "pl" : {
@@ -25718,16 +26001,16 @@
             "value" : "リクエスト済み"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Forespurt"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aangevraagd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "profil_header_button_forespurt"
           }
         },
         "pl" : {
@@ -25849,16 +26132,16 @@
             "value" : "いいね"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liker"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vind-ik-leuks"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "profile_tab_likes"
           }
         },
         "pl" : {
@@ -25980,16 +26263,16 @@
             "value" : "メディア"
           }
         },
-        "nb" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Media"
           }
         },
-        "nl" : {
+        "no" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Media"
+            "value" : "profil_tab_media"
           }
         },
         "pl" : {
@@ -26111,16 +26394,16 @@
             "value" : "投稿"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Innlegg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Berichten"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "profil_tab_tidslinje"
           }
         },
         "pl" : {
@@ -26242,16 +26525,16 @@
             "value" : "投稿と返信"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Innlegg og svar"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Berichten en antwoorden"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "profil_tab_timeline_with_answer"
           }
         },
         "pl" : {
@@ -26372,16 +26655,16 @@
             "value" : "引用"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sitat"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Citeren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tilbud"
           }
         },
         "pl" : {
@@ -26502,16 +26785,16 @@
             "value" : "更新"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oppdater"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vernieuwen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oppdater"
           }
         },
         "pl" : {
@@ -26632,16 +26915,16 @@
             "value" : "登録有効"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Registrering aktivert"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Registratie ingeschakeld"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrering aktivert"
           }
         },
         "pl" : {
@@ -26762,16 +27045,16 @@
             "value" : "%@に返信"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Svar til %@"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Antwoorden aan %@"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Svar til %@"
           }
         },
         "pl" : {
@@ -26892,16 +27175,16 @@
             "value" : "報告"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rapporter"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rapporteren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "rapport"
           }
         },
         "pl" : {
@@ -27022,16 +27305,16 @@
             "value" : "再試行"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Prøv på nytt"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opnieuw proberen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prøv igjen"
           }
         },
         "pl" : {
@@ -27152,16 +27435,16 @@
             "value" : "戻る"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tilbake"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Terug"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "returner"
           }
         },
         "pl" : {
@@ -27282,16 +27565,16 @@
             "value" : "リツイート"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retweet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Retweeten"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "retweet"
           }
         },
         "pl" : {
@@ -27412,16 +27695,16 @@
             "value" : "リツイートを取り消す"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fjern retweet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Retweet verwijderen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "retweet_fjern"
           }
         },
         "pl" : {
@@ -27540,12 +27823,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ルール %1$@: %2$@"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Regel %1$@: %2$@"
           }
         },
         "nl" : {
@@ -27672,16 +27949,16 @@
             "value" : "保存"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lagre"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opslaan"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lagre"
           }
         },
         "pl" : {
@@ -27802,16 +28079,16 @@
             "value" : "メディアを保存"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lagre media"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Media opslaan"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lagre media"
           }
         },
         "pl" : {
@@ -27932,16 +28209,16 @@
             "value" : "ステータスを検索"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Søkestatus"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Zoekstatus"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "søk_status_tittel"
           }
         },
         "pl" : {
@@ -28062,16 +28339,16 @@
             "value" : "ユーザーを検索"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Søk brukere"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gebruikers zoeken"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "søk_brukers_tittel"
           }
         },
         "pl" : {
@@ -28192,16 +28469,16 @@
             "value" : "テキストを選択"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Velg tekst"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tekst selecteren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Velg tekst"
           }
         },
         "pl" : {
@@ -28322,16 +28599,16 @@
             "value" : "サーバー設定"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Serverkonfigurasjon"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Serverconfiguratie"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Server Konfigurasjon"
           }
         },
         "pl" : {
@@ -28452,16 +28729,16 @@
             "value" : "サーバー情報"
           }
         },
-        "nb" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Serverinfo"
           }
         },
-        "nl" : {
+        "no" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Serverinfo"
+            "value" : "Server Info"
           }
         },
         "pl" : {
@@ -28582,16 +28859,16 @@
             "value" : "サーバー合計: %lld"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Server totalt: %lld"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Server totaal: %lld"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serverens totalt: %lld"
           }
         },
         "pl" : {
@@ -28712,16 +28989,16 @@
             "value" : "Bluesky ベースURL (例: https://bsky.social)"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bluesky base-URL (f.eks. https://bsky.social)"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bluesky basis-URL (bijv. https://bsky.social)"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "service_select_bluesky_base_url_placeholder"
           }
         },
         "pl" : {
@@ -28842,16 +29119,16 @@
             "value" : "インスタンスのURLを入力"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Skriv inn instans-URL"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voer instantie-URL in"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "service_select_instance_input_placeholder"
           }
         },
         "pl" : {
@@ -28972,16 +29249,16 @@
             "value" : "インスタンスが見つかりません"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ingen instans funnet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Geen instantie gevonden"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "service_select_no_instance"
           }
         },
         "pl" : {
@@ -29102,16 +29379,16 @@
             "value" : "Flare は Apple 向けのソーシャルネットワーククライアントです。\\n開始するには、接続するサービスを選択してください。"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Flare er en klient for sosiale nettverk for Apple.\\nFor å komme i gang, velg en tjeneste å koble til."
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Flare is een client voor sociale netwerken voor Apple.\\nSelecteer een service om mee te verbinden om te beginnen."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "service_select_welcome_message"
           }
         },
         "pl" : {
@@ -29232,16 +29509,16 @@
             "value" : "Flare へようこそ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Velkommen til Flare"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Welkom bij Flare"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "service_select_welcome_title"
           }
         },
         "pl" : {
@@ -29362,16 +29639,16 @@
             "value" : "Flare についてもっと知る"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lær mer om Flare"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meer informatie over Flare"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "instillinger_about_undertittel"
           }
         },
         "pl" : {
@@ -29492,16 +29769,16 @@
             "value" : "概要"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Om"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Over"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "instillinger_ombrudd_tittel"
           }
         },
         "pl" : {
@@ -29622,16 +29899,16 @@
             "value" : "アカウント管理"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kontoadministrasjon"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Accountbeheer"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_konto_tittel"
           }
         },
         "pl" : {
@@ -29752,16 +30029,16 @@
             "value" : "アバターの形状"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Avatarform"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Avatarvorm"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_utseende_avatar_form"
           }
         },
         "pl" : {
@@ -29882,16 +30159,16 @@
             "value" : "アバターの形状を変更します"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Endre formen på avataren"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "De vorm van de avatar wijzigen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_fremstående_avatar_shape_description"
           }
         },
         "pl" : {
@@ -30012,16 +30289,16 @@
             "value" : "円形"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rund"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rond"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_fremst_avatar_shape_round"
           }
         },
         "pl" : {
@@ -30142,16 +30419,16 @@
             "value" : "正方形"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Firkantet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vierkant"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_fremst_avatar_shape_square"
           }
         },
         "pl" : {
@@ -30272,16 +30549,16 @@
             "value" : "全般"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Generisk"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Algemeen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_fremst_generisk"
           }
         },
         "pl" : {
@@ -30402,16 +30679,16 @@
             "value" : "アクションを表示"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis handlinger"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Acties weergeven"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_fremvisning_handlinger"
           }
         },
         "pl" : {
@@ -30532,16 +30809,16 @@
             "value" : "ステータスの下部にアクションボタンを表示します"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis handlingsknapper nederst i statusen"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Actieknoppen onderaan de status weergeven"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_utseende_show_actions_beskrivelse"
           }
         },
         "pl" : {
@@ -30662,16 +30939,16 @@
             "value" : "センシティブな画像を表示"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis sensitive bilder"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gevoelige afbeeldingen weergeven"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_fremvisende_show_cw_img"
           }
         },
         "pl" : {
@@ -30792,16 +31069,16 @@
             "value" : "センシティブとマークされていても、コンテンツ画像を自動的に表示します"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis innholdsbilder automatisk selv om de er merket som sensitive"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Inhoudsafbeeldingen automatisch weergeven, zelfs als ze als gevoelig zijn gemarkeerd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_fremst_show_cw_img_description"
           }
         },
         "pl" : {
@@ -30922,16 +31199,16 @@
             "value" : "リンクプレビューを表示"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis forhåndsvisninger av lenker"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Linkvoorbeelden weergeven"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_utseende_show_link_previews"
           }
         },
         "pl" : {
@@ -31052,16 +31329,16 @@
             "value" : "ステータスにリンクプレビューを表示します"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis forhåndsvisninger av lenker i statusen"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Linkvoorbeelden in de status weergeven"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_utseende_show_link_previews_description"
           }
         },
         "pl" : {
@@ -31182,16 +31459,16 @@
             "value" : "メディアを表示"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis media"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Media weergeven"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_fremvisning_media"
           }
         },
         "pl" : {
@@ -31312,16 +31589,16 @@
             "value" : "ステータスにメディアを表示します"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis media i statusen"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Media in de status weergeven"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_utseende_show_media_description"
           }
         },
         "pl" : {
@@ -31442,16 +31719,16 @@
             "value" : "数字を表示"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis tall"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nummers weergeven"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_utseende_vis_tall"
           }
         },
         "pl" : {
@@ -31572,16 +31849,16 @@
             "value" : "ステータスの下部に数字を表示します"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis tall nederst i statusen"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nummers onderaan de status weergeven"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_utseende_show_numbers_description"
           }
         },
         "pl" : {
@@ -31702,16 +31979,16 @@
             "value" : "テーマカラー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Temafarge"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Themakleur"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_utseende_teme_farge"
           }
         },
         "pl" : {
@@ -31832,16 +32109,16 @@
             "value" : "外観"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Utseende"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Uiterlijk"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_utseende_tittel"
           }
         },
         "pl" : {
@@ -31962,16 +32239,16 @@
             "value" : "キャッシュデータベースをクリア"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tøm hurtigbufferdatabase"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cache-database wissen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "settings_storage_clear_database"
           }
         },
         "pl" : {
@@ -32092,16 +32369,16 @@
             "value" : "%1$@ ユーザー、 %2$@ ステータスが削除されます"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ brukere, %2$@ statuser vil bli fjernet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ gebruikers, %2$@ statussen worden verwijderd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "settings_storage_clear_database_description"
           }
         },
         "pl" : {
@@ -32222,16 +32499,16 @@
             "value" : "画像キャッシュをクリア"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tøm bildebuffer"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Afbeeldingscache wissen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "settings_storage_clear_image_cache"
           }
         },
         "pl" : {
@@ -32352,16 +32629,16 @@
             "value" : "%1$@ MB の画像が削除されます"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%1$@ MB med bilder vil bli fjernet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ MB aan afbeeldingen wordt verwijderd"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "settings_storage_clear_image_cache_beskrivelse"
           }
         },
         "pl" : {
@@ -32482,16 +32759,16 @@
             "value" : "ストレージ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lagring"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opslag"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_storage_tittel"
           }
         },
         "pl" : {
@@ -32612,16 +32889,16 @@
             "value" : "設定"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Innstillinger"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Instellingen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "innstillinger_tittel"
           }
         },
         "pl" : {
@@ -32742,16 +33019,16 @@
             "value" : "Flare へようこそ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Velkommen til Flare"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Welkom bij Flare"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "instillinger_velkommen"
           }
         },
         "pl" : {
@@ -32815,115 +33092,115 @@
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "SF مدورة"
           }
         },
         "cs" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "SF zaokrouhleno"
           }
         },
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "SF Afrundet"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "SF abgerundet"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "SF Στρογγυλεμένο"
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "SF Redondeado"
           }
         },
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "Sf Pyöristetty"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "Arrondi SF"
           }
         },
         "it" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "SF Arrotondato"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
-          }
-        },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "SF 丸みを帯びた"
           }
         },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "SF Afgerond"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avrundet SF"
           }
         },
         "pl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "SF Zaokrąglony"
           }
         },
         "pt-BR" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "FC Arredondado"
           }
         },
         "pt-PT" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "FC Arredondado"
           }
         },
         "ro" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "SF rotunjit"
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "Округление SF"
           }
         },
         "sv" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "SF Avrundad"
           }
         },
         "uk" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "SF Rounded"
+            "value" : "Закруглений"
           }
         },
         "zh-Hans" : {
@@ -33002,16 +33279,16 @@
             "value" : "共有"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Del"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Del"
           }
         },
         "pl" : {
@@ -33132,16 +33409,16 @@
             "value" : "画像として共有"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Del som bilde"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delen als afbeelding"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Del som bilde"
           }
         },
         "pl" : {
@@ -33262,16 +33539,16 @@
             "value" : "投稿を共有"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Del innlegg"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bericht delen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Del innlegg"
           }
         },
         "pl" : {
@@ -33392,16 +33669,16 @@
             "value" : "投稿を画像として共有"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Del innlegg som bilde"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bericht delen als afbeelding"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Del innlegg som bilde"
           }
         },
         "pl" : {
@@ -33522,16 +33799,16 @@
             "value" : "メンバーを表示"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis medlemmer"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Leden weergeven"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vis medlemmer"
           }
         },
         "pl" : {
@@ -33652,16 +33929,16 @@
             "value" : "スピーカー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Foredragsholder"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Spreker"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Høyttaler"
           }
         },
         "pl" : {
@@ -33782,16 +34059,16 @@
             "value" : "スピーカー (%lld人)"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Foredragsholdere (%lld)"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sprekers (%lld)"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Høyttalere (%lld)"
           }
         },
         "pl" : {
@@ -33912,16 +34189,16 @@
             "value" : "再生を開始"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start lytting"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Begin met luisteren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start Lytter"
           }
         },
         "pl" : {
@@ -34042,16 +34319,16 @@
             "value" : "リアクションを追加"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Legg til reaksjon"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reactie toevoegen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "status_action_legg til_reaksjon"
           }
         },
         "pl" : {
@@ -34172,16 +34449,16 @@
             "value" : "ブックマーク"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bokmerke"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bladwijzer"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "status_action_bokmerke"
           }
         },
         "pl" : {
@@ -34302,16 +34579,16 @@
             "value" : "削除"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Slett"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verwijderen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "slett status"
           }
         },
         "pl" : {
@@ -34432,16 +34709,16 @@
             "value" : "いいね"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liker"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Leuk vinden"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "status_action_lik"
           }
         },
         "pl" : {
@@ -34562,16 +34839,16 @@
             "value" : "その他"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mer"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meer"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "status_action_mer"
           }
         },
         "pl" : {
@@ -34692,16 +34969,16 @@
             "value" : "返信"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Svar"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Antwoorden"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "_status_svar"
           }
         },
         "pl" : {
@@ -34822,16 +35099,16 @@
             "value" : "ブックマークを削除"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fjern bokmerke"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bladwijzer verwijderen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "status_action_ubokmerke"
           }
         },
         "pl" : {
@@ -34952,16 +35229,16 @@
             "value" : "いいねを取り消す"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liker ikke lenger"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Niet meer leuk vinden"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "status_action_ulik"
           }
         },
         "pl" : {
@@ -35082,16 +35359,16 @@
             "value" : "ステータス詳細"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Statusdetaljer"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Statusdetails"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "status_detaljer"
           }
         },
         "pl" : {
@@ -35212,16 +35489,16 @@
             "value" : "コメント"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kommentar"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reactie"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "status_detaljer_kommentar"
           }
         },
         "pl" : {
@@ -35342,16 +35619,16 @@
             "value" : "再投稿"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reposter"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Opnieuw plaatsen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "_Fremstilling av status"
           }
         },
         "pl" : {
@@ -35472,16 +35749,16 @@
             "value" : "メディアを表示"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Vis media"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Media weergeven"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "status_display_media"
           }
         },
         "pl" : {
@@ -35603,16 +35880,16 @@
             "value" : "センシティブなメディア"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sensitivt medieinnhold"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gevoelige media"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "status_sensitive_media"
           }
         },
         "pl" : {
@@ -35733,16 +36010,16 @@
             "value" : "ブックマーク"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bokmerke"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bladwijzer"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "status.action.bokmerke"
           }
         },
         "pl" : {
@@ -35863,16 +36140,16 @@
             "value" : "共有"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Del"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Delen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "status.action.share-tittel"
           }
         },
         "pl" : {
@@ -35993,16 +36270,16 @@
             "value" : "登録者"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Abonnenter"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Abonnees"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "abonnenter"
           }
         },
         "pl" : {
@@ -36123,16 +36400,16 @@
             "value" : "サポートされているMIMEタイプ:"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Støttede MIME-typer:"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ondersteunde MIME-typen:"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Støttede MIME-typer:"
           }
         },
         "pl" : {
@@ -36253,16 +36530,16 @@
             "value" : "システム"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "System"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Systeem"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Systemadministrasjon"
           }
         },
         "pl" : {
@@ -36383,16 +36660,16 @@
             "value" : "システムブラウザ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Systemnettleser"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Systeembrowser"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System nettleser"
           }
         },
         "pl" : {
@@ -36513,16 +36790,16 @@
             "value" : "システムオフライン翻訳"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Systemfrakoblet oversettelse"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Systeem offline vertaling"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "System frakoblet oversettelse"
           }
         },
         "pl" : {
@@ -36643,16 +36920,16 @@
             "value" : "タブビューとラベルが一致しません！"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fanevisninger og etiketter samsvarer ikke!"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tabbladweergaven en labels komen niet overeen!"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tabeller og etiketter samsvarer ikke!"
           }
         },
         "pl" : {
@@ -36773,16 +37050,16 @@
             "value" : "テスト翻訳"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Test oversettelse"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Testvertaling"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Test oversettelse"
           }
         },
         "pl" : {
@@ -36903,16 +37180,16 @@
             "value" : "現在表示できるライブまたは録音されたスペースはありません。"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Det er for øyeblikket ingen direktesendte eller innspilte Spaces å vise."
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Er zijn momenteel geen live of opgenomen Spaces om weer te geven."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Det er for tiden ingen live eller registrerte mellomrom å vise."
           }
         },
         "pl" : {
@@ -37033,16 +37310,16 @@
             "value" : "この操作は元に戻せません。"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Denne handlingen kan ikke angres."
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Deze actie kan niet ongedaan worden gemaakt."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denne handlingen kan ikke angres."
           }
         },
         "pl" : {
@@ -37163,16 +37440,16 @@
             "value" : "現在のユーザーが設定されていない、インスタンスホストが設定されていない、またはデータがまだ読み込まれていることが原因である可能性があります。"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Dette kan skyldes at den gjeldende brukeren ikke er angitt, instansverten ikke er konfigurert, eller at data fortsatt lastes inn."
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dit kan zijn omdat de huidige gebruiker niet is ingesteld, de instance-host niet is geconfigureerd of gegevens nog steeds worden geladen."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dette kan være fordi den gjeldende brukeren ikke er angitt, instansens vert ikke er konfigurert, eller data laster fortsatt inn."
           }
         },
         "pl" : {
@@ -37293,16 +37570,16 @@
             "value" : "このポッドキャストのURLは利用できません。"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Denne podcast-URL-en er ikke tilgjengelig."
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Deze podcast-URL is niet beschikbaar."
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Denne podcast URL-adressen er ikke tilgjengelig."
           }
         },
         "pl" : {
@@ -37424,16 +37701,16 @@
             "value" : "タイムラインは空です"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tidslinjen er tom"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tijdlijn is leeg"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tidslinjen_last_tom"
           }
         },
         "pl" : {
@@ -37555,16 +37832,16 @@
             "value" : "タイムラインの読み込みエラー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Feil ved lasting av tidslinje"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fout bij laden tijdlijn"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tidslinjen_last_feil"
           }
         },
         "pl" : {
@@ -37685,13 +37962,13 @@
             "value" : "ヒント"
           }
         },
-        "nb" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tips"
           }
         },
-        "nl" : {
+        "no" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tips"
@@ -37770,7 +38047,7 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Total: %lld"
+            "value" : "I Alt: %lld"
           }
         },
         "de" : {
@@ -37815,16 +38092,16 @@
             "value" : "合計: %lld"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Totalt: %lld"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Totaal: %lld"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Totalt: %lld"
           }
         },
         "pl" : {
@@ -37945,16 +38222,16 @@
             "value" : "翻訳"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oversett"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vertalen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "oversett"
           }
         },
         "pl" : {
@@ -38075,16 +38352,16 @@
             "value" : "翻訳済み"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oversatt"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vertaald"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "oversatt"
           }
         },
         "pl" : {
@@ -38205,16 +38482,16 @@
             "value" : "翻訳エンジン"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Oversettelsesmotor"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vertaalengine"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oversettelse motor"
           }
         },
         "pl" : {
@@ -38335,16 +38612,16 @@
             "value" : "翻訳設定"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Innstillinger for oversettelse"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vertaalinstellingen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Innstillinger for oversettelse"
           }
         },
         "pl" : {
@@ -38465,16 +38742,16 @@
             "value" : "ブロック解除"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opphev blokkering"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Deblokkeren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "oppheve blokkering"
           }
         },
         "pl" : {
@@ -38595,16 +38872,16 @@
             "value" : "ミュート解除"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opphev demping"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dempen opheffen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "udemp"
           }
         },
         "pl" : {
@@ -38725,16 +39002,16 @@
             "value" : "未使用のタブ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ubrukte faner"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ongebruikte tabbladen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ubrukte faner"
           }
         },
         "pl" : {
@@ -38855,16 +39132,16 @@
             "value" : "使用中のタブ"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brukte faner"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gebruikte tabbladen"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "used tabs"
           }
         },
         "pl" : {
@@ -38985,16 +39262,16 @@
             "value" : "ユーザープロフィール: %@"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brukerprofil: %@"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gebruikersprofiel: %@"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brukerprofil: %@"
           }
         },
         "pl" : {
@@ -39115,16 +39392,16 @@
             "value" : "%1$@ をブロック"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Blokker %1$@"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ blokkeren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "user_blokk"
           }
         },
         "pl" : {
@@ -39245,16 +39522,16 @@
             "value" : "%1$@ のブロックを解除"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Opphev blokkering av %1$@"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "%1$@ deblokkeren"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "user_unblock"
           }
         },
         "pl" : {
@@ -39375,16 +39652,16 @@
             "value" : "ユーザー名"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brukernavn"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gebruikersnaam"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "brukernavn"
           }
         },
         "pl" : {
@@ -39505,16 +39782,16 @@
             "value" : "ユーザー"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brukere"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Gebruikers"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brukere"
           }
         },
         "pl" : {
@@ -39635,16 +39912,16 @@
             "value" : "VVOをいいね"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Liker VVO"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vindt VVO leuk"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "vvo_beskjed_like"
           }
         },
         "pl" : {
@@ -39765,16 +40042,16 @@
             "value" : "ほしい物リスト"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ønskeliste"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Verlanglijst"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ønskeliste"
           }
         },
         "pl" : {
@@ -39850,19 +40127,19 @@
         "da" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "X Audio Space"
+            "value" : "X Lydplads"
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "X Audio Space"
+            "value" : "X-Audio-Abstand"
           }
         },
         "el" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "X Audio Space"
+            "value" : "Χώρος Ήχου X"
           }
         },
         "es" : {
@@ -39874,7 +40151,7 @@
         "fi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "X Audio Space"
+            "value" : "X- Äänitila"
           }
         },
         "fr" : {
@@ -39895,16 +40172,16 @@
             "value" : "Xオーディオスペース"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "X Audio Space"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "X Audio Space"
+            "value" : "X audioruimte"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "X Lydrom"
           }
         },
         "pl" : {
@@ -40025,16 +40302,16 @@
             "value" : "あなたをメンションしました"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "nevnte deg i en status"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "heeft je genoemd in een status"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "xqt_item_mention_status"
           }
         },
         "pl" : {
@@ -40155,16 +40432,16 @@
             "value" : "リツイート済み"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "retweetet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "geretweet"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "xqt_item_reblogged_status"
           }
         },
         "pl" : {
@@ -40285,16 +40562,16 @@
             "value" : "Xスペース"
           }
         },
-        "nb" : {
+        "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "X Space"
           }
         },
-        "nl" : {
+        "no" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "X Space"
+            "value" : "XMellomrom"
           }
         },
         "pl" : {
@@ -40415,16 +40692,16 @@
             "value" : "このウィンドウを閉じることができます"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Du kan nå lukke dette vinduet"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "U kunt dit venster nu sluiten"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nå kan du lukke dette vinduet"
           }
         },
         "pl" : {
@@ -40545,16 +40822,16 @@
             "value" : "あなたは X Spaces をフォローしています"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Du følger X Spaces"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Je volgt de X Spaces"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du følger X grupperom"
           }
         },
         "pl" : {
@@ -40675,16 +40952,16 @@
             "value" : "あなたのアカウントにはフィードがありません"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Kontoen din har ingen feeder"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Je account heeft geen feeds"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kontoen din har ikke noen strømmer"
           }
         },
         "pl" : {
@@ -40805,16 +41082,16 @@
             "value" : "現在のアカウントはフィードをサポートしていません"
           }
         },
-        "nb" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Din nåværende konto støtter ikke feeder"
-          }
-        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Je huidige account ondersteunt geen feeds"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Din gjeldende konto støtter ikke strømmer"
           }
         },
         "pl" : {
@@ -40872,36 +41149,137 @@
           }
         }
       }
-    }, 
-   "Text Render Engine" : {
-    "localizations" : {
-      "ar" : { "stringUnit" : { "state" : "translated", "value" : "محرك عرض النصوص" } },
-      "cs" : { "stringUnit" : { "state" : "translated", "value" : "Renderovací jádro textu" } },
-      "da" : { "stringUnit" : { "state" : "translated", "value" : "Tekstgengivelsesmotor" } },
-      "de" : { "stringUnit" : { "state" : "translated", "value" : "Text-Rendering-Engine" } },
-      "el" : { "stringUnit" : { "state" : "translated", "value" : "Μηχανή Απόδοσης Κειμένου" } },
-      "es" : { "stringUnit" : { "state" : "translated", "value" : "Motor de renderizado de texto" } },
-      "fi" : { "stringUnit" : { "state" : "translated", "value" : "Tekstin renderöintimoottori" } },
-      "fr" : { "stringUnit" : { "state" : "translated", "value" : "Moteur de rendu de texte" } },
-      "it" : { "stringUnit" : { "state" : "translated", "value" : "Motore di rendering del testo" } },
-      "ja" : { "stringUnit" : { "state" : "translated", "value" : "テキストレンダリングエンジン" } },
-      "nl" : { "stringUnit" : { "state" : "translated", "value" : "Tekstweergave-engine" } },
-      "no" : { "stringUnit" : { "state" : "translated", "value" : "Tekstgjengivelsesmotor" } },
-      "pl" : { "stringUnit" : { "state" : "translated", "value" : "Silnik renderowania tekstu" } },
-      "pt-BR" : { "stringUnit" : { "state" : "translated", "value" : "Mecanismo de renderização de texto" } },
-      "pt-PT" : { "stringUnit" : { "state" : "translated", "value" : "Motor de renderização de texto" } },
-      "ro" : { "stringUnit" : { "state" : "translated", "value" : "Motor de randare text" } },
-      "ru" : { "stringUnit" : { "state" : "translated", "value" : "Система визуализации текста" } },
-      "sv" : { "stringUnit" : { "state" : "translated", "value" : "Textåtergivningsmotor" } },
-      "uk" : { "stringUnit" : { "state" : "translated", "value" : "Рушій візуалізації тексту" } },
-      "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "文本渲染引擎" } },
-      "zh-Hant" : { "stringUnit" : { "state" : "translated", "value" : "文字渲染引擎" } }
+    },
+    "Text Render Engine" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "محرك عرض النصوص"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renderovací jádro textu"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekstgengivelsesmotor"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Text-Rendering-Engine"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Μηχανή Απόδοσης Κειμένου"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor de renderizado de texto"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekstin renderöintimoottori"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moteur de rendu de texte"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motore di rendering del testo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "テキストレンダリングエンジン"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekstweergave-engine"
+          }
+        },
+        "no" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tekstgjengivelsesmotor"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Silnik renderowania tekstu"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mecanismo de renderização de texto"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor de renderização de texto"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motor de randare text"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Система визуализации текста"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Textåtergivningsmotor"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Рушій візуалізації тексту"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文本渲染引擎"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "文字渲染引擎"
+          }
+        }
+      }
     }
-  }
- 
-
-
-
   },
   "version" : "1.0"
 }

@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.component
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -91,7 +92,14 @@ internal inline fun <reified T : NavKey> savedStateNavEntryDecorator2(
                 entry.content.invoke(entry.key)
             }
         }
-        childRegistry.lifecycle.currentState = Lifecycle.State.RESUMED
+        DisposableEffect(childRegistry) {
+            childRegistry.lifecycle.currentState = Lifecycle.State.RESUMED
+            onDispose {
+                if (childRegistry.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                    childRegistry.lifecycle.currentState = Lifecycle.State.STARTED
+                }
+            }
+        }
     }
 }
 

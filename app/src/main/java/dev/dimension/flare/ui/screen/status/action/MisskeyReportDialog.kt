@@ -13,53 +13,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.annotation.parameters.DeepLink
-import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.OutlinedTextField2
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.MisskeyReportPresenter
 import moe.tlaster.precompose.molecule.producePresenter
 
 @Composable
-@Destination<RootGraph>(
-    style = DestinationStyle.Dialog::class,
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-        DeepLink(
-            uriPattern = AppDeepLink.Misskey.ReportStatus.ROUTE,
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-internal fun MisskeyReportRoute(
-    navigator: DestinationsNavigator,
-    userKey: MicroBlogKey,
-    statusKey: MicroBlogKey,
-    accountKey: MicroBlogKey,
-) {
-    MisskeyReportDialog(
-        statusKey = statusKey,
-        userKey = userKey,
-        onBack = {
-            navigator.navigateUp()
-        },
-        accountType = AccountType.Specific(accountKey),
-    )
-}
-
-@Composable
-private fun MisskeyReportDialog(
+internal fun MisskeyReportDialog(
     userKey: MicroBlogKey,
     statusKey: MicroBlogKey?,
     accountType: AccountType,

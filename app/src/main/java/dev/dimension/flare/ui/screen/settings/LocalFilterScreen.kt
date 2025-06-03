@@ -9,9 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.LocalFilterEditDialogRouteDestination
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Pen
@@ -21,32 +18,15 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.LocalFilterPresenter
 import dev.dimension.flare.ui.presenter.settings.LocalFilterState
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-internal fun LocalFilterRoute(navigator: ProxyDestinationsNavigator) {
-    LocalFilterScreen(
-        onBack = navigator::navigateUp,
-        edit = { keyword ->
-            navigator.navigate(LocalFilterEditDialogRouteDestination(keyword))
-        },
-        add = {
-            navigator.navigate(LocalFilterEditDialogRouteDestination(null))
-        },
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LocalFilterScreen(
+internal fun LocalFilterScreen(
     onBack: () -> Unit,
     edit: (String) -> Unit,
     add: () -> Unit,

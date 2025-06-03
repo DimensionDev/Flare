@@ -32,10 +32,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.DestinationStyle
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Rss
@@ -48,7 +44,6 @@ import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.OutlinedTextField2
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.CreateListPresenter
@@ -56,20 +51,8 @@ import dev.dimension.flare.ui.presenter.list.CreateListState
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-    style = DestinationStyle.Dialog::class,
-)
 @Composable
-internal fun CreateListRoute(
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-) {
-    CreateListDialog(accountType, onDismissRequest = navigator::navigateUp)
-}
-
-@Composable
-private fun CreateListDialog(
+internal fun CreateListDialog(
     accountType: AccountType,
     onDismissRequest: () -> Unit,
 ) {

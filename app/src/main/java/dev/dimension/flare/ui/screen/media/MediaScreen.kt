@@ -37,11 +37,8 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogProperties
-import androidx.compose.ui.window.DialogWindowProvider
 import coil3.annotation.ExperimentalCoilApi
 import coil3.compose.rememberAsyncImagePainter
 import coil3.imageLoader
@@ -50,18 +47,11 @@ import coil3.request.crossfade
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.annotation.parameters.DeepLink
-import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.DestinationStyle
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.CoroutineScope
@@ -79,42 +69,6 @@ import org.koin.compose.koinInject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-
-object FullScreenDialogStyle : DestinationStyle.Dialog() {
-    override val properties =
-        DialogProperties(
-            decorFitsSystemWindows = false,
-            usePlatformDefaultWidth = false,
-        )
-}
-
-@Composable
-@Destination<RootGraph>(
-    style = FullScreenDialogStyle::class,
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-        DeepLink(
-            uriPattern = AppDeepLink.RawImage.ROUTE,
-        ),
-    ],
-)
-fun MediaRoute(
-    uri: String,
-    navigator: DestinationsNavigator,
-    previewUrl: String? = null,
-) {
-    val view = LocalView.current
-    LaunchedEffect(view) {
-        (view.parent as DialogWindowProvider).window.setDimAmount(0f)
-    }
-    MediaScreen(
-        uri = uri,
-        onDismiss = navigator::navigateUp,
-        previewUrl = previewUrl,
-    )
-}
 
 @OptIn(
     ExperimentalMaterial3Api::class,

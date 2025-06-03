@@ -259,7 +259,7 @@ internal fun RssDetailScreen(
     }
 }
 
-private fun getHtmlData(bodyHTML: String): String =
+internal fun getHtmlData(bodyHTML: String): String =
     """
 <!DOCTYPE html>
 <html>

@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
@@ -45,12 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.destinations.ComposeRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.ServiceSelectRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.TabSettingRouteDestination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
@@ -70,7 +63,6 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalBottomBarShowing
 import dev.dimension.flare.ui.component.RefreshContainer
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
@@ -95,38 +87,9 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-internal fun HomeTimelineRoute(
-    navigator: DestinationsNavigator,
-    drawerState: DrawerState,
-    accountType: AccountType,
-) {
-    val scope = rememberCoroutineScope()
-    HomeTimelineScreen(
-        accountType = accountType,
-        toCompose = {
-            navigator.navigate(ComposeRouteDestination(accountType = accountType))
-        },
-        toQuickMenu = {
-            scope.launch {
-                drawerState.open()
-            }
-        },
-        toLogin = {
-            navigator.navigate(ServiceSelectRouteDestination)
-        },
-        toTabSettings = {
-            navigator.navigate(TabSettingRouteDestination(accountType))
-        },
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HomeTimelineScreen(
+internal fun HomeTimelineScreen(
     accountType: AccountType,
     toCompose: () -> Unit,
     toQuickMenu: () -> Unit,

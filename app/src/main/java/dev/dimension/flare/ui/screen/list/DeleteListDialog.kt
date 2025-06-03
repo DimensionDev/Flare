@@ -12,39 +12,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.res.stringResource
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.DestinationStyle
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.DeleteListPresenter
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-    style = DestinationStyle.Dialog::class,
-)
 @Composable
-internal fun DeleteListRoute(
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-    listId: String,
-    title: String?,
-) {
-    DeleteListDialog(
-        accountType,
-        listId = listId,
-        title = title,
-        onDismissRequest = navigator::navigateUp,
-    )
-}
-
-@Composable
-private fun DeleteListDialog(
+internal fun DeleteListDialog(
     accountType: AccountType,
     listId: String,
     title: String?,

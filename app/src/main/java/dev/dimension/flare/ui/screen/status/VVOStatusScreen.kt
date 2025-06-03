@@ -33,16 +33,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.annotation.parameters.DeepLink
-import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FileCircleExclamation
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -52,7 +46,6 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.component.status.status
@@ -67,54 +60,9 @@ import dev.dimension.flare.ui.presenter.status.VVOStatusDetailState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Composable
-@Destination<RootGraph>(
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-        DeepLink(
-            uriPattern = AppDeepLink.VVO.StatusDetail.ROUTE,
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-internal fun VVOStatusDeeplinkRoute(
-    statusKey: MicroBlogKey,
-    navigator: DestinationsNavigator,
-    accountKey: MicroBlogKey,
-) {
-    VVOStatusScreen(
-        statusKey,
-        onBack = navigator::navigateUp,
-        accountType = AccountType.Specific(accountKey = accountKey),
-    )
-}
-
-@Composable
-@Destination<RootGraph>(
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-internal fun VVOStatusRoute(
-    statusKey: MicroBlogKey,
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-) {
-    VVOStatusScreen(
-        statusKey,
-        onBack = navigator::navigateUp,
-        accountType = accountType,
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun VVOStatusScreen(
+internal fun VVOStatusScreen(
     statusKey: MicroBlogKey,
     onBack: () -> Unit,
     accountType: AccountType,

@@ -6,10 +6,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
@@ -59,14 +56,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindowProvider
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
-import androidx.navigation.NavBackStackEntry
 import coil3.annotation.ExperimentalCoilApi
 import coil3.imageLoader
 import coil3.request.ImageRequest
@@ -75,13 +69,6 @@ import coil3.size.Size
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.annotation.parameters.DeepLink
-import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
-import com.ramcosta.composedestinations.generated.destinations.AltTextSheetRouteDestination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.DestinationStyle
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleInfo
@@ -90,11 +77,9 @@ import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.VideoDownloadHelper
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.DialogWrapper
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.VideoPlayer
@@ -109,7 +94,6 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
-import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
@@ -127,119 +111,14 @@ import moe.tlaster.precompose.molecule.producePresenter
 import moe.tlaster.swiper.Swiper
 import moe.tlaster.swiper.rememberSwiperState
 import org.koin.compose.koinInject
-import soup.compose.material.motion.animation.materialFadeThroughIn
-import soup.compose.material.motion.animation.materialFadeThroughOut
 import kotlin.time.Duration.Companion.milliseconds
-
-internal object StatusMediaTransitions : DestinationStyle.Animated() {
-    override val enterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)?
-        get() = {
-            materialFadeThroughIn()
-        }
-    override val exitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)?
-        get() = {
-            materialFadeThroughOut()
-        }
-    override val popEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)?
-        get() = {
-            materialFadeThroughIn()
-        }
-    override val popExitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)?
-        get() = {
-            materialFadeThroughOut()
-        }
-}
-
-@Composable
-@Destination<RootGraph>(
-    style = FullScreenDialogStyle::class,
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-        DeepLink(
-            uriPattern = AppDeepLink.StatusMedia.ROUTE,
-        ),
-    ],
-    wrappers = [DialogWrapper::class],
-//    style = StatusMediaTransitions::class,
-)
-internal fun StatusMediaDeeplinkRoute(
-    accountKey: MicroBlogKey?,
-    statusKey: MicroBlogKey,
-    mediaIndex: Int,
-    preview: String?,
-    navigator: DestinationsNavigator,
-    navigationState: NavigationState,
-) {
-    val view = LocalView.current
-    LaunchedEffect(view) {
-        (view.parent as DialogWindowProvider).window.setDimAmount(0f)
-    }
-    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-    StatusMediaRoute(
-        statusKey = statusKey,
-        mediaIndex = mediaIndex,
-        preview = preview,
-        navigator = navigator,
-        accountType = accountType,
-        navigationState = navigationState,
-    )
-}
-
-@Composable
-@Destination<RootGraph>(
-    style = FullScreenDialogStyle::class,
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-    ],
-    wrappers = [DialogWrapper::class],
-//    style = StatusMediaTransitions::class,
-)
-internal fun StatusMediaRoute(
-    statusKey: MicroBlogKey,
-    mediaIndex: Int,
-    preview: String?,
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-    navigationState: NavigationState,
-) {
-    val view = LocalView.current
-    LaunchedEffect(view) {
-        (view.parent as DialogWindowProvider).window.setDimAmount(0f)
-    }
-//    AnimatedVisibility(true) {
-//        SharedTransitionScope {
-//    DisposableEffect(Unit) {
-//        navigationState.hide()
-//        navigationState.disableDrawer()
-//        onDispose {
-//            navigationState.show()
-//            navigationState.enableDrawer()
-//        }
-//    }
-    StatusMediaScreen(
-        statusKey = statusKey,
-        accountType = accountType,
-        index = mediaIndex,
-        preview = preview,
-        onDismiss = navigator::navigateUp,
-        toAltText = {
-            it.description?.let { text -> navigator.navigate(AltTextSheetRouteDestination(text)) }
-        },
-    )
-//        }
-//    }
-}
 
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalPermissionsApi::class,
 )
 @Composable
-private fun StatusMediaScreen(
+internal fun StatusMediaScreen(
     statusKey: MicroBlogKey,
     accountType: AccountType,
     index: Int,

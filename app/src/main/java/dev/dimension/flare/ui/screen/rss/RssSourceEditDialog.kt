@@ -19,10 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.spec.DestinationStyle
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleCheck
@@ -30,7 +26,6 @@ import compose.icons.fontawesomeicons.solid.CircleXmark
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.OutlinedTextField2
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -38,29 +33,8 @@ import dev.dimension.flare.ui.presenter.home.rss.EditRssSourcePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import moe.tlaster.precompose.molecule.producePresenter
 
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-    style = DestinationStyle.Dialog::class,
-)
 @Composable
-internal fun CreateRssSourceRoute(navigator: DestinationsNavigator) {
-    RssSourceEditDialog(onDismissRequest = navigator::navigateUp, id = null)
-}
-
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-    style = DestinationStyle.Dialog::class,
-)
-@Composable
-internal fun EditRssSourceRoute(
-    navigator: DestinationsNavigator,
-    id: Int,
-) {
-    RssSourceEditDialog(onDismissRequest = navigator::navigateUp, id = id)
-}
-
-@Composable
-private fun RssSourceEditDialog(
+internal fun RssSourceEditDialog(
     onDismissRequest: () -> Unit,
     id: Int?,
 ) {

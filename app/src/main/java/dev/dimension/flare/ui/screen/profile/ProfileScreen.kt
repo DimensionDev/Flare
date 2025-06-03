@@ -56,19 +56,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.annotation.parameters.DeepLink
-import com.ramcosta.composedestinations.annotation.parameters.FULL_ROUTE_PLACEHOLDER
-import com.ramcosta.composedestinations.generated.destinations.DMScreenRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.EditAccountListRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.FansScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.FollowingScreenDestination
-import com.ramcosta.composedestinations.generated.destinations.SearchRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.StatusMediaRouteDestination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import dev.dimension.flare.R
-import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
@@ -85,7 +73,6 @@ import dev.dimension.flare.ui.component.ProfileHeaderLoading
 import dev.dimension.flare.ui.component.ProfileMenu
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.RichText
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
@@ -93,8 +80,6 @@ import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
-import dev.dimension.flare.ui.model.onError
-import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.ProfileMedia
@@ -111,114 +96,6 @@ import moe.tlaster.nestedscrollview.VerticalNestedScrollView
 import moe.tlaster.nestedscrollview.rememberNestedScrollViewState
 import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.math.max
-
-@Composable
-@Destination<RootGraph>(
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-        DeepLink(
-            uriPattern = AppDeepLink.ProfileWithNameAndHost.ROUTE,
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-internal fun ProfileWithUserNameAndHostDeeplinkRoute(
-    userName: String,
-    host: String,
-    navigator: DestinationsNavigator,
-    accountKey: MicroBlogKey?,
-) {
-    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-    val state by producePresenter(key = "acct_${accountKey}_$userName@$host") {
-        profileWithUserNameAndHostPresenter(
-            userName = userName,
-            host = host,
-            accountType = accountType,
-        )
-    }
-    state
-        .onSuccess {
-            ProfileRoute(
-                userKey = it.key,
-                navigator = navigator,
-                accountType = accountType,
-            )
-        }.onLoading {
-            ProfileLoadingScreen(
-                onBack = {
-                    navigator.navigateUp()
-                },
-            )
-        }.onError {
-            ProfileErrorScreen(
-                onBack = {
-                    navigator.navigateUp()
-                },
-            )
-        }
-}
-
-@Composable
-@Destination<RootGraph>(
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-internal fun ProfileWithUserNameAndHostRoute(
-    userName: String,
-    host: String,
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-) {
-    val state by producePresenter(key = "acct_${accountType}_$userName@$host") {
-        profileWithUserNameAndHostPresenter(
-            userName = userName,
-            host = host,
-            accountType = accountType,
-        )
-    }
-    state
-        .onSuccess {
-            ProfileRoute(
-                userKey = it.key,
-                navigator = navigator,
-                accountType = accountType,
-            )
-        }.onLoading {
-            ProfileLoadingScreen(
-                onBack = {
-                    navigator.navigateUp()
-                },
-            )
-        }.onError {
-            ProfileErrorScreen(
-                onBack = {
-                    navigator.navigateUp()
-                },
-            )
-        }
-}
-
-@Composable
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
-internal fun MeRoute(
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-) {
-    ProfileRoute(
-        userKey = null,
-        navigator = navigator,
-        accountType = accountType,
-        showBackButton = false,
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -284,105 +161,11 @@ private fun profileWithUserNameAndHostPresenter(
     }.invoke().user
 }
 
-@Composable
-@Destination<RootGraph>(
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-        DeepLink(
-            uriPattern = AppDeepLink.Profile.ROUTE,
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-internal fun ProfileDeeplinkRoute(
-    userKey: MicroBlogKey,
-    navigator: DestinationsNavigator,
-    accountKey: MicroBlogKey?,
-) {
-    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-    ProfileRoute(
-        userKey = userKey,
-        navigator = navigator,
-        accountType = accountType,
-    )
-}
-
-@Composable
-@Destination<RootGraph>(
-    deepLinks = [
-        DeepLink(
-            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-        ),
-    ],
-    wrappers = [ThemeWrapper::class],
-)
-internal fun ProfileRoute(
-    userKey: MicroBlogKey?,
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-    showBackButton: Boolean = true,
-) {
-    ProfileScreen(
-        userKey = userKey,
-        onBack = {
-            navigator.navigateUp()
-        },
-        showBackButton = showBackButton,
-        onMediaClick = { statusKey, index, preview ->
-            navigator.navigate(
-                StatusMediaRouteDestination(
-                    statusKey = statusKey,
-                    mediaIndex = index,
-                    preview = preview,
-                    accountType = accountType,
-                ),
-            )
-        },
-        accountType = accountType,
-        toEditAccountList = {
-            if (userKey != null) {
-                navigator.navigate(EditAccountListRouteDestination(accountType, userKey))
-            }
-        },
-        toSearchUserUsingAccount = { handle, accountKey ->
-            navigator.navigate(
-                SearchRouteDestination(
-                    handle,
-                    AccountType.Specific(accountKey),
-                ),
-            )
-        },
-        toStartMessage = {
-            navigator.navigate(
-                DMScreenRouteDestination(accountType = accountType, initialUserKey = it),
-            )
-        },
-        onFollowListClick = {
-            navigator.navigate(
-                FollowingScreenDestination(
-                    userKey = it,
-                    accountType = accountType,
-                ),
-            )
-        },
-        onFansListClick = {
-            navigator.navigate(
-                FansScreenDestination(
-                    userKey = it,
-                    accountType = accountType,
-                ),
-            )
-        },
-    )
-}
-
 @OptIn(
     ExperimentalMaterial3Api::class,
 )
 @Composable
-private fun ProfileScreen(
+internal fun ProfileScreen(
     accountType: AccountType,
     toEditAccountList: () -> Unit,
     toSearchUserUsingAccount: (String, MicroBlogKey) -> Unit,

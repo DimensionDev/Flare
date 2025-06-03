@@ -20,9 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Check
@@ -33,32 +30,15 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.OutlinedTextField2
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.UiKeywordFilter
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.LocalFilterPresenter
-import dev.dimension.flare.ui.screen.media.FullScreenDialogStyle
 import moe.tlaster.precompose.molecule.producePresenter
-
-@Destination<RootGraph>(
-    style = FullScreenDialogStyle::class,
-    wrappers = [ThemeWrapper::class],
-)
-@Composable
-internal fun LocalFilterEditDialogRoute(
-    navigator: DestinationsNavigator,
-    keyword: String?,
-) {
-    LocalFilterEditDialog(
-        keyword = keyword,
-        onBack = navigator::navigateUp,
-    )
-}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-private fun LocalFilterEditDialog(
+internal fun LocalFilterEditDialog(
     keyword: String?,
     onBack: () -> Unit,
 ) {

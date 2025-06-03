@@ -1,44 +1,24 @@
 package dev.dimension.flare.ui.screen.settings
 
-import android.os.Parcelable
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.AnimatedPane
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
-import androidx.compose.material3.adaptive.navigation.ThreePaneScaffoldNavigator
-import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.res.stringResource
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.generated.NavGraphs
-import com.ramcosta.composedestinations.generated.destinations.AboutRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.AccountsRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.AiConfigRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.AppearanceRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.GuestSettingRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.LocalCacheSearchRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.LocalFilterRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.StorageRouteDestination
-import com.ramcosta.composedestinations.generated.destinations.TabCustomizeRouteDestination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
-import com.ramcosta.composedestinations.navigation.dependency
-import com.ramcosta.composedestinations.spec.Direction
+import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleInfo
@@ -46,6 +26,7 @@ import compose.icons.fontawesomeicons.solid.CircleUser
 import compose.icons.fontawesomeicons.solid.ClockRotateLeft
 import compose.icons.fontawesomeicons.solid.Database
 import compose.icons.fontawesomeicons.solid.Filter
+import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.Robot
@@ -54,183 +35,33 @@ import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.screen.home.NavigationState
-import dev.dimension.flare.ui.screen.home.Router
-import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 import moe.tlaster.precompose.molecule.producePresenter
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
 @Composable
-internal fun SettingsRoute(
-    navigationState: NavigationState,
-    navigator: DestinationsNavigator,
-) {
-    val uriHandler = LocalUriHandler.current
-    val scaffoldNavigator =
-        rememberListDetailPaneScaffoldNavigator<SettingsDetailDestination>()
-    val scope = rememberCoroutineScope()
-    NavigableListDetailPaneScaffold(
-        navigator = scaffoldNavigator,
-        listPane = {
-            AnimatedPane {
-                SettingsScreen(
-                    toAccounts = {
-                        scope.launch {
-                            scaffoldNavigator.navigateTo(
-                                ListDetailPaneScaffoldRole.Detail,
-                                SettingsDetailDestination.Accounts,
-                            )
-                        }
-                    },
-                    toAppearance = {
-                        scope.launch {
-                            scaffoldNavigator.navigateTo(
-                                ListDetailPaneScaffoldRole.Detail,
-                                SettingsDetailDestination.Appearance,
-                            )
-                        }
-                    },
-                    toStorage = {
-                        scope.launch {
-                            scaffoldNavigator.navigateTo(
-                                ListDetailPaneScaffoldRole.Detail,
-                                SettingsDetailDestination.Storage,
-                            )
-                        }
-                    },
-                    toAbout = {
-                        scope.launch {
-                            scaffoldNavigator.navigateTo(
-                                ListDetailPaneScaffoldRole.Detail,
-                                SettingsDetailDestination.About,
-                            )
-                        }
-                    },
-                    toTabCustomization = {
-                        scope.launch {
-                            scaffoldNavigator.navigateTo(
-                                ListDetailPaneScaffoldRole.Detail,
-                                SettingsDetailDestination.TabCustomization,
-                            )
-                        }
-                    },
-                    toLocalFilter = {
-                        scope.launch {
-                            scaffoldNavigator.navigateTo(
-                                ListDetailPaneScaffoldRole.Detail,
-                                SettingsDetailDestination.LocalFilter,
-                            )
-                        }
-                    },
-                    toGuestSettings = {
-                        navigator.navigate(GuestSettingRouteDestination)
-                    },
-                    toLocalHistory = {
-                        scope.launch {
-                            scaffoldNavigator.navigateTo(
-                                ListDetailPaneScaffoldRole.Detail,
-                                SettingsDetailDestination.LocalHistory,
-                            )
-                        }
-                    },
-                    toAiConfig = {
-                        scope.launch {
-                            scaffoldNavigator.navigateTo(
-                                ListDetailPaneScaffoldRole.Detail,
-                                SettingsDetailDestination.AiConfig,
-                            )
-                        }
-                    },
-                )
-            }
-        },
-        detailPane = {
-            AnimatedPane {
-                scaffoldNavigator.currentDestination?.contentKey?.let { item ->
-                    Router(navGraph = NavGraphs.root, item.toDestination()) {
-                        dependency(
-                            ProxyDestinationsNavigator(
-                                scaffoldNavigator,
-                                destinationsNavigator,
-                                navigateBack = {
-                                    scope.launch {
-                                        scaffoldNavigator.navigateBack()
-                                    }
-                                },
-                                uriHandler = uriHandler,
-                                rootNavigator = navigator,
-                            ),
-                        )
-                        dependency(navigationState)
-                    }
-                }
-            }
-        },
-    )
-}
-
-@Parcelize
-internal enum class SettingsDetailDestination : Parcelable {
-    Accounts,
-    Appearance,
-    Storage,
-    About,
-    TabCustomization,
-    LocalFilter,
-    LocalHistory,
-    AiConfig,
-    ;
-
-    fun toDestination(): Direction =
-        when (this) {
-            Accounts -> AccountsRouteDestination
-            Appearance -> AppearanceRouteDestination
-            Storage -> StorageRouteDestination
-            About -> AboutRouteDestination
-            TabCustomization -> TabCustomizeRouteDestination
-            LocalFilter -> LocalFilterRouteDestination
-            LocalHistory -> LocalCacheSearchRouteDestination
-            AiConfig -> AiConfigRouteDestination
+internal fun SettingsDetailPlaceholder(modifier: Modifier = Modifier) {
+    FlareScaffold(
+        modifier = modifier,
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(it),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.CenterVertically),
+        ) {
+            FAIcon(
+                FontAwesomeIcons.Solid.Gear,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+            )
         }
-}
-
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
-internal class ProxyDestinationsNavigator(
-    private val scaffoldNavigator: ThreePaneScaffoldNavigator<SettingsDetailDestination>,
-    private val navigator: DestinationsNavigator,
-    private val navigateBack: () -> Unit,
-    val uriHandler: UriHandler,
-    val rootNavigator: DestinationsNavigator,
-) : DestinationsNavigator by navigator {
-    override fun navigateUp(): Boolean =
-        if (navigator.navigateUp()) {
-            true
-        } else if (scaffoldNavigator.canNavigateBack()) {
-            navigateBack()
-            true
-        } else {
-            false
-        }
-
-    override fun popBackStack(): Boolean =
-        if (navigator.popBackStack()) {
-            true
-        } else if (scaffoldNavigator.canNavigateBack()) {
-            navigateBack()
-            true
-        } else {
-            false
-        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

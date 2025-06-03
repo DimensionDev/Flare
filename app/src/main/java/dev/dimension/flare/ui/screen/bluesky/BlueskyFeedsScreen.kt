@@ -1,9 +1,9 @@
 package dev.dimension.flare.ui.screen.bluesky
 
-import android.os.Parcelable
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,30 +18,24 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
-import androidx.compose.material3.adaptive.layout.AnimatedPane
-import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
-import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
-import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.annotation.RootGraph
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Rss
+import compose.icons.fontawesomeicons.solid.SquareRss
 import compose.icons.fontawesomeicons.solid.Thumbtack
 import compose.icons.fontawesomeicons.solid.ThumbtackSlash
 import compose.icons.fontawesomeicons.solid.Trash
@@ -60,7 +54,6 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.RefreshContainer
-import dev.dimension.flare.ui.component.ThemeWrapper
 import dev.dimension.flare.ui.component.status.ListComponent
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.uiListItemComponent
@@ -78,66 +71,34 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
-@Destination<RootGraph>(
-    wrappers = [ThemeWrapper::class],
-)
 @Composable
-internal fun BlueskyFeedsRoute(
-    navigator: DestinationsNavigator,
-    accountType: AccountType,
-) {
-    val scope = rememberCoroutineScope()
-    val scaffoldNavigator =
-        rememberListDetailPaneScaffoldNavigator<BlueskyFeedUri>()
-    NavigableListDetailPaneScaffold(
-        navigator = scaffoldNavigator,
-        listPane = {
-            AnimatedPane {
-                BlueskyFeedsScreen(
-                    accountType = accountType,
-                    toFeed = {
-                        scope.launch {
-                            scaffoldNavigator.navigateTo(
-                                ListDetailPaneScaffoldRole.Detail,
-                                BlueskyFeedUri(it.id),
-                            )
-                        }
-                    },
-                )
-            }
-        },
-        detailPane = {
-            AnimatedPane {
-                scaffoldNavigator.currentDestination?.contentKey?.let {
-                    BlueskyFeedScreen(
-                        accountType = accountType,
-                        uri = it.value,
-                        onBack = {
-                            scope.launch {
-                                scaffoldNavigator.navigateBack()
-                            }
-                        },
-                    )
-                }
-            }
-        },
-    )
+internal fun BlueskyFeedDetailPlaceholder(modifier: Modifier = Modifier) {
+    FlareScaffold(
+        modifier = modifier,
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(it),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.CenterVertically),
+        ) {
+            FAIcon(
+                FontAwesomeIcons.Solid.SquareRss,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+            )
+        }
+    }
 }
-
-@JvmInline
-@Parcelize
-private value class BlueskyFeedUri(
-    val value: String,
-) : Parcelable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun BlueskyFeedsScreen(
+internal fun BlueskyFeedsScreen(
     accountType: AccountType,
     toFeed: (UiList) -> Unit,
 ) {

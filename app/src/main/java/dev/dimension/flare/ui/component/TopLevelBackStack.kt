@@ -57,4 +57,9 @@ internal class TopLevelBackStack<T : NavKey>(
         topLevelKey = topLevelStacks.keys.last()
         updateBackStack()
     }
+
+    fun isInBackStack(key: T): Boolean =
+        topLevelStacks.values.any { stack ->
+            stack.contains(key)
+        }
 }

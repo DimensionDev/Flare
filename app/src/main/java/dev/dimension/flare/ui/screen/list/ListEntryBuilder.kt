@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.screen.list
 
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
@@ -9,26 +11,29 @@ import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.ui.route.Route
+import dev.dimension.flare.ui.screen.home.TimelineScreen
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 internal fun EntryProviderBuilder<NavKey>.listEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
 ) {
-    entry<Route.Lists.List> { args ->
+    entry<Route.Lists.List>(
+        metadata = ListDetailSceneStrategy.listPane(
+            sceneKey = "Lists",
+            detailPlaceholder = {
+                ListDetailPlaceholder()
+            }
+        )
+    ) { args ->
         ListScreen(
             accountType = args.accountType,
             toList = { item ->
                 navigate(
-                    Route.Timeline(
-                        args.accountType,
-                        ListTimelineTabItem(
-                            account = args.accountType,
-                            listId = item.id,
-                            metaData = TabMetaData(
-                                title = TitleType.Text(item.title),
-                                icon = IconType.Material(IconType.Material.MaterialIcon.List),
-                            ),
-                        )
+                    Route.Lists.Detail(
+                        accountType = args.accountType,
+                        listId = item.id,
+                        title = item.title
                     )
                 )
             },
@@ -41,6 +46,28 @@ internal fun EntryProviderBuilder<NavKey>.listEntryBuilder(
             deleteList = { item ->
                 navigate(Route.Lists.Delete(args.accountType, item.id, item.title))
             },
+        )
+    }
+
+    entry<Route.Lists.Detail>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Lists",
+        )
+    ) { args ->
+        TimelineScreen(
+            tabItem = ListTimelineTabItem(
+                account = args.accountType,
+                listId = args.listId,
+                metaData = TabMetaData(
+                    title = TitleType.Text(args.title),
+                    icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                ),
+            ),
+            toCompose = {
+                navigate(Route.Compose.New(args.accountType))
+            },
+            toQuickMenu = { /* No-op for lists */ },
+            toLogin = { /* No-op for lists */ },
         )
     }
 

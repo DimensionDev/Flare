@@ -198,7 +198,7 @@ krypto = { module = "com.soywiz.korlibs.krypto:krypto", version = "4.0.10" }
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
-#androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version = "1.0.0-SNAPSHOT" }
+androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version = "1.0.0-SNAPSHOT" }
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version = "1.0.0-alpha01" }
 
 ### Server ###
@@ -225,7 +225,7 @@ accompanist = ["accompanist-permissions", "accompanist-drawablepainter"]
 media3 = ["media3-exoplayer", "media3-ui", "media3-hls", "media3-session", "media3-ui-compose"]
 firebase = ["firebase-analytics-ktx", "firebase-crashlytics-ktx"]
 ktorfit = ["ktorfit-lib", "ktorfit-converters-response", "ktorfit-converters-flow", "ktorfit-converters-call"]
-navigation3 = ["androidx-navigation3-runtime", "androidx-navigation3-ui", "androidx-lifecycle-viewmodel-navigation3"]
+navigation3 = ["androidx-navigation3-runtime", "androidx-navigation3-ui", "androidx-lifecycle-viewmodel-navigation3", "androidx-material3-adaptive-navigation3"]
 
 ### Server ###
 ktor-server = ["ktor-server-core", "ktor-server-resources", "ktor-server-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-server-hsts", "ktor-server-cio", "ktor-server-config-yaml"]

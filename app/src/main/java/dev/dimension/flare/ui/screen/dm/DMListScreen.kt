@@ -34,6 +34,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleExclamation
 import compose.icons.fontawesomeicons.solid.CircleUser
 import compose.icons.fontawesomeicons.solid.List
+import compose.icons.fontawesomeicons.solid.Message
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -150,6 +151,28 @@ import kotlin.math.min
 //    val key: String,
 //    val isUserKey: Boolean,
 // ) : Parcelable
+
+@Composable
+internal fun DMConversationDetailPlaceholder(modifier: Modifier = Modifier) {
+    FlareScaffold(
+        modifier = modifier,
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(it),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.CenterVertically),
+        ) {
+            FAIcon(
+                FontAwesomeIcons.Solid.Message,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+            )
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.bluesky
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -33,6 +35,7 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Rss
+import compose.icons.fontawesomeicons.solid.SquareRss
 import compose.icons.fontawesomeicons.solid.Thumbtack
 import compose.icons.fontawesomeicons.solid.ThumbtackSlash
 import compose.icons.fontawesomeicons.solid.Trash
@@ -123,6 +126,28 @@ import org.koin.compose.koinInject
 // private value class BlueskyFeedUri(
 //    val value: String,
 // ) : Parcelable
+
+@Composable
+internal fun BlueskyFeedDetailPlaceholder(modifier: Modifier = Modifier) {
+    FlareScaffold(
+        modifier = modifier,
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(it),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.CenterVertically),
+        ) {
+            FAIcon(
+                FontAwesomeIcons.Solid.SquareRss,
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+            )
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

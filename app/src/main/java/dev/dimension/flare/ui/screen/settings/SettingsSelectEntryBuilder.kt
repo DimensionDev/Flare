@@ -1,16 +1,26 @@
 package dev.dimension.flare.ui.screen.settings
 
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import androidx.navigation3.ui.DialogSceneStrategy
 import dev.dimension.flare.ui.route.Route
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 internal fun EntryProviderBuilder<NavKey>.settingsSelectEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit
 ) {
-    entry<Route.Settings.Main> {
+    entry<Route.Settings.Main>(
+        metadata = ListDetailSceneStrategy.listPane(
+            sceneKey = "Settings",
+            detailPlaceholder = {
+                SettingsDetailPlaceholder()
+            }
+        )
+    ) {
         SettingsScreen(
             toAccounts = {
                 navigate(Route.Settings.Accounts)
@@ -42,7 +52,11 @@ internal fun EntryProviderBuilder<NavKey>.settingsSelectEntryBuilder(
         )
     }
 
-    entry<Route.Settings.Accounts> {
+    entry<Route.Settings.Accounts>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
         AccountsScreen(
             onBack = onBack,
             toLogin = {
@@ -51,7 +65,11 @@ internal fun EntryProviderBuilder<NavKey>.settingsSelectEntryBuilder(
         )
     }
 
-    entry<Route.Settings.Appearance> {
+    entry<Route.Settings.Appearance>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
         AppearanceScreen(
             onBack = onBack,
             toColorPicker = {
@@ -60,7 +78,11 @@ internal fun EntryProviderBuilder<NavKey>.settingsSelectEntryBuilder(
         )
     }
 
-    entry<Route.Settings.Storage> {
+    entry<Route.Settings.Storage>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
         StorageScreen(
             onBack = onBack,
             toAppLog = {
@@ -69,19 +91,31 @@ internal fun EntryProviderBuilder<NavKey>.settingsSelectEntryBuilder(
         )
     }
 
-    entry<Route.Settings.About> {
+    entry<Route.Settings.About>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
         AboutScreen(
             onBack = onBack
         )
     }
 
-    entry<Route.Settings.TabCustomization> {
+    entry<Route.Settings.TabCustomization>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
         TabCustomizeScreen(
             onBack = onBack
         )
     }
 
-    entry<Route.Settings.LocalFilter> {
+    entry<Route.Settings.LocalFilter>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
         LocalFilterScreen(
             onBack = onBack,
             edit = { keyword ->
@@ -101,13 +135,21 @@ internal fun EntryProviderBuilder<NavKey>.settingsSelectEntryBuilder(
         )
     }
 
-    entry<Route.Settings.LocalHistory> {
+    entry<Route.Settings.LocalHistory>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
         LocalCacheSearchScreen(
             onBack = onBack
         )
     }
 
-    entry<Route.Settings.AiConfig> {
+    entry<Route.Settings.AiConfig>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
         AiConfigScreen(
             onBack = onBack
         )
@@ -121,13 +163,21 @@ internal fun EntryProviderBuilder<NavKey>.settingsSelectEntryBuilder(
         )
     }
 
-    entry<Route.Settings.AppLogging> {
+    entry<Route.Settings.AppLogging>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) {
         AppLoggingScreen(
             onBack = onBack
         )
     }
 
-    entry<Route.Settings.LocalFilterEdit> { args ->
+    entry<Route.Settings.LocalFilterEdit>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "Settings"
+        )
+    ) { args ->
         LocalFilterEditDialog(
             keyword = args.keyword,
             onBack = onBack

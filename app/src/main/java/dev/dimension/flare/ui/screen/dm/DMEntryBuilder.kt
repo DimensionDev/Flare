@@ -1,17 +1,27 @@
 package dev.dimension.flare.ui.screen.dm
 
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.home.NavigationState
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 internal fun EntryProviderBuilder<NavKey>.dmEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
     navigationState: NavigationState,
 ) {
-    entry<Route.DM.List> { args ->
+    entry<Route.DM.List>(
+        metadata = ListDetailSceneStrategy.listPane(
+            sceneKey = "DirectMessage",
+            detailPlaceholder = {
+                DMConversationDetailPlaceholder()
+            }
+        )
+    ) { args ->
         DMListScreen(
             accountType = args.accountType,
             onItemClicked = { roomKey ->
@@ -20,7 +30,11 @@ internal fun EntryProviderBuilder<NavKey>.dmEntryBuilder(
         )
     }
     
-    entry<Route.DM.Conversation> { args ->
+    entry<Route.DM.Conversation>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "DirectMessage",
+        )
+    ) { args ->
         DMConversationScreen(
             accountType = args.accountType,
             roomKey = args.roomKey,
@@ -32,7 +46,11 @@ internal fun EntryProviderBuilder<NavKey>.dmEntryBuilder(
         )
     }
     
-    entry<Route.DM.UserConversation> { args ->
+    entry<Route.DM.UserConversation>(
+        metadata = ListDetailSceneStrategy.detailPane(
+            sceneKey = "DirectMessage",
+        )
+    ) { args ->
         UserDMConversationScreen(
             accountType = args.accountType,
             userKey = args.userKey,

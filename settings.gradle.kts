@@ -14,6 +14,7 @@ dependencyResolutionManagement {
         maven("https://jitpack.io")
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
         maven("https://oss.sonatype.org/content/repositories/snapshots/")
+        maven("https://androidx.dev/snapshots/builds/13508953/artifacts/repository")
     }
 }
 

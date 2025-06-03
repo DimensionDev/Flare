@@ -2,6 +2,8 @@ package dev.dimension.flare.ui.route
 
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
@@ -33,6 +35,7 @@ import soup.compose.material.motion.animation.materialSharedAxisXIn
 import soup.compose.material.motion.animation.materialSharedAxisXOut
 import soup.compose.material.motion.animation.rememberSlideDistance
 
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 internal fun Router(
     topLevelBackStack: TopLevelBackStack<Route>,
@@ -41,6 +44,8 @@ internal fun Router(
 ) {
     val scope = rememberCoroutineScope()
     val slideDistance = rememberSlideDistance()
+
+    val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
 
     fun navigate(route: Route) {
         topLevelBackStack.add(route)
@@ -66,6 +71,7 @@ internal fun Router(
                 remember {
                     DialogSceneStrategy<NavKey>()
                         .then(BottomSheetSceneStrategy())
+                        .then(listDetailStrategy)
                 },
             entryDecorators =
                 listOf(

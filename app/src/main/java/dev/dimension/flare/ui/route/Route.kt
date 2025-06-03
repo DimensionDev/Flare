@@ -220,6 +220,13 @@ internal sealed interface Route : NavKey {
         ) : Lists
 
         @Serializable
+        data class Detail(
+            val accountType: AccountType,
+            val listId: String,
+            val title: String,
+        ) : Lists
+
+        @Serializable
         data class Create(
             val accountType: AccountType,
         ) : Lists

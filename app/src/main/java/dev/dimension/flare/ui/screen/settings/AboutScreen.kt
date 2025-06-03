@@ -12,16 +12,6 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun AboutRoute(navigator: ProxyDestinationsNavigator) {
-//    AboutScreen(
-//        onBack = navigator::navigateUp,
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AboutScreen(onBack: () -> Unit) {

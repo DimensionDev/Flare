@@ -73,25 +73,6 @@ import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun EditListRoute(
-//    navigator: DestinationsNavigator,
-//    accountType: AccountType,
-//    listId: String,
-// ) {
-//    EditListScreen(
-//        accountType,
-//        listId,
-//        onBack = navigator::navigateUp,
-//        toEditUser = {
-//            navigator.navigate(EditListMemberRouteDestination(accountType, listId))
-//        },
-//    )
-// }
-
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class,

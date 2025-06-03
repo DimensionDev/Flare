@@ -22,33 +22,6 @@ import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusPresent
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Composable
-// @Destination<RootGraph>(
-//    style = DestinationStyle.Dialog::class,
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//        DeepLink(
-//            uriPattern = AppDeepLink.Bluesky.ReportStatus.ROUTE,
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// internal fun BlueskyReportStatusRoute(
-//    navigator: DestinationsNavigator,
-//    accountKey: MicroBlogKey,
-//    statusKey: MicroBlogKey,
-// ) {
-//    BlueskyReportStatusDialog(
-//        statusKey = statusKey,
-//        accountType = AccountType.Specific(accountKey),
-//        onBack = {
-//            navigator.navigateUp()
-//        },
-//    )
-// }
-
 @Composable
 internal fun BlueskyReportStatusDialog(
     statusKey: MicroBlogKey,

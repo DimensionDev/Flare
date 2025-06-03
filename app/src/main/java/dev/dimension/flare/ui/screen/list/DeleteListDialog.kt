@@ -19,25 +19,6 @@ import dev.dimension.flare.ui.presenter.list.DeleteListPresenter
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-//    style = DestinationStyle.Dialog::class,
-// )
-// @Composable
-// internal fun DeleteListRoute(
-//    navigator: DestinationsNavigator,
-//    accountType: AccountType,
-//    listId: String,
-//    title: String?,
-// ) {
-//    DeleteListDialog(
-//        accountType,
-//        listId = listId,
-//        title = title,
-//        onDismissRequest = navigator::navigateUp,
-//    )
-// }
-
 @Composable
 internal fun DeleteListDialog(
     accountType: AccountType,

@@ -51,18 +51,6 @@ import dev.dimension.flare.ui.presenter.list.CreateListState
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-//    style = DestinationStyle.Dialog::class,
-// )
-// @Composable
-// internal fun CreateListRoute(
-//    navigator: DestinationsNavigator,
-//    accountType: AccountType,
-// ) {
-//    CreateListDialog(accountType, onDismissRequest = navigator::navigateUp)
-// }
-
 @Composable
 internal fun CreateListDialog(
     accountType: AccountType,

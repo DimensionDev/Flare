@@ -55,27 +55,6 @@ import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun DiscoverRoute(
-//    navigator: DestinationsNavigator,
-//    accountType: AccountType,
-//    drawerState: DrawerState,
-// ) {
-//    val scope = rememberCoroutineScope()
-//    DiscoverScreen(
-//        accountType = accountType,
-//        onUserClick = { navigator.navigate(ProfileRouteDestination(it, accountType)) },
-//        onAccountClick = {
-//            scope.launch {
-//                drawerState.open()
-//            }
-//        },
-//    )
-// }
-
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun DiscoverScreen(

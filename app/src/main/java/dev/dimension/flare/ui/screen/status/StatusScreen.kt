@@ -28,51 +28,6 @@ import dev.dimension.flare.ui.presenter.status.StatusContextPresenter
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Composable
-// @Destination<RootGraph>(
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//        DeepLink(
-//            uriPattern = AppDeepLink.StatusDetail.ROUTE,
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// fun StatusDeeplinkRoute(
-//    statusKey: MicroBlogKey,
-//    accountKey: MicroBlogKey?,
-//    navigator: DestinationsNavigator,
-// ) {
-//    StatusScreen(
-//        statusKey,
-//        onBack = navigator::navigateUp,
-//        accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest,
-//    )
-// }
-//
-// @Composable
-// @Destination<RootGraph>(
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// fun StatusRoute(
-//    statusKey: MicroBlogKey,
-//    navigator: DestinationsNavigator,
-//    accountType: AccountType,
-// ) {
-//    StatusScreen(
-//        statusKey,
-//        onBack = navigator::navigateUp,
-//        accountType = accountType,
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun StatusScreen(

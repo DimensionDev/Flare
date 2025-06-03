@@ -36,21 +36,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.LocalFilterPresenter
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    style = FullScreenDialogStyle::class,
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun LocalFilterEditDialogRoute(
-//    navigator: DestinationsNavigator,
-//    keyword: String?,
-// ) {
-//    LocalFilterEditDialog(
-//        keyword = keyword,
-//        onBack = navigator::navigateUp,
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun LocalFilterEditDialog(

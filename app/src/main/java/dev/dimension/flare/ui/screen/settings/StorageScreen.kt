@@ -33,19 +33,6 @@ import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun StorageRoute(navigator: ProxyDestinationsNavigator) {
-//    StorageScreen(
-//        onBack = navigator::navigateUp,
-//        toAppLog = {
-//            navigator.navigate(AppLoggingRouteDestination)
-//        },
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun StorageScreen(

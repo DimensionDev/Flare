@@ -54,19 +54,6 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun AppearanceRoute(navigator: ProxyDestinationsNavigator) {
-//    AppearanceScreen(
-//        onBack = navigator::navigateUp,
-//        toColorPicker = {
-//            navigator.navigate(ColorPickerDialogRouteDestination)
-//        },
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AppearanceScreen(

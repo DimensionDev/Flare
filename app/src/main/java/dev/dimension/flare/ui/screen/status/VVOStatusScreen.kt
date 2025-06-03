@@ -60,51 +60,6 @@ import dev.dimension.flare.ui.presenter.status.VVOStatusDetailState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Composable
-// @Destination<RootGraph>(
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//        DeepLink(
-//            uriPattern = AppDeepLink.VVO.StatusDetail.ROUTE,
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// internal fun VVOStatusDeeplinkRoute(
-//    statusKey: MicroBlogKey,
-//    navigator: DestinationsNavigator,
-//    accountKey: MicroBlogKey,
-// ) {
-//    VVOStatusScreen(
-//        statusKey,
-//        onBack = navigator::navigateUp,
-//        accountType = AccountType.Specific(accountKey = accountKey),
-//    )
-// }
-//
-// @Composable
-// @Destination<RootGraph>(
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// internal fun VVOStatusRoute(
-//    statusKey: MicroBlogKey,
-//    navigator: DestinationsNavigator,
-//    accountType: AccountType,
-// ) {
-//    VVOStatusScreen(
-//        statusKey,
-//        onBack = navigator::navigateUp,
-//        accountType = accountType,
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun VVOStatusScreen(

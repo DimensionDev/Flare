@@ -33,17 +33,6 @@ import dev.dimension.flare.ui.presenter.settings.GuestConfigPresenter
 import kotlinx.coroutines.flow.distinctUntilChanged
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-//    style = DestinationStyle.Dialog::class,
-// )
-// @Composable
-// internal fun GuestSettingRoute(navigator: DestinationsNavigator) {
-//    GuestSettingScreen(
-//        onBack = navigator::navigateUp,
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun GuestSettingScreen(onBack: () -> Unit) {

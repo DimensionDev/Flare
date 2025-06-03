@@ -40,67 +40,6 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-// @Composable
-// @Destination<RootGraph>(
-//    style = DestinationStyleBottomSheet::class,
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// internal fun PodcastRoute(
-//    accountType: AccountType,
-//    id: String,
-//    navigator: DestinationsNavigator,
-// ) {
-//    PodcastScreen(
-//        accountType = accountType,
-//        id = id,
-//        toUser = {
-//            navigator.navigate(
-//                ProfileRouteDestination(
-//                    accountType = accountType,
-//                    userKey = it,
-//                ),
-//            )
-//        },
-//    )
-// }
-//
-// @Composable
-// @Destination<RootGraph>(
-//    style = DestinationStyleBottomSheet::class,
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//        DeepLink(
-//            uriPattern = AppDeepLink.Podcast.ROUTE,
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// internal fun PodcastDeeplinkRoute(
-//    accountKey: MicroBlogKey,
-//    id: String,
-//    navigator: DestinationsNavigator,
-// ) {
-//    PodcastScreen(
-//        accountType = AccountType.Specific(accountKey),
-//        id = id,
-//        toUser = {
-//            navigator.navigate(
-//                ProfileRouteDestination(
-//                    accountType = AccountType.Specific(accountKey),
-//                    userKey = it,
-//                ),
-//            )
-//        },
-//    )
-// }
-
 @Composable
 internal fun PodcastScreen(
     accountType: AccountType,

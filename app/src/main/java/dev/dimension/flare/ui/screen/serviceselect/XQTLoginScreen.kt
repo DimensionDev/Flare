@@ -19,29 +19,6 @@ import kotlinx.coroutines.delay
 import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.time.Duration.Companion.seconds
 
-// @Composable
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// internal fun XQTLoginRoute(
-//    resultNavigator: ResultBackNavigator<Boolean>,
-//    navigationState: NavigationState,
-// ) {
-//    DisposableEffect(Unit) {
-//        navigationState.hide()
-//        navigationState.disableDrawer()
-//        onDispose {
-//            navigationState.show()
-//            navigationState.enableDrawer()
-//        }
-//    }
-//    XQTLoginScreen(
-//        toHome = {
-//            resultNavigator.navigateBack(result = true)
-//        },
-//    )
-// }
-
 @Composable
 internal fun XQTLoginScreen(toHome: () -> Unit) {
     val state by producePresenter { xQtLoginPresenter(toHome) }

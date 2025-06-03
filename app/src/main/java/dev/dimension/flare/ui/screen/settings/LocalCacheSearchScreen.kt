@@ -45,20 +45,6 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun LocalCacheSearchRoute(navigator: ProxyDestinationsNavigator) {
-//    CompositionLocalProvider(
-//        LocalUriHandler provides navigator.uriHandler,
-//    ) {
-//        LocalCacheSearchScreen(
-//            onBack = navigator::navigateUp,
-//        )
-//    }
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun LocalCacheSearchScreen(onBack: () -> Unit) {

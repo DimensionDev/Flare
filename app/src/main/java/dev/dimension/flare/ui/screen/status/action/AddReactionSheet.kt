@@ -15,31 +15,6 @@ import dev.dimension.flare.ui.presenter.status.action.AddReactionPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    style = DestinationStyleBottomSheet::class,
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//        DeepLink(
-//            uriPattern = AppDeepLink.AddReaction.ROUTE,
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun AddReactionRoute(
-//    statusKey: MicroBlogKey,
-//    accountKey: MicroBlogKey,
-//    navigator: DestinationsNavigator,
-// ) {
-//    AddReactionSheet(
-//        statusKey = statusKey,
-//        onBack = navigator::navigateUp,
-//        accountType = AccountType.Specific(accountKey),
-//    )
-// }
-
 @Composable
 internal fun AddReactionSheet(
     statusKey: MicroBlogKey,

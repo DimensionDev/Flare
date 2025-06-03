@@ -54,19 +54,6 @@ import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import io.github.fornewid.placeholder.material3.placeholder
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Composable
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// internal fun AccountsRoute(navigator: ProxyDestinationsNavigator) {
-//    AccountsScreen(
-//        onBack = navigator::navigateUp,
-//        toLogin = {
-//            navigator.navigate(ServiceSelectRouteDestination)
-//        },
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AccountsScreen(

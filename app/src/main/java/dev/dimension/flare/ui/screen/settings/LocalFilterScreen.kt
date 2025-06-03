@@ -24,22 +24,6 @@ import dev.dimension.flare.ui.presenter.settings.LocalFilterPresenter
 import dev.dimension.flare.ui.presenter.settings.LocalFilterState
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun LocalFilterRoute(navigator: ProxyDestinationsNavigator) {
-//    LocalFilterScreen(
-//        onBack = navigator::navigateUp,
-//        edit = { keyword ->
-//            navigator.navigate(LocalFilterEditDialogRouteDestination(keyword))
-//        },
-//        add = {
-//            navigator.navigate(LocalFilterEditDialogRouteDestination(null))
-//        },
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun LocalFilterScreen(

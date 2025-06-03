@@ -74,59 +74,6 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-// @OptIn(ExperimentalMaterial3AdaptiveApi::class)
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun BlueskyFeedsRoute(
-//    navigator: DestinationsNavigator,
-//    accountType: AccountType,
-// ) {
-//    val scope = rememberCoroutineScope()
-//    val scaffoldNavigator =
-//        rememberListDetailPaneScaffoldNavigator<BlueskyFeedUri>()
-//    NavigableListDetailPaneScaffold(
-//        navigator = scaffoldNavigator,
-//        listPane = {
-//            AnimatedPane {
-//                BlueskyFeedsScreen(
-//                    accountType = accountType,
-//                    toFeed = {
-//                        scope.launch {
-//                            scaffoldNavigator.navigateTo(
-//                                ListDetailPaneScaffoldRole.Detail,
-//                                BlueskyFeedUri(it.id),
-//                            )
-//                        }
-//                    },
-//                )
-//            }
-//        },
-//        detailPane = {
-//            AnimatedPane {
-//                scaffoldNavigator.currentDestination?.contentKey?.let {
-//                    BlueskyFeedScreen(
-//                        accountType = accountType,
-//                        uri = it.value,
-//                        onBack = {
-//                            scope.launch {
-//                                scaffoldNavigator.navigateBack()
-//                            }
-//                        },
-//                    )
-//                }
-//            }
-//        },
-//    )
-// }
-//
-// @JvmInline
-// @Parcelize
-// private value class BlueskyFeedUri(
-//    val value: String,
-// ) : Parcelable
-
 @Composable
 internal fun BlueskyFeedDetailPlaceholder(modifier: Modifier = Modifier) {
     FlareScaffold(

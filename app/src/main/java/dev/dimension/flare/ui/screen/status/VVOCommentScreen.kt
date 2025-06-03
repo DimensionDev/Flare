@@ -32,51 +32,6 @@ import dev.dimension.flare.ui.presenter.status.VVOCommentPresenter
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//        DeepLink(
-//            uriPattern = AppDeepLink.VVO.CommentDetail.ROUTE,
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun VVOCommentDeeplinkRoute(
-//    navigator: DestinationsNavigator,
-//    statusKey: MicroBlogKey,
-//    accountKey: MicroBlogKey,
-// ) {
-//    VVOCommentScreen(
-//        commentKey = statusKey,
-//        onBack = navigator::navigateUp,
-//        accountType = AccountType.Specific(accountKey = accountKey),
-//    )
-// }
-//
-// @Destination<RootGraph>(
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun VVOCommentRoute(
-//    navigator: DestinationsNavigator,
-//    accountType: AccountType,
-//    commentKey: MicroBlogKey,
-// ) {
-//    VVOCommentScreen(
-//        commentKey = commentKey,
-//        onBack = navigator::navigateUp,
-//        accountType = accountType,
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun VVOCommentScreen(

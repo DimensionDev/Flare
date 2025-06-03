@@ -33,27 +33,6 @@ import dev.dimension.flare.ui.presenter.home.rss.EditRssSourcePresenter
 import dev.dimension.flare.ui.presenter.invoke
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-//    style = DestinationStyle.Dialog::class,
-// )
-// @Composable
-// internal fun CreateRssSourceRoute(navigator: DestinationsNavigator) {
-//    RssSourceEditDialog(onDismissRequest = navigator::navigateUp, id = null)
-// }
-//
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-//    style = DestinationStyle.Dialog::class,
-// )
-// @Composable
-// internal fun EditRssSourceRoute(
-//    navigator: DestinationsNavigator,
-//    id: Int,
-// ) {
-//    RssSourceEditDialog(onDismissRequest = navigator::navigateUp, id = id)
-// }
-
 @Composable
 internal fun RssSourceEditDialog(
     onDismissRequest: () -> Unit,

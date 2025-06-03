@@ -14,35 +14,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.MastodonReportPresenter
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Composable
-// @Destination<RootGraph>(
-//    style = DestinationStyle.Dialog::class,
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//        DeepLink(
-//            uriPattern = AppDeepLink.Mastodon.ReportStatus.ROUTE,
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// internal fun MastodonReportRoute(
-//    navigator: DestinationsNavigator,
-//    userKey: MicroBlogKey,
-//    statusKey: MicroBlogKey,
-//    accountKey: MicroBlogKey,
-// ) {
-//    MastodonReportDialog(
-//        statusKey = statusKey,
-//        userKey = userKey,
-//        onBack = {
-//            navigator.navigateUp()
-//        },
-//        accountType = AccountType.Specific(accountKey),
-//    )
-// }
-
 @Composable
 internal fun MastodonReportDialog(
     userKey: MicroBlogKey,

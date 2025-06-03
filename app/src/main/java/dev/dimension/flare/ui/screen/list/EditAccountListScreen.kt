@@ -29,20 +29,6 @@ import dev.dimension.flare.ui.presenter.list.EditAccountListPresenter
 import io.github.fornewid.placeholder.material3.placeholder
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>
-// @Composable
-// internal fun EditAccountListRoute(
-//    navigator: DestinationsNavigator,
-//    accountType: AccountType,
-//    userKey: MicroBlogKey,
-// ) {
-//    EditAccountListScreen(
-//        accountType = accountType,
-//        userKey = userKey,
-//        onBack = navigator::navigateUp,
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun EditAccountListScreen(

@@ -18,29 +18,6 @@ import kotlinx.coroutines.delay
 import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.time.Duration.Companion.seconds
 
-// @Composable
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// internal fun VVOLoginRoute(
-//    resultNavigator: ResultBackNavigator<Boolean>,
-//    navigationState: NavigationState,
-// ) {
-//    DisposableEffect(Unit) {
-//        navigationState.hide()
-//        navigationState.disableDrawer()
-//        onDispose {
-//            navigationState.show()
-//            navigationState.enableDrawer()
-//        }
-//    }
-//    VVOLoginScreen(
-//        toHome = {
-//            resultNavigator.navigateBack(result = true)
-//        },
-//    )
-// }
-
 @Composable
 internal fun VVOLoginScreen(toHome: () -> Unit) {
     val state by producePresenter { presenter(toHome) }

@@ -42,22 +42,6 @@ import dev.dimension.flare.ui.presenter.list.EmptyQueryException
 import dev.dimension.flare.ui.screen.settings.AccountItem
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun EditListMemberRoute(
-//    navigator: DestinationsNavigator,
-//    accountType: AccountType,
-//    listId: String,
-// ) {
-//    EditListMemberScreen(
-//        accountType = accountType,
-//        listId = listId,
-//        onBack = navigator::navigateUp,
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun EditListMemberScreen(

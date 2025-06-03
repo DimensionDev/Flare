@@ -35,33 +35,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.screen.settings.TabTitle
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @RootNavGraph(start = true) // sets this as the start destination of the default nav graph
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun TimelineRoute(
-//    navigator: DestinationsNavigator,
-//    tabItem: TimelineTabItem,
-//    drawerState: DrawerState,
-// ) {
-//    val scope = rememberCoroutineScope()
-//    TimelineScreen(
-//        tabItem = tabItem,
-//        toCompose = {
-//            navigator.navigate(ComposeRouteDestination(accountType = tabItem.account))
-//        },
-//        toQuickMenu = {
-//            scope.launch {
-//                drawerState.open()
-//            }
-//        },
-//        toLogin = {
-//            navigator.navigate(ServiceSelectRouteDestination)
-//        },
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TimelineScreen(

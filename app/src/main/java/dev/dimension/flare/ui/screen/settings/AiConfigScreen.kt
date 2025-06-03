@@ -56,16 +56,6 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-// @Composable
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// internal fun AiConfigRoute(navigator: ProxyDestinationsNavigator) {
-//    AccountsScreen(
-//        onBack = navigator::navigateUp,
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AiConfigScreen(onBack: () -> Unit) {

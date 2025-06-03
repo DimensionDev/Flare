@@ -15,33 +15,6 @@ import dev.dimension.flare.ui.presenter.status.action.DeleteStatusPresenter
 import dev.dimension.flare.ui.presenter.status.action.DeleteStatusState
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Composable
-// @Destination<RootGraph>(
-//    style = DestinationStyle.Dialog::class,
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//        DeepLink(
-//            uriPattern = AppDeepLink.DeleteStatus.ROUTE,
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// internal fun DeleteStatusConfirmRoute(
-//    navigator: DestinationsNavigator,
-//    accountKey: MicroBlogKey,
-//    statusKey: MicroBlogKey,
-// ) {
-//    DeleteStatusConfirmDialog(
-//        statusKey = statusKey,
-//        onBack = {
-//            navigator.navigateUp()
-//        },
-//        accountType = AccountType.Specific(accountKey),
-//    )
-// }
-
 @Composable
 internal fun DeleteStatusConfirmDialog(
     statusKey: MicroBlogKey,

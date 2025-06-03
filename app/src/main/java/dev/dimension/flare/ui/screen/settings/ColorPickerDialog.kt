@@ -32,17 +32,6 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-//    style = DestinationStyle.Dialog::class,
-// )
-// @Composable
-// internal fun ColorPickerDialogRoute(navigator: ProxyDestinationsNavigator) {
-//    ColorPickerDialog(
-//        onBack = navigator::navigateUp,
-//    )
-// }
-
 @Composable
 internal fun ColorPickerDialog(onBack: () -> Unit) {
     val appearanceSettings = LocalAppearanceSettings.current

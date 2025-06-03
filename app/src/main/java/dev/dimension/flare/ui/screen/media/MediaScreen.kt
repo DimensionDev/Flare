@@ -70,42 +70,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 
-// object FullScreenDialogStyle : DestinationStyle.Dialog() {
-//    override val properties =
-//        DialogProperties(
-//            decorFitsSystemWindows = false,
-//            usePlatformDefaultWidth = false,
-//        )
-// }
-//
-// @Composable
-// @Destination<RootGraph>(
-//    style = FullScreenDialogStyle::class,
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//        DeepLink(
-//            uriPattern = AppDeepLink.RawImage.ROUTE,
-//        ),
-//    ],
-// )
-// fun MediaRoute(
-//    uri: String,
-//    navigator: DestinationsNavigator,
-//    previewUrl: String? = null,
-// ) {
-//    val view = LocalView.current
-//    LaunchedEffect(view) {
-//        (view.parent as DialogWindowProvider).window.setDimAmount(0f)
-//    }
-//    MediaScreen(
-//        uri = uri,
-//        onDismiss = navigator::navigateUp,
-//        previewUrl = previewUrl,
-//    )
-// }
-
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalPermissionsApi::class,

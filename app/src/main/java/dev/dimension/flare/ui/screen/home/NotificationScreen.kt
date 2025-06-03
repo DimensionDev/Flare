@@ -43,25 +43,6 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun NotificationRoute(
-//    accountType: AccountType,
-//    drawerState: DrawerState,
-// ) {
-//    val scope = rememberCoroutineScope()
-//    NotificationScreen(
-//        accountType = accountType,
-//        toQuickMenu = {
-//            scope.launch {
-//                drawerState.open()
-//            }
-//        },
-//    )
-// }
-
 @OptIn(
     ExperimentalMaterial3Api::class,
 )

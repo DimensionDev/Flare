@@ -12,29 +12,6 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
-// @Destination<RootGraph>(
-//    style = DestinationStyleBottomSheet::class,
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//        DeepLink(
-//            uriPattern = AppDeepLink.AltText.ROUTE,
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun AltTextSheetRoute(
-//    text: String,
-//    navigator: DestinationsNavigator,
-// ) {
-//    AltTextSheet(
-//        text = text,
-//        onBack = navigator::navigateUp,
-//    )
-// }
-
 @Composable
 internal fun AltTextSheet(
     text: String,

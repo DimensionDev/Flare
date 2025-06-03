@@ -75,43 +75,6 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.distinctUntilChanged
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Composable
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//        DeepLink(
-//            uriPattern = AppDeepLink.LOGIN,
-//        ),
-//    ],
-// )
-// fun ServiceSelectRoute(
-//    navigator: DestinationsNavigator,
-//    resultRecipient: ResultRecipient<XQTLoginRouteDestination, Boolean>,
-// ) {
-//    resultRecipient.onNavResult {
-//        when (it) {
-//            NavResult.Canceled -> Unit
-//            is NavResult.Value -> {
-//                if (it.value) {
-//                    navigator.navigateUp()
-//                }
-//            }
-//        }
-//    }
-//    ServiceSelectScreen(
-//        onBack = navigator::navigateUp,
-//        onXQT = {
-//            navigator.navigate(XQTLoginRouteDestination)
-//        },
-//        onVVO = {
-//            navigator.navigate(VVOLoginRouteDestination)
-//        },
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun ServiceSelectScreen(

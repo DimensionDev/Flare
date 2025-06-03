@@ -37,16 +37,6 @@ import dev.dimension.flare.ui.screen.media.saveByteArrayToDownloads
 import kotlinx.datetime.Clock
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun AppLoggingRoute(navigator: ProxyDestinationsNavigator) {
-//    AppLoggingScreen(
-//        onBack = navigator::navigateUp,
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AppLoggingScreen(onBack: () -> Unit) {

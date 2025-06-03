@@ -116,16 +116,6 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun TabCustomizeRoute(navigator: ProxyDestinationsNavigator) {
-//    TabCustomizeScreen(
-//        onBack = navigator::navigateUp,
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun TabCustomizeScreen(onBack: () -> Unit) {

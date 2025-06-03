@@ -87,35 +87,6 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun HomeTimelineRoute(
-//    navigator: DestinationsNavigator,
-//    drawerState: DrawerState,
-//    accountType: AccountType,
-// ) {
-//    val scope = rememberCoroutineScope()
-//    HomeTimelineScreen(
-//        accountType = accountType,
-//        toCompose = {
-//            navigator.navigate(ComposeRouteDestination(accountType = accountType))
-//        },
-//        toQuickMenu = {
-//            scope.launch {
-//                drawerState.open()
-//            }
-//        },
-//        toLogin = {
-//            navigator.navigate(ServiceSelectRouteDestination)
-//        },
-//        toTabSettings = {
-//            navigator.navigate(TabSettingRouteDestination(accountType))
-//        },
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun HomeTimelineScreen(

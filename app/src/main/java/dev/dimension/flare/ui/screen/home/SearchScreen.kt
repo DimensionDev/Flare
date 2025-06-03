@@ -23,60 +23,6 @@ import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//        DeepLink(
-//            uriPattern = AppDeepLink.Search.ROUTE,
-//        ),
-//    ],
-// )
-// @Composable
-// internal fun SearchDeepLink(
-//    accountKey: MicroBlogKey?,
-//    keyword: String,
-//    navigator: DestinationsNavigator,
-//    drawerState: DrawerState,
-// ) {
-//    SearchRoute(
-//        keyword = keyword,
-//        navigator = navigator,
-//        accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest,
-//        drawerState = drawerState,
-//    )
-// }
-//
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//    ],
-// )
-// @Composable
-// internal fun SearchRoute(
-//    keyword: String,
-//    navigator: DestinationsNavigator,
-//    accountType: AccountType,
-//    drawerState: DrawerState,
-// ) {
-//    val scope = rememberCoroutineScope()
-//    SearchScreen(
-//        initialQuery = keyword,
-//        accountType = accountType,
-//        onAccountClick = {
-//            scope.launch {
-//                drawerState.open()
-//            }
-//        },
-//        onUserClick = { navigator.navigate(ProfileRouteDestination(it, accountType)) },
-//    )
-// }
-
 @Composable
 internal fun SearchScreen(
     initialQuery: String,

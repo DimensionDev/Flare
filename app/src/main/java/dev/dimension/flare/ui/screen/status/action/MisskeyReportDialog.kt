@@ -21,35 +21,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.MisskeyReportPresenter
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Composable
-// @Destination<RootGraph>(
-//    style = DestinationStyle.Dialog::class,
-//    deepLinks = [
-//        DeepLink(
-//            uriPattern = "flare://$FULL_ROUTE_PLACEHOLDER",
-//        ),
-//        DeepLink(
-//            uriPattern = AppDeepLink.Misskey.ReportStatus.ROUTE,
-//        ),
-//    ],
-//    wrappers = [ThemeWrapper::class],
-// )
-// internal fun MisskeyReportRoute(
-//    navigator: DestinationsNavigator,
-//    userKey: MicroBlogKey,
-//    statusKey: MicroBlogKey,
-//    accountKey: MicroBlogKey,
-// ) {
-//    MisskeyReportDialog(
-//        statusKey = statusKey,
-//        userKey = userKey,
-//        onBack = {
-//            navigator.navigateUp()
-//        },
-//        accountType = AccountType.Specific(accountKey),
-//    )
-// }
-
 @Composable
 internal fun MisskeyReportDialog(
     userKey: MicroBlogKey,

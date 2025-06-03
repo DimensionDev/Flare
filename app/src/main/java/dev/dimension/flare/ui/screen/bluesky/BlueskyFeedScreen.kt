@@ -57,22 +57,6 @@ import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun BlueskyFeedRoute(
-//    navigator: DestinationsNavigator,
-//    accountType: AccountType,
-//    uri: String,
-// ) {
-//    BlueskyFeedScreen(
-//        accountType = accountType,
-//        uri = uri,
-//        onBack = navigator::navigateUp,
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun BlueskyFeedScreen(

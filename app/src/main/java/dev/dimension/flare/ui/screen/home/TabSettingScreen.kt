@@ -73,20 +73,6 @@ import org.koin.compose.koinInject
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-// @Destination<RootGraph>(
-//    wrappers = [ThemeWrapper::class],
-// )
-// @Composable
-// internal fun TabSettingRoute(
-//    navigator: DestinationsNavigator,
-//    accountType: AccountType,
-// ) {
-//    TabSettingScreen(
-//        accountType = accountType,
-//        onBack = navigator::navigateUp,
-//    )
-// }
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun TabSettingScreen(

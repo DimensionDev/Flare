@@ -46,6 +46,13 @@ internal class TopLevelBackStack<T : NavKey>(
     }
 
     fun add(key: T) {
+        val last =
+            topLevelStacks[topLevelKey]?.lastOrNull()
+                ?: throw IllegalStateException("No stack found for top level key: $topLevelKey")
+        if (last == key) {
+            // If the key is already the last one, do nothing
+            return
+        }
         topLevelStacks[topLevelKey]?.add(key)
         updateBackStack()
     }

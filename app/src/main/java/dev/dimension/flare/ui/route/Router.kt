@@ -29,10 +29,6 @@ import dev.dimension.flare.ui.screen.rss.rssEntryBuilder
 import dev.dimension.flare.ui.screen.serviceselect.serviceSelectEntryBuilder
 import dev.dimension.flare.ui.screen.settings.settingsSelectEntryBuilder
 import dev.dimension.flare.ui.screen.status.statusEntryBuilder
-import soup.compose.material.motion.animation.materialElevationScaleIn
-import soup.compose.material.motion.animation.materialElevationScaleOut
-import soup.compose.material.motion.animation.materialFadeIn
-import soup.compose.material.motion.animation.materialFadeOut
 import soup.compose.material.motion.animation.materialSharedAxisXIn
 import soup.compose.material.motion.animation.materialSharedAxisXOut
 import soup.compose.material.motion.animation.rememberSlideDistance
@@ -88,8 +84,8 @@ internal fun Router(
                     materialSharedAxisXOut(false, slideDistance)
             },
             predictivePopTransitionSpec = {
-                materialSharedAxisXIn(false, slideDistance) + materialElevationScaleIn() + materialFadeIn() togetherWith
-                    materialSharedAxisXOut(false, slideDistance) + materialElevationScaleOut() + materialFadeOut()
+                materialSharedAxisXIn(false, slideDistance) togetherWith
+                    materialSharedAxisXOut(false, slideDistance)
             },
             entryProvider =
                 entryProvider {

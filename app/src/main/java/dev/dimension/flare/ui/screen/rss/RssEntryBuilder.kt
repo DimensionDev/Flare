@@ -21,7 +21,7 @@ import androidx.navigation3.runtime.entry
 import androidx.navigation3.ui.DialogSceneStrategy
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Rss
+import compose.icons.fontawesomeicons.solid.SquareRss
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.route.Route
@@ -119,7 +119,7 @@ internal fun RssPlaceholder(
             verticalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.CenterVertically),
         ) {
             FAIcon(
-                FontAwesomeIcons.Solid.Rss,
+                FontAwesomeIcons.Solid.SquareRss,
                 contentDescription = null,
                 modifier = Modifier.size(64.dp)
             )

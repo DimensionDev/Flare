@@ -1005,6 +1005,9 @@
         }
       }
     },
+    "AI Settings" : {
+
+    },
     "Allow swiping back from anywhere on the screen" : {
       "localizations" : {
         "ar" : {
@@ -2305,6 +2308,9 @@
         }
       }
     },
+    "Automatically detect and blur sensitive images using Apple's Sensitive Content Analysis framework runs locally on your device" : {
+
+    },
     "available feeds" : {
       "localizations" : {
         "ar" : {
@@ -2566,6 +2572,7 @@
       }
     },
     "base settings" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2694,6 +2701,9 @@
           }
         }
       }
+    },
+    "Base Settings" : {
+
     },
     "block" : {
       "localizations" : {
@@ -22305,6 +22315,9 @@
         }
       }
     },
+    "No feature enabled that is requiring Sensitive Analysis on device, analysis will be disabled. Please enable it in System Settings > Privacy & Security > Sensitive Content Warning." : {
+
+    },
     "NO FEEDS" : {
       "localizations" : {
         "ar" : {
@@ -29016,6 +29029,9 @@
           }
         }
       }
+    },
+    "Sensitive Content Analysis" : {
+
     },
     "Server Configuration" : {
       "localizations" : {

@@ -22,8 +22,9 @@ struct SettingsUIScreen: View {
                             }
                             .tag(SettingsDestination.appearance)
 
+                            // base settings
                             Label {
-                                Text("base settings")
+                                Text("Base Settings")
                                     .foregroundColor(theme.labelColor)
                             } icon: {
                                 Image(systemName: "gear")
@@ -31,6 +32,17 @@ struct SettingsUIScreen: View {
                             }
                             .tag(SettingsDestination.other)
 
+                            // ai
+                            Label {
+                                Text("AI Settings")
+                                    .foregroundColor(theme.labelColor)
+                            } icon: {
+                                Image(systemName: "gear")
+                                    .foregroundColor(theme.tintColor)
+                            }
+                            .tag(SettingsDestination.ai)
+
+                            // storage
                             Label {
                                 Text("settings_storage_title")
                                     .foregroundColor(theme.labelColor)
@@ -40,6 +52,7 @@ struct SettingsUIScreen: View {
                             }
                             .tag(SettingsDestination.storage)
 
+                            // feature
                             Label {
                                 Text("Feature Requests")
                                     .foregroundColor(theme.labelColor)
@@ -49,6 +62,7 @@ struct SettingsUIScreen: View {
                             }
                             .tag(SettingsDestination.wishlist)
 
+                            // settings
                             Label {
                                 Text("settings_about_subtitle")
                                     .foregroundColor(theme.labelColor)
@@ -77,6 +91,8 @@ struct SettingsUIScreen: View {
                             AboutScreen()
                         case .wishlist:
                             WishlistView()
+                        case .ai:
+                            AISettingsScreen()
                         }
                     } else {
                         Text("settings_welcome")
@@ -99,6 +115,7 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
     case storage
     case about
     case wishlist
+    case ai
     // case serverInfo
     public var id: String {
         rawValue

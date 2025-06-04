@@ -103,10 +103,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import me.saket.telephoto.ExperimentalTelephotoApi
 import me.saket.telephoto.zoomable.ZoomSpec
+import me.saket.telephoto.zoomable.ZoomableContent
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
+import me.saket.telephoto.zoomable.spatial.CoordinateSpace
 import moe.tlaster.precompose.molecule.producePresenter
 import moe.tlaster.swiper.Swiper
 import moe.tlaster.swiper.rememberSwiperState
@@ -568,6 +571,7 @@ private fun PlayerControl(
     }
 }
 
+@OptIn(ExperimentalTelephotoApi::class)
 @Composable
 private fun ImageItem(
     url: String,
@@ -593,8 +597,10 @@ private fun ImageItem(
         }
     }
     val aspectRatio =
-        remember(zoomableState.transformedContentBounds) {
-            zoomableState.transformedContentBounds.let {
+        remember(zoomableState.coordinateSystem) {
+            with(zoomableState.coordinateSystem) {
+                zoomableState.coordinateSystem.unscaledContentBounds.rectIn(CoordinateSpace.ZoomableContent)
+            }.let {
                 it.height / it.width
             }
         }

@@ -168,4 +168,13 @@ afterEvaluate {
     val runKtlintCheckOverCommonMainSourceSet by tasks
     runKtlintFormatOverCommonMainSourceSet.dependsOn("kspCommonMainKotlinMetadata")
     runKtlintCheckOverCommonMainSourceSet.dependsOn("kspCommonMainKotlinMetadata")
+    tasks {
+        configureEach {
+            if (this.name != "kspCommonMainKotlinMetadata" && this.name.startsWith("ksp")) {
+                this.dependsOn("kspCommonMainKotlinMetadata")
+            }
+        }
+    }
+
+
 }

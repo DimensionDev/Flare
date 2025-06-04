@@ -297,7 +297,6 @@
 				en,
 				Base,
 				"zh-Hans",
-				"en-GB",
 			);
 			mainGroup = 7555FF72242A565900829871;
 			packageReferences = (

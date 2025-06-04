@@ -51,6 +51,7 @@ sqlite = "2.5.1"
 compose-multiplatform = "1.8.1"
 logback = "1.5.18"
 navigation3 = "1.0.0-alpha02"
+zoomable = "0.16.0"
 
 [libraries]
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
@@ -128,8 +129,8 @@ coil3-network = { group = "io.coil-kt.coil3", name = "coil-network-core", versio
 apng = { group = "com.github.penfeizhou.android.animation", name = "apng", version.ref = "apng-android" }
 awebp = { group = "com.github.penfeizhou.android.animation", name = "awebp", version.ref = "apng-android" }
 vectordrawable-animated = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version = "1.2.0" }
-zoomable-image = { group = "me.saket.telephoto", name = "zoomable-image-coil3", version = "0.15.1" }
-zoomable = { group = "me.saket.telephoto", name = "zoomable", version = "0.15.1" }
+zoomable-image = { group = "me.saket.telephoto", name = "zoomable-image-coil3", version.ref = "zoomable" }
+zoomable = { group = "me.saket.telephoto", name = "zoomable", version.ref = "zoomable" }
 
 ktorfit-lib = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-lib", version.ref = "ktorfit" }
 ktorfit-ksp = { group = "de.jensklingenberg.ktorfit", name = "ktorfit-ksp", version.ref = "ktorfit" }

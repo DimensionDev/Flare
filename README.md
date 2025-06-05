@@ -28,8 +28,8 @@ The ultimate next generation* open-sourced AI powered** decentralized social net
 Here're some features we're planning to implement in the future.
  - [ ] Mixed timeline
  - [ ] AI powered features
-   - [ ] Translation
-   - [ ] Summary
+   - [x] Translation
+   - [x] Summary
    - [ ] Quick reply
  - [ ] Support for Meta Threads
  - [x] Anonymous mode enhancement
@@ -54,6 +54,18 @@ Here're some features we're planning to implement in the future.
  - Make sure you have JDK 21 installed
  - Run `./gradlew :server:runDebugExecutableMacosArm64 -PrunArgs="--config-path=path/to/server/src/commonMain/resources/application.yaml"` to build and run the server, remember to replace `path/to/server/src/commonMain/resources/application.yaml` with the path to your config file
  - The server will run on `http://localhost:8080` by default
+#### Docker
+If you prefer using Docker, you can use Docker Compose to run prebuild Server Image.
+ - Rename `.env.sample` to `.env`, and update the environment variables in the file.
+ - If you're deploying into a production server, you might need to update the `docker-compose.yml` file with these lines:
+   ```diff
+   environment:
+   -   # STAGE: local
+   +   STAGE: 'production'
+   -   DOMAINS: api.flareapp.moe -> http://flare-backend:8080
+   +   DOMAINS: your_domain_here -> http://flare-backend:8080
+   ```
+ - Run `docker compose up -d`
 
 ## Contributing
 See [CONTRIBUTING.md](CONTRIBUTING.md) for more information.

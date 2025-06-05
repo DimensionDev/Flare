@@ -261,7 +261,9 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 
     private func observeUser() {
         // 先检查UserManager中是否有用户
-        if let user = UserManager.shared.getCurrentUser() {
+        let result = UserManager.shared.getCurrentUser()
+
+        if let user = result.0 {
             initializeWithUser(user)
             return
         }

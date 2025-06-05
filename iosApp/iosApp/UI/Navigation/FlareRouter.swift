@@ -93,18 +93,6 @@ class FlareRouter: ObservableObject {
         os_log("[FlareRouter] Initialized router: %{public}@", log: .default, type: .debug, String(describing: ObjectIdentifier(self)))
     }
 
-    func captureCurrentPageSnapshot() {
-        guard let window = UIApplication.shared.windows.first(where: { $0.isKeyWindow }) else { return }
-
-        UIGraphicsBeginImageContextWithOptions(window.bounds.size, false, UIScreen.main.scale)
-        window.drawHierarchy(in: window.bounds, afterScreenUpdates: true)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-
-        previousPageSnapshot = image
-        os_log("[FlareRouter] Captured page snapshot", log: .default, type: .debug)
-    }
-
     func navigate(to destination: FlareDestination) {
         if case let .compose(accountType, status) = destination {
             showComposeSheet(accountType: accountType, status: status)
@@ -118,8 +106,6 @@ class FlareRouter: ObservableObject {
                String(describing: destination),
                navigationDepth,
                String(describing: activeTab))
-
-        captureCurrentPageSnapshot()
 
         presentationType = destination.navigationType
         activeDestination = destination

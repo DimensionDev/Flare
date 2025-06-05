@@ -51,29 +51,6 @@ class AppBarNotificationService {
         }
     }
 
-    // 发送列表标题更新通知
-    func postListTitleDidUpdateNotification(
-        listId: String,
-        oldTitle: String,
-        newTitle: String,
-        isBlueskyFeed: Bool
-    ) {
-        let userInfo: [String: Any] = [
-            "listId": listId,
-            "oldTitle": oldTitle,
-            "newTitle": newTitle,
-            "itemType": isBlueskyFeed ? "feed" : "list",
-        ]
-
-        DispatchQueue.main.async {
-            NotificationCenter.default.post(
-                name: .listTitleDidUpdate,
-                object: nil,
-                userInfo: userInfo
-            )
-        }
-    }
-
     // 添加列表Pin状态变化观察者
     func addListPinStatusChangedObserver(
         target: Any,
@@ -96,19 +73,6 @@ class AppBarNotificationService {
             target,
             selector: selector,
             name: .listTitleDidUpdate,
-            object: nil
-        )
-    }
-
-    // 添加用户更新观察者
-    func addUserDidUpdateObserver(
-        target: Any,
-        selector: Selector
-    ) {
-        NotificationCenter.default.addObserver(
-            target,
-            selector: selector,
-            name: .userDidUpdate,
             object: nil
         )
     }

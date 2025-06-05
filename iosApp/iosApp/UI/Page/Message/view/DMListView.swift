@@ -29,7 +29,7 @@ struct DMListView: View {
                     if let room = success.peek(index: index) {
                         NavigationLink(
                             destination: DMConversationView(
-                                accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
+                                accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
                                 roomKey: room.key,
                                 title: room.getFormattedTitle()
                             )

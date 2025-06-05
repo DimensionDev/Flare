@@ -23,8 +23,11 @@ struct AllListsView: View {
         presenter = .init(accountType: accountType)
         self.accountType = accountType
 
-        let user = UserManager.shared.getCurrentUser()
-        _currentUser = State(initialValue: user)
+        //  let user ,  accountTypeSpecific = UserManager.shared.getCurrentUser()
+        let result = UserManager.shared.getCurrentUser()
+        let user: UiUserV2? = result.0
+
+//        _currentUser = State(initialValue: user)
 
         // check if the user is a Mastodon account
         var isMastodon = false

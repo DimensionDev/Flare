@@ -2,7 +2,7 @@ import shared
 import SwiftUI
 
 struct AppBarViewSwiftUI: View {
-    @Binding var selectedTab: String
+    @Binding var selectedHomeAppBarTab: String
     let tabs: [FLTabItem]
     let user: UiUserV2?
     let accountType: AccountType
@@ -29,7 +29,7 @@ struct AppBarViewSwiftUI: View {
 
             // 标签栏
             TabItemsViewSwiftUI(
-                selection: $selectedTab,
+                selection: $selectedHomeAppBarTab,
                 items: tabs
             )
 

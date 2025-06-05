@@ -30,7 +30,7 @@ struct FlareRootView: View {
                                        log: .default, type: .debug,
                                        String(describing: ObjectIdentifier(router)))
 
-                        HomeContent(accountType: accountType)
+                        HomeTabViewContent(accountType: accountType)
                             .environment(theme).applyTheme(theme)
                             .environmentObject(appState)
                             .environmentObject(router)

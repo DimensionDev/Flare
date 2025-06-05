@@ -72,7 +72,7 @@ struct CommonTimelineStatusComponent: View {
                                 bottomMainActions.append(subAction)
                             } else {
                                 // 其他操作添加到更多操作
-                                bottomMoreActions.append(item)
+                                // bottomMoreActions.append(item)
                             }
                         } else if subAction is StatusActionAsyncActionItem {}
                     }
@@ -93,95 +93,93 @@ struct CommonTimelineStatusComponent: View {
             Spacer().frame(height: 2)
 
             HStack(alignment: .top) {
-                if let user = data.user {
-                    UserComponent(
-                        user: user,
-                        topEndContent: data.topEndContent as? UiTimelineItemContentStatusTopEndContent
-                    ).id("UserComponent_\(user.key)")
-                        .environmentObject(router)
-                }
-                Spacer()
-                // icon + time
-                VStack(alignment: .trailing, spacing: 1) {
+                HStack(alignment: .center, spacing: 1) {
+                    if let user = data.user {
+                        UserComponent(
+                            user: user,
+                            topEndContent: data.topEndContent as? UiTimelineItemContentStatusTopEndContent
+                        ).id("UserComponent_\(user.key)")
+                            .environmentObject(router)
+                    }
+                    Spacer()
+                    // icon + time
+
                     // 更多按钮
-                    if !processActions().moreActions.isEmpty {
-                        Menu {
-                            ForEach(0 ..< processActions().moreActions.count, id: \.self) { index in
-                                let item = processActions().moreActions[index]
-                                let role: ButtonRole? =
-                                    if let colorData = item as? StatusActionItemColorized {
-                                        switch colorData.color {
-                                        case .red: .destructive
-                                        case .primaryColor: nil
-                                        case .contentColor: nil
-                                        case .error: .destructive
-                                        }
-                                    } else {
-                                        nil
-                                    }
+                    // if !processActions().moreActions.isEmpty {
+                    //     Menu {
+                    //         ForEach(0 ..< processActions().moreActions.count, id: \.self) { index in
+                    //             let item = processActions().moreActions[index]
+                    //             let role: ButtonRole? =
+                    //                 if let colorData = item as? StatusActionItemColorized {
+                    //                     switch colorData.color {
+                    //                     case .red: .destructive
+                    //                     case .primaryColor: nil
+                    //                     case .contentColor: nil
+                    //                     case .error: .destructive
+                    //                     }
+                    //                 } else {
+                    //                     nil
+                    //                 }
 
-                                Button(
-                                    role: role,
-                                    action: {
-                                        if let clickable = item as? StatusActionItemClickable {
-                                            clickable.onClicked(
-                                                .init(launcher: AppleUriLauncher(openURL: openURL)))
-                                            // 如果是举报操作，显示 Toast
-                                            if case .report = onEnum(of: item) {
-                                                showReportToast()
-                                            }
-                                        }
-                                    },
-                                    label: {
-                                        let text: LocalizedStringKey =
-                                            switch onEnum(of: item) {
-                                            case let .bookmark(data):
-                                                data.bookmarked
-                                                    ? LocalizedStringKey("status_action_unbookmark")
-                                                    : LocalizedStringKey("status_action_bookmark")
-                                            case .delete: LocalizedStringKey("status_action_delete")
-                                            case let .like(data):
-                                                data.liked
-                                                    ? LocalizedStringKey("status_action_unlike")
-                                                    : LocalizedStringKey("status_action_like")
-                                            case .quote: LocalizedStringKey("quote")
-                                            case .reaction:
-                                                LocalizedStringKey("status_action_add_reaction")
-                                            case .reply: LocalizedStringKey("status_action_reply")
-                                            case .report: LocalizedStringKey("report")
-                                            case let .retweet(data):
-                                                data.retweeted
-                                                    ? LocalizedStringKey("retweet_remove")
-                                                    : LocalizedStringKey("retweet")
-                                            case .more: LocalizedStringKey("status_action_more")
-                                            }
-                                        Label {
-                                            Text(text)
-                                        } icon: {
-                                            StatusActionItemIcon(item: item)
-                                        }
-                                    }
-                                )
-                            }
-                        } label: {
-                            Image(asset: Asset.Image.Status.more)
-                                .renderingMode(.template)
-                                .rotationEffect(.degrees(0))
-                                .foregroundColor(theme.labelColor)
-                                .modifier(SmallIconModifier())
-                        }
-                        .padding(.top, 0)
-                    }
+                    //             Button(
+                    //                 role: role,
+                    //                 action: {
+                    //                     if let clickable = item as? StatusActionItemClickable {
+                    //                         clickable.onClicked(
+                    //                             .init(launcher: AppleUriLauncher(openURL: openURL)))
+                    //                         // 如果是举报操作，显示 Toast
+                    //                         if case .report = onEnum(of: item) {
+                    //                             showReportToast()
+                    //                         }
+                    //                     }
+                    //                 },
+                    //                 label: {
+                    //                     let text: LocalizedStringKey =
+                    //                         switch onEnum(of: item) {
+                    //                         case let .bookmark(data):
+                    //                             data.bookmarked
+                    //                                 ? LocalizedStringKey("status_action_unbookmark")
+                    //                                 : LocalizedStringKey("status_action_bookmark")
+                    //                         case .delete: LocalizedStringKey("status_action_delete")
+                    //                         case let .like(data):
+                    //                             data.liked
+                    //                                 ? LocalizedStringKey("status_action_unlike")
+                    //                                 : LocalizedStringKey("status_action_like")
+                    //                         case .quote: LocalizedStringKey("quote")
+                    //                         case .reaction:
+                    //                             LocalizedStringKey("status_action_add_reaction")
+                    //                         case .reply: LocalizedStringKey("status_action_reply")
+                    //                         case .report: LocalizedStringKey("report")
+                    //                         case let .retweet(data):
+                    //                             data.retweeted
+                    //                                 ? LocalizedStringKey("retweet_remove")
+                    //                                 : LocalizedStringKey("retweet")
+                    //                         case .more: LocalizedStringKey("status_action_more")
+                    //                         }
+                    //                     Label {
+                    //                         Text(text)
+                    //                     } icon: {
+                    //                         StatusActionItemIcon(item: item)
+                    //                     }
+                    //                 }
+                    //             )
+                    //         }
+                    //     } label: {
+                    //         Image(asset: Asset.Image.Status.more)
+                    //             .renderingMode(.template)
+                    //             .rotationEffect(.degrees(0))
+                    //             .foregroundColor(theme.labelColor)
+                    //             .modifier(SmallIconModifier())
+                    //     }
+                    //     .padding(.top, 0)
+                    // }
 
-                    HStack(spacing: 10) {
-                        if !isDetail {
-                            dateFormatter(data.createdAt)
-                                .foregroundColor(.gray)
-                                .font(.caption)
-                                .frame(minWidth: 80, alignment: .trailing)
-                        }
+                    if !isDetail {
+                        dateFormatter(data.createdAt)
+                            .foregroundColor(.gray)
+                            .font(.caption)
+                            .frame(minWidth: 80, alignment: .trailing)
                     }
-                    .frame(minWidth: 80)
                 }
                 .padding(.bottom, 1)
             }
@@ -494,7 +492,7 @@ struct CommonTimelineStatusComponent: View {
                     if !bottomActionBarFrame.contains(tapLocation.frame.origin) {
                         //  data.onClicked(ClickContext(launcher: AppleUriLauncher(openURL: openURL)))
                         router.navigate(to: .statusDetail(
-                            accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
+                            accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
                             statusKey: data.statusKey
                         ))
                     }

@@ -7,7 +7,7 @@ struct HomeTabScreenSwiftUI: View {
     var onSwitchToMenuTab: (() -> Void)?
 
     @StateObject private var tabStore = AppBarTabSettingStore.shared
-    @State private var selectedTabKey: String = ""
+    @State private var selectedHomeAppBarTabKey: String = ""
     @State private var showAppbarSettings = false
     @State private var showLogin = false
     @Environment(FlareTheme.self) private var theme
@@ -15,7 +15,7 @@ struct HomeTabScreenSwiftUI: View {
     var body: some View {
         VStack(spacing: 0) {
             AppBarViewSwiftUI(
-                selectedTab: $selectedTabKey,
+                selectedHomeAppBarTab: $selectedHomeAppBarTabKey,
                 tabs: tabStore.availableAppBarTabsItems,
                 user: tabStore.currentUser,
                 accountType: accountType,
@@ -30,16 +30,16 @@ struct HomeTabScreenSwiftUI: View {
 
             TabContentViewSwiftUI(
                 tabStore: tabStore,
-                selectedTab: $selectedTabKey
+                selectedTab: $selectedHomeAppBarTabKey
             )
         }.toolbarVisibility(.hidden, for: .navigationBar) // 隐藏，避免滑动返回 appbar 高度增加
-            .onAppear {
-                if let firstTab = tabStore.availableAppBarTabsItems.first {
-                    selectedTabKey = firstTab.key
-                    tabStore.updateSelectedTab(firstTab)
-                }
-            }
-            .onChange(of: selectedTabKey) { _, newValue in
+//            .onAppear {
+//                if let firstTab = tabStore.availableAppBarTabsItems.first {
+//                    selectedHomeAppBarTabKey = firstTab.key
+//                    tabStore.updateSelectedTab(firstTab)
+//                }
+//            }
+            .onChange(of: selectedHomeAppBarTabKey) { _, newValue in
                 if let tab = tabStore.availableAppBarTabsItems.first(where: { $0.key == newValue }) {
                     tabStore.updateSelectedTab(tab)
                 }

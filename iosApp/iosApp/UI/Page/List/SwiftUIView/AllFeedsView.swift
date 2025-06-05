@@ -23,7 +23,7 @@ struct AllFeedsView: View {
         presenter = .init(accountType: accountType)
         self.accountType = accountType
 
-        let user = UserManager.shared.getCurrentUser()
+        let (user, accountTypeSpecific) = UserManager.shared.getCurrentUser()
         _currentUser = State(initialValue: user)
 
         // check if the current platform is Bluesky (only Bluesky has Feeds)

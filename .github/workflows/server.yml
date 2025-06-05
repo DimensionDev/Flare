@@ -54,6 +54,7 @@ jobs:
           cat > Dockerfile <<'EOF'
           FROM ubuntu:24.04
           WORKDIR /app
+          RUN apt-get update && apt-get install -y curl ca-certificates
           COPY server/build/bin/linuxX64/releaseExecutable/server.kexe /app/server.kexe
           COPY server/src/commonMain/resources/application.yaml /app/application.yaml
           EXPOSE 8080

@@ -31,9 +31,13 @@ import dev.dimension.flare.ui.screen.rss.rssEntryBuilder
 import dev.dimension.flare.ui.screen.serviceselect.serviceSelectEntryBuilder
 import dev.dimension.flare.ui.screen.settings.settingsSelectEntryBuilder
 import dev.dimension.flare.ui.screen.status.statusEntryBuilder
-import soup.compose.material.motion.animation.materialSharedAxisXIn
-import soup.compose.material.motion.animation.materialSharedAxisXOut
+import soup.compose.material.motion.animation.holdIn
+import soup.compose.material.motion.animation.holdOut
+import soup.compose.material.motion.animation.materialElevationScaleIn
+import soup.compose.material.motion.animation.materialElevationScaleOut
 import soup.compose.material.motion.animation.rememberSlideDistance
+import soup.compose.material.motion.animation.translateXIn
+import soup.compose.material.motion.animation.translateXOut
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -90,16 +94,16 @@ internal fun Router(
             backStack = topLevelBackStack.backStack,
             onBack = { onBack() },
             transitionSpec = {
-                materialSharedAxisXIn(true, slideDistance) togetherWith
-                    materialSharedAxisXOut(true, slideDistance)
+                holdIn() + translateXIn { it } togetherWith
+                    materialElevationScaleOut() // + translateXOut { -it / 3 }
             },
             popTransitionSpec = {
-                materialSharedAxisXIn(false, slideDistance) togetherWith
-                    materialSharedAxisXOut(false, slideDistance)
+                materialElevationScaleIn() togetherWith
+                    holdOut() + translateXOut { it }
             },
             predictivePopTransitionSpec = {
-                materialSharedAxisXIn(false, slideDistance) togetherWith
-                    materialSharedAxisXOut(false, slideDistance)
+                materialElevationScaleIn() togetherWith
+                    holdOut() + translateXOut { it }
             },
             entryProvider =
                 entryProvider {

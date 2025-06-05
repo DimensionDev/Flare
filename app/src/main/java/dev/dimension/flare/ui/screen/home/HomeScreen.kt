@@ -100,10 +100,7 @@ import org.koin.compose.koinInject
     ExperimentalMaterial3Api::class,
 )
 @Composable
-internal fun HomeScreen(
-    afterInit: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+internal fun HomeScreen(afterInit: () -> Unit) {
     val scope = rememberCoroutineScope()
     val state by producePresenter { presenter() }
     val hapticFeedback = LocalHapticFeedback.current
@@ -146,9 +143,7 @@ internal fun HomeScreen(
                 )
             val actualLayoutType = state.navigationState.type ?: layoutType
             FlareTheme {
-                Box(
-                    modifier = modifier,
-                ) {
+                Box {
                     NavigationSuiteScaffold2(
                         modifier = Modifier.fillMaxSize(),
                         bottomBarDividerEnabled = state.navigationState.bottomBarDividerEnabled,

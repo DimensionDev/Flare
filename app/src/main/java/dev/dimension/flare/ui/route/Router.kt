@@ -17,6 +17,7 @@ import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import dev.dimension.flare.ui.common.ProxyUriHandler
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.component.TopLevelBackStack
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.rememberSavedStateNavEntryDecorator2
 import dev.dimension.flare.ui.component.rememberViewModelStoreNavEntryDecorator2
 import dev.dimension.flare.ui.screen.bluesky.blueskyEntryBuilder
@@ -35,7 +36,7 @@ import soup.compose.material.motion.animation.holdIn
 import soup.compose.material.motion.animation.holdOut
 import soup.compose.material.motion.animation.materialElevationScaleIn
 import soup.compose.material.motion.animation.materialElevationScaleOut
-import soup.compose.material.motion.animation.rememberSlideDistance
+import soup.compose.material.motion.animation.materialSharedAxisZ
 import soup.compose.material.motion.animation.translateXIn
 import soup.compose.material.motion.animation.translateXOut
 
@@ -47,7 +48,6 @@ internal fun Router(
     drawerState: DrawerState,
 ) {
     val scope = rememberCoroutineScope()
-    val slideDistance = rememberSlideDistance()
 
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
 
@@ -58,6 +58,8 @@ internal fun Router(
     fun onBack() {
         topLevelBackStack.removeLast()
     }
+
+    val isBigScreen = isBigScreen()
 
     val uriHandler = LocalUriHandler.current
     CompositionLocalProvider(
@@ -94,16 +96,28 @@ internal fun Router(
             backStack = topLevelBackStack.backStack,
             onBack = { onBack() },
             transitionSpec = {
-                holdIn() + translateXIn { it } togetherWith
-                    materialElevationScaleOut() // + translateXOut { -it / 3 }
+                if (isBigScreen) {
+                    materialSharedAxisZ(true)
+                } else {
+                    holdIn() + translateXIn { it } togetherWith
+                        materialElevationScaleOut()
+                }
             },
             popTransitionSpec = {
-                materialElevationScaleIn() togetherWith
-                    holdOut() + translateXOut { it }
+                if (isBigScreen) {
+                    materialSharedAxisZ(false)
+                } else {
+                    materialElevationScaleIn() togetherWith
+                        holdOut() + translateXOut { it }
+                }
             },
             predictivePopTransitionSpec = {
-                materialElevationScaleIn() togetherWith
-                    holdOut() + translateXOut { it }
+                if (isBigScreen) {
+                    materialSharedAxisZ(false)
+                } else {
+                    materialElevationScaleIn() togetherWith
+                        holdOut() + translateXOut { it }
+                }
             },
             entryProvider =
                 entryProvider {

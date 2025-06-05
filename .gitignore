@@ -30,4 +30,6 @@ shared/shared.podspec
 iosApp/K_D/
 *.sh
 .*
+/package_source
+/example_app
 

@@ -29,12 +29,17 @@ struct ShareButton: View {
     @Environment(\.appSettings) var appSettings
     @Environment(\.openURL) private var openURL
     @EnvironmentObject var router: FlareRouter
+    @Environment(FlareTheme.self) private var theme
+
+
     @State private var isShareAsImageSheetPresented: Bool = false
     @State private var showTextForSelection: Bool = false
     @State private var renderer: ImageRenderer<AnyView>?
     @State private var capturedImage: UIImage?
     @State private var isPreparingShare: Bool = false
     @State private var showTranslation: Bool = false
+    @State private var showReportAlert = false
+
     let content: UiTimelineItemContentStatus
     let view: CommonTimelineStatusComponent
 
@@ -82,6 +87,12 @@ struct ShareButton: View {
 
     var body: some View {
         Menu {
+             Button(action: {
+                showReportAlert = true 
+            }) {
+                Label("Report", systemImage: "exclamationmark.triangle")
+            }
+
             Button(action: {
                 UIPasteboard.general.string = content.content.raw
             }) {
@@ -98,7 +109,7 @@ struct ShareButton: View {
                 showTextForSelection = true
             }) {
                 Label("Select Text", systemImage: "text.cursor")
-            }
+            }.buttonStyle(PlainButtonStyle())  
 
             if let url = statusUrl {
                 Button(action: {
@@ -256,11 +267,15 @@ struct ShareButton: View {
                 Label("", systemImage: "square.and.arrow.up")
                     .imageScale(.medium)
                     .font(.system(size: 13))
-                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+                    .foregroundColor(theme.tintColor)
                 Spacer()
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
+        }.alert("Report", isPresented: $showReportAlert) {
+            Button("OK") { }
+        } message: {
+            Text("Report Success")
         }
         .sheet(isPresented: $showTextForSelection) {
             let selectableContent = AttributedString(content.content.markdown)
@@ -283,5 +298,7 @@ struct ShareButton: View {
                 .environmentObject(router)
             }
         }
+          
+
     }
 }

@@ -17,8 +17,9 @@ struct HomeScreen: View {
                 #endif
             case .error: AccountTypeGuest()
             }
+
             if let actualAccountType = accountType {
-                HomeContent(accountType: actualAccountType)
+                HomeTabViewContent(accountType: actualAccountType)
             }
         }
     }

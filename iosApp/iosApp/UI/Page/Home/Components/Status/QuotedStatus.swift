@@ -17,7 +17,7 @@ struct QuotedStatus: View {
         Button(action: {
             // 移除KMP回调，直接使用FlareRouter导航
             router.navigate(to: .statusDetail(
-                accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
+                accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
                 statusKey: data.statusKey
             ))
         }, label: {

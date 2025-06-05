@@ -13,7 +13,7 @@ struct UserComponent: View {
         Button(
             action: {
                 router.navigate(to: .profile(
-                    accountType: UserManager.shared.getCurrentAccount() ?? AccountTypeGuest(),
+                    accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
                     userKey: user.key
                 ))
             },

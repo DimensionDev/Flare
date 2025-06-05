@@ -38,7 +38,9 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
 
     private func observeUser(userKey: MicroBlogKey?) {
         // 先检查UserManager中是否有用户
-        if let user = UserManager.shared.getCurrentUser() {
+        let result = UserManager.shared.getCurrentUser()
+
+        if let user = result.0 {
             initializeWithUser(user, userKey: userKey)
             return
         } else if let userKey {
@@ -49,12 +51,12 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
         }
 
         // 如果没有，则等待用户更新通知
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleUserUpdate),
-            name: .userDidUpdate,
-            object: nil
-        )
+//        NotificationCenter.default.addObserver(
+//            self,
+//            selector: #selector(handleUserUpdate),
+//            name: .userDidUpdate,
+//            object: nil
+//        )
     }
 
     @objc private func handleUserUpdate(_ notification: Notification) {
@@ -141,7 +143,7 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
     // - Private Methods
     private func updateTabs(user: UiUserV2, userKey: MicroBlogKey?) {
         // 检查是否是未登录模式
-        let isGuestMode = user.key is AccountTypeGuest || UserManager.shared.getCurrentUser() == nil
+        let isGuestMode = user.key is AccountTypeGuest || UserManager.shared.getCurrentUser().0 == nil
 
         // 创建media标签
         let mediaTab = FLProfileMediaTabItem(

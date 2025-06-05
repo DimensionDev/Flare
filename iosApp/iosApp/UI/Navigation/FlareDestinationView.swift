@@ -25,24 +25,18 @@ struct FlareDestinationView: View {
                 ProfileTabScreenUikit(
                     accountType: accountType,
                     userKey: userKey,
-                    toProfileMedia: { _ in
-//                        print("查看用户媒体: \(userKey.description)")
-                    }
+                    toProfileMedia: { _ in }
                 )
                 .environmentObject(router)
-                .environment(theme).applyTheme(theme)
 
             case let .profileWithNameAndHost(accountType, userName, host):
                 ProfileWithUserNameScreen(
                     accountType: accountType,
                     userName: userName,
                     host: host,
-                    toProfileMedia: { _ in
-                        // 在这里处理媒体查看导航
-//                        print("查看用户媒体: \(userKey.description)")
-                    }
+                    toProfileMedia: { _ in }
                 )
-                .environmentObject(router).environment(theme).applyTheme(theme)
+                .environmentObject(router)
 
             case let .statusDetail(accountType, statusKey):
                 StatusDetailScreen(accountType: accountType, statusKey: statusKey, router: router)
@@ -70,7 +64,6 @@ struct FlareDestinationView: View {
 
             case let .feeds(accountType):
                 AllFeedsView(accountType: accountType)
-                    .environment(theme).applyTheme(theme)
                     .navigationTitle("Feeds")
                     .navigationBarTitleDisplayMode(.inline)
 
@@ -131,7 +124,7 @@ struct FlareDestinationView: View {
                     .environmentObject(router)
                     .environmentObject(appState)
 
-            case let .instanceScreen(host, platformType):
+            case let .instanceScreen(host, _):
                 InstanceScreen(host: host)
                     .environmentObject(router)
                     .environmentObject(appState)
@@ -156,36 +149,6 @@ struct FlareDestinationView: View {
         .environmentObject(appState)
         .background(theme.primaryBackgroundColor)
         .foregroundColor(theme.labelColor)
-    }
-}
-
-struct NewComposeView: View {
-    let accountType: AccountType
-    let status: FlareComposeStatus?
-
-    @EnvironmentObject private var router: FlareRouter
-
-    var body: some View {
-        ComposeScreen(
-            onBack: {
-                router.dismissSheet()
-            },
-            accountType: accountType,
-            status: convertToSharedComposeStatus(status)
-        )
-    }
-
-    private func convertToSharedComposeStatus(_ status: FlareComposeStatus?) -> shared.ComposeStatus? {
-        guard let status else { return nil }
-
-        switch status {
-        case let .reply(statusKey):
-            return shared.ComposeStatusReply(statusKey: statusKey)
-        case let .quote(statusKey):
-            return shared.ComposeStatusQuote(statusKey: statusKey)
-        case let .vvoComment(statusKey, rootId):
-            return shared.ComposeStatusVVOComment(statusKey: statusKey, rootId: rootId)
-        }
     }
 }
 

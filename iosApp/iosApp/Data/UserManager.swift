@@ -6,6 +6,7 @@ class UserManager {
     static let shared = UserManager()
 
     private var currentUser: UiUserV2?
+    private var accountType: AccountType = AccountTypeGuest()
     private(set) var instanceMetadata: UiInstanceMetadata?
 
     private var presenter = ActiveAccountPresenter()
@@ -13,23 +14,27 @@ class UserManager {
 
     private init() {}
 
-    func getCurrentUser() -> UiUserV2? {
+    // 这个地方可以返回 UiUserV2 accountType
+    func getCurrentUser() -> (UiUserV2?, AccountType) {
         if !isInitialized {
             initialize()
         }
-        return currentUser
+
+        return (currentUser, accountType)
     }
 
-    func getCurrentAccount() -> AccountType? {
-        if let user = getCurrentUser() {
-            return AccountTypeSpecific(accountKey: user.key)
+    func getCurrentAccountType() -> AccountType? {
+        let (user, acctype) = getCurrentUser()
+        if let user {
+            return acctype
         }
         return AccountTypeGuest()
     }
 
     /// 判断给定用户是否是当前登录用户
     func isCurrentUser(user: UiUserV2) -> Bool {
-        if let currentUser = getCurrentUser() {
+        let (currentUser, _) = getCurrentUser()
+        if let currentUser {
             // 比较用户ID
             return user.key.id == currentUser.key.id
         }
@@ -43,14 +48,15 @@ class UserManager {
             for await state in presenter.models {
                 if case let .success(data) = onEnum(of: state.user) {
                     self.currentUser = data.data
+                    self.accountType = AccountTypeSpecific(accountKey: data.data.key)
+
                     isInitialized = true
 
                     // 初始化AppBarTabSettingStore
-                    let account = AccountTypeSpecific(accountKey: data.data.key)
-                    AppBarTabSettingStore.shared.initialize(with: account, user: data.data)
+                    AppBarTabSettingStore.shared.initialize(with: accountType, user: data.data)
 
                     // 发送通知
-                    NotificationCenter.default.post(name: .userDidUpdate, object: data.data)
+//                    NotificationCenter.default.post(name: .userDidUpdate, object: data.data)
                     os_log("[UserManager] 初始化完成，用户: %{public}@", log: .default, type: .debug, data.data.name.raw)
                     // 获取到用户后就退出循环
 

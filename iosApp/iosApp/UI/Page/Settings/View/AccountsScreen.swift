@@ -30,10 +30,10 @@ struct AccountsScreen: View {
                                                     "checkmark.circle.fill" :
                                                     "circle"
                                             )
-                                            .foregroundStyle(.blue)
+                                            .foregroundStyle(theme.tintColor)
                                         default:
                                             Image(systemName: "circle")
-                                                .foregroundStyle(.blue)
+                                                .foregroundStyle(theme.tintColor)
                                         }
                                     }
                                     .swipeActions(edge: .trailing) {
@@ -61,7 +61,9 @@ struct AccountsScreen: View {
                             case .none:
                                 EmptyView()
                             }
-                        }.scrollContentBackground(.hidden).listRowBackground(theme.primaryBackgroundColor).listSectionSpacing(50)
+                        }.scrollContentBackground(.hidden)
+                            .listRowBackground(theme.primaryBackgroundColor)
+
                     } else {
                         Text("no_accounts")
                     }
@@ -71,8 +73,9 @@ struct AccountsScreen: View {
                     Text("loading")
                 }
             }
-
-            .listStyle(.insetGrouped)
+            .environment(\.defaultMinListRowHeight, 90)
+//            .listSectionSpacing(80)
+            .listStyle(.sidebar)
             .navigationTitle("settings_accounts_title")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -80,7 +83,7 @@ struct AccountsScreen: View {
                     Button(action: {
                         showServiceSelectSheet = true
                     }, label: {
-                        Image(systemName: "plus")
+                        Image(systemName: "plus").foregroundColor(theme.tintColor)
                     })
                 }
             }

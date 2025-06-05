@@ -8,7 +8,8 @@ struct DMRoomItemView: View {
     var body: some View {
         HStack(spacing: 12) {
             if !room.hasUser {
-                if let currentUser = UserManager.shared.getCurrentUser() {
+                let result = UserManager.shared.getCurrentUser()
+                if let currentUser = result.0 {
                     AsyncImage(url: URL(string: currentUser.avatar)) { phase in
                         switch phase {
                         case .empty:
@@ -119,7 +120,8 @@ struct DMRoomItemView: View {
                                 .lineLimit(1)
                         }
                     } else {
-                        if let currentUser = UserManager.shared.getCurrentUser() {
+                        let result = UserManager.shared.getCurrentUser()
+                        if let currentUser = result.0 {
                             Text(currentUser.name.raw)
                                 .font(.headline)
                                 .lineLimit(1)

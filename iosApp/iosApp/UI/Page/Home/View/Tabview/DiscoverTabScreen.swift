@@ -3,15 +3,13 @@ import shared
 import SwiftUI
 
 struct DiscoverTabScreen: View {
-    private let onUserClicked: (UiUserV2) -> Void
     @State private var searchPresenter: SearchPresenter
     @State private var presenter: DiscoverPresenter
     @State var searchText = ""
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(FlareTheme.self) private var theme
 
-    init(accountType: AccountType, onUserClicked: @escaping (UiUserV2) -> Void) {
-        self.onUserClicked = onUserClicked
+    init(accountType: AccountType) {
         searchPresenter = .init(accountType: accountType, initialQuery: "")
         presenter = .init(accountType: accountType)
     }
@@ -32,9 +30,6 @@ struct DiscoverTabScreen: View {
                                                 UserComponent(
                                                     user: item,
                                                     topEndContent: nil
-//                                                    onUserClicked: {
-//                                                        onUserClicked(item)
-//                                                    }
                                                 )
                                                 .frame(width: 200, alignment: .leading)
                                                 .onAppear {

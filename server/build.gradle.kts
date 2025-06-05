@@ -46,7 +46,7 @@ kotlin {
         }
         val linuxMain by getting {
             dependencies {
-                implementation(libs.ktor.client.cio)
+                implementation(libs.ktor.client.curl)
             }
         }
         val commonTest by getting {

@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.window.core.layout.WindowWidthSizeClass
 
 @Composable
-internal actual fun isBigScreen(): Boolean {
+public actual fun isBigScreen(): Boolean {
     val windowInfo = currentWindowAdaptiveInfo()
     return windowInfo.windowSizeClass.windowWidthSizeClass == WindowWidthSizeClass.EXPANDED
 }

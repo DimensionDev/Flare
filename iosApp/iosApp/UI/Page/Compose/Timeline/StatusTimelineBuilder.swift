@@ -50,5 +50,3 @@ struct StatusTimelineComponent: View {
         }
     }
 }
-
-

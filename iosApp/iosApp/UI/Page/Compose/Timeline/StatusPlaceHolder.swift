@@ -1,7 +1,6 @@
 import shared
 import SwiftUI
 
-
 struct StatusPlaceHolder: View {
     var body: some View {
         StatusItemView(

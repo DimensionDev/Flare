@@ -31,7 +31,6 @@ struct ShareButton: View {
     @EnvironmentObject var router: FlareRouter
     @Environment(FlareTheme.self) private var theme
 
-
     @State private var isShareAsImageSheetPresented: Bool = false
     @State private var showTextForSelection: Bool = false
     @State private var renderer: ImageRenderer<AnyView>?
@@ -87,8 +86,8 @@ struct ShareButton: View {
 
     var body: some View {
         Menu {
-             Button(action: {
-                showReportAlert = true 
+            Button(action: {
+                showReportAlert = true
             }) {
                 Label("Report", systemImage: "exclamationmark.triangle")
             }
@@ -109,7 +108,7 @@ struct ShareButton: View {
                 showTextForSelection = true
             }) {
                 Label("Select Text", systemImage: "text.cursor")
-            }.buttonStyle(PlainButtonStyle())  
+            }.buttonStyle(PlainButtonStyle())
 
             if let url = statusUrl {
                 Button(action: {
@@ -273,7 +272,7 @@ struct ShareButton: View {
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }.alert("Report", isPresented: $showReportAlert) {
-            Button("OK") { }
+            Button("OK") {}
         } message: {
             Text("Report Success")
         }
@@ -298,7 +297,5 @@ struct ShareButton: View {
                 .environmentObject(router)
             }
         }
-          
-
     }
 }

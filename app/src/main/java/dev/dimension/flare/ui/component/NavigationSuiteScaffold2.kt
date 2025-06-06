@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.component
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
@@ -19,31 +18,29 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.ModalWideNavigationRail
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
-import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
-import androidx.compose.material3.NavigationRailItemDefaults
-import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.WideNavigationRailState
+import androidx.compose.material3.WideNavigationRailValue
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuite
@@ -54,7 +51,6 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScope
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.contentColorFor
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.State
@@ -77,22 +73,20 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 
 private val bottomBarHeight = 56.dp
 
 val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { bottomBarHeight }
 val LocalBottomBarShowing = androidx.compose.runtime.staticCompositionLocalOf<Boolean> { false }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @ExperimentalMaterial3AdaptiveNavigationSuiteApi
 @Composable
 fun NavigationSuiteScaffold2(
     navigationSuiteItems: NavigationSuiteScope2.() -> Unit,
     secondaryItems: NavigationSuiteScope2.() -> Unit,
+    wideNavigationRailState: WideNavigationRailState,
     modifier: Modifier = Modifier,
-    drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed),
-    drawerGesturesEnabled: Boolean = true,
     bottomBarAutoHideEnabled: Boolean = true,
     bottomBarDividerEnabled: Boolean = true,
     layoutType: NavigationSuiteType =
@@ -101,7 +95,6 @@ fun NavigationSuiteScaffold2(
     containerColor: Color = MaterialTheme.colorScheme.background,
     contentColor: Color = contentColorFor(containerColor),
     railHeader: @Composable (ColumnScope.() -> Unit)? = null,
-    drawerHeader: @Composable (ColumnScope.() -> Unit)? = null,
     footerItems: NavigationSuiteScope2.() -> Unit = {},
     content: @Composable () -> Unit = {},
 ) {
@@ -137,198 +130,198 @@ fun NavigationSuiteScaffold2(
         val scope by rememberStateOfItems(navigationSuiteItems)
         val footerScope by rememberStateOfItems(footerItems)
         val secondaryScope by rememberStateOfItems(secondaryItems)
-        ModalNavigationDrawer(
-            drawerContent = {
-                ModalDrawerSheet(
-                    drawerContainerColor = navigationSuiteColors.navigationDrawerContainerColor,
-                    drawerContentColor = navigationSuiteColors.navigationDrawerContentColor,
-                ) {
-                    DrawerContent(
-                        drawerHeader = drawerHeader,
-                        showPrimaryItems = layoutType != NavigationSuiteType.NavigationBar,
-                        scope = scope,
-                        secondaryScope = secondaryScope,
-                        footerScope = footerScope,
-                        onItemClicked = {
-                            coroutineScope.launch {
-                                drawerState.close()
-                            }
-                        },
-                    )
-                }
-            },
-            gesturesEnabled = layoutType != NavigationSuiteType.NavigationDrawer && drawerGesturesEnabled,
-            drawerState = drawerState,
-        ) {
-            Row {
-                AnimatedVisibility(layoutType == NavigationSuiteType.NavigationRail) {
-                    NavigationRail(
-                        header = railHeader,
-                        containerColor = navigationSuiteColors.navigationRailContainerColor,
-                        contentColor = navigationSuiteColors.navigationRailContentColor,
-                    ) {
-                        scope.itemList.forEach {
-                            NavigationRailItem(
-                                modifier = it.modifier,
-                                selected = it.selected,
-                                onClick = it.onClick,
-                                icon = { NavigationItemIcon(icon = it.icon, badge = it.badge) },
-                                enabled = it.enabled,
-                                label = it.label,
-                                alwaysShowLabel = it.alwaysShowLabel,
-                                colors =
-                                    it.colors?.navigationRailItemColors
-                                        ?: NavigationRailItemDefaults.colors(),
-                                interactionSource = it.interactionSource,
-                            )
+
+        Row {
+            ModalWideNavigationRail(
+                hideOnCollapse = layoutType == NavigationSuiteType.NavigationBar,
+                state = wideNavigationRailState,
+                colors = navigationSuiteColors.wideNavigationRailColors,
+            ) {
+                val actualLayoutType =
+                    if (layoutType == NavigationSuiteType.NavigationBar) {
+                        NavigationSuiteType.NavigationDrawer
+                    } else if (layoutType == NavigationSuiteType.NavigationRail) {
+                        if (wideNavigationRailState.currentValue == WideNavigationRailValue.Expanded) {
+                            NavigationSuiteType.WideNavigationRailExpanded
+                        } else {
+                            NavigationSuiteType.WideNavigationRailCollapsed
                         }
-                        Spacer(modifier = Modifier.weight(1f))
-                        footerScope.itemList.forEach {
-                            NavigationRailItem(
+                    } else {
+                        layoutType
+                    }
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState()),
+                    verticalArrangement =
+                        Arrangement.spacedBy(
+                            if (layoutType == NavigationSuiteType.NavigationBar) {
+                                0.dp
+                            } else {
+                                8.dp
+                            },
+                        ),
+                ) {
+                    railHeader?.invoke(this)
+                    if (layoutType != NavigationSuiteType.NavigationBar) {
+                        scope.itemList.forEach {
+                            androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem(
                                 modifier = it.modifier,
                                 selected = it.selected,
                                 onClick = it.onClick,
-                                icon = { NavigationItemIcon(icon = it.icon, badge = it.badge) },
+                                icon = it.icon,
                                 enabled = it.enabled,
                                 label = it.label,
-                                alwaysShowLabel = it.alwaysShowLabel,
-                                colors =
-                                    it.colors?.navigationRailItemColors
-                                        ?: NavigationRailItemDefaults.colors(),
                                 interactionSource = it.interactionSource,
+                                navigationSuiteType = actualLayoutType,
+                                badge = it.badge,
                             )
                         }
                     }
-                }
-                AnimatedVisibility(layoutType == NavigationSuiteType.NavigationDrawer) {
-                    PermanentDrawerSheet(
-                        modifier =
-                            Modifier
-                                .width(240.dp)
-                                .padding(horizontal = 12.dp),
-                        drawerContainerColor = navigationSuiteColors.navigationDrawerContainerColor,
-                        drawerContentColor = navigationSuiteColors.navigationDrawerContentColor,
-                    ) {
-                        DrawerContent(
-                            drawerHeader = drawerHeader,
-                            showPrimaryItems = true,
-                            scope = scope,
-                            secondaryScope = secondaryScope,
-                            footerScope = footerScope,
-                            onItemClicked = {},
+                    if (wideNavigationRailState.currentValue == WideNavigationRailValue.Expanded) {
+                        if (secondaryScope.itemList.isNotEmpty()) {
+                            HorizontalDivider()
+                        }
+                        secondaryScope.itemList.forEach {
+                            androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem(
+                                modifier = it.modifier,
+                                selected = it.selected,
+                                onClick = it.onClick,
+                                icon = it.icon,
+                                enabled = it.enabled,
+                                label = it.label,
+                                interactionSource = it.interactionSource,
+                                navigationSuiteType = actualLayoutType,
+                                badge = it.badge,
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    footerScope.itemList.forEach {
+                        androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem(
+                            modifier = it.modifier,
+                            selected = it.selected,
+                            onClick = it.onClick,
+                            icon = it.icon,
+                            enabled = it.enabled,
+                            label = it.label,
+                            interactionSource = it.interactionSource,
+                            navigationSuiteType = actualLayoutType,
+                            badge = it.badge,
                         )
                     }
                 }
-                Box {
-                    CompositionLocalProvider(
-                        LocalBottomBarHeight provides
-                            if (layoutType == NavigationSuiteType.NavigationBar) {
-                                bottomBarHeight
-                            } else {
-                                0.dp
-                            } +
-                            if (isPodcastShowing) {
-                                56.dp
-                            } else {
-                                0.dp
-                            },
-                        LocalBottomBarShowing provides (layoutType == NavigationSuiteType.NavigationBar),
-                    ) {
-                        content.invoke()
-                    }
-                    Column(
+            }
+            Box {
+                CompositionLocalProvider(
+                    LocalBottomBarHeight provides
+                        if (layoutType == NavigationSuiteType.NavigationBar) {
+                            bottomBarHeight
+                        } else {
+                            0.dp
+                        } +
+                        if (isPodcastShowing) {
+                            56.dp
+                        } else {
+                            0.dp
+                        },
+                    LocalBottomBarShowing provides (layoutType == NavigationSuiteType.NavigationBar),
+                ) {
+                    content.invoke()
+                }
+                Column(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
+                            .animateContentSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Bottom,
+                ) {
+                    PodcastFAB(
+                        onVisibilityChanged = {
+                            isPodcastShowing = it
+                        },
                         modifier =
                             Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter)
-                                .animateContentSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Bottom,
+                                .let {
+                                    if (layoutType == NavigationSuiteType.NavigationBar && !shouldHideBottomBar) {
+                                        it
+                                    } else {
+                                        it.windowInsetsPadding(
+                                            WindowInsets.systemBars.only(
+                                                WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                            ),
+                                        )
+                                    }
+                                },
+                    )
+                    androidx.compose.animation.AnimatedVisibility(
+                        layoutType == NavigationSuiteType.NavigationBar && !shouldHideBottomBar,
+                        enter = slideInVertically { it },
+                        exit = slideOutVertically { it },
+                        modifier =
+                        Modifier,
                     ) {
-                        PodcastFAB(
-                            onVisibilityChanged = {
-                                isPodcastShowing = it
-                            },
-                            modifier =
-                                Modifier
-                                    .let {
-                                        if (layoutType == NavigationSuiteType.NavigationBar && !shouldHideBottomBar) {
-                                            it
-                                        } else {
-                                            it.windowInsetsPadding(
+                        Surface(
+                            contentColor = navigationSuiteColors.navigationBarContentColor,
+                        ) {
+                            Box {
+                                if (bottomBarDividerEnabled) {
+                                    HorizontalDivider(
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.TopCenter)
+                                                .fillMaxWidth(),
+                                        color = FlareDividerDefaults.color,
+                                        thickness = FlareDividerDefaults.thickness,
+                                    )
+                                }
+                                Row(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .windowInsetsPadding(
                                                 WindowInsets.systemBars.only(
                                                     WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
                                                 ),
-                                            )
-                                        }
-                                    },
-                        )
-                        androidx.compose.animation.AnimatedVisibility(
-                            layoutType == NavigationSuiteType.NavigationBar && !shouldHideBottomBar,
-                            enter = slideInVertically { it },
-                            exit = slideOutVertically { it },
-                            modifier =
-                            Modifier,
-                        ) {
-                            Surface(
-                                contentColor = navigationSuiteColors.navigationBarContentColor,
-                            ) {
-                                Box {
-                                    if (bottomBarDividerEnabled) {
-                                        HorizontalDivider(
+                                            ),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    scope.itemList.forEach {
+                                        Box(
                                             modifier =
-                                                Modifier
-                                                    .align(Alignment.TopCenter)
-                                                    .fillMaxWidth(),
-                                            color = FlareDividerDefaults.color,
-                                            thickness = FlareDividerDefaults.thickness,
-                                        )
-                                    }
-                                    Row(
-                                        modifier =
-                                            Modifier
-                                                .fillMaxWidth()
-                                                .windowInsetsPadding(
-                                                    WindowInsets.systemBars.only(
-                                                        WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
-                                                    ),
-                                                ),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                    ) {
-                                        scope.itemList.forEach {
-                                            Box(
-                                                modifier =
-                                                    it.modifier
-                                                        .weight(1f)
-                                                        .combinedClickable(
-                                                            interactionSource = it.interactionSource,
-                                                            onClick = it.onClick,
-                                                            indication = LocalIndication.current,
-                                                            onLongClick = it.onLongClick,
-                                                        ).height(bottomBarHeight),
-                                                contentAlignment = Alignment.Center,
-                                            ) {
-                                                val colors =
-                                                    it.colors?.navigationBarItemColors
-                                                        ?: NavigationBarItemDefaults.colors()
-                                                val color =
-                                                    with(colors) {
-                                                        when {
-                                                            !it.enabled -> disabledIconColor
-                                                            it.selected -> MaterialTheme.colorScheme.primary
-                                                            else -> unselectedIconColor
-                                                        }
+                                                it.modifier
+                                                    .weight(1f)
+                                                    .combinedClickable(
+                                                        interactionSource = it.interactionSource,
+                                                        onClick = it.onClick,
+                                                        indication = LocalIndication.current,
+                                                        onLongClick = it.onLongClick,
+                                                    ).height(bottomBarHeight),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            val colors =
+                                                it.colors?.navigationBarItemColors
+                                                    ?: NavigationBarItemDefaults.colors()
+                                            val color =
+                                                with(colors) {
+                                                    when {
+                                                        !it.enabled -> disabledIconColor
+                                                        it.selected -> MaterialTheme.colorScheme.primary
+                                                        else -> unselectedIconColor
                                                     }
-                                                val iconColor by animateColorAsState(
-                                                    targetValue = color,
-                                                    animationSpec = tween(100),
-                                                )
-                                                CompositionLocalProvider(LocalContentColor provides iconColor) {
-                                                    NavigationItemIcon(
-                                                        icon = it.icon,
-                                                        badge = it.badge,
-                                                    )
                                                 }
+                                            val iconColor by animateColorAsState(
+                                                targetValue = color,
+                                                animationSpec = tween(100),
+                                            )
+                                            CompositionLocalProvider(LocalContentColor provides iconColor) {
+                                                NavigationItemIcon(
+                                                    icon = it.icon,
+                                                    badge = it.badge,
+                                                )
                                             }
                                         }
                                     }

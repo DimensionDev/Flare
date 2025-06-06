@@ -32,7 +32,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -246,7 +246,7 @@ internal fun TabCustomizeScreen(onBack: () -> Unit) {
                         rememberPagerState {
                             tabs.size + 1
                         }
-                    ScrollableTabRow(
+                    SecondaryScrollableTabRow(
                         selectedTabIndex = pagerState.currentPage,
                         containerColor = Color.Transparent,
                         contentColor = MaterialTheme.colorScheme.onBackground,

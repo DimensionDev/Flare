@@ -63,6 +63,7 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalBottomBarShowing
 import dev.dimension.flare.ui.component.RefreshContainer
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
@@ -149,7 +150,7 @@ internal fun HomeTimelineScreen(
                 },
                 scrollBehavior = topAppBarScrollBehavior,
                 navigationIcon = {
-                    if (LocalBottomBarShowing.current) {
+                    if (!isBigScreen()) {
                         state.user.onSuccess {
                             IconButton(
                                 onClick = toQuickMenu,

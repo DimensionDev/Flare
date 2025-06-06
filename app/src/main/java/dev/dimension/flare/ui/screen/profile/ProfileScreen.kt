@@ -248,7 +248,7 @@ internal fun ProfileScreen(
                         }
                     },
                     colors =
-                        TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        TopAppBarDefaults.topAppBarColors(
                             containerColor = Color.Transparent,
                             scrolledContainerColor = Color.Transparent,
                         ),

@@ -11,9 +11,8 @@
 ![badge-iOS](https://img.shields.io/badge/iOS-18.0-black)
 
 
-The ultimate next generation* open-sourced AI powered** decentralized social network client for Android/iOS, still in development.
-*: _Just a joke_
-**: _Not yet implemented_
+The ultimate next generation* open-sourced AI powered decentralized social network client for Android/iOS, still in development.  
+*: _Just a joke_  
 
 
 <a href='https://testflight.apple.com/join/iYP7QZME'><img alt='Get it on Google Play' src='https://developer.apple.com/app-store/marketing/guidelines/images/badge-example-preferred_2x.png' height=50/></a>

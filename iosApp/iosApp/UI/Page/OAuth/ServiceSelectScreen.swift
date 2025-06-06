@@ -275,6 +275,18 @@ struct ServiceSelectScreen: View {
             }
             .frame(height: 80)
 
+            // 第二部分：简介
+            if let description = instance.description_ {
+                Text(parseHTML(description))
+                    .lineLimit(3)
+                    .font(.footnote)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .allowsHitTesting(false)
+                    .foregroundStyle(Color.secondary)
+            }
+
             HStack(alignment: .top) {
                 ServiceIcon(
                     url: instance.iconUrl ?? "",
@@ -302,18 +314,6 @@ struct ServiceSelectScreen: View {
                         .clipShape(RoundedRectangle(cornerRadius: 6))
                 }
             }.padding(.horizontal)
-
-            // 第二部分：简介
-            if let description = instance.description_ {
-                Text(parseHTML(description))
-                    .lineLimit(3)
-                    .font(.footnote)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .allowsHitTesting(false)
-                    .foregroundStyle(Color.secondary)
-            }
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 8)

@@ -38,6 +38,7 @@
 		64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */ = {isa = PBXBuildFile; productRef = 64BBDA712CFDD8420052E599 /* SwiftDate */; };
 		64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */; };
 		64D13E3D2DEEE1390013547A /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 64D13E3C2DEEE1390013547A /* PrivacyInfo.xcprivacy */; };
+		64E05CEE2DF2A62700515AC7 /* todo in Resources */ = {isa = PBXBuildFile; fileRef = 64E05CED2DF2A61E00515AC7 /* todo */; };
 		64E208712CF8458A001C64EF /* FLAnimatedImage in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208702CF8458A001C64EF /* FLAnimatedImage */; };
 		64E208742CF845C2001C64EF /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208732CF845C2001C64EF /* Kingfisher */; };
 		64E208772CF84612001C64EF /* JXPhotoBrowser in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208762CF84612001C64EF /* JXPhotoBrowser */; };
@@ -63,6 +64,7 @@
 		64655C2C2CFD6CA000255488 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		64C855FF2CFD7F260071DCD8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		64D13E3C2DEEE1390013547A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		64E05CED2DF2A61E00515AC7 /* todo */ = {isa = PBXFileReference; lastKnownFileType = text; path = todo; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* Flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
@@ -75,7 +77,6 @@
 			membershipExceptions = (
 				Page/Home/View/UIKit/HomeTabController.swift.bak,
 				Page/Home/View/UIKit/HomeTabScreen.swift.bak,
-				Page/Menu/View/FlareMenuContainer.swift.bak,
 			);
 			target = 7555FF7A242A565900829871 /* iosApp */;
 		};
@@ -95,7 +96,6 @@
 			membershipExceptions = (
 				Page/Home/View/UIKit/HomeTabController.swift.bak,
 				Page/Home/View/UIKit/HomeTabScreen.swift.bak,
-				Page/Menu/View/FlareMenuContainer.swift.bak,
 			);
 		};
 		64E05B082DF1AD3F00515AC7 /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */ = {
@@ -196,6 +196,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				64E05CED2DF2A61E00515AC7 /* todo */,
 				64D13E3C2DEEE1390013547A /* PrivacyInfo.xcprivacy */,
 				647078EC2D76F0B900551073 /* Data */,
 				647078602D76F0A100551073 /* UI */,
@@ -379,6 +380,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				64E05CEE2DF2A62700515AC7 /* todo in Resources */,
 				058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */,
 				058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */,
 				64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */,

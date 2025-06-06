@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.route
 
 import androidx.compose.animation.togetherWith
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
@@ -45,7 +44,7 @@ import soup.compose.material.motion.animation.translateXOut
 internal fun Router(
     topLevelBackStack: TopLevelBackStack<Route>,
     navigationState: NavigationState,
-    drawerState: DrawerState,
+    openDrawer: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -122,7 +121,7 @@ internal fun Router(
             entryProvider =
                 entryProvider {
                     with(scope) {
-                        homeEntryBuilder(::navigate, ::onBack, scope, drawerState)
+                        homeEntryBuilder(::navigate, ::onBack, openDrawer)
                         blueskyEntryBuilder(::navigate, ::onBack)
                         composeEntryBuilder(::navigate, ::onBack)
                         dmEntryBuilder(::navigate, ::onBack, navigationState)

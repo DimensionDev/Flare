@@ -1,18 +1,14 @@
 package dev.dimension.flare.ui.screen.home
 
-import androidx.compose.material3.DrawerState
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import dev.dimension.flare.ui.route.Route
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 internal fun EntryProviderBuilder<NavKey>.homeEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
-    scope: CoroutineScope,
-    drawerState: DrawerState,
+    openDrawer: () -> Unit,
 ) {
     entry<Route.Home> { args ->
         HomeTimelineScreen(
@@ -21,9 +17,7 @@ internal fun EntryProviderBuilder<NavKey>.homeEntryBuilder(
                 navigate(Route.Compose.New(args.accountType))
             },
             toQuickMenu = {
-                scope.launch {
-                    drawerState.open()
-                }
+                openDrawer.invoke()
             },
             toLogin = {
                 navigate(Route.ServiceSelect.Selection)
@@ -40,9 +34,7 @@ internal fun EntryProviderBuilder<NavKey>.homeEntryBuilder(
                 navigate(Route.Compose.New(accountType = args.accountType))
             },
             toQuickMenu = {
-                scope.launch {
-                    drawerState.open()
-                }
+                openDrawer.invoke()
             },
             toLogin = {
                 navigate(Route.ServiceSelect.Selection)
@@ -54,9 +46,7 @@ internal fun EntryProviderBuilder<NavKey>.homeEntryBuilder(
             accountType = args.accountType,
             onUserClick = { navigate(Route.Profile.User(args.accountType, it)) },
             onAccountClick = {
-                scope.launch {
-                    drawerState.open()
-                }
+                openDrawer.invoke()
             },
         )
     }
@@ -64,9 +54,7 @@ internal fun EntryProviderBuilder<NavKey>.homeEntryBuilder(
         NotificationScreen(
             accountType = args.accountType,
             toQuickMenu = {
-                scope.launch {
-                    drawerState.open()
-                }
+                openDrawer.invoke()
             },
         )
     }
@@ -75,9 +63,7 @@ internal fun EntryProviderBuilder<NavKey>.homeEntryBuilder(
             initialQuery = args.query,
             accountType = args.accountType,
             onAccountClick = {
-                scope.launch {
-                    drawerState.open()
-                }
+                openDrawer.invoke()
             },
             onUserClick = { navigate(Route.Profile.User(args.accountType, it)) },
         )

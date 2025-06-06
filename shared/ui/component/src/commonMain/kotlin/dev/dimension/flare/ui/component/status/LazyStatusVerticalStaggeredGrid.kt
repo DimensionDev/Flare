@@ -21,7 +21,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 @Composable
 public fun LazyStatusVerticalStaggeredGrid(
     modifier: Modifier = Modifier,
-    columns: StaggeredGridCells = StaggeredGridCells.Adaptive(360.dp),
+    columns: StaggeredGridCells = StaggeredGridCells.Adaptive(320.dp),
     state: LazyStaggeredGridState = rememberLazyStaggeredGridState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
     reverseLayout: Boolean = false,

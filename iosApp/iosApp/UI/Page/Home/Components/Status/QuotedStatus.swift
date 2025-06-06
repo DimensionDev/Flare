@@ -15,7 +15,6 @@ struct QuotedStatus: View {
 
     var body: some View {
         Button(action: {
-            // 移除KMP回调，直接使用FlareRouter导航
             router.navigate(to: .statusDetail(
                 accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
                 statusKey: data.statusKey
@@ -51,11 +50,11 @@ struct QuotedStatus: View {
                     mentionColor: UIColor(theme.tintColor),
                     hashtagColor: UIColor(theme.tintColor),
                     cashtagColor: UIColor(theme.tintColor)
-                ))
-                .onLinkTap { url in
-                    openURL(url)
-                }
-                .font(.system(size: 16))
+                ), lang: data.lang)
+                    .onLinkTap { url in
+                        openURL(url)
+                    }
+                    .font(.system(size: 16))
 
                 if appSettings.appearanceSettings.autoTranslate {
                     TranslatableText(originalText: data.content.raw)

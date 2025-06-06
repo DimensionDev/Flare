@@ -14,7 +14,7 @@ import UIKit
 // timeline tweet
 struct CommonTimelineStatusComponent: View {
     @State private var showMedia: Bool = false
-    @State private var expanded: Bool = false
+    // @State private var expanded: Bool = false
     @State private var showShareMenu: Bool = false
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
@@ -183,6 +183,12 @@ struct CommonTimelineStatusComponent: View {
                 }
                 .padding(.bottom, 1)
             }
+            .allowsHitTesting(true)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                // 空的手势处理
+            }
+
             // reply
             if let aboveTextContent = data.aboveTextContent {
                 switch onEnum(of: aboveTextContent) {
@@ -199,63 +205,77 @@ struct CommonTimelineStatusComponent: View {
             if let cwText = data.contentWarning, !cwText.raw.isEmpty {
                 Button(
                     action: {
-                        withAnimation {
-                            expanded = !expanded
-                        }
+                        // withAnimation {
+                        //     // expanded = !expanded
+                        // }
                     },
                     label: {
                         Image(systemName: "exclamationmark.triangle")
                             .foregroundColor(theme.labelColor)
 
-                        Markdown(cwText.markdown)
-                            .font(.scaledBody)
-                            .markdownInlineImageProvider(.emoji)
-                        Spacer()
-                        if expanded {
-                            Image(systemName: "arrowtriangle.down.circle.fill")
-                        } else {
-                            Image(systemName: "arrowtriangle.left.circle.fill")
-                        }
+                        FlareText(cwText.raw, cwText.markdown, style: FlareTextStyle.Style(
+                            font: Font.scaledCaptionFont, // 字体小
+                            textColor: UIColor(.gray), // 灰色
+                            linkColor: UIColor(theme.tintColor),
+                            mentionColor: UIColor(theme.tintColor),
+                            hashtagColor: UIColor(theme.tintColor),
+                            cashtagColor: UIColor(theme.tintColor)
+                        ), lang: data.lang)
+                            .onLinkTap { url in
+                                openURL(url)
+                            }
+                            .lineSpacing(CGFloat(theme.lineSpacing))
+                            .foregroundColor(theme.labelColor)
+
+                        // Markdown()
+                        //     .font(.caption2)
+                        //     .markdownInlineImageProvider(.emoji)
+                        // Spacer()
+                        // if expanded {
+                        //     Image(systemName: "arrowtriangle.down.circle.fill")
+                        // } else {
+                        //     Image(systemName: "arrowtriangle.left.circle.fill")
+                        // }
                     }
                 )
                 .opacity(0.6)
                 .buttonStyle(.plain)
-                if expanded {
-                    Spacer()
-                        .frame(height: 8)
-                }
+                // if expanded {
+                //     Spacer()
+                //         .frame(height: 8)
+                // }
             }
             // tweet content
-            if expanded || data.contentWarning == nil || data.contentWarning?.raw.isEmpty == true {
-                Spacer()
-                    .frame(height: 10)
+            // if expanded || data.contentWarning == nil || data.contentWarning?.raw.isEmpty == true {
+            Spacer()
+                .frame(height: 10)
 
-                if !data.content.raw.isEmpty {
-                    FlareText(data.content.raw, data.content.markdown, style: FlareTextStyle.Style(
-                        font: Font.scaledBodyFont,
-                        textColor: UIColor(theme.labelColor),
-                        linkColor: UIColor(theme.tintColor),
-                        mentionColor: UIColor(theme.tintColor),
-                        hashtagColor: UIColor(theme.tintColor),
-                        cashtagColor: UIColor(theme.tintColor)
-                    ))
+            if !data.content.raw.isEmpty {
+                FlareText(data.content.raw, data.content.markdown, style: FlareTextStyle.Style(
+                    font: Font.scaledBodyFont,
+                    textColor: UIColor(theme.labelColor),
+                    linkColor: UIColor(theme.tintColor),
+                    mentionColor: UIColor(theme.tintColor),
+                    hashtagColor: UIColor(theme.tintColor),
+                    cashtagColor: UIColor(theme.tintColor)
+                ), lang: data.lang)
                     .onLinkTap { url in
                         openURL(url)
                     }
                     .lineSpacing(CGFloat(theme.lineSpacing))
                     .foregroundColor(theme.labelColor)
 
-                    // Add translation component
-                    if appSettings.appearanceSettings.autoTranslate, enableTranslation {
-                        TranslatableText(originalText: data.content.raw)
-                    }
-                } else {
-                    // 如果内容为空，显示一个空的 Text
-                    Text("")
-                        .font(.system(size: 16))
-                        .foregroundColor(theme.labelColor)
+                // Add translation component
+                if appSettings.appearanceSettings.autoTranslate, enableTranslation {
+                    TranslatableText(originalText: data.content.raw)
                 }
+            } else {
+                // 如果内容为空，显示一个空的 Text
+                Text("")
+                    .font(.system(size: 16))
+                    .foregroundColor(theme.labelColor)
             }
+            // }
             // media
             if !data.images.isEmpty {
                 Spacer().frame(height: 8)
@@ -276,9 +296,20 @@ struct CommonTimelineStatusComponent: View {
                         .onTapGesture {
                             handlePodcastCardTap(card: card)
                         }
-                } else if appSettings.appearanceSettings.showLinkPreview { // Original LinkPreview condition
+                } else if appSettings.appearanceSettings.showLinkPreview {
+                    // Original LinkPreview condition
                     // link preview
-                    LinkPreview(card: card)
+
+                    // appearanceSettings.showLinkPreview && item.images.isEmpty() && item.quote.isEmpty() Android这边是这样判断的
+
+                    // UiCard(title=Suriyelilerin dönüşleri hızlandı, description=Ülkelerine giden Suriyelilerin, Hatay'daki Cilvegözü Sınır Kapısı'ndan kalıcı dönüş kapsamında geçişleri sürüyor., media=Image(url=https://media.mstdn.jp/cache/preview_cards/images/050/309/626/original/6cb0b724dfc66d2d.webp, previewUrl=https://media.mstdn.jp/cache/preview_cards/images/050/309/626/original/6cb0b724dfc66d2d.webp, description=Ülkelerine giden Suriyelilerin, Hatay'daki Cilvegözü Sınır Kapısı'ndan kalıcı dönüş kapsamında geçişleri sürüyor., height=225.0, width=400.0, sensitive=false, customHeaders=null)
+
+                    // card=UiCard(title=Xscape Club, description=null, media=null, url=https://xscape.club/tag/nsfw)
+
+                    // 只有有预览图片的，才显示 LinkPreview
+                    if let media = card.media {
+                        LinkPreview(card: card)
+                    }
                 }
             }
 
@@ -467,6 +498,7 @@ struct CommonTimelineStatusComponent: View {
                         .frame(maxWidth: .infinity)
                         .padding(.horizontal, 0)
                 }
+                .padding(.vertical, 6) // 增加上下边距
                 .labelStyle(CenteredLabelStyle())
                 .buttonStyle(.borderless)
                 .opacity(0.6)
@@ -474,8 +506,13 @@ struct CommonTimelineStatusComponent: View {
                     view.font(.caption)
                 }
                 .allowsHitTesting(true)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    // 空的手势处理
+                }
             }
-            Spacer().frame(height: 2)
+
+            // Spacer().frame(height: 3)
         }.frame(alignment: .leading)
             .contentShape(Rectangle())
             .onTapGesture {

@@ -4,6 +4,7 @@ import TwitterText
 
 public struct FlareText: View {
     private let text: String
+    private let lang: String?
     private let markdownText: String
     private let style: FlareTextStyle.Style
     private var linkHandler: ((URL) -> Void)?
@@ -13,11 +14,13 @@ public struct FlareText: View {
     public init(
         _ text: String,
         _ markdownText: String,
-        style: FlareTextStyle.Style
+        style: FlareTextStyle.Style,
+        lang: String? = nil
     ) {
         self.text = text
         self.markdownText = markdownText
         self.style = style
+        self.lang = lang
     }
 
     public func onLinkTap(_ handler: @escaping (URL) -> Void) -> FlareText {
@@ -66,8 +69,11 @@ public struct FlareText: View {
     }
 
     private func isRTL() -> Bool {
-        let language = Locale.current.language.languageCode?.identifier ?? ""
-        let isRTL: Bool = ["ar", "he", "fa", "ur", "ku", "az", "dv"].contains(language)
+        if lang == "" || lang == nil {
+            return false
+        }
+        // let language = Locale.current.language.languageCode?.identifier ?? ""
+        let isRTL: Bool = ["ar", "fa", "he", "iw", "ps", "ur"].contains(lang)
         return isRTL
     }
 }

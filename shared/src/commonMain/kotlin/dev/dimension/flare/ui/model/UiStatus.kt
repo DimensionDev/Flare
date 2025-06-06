@@ -134,5 +134,6 @@ public fun createSampleStatus(user: UiUserV2): UiTimeline =
                 onMediaClicked = { _, _ -> },
                 platformType = user.platformType,
                 url = "",
+                lang = "",
             ),
     )

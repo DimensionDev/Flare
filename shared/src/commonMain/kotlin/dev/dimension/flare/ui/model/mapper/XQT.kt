@@ -486,9 +486,11 @@ internal fun Tweet.renderStatus(
             id = legacy?.idStr ?: restId,
             host = accountKey.host,
         )
+
     return UiTimeline.ItemContent.Status(
         statusKey = statusKey,
         user = user,
+        lang = legacy?.lang ?: "",
         content = content.toUi(),
         card = uiCard,
         quote = listOfNotNull(quote).toImmutableList(),

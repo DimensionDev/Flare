@@ -472,6 +472,7 @@ private fun Status.renderStatus(
                     append("https://$host/@${account.acct}/$id")
                 }
             },
+        lang = "",
     )
 }
 

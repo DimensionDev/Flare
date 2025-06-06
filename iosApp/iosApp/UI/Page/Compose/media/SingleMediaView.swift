@@ -7,6 +7,7 @@ public struct SingleMediaView: View {
     let isSingleVideo: Bool
     let fixedAspectRatio: CGFloat?
     let action: () -> Void
+    @Environment(FlareTheme.self) private var theme
 
     public var body: some View {
         GeometryReader { geometry in
@@ -31,9 +32,13 @@ public struct SingleMediaView: View {
             .overlay {
                 if viewModel.mediaKind == .video {
                     Image(systemName: "play.circle.fill")
-                        .font(.system(size: 44))
-                        .foregroundColor(.white)
+                        .font(.system(size: isSingleVideo ? 38 : 24))
+                        .foregroundColor(theme.tintColor)
                         .shadow(radius: 8)
+                        .padding(.bottom, 16)
+                        .cornerRadius(8)
+                        .padding(.leading, 16)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
                 }
             }
             .onTapGesture {

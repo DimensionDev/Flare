@@ -78,7 +78,7 @@ struct CommonProfileHeader: View {
                             .markdownInlineImageProvider(.emoji)
                             .lineLimit(1)
                         HStack {
-                            Text(userInfo.profile.handle)
+                            Text(userInfo.profile.handleWithoutFirstAt)
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                                 .lineLimit(1)

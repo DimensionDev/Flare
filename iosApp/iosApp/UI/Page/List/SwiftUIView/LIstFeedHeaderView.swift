@@ -87,7 +87,7 @@ struct ListFeedHeaderView {
                     .font(.headline)
                     .lineLimit(1)
 
-                Text("\(creator.handle)")
+                Text("\(creator.handleWithoutFirstAt)")
                     .font(.subheadline)
                     .foregroundColor(.gray)
                     .lineLimit(1)

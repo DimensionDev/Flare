@@ -269,7 +269,7 @@ class ProfileNewHeaderView: UIView {
         nameLabel.text = userInfo.profile.name.markdown
 
         // 设置用户handle
-        handleLabel.text = "\(userInfo.profile.handle)"
+        handleLabel.text = "\(userInfo.profile.handleWithoutFirstAt)"
 
         // 设置头像 - 使用 Kingfisher 缓存
         if let url = URL(string: userInfo.profile.avatar) {

@@ -109,7 +109,7 @@ struct DMRoomItemView: View {
                                     .font(.headline)
                                     .lineLimit(1)
 
-                                Text(room.users[0].handle)
+                                Text(room.users[0].handleWithoutFirstAt)
                                     .font(.caption)
                                     .foregroundColor(.gray)
                                     .lineLimit(1)

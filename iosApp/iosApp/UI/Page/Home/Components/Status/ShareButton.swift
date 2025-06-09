@@ -38,6 +38,7 @@ struct ShareButton: View {
     @State private var isPreparingShare: Bool = false
     @State private var showTranslation: Bool = false
     @State private var showReportAlert = false
+    @State private var showSelectUrlSheet: Bool = false
 
     let content: UiTimelineItemContentStatus
     let view: CommonTimelineStatusComponent
@@ -104,17 +105,30 @@ struct ShareButton: View {
                 Label("Copy Text (MarkDown)", systemImage: "doc.on.doc")
             }
 
+            if !content.images.isEmpty {
+                Button(action: {
+                    let extractedUrls = content.images.compactMap(\.url)
+                    if !extractedUrls.isEmpty {
+                        showSelectUrlSheet = true
+                    } else if let url = statusUrl {
+                        UIPasteboard.general.string = url.absoluteString
+                    }
+                }) {
+                    Label("Copy Media Link", systemImage: "media")
+                }
+            }
+
             Button(action: {
                 showTextForSelection = true
             }) {
-                Label("Select Text", systemImage: "text.cursor")
+                Label("Select Any Element", systemImage: "text.cursor")
             }.buttonStyle(PlainButtonStyle())
 
             if let url = statusUrl {
                 Button(action: {
                     UIPasteboard.general.string = url.absoluteString
                 }) {
-                    Label("Copy Link", systemImage: "link")
+                    Label("Copy Tweet Link", systemImage: "link")
                 }
 
                 Button(action: {
@@ -200,7 +214,7 @@ struct ShareButton: View {
 
             Button(action: {
                 print("Save Media tapped")
-                // show toast
+
                 let toastView = ToastView(
                     icon: UIImage(systemName: "download.fill"),
                     message: String(localized: "download") + " success"
@@ -296,6 +310,11 @@ struct ShareButton: View {
                 .environment(\.isInCaptureMode, true)
                 .environmentObject(router)
             }
+        }
+        .sheet(isPresented: $showSelectUrlSheet) {
+            let urlsString = content.images.compactMap(\.url).joined(separator: "\n")
+            StatusRowSelectableTextView(content: AttributedString(urlsString))
+                .tint(.accentColor)
         }
     }
 }

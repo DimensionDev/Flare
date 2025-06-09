@@ -32,10 +32,11 @@ struct UserComponent: View {
                                 .markdownInlineImageProvider(.emoji)
                         }
                         HStack {
-                            Text(user.handle)
+                            Text(user.handleWithoutFirstAt)
                                 .lineLimit(1)
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
+
                             // 设置 pawoo 用户的可见状态 就是 后面的图标
                             if topEndContent != nil {
                                 if let topEndContent {

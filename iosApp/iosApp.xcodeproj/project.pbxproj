@@ -21,6 +21,7 @@
 		06B8514F2B6B22A500DFA075 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 06B8514E2B6B22A500DFA075 /* GoogleService-Info.plist */; };
 		06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06B851502B6B22DD00DFA075 /* AppDelegate.swift */; };
 		06B851552B6B926D00DFA075 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 06B851542B6B926D00DFA075 /* Localizable.xcstrings */; };
+		640236062DF6B62200C0D558 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 640236052DF6B62200C0D558 /* SwiftUIIntrospect */; };
 		6404FB1E2DE45EB700D0A053 /* EmojiText in Frameworks */ = {isa = PBXBuildFile; productRef = 6404FB1D2DE45EB700D0A053 /* EmojiText */; };
 		642DED2D2DBF6965006B944C /* FontAwesomeSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 642DED2C2DBF6965006B944C /* FontAwesomeSwiftUI */; };
 		644C84F82D535D0B00E92D0D /* JXPagingView in Frameworks */ = {isa = PBXBuildFile; productRef = 644C84F72D535D0B00E92D0D /* JXPagingView */; };
@@ -78,13 +79,6 @@
 			);
 			target = 7555FF7A242A565900829871 /* iosApp */;
 		};
-		64E05B072DF1AD3F00515AC7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Notifications.swift.bak,
-			);
-			target = 7555FF7A242A565900829871 /* iosApp */;
-		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
@@ -96,20 +90,13 @@
 				Page/Home/View/UIKit/HomeTabScreen.swift.bak,
 			);
 		};
-		64E05B082DF1AD3F00515AC7 /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 7555FF77242A565900829871 /* Sources */;
-			membershipExceptions = (
-				Notifications.swift.bak,
-			);
-		};
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		647078602D76F0A100551073 /* UI */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (6423385A2DF07E900022CB96 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 6423385B2DF07E900022CB96 /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = UI; sourceTree = "<group>"; };
 		647078DE2D76F0A400551073 /* Extension */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Extension; sourceTree = "<group>"; };
 		647078E32D76F0A600551073 /* Common */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Common; sourceTree = "<group>"; };
-		647078EC2D76F0B900551073 /* Data */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (64E05B072DF1AD3F00515AC7 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 64E05B082DF1AD3F00515AC7 /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = Data; sourceTree = "<group>"; };
+		647078EC2D76F0B900551073 /* Data */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Data; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -144,6 +131,7 @@
 				64E890742D2D28400001B93D /* MJRefresh in Frameworks */,
 				6489B3312D68D50800D8AEBB /* SVGView in Frameworks */,
 				64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */,
+				640236062DF6B62200C0D558 /* SwiftUIIntrospect in Frameworks */,
 				64EA48E32D6344A900D0F609 /* Hero in Frameworks */,
 				64E877C92D0842AA003559B9 /* SwiftSoup in Frameworks */,
 				64E208772CF84612001C64EF /* JXPhotoBrowser in Frameworks */,
@@ -304,6 +292,7 @@
 				642DED2C2DBF6965006B944C /* FontAwesomeSwiftUI */,
 				645CC8662DC9FEF600B8CBF6 /* WishKit */,
 				6404FB1D2DE45EB700D0A053 /* EmojiText */,
+				640236052DF6B62200C0D558 /* SwiftUIIntrospect */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* Flare.app */;
@@ -361,6 +350,7 @@
 				642DED2B2DBF6965006B944C /* XCRemoteSwiftPackageReference "FontAwesomeSwiftUI" */,
 				645CC8652DC9FEF600B8CBF6 /* XCRemoteSwiftPackageReference "wishkit-ios" */,
 				6404FB1C2DE45EB700D0A053 /* XCRemoteSwiftPackageReference "EmojiText" */,
+				640236042DF6B62200C0D558 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 			);
 			preferredProjectObjectVersion = 50;
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
@@ -760,6 +750,14 @@
 				minimumVersion = 10.20.0;
 			};
 		};
+		640236042DF6B62200C0D558 /* XCRemoteSwiftPackageReference "swiftui-introspect" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/siteline/swiftui-introspect";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.3.0;
+			};
+		};
 		6404FB1C2DE45EB700D0A053 /* XCRemoteSwiftPackageReference "EmojiText" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/divadretlaw/EmojiText";
@@ -957,6 +955,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 06B851492B6B228600DFA075 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseCrashlytics;
+		};
+		640236052DF6B62200C0D558 /* SwiftUIIntrospect */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 640236042DF6B62200C0D558 /* XCRemoteSwiftPackageReference "swiftui-introspect" */;
+			productName = SwiftUIIntrospect;
 		};
 		6404FB1D2DE45EB700D0A053 /* EmojiText */ = {
 			isa = XCSwiftPackageProductDependency;

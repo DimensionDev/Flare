@@ -137,6 +137,9 @@
         }
       }
     },
+    "(%lld)" : {
+
+    },
     "[Unsupported Media: %@]" : {
       "localizations" : {
         "ar" : {
@@ -6431,6 +6434,7 @@
       }
     },
     "Copy Link" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -6559,6 +6563,9 @@
           }
         }
       }
+    },
+    "Copy Media Link" : {
+
     },
     "Copy Selected" : {
       "localizations" : {
@@ -6949,6 +6956,9 @@
           }
         }
       }
+    },
+    "Copy Tweet Link" : {
+
     },
     "Count: %lld" : {
       "localizations" : {
@@ -11273,6 +11283,12 @@
             "value" : "Ακόλουθοι"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "fans"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -12443,6 +12459,12 @@
             "value" : "Ακολουθείτε"
           }
         },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "following"
+          }
+        },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
@@ -13314,6 +13336,9 @@
           }
         }
       }
+    },
+    "Granularity" : {
+
     },
     "Hello World!" : {
       "localizations" : {
@@ -15915,6 +15940,9 @@
           }
         }
       }
+    },
+    "Language: %@" : {
+
     },
     "Line Spacing: %@" : {
       "localizations" : {
@@ -27796,16 +27824,16 @@
             "value" : "レポート"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rapporter"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rapporteren"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rapporter"
           }
         },
         "pl" : {
@@ -27920,16 +27948,16 @@
             "value" : "報告成功"
           }
         },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rapporten var vellykket"
+          }
+        },
         "nl" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rapport geslaagd"
-          }
-        },
-        "no" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rapporten var vellykket"
           }
         },
         "pl" : {
@@ -29146,7 +29174,11 @@
         }
       }
     },
+    "Select Any Element" : {
+
+    },
     "Select Text" : {
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -29399,6 +29431,9 @@
           }
         }
       }
+    },
+    "Sentence" : {
+
     },
     "Server Configuration" : {
       "localizations" : {
@@ -37821,6 +37856,9 @@
         }
       }
     },
+    "Tag Types" : {
+
+    },
     "Test Translation" : {
       "localizations" : {
         "ar" : {
@@ -39122,6 +39160,9 @@
           }
         }
       }
+    },
+    "Total: %lld tags" : {
+
     },
     "translate" : {
       "localizations" : {
@@ -41048,6 +41089,9 @@
           }
         }
       }
+    },
+    "Word" : {
+
     },
     "X Audio Space" : {
       "localizations" : {

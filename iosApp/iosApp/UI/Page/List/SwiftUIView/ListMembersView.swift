@@ -129,7 +129,7 @@ struct ListMembersView: View {
                     Text(member.name.raw)
                         .font(.headline)
 
-                    Text(member.handle)
+                    Text(member.handleWithoutFirstAt)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }

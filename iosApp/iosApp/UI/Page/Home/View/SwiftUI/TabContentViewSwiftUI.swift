@@ -1,5 +1,6 @@
 import shared
 import SwiftUI
+import SwiftUIIntrospect
 
 struct TabContentViewSwiftUI: View {
     @ObservedObject var tabStore: AppBarTabSettingStore
@@ -28,6 +29,12 @@ struct TabContentViewSwiftUI: View {
                 }
             }
             .tabViewStyle(.page(indexDisplayMode: .never))
+            .introspect(
+                .tabView(style: .page),
+                on: .iOS(.v17, .v18)
+            ) { collectionView in
+                collectionView.bounces = false
+            }
         }
     }
 }

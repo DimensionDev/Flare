@@ -193,7 +193,7 @@ struct CommonTimelineStatusComponent: View {
             if let aboveTextContent = data.aboveTextContent {
                 switch onEnum(of: aboveTextContent) {
                 case let .replyTo(data):
-                    Text(String(localized: "Reply to \(data.handle)"))
+                    Text(String(localized: "Reply to \(data.handle.removingHandleFirstPrefix("@"))"))
                         .font(.caption)
                         .opacity(0.6)
                 }

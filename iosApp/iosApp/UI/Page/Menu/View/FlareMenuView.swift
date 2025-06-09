@@ -236,7 +236,7 @@ struct FlareMenuView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(currentUser.name.raw)
                                 .font(.headline)
-                            Text("\(currentUser.handle)")
+                            Text("\(currentUser.handleWithoutFirstAt)")
                                 .font(.caption)
                             // .foregroundColor(.gray)
                         }

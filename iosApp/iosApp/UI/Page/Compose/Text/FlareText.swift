@@ -4,7 +4,7 @@ import TwitterText
 
 public struct FlareText: View {
     private let text: String
-    private let lang: String?
+    private let isRTL: Bool
     private let markdownText: String
     private let style: FlareTextStyle.Style
     private var linkHandler: ((URL) -> Void)?
@@ -15,7 +15,7 @@ public struct FlareText: View {
         _ text: String,
         _ markdownText: String,
         style: FlareTextStyle.Style,
-        lang: String? = nil
+        isRTL: Bool = false
     ) {
         self.text = text
         self.markdownText = markdownText
@@ -36,7 +36,7 @@ public struct FlareText: View {
                 .markdownInlineImageProvider(.emoji)
                 .relativeLineSpacing(.em(theme.lineSpacing - 1.0)) // 转换为相对行高
                 .padding(.vertical, 4)
-                .environment(\.layoutDirection, isRTL() ? .rightToLeft : .leftToRight)
+                .environment(\.layoutDirection, isRTL ? .rightToLeft : .leftToRight)
                 .environment(\.openURL, OpenURLAction { url in
                     if let handler = linkHandler {
                         handler(url)
@@ -55,7 +55,7 @@ public struct FlareText: View {
                     }
                     return .handled
                 })
-                .environment(\.layoutDirection, isRTL() ? .rightToLeft : .leftToRight)
+                .environment(\.layoutDirection, isRTL ? .rightToLeft : .leftToRight)
         }
     }
 
@@ -66,14 +66,5 @@ public struct FlareText: View {
             style: style
         )
         return NSAttributedString(attributedString)
-    }
-
-    private func isRTL() -> Bool {
-        if lang == "" || lang == nil {
-            return false
-        }
-        // let language = Locale.current.language.languageCode?.identifier ?? ""
-        let isRTL: Bool = ["ar", "fa", "he", "iw", "ps", "ur"].contains(lang)
-        return isRTL
     }
 }

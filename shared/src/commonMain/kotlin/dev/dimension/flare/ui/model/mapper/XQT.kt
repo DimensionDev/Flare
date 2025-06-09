@@ -490,7 +490,6 @@ internal fun Tweet.renderStatus(
     return UiTimeline.ItemContent.Status(
         statusKey = statusKey,
         user = user,
-        lang = legacy?.lang ?: "",
         content = content.toUi(),
         card = uiCard,
         quote = listOfNotNull(quote).toImmutableList(),

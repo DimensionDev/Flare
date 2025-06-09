@@ -499,7 +499,6 @@ internal fun PostView.renderStatus(
                 append("/post/")
                 append(uri.atUri.substringAfterLast("/"))
             },
-        lang = "",
     )
 }
 
@@ -959,7 +958,6 @@ private fun render(
                                 .substringAfterLast("/"),
                         )
                     },
-                lang = "",
             )
         }
 

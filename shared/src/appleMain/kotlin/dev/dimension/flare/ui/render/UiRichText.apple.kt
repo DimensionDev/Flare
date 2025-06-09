@@ -3,11 +3,29 @@ package dev.dimension.flare.ui.render
 import com.fleeksoft.ksoup.nodes.Element
 import com.fleeksoft.ksoup.nodes.Node
 import com.fleeksoft.ksoup.nodes.TextNode
+import kotlinx.cinterop.BetaInteropApi
+import kotlinx.cinterop.autoreleasepool
+import platform.Foundation.NSLocale
+import platform.Foundation.NSLocaleLanguageDirectionRightToLeft
+import platform.Foundation.characterDirectionForLanguage
+import platform.NaturalLanguage.NLLanguageRecognizer
 
 public actual data class UiRichText internal constructor(
     val markdown: String,
     actual val raw: String,
+    val isRTL: Boolean = raw.isRightToLeft(),
 )
+
+@OptIn(BetaInteropApi::class)
+private fun String.isRightToLeft(): Boolean =
+    autoreleasepool {
+        val langCode =
+            NLLanguageRecognizer
+                .dominantLanguageForString(this) ?: return@autoreleasepool false
+
+        NSLocale.characterDirectionForLanguage(langCode) ==
+            NSLocaleLanguageDirectionRightToLeft
+    }
 
 internal actual fun Element.toUi(): UiRichText =
     UiRichText(

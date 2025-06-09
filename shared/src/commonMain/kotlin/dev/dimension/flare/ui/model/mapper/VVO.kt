@@ -259,7 +259,6 @@ internal fun Status.renderStatus(
                 append('/')
                 append(bid)
             },
-        lang = "",
     )
 }
 
@@ -476,7 +475,6 @@ internal fun Comment.renderStatus(
                 append('/')
                 append(bid)
             },
-        lang = "",
     )
 }
 

@@ -220,7 +220,7 @@ struct CommonTimelineStatusComponent: View {
                             mentionColor: UIColor(theme.tintColor),
                             hashtagColor: UIColor(theme.tintColor),
                             cashtagColor: UIColor(theme.tintColor)
-                        ), lang: data.lang)
+                        ), isRTL: data.isRTL)
                             .onLinkTap { url in
                                 openURL(url)
                             }
@@ -258,7 +258,7 @@ struct CommonTimelineStatusComponent: View {
                     mentionColor: UIColor(theme.tintColor),
                     hashtagColor: UIColor(theme.tintColor),
                     cashtagColor: UIColor(theme.tintColor)
-                ), lang: data.lang)
+                ), isRTL: data.isRTL)
                     .onLinkTap { url in
                         openURL(url)
                     }

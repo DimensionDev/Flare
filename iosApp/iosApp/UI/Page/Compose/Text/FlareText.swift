@@ -20,7 +20,7 @@ public struct FlareText: View {
         self.text = text
         self.markdownText = markdownText
         self.style = style
-        self.lang = lang
+        self.isRTL = isRTL
     }
 
     public func onLinkTap(_ handler: @escaping (URL) -> Void) -> FlareText {

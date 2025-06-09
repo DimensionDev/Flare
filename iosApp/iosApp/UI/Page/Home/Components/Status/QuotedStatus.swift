@@ -50,7 +50,7 @@ struct QuotedStatus: View {
                     mentionColor: UIColor(theme.tintColor),
                     hashtagColor: UIColor(theme.tintColor),
                     cashtagColor: UIColor(theme.tintColor)
-                ), isRTL: data.isRTL)
+                ), isRTL: data.content.isRTL)
                     .onLinkTap { url in
                         openURL(url)
                     }

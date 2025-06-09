@@ -75,7 +75,6 @@ public data class UiTimeline internal constructor(
             val sensitive: Boolean,
             val contentWarning: UiRichText?,
             val user: UiUserV2?,
-            var lang: String?,
             val quote: ImmutableList<Status>,
             val content: UiRichText,
             val actions: ImmutableList<StatusAction>,

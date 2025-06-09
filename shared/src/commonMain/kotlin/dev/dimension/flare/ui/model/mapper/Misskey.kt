@@ -582,7 +582,6 @@ private fun Note.renderStatus(
                     append(id)
                 }
             },
-        lang = "",
     )
 }
 

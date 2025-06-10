@@ -7,12 +7,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.SearchBarDefaults
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -45,7 +44,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun LocalCacheSearchScreen(onBack: () -> Unit) {
     val state by producePresenter {
@@ -121,26 +120,26 @@ internal fun LocalCacheSearchScreen(onBack: () -> Unit) {
             item(
                 span = StaggeredGridItemSpan.FullLine,
             ) {
-                SingleChoiceSegmentedButtonRow(
+                val items =
+                    state.allSearchTypes.associate { searchType ->
+                        searchType to stringResource(id = searchType.title)
+                    }
+                ButtonGroup(
+                    overflowIndicator = {},
                     modifier =
                         Modifier
                             .padding(horizontal = screenHorizontalPadding, vertical = 8.dp)
                             .widthIn(max = 300.dp),
                 ) {
-                    state.allSearchTypes.forEachIndexed { index, searchType ->
-                        SegmentedButton(
-                            selected = state.selectedSearchType == searchType,
-                            onClick = {
+                    items.forEach { (searchType, title) ->
+                        toggleableItem(
+                            checked = state.selectedSearchType == searchType,
+                            onCheckedChange = {
                                 state.setSearchType(searchType)
                             },
-                            shape =
-                                SegmentedButtonDefaults.itemShape(
-                                    index = index,
-                                    count = state.allSearchTypes.size,
-                                ),
-                        ) {
-                            Text(text = stringResource(id = searchType.title))
-                        }
+                            label = title,
+                            weight = 1f,
+                        )
                     }
                 }
             }

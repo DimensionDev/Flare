@@ -27,21 +27,20 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -136,6 +135,7 @@ fun ShortcutComposeRoute(
 
 @OptIn(
     ExperimentalMaterial3Api::class,
+    ExperimentalMaterial3ExpressiveApi::class,
 )
 @Composable
 internal fun ComposeScreen(
@@ -438,36 +438,26 @@ internal fun ComposeScreen(
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            SingleChoiceSegmentedButtonRow(
+                            val items =
+                                mapOf(
+                                    true to stringResource(id = R.string.compose_poll_single_choice),
+                                    false to stringResource(id = R.string.compose_poll_multiple_choice),
+                                )
+                            ButtonGroup(
+                                overflowIndicator = {},
                                 modifier =
                                     Modifier
                                         .weight(1f),
                             ) {
-                                SegmentedButton(
-                                    selected = pollState.pollSingleChoice,
-                                    onClick = {
-                                        pollState.setPollSingleChoice(true)
-                                    },
-                                    shape =
-                                        SegmentedButtonDefaults.itemShape(
-                                            index = 0,
-                                            count = 2,
-                                        ),
-                                ) {
-                                    Text(text = stringResource(id = R.string.compose_poll_single_choice))
-                                }
-                                SegmentedButton(
-                                    selected = !pollState.pollSingleChoice,
-                                    onClick = {
-                                        pollState.setPollSingleChoice(false)
-                                    },
-                                    shape =
-                                        SegmentedButtonDefaults.itemShape(
-                                            index = 1,
-                                            count = 2,
-                                        ),
-                                ) {
-                                    Text(text = stringResource(id = R.string.compose_poll_multiple_choice))
+                                items.forEach { (singleChoice, label) ->
+                                    toggleableItem(
+                                        checked = pollState.pollSingleChoice == singleChoice,
+                                        onCheckedChange = {
+                                            pollState.setPollSingleChoice(singleChoice)
+                                        },
+                                        label = label,
+                                        weight = 1f,
+                                    )
                                 }
                             }
                             FilledTonalIconButton(

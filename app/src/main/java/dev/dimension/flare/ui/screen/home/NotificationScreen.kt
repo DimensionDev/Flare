@@ -1,14 +1,14 @@
 package dev.dimension.flare.ui.screen.home
 
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -104,14 +105,18 @@ internal fun NotificationScreen(
                                 item(
                                     span = StaggeredGridItemSpan.FullLine,
                                 ) {
-                                    NotificationFilterSelector(
-                                        it,
-                                        state.state,
+                                    Box(
                                         modifier =
                                             Modifier
-                                                .fillMaxSize()
+                                                .fillMaxWidth()
                                                 .padding(horizontal = screenHorizontalPadding),
-                                    )
+                                        contentAlignment = Alignment.CenterStart,
+                                    ) {
+                                        NotificationFilterSelector(
+                                            it,
+                                            state.state,
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -123,29 +128,26 @@ internal fun NotificationScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun NotificationFilterSelector(
     filters: ImmutableList<NotificationFilter>,
     notificationState: NotificationState,
     modifier: Modifier = Modifier,
 ) {
-    SingleChoiceSegmentedButtonRow(
+    val titles = filters.map { stringResource(id = it.title) }
+    ButtonGroup(
         modifier = modifier,
+        overflowIndicator = {},
     ) {
         filters.forEachIndexed { index, notificationType ->
-            SegmentedButton(
-                selected = notificationState.notificationType == notificationType,
-                onClick = {
+            toggleableItem(
+                checked = notificationState.notificationType == notificationType,
+                onCheckedChange = {
                     notificationState.onNotificationTypeChanged(notificationType)
                 },
-                shape =
-                    SegmentedButtonDefaults.itemShape(
-                        index = index,
-                        count = filters.size,
-                    ),
-            ) {
-                Text(text = stringResource(id = notificationType.title))
-            }
+                label = titles[index],
+            )
         }
     }
 }

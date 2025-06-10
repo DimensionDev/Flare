@@ -11,10 +11,9 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -189,6 +188,7 @@ private fun StatusContent(
         }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 private fun LazyStaggeredGridScope.reactionContent(
     comment: PagingState<UiTimeline>,
     repost: PagingState<UiTimeline>,
@@ -198,23 +198,22 @@ private fun LazyStaggeredGridScope.reactionContent(
     item(
         span = StaggeredGridItemSpan.FullLine,
     ) {
-        SingleChoiceSegmentedButtonRow(
-            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+        val items =
+            DetailType.entries.associate {
+                it to stringResource(it.title)
+            }
+        ButtonGroup(
+            overflowIndicator = {},
         ) {
-            DetailType.entries.forEachIndexed { index, type ->
-                SegmentedButton(
-                    selected = detailType == type,
-                    onClick = {
+            items.forEach { (type, title) ->
+                toggleableItem(
+                    checked = detailType == type,
+                    onCheckedChange = {
                         onDetailTypeChange(type)
                     },
-                    shape =
-                        SegmentedButtonDefaults.itemShape(
-                            index = index,
-                            count = DetailType.entries.size,
-                        ),
-                ) {
-                    Text(text = stringResource(id = type.title))
-                }
+                    label = title,
+                    weight = 1f,
+                )
             }
         }
     }

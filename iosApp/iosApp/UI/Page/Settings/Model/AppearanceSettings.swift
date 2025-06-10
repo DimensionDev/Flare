@@ -56,6 +56,8 @@ struct AppearanceSettings: Codable, Changeable {
 enum RenderEngine: Codable, CaseIterable {
     case markdown
     case flareText
+    case textViewMarkdown
+    case emojiText
 
     var title: String {
         switch self {
@@ -63,6 +65,10 @@ enum RenderEngine: Codable, CaseIterable {
             "Markdown"
         case .flareText:
             "FlareText"
+        case .textViewMarkdown:
+             "TextViewMarkdown"
+            case .emojiText:
+                "EmojiText"
         }
     }
 }

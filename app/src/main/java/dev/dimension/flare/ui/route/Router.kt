@@ -15,6 +15,7 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import dev.dimension.flare.ui.common.ProxyUriHandler
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
+import dev.dimension.flare.ui.component.FullScreenSceneStrategy
 import dev.dimension.flare.ui.component.TopLevelBackStack
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.rememberSavedStateNavEntryDecorator2
@@ -76,6 +77,7 @@ internal fun Router(
                 remember {
                     DialogSceneStrategy<NavKey>()
                         .then(BottomSheetSceneStrategy())
+                        .then(FullScreenSceneStrategy())
                         .then(listDetailStrategy)
                 },
             entryDecorators =

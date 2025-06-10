@@ -50,6 +50,7 @@ public fun RichText(
     linkStyle: TextStyle =
         textStyle.copy(
             color = if (isLightTheme()) lightLinkColor else darkLinkColor,
+            textDecoration = TextDecoration.None,
         ),
 ) {
     CompositionLocalProvider(

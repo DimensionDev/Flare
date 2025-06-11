@@ -102,7 +102,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
     state.tabs
         .onSuccess { tabs ->
             val topLevelBackStack by producePresenter(
-                key = "home_top_level_back_stack",
+                key = "home_top_level_back_stack_${tabs.all.first().tabItem}",
                 useImmediateClock = true,
             ) {
                 TopLevelBackStack<Route>(

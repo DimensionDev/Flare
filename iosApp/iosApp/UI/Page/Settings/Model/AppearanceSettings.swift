@@ -66,9 +66,9 @@ enum RenderEngine: Codable, CaseIterable {
         case .flareText:
             "FlareText"
         case .textViewMarkdown:
-             "TextViewMarkdown"
-            case .emojiText:
-                "EmojiText"
+            "TextViewMarkdown"
+        case .emojiText:
+            "EmojiText"
         }
     }
 }

@@ -54,6 +54,7 @@ struct ShareButton: View {
             .environment(\.colorScheme, colorScheme)
             .environment(\.isInCaptureMode, true)
             .environmentObject(router)
+            .environment(theme).applyTheme(theme)
 
         let controller = UIHostingController(rootView: captureView)
 

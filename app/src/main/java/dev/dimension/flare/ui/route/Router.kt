@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.route
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
@@ -63,80 +62,78 @@ internal fun Router(
     val isBigScreen = isBigScreen()
 
     val uriHandler = LocalUriHandler.current
-    SharedTransitionLayout {
-        CompositionLocalProvider(
-            LocalUriHandler provides
+    CompositionLocalProvider(
+        LocalUriHandler provides
+            remember {
+                ProxyUriHandler(uriHandler) {
+                    Route.parse(it)?.let {
+                        navigate(it)
+                    }
+                }
+            },
+    ) {
+        NavDisplay(
+            sceneStrategy =
                 remember {
-                    ProxyUriHandler(uriHandler) {
-                        Route.parse(it)?.let {
-                            navigate(it)
-                        }
-                    }
+                    DialogSceneStrategy<NavKey>()
+                        .then(BottomSheetSceneStrategy())
+                        .then(FullScreenSceneStrategy())
+                        .then(listDetailStrategy)
                 },
-        ) {
-            NavDisplay(
-                sceneStrategy =
-                    remember {
-                        DialogSceneStrategy<NavKey>()
-                            .then(BottomSheetSceneStrategy())
-                            .then(FullScreenSceneStrategy())
-                            .then(listDetailStrategy)
-                    },
-                entryDecorators =
-                    listOf(
-                        rememberSceneSetupNavEntryDecorator(),
-                        rememberSavedStateNavEntryDecorator2<Route>(
-                            shouldRemoveState = {
-                                !topLevelBackStack.isInBackStack(it)
-                            },
-                        ),
-                        rememberViewModelStoreNavEntryDecorator2<Route>(
-                            shouldRemoveState = {
-                                !topLevelBackStack.isInBackStack(it)
-                            },
-                        ),
+            entryDecorators =
+                listOf(
+                    rememberSceneSetupNavEntryDecorator(),
+                    rememberSavedStateNavEntryDecorator2<Route>(
+                        shouldRemoveState = {
+                            !topLevelBackStack.isInBackStack(it)
+                        },
                     ),
-                backStack = topLevelBackStack.backStack,
-                onBack = { onBack() },
-                transitionSpec = {
-                    if (isBigScreen) {
-                        materialSharedAxisZ(true)
-                    } else {
-                        holdIn() + translateXIn { it } togetherWith
-                            materialElevationScaleOut()
-                    }
+                    rememberViewModelStoreNavEntryDecorator2<Route>(
+                        shouldRemoveState = {
+                            !topLevelBackStack.isInBackStack(it)
+                        },
+                    ),
+                ),
+            backStack = topLevelBackStack.backStack,
+            onBack = { onBack() },
+            transitionSpec = {
+                if (isBigScreen) {
+                    materialSharedAxisZ(true)
+                } else {
+                    holdIn() + translateXIn { it } togetherWith
+                        materialElevationScaleOut()
+                }
+            },
+            popTransitionSpec = {
+                if (isBigScreen) {
+                    materialSharedAxisZ(false)
+                } else {
+                    materialElevationScaleIn() togetherWith
+                        holdOut() + translateXOut { it }
+                }
+            },
+            predictivePopTransitionSpec = {
+                if (isBigScreen) {
+                    materialSharedAxisZ(false)
+                } else {
+                    materialElevationScaleIn() togetherWith
+                        holdOut() + translateXOut { it }
+                }
+            },
+            entryProvider =
+                entryProvider {
+                    homeEntryBuilder(::navigate, ::onBack, openDrawer)
+                    blueskyEntryBuilder(::navigate, ::onBack)
+                    composeEntryBuilder(::navigate, ::onBack)
+                    dmEntryBuilder(::navigate, ::onBack, navigationState)
+                    listEntryBuilder(::navigate, ::onBack)
+                    mediaEntryBuilder(::navigate, ::onBack)
+                    profileEntryBuilder(::navigate, ::onBack)
+                    rssEntryBuilder(::navigate, ::onBack)
+                    serviceSelectEntryBuilder(::navigate, ::onBack)
+                    settingsSelectEntryBuilder(::navigate, ::onBack)
+                    statusEntryBuilder(::navigate, ::onBack)
                 },
-                popTransitionSpec = {
-                    if (isBigScreen) {
-                        materialSharedAxisZ(false)
-                    } else {
-                        materialElevationScaleIn() togetherWith
-                            holdOut() + translateXOut { it }
-                    }
-                },
-                predictivePopTransitionSpec = {
-                    if (isBigScreen) {
-                        materialSharedAxisZ(false)
-                    } else {
-                        materialElevationScaleIn() togetherWith
-                            holdOut() + translateXOut { it }
-                    }
-                },
-                entryProvider =
-                    entryProvider {
-                        homeEntryBuilder(::navigate, ::onBack, openDrawer)
-                        blueskyEntryBuilder(::navigate, ::onBack)
-                        composeEntryBuilder(::navigate, ::onBack)
-                        dmEntryBuilder(::navigate, ::onBack, navigationState)
-                        listEntryBuilder(::navigate, ::onBack)
-                        mediaEntryBuilder(::navigate, ::onBack)
-                        profileEntryBuilder(::navigate, ::onBack)
-                        rssEntryBuilder(::navigate, ::onBack)
-                        serviceSelectEntryBuilder(::navigate, ::onBack)
-                        settingsSelectEntryBuilder(::navigate, ::onBack)
-                        statusEntryBuilder(::navigate, ::onBack)
-                    },
-            )
-        }
+        )
     }
 }

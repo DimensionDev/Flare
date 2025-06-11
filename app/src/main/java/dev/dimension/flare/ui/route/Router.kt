@@ -1,12 +1,14 @@
 package dev.dimension.flare.ui.route
 
+import android.annotation.SuppressLint
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -40,15 +42,14 @@ import soup.compose.material.motion.animation.materialSharedAxisZ
 import soup.compose.material.motion.animation.translateXIn
 import soup.compose.material.motion.animation.translateXOut
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@SuppressLint("UnusedContentLambdaTargetStateParameter")
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun Router(
     topLevelBackStack: TopLevelBackStack<Route>,
     navigationState: NavigationState,
     openDrawer: () -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
-
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
 
     fun navigate(route: Route) {
@@ -62,67 +63,67 @@ internal fun Router(
     val isBigScreen = isBigScreen()
 
     val uriHandler = LocalUriHandler.current
-    CompositionLocalProvider(
-        LocalUriHandler provides
-            remember {
-                ProxyUriHandler(uriHandler) {
-                    Route.parse(it)?.let {
-                        navigate(it)
-                    }
-                }
-            },
-    ) {
-        NavDisplay(
-            sceneStrategy =
+    SharedTransitionLayout {
+        CompositionLocalProvider(
+            LocalUriHandler provides
                 remember {
-                    DialogSceneStrategy<NavKey>()
-                        .then(BottomSheetSceneStrategy())
-                        .then(FullScreenSceneStrategy())
-                        .then(listDetailStrategy)
+                    ProxyUriHandler(uriHandler) {
+                        Route.parse(it)?.let {
+                            navigate(it)
+                        }
+                    }
                 },
-            entryDecorators =
-                listOf(
-                    rememberSceneSetupNavEntryDecorator(),
-                    rememberSavedStateNavEntryDecorator2<Route>(
-                        shouldRemoveState = {
-                            !topLevelBackStack.isInBackStack(it)
-                        },
+        ) {
+            NavDisplay(
+                sceneStrategy =
+                    remember {
+                        DialogSceneStrategy<NavKey>()
+                            .then(BottomSheetSceneStrategy())
+                            .then(FullScreenSceneStrategy())
+                            .then(listDetailStrategy)
+                    },
+                entryDecorators =
+                    listOf(
+                        rememberSceneSetupNavEntryDecorator(),
+                        rememberSavedStateNavEntryDecorator2<Route>(
+                            shouldRemoveState = {
+                                !topLevelBackStack.isInBackStack(it)
+                            },
+                        ),
+                        rememberViewModelStoreNavEntryDecorator2<Route>(
+                            shouldRemoveState = {
+                                !topLevelBackStack.isInBackStack(it)
+                            },
+                        ),
                     ),
-                    rememberViewModelStoreNavEntryDecorator2<Route>(
-                        shouldRemoveState = {
-                            !topLevelBackStack.isInBackStack(it)
-                        },
-                    ),
-                ),
-            backStack = topLevelBackStack.backStack,
-            onBack = { onBack() },
-            transitionSpec = {
-                if (isBigScreen) {
-                    materialSharedAxisZ(true)
-                } else {
-                    holdIn() + translateXIn { it } togetherWith
-                        materialElevationScaleOut()
-                }
-            },
-            popTransitionSpec = {
-                if (isBigScreen) {
-                    materialSharedAxisZ(false)
-                } else {
-                    materialElevationScaleIn() togetherWith
-                        holdOut() + translateXOut { it }
-                }
-            },
-            predictivePopTransitionSpec = {
-                if (isBigScreen) {
-                    materialSharedAxisZ(false)
-                } else {
-                    materialElevationScaleIn() togetherWith
-                        holdOut() + translateXOut { it }
-                }
-            },
-            entryProvider =
-                entryProvider {
-                    with(scope) {
+                backStack = topLevelBackStack.backStack,
+                onBack = { onBack() },
+                transitionSpec = {
+                    if (isBigScreen) {
+                        materialSharedAxisZ(true)
+                    } else {
+                        holdIn() + translateXIn { it } togetherWith
+                            materialElevationScaleOut()
+                    }
+                },
+                popTransitionSpec = {
+                    if (isBigScreen) {
+                        materialSharedAxisZ(false)
+                    } else {
+                        materialElevationScaleIn() togetherWith
+                            holdOut() + translateXOut { it }
+                    }
+                },
+                predictivePopTransitionSpec = {
+                    if (isBigScreen) {
+                        materialSharedAxisZ(false)
+                    } else {
+                        materialElevationScaleIn() togetherWith
+                            holdOut() + translateXOut { it }
+                    }
+                },
+                entryProvider =
+                    entryProvider {
                         homeEntryBuilder(::navigate, ::onBack, openDrawer)
                         blueskyEntryBuilder(::navigate, ::onBack)
                         composeEntryBuilder(::navigate, ::onBack)
@@ -134,8 +135,8 @@ internal fun Router(
                         serviceSelectEntryBuilder(::navigate, ::onBack)
                         settingsSelectEntryBuilder(::navigate, ::onBack)
                         statusEntryBuilder(::navigate, ::onBack)
-                    }
-                },
-        )
+                    },
+            )
+        }
     }
 }

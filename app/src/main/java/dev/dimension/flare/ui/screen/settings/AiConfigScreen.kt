@@ -75,8 +75,8 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
         Column(
             modifier =
                 Modifier
-                    .padding(it)
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(rememberScrollState())
+                    .padding(it),
         ) {
             ListItem(
                 modifier =

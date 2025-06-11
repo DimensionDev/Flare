@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.WideNavigationRailValue
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.ExperimentalMaterial3AdaptiveNavigationSuiteApi
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.rememberWideNavigationRailState
@@ -146,6 +147,10 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                     bottomBarDividerEnabled = state.navigationState.bottomBarDividerEnabled,
                     bottomBarAutoHideEnabled = state.navigationState.bottomBarAutoHideEnabled,
                     layoutType = actualLayoutType,
+                    navigationSuiteColors =
+                        NavigationSuiteDefaults.colors(
+                            navigationBarContainerColor = MaterialTheme.colorScheme.surface,
+                        ),
                     railHeader = {
                         accountTypeState.user.onSuccess { it ->
                             SharedTransitionLayout {

@@ -62,6 +62,7 @@ struct StatusShareAsImageView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.appSettings) private var appSettings
     @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareTheme.self) private var theme
 
     let content: CommonTimelineStatusComponent
     let renderer: ImageRenderer<AnyView>
@@ -103,6 +104,7 @@ struct StatusShareAsImageView: View {
                             )
                         ) {
                             Label("Share", systemImage: "square.and.arrow.up")
+                                .foregroundColor(theme.tintColor)
                         }
                         .disabled(!isImageReady)
                     }
@@ -130,6 +132,7 @@ struct StatusShareAsImageView: View {
                 .environment(\.colorScheme, colorScheme)
                 .environment(\.isInCaptureMode, true)
                 .environmentObject(router)
+                .environment(theme).applyTheme(theme)
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
                 if let image = ScreenshotRenderer.render(view) {
@@ -138,5 +141,6 @@ struct StatusShareAsImageView: View {
                 }
             }
         }
+        .environment(theme).applyTheme(theme)
     }
 }

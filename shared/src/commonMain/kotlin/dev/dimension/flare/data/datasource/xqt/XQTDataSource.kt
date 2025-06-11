@@ -918,6 +918,12 @@ internal class XQTDataSource(
                                 legacy =
                                     it.data.legacy?.copy(
                                         bookmarked = !bookmarked,
+                                        bookmarkCount =
+                                            if (bookmarked) {
+                                                maxOf(0, (it.data.legacy.bookmarkCount ?: 1) - 1)
+                                            } else {
+                                                (it.data.legacy.bookmarkCount ?: 0) + 1
+                                            },
                                     ),
                             ),
                     )
@@ -958,6 +964,12 @@ internal class XQTDataSource(
                                     legacy =
                                         it.data.legacy?.copy(
                                             bookmarked = bookmarked,
+                                            bookmarkCount =
+                                                if (bookmarked) {
+                                                    maxOf(0, (it.data.legacy.bookmarkCount ?: 1) - 1)
+                                                } else {
+                                                    (it.data.legacy.bookmarkCount ?: 0) + 1
+                                                },
                                         ),
                                 ),
                         )

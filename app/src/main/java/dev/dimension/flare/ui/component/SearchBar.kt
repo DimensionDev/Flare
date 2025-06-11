@@ -1,6 +1,9 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -126,7 +129,12 @@ private fun SearchContent(
                     }
                 },
                 leadingIcon = {
-                    AnimatedContent(expanded) {
+                    AnimatedContent(
+                        expanded,
+                        transitionSpec = {
+                            fadeIn() togetherWith fadeOut()
+                        },
+                    ) {
                         if (it) {
                             BackButton(onBack = onBack)
                         } else {

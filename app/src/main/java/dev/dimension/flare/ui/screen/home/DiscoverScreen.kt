@@ -302,7 +302,7 @@ private fun discoverPresenter(accountType: AccountType) =
 
         object : DiscoverState by state, SearchBarState by searchBarState {
             val searchState = searchState
-            val isInSearchMode = query.isNotEmpty()
+            val isInSearchMode = queryTextState.text.isNotEmpty()
             val refreshing =
                 if (!isInSearchMode) {
                     state.users.isRefreshing ||
@@ -315,7 +315,7 @@ private fun discoverPresenter(accountType: AccountType) =
 
             fun refresh() {
                 if (isInSearchMode) {
-                    searchState.search(query)
+                    searchState.search(queryTextState.text.toString())
                 } else {
                     scope.launch {
                         state.users.onSuccess {

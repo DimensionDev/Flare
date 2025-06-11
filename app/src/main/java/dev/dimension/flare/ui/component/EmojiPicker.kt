@@ -14,6 +14,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -64,7 +65,7 @@ internal fun EmojiPicker(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        OutlinedTextField2(
+        OutlinedTextField(
             state = searchTextState,
             label = { Text(stringResource(R.string.emoji_picker_search)) },
             lineLimits = TextFieldLineLimits.SingleLine,

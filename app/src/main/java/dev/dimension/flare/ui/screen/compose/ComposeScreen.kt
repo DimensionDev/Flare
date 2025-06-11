@@ -41,8 +41,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.surfaceColorAtElevation
@@ -86,8 +88,6 @@ import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
-import dev.dimension.flare.ui.component.OutlinedTextField2
-import dev.dimension.flare.ui.component.TextField2
 import dev.dimension.flare.ui.component.status.QuotedStatus
 import dev.dimension.flare.ui.component.status.StatusVisibilityComponent
 import dev.dimension.flare.ui.model.UiEmoji
@@ -293,7 +293,7 @@ internal fun ComposeScreen(
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        TextField2(
+                        TextField(
                             state = it.textFieldState,
                             modifier =
                                 Modifier
@@ -323,7 +323,7 @@ internal fun ComposeScreen(
                     Modifier
                         .fillMaxWidth(),
             ) {
-                TextField2(
+                TextField(
                     state = state.textFieldState,
                     modifier =
                         Modifier
@@ -715,7 +715,7 @@ private fun PollOption(
     onRemove: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    OutlinedTextField2(
+    OutlinedTextField(
         state = textFieldState,
         modifier =
             modifier

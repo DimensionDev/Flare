@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -25,7 +26,6 @@ import compose.icons.fontawesomeicons.solid.CircleCheck
 import compose.icons.fontawesomeicons.solid.CircleXmark
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -47,13 +47,13 @@ internal fun RssSourceEditDialog(
                     androidx.compose.foundation.layout.Arrangement
                         .spacedBy(8.dp),
             ) {
-                OutlinedTextField2(
+                OutlinedTextField(
                     state = state.title,
                     label = { Text(text = stringResource(id = R.string.rss_sources_title_label)) },
                     modifier = Modifier.fillMaxWidth(),
                     lineLimits = TextFieldLineLimits.SingleLine,
                 )
-                OutlinedTextField2(
+                OutlinedTextField(
                     state = state.url,
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(text = stringResource(id = R.string.rss_sources_url_label)) },

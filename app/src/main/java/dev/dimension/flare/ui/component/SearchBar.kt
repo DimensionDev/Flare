@@ -14,6 +14,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.delete
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -68,12 +71,9 @@ internal fun SearchBar(
     val keyboardController = LocalSoftwareKeyboardController.current
     SearchContent(
         user = state.user,
-        query = state.query,
-        onQueryChange = {
-            state.setQuery(it)
-        },
         onSearch = {
             onSearch.invoke(it)
+            state.setQuery(it)
             state.setExpanded(false)
             keyboardController?.hide()
         },
@@ -88,6 +88,7 @@ internal fun SearchBar(
         onDelete = {
             state.deleteSearchHistory(it)
         },
+        queryTextState = state.queryTextState,
     )
 }
 
@@ -99,8 +100,7 @@ private fun SearchContent(
     user: UiState<UiUserV2>?,
     historyState: UiState<ImmutableListWrapper<UiSearchHistory>>,
     onDelete: (UiSearchHistory) -> Unit,
-    query: String,
-    onQueryChange: (String) -> Unit,
+    queryTextState: TextFieldState,
     onSearch: (String) -> Unit,
     expanded: Boolean,
     onExpandedChange: (Boolean) -> Unit,
@@ -113,8 +113,7 @@ private fun SearchContent(
             SearchBarDefaults.InputField(
                 expanded = expanded,
                 onExpandedChange = onExpandedChange,
-                query = query,
-                onQueryChange = onQueryChange,
+                state = queryTextState,
                 onSearch = onSearch,
                 placeholder = {
                     Text(text = stringResource(R.string.discover_search_placeholder))
@@ -164,7 +163,6 @@ private fun SearchContent(
                         modifier =
                             Modifier
                                 .clickable {
-                                    onQueryChange(item.keyword)
                                     onSearch(item.keyword)
                                 },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -279,12 +277,12 @@ internal fun searchBarPresenter(
             remember { UserPresenter(accountType = accountType, userKey = null) }.invoke()
         val searchHistoryState = remember { SearchHistoryPresenter() }.invoke()
         var expanded by remember { mutableStateOf(false) }
-        var query by remember { mutableStateOf(initialQuery) }
         LaunchedEffect(Unit) {
             if (initialQuery.isNotEmpty()) {
                 searchHistoryState.addSearchHistory(initialQuery)
             }
         }
+        val queryTextState = rememberTextFieldState()
 
         object :
             SearchBarState,
@@ -293,19 +291,23 @@ internal fun searchBarPresenter(
             override val expanded: Boolean
                 get() = expanded
 
-            override val query: String
-                get() = query
-
             override fun setExpanded(value: Boolean) {
                 expanded = value
             }
 
-            override fun setQuery(value: String) {
-                query = value
-            }
+            override val queryTextState: TextFieldState
+                get() = queryTextState
 
             override fun deleteSearchHistory(history: UiSearchHistory) {
                 searchHistoryState.deleteSearchHistory(history.keyword)
+            }
+
+            override fun setQuery(query: String) {
+                if (queryTextState.text == query) return
+                queryTextState.edit {
+                    delete(0, queryTextState.text.length)
+                    append(query)
+                }
             }
         }
     }
@@ -314,11 +316,11 @@ internal interface SearchBarState :
     UserState,
     SearchHistoryState {
     val expanded: Boolean
-    val query: String
+    val queryTextState: TextFieldState
 
     fun setExpanded(value: Boolean)
 
-    fun setQuery(value: String)
-
     fun deleteSearchHistory(history: UiSearchHistory)
+
+    fun setQuery(query: String)
 }

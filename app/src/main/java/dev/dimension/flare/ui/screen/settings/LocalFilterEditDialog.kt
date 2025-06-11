@@ -10,6 +10,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -29,7 +30,6 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.model.UiKeywordFilter
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
@@ -85,7 +85,7 @@ internal fun LocalFilterEditDialog(
         ) {
             ListItem(
                 headlineContent = {
-                    OutlinedTextField2(
+                    OutlinedTextField(
                         state = state.input,
                         placeholder = {
                             Text(text = stringResource(id = R.string.local_filter_keyword_hint))

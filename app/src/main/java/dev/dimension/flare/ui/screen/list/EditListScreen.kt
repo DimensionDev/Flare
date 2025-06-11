@@ -24,6 +24,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -60,7 +61,6 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
-import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -195,7 +195,7 @@ internal fun EditListScreen(
                             }
                         }
 
-                        OutlinedTextField2(
+                        OutlinedTextField(
                             state = state.text,
                             label = { Text(text = stringResource(id = R.string.list_create_name)) },
                             placeholder = { Text(text = stringResource(id = R.string.list_create_name_hint)) },
@@ -207,7 +207,7 @@ internal fun EditListScreen(
 
                     state.supportedMetaData.onSuccess {
                         if (it.contains(ListMetaDataType.DESCRIPTION)) {
-                            OutlinedTextField2(
+                            OutlinedTextField(
                                 state = state.description,
                                 label = { Text(text = stringResource(id = R.string.list_create_description)) },
                                 placeholder = { Text(text = stringResource(id = R.string.list_create_description_hint)) },

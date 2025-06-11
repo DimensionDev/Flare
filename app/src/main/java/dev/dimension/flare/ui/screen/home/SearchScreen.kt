@@ -93,7 +93,7 @@ private fun presenter(
                 searchState.status.isRefreshing
 
         fun refresh() {
-            searchState.search(query)
+            searchState.search(queryTextState.text.toString())
         }
 
         fun commitSearch(new: String) {

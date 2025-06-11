@@ -24,6 +24,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedSecureTextField
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -57,8 +59,6 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
-import dev.dimension.flare.ui.component.OutlinedSecureTextField2
-import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
@@ -122,7 +122,7 @@ internal fun ServiceSelectScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
             )
-            OutlinedTextField2(
+            OutlinedTextField(
                 state = state.instanceInputState,
                 placeholder = {
                     Text(
@@ -180,7 +180,7 @@ internal fun ServiceSelectScreen(
                     when (state.detectedPlatformType.takeSuccess()) {
                         null -> Unit
                         PlatformType.Bluesky -> {
-                            OutlinedTextField2(
+                            OutlinedTextField(
                                 state = state.blueskyInputState.username,
                                 label = {
                                     Text(text = stringResource(id = R.string.bluesky_login_username_hint))
@@ -191,7 +191,7 @@ internal fun ServiceSelectScreen(
                                         .width(300.dp),
                                 lineLimits = TextFieldLineLimits.SingleLine,
                             )
-                            OutlinedSecureTextField2(
+                            OutlinedSecureTextField(
                                 state = state.blueskyInputState.password,
                                 label = {
                                     Text(text = stringResource(id = R.string.bluesky_login_password_hint))
@@ -200,7 +200,7 @@ internal fun ServiceSelectScreen(
                                 modifier =
                                     Modifier
                                         .width(300.dp),
-                                lineLimits = TextFieldLineLimits.SingleLine,
+//                                lineLimits = TextFieldLineLimits.SingleLine,
                                 onKeyboardAction = {
                                     state.blueskyLoginState.login(
                                         "https://${state.instanceInputState.text}",

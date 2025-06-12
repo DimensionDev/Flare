@@ -54,6 +54,7 @@ struct ShareButton: View {
             .environment(\.colorScheme, colorScheme)
             .environment(\.isInCaptureMode, true)
             .environmentObject(router)
+            .environment(theme).applyTheme(theme)
 
         let controller = UIHostingController(rootView: captureView)
 
@@ -114,12 +115,13 @@ struct ShareButton: View {
                         UIPasteboard.general.string = url.absoluteString
                     }
                 }) {
-                    Label("Copy Media Link", systemImage: "media")
+                    Label("Copy Media Link", systemImage: "photo.on.rectangle")
                 }
             }
 
             Button(action: {
                 showTextForSelection = true
+
             }) {
                 Label("Select Any Element", systemImage: "text.cursor")
             }.buttonStyle(PlainButtonStyle())
@@ -179,7 +181,9 @@ struct ShareButton: View {
                 .disabled(isPreparingShare)
 
                 Button(action: {
-                    prepareScreenshot { image in
+//                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    prepareScreenshot {
+                        image in
                         if let image {
                             capturedImage = image
                             let newRenderer = ImageRenderer(content: AnyView(
@@ -187,6 +191,7 @@ struct ShareButton: View {
                                     .environment(\.appSettings, appSettings)
                                     .environment(\.colorScheme, colorScheme)
                                     .environment(\.isInCaptureMode, true)
+                                    .environment(theme).applyTheme(theme)
                                     .environmentObject(router)
                             ))
                             newRenderer.scale = 3.0
@@ -195,6 +200,7 @@ struct ShareButton: View {
                             isShareAsImageSheetPresented = true
                         }
                     }
+//                    }
                 }) {
                     Label("Share as Image", systemImage: "camera")
                 }
@@ -309,6 +315,7 @@ struct ShareButton: View {
                 .environment(\.colorScheme, colorScheme)
                 .environment(\.isInCaptureMode, true)
                 .environmentObject(router)
+                .environment(theme).applyTheme(theme)
             }
         }
         .sheet(isPresented: $showSelectUrlSheet) {

@@ -34,8 +34,6 @@ struct TextViewMarkdown: UIViewRepresentable {
     }
 }
 
-// MARK: - MarkdownTextViewWrapper
-
 class MarkdownTextViewWrapper: UIView {
     private let markdownTextView = MarkdownTextView()
     private var currentMarkdownText: String = ""
@@ -69,7 +67,6 @@ class MarkdownTextViewWrapper: UIView {
             fontScale: fontScale
         )
 
-        // 检查主题是否发生变化
         let themeChanged = currentStyle == nil ||
             !style.isEqual(to: currentStyle!) ||
             currentFontScale != fontScale
@@ -79,7 +76,6 @@ class MarkdownTextViewWrapper: UIView {
             currentFontScale = fontScale
             markdownTextView.theme = newTheme
 
-            // 如果已有内容且主题发生变化，重新渲染
             if !currentMarkdownText.isEmpty {
                 DispatchQueue.main.async { [weak self] in
                     self?.rerenderCurrentContent()
@@ -92,11 +88,9 @@ class MarkdownTextViewWrapper: UIView {
         guard text != currentMarkdownText else { return }
         currentMarkdownText = text
 
-        // 在后台线程处理 Markdown
         DispatchQueue.global().async { [weak self] in
             guard let self else { return }
 
-            // 处理常见的HTML标签，特别是<br>换行标签
             var processedContent: String = if text.lowercased().contains("<br") {
                 // 将<br>、<br/>、<br />等变体都转换为换行符
                 text.replacingOccurrences(
@@ -105,18 +99,15 @@ class MarkdownTextViewWrapper: UIView {
                     options: [.regularExpression, .caseInsensitive]
                 )
             } else {
-                // 对于其他HTML标签，保持原样显示
                 text
             }
 
             let parser = MarkdownParser()
             let result = parser.parse(processedContent)
 
-            // 准备渲染内容
             let theme = markdownTextView.theme
             var renderedContexts: [String: RenderedItem] = [:]
 
-            // 处理数学公式内容
             for (key, value) in result.mathContext {
                 let image = MathRenderer.renderToImage(
                     latex: value,
@@ -131,7 +122,6 @@ class MarkdownTextViewWrapper: UIView {
                 renderedContexts["math://\(key)"] = renderedContext
             }
 
-            // 切换到主线程更新 UI
             DispatchQueue.main.async {
                 self.markdownTextView.setMarkdown(result.document, renderedContent: renderedContexts)
                 self.invalidateIntrinsicContentSize()
@@ -160,11 +150,9 @@ class MarkdownTextViewWrapper: UIView {
     private func rerenderCurrentContent() {
         guard !currentMarkdownText.isEmpty else { return }
 
-        // 在后台线程重新处理当前内容
         DispatchQueue.global().async { [weak self] in
             guard let self else { return }
 
-            // 处理常见的HTML标签，特别是<br>换行标签
             var processedContent: String = if currentMarkdownText.lowercased().contains("<br") {
                 // 将<br>、<br/>、<br />等变体都转换为换行符
                 currentMarkdownText.replacingOccurrences(
@@ -173,18 +161,15 @@ class MarkdownTextViewWrapper: UIView {
                     options: [.regularExpression, .caseInsensitive]
                 )
             } else {
-                // 对于其他HTML标签，保持原样显示
                 currentMarkdownText
             }
 
             let parser = MarkdownParser()
             let result = parser.parse(processedContent)
 
-            // 准备渲染内容
             let theme = markdownTextView.theme
             var renderedContexts: [String: RenderedItem] = [:]
 
-            // 处理数学公式内容
             for (key, value) in result.mathContext {
                 let image = MathRenderer.renderToImage(
                     latex: value,
@@ -199,7 +184,6 @@ class MarkdownTextViewWrapper: UIView {
                 renderedContexts["math://\(key)"] = renderedContext
             }
 
-            // 切换到主线程更新 UI
             DispatchQueue.main.async {
                 self.markdownTextView.setMarkdown(result.document, renderedContent: renderedContexts)
                 self.invalidateIntrinsicContentSize()

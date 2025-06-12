@@ -70,7 +70,11 @@ internal inline fun <R> tryRun(block: () -> R): Result<R> =
     try {
         Result.success(block())
     } catch (e: Throwable) {
-        e.printStackTrace()
-        DebugRepository.error(e)
+        with(CoroutineScope(Dispatchers.IO)) {
+            launch {
+                e.printStackTrace()
+                DebugRepository.error(e)
+            }
+        }
         Result.failure(e)
     }

@@ -140,12 +140,10 @@ public struct FlareText: View {
     }
 
     private func getCachedOrProcessText(cacheKey: String) -> NSAttributedString {
-        // 先尝试从缓存获取
         if let cached = FlareTextCache.shared.getCachedText(for: cacheKey) {
             return cached
         }
 
-        // 缓存未命中，重新计算
         let attributedString = FlareTextStyle.attributeString(
             of: text,
             markdownText: markdownText,
@@ -153,7 +151,6 @@ public struct FlareText: View {
         )
         let nsAttributedString = NSAttributedString(attributedString)
 
-        // 存入缓存
         FlareTextCache.shared.setCachedText(nsAttributedString, for: cacheKey)
 
         return nsAttributedString

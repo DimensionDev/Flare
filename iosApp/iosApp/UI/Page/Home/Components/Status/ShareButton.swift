@@ -37,7 +37,7 @@ struct ShareButton: View {
     @State private var capturedImage: UIImage?
     @State private var isPreparingShare: Bool = false
     @State private var showTranslation: Bool = false
-    @State private var showReportAlert = false
+    // @State private var showReportAlert = false
     @State private var showSelectUrlSheet: Bool = false
 
     let content: UiTimelineItemContentStatus
@@ -89,19 +89,22 @@ struct ShareButton: View {
     var body: some View {
         Menu {
             Button(action: {
-                showReportAlert = true
+                //  showReportAlert = true
+                ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Report Success", comment: "")).show()
             }) {
                 Label("Report", systemImage: "exclamationmark.triangle")
             }
 
             Button(action: {
                 UIPasteboard.general.string = content.content.raw
+                ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Copy Success", comment: "")).show()
             }) {
                 Label("Copy Text ", systemImage: "doc.on.doc")
             }
 
             Button(action: {
                 UIPasteboard.general.string = content.content.markdown
+                ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Copy Success", comment: "")).show()
             }) {
                 Label("Copy Text (MarkDown)", systemImage: "doc.on.doc")
             }
@@ -115,19 +118,22 @@ struct ShareButton: View {
                         UIPasteboard.general.string = url.absoluteString
                     }
                 }) {
-                    Label("Copy Media Link", systemImage: "media")
+                    Label("Copy Media Link", systemImage: "photo.on.rectangle")
                 }
             }
 
             Button(action: {
                 showTextForSelection = true
+
             }) {
-                Label("Select Any Element", systemImage: "text.cursor")
+                Label("Copy Any", systemImage: "text.cursor")
             }.buttonStyle(PlainButtonStyle())
 
             if let url = statusUrl {
                 Button(action: {
                     UIPasteboard.general.string = url.absoluteString
+                    ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Copy Success", comment: "")).show()
+
                 }) {
                     Label("Copy Tweet Link", systemImage: "link")
                 }
@@ -180,7 +186,9 @@ struct ShareButton: View {
                 .disabled(isPreparingShare)
 
                 Button(action: {
-                    prepareScreenshot { image in
+//                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    prepareScreenshot {
+                        image in
                         if let image {
                             capturedImage = image
                             let newRenderer = ImageRenderer(content: AnyView(
@@ -188,6 +196,7 @@ struct ShareButton: View {
                                     .environment(\.appSettings, appSettings)
                                     .environment(\.colorScheme, colorScheme)
                                     .environment(\.isInCaptureMode, true)
+                                    .environment(theme).applyTheme(theme)
                                     .environmentObject(router)
                             ))
                             newRenderer.scale = 3.0
@@ -196,6 +205,7 @@ struct ShareButton: View {
                             isShareAsImageSheetPresented = true
                         }
                     }
+//                    }
                 }) {
                     Label("Share as Image", systemImage: "camera")
                 }
@@ -216,11 +226,10 @@ struct ShareButton: View {
             Button(action: {
                 print("Save Media tapped")
 
-                let toastView = ToastView(
-                    icon: UIImage(systemName: "download.fill"),
-                    message: String(localized: "download") + " success"
-                )
-                toastView.show()
+                ToastView(
+                    icon: UIImage(systemName: "square.and.arrow.down"),
+                    message: String(localized: "download to App \n Download Manager")
+                ).show()
 
                 for media in content.images {
                     if let image = media as? UiMediaImage {
@@ -247,11 +256,10 @@ struct ShareButton: View {
                                 previewImageUrl: video.thumbnailUrl
                             )
                         } else {
-                            let toastView = ToastView(
+                            ToastView(
                                 icon: UIImage(systemName: "flag.fill"),
                                 message: String(localized: "only support mp4")
-                            )
-                            toastView.show()
+                            ).show()
                         }
 
                     } else if let gif = media as? UiMediaGif {
@@ -286,13 +294,11 @@ struct ShareButton: View {
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
-        }.alert("Report", isPresented: $showReportAlert) {
-            Button("OK") {}
-        } message: {
-            Text("Report Success")
         }
         .sheet(isPresented: $showTextForSelection) {
-            let selectableContent = AttributedString(content.content.markdown)
+            let imageURLsString = content.images.compactMap(\.url).joined(separator: "\n")
+            let selectableContent = AttributedString(content.content.markdown + "\n" + imageURLsString)
+
             StatusRowSelectableTextView(content: selectableContent)
                 .tint(.accentColor)
         }
@@ -310,6 +316,7 @@ struct ShareButton: View {
                 .environment(\.colorScheme, colorScheme)
                 .environment(\.isInCaptureMode, true)
                 .environmentObject(router)
+                .environment(theme).applyTheme(theme)
             }
         }
         .sheet(isPresented: $showSelectUrlSheet) {

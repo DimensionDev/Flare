@@ -8,6 +8,7 @@ struct MediaComponent: View {
     @State var hideSensitive: Bool
     @State private var aiDetectedSensitive: Bool = false
     @Environment(\.appSettings) private var appSettings
+    @Environment(\.isInCaptureMode) private var isInCaptureMode
 
     let medias: [UiMedia]
     let onMediaClick: (Int, UiMedia) -> Void
@@ -19,7 +20,8 @@ struct MediaComponent: View {
         } && (sensitive || aiDetectedSensitive)
 
         // 如果原本就是敏感内容或AI检测到敏感内容，则应用模糊
-        let shouldBlur = hideSensitive || (aiDetectedSensitive && appSettings.otherSettings.sensitiveContentAnalysisEnabled)
+        // 在截图模式下，为了避免渲染错误，禁用模糊效果
+        let shouldBlur = !isInCaptureMode && (hideSensitive || (aiDetectedSensitive && appSettings.otherSettings.sensitiveContentAnalysisEnabled))
 
         ZStack(alignment: .topLeading) {
             let mediaViewModels = medias.map { media -> FeedMediaViewModel in
@@ -54,7 +56,8 @@ struct MediaComponent: View {
                 view.blur(radius: 32)
             })
 
-            if showSensitiveButton {
+            // 在截图模式下隐藏敏感内容按钮，避免渲染冲突
+            if showSensitiveButton, !isInCaptureMode {
                 SensitiveContentButton(
                     hideSensitive: shouldBlur,
                     action: {

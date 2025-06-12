@@ -134,7 +134,8 @@ struct StatusShareAsImageView: View {
                 .environmentObject(router)
                 .environment(theme).applyTheme(theme)
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            // 增加延迟时间，确保敏感内容和媒体完全加载后再截图
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
                 if let image = ScreenshotRenderer.render(view) {
                     capturedImage = image
                     isImageReady = true

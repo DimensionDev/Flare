@@ -193,7 +193,12 @@ class PhotoBrowserManager {
                                         self.saveImageToAlbum(image: value.image) { success in
                                             DispatchQueue.main.async {
                                                 if success {
-                                                    self.showToast(message: "saved", icon: UIImage(systemName: "checkmark.circle.fill"))
+//                                     self.showToast(message: "saved", icon: UIImage(systemName: "checkmark.circle.fill"))
+                                                    ToastView(
+                                                        icon: UIImage(systemName: "checkmark.circle.fill"),
+                                                        message: " saved to photos"
+                                                    ).show()
+
                                                 } else {
                                                     // 保存失败时显示错误提示
                                                     let alert = UIAlertController(
@@ -208,7 +213,12 @@ class PhotoBrowserManager {
                                         }
                                     case .failure:
                                         DispatchQueue.main.async {
-                                            self.showToast(message: "get original image failed", icon: UIImage(systemName: "xmark.circle.fill"))
+//                            self.showToast(message: "get original image failed", icon: UIImage(systemName: "xmark.circle.fill"))
+
+                                            ToastView(
+                                                icon: UIImage(systemName: "xmark.circle.fill"),
+                                                message: " get original image failed"
+                                            ).show()
                                         }
                                     }
                                 }
@@ -240,7 +250,11 @@ class PhotoBrowserManager {
                                         }
                                     case .failure:
                                         DispatchQueue.main.async {
-                                            self.showToast(message: "get original image failed", icon: UIImage(systemName: "xmark.circle.fill"))
+//                                            self.showToast(message: "", icon: UIImage(systemName: ""))
+                                            ToastView(
+                                                icon: UIImage(systemName: "xmark.circle.fill"),
+                                                message: " get original image failed"
+                                            ).show()
                                         }
                                     }
                                 }
@@ -324,18 +338,6 @@ class PhotoBrowserManager {
                 completion(false)
                 print("no album access permission")
             }
-        }
-    }
-
-    private func showToast(message: String, icon: UIImage? = nil) {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first
-        {
-            let toastView = ToastView(
-                icon: icon ?? UIImage(systemName: "checkmark.circle.fill"),
-                message: message
-            )
-            toastView.show()
         }
     }
 }

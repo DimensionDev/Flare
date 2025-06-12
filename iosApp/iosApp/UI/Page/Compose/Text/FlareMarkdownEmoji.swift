@@ -1,3 +1,4 @@
+
 import EmojiText
 import SwiftUI
 
@@ -38,7 +39,6 @@ public struct FlareEmojiText: View {
     }
 
     public var body: some View {
-        // 使用EmojiText渲染
         EmojiText(markdown: markdownText.replacingOccurrences(
             of: "<br\\s*/?>",
             with: "\n",

@@ -7,6 +7,7 @@ struct TabItemsViewSwiftUI: View {
     let items: [FLTabItem]
     @Namespace private var tabNamespace
     @State private var scrollPosition: String?
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -25,9 +26,17 @@ struct TabItemsViewSwiftUI: View {
 
                             if selection == item.key {
                                 Rectangle()
-                                    .fill(Color.blue)
+                                    .fill(theme.tintColor)
                                     .frame(height: 2)
                                     .matchedGeometryEffect(id: "activeTab", in: tabNamespace)
+                            } else if selection == "" {
+                                // first key , show active tab ,home
+                                if item.key == items.first?.key {
+                                    Rectangle()
+                                        .fill(theme.tintColor)
+                                        .frame(height: 2)
+                                        .matchedGeometryEffect(id: "activeTab", in: tabNamespace)
+                                }
                             } else {
                                 Rectangle()
                                     .fill(Color.clear)
@@ -53,116 +62,9 @@ struct TabItemsViewSwiftUI: View {
         switch item.metaData.title {
         case let .text(title):
             Markdown(title)
-//            if containsEmoji(title) {
-
-//                let components = splitTextAndEmoji(title)
-//                HStack(spacing: 2) {
-//                    ForEach(components.indices, id: \.self) { index in
-//                        let component = components[index]
-//                        if component.isEmoji {
-//                            EmojiText(
-//                                text: component.text,
-//                                color: selection == item.key ? FColors.Text.swiftUIPrimary  : FColors.Text.swiftUISecondary
-//                            )
-//                        } else {
-//                            Text(component.text)
-//                                .font(.system(size: 14))
-        ////                                .foregroundColor(selection == item.key ? FColors.Text.swiftUIPrimary  : FColors.Text.swiftUISecondary)
-//                                .fontWeight(selection == item.key ? .medium : .regular)
-//                        }
-//                    }
-//                }
-//            } else {
-//                Text(title)
-//                    .font(.system(size: 14))
-        ////                    .foregroundColor(selection == item.key ? FColors.Text.swiftUIPrimary  : FColors.Text.swiftUISecondary)
-//                    .fontWeight(selection == item.key ? .medium : .regular)
-//            }
         case let .localized(key):
             let title = NSLocalizedString(key, comment: "")
             Markdown(title)
-//            if containsEmoji(title) {
-//                let components = splitTextAndEmoji(title)
-//                HStack(spacing: 2) {
-//                    ForEach(components.indices, id: \.self) { index in
-//                        let component = components[index]
-//                        if component.isEmoji {
-            ////                            EmojiText(
-            ////                                text: component.text,
-            ////                                color: selection == item.key ? FColors.Text.swiftUIPrimary  : FColors.Text.swiftUISecondary
-            ////                            )
-//                        } else {
-//                            Text(component.text)
-//                                .font(.system(size: 14))
-            ////                                .foregroundColor(selection == item.key ? FColors.Text.swiftUIPrimary  : FColors.Text.swiftUISecondary)
-//                                .fontWeight(selection == item.key ? .medium : .regular)
-//                        }
-//                    }
-//                }
-//            } else {
-//                Text(title)
-//                    .font(.system(size: 14))
-            ////                    .foregroundColor(selection == item.key ? FColors.Text.swiftUIPrimary  : FColors.Text.swiftUISecondary)
-//                    .fontWeight(selection == item.key ? .medium : .regular)
-//            }
         }
     }
-
-//    private func containsEmoji(_ text: String) -> Bool {
-//        for scalar in text.unicodeScalars {
-//            if scalar.properties.isEmoji {
-//                return true
-//            }
-//        }
-//        return false
-//    }
-
-//    private func splitTextAndEmoji(_ text: String) -> [TextComponent] {
-//        var components: [TextComponent] = []
-//        var currentComponent = ""
-//        var currentIsEmoji = false
-//
-//        for character in text {
-//            let isEmoji = character.unicodeScalars.first?.properties.isEmoji ?? false
-//
-//            if currentComponent.isEmpty {
-//                currentComponent.append(character)
-//                currentIsEmoji = isEmoji
-//            } else if isEmoji == currentIsEmoji {
-//                currentComponent.append(character)
-//            } else {
-//                components.append(TextComponent(text: currentComponent, isEmoji: currentIsEmoji))
-//                currentComponent = String(character)
-//                currentIsEmoji = isEmoji
-//            }
-//        }
-//
-//        if !currentComponent.isEmpty {
-//            components.append(TextComponent(text: currentComponent, isEmoji: currentIsEmoji))
-//        }
-//
-//        return components
-//    }
 }
-
-// struct TextComponent {
-//    let text: String
-//    let isEmoji: Bool
-// }
-//
-// extension UnicodeScalar {
-//    var isEmoji: Bool {
-//        properties.isEmoji
-//    }
-// }
-
-// extension Character {
-//    var isEmoji: Bool {
-//        for scalar in unicodeScalars {
-//            if scalar.isEmoji {
-//                return true
-//            }
-//        }
-//        return false
-//    }
-// }

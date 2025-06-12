@@ -345,7 +345,9 @@ struct StatusRowSelectableTextView: View {
                             Spacer()
                             Button {
                                 copySelectedText()
-                                dismiss()
+                            ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Copy Success", comment: "")).show() 
+
+                                // dismiss()
                             } label: {
                                 HStack {
                                     Image(systemName: "doc.on.doc")
@@ -377,7 +379,7 @@ struct StatusRowSelectableTextView: View {
                     }
                 }
             }
-            .navigationTitle("Select Any Element")
+            .navigationTitle("Copy Any")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 processTextWithNaturalLanguage()

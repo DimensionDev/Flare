@@ -99,17 +99,7 @@ enum ActionProcessor {
         return (bottomMainActions, bottomMoreActions)
     }
 
-    static func showReportToast() {
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first
-        {
-            let toastView = ToastView(
-                icon: UIImage(systemName: "flag.fill"),
-                message: String(localized: "report") + " success"
-            )
-            toastView.show()
-        }
-    }
+    
 }
 
 @Observable
@@ -685,8 +675,11 @@ struct StatusActionButton: View {
             clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
 
             if case .report = onEnum(of: item) {
-                ActionProcessor.showReportToast()
-            }
+                ToastView(
+                    icon: UIImage(systemName: "flag.fill"),
+                    message: " report success"
+                ).show()
+             }
         }
     }
 }

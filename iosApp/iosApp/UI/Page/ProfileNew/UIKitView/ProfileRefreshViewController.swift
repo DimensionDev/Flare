@@ -374,8 +374,7 @@ class ProfileNewRefreshViewController: UIViewController {
                                             (UIImage(systemName: "checkmark.circle"), "Muted")
                                         }
                                     }
-                                    let toastView = ToastView(icon: icon, message: message)
-                                    toastView.show()
+                                    ToastView(icon: icon, message: message).show() 
                                 }
                             }
                         }
@@ -386,14 +385,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 添加举报选项
         if case let .success(user) = onEnum(of: state.userState) {
-            alertController.addAction(UIAlertAction(title: NSLocalizedString("report", comment: ""), style: .destructive) { [weak self] _ in
-                state.report(userKey: user.data.key)
-                // 显示举报成功的 Toast
-                if let window = self?.view.window {
-                    let toastView = ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("report", comment: ""))
-                    toastView.show()
-                }
-            })
+            ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Report Success", comment: "")).show() 
         }
 
         // 添加取消选项

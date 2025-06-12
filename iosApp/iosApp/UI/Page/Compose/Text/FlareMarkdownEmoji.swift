@@ -1,6 +1,6 @@
 
-import SwiftUI
 import EmojiText
+import SwiftUI
 
 @MainActor
 public struct FlareEmojiText: View {
@@ -31,34 +31,33 @@ public struct FlareEmojiText: View {
         self.fontScale = fontScale
         self.lineSpacing = lineSpacing
     }
-    
+
     public func onLinkTap(_ handler: @escaping (URL) -> Void) -> FlareEmojiText {
         var view = self
         view.linkHandler = handler
         return view
     }
-    
+
     public var body: some View {
-            EmojiText(markdown: markdownText.replacingOccurrences(
-                    of: "<br\\s*/?>", 
-                    with: "\n", 
-                    options: [.regularExpression, .caseInsensitive]
-                ), emojis: emojis)
+        EmojiText(markdown: markdownText.replacingOccurrences(
+            of: "<br\\s*/?>",
+            with: "\n",
+            options: [.regularExpression, .caseInsensitive]
+        ), emojis: emojis)
             .markdownTheme(.flareMarkdownStyle(using: style, fontScale: theme.fontSizeScale))
 //                .font(style.font.scaled(by: fontScale))
 //                .foregroundColor(style.color)
-                .multilineTextAlignment(.leading)
-                .fixedSize(horizontal: false, vertical: true)
-                .relativeLineSpacing(.em(lineSpacing - 1.0))
-                .environment(\.layoutDirection, isRTL ? .rightToLeft : .leftToRight)
-                .environment(\.openURL, OpenURLAction { url in
-                    if let handler = linkHandler {
-                        handler(url)
-                        return .handled
-                    } else {
-                        return .systemAction
-                    }
-                })
-        }
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+            .relativeLineSpacing(.em(lineSpacing - 1.0))
+            .environment(\.layoutDirection, isRTL ? .rightToLeft : .leftToRight)
+            .environment(\.openURL, OpenURLAction { url in
+                if let handler = linkHandler {
+                    handler(url)
+                    return .handled
+                } else {
+                    return .systemAction
+                }
+            })
+    }
 }
-  

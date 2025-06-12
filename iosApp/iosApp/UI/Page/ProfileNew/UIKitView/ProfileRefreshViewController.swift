@@ -374,7 +374,7 @@ class ProfileNewRefreshViewController: UIViewController {
                                             (UIImage(systemName: "checkmark.circle"), "Muted")
                                         }
                                     }
-                                    ToastView(icon: icon, message: message).show() 
+                                    ToastView(icon: icon, message: message).show()
                                 }
                             }
                         }
@@ -385,7 +385,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 添加举报选项
         if case let .success(user) = onEnum(of: state.userState) {
-            ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Report Success", comment: "")).show() 
+            ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Report Success", comment: "")).show()
         }
 
         // 添加取消选项

@@ -98,8 +98,6 @@ enum ActionProcessor {
 
         return (bottomMainActions, bottomMoreActions)
     }
-
-    
 }
 
 @Observable
@@ -679,7 +677,7 @@ struct StatusActionButton: View {
                     icon: UIImage(systemName: "flag.fill"),
                     message: " report success"
                 ).show()
-             }
+            }
         }
     }
 }

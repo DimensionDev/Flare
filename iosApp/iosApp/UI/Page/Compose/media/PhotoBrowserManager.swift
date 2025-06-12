@@ -198,7 +198,6 @@ class PhotoBrowserManager {
                                                         icon: UIImage(systemName: "checkmark.circle.fill"),
                                                         message: " saved to photos"
                                                     ).show()
-                                                     
 
                                                 } else {
                                                     // 保存失败时显示错误提示
@@ -215,7 +214,7 @@ class PhotoBrowserManager {
                                     case .failure:
                                         DispatchQueue.main.async {
 //                            self.showToast(message: "get original image failed", icon: UIImage(systemName: "xmark.circle.fill"))
-                                            
+
                                             ToastView(
                                                 icon: UIImage(systemName: "xmark.circle.fill"),
                                                 message: " get original image failed"
@@ -340,5 +339,5 @@ class PhotoBrowserManager {
                 print("no album access permission")
             }
         }
-    } 
+    }
 }

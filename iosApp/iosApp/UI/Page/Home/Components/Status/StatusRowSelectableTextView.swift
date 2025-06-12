@@ -345,7 +345,7 @@ struct StatusRowSelectableTextView: View {
                             Spacer()
                             Button {
                                 copySelectedText()
-                            ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Copy Success", comment: "")).show() 
+                                ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Copy Success", comment: "")).show()
 
                                 // dismiss()
                             } label: {

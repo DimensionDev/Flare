@@ -296,7 +296,7 @@ struct ShareButton: View {
             .contentShape(Rectangle())
         }
         .sheet(isPresented: $showTextForSelection) {
-            let imageURLsString = content.images.compactMap(\.url).joined(separator: "\n") 
+            let imageURLsString = content.images.compactMap(\.url).joined(separator: "\n")
             let selectableContent = AttributedString(content.content.markdown + "\n" + imageURLsString)
 
             StatusRowSelectableTextView(content: selectableContent)

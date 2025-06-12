@@ -101,8 +101,18 @@ public fun createSampleStatus(user: UiUserV2): UiTimeline =
                         .apply {
                             appendChild(
                                 TextNode(
-                                    "Sample content for ${user.name.raw} on ${user.key.host} 😊 \n https://github.com/dimensiondev/flare   \n \n  [@realMaskNetwork](flare://ProfileWithNameAndHost/realMaskNetwork/twitter.com?accountKey=${user.key.id})    [#flare](flare://Search/%23flare?accountKey=${user.key.id})     [\$MASK](flare://Search/%23MASK?accountKey=${user.key.id})    ",
+                                    "Sample content for ${user.name.raw} on ${user.key.host} ",
                                 ),
+                            )
+                            appendChild(
+                                Element("a")
+                                    .apply {
+                                        attributes().put(
+                                            "href",
+                                            AppDeepLink.Search(user.key, "#flare"),
+                                        )
+                                        addChildren(TextNode("#flare"))
+                                    },
                             )
                         }.toUi(),
                 actions =

@@ -1,12 +1,13 @@
 package dev.dimension.flare.ui.route
 
+import android.annotation.SuppressLint
+import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.togetherWith
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -15,6 +16,7 @@ import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
 import dev.dimension.flare.ui.common.ProxyUriHandler
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
+import dev.dimension.flare.ui.component.FullScreenSceneStrategy
 import dev.dimension.flare.ui.component.TopLevelBackStack
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.rememberSavedStateNavEntryDecorator2
@@ -39,15 +41,14 @@ import soup.compose.material.motion.animation.materialSharedAxisZ
 import soup.compose.material.motion.animation.translateXIn
 import soup.compose.material.motion.animation.translateXOut
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@SuppressLint("UnusedContentLambdaTargetStateParameter")
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun Router(
     topLevelBackStack: TopLevelBackStack<Route>,
     navigationState: NavigationState,
     openDrawer: () -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
-
     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
 
     fun navigate(route: Route) {
@@ -76,6 +77,7 @@ internal fun Router(
                 remember {
                     DialogSceneStrategy<NavKey>()
                         .then(BottomSheetSceneStrategy())
+                        .then(FullScreenSceneStrategy())
                         .then(listDetailStrategy)
                 },
             entryDecorators =
@@ -120,19 +122,17 @@ internal fun Router(
             },
             entryProvider =
                 entryProvider {
-                    with(scope) {
-                        homeEntryBuilder(::navigate, ::onBack, openDrawer)
-                        blueskyEntryBuilder(::navigate, ::onBack)
-                        composeEntryBuilder(::navigate, ::onBack)
-                        dmEntryBuilder(::navigate, ::onBack, navigationState)
-                        listEntryBuilder(::navigate, ::onBack)
-                        mediaEntryBuilder(::navigate, ::onBack)
-                        profileEntryBuilder(::navigate, ::onBack)
-                        rssEntryBuilder(::navigate, ::onBack)
-                        serviceSelectEntryBuilder(::navigate, ::onBack)
-                        settingsSelectEntryBuilder(::navigate, ::onBack)
-                        statusEntryBuilder(::navigate, ::onBack)
-                    }
+                    homeEntryBuilder(::navigate, ::onBack, openDrawer)
+                    blueskyEntryBuilder(::navigate, ::onBack)
+                    composeEntryBuilder(::navigate, ::onBack)
+                    dmEntryBuilder(::navigate, ::onBack, navigationState)
+                    listEntryBuilder(::navigate, ::onBack)
+                    mediaEntryBuilder(::navigate, ::onBack)
+                    profileEntryBuilder(::navigate, ::onBack)
+                    rssEntryBuilder(::navigate, ::onBack)
+                    serviceSelectEntryBuilder(::navigate, ::onBack)
+                    settingsSelectEntryBuilder(::navigate, ::onBack)
+                    statusEntryBuilder(::navigate, ::onBack)
                 },
         )
     }

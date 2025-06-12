@@ -48,8 +48,9 @@ public fun AboutScreenContent(
     val uriHandler = LocalUriHandler.current
     Column(
         modifier =
-            modifier
-                .verticalScroll(rememberScrollState()),
+            Modifier
+                .verticalScroll(rememberScrollState())
+                .then(modifier),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(

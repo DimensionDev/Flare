@@ -5,10 +5,10 @@ import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
@@ -19,7 +19,7 @@ import androidx.core.view.WindowCompat
 import com.materialkolor.rememberDynamicColorScheme
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
-import dev.dimension.flare.ui.common.isExpanded
+import dev.dimension.flare.ui.component.platform.isBigScreen
 
 private object MoreColors {
     val Gray50 = Color(0xFFFAFAFA)
@@ -85,8 +85,7 @@ fun FlareTheme(
 ) {
     val seed = Color(LocalAppearanceSettings.current.colorSeed)
     val pureColorMode = LocalAppearanceSettings.current.pureColorMode
-    val windowInfo = currentWindowAdaptiveInfo()
-    val bigScreen = windowInfo.windowSizeClass.isExpanded()
+    val bigScreen = isBigScreen()
     val colorScheme =
         when {
             dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
@@ -154,9 +153,22 @@ fun FlareTheme(
         SideEffect {
             val window = (view.context as Activity).window
 //            window.statusBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars =
-                !darkTheme
+            WindowCompat.getInsetsController(window, view).apply {
+                isAppearanceLightStatusBars = !darkTheme
+                isAppearanceLightNavigationBars = !darkTheme
+            }
+        }
+        val actualDarkTheme = isDarkTheme()
+        if (darkTheme != actualDarkTheme) {
+            DisposableEffect(Unit) {
+                onDispose {
+                    val window = (view.context as Activity).window
+                    WindowCompat.getInsetsController(window, view).apply {
+                        isAppearanceLightStatusBars = !actualDarkTheme
+                        isAppearanceLightNavigationBars = !actualDarkTheme
+                    }
+                }
+            }
         }
     }
     MaterialTheme(
@@ -175,24 +187,3 @@ private fun isDarkTheme(): Boolean =
 
 @Composable
 fun ColorScheme.isLight() = this.background.luminance() > 0.5
-
-// @Composable
-// internal fun rememberNavAnimX(): NavHostAnimatedDestinationStyle {
-//    val slideDistance = rememberSlideDistance()
-//    return remember(slideDistance) {
-//        object : NavHostAnimatedDestinationStyle() {
-//            override val enterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
-//                materialSharedAxisXIn(true, slideDistance)
-//            }
-//            override val exitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
-//                materialSharedAxisXOut(true, slideDistance)
-//            }
-//            override val popEnterTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition = {
-//                materialSharedAxisXIn(false, slideDistance)
-//            }
-//            override val popExitTransition: AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition = {
-//                materialSharedAxisXOut(false, slideDistance)
-//            }
-//        }
-//    }
-// }

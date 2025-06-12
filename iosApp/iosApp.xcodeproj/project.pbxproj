@@ -76,6 +76,8 @@
 		6423385A2DF07E900022CB96 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Page/Compose/Timeline/CommonTimelineStatusComponent.bak,
+				Page/Home/View/SwiftUI/TimelineViewSwiftUI.bak,
 				Page/Home/View/UIKit/HomeTabController.swift.bak,
 				Page/Home/View/UIKit/HomeTabScreen.swift.bak,
 			);
@@ -88,6 +90,8 @@
 			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
 			buildPhase = 7555FF77242A565900829871 /* Sources */;
 			membershipExceptions = (
+				Page/Compose/Timeline/CommonTimelineStatusComponent.bak,
+				Page/Home/View/SwiftUI/TimelineViewSwiftUI.bak,
 				Page/Home/View/UIKit/HomeTabController.swift.bak,
 				Page/Home/View/UIKit/HomeTabScreen.swift.bak,
 			);

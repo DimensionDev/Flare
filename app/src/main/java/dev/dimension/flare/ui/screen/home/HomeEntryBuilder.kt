@@ -1,10 +1,13 @@
 package dev.dimension.flare.ui.screen.home
 
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
+import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.route.Route
 
+@OptIn(ExperimentalMaterial3Api::class)
 internal fun EntryProviderBuilder<NavKey>.homeEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
@@ -72,6 +75,14 @@ internal fun EntryProviderBuilder<NavKey>.homeEntryBuilder(
         TabSettingScreen(
             accountType = args.accountType,
             onBack = onBack,
+        )
+    }
+    entry<Route.AccountSelection>(
+        metadata = BottomSheetSceneStrategy.bottomSheet()
+    ) {
+        AccountSelectionModal(
+            onBack = onBack,
+            navigate = navigate,
         )
     }
 }

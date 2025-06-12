@@ -14,6 +14,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,7 +41,6 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
@@ -75,8 +75,8 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
         Column(
             modifier =
                 Modifier
-                    .padding(it)
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(rememberScrollState())
+                    .padding(it),
         ) {
             ListItem(
                 modifier =
@@ -192,7 +192,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                 )
             },
             text = {
-                OutlinedTextField2(
+                OutlinedTextField(
                     state = state.serverText,
                     placeholder = {
                         Text(

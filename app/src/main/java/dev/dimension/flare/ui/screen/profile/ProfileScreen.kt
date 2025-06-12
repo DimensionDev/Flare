@@ -80,6 +80,8 @@ import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.ProfileMedia
@@ -96,6 +98,54 @@ import moe.tlaster.nestedscrollview.VerticalNestedScrollView
 import moe.tlaster.nestedscrollview.rememberNestedScrollViewState
 import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.math.max
+
+@Composable
+internal fun ProfileWithUserNameAndHostDeeplinkRoute(
+    userName: String,
+    host: String,
+    accountType: AccountType,
+    toEditAccountList: (userKey: MicroBlogKey) -> Unit,
+    toSearchUserUsingAccount: (String, MicroBlogKey) -> Unit,
+    toStartMessage: (MicroBlogKey) -> Unit,
+    onFollowListClick: (userKey: MicroBlogKey) -> Unit,
+    onFansListClick: (userKey: MicroBlogKey) -> Unit,
+    onBack: () -> Unit = {},
+    showBackButton: Boolean = true,
+    onMediaClick: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
+) {
+    val state by producePresenter(key = "acct_${accountType}_$userName@$host") {
+        profileWithUserNameAndHostPresenter(
+            userName = userName,
+            host = host,
+            accountType = accountType,
+        )
+    }
+    state
+        .onSuccess {
+            ProfileScreen(
+                accountType = accountType,
+                toEditAccountList = {
+                    toEditAccountList(it.key)
+                },
+                toSearchUserUsingAccount = toSearchUserUsingAccount,
+                toStartMessage = toStartMessage,
+                onFollowListClick = onFollowListClick,
+                onFansListClick = onFansListClick,
+                userKey = it.key,
+                onBack = onBack,
+                showBackButton = showBackButton,
+                onMediaClick = onMediaClick,
+            )
+        }.onLoading {
+            ProfileLoadingScreen(
+                onBack = onBack,
+            )
+        }.onError {
+            ProfileErrorScreen(
+                onBack = onBack,
+            )
+        }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -347,23 +397,25 @@ internal fun ProfileScreen(
                                             edgePadding = screenHorizontalPadding,
                                             divider = {},
                                         ) {
-                                            tabs.toImmutableList().forEachIndexed { index, profileTab ->
-                                                Tab(
-                                                    selected = pagerState.currentPage == index,
-                                                    onClick = {
-                                                        scope.launch {
-                                                            pagerState.animateScrollToPage(index)
-                                                        }
-                                                    },
-                                                ) {
-                                                    Text(
-                                                        profileTab.title,
-                                                        modifier =
-                                                            Modifier
-                                                                .padding(8.dp),
-                                                    )
+                                            tabs
+                                                .toImmutableList()
+                                                .forEachIndexed { index, profileTab ->
+                                                    Tab(
+                                                        selected = pagerState.currentPage == index,
+                                                        onClick = {
+                                                            scope.launch {
+                                                                pagerState.animateScrollToPage(index)
+                                                            }
+                                                        },
+                                                    ) {
+                                                        Text(
+                                                            profileTab.title,
+                                                            modifier =
+                                                                Modifier
+                                                                    .padding(8.dp),
+                                                        )
+                                                    }
                                                 }
-                                            }
                                         }
                                     }
                                     HorizontalDivider(
@@ -387,6 +439,7 @@ internal fun ProfileScreen(
                                                 modifier = Modifier.fillMaxSize(),
                                             )
                                         }
+
                                         is ProfileState.Tab.Timeline -> {
                                             val listState = rememberLazyStaggeredGridState()
                                             if (index == pagerState.currentPage) {
@@ -503,13 +556,23 @@ private fun ProfileMediaTab(
                         )
                     } else {
                         Card {
-                            Box(modifier = Modifier.size(120.dp).placeholder(true))
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .size(120.dp)
+                                        .placeholder(true),
+                            )
                         }
                     }
                 }
             }.onLoading {
                 items(10) {
-                    Box(modifier = Modifier.size(120.dp).placeholder(true))
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(120.dp)
+                                .placeholder(true),
+                    )
                 }
             }
     }
@@ -584,5 +647,6 @@ private val ProfileState.Tab.title: String
                     ProfileTab.Timeline.Type.StatusWithReplies -> stringResource(R.string.profile_tab_timeline_with_reply)
                     ProfileTab.Timeline.Type.Likes -> stringResource(R.string.profile_tab_likes)
                 }
+
             is ProfileState.Tab.Media -> stringResource(R.string.profile_tab_media)
         }

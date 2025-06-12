@@ -18,6 +18,7 @@ import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -43,7 +44,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.NetworkImage
-import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.CreateListPresenter
@@ -138,7 +138,7 @@ internal fun CreateListDialog(
                         }
                     }
 
-                    OutlinedTextField2(
+                    OutlinedTextField(
                         state = state.text,
                         label = { Text(text = stringResource(id = R.string.list_create_name)) },
                         placeholder = { Text(text = stringResource(id = R.string.list_create_name_hint)) },
@@ -149,7 +149,7 @@ internal fun CreateListDialog(
                 }
                 state.supportedMetaData.onSuccess {
                     if (it.contains(ListMetaDataType.DESCRIPTION)) {
-                        OutlinedTextField2(
+                        OutlinedTextField(
                             state = state.description,
                             label = { Text(text = stringResource(id = R.string.list_create_description)) },
                             placeholder = { Text(text = stringResource(id = R.string.list_create_description_hint)) },

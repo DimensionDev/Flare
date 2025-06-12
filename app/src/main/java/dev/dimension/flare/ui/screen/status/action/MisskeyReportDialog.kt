@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -16,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.MisskeyReportPresenter
 import moe.tlaster.precompose.molecule.producePresenter
@@ -50,7 +50,7 @@ internal fun MisskeyReportDialog(
                 Text(
                     text = stringResource(R.string.report_description),
                 )
-                OutlinedTextField2(
+                OutlinedTextField(
                     state = comment,
                     modifier = Modifier.fillMaxWidth(),
                 )

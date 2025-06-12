@@ -14,14 +14,17 @@ import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.screen.home.HomeScreen
+import dev.dimension.flare.ui.theme.FlareTheme
 import org.koin.compose.koinInject
 
 @Composable
 fun AppContainer(afterInit: () -> Unit) {
     FlareApp {
-        HomeScreen(
-            afterInit = afterInit,
-        )
+        FlareTheme {
+            HomeScreen(
+                afterInit = afterInit,
+            )
+        }
     }
 }
 

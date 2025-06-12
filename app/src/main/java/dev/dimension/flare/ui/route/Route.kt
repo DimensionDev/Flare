@@ -341,6 +341,9 @@ internal sealed interface Route : NavKey {
         ) : Media
     }
 
+    @Serializable
+    data object AccountSelection : Route
+
     companion object {
         public fun parse(url: String): Route? {
             val data = Url(url)

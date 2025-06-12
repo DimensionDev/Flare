@@ -58,8 +58,8 @@ internal fun StorageScreen(
         Column(
             modifier =
                 Modifier
-                    .padding(it)
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(rememberScrollState())
+                    .padding(it),
         ) {
             ListItem(
                 headlineContent = {

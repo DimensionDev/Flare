@@ -37528,6 +37528,7 @@
     },
     "status_sensitive_media" : {
       "comment" : "Status media sensitive button",
+      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {

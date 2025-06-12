@@ -34,6 +34,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -73,7 +74,6 @@ import dev.dimension.flare.ui.component.FlareDividerDefaults
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalBottomBarHeight
-import dev.dimension.flare.ui.component.OutlinedTextField2
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.QuotedStatus
@@ -222,7 +222,7 @@ internal fun DMConversationScreen(
                         color = FlareDividerDefaults.color,
                         thickness = FlareDividerDefaults.thickness,
                     )
-                    OutlinedTextField2(
+                    OutlinedTextField(
                         modifier =
                             Modifier
                                 .padding(

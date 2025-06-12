@@ -36,7 +36,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil3.annotation.ExperimentalCoilApi
@@ -90,7 +89,6 @@ internal fun MediaScreen(
     val state by producePresenter(uri) {
         mediaPresenter(uri, context)
     }
-    val haptics = LocalHapticFeedback.current
     FlareTheme(
         darkTheme = true,
     ) {

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -56,6 +57,7 @@ public fun CommonStatusHeaderComponent(
                             onUserClick(data.key)
                         },
                 maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         },
         supportingContent = {
@@ -72,6 +74,8 @@ public fun CommonStatusHeaderComponent(
                         ) {
                             onUserClick(data.key)
                         },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         },
         trailingContent = trailing,

@@ -282,7 +282,7 @@ internal fun searchBarPresenter(
                 searchHistoryState.addSearchHistory(initialQuery)
             }
         }
-        val queryTextState = rememberTextFieldState()
+        val queryTextState = rememberTextFieldState(initialText = initialQuery)
 
         object :
             SearchBarState,

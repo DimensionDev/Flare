@@ -64,6 +64,10 @@ class IOSPodcastManager: ObservableObject {
         removePlayerItemDidPlayToEndObserver()
     }
 
+    func getPlayingPodcast() -> UiPodcast? {
+        currentPodcast
+    }
+
     func playPodcast(podcast: UiPodcast) {
         print("=========================================")
         print("[iOSPodcastManager] Request received: playPodcast")

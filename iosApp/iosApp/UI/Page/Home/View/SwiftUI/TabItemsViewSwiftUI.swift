@@ -29,14 +29,14 @@ struct TabItemsViewSwiftUI: View {
                                     .fill(theme.tintColor)
                                     .frame(height: 2)
                                     .matchedGeometryEffect(id: "activeTab", in: tabNamespace)
-                            } else if selection == "" {
+                            } else if selection == "", item.key == items.first?.key {
                                 // first key , show active tab ,home
-                                if item.key == items.first?.key {
-                                    Rectangle()
-                                        .fill(theme.tintColor)
-                                        .frame(height: 2)
-                                        .matchedGeometryEffect(id: "activeTab", in: tabNamespace)
-                                }
+
+                                Rectangle()
+                                    .fill(theme.tintColor)
+                                    .frame(height: 2)
+                                    .matchedGeometryEffect(id: "activeTab", in: tabNamespace)
+
                             } else {
                                 Rectangle()
                                     .fill(Color.clear)

@@ -13,17 +13,17 @@ struct StatusViewModel {
     let data: UiTimelineItemContentStatus
     let isDetail: Bool
     let enableTranslation: Bool
-    
+
     init(data: UiTimelineItemContentStatus, isDetail: Bool, enableTranslation: Bool = true) {
         self.data = data
         self.isDetail = isDetail
         self.enableTranslation = enableTranslation
     }
-    
+
     var statusData: UiTimelineItemContentStatus { data }
     var shouldShowTranslation: Bool { enableTranslation }
     var isDetailView: Bool { isDetail }
-    
+
     var hasUser: Bool { data.user != nil }
     var hasAboveTextContent: Bool { data.aboveTextContent != nil }
     var hasContentWarning: Bool { data.contentWarning != nil && !data.contentWarning!.raw.isEmpty }
@@ -33,22 +33,22 @@ struct StatusViewModel {
     var hasQuote: Bool { !data.quote.isEmpty }
     var hasBottomContent: Bool { data.bottomContent != nil }
     var hasActions: Bool { !data.actions.isEmpty }
-    
+
     var isPodcastCard: Bool {
         guard let card = data.card,
               let url = URL(string: card.url) else { return false }
         return url.scheme == "flare" && url.host?.lowercased() == "podcast"
     }
-    
+
     var shouldShowLinkPreview: Bool {
         guard let card = data.card else { return false }
         return !isPodcastCard && card.media != nil
     }
-    
+
     func getProcessedActions() -> (mainActions: [StatusAction], moreActions: [StatusActionItem]) {
         ActionProcessor.processActions(data.actions)
     }
-    
+
     func getFormattedDate() -> String {
         let dateInRegion = DateInRegion(data.createdAt, region: .current)
         return dateInRegion.toRelative(since: DateInRegion(Date(), region: .current))
@@ -59,46 +59,46 @@ enum ActionProcessor {
     static func processActions(_ actions: [StatusAction]) -> (mainActions: [StatusAction], moreActions: [StatusActionItem]) {
         var bottomMainActions: [StatusAction] = []
         var bottomMoreActions: [StatusActionItem] = []
-        
+
         for action in actions {
             switch onEnum(of: action) {
-                case let .item(item):
-                    // 所有非 More 的 item 都加入主操作
-                    if !(item is StatusActionItemMore) {
-                        //                    if item is StatusActionItemReaction {
-                        //                        // misskey 的+ emoji，先去掉
-                        //                    } else {
-                        
-                        bottomMainActions.append(action)
-                        //                    }
+            case let .item(item):
+                // 所有非 More 的 item 都加入主操作
+                if !(item is StatusActionItemMore) {
+                    //                    if item is StatusActionItemReaction {
+                    //                        // misskey 的+ emoji，先去掉
+                    //                    } else {
+
+                    bottomMainActions.append(action)
+                    //                    }
+                }
+            case let .group(group):
+                let displayItem = group.displayItem
+                if (displayItem as? StatusActionItemMore) != nil {
+                    // 只处理 More 菜单中的操作
+                    for subAction in group.actions {
+                        if case let .item(item) = onEnum(of: subAction) {
+                            if item is StatusActionItemBookmark {
+                                // 将书签添加到主操作
+                                bottomMainActions.append(subAction)
+                            } else {
+                                // 其他操作添加到更多操作
+                                // bottomMoreActions.append(item)
+                            }
+                        } else if subAction is StatusActionAsyncActionItem {}
                     }
-                case let .group(group):
-                    let displayItem = group.displayItem
-                    if (displayItem as? StatusActionItemMore) != nil {
-                        // 只处理 More 菜单中的操作
-                        for subAction in group.actions {
-                            if case let .item(item) = onEnum(of: subAction) {
-                                if item is StatusActionItemBookmark {
-                                    // 将书签添加到主操作
-                                    bottomMainActions.append(subAction)
-                                } else {
-                                    // 其他操作添加到更多操作
-                                    // bottomMoreActions.append(item)
-                                }
-                            } else if subAction is StatusActionAsyncActionItem {}
-                        }
-                    } else {
-                        // 其他 group（比如转发组）保持原样
-                        bottomMainActions.append(action)
-                    }
-                case .asyncActionItem:
-                    break
+                } else {
+                    // 其他 group（比如转发组）保持原样
+                    bottomMainActions.append(action)
+                }
+            case .asyncActionItem:
+                break
             }
         }
-        
+
         return (bottomMainActions, bottomMoreActions)
     }
-    
+
     static func showReportToast() {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first
@@ -116,12 +116,12 @@ enum ActionProcessor {
 class StatusContentViewModel {
     let content: UiRichText
     let isRTL: Bool
-    
+
     init(content: UiRichText) {
         self.content = content
         isRTL = content.isRTL
     }
-    
+
     var hasContent: Bool { !content.raw.isEmpty }
     var rawText: String { content.raw }
     var markdownText: String { content.markdown }
@@ -133,32 +133,32 @@ struct CommonTimelineStatusComponent: View {
     let enableTranslation: Bool
     @State private var showMedia: Bool = false
     @State private var showShareMenu: Bool = false
-    
+
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
     @EnvironmentObject private var router: FlareRouter
     @Environment(FlareTheme.self) private var theme
-    
+
     let onMediaClick: (Int, UiMedia) -> Void
-    
+
     init(data: UiTimelineItemContentStatus, onMediaClick: @escaping (Int, UiMedia) -> Void, isDetail: Bool, enableTranslation: Bool = true) {
         self.data = data
         self.isDetail = isDetail
         self.enableTranslation = enableTranslation
         self.onMediaClick = onMediaClick
     }
-    
+
     //  每次都要算，性能堪忧，无解，后期想办法
     private var viewModel: StatusViewModel {
         StatusViewModel(data: data, isDetail: isDetail, enableTranslation: enableTranslation)
     }
-    
+
     var body: some View {
         VStack(alignment: .leading) {
             Spacer().frame(height: 2)
-            
+
             StatusHeaderView(viewModel: viewModel)
-            
+
             StatusContentView(
                 viewModel: viewModel,
                 appSettings: appSettings,
@@ -167,14 +167,14 @@ struct CommonTimelineStatusComponent: View {
                 onMediaClick: onMediaClick,
                 onPodcastCardTap: handlePodcastCardTap
             )
-            
+
             StatusActionsView(
                 viewModel: viewModel,
                 appSettings: appSettings,
                 openURL: openURL,
                 parentView: self
             )
-            
+
             // Spacer().frame(height: 3)
         }
         .frame(alignment: .leading)
@@ -183,7 +183,7 @@ struct CommonTimelineStatusComponent: View {
             handleStatusTap()
         }
     }
-    
+
     private func handleStatusTap() {
         if let tapLocation = UIApplication.shared.windows.first?.hitTest(
             UIApplication.shared.windows.first?.convert(CGPoint(x: 0, y: 0), to: nil) ?? .zero,
@@ -201,7 +201,7 @@ struct CommonTimelineStatusComponent: View {
             }
         }
     }
-    
+
     private func handlePodcastCardTap(card: UiCard) {
         if let route = AppDeepLinkHelper().parse(url: card.url) as? AppleRoute.Podcast {
             print("Podcast Card Tapped, navigating via router to: podcastSheet(accountType: \(route.accountType), podcastId: \(route.id))")
@@ -217,7 +217,7 @@ struct StatusHeaderView: View {
     let viewModel: StatusViewModel
     @EnvironmentObject private var router: FlareRouter
     @Environment(FlareTheme.self) private var theme
-    
+
     var body: some View {
         HStack(alignment: .top) {
             HStack(alignment: .center, spacing: 1) {
@@ -229,10 +229,10 @@ struct StatusHeaderView: View {
                     .id("UserComponent_\(user.key)")
                     .environmentObject(router)
                 }
-                
+
                 Spacer()
                 // icon + time
-                
+
                 // 更多按钮
                 // if !processActions().moreActions.isEmpty {
                 //     Menu {
@@ -249,7 +249,7 @@ struct StatusHeaderView: View {
                 //                 } else {
                 //                     nil
                 //                 }
-                
+
                 //             Button(
                 //                 role: role,
                 //                 action: {
@@ -302,7 +302,7 @@ struct StatusHeaderView: View {
                 //     }
                 //     .padding(.top, 0)
                 // }
-                
+
                 if !viewModel.isDetailView {
                     Text(viewModel.getFormattedDate())
                         .foregroundColor(.gray)
@@ -327,21 +327,21 @@ struct StatusContentView: View {
     let openURL: OpenURLAction
     let onMediaClick: (Int, UiMedia) -> Void
     let onPodcastCardTap: (UiCard) -> Void
-    
+
     var body: some View {
         VStack(alignment: .leading) {
             // Reply content
             if viewModel.hasAboveTextContent, let aboveTextContent = viewModel.statusData.aboveTextContent {
                 StatusReplyView(aboveTextContent: aboveTextContent)
             }
-            
+
             // Content warning
             if viewModel.hasContentWarning, let cwText = viewModel.statusData.contentWarning {
                 StatusContentWarningView(contentWarning: cwText, theme: theme, openURL: openURL)
             }
-            
+
             Spacer().frame(height: 10)
-            
+
             // Main content
             StatusMainContentView(
                 viewModel: viewModel,
@@ -349,7 +349,7 @@ struct StatusContentView: View {
                 theme: theme,
                 openURL: openURL
             )
-            
+
             // Media
             if viewModel.hasImages {
                 StatusMediaView(
@@ -358,7 +358,7 @@ struct StatusContentView: View {
                     onMediaClick: onMediaClick
                 )
             }
-            
+
             // Card (Podcast or Link Preview)
             if viewModel.hasCard, let card = viewModel.statusData.card {
                 StatusCardView(
@@ -368,17 +368,17 @@ struct StatusContentView: View {
                     onPodcastCardTap: onPodcastCardTap
                 )
             }
-            
+
             // Quote
             if viewModel.hasQuote {
                 StatusQuoteView(quotes: viewModel.statusData.quote, onMediaClick: onMediaClick)
             }
-            
+
             // misskey 的+ 的emojis
             if viewModel.hasBottomContent, let bottomContent = viewModel.statusData.bottomContent {
                 StatusBottomContentView(bottomContent: bottomContent)
             }
-            
+
             // Detail date
             if viewModel.isDetailView {
                 StatusDetailDateView(createdAt: viewModel.statusData.createdAt)
@@ -389,13 +389,13 @@ struct StatusContentView: View {
 
 struct StatusReplyView: View {
     let aboveTextContent: UiTimelineItemContentStatusAboveTextContent
-    
+
     var body: some View {
         switch onEnum(of: aboveTextContent) {
-            case let .replyTo(data):
-                Text(String(localized: "Reply to \(data.handle.removingHandleFirstPrefix("@"))"))
-                    .font(.caption)
-                    .opacity(0.6)
+        case let .replyTo(data):
+            Text(String(localized: "Reply to \(data.handle.removingHandleFirstPrefix("@"))"))
+                .font(.caption)
+                .opacity(0.6)
         }
         Spacer().frame(height: 4)
     }
@@ -405,7 +405,7 @@ struct StatusContentWarningView: View {
     let contentWarning: UiRichText
     let theme: FlareTheme
     let openURL: OpenURLAction
-    
+
     var body: some View {
         Button(action: {
             // withAnimation {
@@ -414,7 +414,7 @@ struct StatusContentWarningView: View {
         }) {
             Image(systemName: "exclamationmark.triangle")
                 .foregroundColor(theme.labelColor)
-            
+
             FlareText(
                 contentWarning.raw,
                 contentWarning.markdown,
@@ -457,7 +457,7 @@ struct StatusMainContentView: View {
     let appSettings: AppSettings
     let theme: FlareTheme
     let openURL: OpenURLAction
-    
+
     var body: some View {
         if viewModel.hasContent {
             let content = viewModel.statusData.content
@@ -479,7 +479,7 @@ struct StatusMainContentView: View {
             }
             .lineSpacing(CGFloat(theme.lineSpacing))
             .foregroundColor(theme.labelColor)
-            
+
             if appSettings.appearanceSettings.autoTranslate, viewModel.shouldShowTranslation {
                 TranslatableText(originalText: content.raw)
             }
@@ -495,10 +495,10 @@ struct StatusMediaView: View {
     let viewModel: StatusViewModel
     let appSettings: AppSettings
     let onMediaClick: (Int, UiMedia) -> Void
-    
+
     var body: some View {
         Spacer().frame(height: 8)
-        
+
         MediaComponent(
             hideSensitive: viewModel.statusData.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
             medias: viewModel.statusData.images,
@@ -519,7 +519,7 @@ struct StatusCardView: View {
     let viewModel: StatusViewModel
     let appSettings: AppSettings
     let onPodcastCardTap: (UiCard) -> Void
-    
+
     var body: some View {
         if viewModel.isPodcastCard {
             PodcastPreview(card: card)
@@ -535,16 +535,16 @@ struct StatusCardView: View {
 struct StatusQuoteView: View {
     let quotes: [UiTimelineItemContentStatus]
     let onMediaClick: (Int, UiMedia) -> Void
-    
+
     var body: some View {
         Spacer().frame(height: 10)
-        
+
         VStack {
             ForEach(0 ..< quotes.count, id: \.self) { index in
                 let quote = quotes[index]
                 QuotedStatus(data: quote, onMediaClick: onMediaClick)
                     .foregroundColor(.gray)
-                
+
                 if index != quotes.count - 1 {
                     Divider()
                 }
@@ -561,41 +561,41 @@ struct StatusQuoteView: View {
 
 struct StatusBottomContentView: View {
     let bottomContent: UiTimelineItemContentStatusBottomContent
-    
+
     var body: some View {
         switch onEnum(of: bottomContent) {
-            case let .reaction(data):
-                ScrollView(.horizontal) {
-                    LazyHStack {
-                        if !data.emojiReactions.isEmpty {
-                            ForEach(0 ..< data.emojiReactions.count, id: \.self) { index in
-                                let reaction = data.emojiReactions[index]
-                                Button(action: {
-                                    reaction.onClicked()
-                                }) {
-                                    HStack {
-                                        if !reaction.url.isEmpty {
-                                            KFImage(URL(string: reaction.url))
-                                                .resizable()
-                                                .scaledToFit()
-                                        } else {
-                                            Text(reaction.name)
-                                        }
-                                        Text(reaction.humanizedCount)
+        case let .reaction(data):
+            ScrollView(.horizontal) {
+                LazyHStack {
+                    if !data.emojiReactions.isEmpty {
+                        ForEach(0 ..< data.emojiReactions.count, id: \.self) { index in
+                            let reaction = data.emojiReactions[index]
+                            Button(action: {
+                                reaction.onClicked()
+                            }) {
+                                HStack {
+                                    if !reaction.url.isEmpty {
+                                        KFImage(URL(string: reaction.url))
+                                            .resizable()
+                                            .scaledToFit()
+                                    } else {
+                                        Text(reaction.name)
                                     }
+                                    Text(reaction.humanizedCount)
                                 }
-                                .buttonStyle(.borderless)
                             }
+                            .buttonStyle(.borderless)
                         }
                     }
                 }
+            }
         }
     }
 }
 
 struct StatusDetailDateView: View {
     let createdAt: Date
-    
+
     var body: some View {
         Spacer().frame(height: 4)
         HStack {
@@ -611,17 +611,17 @@ struct StatusActionsView: View {
     let appSettings: AppSettings
     let openURL: OpenURLAction
     let parentView: CommonTimelineStatusComponent
-    
+
     var body: some View {
         Spacer().frame(height: 10)
-        
+
         if appSettings.appearanceSettings.showActions || viewModel.isDetailView, viewModel.hasActions {
             let processedActions = viewModel.getProcessedActions()
-            
+
             HStack(spacing: 0) {
                 ForEach(0 ..< processedActions.mainActions.count, id: \.self) { actionIndex in
                     let action = processedActions.mainActions[actionIndex]
-                    
+
                     StatusActionButton(
                         action: action,
                         isDetail: viewModel.isDetailView,
@@ -630,7 +630,7 @@ struct StatusActionsView: View {
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal, 10)
                 }
-                
+
                 ShareButton(content: viewModel.statusData, view: parentView)
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal, 0)
@@ -653,37 +653,37 @@ struct StatusActionButton: View {
     let action: StatusAction
     let isDetail: Bool
     let openURL: OpenURLAction
-    
+
     var body: some View {
         switch onEnum(of: action) {
-            case .asyncActionItem:
-                EmptyView()
-            case let .item(item):
-                Button(action: {
-                    handleItemAction(item)
-                },
-                       label: {
-                    StatusActionLabel(item: item)
-                })
-            case let .group(group):
-                Menu {
-                    ForEach(0 ..< group.actions.count, id: \.self) { subActionIndex in
-                        let subAction = group.actions[subActionIndex]
-                        if case let .item(item) = onEnum(of: subAction) {
-                            StatusActionMenuItem(item: item, openURL: openURL)
-                        }
+        case .asyncActionItem:
+            EmptyView()
+        case let .item(item):
+            Button(action: {
+                       handleItemAction(item)
+                   },
+                   label: {
+                       StatusActionLabel(item: item)
+                   })
+        case let .group(group):
+            Menu {
+                ForEach(0 ..< group.actions.count, id: \.self) { subActionIndex in
+                    let subAction = group.actions[subActionIndex]
+                    if case let .item(item) = onEnum(of: subAction) {
+                        StatusActionMenuItem(item: item, openURL: openURL)
                     }
-                } label: {
-                    StatusActionLabel(item: group.displayItem)
                 }
+            } label: {
+                StatusActionLabel(item: group.displayItem)
+            }
         }
     }
-    
+
     private func handleItemAction(_ item: StatusActionItem) {
         if let clickable = item as? StatusActionItemClickable {
             os_log("[URL点击] 状态操作点击: %{public}@", log: .default, type: .debug, String(describing: type(of: item)))
             clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-            
+
             if case .report = onEnum(of: item) {
                 ActionProcessor.showReportToast()
             }
@@ -694,19 +694,19 @@ struct StatusActionButton: View {
 struct StatusActionMenuItem: View {
     let item: StatusActionItem
     let openURL: OpenURLAction
-    
+
     var body: some View {
         let role: ButtonRole? =
-        if let colorData = item as? StatusActionItemColorized {
-            switch colorData.color {
+            if let colorData = item as? StatusActionItemColorized {
+                switch colorData.color {
                 case .red: .destructive
                 case .primaryColor: nil
                 case .contentColor: nil
                 case .error: .destructive
+                }
+            } else {
+                nil
             }
-        } else {
-            nil
-        }
         Button(
             role: role,
             action: {
@@ -716,19 +716,19 @@ struct StatusActionMenuItem: View {
             },
             label: {
                 let text: LocalizedStringKey =
-                switch onEnum(of: item) {
+                    switch onEnum(of: item) {
                     case let .bookmark(data):
                         data.bookmarked
-                        ? LocalizedStringKey("status_action_unbookmark")
-                        : LocalizedStringKey("status_action_bookmark")
+                            ? LocalizedStringKey("status_action_unbookmark")
+                            : LocalizedStringKey("status_action_bookmark")
                     case .delete:
                         LocalizedStringKey("status_action_delete")
                     case let .like(data):
                         data.liked
-                        ? LocalizedStringKey(
-                            "status_action_unlike")
-                        : LocalizedStringKey(
-                            "status_action_like")
+                            ? LocalizedStringKey(
+                                "status_action_unlike")
+                            : LocalizedStringKey(
+                                "status_action_like")
                     case .quote: LocalizedStringKey("quote")
                     case .reaction:
                         LocalizedStringKey(
@@ -738,11 +738,11 @@ struct StatusActionMenuItem: View {
                     case .report: LocalizedStringKey("report")
                     case let .retweet(data):
                         data.retweeted
-                        ? LocalizedStringKey("retweet_remove")
-                        : LocalizedStringKey("retweet")
+                            ? LocalizedStringKey("retweet_remove")
+                            : LocalizedStringKey("retweet")
                     case .more:
                         LocalizedStringKey("status_action_more")
-                }
+                    }
                 Label {
                     Text(text)
                 } icon: {
@@ -763,68 +763,68 @@ func dateFormatter(_ date: Date) -> some View {
 struct StatusActionItemIcon: View {
     let item: StatusActionItem
     @Environment(\.colorScheme) var colorScheme
-    
+
     var body: some View {
         switch onEnum(of: item) {
-            case let .bookmark(data):
-                if data.bookmarked {
-                    Image(asset: Asset.Image.Status.Toolbar.bookmarkFilled)
-                        .renderingMode(.template)
-                    //                    .foregroundColor(FColors.State.swiftUIBookmarkActive)
-                } else {
-                    Image(asset: Asset.Image.Status.Toolbar.bookmark)
-                        .renderingMode(.template)
-                    //                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
-                }
-            case .delete:
-                Image(asset: Asset.Image.Status.Toolbar.delete)
+        case let .bookmark(data):
+            if data.bookmarked {
+                Image(asset: Asset.Image.Status.Toolbar.bookmarkFilled)
                     .renderingMode(.template)
-                //                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
-            case let .like(data):
-                if data.liked {
-                    Image(asset: Asset.Image.Status.Toolbar.favorite)
-                        .renderingMode(.template)
-                    //                    .foregroundColor(FColors.State.swiftUILikeActive)
-                } else {
-                    Image(asset: Asset.Image.Status.Toolbar.favoriteBorder)
-                        .renderingMode(.template)
-                    //                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
-                }
-            case .more:
-                Image(asset: Asset.Image.Status.more)
+                //                    .foregroundColor(FColors.State.swiftUIBookmarkActive)
+            } else {
+                Image(asset: Asset.Image.Status.Toolbar.bookmark)
                     .renderingMode(.template)
+                //                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+            }
+        case .delete:
+            Image(asset: Asset.Image.Status.Toolbar.delete)
+                .renderingMode(.template)
+        //                .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+        case let .like(data):
+            if data.liked {
+                Image(asset: Asset.Image.Status.Toolbar.favorite)
+                    .renderingMode(.template)
+                //                    .foregroundColor(FColors.State.swiftUILikeActive)
+            } else {
+                Image(asset: Asset.Image.Status.Toolbar.favoriteBorder)
+                    .renderingMode(.template)
+                //                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+            }
+        case .more:
+            Image(asset: Asset.Image.Status.more)
+                .renderingMode(.template)
                 //       .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
-                    .rotationEffect(.degrees(90))
-            case .quote:
-                Image(asset: Asset.Image.Status.Toolbar.quote)
+                .rotationEffect(.degrees(90))
+        case .quote:
+            Image(asset: Asset.Image.Status.Toolbar.quote)
+                .renderingMode(.template)
+        //     .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+        case let .reaction(data):
+            if data.reacted {
+                Awesome.Classic.Solid.minus.image
+                //         .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+            } else {
+                Awesome.Classic.Solid.plus.image
+                //        .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+            }
+        case .reply:
+            Image(asset: Asset.Image.Status.Toolbar.chatBubbleOutline)
+                .renderingMode(.template)
+        //      .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+        case .report:
+            Image(asset: Asset.Image.Status.Toolbar.flag)
+                .renderingMode(.template)
+        //   .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+        case let .retweet(data):
+            if data.retweeted {
+                Image(asset: Asset.Image.Status.Toolbar.repeat)
                     .renderingMode(.template)
-                //     .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
-            case let .reaction(data):
-                if data.reacted {
-                    Awesome.Classic.Solid.minus.image
-                    //         .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
-                } else {
-                    Awesome.Classic.Solid.plus.image
-                    //        .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
-                }
-            case .reply:
-                Image(asset: Asset.Image.Status.Toolbar.chatBubbleOutline)
+                //                    .foregroundColor(FColors.State.swiftUIRetweetActive)
+            } else {
+                Image(asset: Asset.Image.Status.Toolbar.repeat)
                     .renderingMode(.template)
-                //      .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
-            case .report:
-                Image(asset: Asset.Image.Status.Toolbar.flag)
-                    .renderingMode(.template)
-                //   .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
-            case let .retweet(data):
-                if data.retweeted {
-                    Image(asset: Asset.Image.Status.Toolbar.repeat)
-                        .renderingMode(.template)
-                    //                    .foregroundColor(FColors.State.swiftUIRetweetActive)
-                } else {
-                    Image(asset: Asset.Image.Status.Toolbar.repeat)
-                        .renderingMode(.template)
-                    //                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
-                }
+                //                    .foregroundColor(colorScheme == .dark ? Color.white : Color.black)
+            }
         }
     }
 }
@@ -834,10 +834,10 @@ struct StatusActionLabel: View {
     let item: StatusActionItem
     @Environment(\.colorScheme) var colorScheme
     @Environment(FlareTheme.self) private var theme
-    
+
     var body: some View {
         let text =
-        switch onEnum(of: item) {
+            switch onEnum(of: item) {
             case let .like(data):
                 formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
             case let .retweet(data):
@@ -849,8 +849,8 @@ struct StatusActionLabel: View {
             case let .bookmark(data):
                 formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
             default: ""
-        }
-        
+            }
+
         // let color = Color.black
         //            switch onEnum(of: item) {
         //            case let .retweet(data):
@@ -868,7 +868,7 @@ struct StatusActionLabel: View {
         //            default:
         //                colorScheme == .dark ? Color.white : Color.black
         //            }
-        
+
         Label {
             Text(text)
         } icon: {
@@ -880,24 +880,24 @@ struct StatusActionLabel: View {
 
 struct StatusVisibilityComponent: View {
     let visibility: UiTimelineItemContentStatusTopEndContentVisibility.Type_
-    
+
     var body: some View {
         switch visibility {
-            case .public:
-                Awesome.Classic.Solid.globe.image.opacity(0.6)
-            case .home:
-                Awesome.Classic.Solid.lockOpen.image
-            case .followers:
-                Awesome.Classic.Solid.lock.image
-            case .specified:
-                Awesome.Classic.Solid.at.image
+        case .public:
+            Awesome.Classic.Solid.globe.image.opacity(0.6)
+        case .home:
+            Awesome.Classic.Solid.lockOpen.image
+        case .followers:
+            Awesome.Classic.Solid.lock.image
+        case .specified:
+            Awesome.Classic.Solid.at.image
         }
     }
 }
 
 struct CenteredLabelStyle: LabelStyle {
     @Environment(FlareTheme.self) private var theme
-    
+
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 4) {
             configuration.icon.foregroundColor(theme.labelColor)

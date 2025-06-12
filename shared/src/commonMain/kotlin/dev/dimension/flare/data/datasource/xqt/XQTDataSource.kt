@@ -1888,9 +1888,7 @@ internal class XQTDataSource(
                     ?.get(userKey.id)
                     ?.canDm == true
             if (!canDm) {
-                // 先返回false吧，异常导致ui卡顿，后期统一处理 todo：
-                // throw Exception("Cannot send DM")
-                return false
+                throw Exception("Cannot send DM")
             }
         }.isSuccess
 

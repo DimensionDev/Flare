@@ -12,15 +12,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -50,11 +49,12 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AppearancePresenter
 import dev.dimension.flare.ui.presenter.settings.AppearanceState
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun AppearanceScreen(
     onBack: () -> Unit,
@@ -109,51 +109,25 @@ internal fun AppearanceScreen(
                     },
                     trailingContent = {
                         if (maxWidth >= 400.dp) {
-                            SingleChoiceSegmentedButtonRow {
-                                SegmentedButton(
-                                    selected = appearanceSettings.theme == Theme.LIGHT,
-                                    onClick = {
-                                        state.updateSettings {
-                                            copy(theme = Theme.LIGHT)
-                                        }
-                                    },
-                                    shape =
-                                        SegmentedButtonDefaults.itemShape(
-                                            index = 0,
-                                            count = 3,
-                                        ),
-                                ) {
-                                    Text(text = stringResource(id = R.string.settings_appearance_theme_light))
-                                }
-                                SegmentedButton(
-                                    selected = appearanceSettings.theme == Theme.SYSTEM,
-                                    onClick = {
-                                        state.updateSettings {
-                                            copy(theme = Theme.SYSTEM)
-                                        }
-                                    },
-                                    shape =
-                                        SegmentedButtonDefaults.itemShape(
-                                            index = 1,
-                                            count = 3,
-                                        ),
-                                ) {
-                                    Text(text = stringResource(id = R.string.settings_appearance_theme_auto))
-                                }
-                                SegmentedButton(
-                                    selected = appearanceSettings.theme == Theme.DARK,
-                                    onClick = {
-                                        state.updateSettings {
-                                            copy(theme = Theme.DARK)
-                                        }
-                                    },
-                                    shape =
-                                        SegmentedButtonDefaults.itemShape(
-                                            index = 2,
-                                            count = 3,
-                                        ),
-                                ) {
-                                    Text(text = stringResource(id = R.string.settings_appearance_theme_dark))
+                            val items =
+                                persistentMapOf(
+                                    Theme.LIGHT to stringResource(id = R.string.settings_appearance_theme_light),
+                                    Theme.SYSTEM to stringResource(id = R.string.settings_appearance_theme_auto),
+                                    Theme.DARK to stringResource(id = R.string.settings_appearance_theme_dark),
+                                )
+                            ButtonGroup(
+                                overflowIndicator = {},
+                            ) {
+                                items.forEach { (theme, label) ->
+                                    toggleableItem(
+                                        checked = appearanceSettings.theme == theme,
+                                        onCheckedChange = {
+                                            state.updateSettings {
+                                                copy(theme = theme)
+                                            }
+                                        },
+                                        label = label,
+                                    )
                                 }
                             }
                         } else {
@@ -304,36 +278,24 @@ internal fun AppearanceScreen(
                     },
                     trailingContent = {
                         if (maxWidth >= 400.dp) {
-                            SingleChoiceSegmentedButtonRow {
-                                SegmentedButton(
-                                    selected = appearanceSettings.avatarShape == AvatarShape.CIRCLE,
-                                    onClick = {
-                                        state.updateSettings {
-                                            copy(avatarShape = AvatarShape.CIRCLE)
-                                        }
-                                    },
-                                    shape =
-                                        SegmentedButtonDefaults.itemShape(
-                                            index = 0,
-                                            count = 2,
-                                        ),
-                                ) {
-                                    Text(text = stringResource(id = R.string.settings_appearance_avatar_shape_round))
-                                }
-                                SegmentedButton(
-                                    selected = appearanceSettings.avatarShape == AvatarShape.SQUARE,
-                                    onClick = {
-                                        state.updateSettings {
-                                            copy(avatarShape = AvatarShape.SQUARE)
-                                        }
-                                    },
-                                    shape =
-                                        SegmentedButtonDefaults.itemShape(
-                                            index = 1,
-                                            count = 2,
-                                        ),
-                                ) {
-                                    Text(text = stringResource(id = R.string.settings_appearance_avatar_shape_square))
+                            val items =
+                                persistentMapOf(
+                                    AvatarShape.CIRCLE to stringResource(id = R.string.settings_appearance_avatar_shape_round),
+                                    AvatarShape.SQUARE to stringResource(id = R.string.settings_appearance_avatar_shape_square),
+                                )
+                            ButtonGroup(
+                                overflowIndicator = {},
+                            ) {
+                                items.forEach { (shape, label) ->
+                                    toggleableItem(
+                                        checked = appearanceSettings.avatarShape == shape,
+                                        onCheckedChange = {
+                                            state.updateSettings {
+                                                copy(avatarShape = shape)
+                                            }
+                                        },
+                                        label = label,
+                                    )
                                 }
                             }
                         } else {
@@ -573,23 +535,25 @@ internal fun AppearanceScreen(
                         },
                         trailingContent = {
                             if (maxWidth >= 400.dp) {
-                                SingleChoiceSegmentedButtonRow {
-                                    VideoAutoplay.entries.forEachIndexed { index, it ->
-                                        SegmentedButton(
-                                            selected = appearanceSettings.videoAutoplay == it,
-                                            onClick = {
+                                val items =
+                                    persistentMapOf(
+                                        VideoAutoplay.WIFI to stringResource(id = R.string.settings_appearance_video_autoplay_wifi),
+                                        VideoAutoplay.ALWAYS to stringResource(id = R.string.settings_appearance_video_autoplay_always),
+                                        VideoAutoplay.NEVER to stringResource(id = R.string.settings_appearance_video_autoplay_never),
+                                    )
+                                ButtonGroup(
+                                    overflowIndicator = {},
+                                ) {
+                                    items.forEach { (autoplay, label) ->
+                                        toggleableItem(
+                                            checked = appearanceSettings.videoAutoplay == autoplay,
+                                            onCheckedChange = {
                                                 state.updateSettings {
-                                                    copy(videoAutoplay = it)
+                                                    copy(videoAutoplay = autoplay)
                                                 }
                                             },
-                                            shape =
-                                                SegmentedButtonDefaults.itemShape(
-                                                    index = index,
-                                                    count = VideoAutoplay.entries.size,
-                                                ),
-                                        ) {
-                                            Text(text = stringResource(id = it.id))
-                                        }
+                                            label = label,
+                                        )
                                     }
                                 }
                             } else {

@@ -5,7 +5,6 @@ import android.content.Context
 import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -42,7 +41,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -143,17 +141,6 @@ internal fun StatusMediaScreen(
             accountType = accountType,
         )
     }
-    var backProgress by remember { mutableFloatStateOf(0f) }
-    PredictiveBackHandler {
-        try {
-            it.collect {
-                backProgress = it.progress
-            }
-            onDismiss.invoke()
-        } catch (e: Exception) {
-            backProgress = 0f
-        }
-    }
     val pagerState =
         rememberPagerState(
             initialPage = index,
@@ -174,8 +161,8 @@ internal fun StatusMediaScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.background.copy(alpha = 1 - swiperState.progress - backProgress))
-                    .alpha(1 - swiperState.progress - backProgress),
+                    .background(MaterialTheme.colorScheme.background.copy(alpha = 1 - swiperState.progress))
+                    .alpha(1 - swiperState.progress),
         ) {
             Box(
                 modifier =

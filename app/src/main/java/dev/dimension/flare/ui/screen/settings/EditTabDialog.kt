@@ -13,6 +13,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -31,7 +32,6 @@ import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.resId
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.component.OutlinedTextField2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
@@ -135,7 +135,7 @@ internal fun EditTabDialog(
                     },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 )
-                OutlinedTextField2(
+                OutlinedTextField(
                     state = state.text,
                     modifier = Modifier.fillMaxWidth(),
                     label = {

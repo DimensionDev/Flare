@@ -10,24 +10,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import dev.dimension.flare.R
-import dev.dimension.flare.ui.theme.FlareTheme
 
 @Composable
 internal fun SplashScreen() {
-    FlareTheme {
-        Scaffold {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(it),
-                contentAlignment = Alignment.Center,
-            ) {
-                Image(
-                    painterResource(id = R.drawable.ic_launcher_foreground),
-                    contentDescription = null,
-                )
-            }
+    Scaffold {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(it),
+            contentAlignment = Alignment.Center,
+        ) {
+            Image(
+                painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = null,
+            )
         }
     }
 }

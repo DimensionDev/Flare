@@ -25,7 +25,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.ListItem
@@ -33,9 +35,6 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SecondaryScrollableTabRow
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -116,7 +115,11 @@ import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.ReorderableLazyListState
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(
+    ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class,
+    ExperimentalMaterial3ExpressiveApi::class,
+)
 @Composable
 internal fun TabCustomizeScreen(onBack: () -> Unit) {
     val haptics = LocalHapticFeedback.current
@@ -325,45 +328,28 @@ internal fun TabCustomizeScreen(onBack: () -> Unit) {
                                 tabState.onSuccess { tab ->
                                     var selectedIndex by remember { mutableStateOf(0) }
                                     if (tab.extraTabs.any()) {
-                                        SingleChoiceSegmentedButtonRow {
-                                            SegmentedButton(
-                                                selected = selectedIndex == 0,
-                                                onClick = {
-                                                    selectedIndex = 0
-                                                },
-                                                shape =
-                                                    SegmentedButtonDefaults.itemShape(
-                                                        index = 0,
-                                                        count = tab.extraTabs.size + 1,
-                                                    ),
-                                            ) {
-                                                Text(
-                                                    text = stringResource(id = R.string.tab_settings_default),
-                                                    maxLines = 1,
-                                                )
-                                            }
-                                            tab.extraTabs.forEachIndexed { index, extraTab ->
-                                                SegmentedButton(
-                                                    selected = selectedIndex == index + 1,
-                                                    onClick = {
-                                                        selectedIndex = index + 1
-                                                    },
-                                                    shape =
-                                                        SegmentedButtonDefaults.itemShape(
-                                                            index = index + 1,
-                                                            count = tab.extraTabs.size + 1,
-                                                        ),
-                                                ) {
-                                                    val text =
-                                                        when (extraTab) {
+                                        val items =
+                                            listOf(
+                                                stringResource(id = R.string.tab_settings_default),
+                                            ) +
+                                                tab.extraTabs
+                                                    .map {
+                                                        when (it) {
                                                             is PinnableTimelineTabPresenter.State.Tab.Feed -> R.string.tab_settings_feed
                                                             is PinnableTimelineTabPresenter.State.Tab.List -> R.string.tab_settings_list
                                                         }
-                                                    Text(
-                                                        text = stringResource(id = text),
-                                                        maxLines = 1,
-                                                    )
-                                                }
+                                                    }.map { stringResource(id = it) }
+                                        ButtonGroup(
+                                            overflowIndicator = {},
+                                        ) {
+                                            items.forEachIndexed { index, text ->
+                                                toggleableItem(
+                                                    checked = selectedIndex == index,
+                                                    onCheckedChange = {
+                                                        selectedIndex = index
+                                                    },
+                                                    label = text,
+                                                )
                                             }
                                         }
                                     }

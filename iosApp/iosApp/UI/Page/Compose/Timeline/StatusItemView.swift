@@ -46,7 +46,7 @@ struct StatusItemView: View {
                             ))
                         }
                     }, label: {
-                        CommonTimelineStatusComponent(
+                        TimelineStatusView(
                             data: data,
                             onMediaClick: { index, _ in
                                 // data.onMediaClicked(.init(launcher: AppleUriLauncher(openURL: openURL)), media, KotlinInt(integerLiteral: index))

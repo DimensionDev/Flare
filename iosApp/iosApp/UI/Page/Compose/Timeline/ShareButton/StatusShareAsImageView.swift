@@ -29,7 +29,7 @@ extension EnvironmentValues {
 }
 
 struct StatusCaptureWrapper: View {
-    let content: CommonTimelineStatusComponent
+    let content: TimelineStatusView
 
     var body: some View {
         content
@@ -64,7 +64,7 @@ struct StatusShareAsImageView: View {
     @EnvironmentObject private var router: FlareRouter
     @Environment(FlareTheme.self) private var theme
 
-    let content: CommonTimelineStatusComponent
+    let content: TimelineStatusView
     let renderer: ImageRenderer<AnyView>
     @State private var capturedImage: UIImage?
     @State private var isImageReady: Bool = false

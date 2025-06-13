@@ -59,7 +59,9 @@ struct FlareApp: SwiftUI.App {
 
                 // --- Global Floating Player Overlay ---
                 if podcastManager.currentPodcast != nil {
-                    DraggablePlayerOverlay().animation(.spring(), value: podcastManager.currentPodcast?.id)
+                    DraggablePlayerOverlay()
+                        .animation(.spring(), value: podcastManager.currentPodcast?.id)
+                        .environmentObject(router)
                 }
             }.environment(theme).withFlareTheme().applyTheme(theme).environment(theme)
         }

@@ -4,13 +4,16 @@ import SwiftUI
 
 struct LiveFloatingPlayerView: View {
     @StateObject private var manager = IOSPodcastManager.shared
+    @EnvironmentObject private var router: FlareRouter
+
+    @State private var showPodcastSheet: Bool = false
 
     private var isFailedState: Bool {
         if case .failed = manager.playbackState { true } else { false }
     }
 
     var body: some View {
-        Group {
+        HStack {
             if let podcast = manager.currentPodcast {
                 VStack(spacing: 0) {
                     playerControls(podcast: podcast)
@@ -22,6 +25,28 @@ struct LiveFloatingPlayerView: View {
                 .padding(.horizontal)
                 .padding(.bottom, 5)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+                .onTapGesture {
+                    showPodcastSheet = true
+//                    router
+//                        .navigate(
+//                            to:
+//                            .podcastSheet(
+//                                accountType: UserManager.shared
+//                                    .getCurrentAccountType()!,
+//                                podcastId: podcast.id
+//                            )
+//                        )
+                }.sheet(isPresented: $showPodcastSheet) {
+                    if let podcastId = manager.currentPodcast?.id {
+                        PodcastSheetView(
+                            accountType: UserManager.shared.getCurrentAccountType()!,
+                            podcastId: podcastId
+                        )
+                    } else {
+                        // Handle the case where podcastId is nil, perhaps show an error or an empty state
+                        Text("Error: Podcast ID not available.")
+                    }
+                }
                 // .onChange(of: manager.currentTime) { ... }
                 // .onAppear { ... }
                 // .onChange(of: manager.currentPodcast?.id) { ... }

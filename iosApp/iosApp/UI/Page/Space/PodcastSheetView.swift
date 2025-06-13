@@ -115,16 +115,29 @@ struct PodcastDetailContent: View {
                 Spacer()
 
                 // Action Button
-                Button {
-                    IOSPodcastManager.shared.playPodcast(podcast: podcast)
-                    router.dismissSheet()
-                } label: {
-                    Label("Start Listening", systemImage: "headphones")
-                        .frame(maxWidth: .infinity)
+                if IOSPodcastManager.shared.currentPodcast != nil, IOSPodcastManager.shared.currentPodcast?.playbackUrl == podcast.playbackUrl {
+                    Button {
+                        IOSPodcastManager.shared.stopPodcast()
+                        router.dismissSheet()
+                    } label: {
+                        Label("Stop Listening ", systemImage: "headphones")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(podcast.playbackUrl == "" || podcast.playbackUrl == nil)
+                    .tint(.pink)
+                } else {
+                    Button {
+                        IOSPodcastManager.shared.playPodcast(podcast: podcast)
+                        router.dismissSheet()
+                    } label: {
+                        Label("Start Listening", systemImage: "headphones")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(podcast.playbackUrl == "" || podcast.playbackUrl == nil)
+                    .tint(.pink)
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(podcast.playbackUrl == "" || podcast.playbackUrl == nil)
-                .tint(.pink)
 
                 if podcast.ended {
                     Text("This podcast url not available.")

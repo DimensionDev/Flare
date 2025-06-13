@@ -32,6 +32,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.rememberWideNavigationRailState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -131,7 +132,6 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                     tabs.all.firstOrNull { getDirection(it.tabItem) == currentRoute }?.tabItem
                 }
             }
-
             val accountTypeState by producePresenter(key = "home_account_type_${currentTab?.account}") {
                 accountTypePresenter(currentTab?.account ?: AccountType.Active)
             }
@@ -139,14 +139,13 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(
                     currentWindowAdaptiveInfo(),
                 )
-            val actualLayoutType = state.navigationState.type ?: layoutType
             Box {
                 NavigationSuiteScaffold2(
                     wideNavigationRailState = wideNavigationRailState,
                     modifier = Modifier.fillMaxSize(),
                     bottomBarDividerEnabled = state.navigationState.bottomBarDividerEnabled,
                     bottomBarAutoHideEnabled = state.navigationState.bottomBarAutoHideEnabled,
-                    layoutType = actualLayoutType,
+                    layoutType = layoutType,
                     navigationSuiteColors =
                         NavigationSuiteDefaults.colors(
                             navigationBarContainerColor = MaterialTheme.colorScheme.surface,
@@ -206,7 +205,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                                             Modifier
                                                                 .padding(
                                                                     horizontal =
-                                                                        if (actualLayoutType ==
+                                                                        if (layoutType ==
                                                                             NavigationSuiteType.NavigationBar
                                                                         ) {
                                                                             16.dp
@@ -259,7 +258,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                                 }
                                         }
                                     }
-                                    if (actualLayoutType == NavigationSuiteType.NavigationRail) {
+                                    if (layoutType == NavigationSuiteType.NavigationRail) {
                                         AnimatedContent(
                                             wideNavigationRailState.currentValue,
                                             modifier = Modifier.padding(horizontal = 20.dp),
@@ -332,12 +331,12 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         }
                     },
                     navigationSuiteItems = {
-                        tabs.primary.forEach { (tab, tabState, badgeState) ->
+                        tabs.primary.forEach { (tab, badgeState) ->
                             item(
                                 selected = currentRoute == getDirection(tab),
                                 onClick = {
                                     if (currentRoute == getDirection(tab)) {
-                                        tabState.onClick()
+                                        state.scrollToTopRegistry.scrollToTop()
                                     } else {
                                         navigate(getDirection(tab))
                                     }
@@ -383,12 +382,12 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         }
                     },
                     secondaryItems = {
-                        tabs.secondary.forEach { (tab, tabState) ->
+                        tabs.secondary.forEach { (tab, badgeState) ->
                             item(
                                 selected = currentRoute == getDirection(tab),
                                 onClick = {
                                     if (currentRoute == getDirection(tab)) {
-                                        tabState.onClick()
+                                        state.scrollToTopRegistry.scrollToTop()
                                     } else {
                                         navigate(getDirection(tab))
                                     }
@@ -406,6 +405,20 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                                         title = tab.metaData.title,
                                     )
                                 },
+                                badge =
+                                    if (badgeState.isSuccess) {
+                                        {
+                                            badgeState.onSuccess {
+                                                if (it > 0) {
+                                                    Badge {
+                                                        Text(text = it.toString())
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        null
+                                    },
                             )
                         }
                     },
@@ -429,15 +442,19 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                         }
                     },
                 ) {
-                    Router(
-                        topLevelBackStack = topLevelBackStack,
-                        navigationState = state.navigationState,
-                        openDrawer = {
-                            scope.launch {
-                                wideNavigationRailState.toggle()
-                            }
-                        },
-                    )
+                    CompositionLocalProvider(
+                        LocalScrollToTopRegistry provides state.scrollToTopRegistry,
+                    ) {
+                        Router(
+                            topLevelBackStack = topLevelBackStack,
+                            navigationState = state.navigationState,
+                            openDrawer = {
+                                scope.launch {
+                                    wideNavigationRailState.toggle()
+                                }
+                            },
+                        )
+                    }
                 }
                 InAppNotificationComponent(
                     modifier = Modifier.align(Alignment.TopCenter),
@@ -494,9 +511,14 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
             remember {
                 HomeTabsPresenter(settingsRepository.tabSettings)
             }.invoke()
+        val scrollToTopRegistry =
+            remember {
+                ScrollToTopRegistry()
+            }
         object {
             val tabs = tabs.tabs
             val navigationState = navigationState
+            val scrollToTopRegistry = scrollToTopRegistry
         }
     }
 
@@ -507,35 +529,12 @@ private fun accountTypePresenter(accountType: AccountType) =
     }
 
 internal class NavigationState {
-    private val state = mutableStateOf<NavigationSuiteType?>(null)
-    private val drawerState = mutableStateOf(true)
     private val bottomBarAutoHideState = mutableStateOf(true)
     private val bottomBarDividerState = mutableStateOf(true)
-    val type: NavigationSuiteType?
-        get() = state.value
-
-    val drawerEnabled: Boolean
-        get() = drawerState.value
     val bottomBarAutoHideEnabled: Boolean
         get() = bottomBarAutoHideState.value
     val bottomBarDividerEnabled: Boolean
         get() = bottomBarDividerState.value
-
-    fun hide() {
-        state.value = NavigationSuiteType.None
-    }
-
-    fun show() {
-        state.value = null
-    }
-
-    fun enableDrawer() {
-        drawerState.value = true
-    }
-
-    fun disableDrawer() {
-        drawerState.value = false
-    }
 
     fun enableBottomBarAutoHide() {
         bottomBarAutoHideState.value = true
@@ -554,14 +553,30 @@ internal class NavigationState {
     }
 }
 
-private val LocalTabState =
-    androidx.compose.runtime.staticCompositionLocalOf<HomeTabsPresenter.State.HomeTabState.HomeTabItem.TabState?> {
+private class ScrollToTopRegistry {
+    private val callbacks = mutableSetOf<() -> Unit>()
+
+    fun registerCallback(callback: () -> Unit) {
+        callbacks.add(callback)
+    }
+
+    fun unregisterCallback(callback: () -> Unit) {
+        callbacks.remove(callback)
+    }
+
+    fun scrollToTop() {
+        callbacks.forEach { it.invoke() }
+    }
+}
+
+private val LocalScrollToTopRegistry =
+    androidx.compose.runtime.staticCompositionLocalOf<ScrollToTopRegistry?> {
         null
     }
 
 @Composable
 internal fun RegisterTabCallback(lazyListState: LazyStaggeredGridState) {
-    val tabState = LocalTabState.current
+    val tabState = LocalScrollToTopRegistry.current
     if (tabState != null) {
         val scope = rememberCoroutineScope()
         val callback: () -> Unit =

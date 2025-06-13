@@ -47,25 +47,8 @@ public class HomeTabsPresenter(
             @Immutable
             public data class HomeTabItem(
                 val tabItem: TabItem,
-                val tabState: TabState = TabState(),
                 val badgeCountState: UiState<Int> = UiState.Success(0),
-            ) {
-                public class TabState {
-                    private val callbacks = mutableListOf<() -> Unit>()
-
-                    public fun registerCallback(callback: () -> Unit) {
-                        callbacks.add(callback)
-                    }
-
-                    public fun unregisterCallback(callback: () -> Unit) {
-                        callbacks.remove(callback)
-                    }
-
-                    public fun onClick() {
-                        callbacks.lastOrNull()?.invoke()
-                    }
-                }
-            }
+            )
         }
     }
 

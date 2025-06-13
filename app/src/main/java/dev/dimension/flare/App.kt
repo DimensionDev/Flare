@@ -10,6 +10,7 @@ import coil3.gif.GifDecoder
 import coil3.network.ktor3.KtorNetworkFetcherFactory
 import coil3.request.crossfade
 import coil3.svg.SvgDecoder
+import coil3.video.VideoFrameDecoder
 import dev.dimension.flare.common.AnimatedPngDecoder
 import dev.dimension.flare.common.AnimatedWebPDecoder
 import dev.dimension.flare.di.KoinHelper
@@ -41,6 +42,7 @@ class App :
                 add(AnimatedPngDecoder.Factory())
                 add(SvgDecoder.Factory())
                 add(AnimatedWebPDecoder.Factory())
+                add(VideoFrameDecoder.Factory())
                 add(
                     KtorNetworkFetcherFactory(
                         httpClient = HttpClient(dev.dimension.flare.data.network.httpClientEngine),

@@ -8,8 +8,8 @@ public actual data class UiRichText(
     val data: Element,
     val direction: LayoutDirection,
 ) {
-    public val innerText: String = data.text()
-    actual val raw: String = data.text()
+    public val innerText: String = data.wholeText()
+    actual val raw: String = data.wholeText()
     val html: String = data.html()
     public val isEmpty: Boolean = raw.isEmpty() && data.getAllElements().size <= 1
     public val isLongText: Boolean = innerText.length > 480

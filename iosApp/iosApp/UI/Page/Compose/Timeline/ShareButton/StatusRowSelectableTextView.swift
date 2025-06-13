@@ -69,20 +69,24 @@ struct StatusRowSelectableTextView: View {
 
         // 1. 提取特殊元素
         let (specialTags, cleanedText) = extractSpecialElements(from: markdownText)
+ 
+        // 2. 文本清理 
+        let cleanedTextSegments = cleanTextForTokenization(cleanedText)
 
-        // 2. 语言检测
+        // 3. 语言检测
         let languageRecognizer = NLLanguageRecognizer()
         languageRecognizer.processString(cleanedText)
         detectedLanguage = languageRecognizer.dominantLanguage
 
-        // 3. 文本清理
-        let finalText = cleanTextForTokenization(cleanedText)
 
-        // 4. 分词处理
-        let tokenizedTags = tokenizeText(finalText, unit: selectedGranularity, language: detectedLanguage)
-
+        // 4. 分词处理  
+        var tempTokenizedTags: [Tag] = []
+        for segment in cleanedTextSegments {
+            tempTokenizedTags.append(contentsOf: tokenizeText(segment, unit: selectedGranularity, language: detectedLanguage))
+        }
+        
         // 5. 合并所有标签
-        allTags = specialTags + tokenizedTags
+        allTags = specialTags + tempTokenizedTags
     }
 
     private func extractSpecialElements(from text: String) -> ([Tag], String) {
@@ -158,16 +162,22 @@ struct StatusRowSelectableTextView: View {
         return (specialTags, processedText)
     }
 
-    private func cleanTextForTokenization(_ text: String) -> String {
-        text
-            // HTML标签
-            .replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
-            // Markdown格式字符
-            .replacingOccurrences(of: "[*_~`#]", with: "", options: .regularExpression)
-            // 多余的空白字符
-            .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-            .replacingOccurrences(of: "{ }", with: "")
+    private func cleanTextForTokenization(_ text: String) -> [String] {
+        let segments = text.components(separatedBy: "<br />")
+        
+        return segments.compactMap { segment -> String? in
+            let cleanedSegment = segment
+                // HTML标签
+                .replacingOccurrences(of: "<[^>]+>", with: "", options: .regularExpression)
+                // Markdown格式字符
+                .replacingOccurrences(of: "[*_~`#]", with: "", options: .regularExpression)
+                // 多余的空白字符
+                .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .replacingOccurrences(of: "{ }", with: "")
+            
+            return cleanedSegment.isEmpty ? nil : cleanedSegment
+        }
     }
 
     private func tokenizeText(_ text: String, unit: NLTokenUnit, language: NLLanguage?) -> [Tag] {

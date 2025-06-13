@@ -23,7 +23,8 @@ struct StatusDetailScreen: View {
                 StatusTimelineComponent(
                     data: state.listState,
                     detailKey: statusKey
-                ).listRowBackground(theme.primaryBackgroundColor)
+                ) 
+                // .padding(.horizontal, 16)
             }
             .listStyle(.plain)
             // 列表背景色

@@ -41,7 +41,7 @@ struct ShareButton: View {
     @State private var showSelectUrlSheet: Bool = false
 
     let content: UiTimelineItemContentStatus
-    let view: CommonTimelineStatusComponent
+    let view: TimelineStatusView
 
     private var statusUrl: URL? {
         guard let urlString = content.url as String? else { return nil }
@@ -288,8 +288,9 @@ struct ShareButton: View {
                 Spacer()
                 Label("", systemImage: "square.and.arrow.up")
                     .imageScale(.medium)
+                    .foregroundColor(theme.labelColor)
                     .font(.system(size: 13))
-                    .foregroundColor(theme.tintColor)
+                    // .foregroundColor(theme.tintColor)
                 Spacer()
             }
             .frame(maxWidth: .infinity)

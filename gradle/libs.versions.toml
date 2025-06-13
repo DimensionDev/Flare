@@ -126,6 +126,7 @@ coil3-gif = { group = "io.coil-kt.coil3", name = "coil-gif", version.ref = "coil
 coil3-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil3" }
 coil3-ktor3 = { group = "io.coil-kt.coil3", name = "coil-network-ktor3", version.ref = "coil3" }
 coil3-network = { group = "io.coil-kt.coil3", name = "coil-network-core", version.ref = "coil3" }
+coil3-video = { group = "io.coil-kt.coil3", name = "coil-video", version.ref = "coil3" }
 apng = { group = "com.github.penfeizhou.android.animation", name = "apng", version.ref = "apng-android" }
 awebp = { group = "com.github.penfeizhou.android.animation", name = "awebp", version.ref = "apng-android" }
 vectordrawable-animated = { group = "androidx.vectordrawable", name = "vectordrawable-animated", version = "1.2.0" }
@@ -220,7 +221,7 @@ kotlinx = ["kotlinx-datetime", "kotlinx-immutable", "kotlinx-serialization-json"
 koin = ["koin-core", "koin-android", "koin-compose", "koin-androidx-compose"]
 ktor = ["ktor-client-content-negotiation", "ktor-serialization-kotlinx-json", "ktor-client-logging", "ktor-serialization-kotlinx-xml"]
 coil3 = ["coil3-compose", "coil3-svg", "coil3-ktor3", "coil3-network"]
-coil3-extensions = ["apng", "awebp", "vectordrawable-animated", "zoomable-image", "coil3-gif"]
+coil3-extensions = ["apng", "awebp", "vectordrawable-animated", "zoomable-image", "coil3-gif", "coil3-video"]
 accompanist = ["accompanist-permissions", "accompanist-drawablepainter"]
 media3 = ["media3-exoplayer", "media3-ui", "media3-hls", "media3-session", "media3-ui-compose"]
 firebase = ["firebase-analytics-ktx", "firebase-crashlytics-ktx"]

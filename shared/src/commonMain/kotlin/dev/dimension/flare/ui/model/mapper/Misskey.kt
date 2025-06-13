@@ -598,7 +598,8 @@ private fun DriveFile.toUi(): UiMedia? {
     } else if (type.startsWith("video/")) {
         return UiMedia.Video(
             url = url.orEmpty(),
-            thumbnailUrl = thumbnailUrl.orEmpty(),
+            // thumbnailUrl is not always present like post from Mastodon
+            thumbnailUrl = thumbnailUrl?.takeIf { it.isNotEmpty() } ?: url.orEmpty(),
             description = comment,
             width = properties.width?.toFloat() ?: 0f,
             height = properties.height?.toFloat() ?: 0f,

@@ -46,7 +46,12 @@ internal fun TimelineScreen(
     val state by producePresenter(key = "timeline_${tabItem.key}") {
         timelinePresenter(tabItem)
     }
-    RegisterTabCallback(lazyListState = state.lazyListState)
+    RegisterTabCallback(
+        lazyListState = state.lazyListState,
+        onRefresh = {
+            state.refreshSync()
+        },
+    )
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     FlareScaffold(
         topBar = {

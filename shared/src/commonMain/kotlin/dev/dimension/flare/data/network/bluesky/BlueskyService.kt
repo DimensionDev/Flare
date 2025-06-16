@@ -46,6 +46,7 @@ internal data class BlueskyService(
                 access = accessToken
                 refresh = refreshToken
                 tokenRefreshed = onTokenRefreshed
+                this.baseUrl = baseUrl
             }
             install(AtprotoProxyPlugin)
 
@@ -83,6 +84,7 @@ private class AtprotoProxyPlugin {
  */
 internal class XrpcAuthPlugin(
     private val json: Json,
+    private val baseUrl: String,
     private val accessToken: String? = null,
     private val refreshToken: String? = null,
     private val onTokenRefreshed: ((accessToken: String, refreshToken: String) -> Unit)? = null,
@@ -92,6 +94,7 @@ internal class XrpcAuthPlugin(
         var access: String? = null,
         var refresh: String? = null,
         var tokenRefreshed: ((accessToken: String, refreshToken: String) -> Unit)? = null,
+        var baseUrl: String? = null,
     )
 
     companion object : HttpClientPlugin<Config, XrpcAuthPlugin> {
@@ -100,10 +103,11 @@ internal class XrpcAuthPlugin(
         override fun prepare(block: Config.() -> Unit): XrpcAuthPlugin {
             val config = Config().apply(block)
             return XrpcAuthPlugin(
-                config.json,
-                config.access,
-                config.refresh,
-                config.tokenRefreshed,
+                json = config.json,
+                accessToken = config.access,
+                refreshToken = config.refresh,
+                onTokenRefreshed = config.tokenRefreshed,
+                baseUrl = config.baseUrl!!,
             )
         }
 
@@ -129,8 +133,16 @@ internal class XrpcAuthPlugin(
                     }
 
                 if (response.getOrNull()?.error == "ExpiredToken") {
+                    scope.attributes
                     val refreshResponse =
-                        scope.post("/xrpc/com.atproto.server.refreshSession") {
+                        ktorClient {
+                            install(DefaultRequest) {
+                                val hostUrl = Url(plugin.baseUrl)
+                                url.protocol = hostUrl.protocol
+                                url.host = hostUrl.host
+                                url.port = hostUrl.port
+                            }
+                        }.post("/xrpc/com.atproto.server.refreshSession") {
                             plugin.refreshToken?.let { bearerAuth(it) }
                         }
                     if (StatusCode.fromCode(refreshResponse.status.value) == StatusCode.Okay) {

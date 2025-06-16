@@ -1,11 +1,12 @@
 package dev.dimension.flare.ui.screen.media
 
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
+import androidx.navigation3.ui.DialogSceneStrategy
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
-import dev.dimension.flare.ui.component.FullScreenSceneStrategy
 import dev.dimension.flare.ui.route.Route
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -14,7 +15,12 @@ internal fun EntryProviderBuilder<NavKey>.mediaEntryBuilder(
     onBack: () -> Unit,
 ) {
     entry<Route.Media.Image>(
-        metadata = FullScreenSceneStrategy.fullScreen()
+        metadata = DialogSceneStrategy.dialog(
+            dialogProperties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false,
+            )
+        )
     ) { args ->
         MediaScreen(
             uri = args.uri,
@@ -24,7 +30,12 @@ internal fun EntryProviderBuilder<NavKey>.mediaEntryBuilder(
     }
 
     entry<Route.Media.StatusMedia>(
-        metadata = FullScreenSceneStrategy.fullScreen()
+        metadata = DialogSceneStrategy.dialog(
+            dialogProperties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                decorFitsSystemWindows = false,
+            )
+        )
     ) { args ->
         StatusMediaScreen(
             statusKey = args.statusKey,

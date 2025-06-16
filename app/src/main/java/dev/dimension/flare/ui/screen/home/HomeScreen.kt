@@ -625,18 +625,28 @@ private val LocalScrollToTopRegistry =
     }
 
 @Composable
-internal fun RegisterTabCallback(lazyListState: LazyStaggeredGridState) {
+internal fun RegisterTabCallback(
+    lazyListState: LazyStaggeredGridState,
+    onRefresh: () -> Unit,
+) {
+    val onRefreshState by rememberUpdatedState(onRefresh)
     val tabState = LocalScrollToTopRegistry.current
     if (tabState != null) {
         val scope = rememberCoroutineScope()
         val callback: () -> Unit =
             remember(lazyListState, scope) {
                 {
-                    scope.launch {
-                        if (lazyListState.firstVisibleItemIndex > 20) {
-                            lazyListState.scrollToItem(0)
-                        } else {
-                            lazyListState.animateScrollToItem(0)
+                    if (lazyListState.firstVisibleItemIndex == 0 &&
+                        lazyListState.firstVisibleItemScrollOffset == 0
+                    ) {
+                        onRefreshState.invoke()
+                    } else {
+                        scope.launch {
+                            if (lazyListState.firstVisibleItemIndex > 20) {
+                                lazyListState.scrollToItem(0)
+                            } else {
+                                lazyListState.animateScrollToItem(0)
+                            }
                         }
                     }
                 }

@@ -65,7 +65,12 @@ internal fun DiscoverScreen(
     val windowInfo = currentWindowAdaptiveInfo()
     val state by producePresenter("discover_$accountType") { discoverPresenter(accountType) }
     val lazyListState = rememberLazyStaggeredGridState()
-    RegisterTabCallback(lazyListState = lazyListState)
+    RegisterTabCallback(
+        lazyListState = lazyListState,
+        onRefresh = {
+            state.refresh()
+        },
+    )
     BackHandler(enabled = state.isInSearchMode) {
         state.clearSearch()
     }

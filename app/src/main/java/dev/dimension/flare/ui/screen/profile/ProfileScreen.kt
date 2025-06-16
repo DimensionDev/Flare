@@ -443,7 +443,12 @@ internal fun ProfileScreen(
                                         is ProfileState.Tab.Timeline -> {
                                             val listState = rememberLazyStaggeredGridState()
                                             if (index == pagerState.currentPage) {
-                                                RegisterTabCallback(lazyListState = listState)
+                                                RegisterTabCallback(
+                                                    lazyListState = listState,
+                                                    onRefresh = {
+                                                        state.refresh()
+                                                    },
+                                                )
                                             }
                                             LazyStatusVerticalStaggeredGrid(
                                                 state = listState,

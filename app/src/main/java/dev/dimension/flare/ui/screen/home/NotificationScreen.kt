@@ -56,7 +56,12 @@ internal fun NotificationScreen(
         notificationPresenter(accountType = accountType)
     }
     val lazyListState = rememberLazyStaggeredGridState()
-    RegisterTabCallback(lazyListState = lazyListState)
+    RegisterTabCallback(
+        lazyListState = lazyListState,
+        onRefresh = {
+            state.refresh()
+        },
+    )
     val windowInfo = currentWindowAdaptiveInfo()
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     FlareScaffold(

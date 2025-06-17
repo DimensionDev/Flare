@@ -774,7 +774,7 @@
 			repositoryURL = "https://github.com/divadretlaw/EmojiText";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 4.2.1;
+				minimumVersion = 4.2.2;
 			};
 		};
 		641DA51C2DF80F53008FD9BF /* XCRemoteSwiftPackageReference "MarkdownView" */ = {

@@ -103,8 +103,14 @@ internal fun HomeTimelineScreen(
     val scope = rememberCoroutineScope()
     state.pagerState.onSuccess { pagerState ->
         state.tabState.onSuccess { tabState ->
-            val lazyListState = tabState[pagerState.currentPage].lazyListState
-            RegisterTabCallback(lazyListState = lazyListState)
+            val currentTab = tabState[pagerState.currentPage]
+            val lazyListState = currentTab.lazyListState
+            RegisterTabCallback(
+                lazyListState = lazyListState,
+                onRefresh = {
+                    currentTab.refreshSync()
+                },
+            )
         }
     }
 

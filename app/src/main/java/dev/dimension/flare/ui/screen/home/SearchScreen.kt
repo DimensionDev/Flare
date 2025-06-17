@@ -32,7 +32,12 @@ internal fun SearchScreen(
 ) {
     val state by producePresenter("search_$accountType") { presenter(accountType, initialQuery) }
     val lazyListState = rememberLazyStaggeredGridState()
-    RegisterTabCallback(lazyListState = lazyListState)
+    RegisterTabCallback(
+        lazyListState = lazyListState,
+        onRefresh = {
+            state.refresh()
+        },
+    )
     FlareScaffold(
         topBar = {
             Box(

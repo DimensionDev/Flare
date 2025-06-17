@@ -12,16 +12,16 @@ import UIKit
 struct StatusQuoteView: View {
     let quotes: [UiTimelineItemContentStatus]
     let onMediaClick: (Int, UiMedia) -> Void
-    
+
     var body: some View {
         Spacer().frame(height: 10)
-        
+
         VStack {
             ForEach(0 ..< quotes.count, id: \.self) { index in
                 let quote = quotes[index]
                 QuotedStatus(data: quote, onMediaClick: onMediaClick)
                     .foregroundColor(.gray)
-                
+
                 if index != quotes.count - 1 {
                     Divider()
                 }

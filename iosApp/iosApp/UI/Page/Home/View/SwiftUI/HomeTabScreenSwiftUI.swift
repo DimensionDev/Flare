@@ -3,6 +3,8 @@ import SwiftUI
 
 struct HomeTabScreenSwiftUI: View {
     let accountType: AccountType
+    @Binding var scrollToTopTrigger: Bool
+    @Binding var showFloatingButton: Bool
 
     var onSwitchToMenuTab: (() -> Void)?
 
@@ -30,15 +32,17 @@ struct HomeTabScreenSwiftUI: View {
 
             TabContentViewSwiftUI(
                 tabStore: tabStore,
-                selectedTab: $selectedHomeAppBarTabKey
+                selectedTab: $selectedHomeAppBarTabKey,
+                scrollToTopTrigger: $scrollToTopTrigger,
+                showFloatingButton: $showFloatingButton
             )
         }.toolbarVisibility(.hidden, for: .navigationBar) // 隐藏，避免滑动返回 appbar 高度增加
-//            .onAppear {
-//                if let firstTab = tabStore.availableAppBarTabsItems.first {
-//                    selectedHomeAppBarTabKey = firstTab.key
-//                    tabStore.updateSelectedTab(firstTab)
-//                }
-//            }
+            .onAppear {
+                if let firstTab = tabStore.availableAppBarTabsItems.first {
+                    selectedHomeAppBarTabKey = firstTab.key
+                    tabStore.updateSelectedTab(firstTab)
+                }
+            }
             .onChange(of: selectedHomeAppBarTabKey) { _, newValue in
                 if let tab = tabStore.availableAppBarTabsItems.first(where: { $0.key == newValue }) {
                     tabStore.updateSelectedTab(tab)

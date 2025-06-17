@@ -1,6 +1,7 @@
 import Awesome
 import FontAwesomeSwiftUI
 import Generated
+import os
 import os.log
 import shared
 import SwiftUI
@@ -17,6 +18,10 @@ struct HomeTabViewContent: View {
     @Namespace private var tabBarNamespace
 
     @Environment(FlareTheme.self) private var theme
+
+    @State private var scrollToTopTrigger = false
+
+    @State private var showFloatingButton = false
 
     private var visibleTabs: [FlareHomeTabs] {
         var tabs: [FlareHomeTabs] = [.menu, .timeline]
@@ -47,6 +52,8 @@ struct HomeTabViewContent: View {
                     FlareTabItem(router: router, tabType: .timeline) { _ in
                         HomeTabScreenSwiftUI(
                             accountType: accountType,
+                            scrollToTopTrigger: $scrollToTopTrigger,
+                            showFloatingButton: $showFloatingButton,
                             onSwitchToMenuTab: {
                                 withAnimation {
                                     selectedTab = .menu
@@ -98,6 +105,13 @@ struct HomeTabViewContent: View {
                     .padding(.horizontal)
                     .padding(.bottom, 0)
             }
+
+            if selectedTab == .timeline {
+                FloatingScrollToTopButton(
+                    isVisible: $showFloatingButton,
+                    scrollToTopTrigger: $scrollToTopTrigger
+                )
+            }
         }
 
         .background(theme.primaryBackgroundColor)
@@ -145,9 +159,19 @@ struct HomeTabViewContent: View {
     @ViewBuilder
     private func tabBarItem(for tab: FlareHomeTabs) -> some View {
         Button {
-            selectedTab = tab
-            // withAnimation(.easeInOut(duration: 0.0)) { selectedTab = tab }
-            // os_log("[HomeContent] Tab selected: %{public}@", log: .default, type: .debug, String(describing: tab))
+            print("[HomeTabContent] Tab button tapped: \(tab), selectedTab: \(selectedTab)")
+
+            if selectedTab == tab {
+                print("[HomeTabContent] Same tab tapped again: \(tab)")
+                if tab == .timeline {
+                    let oldValue = scrollToTopTrigger
+                    scrollToTopTrigger.toggle()
+                    print("[HomeTabContent] Timeline scroll trigger toggled: \(oldValue) -> \(scrollToTopTrigger)")
+                }
+            } else {
+                selectedTab = tab
+                print("[HomeTabContent] Tab switched to: \(tab)")
+            }
         } label: {
             VStack(spacing: 2) {
                 icon(for: tab, isActive: selectedTab == tab)

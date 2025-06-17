@@ -23,7 +23,7 @@ struct StatusDetailScreen: View {
                 StatusTimelineComponent(
                     data: state.listState,
                     detailKey: statusKey
-                ) 
+                )
                 // .padding(.horizontal, 16)
             }
             .listStyle(.plain)

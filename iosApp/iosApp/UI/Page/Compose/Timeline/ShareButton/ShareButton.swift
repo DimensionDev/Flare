@@ -290,7 +290,7 @@ struct ShareButton: View {
                     .imageScale(.medium)
                     .foregroundColor(theme.labelColor)
                     .font(.system(size: 13))
-                    // .foregroundColor(theme.tintColor)
+                // .foregroundColor(theme.tintColor)
                 Spacer()
             }
             .frame(maxWidth: .infinity)

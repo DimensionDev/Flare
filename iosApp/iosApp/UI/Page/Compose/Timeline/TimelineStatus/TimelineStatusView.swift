@@ -75,12 +75,12 @@ struct TimelineStatusView: View {
         //         x: 16, y: tapLocation.frame.height - 44,
         //         width: tapLocation.frame.width - 32, height: 44
         //     )
-            // if !bottomActionBarFrame.contains(tapLocation.frame.origin) {
-                router.navigate(to: .statusDetail(
-                    accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
-                    statusKey: viewModel.statusData.statusKey
-                ))
-            // }
+        // if !bottomActionBarFrame.contains(tapLocation.frame.origin) {
+        router.navigate(to: .statusDetail(
+            accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
+            statusKey: viewModel.statusData.statusKey
+        ))
+        // }
         // }
     }
 

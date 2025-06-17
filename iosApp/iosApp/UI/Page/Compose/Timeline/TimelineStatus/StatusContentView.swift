@@ -178,7 +178,6 @@ struct StatusDetailDateView: View {
     }
 }
 
-
 struct StatusContentWarningView: View {
     let contentWarning: UiRichText
     let theme: FlareTheme

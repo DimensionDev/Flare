@@ -21,7 +21,6 @@ struct StatusActionsView: View {
         if appSettings.appearanceSettings.showActions || viewModel.isDetailView, viewModel.hasActions {
             let processedActions = viewModel.getProcessedActions()
 
-            
             HStack(spacing: 0) {
                 ForEach(0 ..< processedActions.mainActions.count, id: \.self) { actionIndex in
                     let action = processedActions.mainActions[actionIndex]
@@ -53,9 +52,6 @@ struct StatusActionsView: View {
     }
 }
 
-
-
-
 struct StatusActionButton: View {
     let action: StatusAction
     let isDetail: Bool
@@ -63,7 +59,6 @@ struct StatusActionButton: View {
 
     var body: some View {
         switch onEnum(of: action) {
-        
         case let .item(item):
             Button(action: {
                        handleItemAction(item)
@@ -71,11 +66,11 @@ struct StatusActionButton: View {
                    label: {
                        StatusActionLabel(item: item)
                    })
-            case .asyncActionItem:
-                EmptyView()
-            case let .group(group):
-                EmptyView()
-           // menu给删了，代码留着吧
+        case .asyncActionItem:
+            EmptyView()
+        case let .group(group):
+            EmptyView()
+            // menu给删了，代码留着吧
 //            Menu {
 //                // ForEach(0 ..< group.actions.count, id: \.self) { subActionIndex in
 //                //     let subAction = group.actions[subActionIndex]
@@ -112,7 +107,7 @@ struct StatusActionLabel: View {
 
     var body: some View {
         Label {
-             let textContent =
+            let textContent =
                 switch onEnum(of: item) {
                 case let .like(data):
                     formatCount(data.humanizedCount.isEmpty ? 0 : Int64(data.humanizedCount) ?? 0)
@@ -128,53 +123,53 @@ struct StatusActionLabel: View {
                 }
             Text(textContent).font(.system(size: 12))
         } icon: {
-             switch onEnum(of: item) {
-                case let .bookmark(data):
-                    if data.bookmarked {
-                        Image(asset: Asset.Image.Status.Toolbar.bookmarkFilled)
-                            .renderingMode(.template)
-                    } else {
-                        Image(asset: Asset.Image.Status.Toolbar.bookmark)
-                            .renderingMode(.template)
-                    }
-                case .delete:
-                    Image(asset: Asset.Image.Status.Toolbar.delete)
+            switch onEnum(of: item) {
+            case let .bookmark(data):
+                if data.bookmarked {
+                    Image(asset: Asset.Image.Status.Toolbar.bookmarkFilled)
                         .renderingMode(.template)
-                case let .like(data):
-                    if data.liked {
-                        Image(asset: Asset.Image.Status.Toolbar.favorite)
-                            .renderingMode(.template)
-                    } else {
-                        Image(asset: Asset.Image.Status.Toolbar.favoriteBorder)
-                            .renderingMode(.template)
-                    }
-                case .more:
-                    Image(asset: Asset.Image.Status.more)
+                } else {
+                    Image(asset: Asset.Image.Status.Toolbar.bookmark)
                         .renderingMode(.template)
-                        .rotationEffect(.degrees(90))
-                case .quote:
-                    Image(asset: Asset.Image.Status.Toolbar.quote)
+                }
+            case .delete:
+                Image(asset: Asset.Image.Status.Toolbar.delete)
+                    .renderingMode(.template)
+            case let .like(data):
+                if data.liked {
+                    Image(asset: Asset.Image.Status.Toolbar.favorite)
                         .renderingMode(.template)
-                case let .reaction(data):
-                    if data.reacted {
-                        Awesome.Classic.Solid.minus.image
-                    } else {
-                        Awesome.Classic.Solid.plus.image
-                    }
-                case .reply:
-                    Image(asset: Asset.Image.Status.Toolbar.chatBubbleOutline)
+                } else {
+                    Image(asset: Asset.Image.Status.Toolbar.favoriteBorder)
                         .renderingMode(.template)
-                case .report:
-                    Image(asset: Asset.Image.Status.Toolbar.flag)
+                }
+            case .more:
+                Image(asset: Asset.Image.Status.more)
+                    .renderingMode(.template)
+                    .rotationEffect(.degrees(90))
+            case .quote:
+                Image(asset: Asset.Image.Status.Toolbar.quote)
+                    .renderingMode(.template)
+            case let .reaction(data):
+                if data.reacted {
+                    Awesome.Classic.Solid.minus.image
+                } else {
+                    Awesome.Classic.Solid.plus.image
+                }
+            case .reply:
+                Image(asset: Asset.Image.Status.Toolbar.chatBubbleOutline)
+                    .renderingMode(.template)
+            case .report:
+                Image(asset: Asset.Image.Status.Toolbar.flag)
+                    .renderingMode(.template)
+            case let .retweet(data):
+                if data.retweeted {
+                    Image(asset: Asset.Image.Status.Toolbar.repeat)
                         .renderingMode(.template)
-                case let .retweet(data):
-                    if data.retweeted {
-                        Image(asset: Asset.Image.Status.Toolbar.repeat)
-                            .renderingMode(.template)
-                    } else {
-                        Image(asset: Asset.Image.Status.Toolbar.repeat)
-                            .renderingMode(.template)
-                    }
+                } else {
+                    Image(asset: Asset.Image.Status.Toolbar.repeat)
+                        .renderingMode(.template)
+                }
             }
         }
         .foregroundStyle(theme.labelColor, theme.labelColor)
@@ -183,7 +178,7 @@ struct StatusActionLabel: View {
 
 // struct CenteredLabelStyle: LabelStyle {
 //     @Environment(FlareTheme.self) private var theme
-    
+
 //     func makeBody(configuration: Configuration) -> some View {
 //         HStack(spacing: 4) {
 //             configuration.icon.foregroundColor(theme.labelColor)
@@ -305,4 +300,3 @@ struct StatusActionLabel: View {
 //         )
 //     }
 // }
-

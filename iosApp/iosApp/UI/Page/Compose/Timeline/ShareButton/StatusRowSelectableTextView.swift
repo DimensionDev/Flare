@@ -69,8 +69,8 @@ struct StatusRowSelectableTextView: View {
 
         // 1. 提取特殊元素
         let (specialTags, cleanedText) = extractSpecialElements(from: markdownText)
- 
-        // 2. 文本清理 
+
+        // 2. 文本清理
         let cleanedTextSegments = cleanTextForTokenization(cleanedText)
 
         // 3. 语言检测
@@ -78,13 +78,12 @@ struct StatusRowSelectableTextView: View {
         languageRecognizer.processString(cleanedText)
         detectedLanguage = languageRecognizer.dominantLanguage
 
-
-        // 4. 分词处理  
+        // 4. 分词处理
         var tempTokenizedTags: [Tag] = []
         for segment in cleanedTextSegments {
             tempTokenizedTags.append(contentsOf: tokenizeText(segment, unit: selectedGranularity, language: detectedLanguage))
         }
-        
+
         // 5. 合并所有标签
         allTags = specialTags + tempTokenizedTags
     }
@@ -164,7 +163,7 @@ struct StatusRowSelectableTextView: View {
 
     private func cleanTextForTokenization(_ text: String) -> [String] {
         let segments = text.components(separatedBy: "<br />")
-        
+
         return segments.compactMap { segment -> String? in
             let cleanedSegment = segment
                 // HTML标签
@@ -175,7 +174,7 @@ struct StatusRowSelectableTextView: View {
                 .replacingOccurrences(of: "\\s+", with: " ", options: .regularExpression)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
                 .replacingOccurrences(of: "{ }", with: "")
-            
+
             return cleanedSegment.isEmpty ? nil : cleanedSegment
         }
     }

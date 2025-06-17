@@ -44,6 +44,7 @@ internal val TitleType.Localized.resId: Int
             TitleType.Localized.LocalizedKey.Feeds -> R.string.home_tab_feeds_title
             TitleType.Localized.LocalizedKey.DirectMessage -> R.string.dm_list_title
             TitleType.Localized.LocalizedKey.Rss -> R.string.rss_title
+            TitleType.Localized.LocalizedKey.Antenna -> R.string.home_tab_antennas_title
         }
 
 internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =

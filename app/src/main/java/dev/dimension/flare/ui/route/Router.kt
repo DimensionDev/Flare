@@ -28,6 +28,7 @@ import dev.dimension.flare.ui.screen.home.NavigationState
 import dev.dimension.flare.ui.screen.home.homeEntryBuilder
 import dev.dimension.flare.ui.screen.list.listEntryBuilder
 import dev.dimension.flare.ui.screen.media.mediaEntryBuilder
+import dev.dimension.flare.ui.screen.misskey.misskeyEntryBuilder
 import dev.dimension.flare.ui.screen.profile.profileEntryBuilder
 import dev.dimension.flare.ui.screen.rss.rssEntryBuilder
 import dev.dimension.flare.ui.screen.serviceselect.serviceSelectEntryBuilder
@@ -133,6 +134,7 @@ internal fun Router(
                     serviceSelectEntryBuilder(::navigate, ::onBack)
                     settingsSelectEntryBuilder(::navigate, ::onBack)
                     statusEntryBuilder(::navigate, ::onBack)
+                    misskeyEntryBuilder(::navigate, ::onBack)
                 },
         )
     }

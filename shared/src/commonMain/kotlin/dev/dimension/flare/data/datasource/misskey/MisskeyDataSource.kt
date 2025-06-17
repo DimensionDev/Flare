@@ -1454,4 +1454,38 @@ internal class MisskeyDataSource(
             }
         }
     }
+
+    fun antennasList(
+        scope: CoroutineScope,
+        pageSize: Int = 20,
+    ): Flow<PagingData<UiList>> =
+        Pager(
+            config = PagingConfig(pageSize = pageSize),
+        ) {
+            AntennasListPagingSource(
+                service = service,
+            )
+        }.flow.cachedIn(scope)
+
+    fun antennasTimeline(
+        id: String,
+        scope: CoroutineScope,
+        pageSize: Int = 20,
+    ): Flow<PagingData<UiTimeline>> =
+        timelinePager(
+            pageSize = pageSize,
+            pagingKey = "antennas_$id",
+            accountKey = accountKey,
+            database = database,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            scope = scope,
+            mediator =
+                AntennasTimelineRemoteMediator(
+                    service = service,
+                    database = database,
+                    accountKey = accountKey,
+                    id = id,
+                    pagingKey = "antennas_$id",
+                ),
+        )
 }

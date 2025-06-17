@@ -8,6 +8,8 @@ import dev.dimension.flare.data.network.misskey.api.model.AntennasDeleteRequest
 import dev.dimension.flare.data.network.misskey.api.model.AntennasNotesRequest
 import dev.dimension.flare.data.network.misskey.api.model.AntennasUpdateRequest
 import dev.dimension.flare.data.network.misskey.api.model.Note
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
 
 internal interface AntennasApi {
     /**
@@ -61,7 +63,7 @@ internal interface AntennasApi {
      */
     @POST("antennas/list")
     suspend fun antennasList(
-        @Body body: kotlin.Any,
+        @Body body: JsonObject = buildJsonObject { },
     ): kotlin.collections.List<Antenna>
 
     /**

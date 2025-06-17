@@ -24,5 +24,6 @@ public data class UiList internal constructor(
     public enum class Type {
         Feed,
         List,
+        Antenna,
     }
 }

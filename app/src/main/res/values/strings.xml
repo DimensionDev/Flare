@@ -316,4 +316,7 @@
     <string name="podcast_leave">Leave</string>
     <string name="podcast_ended">Podcast ended</string>
     <string name="podcast_living">Podcast live</string>
+
+    <string name="home_tab_antennas_title">Antenna</string>
+    <string name="antennas_empty">No antennas</string>
 </resources>

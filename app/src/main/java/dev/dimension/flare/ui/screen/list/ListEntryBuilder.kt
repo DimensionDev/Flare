@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.list
 
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
+import androidx.compose.runtime.remember
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
@@ -55,14 +56,16 @@ internal fun EntryProviderBuilder<NavKey>.listEntryBuilder(
         )
     ) { args ->
         TimelineScreen(
-            tabItem = ListTimelineTabItem(
-                account = args.accountType,
-                listId = args.listId,
-                metaData = TabMetaData(
-                    title = TitleType.Text(args.title),
-                    icon = IconType.Material(IconType.Material.MaterialIcon.List),
-                ),
-            ),
+            tabItem = remember(args) {
+                ListTimelineTabItem(
+                    account = args.accountType,
+                    listId = args.listId,
+                    metaData = TabMetaData(
+                        title = TitleType.Text(args.title),
+                        icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                    ),
+                )
+            },
             toCompose = {
                 navigate(Route.Compose.New(args.accountType))
             },

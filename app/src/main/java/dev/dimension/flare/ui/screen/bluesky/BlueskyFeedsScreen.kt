@@ -350,17 +350,24 @@ private fun presenter(
                             homeTabs =
                                 homeTabs + (
                                     user.key to
-                                        homeTabs[user.key].orEmpty().plus(
-                                            Bluesky.FeedTabItem(
-                                                account = AccountType.Specific(user.key),
-                                                uri = item.id,
-                                                metaData =
-                                                    TabMetaData(
-                                                        title = TitleType.Text(item.title),
-                                                        icon = IconType.Material(IconType.Material.MaterialIcon.Feeds),
+                                        homeTabs
+                                            .getOrDefault(
+                                                user.key,
+                                                defaultValue =
+                                                    listOf(
+                                                        HomeTimelineTabItem(accountType),
                                                     ),
-                                            ),
-                                        )
+                                            ).plus(
+                                                Bluesky.FeedTabItem(
+                                                    account = AccountType.Specific(user.key),
+                                                    uri = item.id,
+                                                    metaData =
+                                                        TabMetaData(
+                                                            title = TitleType.Text(item.title),
+                                                            icon = IconType.Material(IconType.Material.MaterialIcon.Feeds),
+                                                        ),
+                                                ),
+                                            )
                                 ),
                         )
                     }
@@ -376,13 +383,20 @@ private fun presenter(
                             homeTabs =
                                 homeTabs + (
                                     user.key to
-                                        homeTabs[user.key].orEmpty().filter {
-                                            if (it is Bluesky.FeedTabItem) {
-                                                it.uri != item.id
-                                            } else {
-                                                true
+                                        homeTabs
+                                            .getOrDefault(
+                                                user.key,
+                                                defaultValue =
+                                                    listOf(
+                                                        HomeTimelineTabItem(accountType),
+                                                    ),
+                                            ).filter {
+                                                if (it is Bluesky.FeedTabItem) {
+                                                    it.uri != item.id
+                                                } else {
+                                                    true
+                                                }
                                             }
-                                        }
                                 ),
                         )
                     }

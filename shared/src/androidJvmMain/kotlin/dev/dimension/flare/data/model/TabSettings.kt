@@ -70,6 +70,7 @@ public sealed interface TitleType {
             Feeds,
             DirectMessage,
             Rss,
+            Antenna,
         }
     }
 }
@@ -368,6 +369,14 @@ public sealed interface TimelineTabItem : TabItem {
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.MastodonPublic),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.World, accountKey),
+                        ),
+                ),
+                Misskey.AntennasListTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Antenna),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Rss, accountKey),
                         ),
                 ),
             )
@@ -685,6 +694,31 @@ public object Misskey {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.misskey
                 .MisskeyFavouriteTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Serializable
+    public data class AntennasListTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TabItem {
+        override val key: String = "antennas_$account"
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Serializable
+    public data class AntennasTimelineTabItem(
+        val id: String,
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "antennas_${account}_$id"
+
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.list
+                .AntennasTimelinePresenter(account, id)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }

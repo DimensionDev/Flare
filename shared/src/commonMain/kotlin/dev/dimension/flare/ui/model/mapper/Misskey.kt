@@ -6,6 +6,7 @@ import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.network.misskey.api.model.Antenna
 import dev.dimension.flare.data.network.misskey.api.model.DriveFile
 import dev.dimension.flare.data.network.misskey.api.model.EmojiSimple
 import dev.dimension.flare.data.network.misskey.api.model.Meta200Response
@@ -992,3 +993,11 @@ internal fun Meta200Response.render(): UiInstanceMetadata {
         configuration = configuration,
     )
 }
+
+internal fun Antenna.render(): UiList =
+    UiList(
+        id = id,
+        title = name,
+        platformType = PlatformType.Misskey,
+        type = UiList.Type.Antenna,
+    )

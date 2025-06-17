@@ -62,6 +62,7 @@ import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.DirectMessageTabItem
 import dev.dimension.flare.data.model.DiscoverTabItem
 import dev.dimension.flare.data.model.HomeTimelineTabItem
+import dev.dimension.flare.data.model.Misskey
 import dev.dimension.flare.data.model.NotificationTabItem
 import dev.dimension.flare.data.model.ProfileTabItem
 import dev.dimension.flare.data.model.RssTabItem
@@ -520,34 +521,17 @@ private fun getDirection(
     accountType: AccountType = tab.account,
 ): Route =
     when (tab) {
-        is DiscoverTabItem -> {
-            Route.Discover(accountType)
-        }
-
-        is ProfileTabItem -> {
-            Route.Profile.Me(accountType)
-        }
-
-        is HomeTimelineTabItem -> {
-            Route.Home(accountType)
-        }
-
-        is TimelineTabItem -> {
-            Route.Timeline(accountType, tab)
-        }
-
-        is NotificationTabItem -> {
-            Route.Notification(accountType)
-        }
-
-        SettingsTabItem -> {
-            Route.Settings.Main
-        }
-
+        is DiscoverTabItem -> Route.Discover(accountType)
+        is ProfileTabItem -> Route.Profile.Me(accountType)
+        is HomeTimelineTabItem -> Route.Home(accountType)
+        is TimelineTabItem -> Route.Timeline(accountType, tab)
+        is NotificationTabItem -> Route.Notification(accountType)
+        SettingsTabItem -> Route.Settings.Main
         is AllListTabItem -> Route.Lists.List(accountType)
         is Bluesky.FeedsTabItem -> Route.Bluesky.Feed(accountType)
         is DirectMessageTabItem -> Route.DM.List(accountType)
         is RssTabItem -> Route.Rss.Sources
+        is Misskey.AntennasListTabItem -> Route.Misskey.AntennasList(accountType)
     }
 
 @Composable

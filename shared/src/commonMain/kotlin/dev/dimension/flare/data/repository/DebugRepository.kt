@@ -35,6 +35,7 @@ internal object DebugRepository {
             return
         }
         scope.launch {
+            exception.printStackTrace()
             val message =
                 buildString {
                     appendLine("Error: ${exception.message}")
@@ -70,11 +71,6 @@ internal inline fun <R> tryRun(block: () -> R): Result<R> =
     try {
         Result.success(block())
     } catch (e: Throwable) {
-        with(CoroutineScope(Dispatchers.IO)) {
-            launch {
-                e.printStackTrace()
-                DebugRepository.error(e)
-            }
-        }
+        DebugRepository.error(e)
         Result.failure(e)
     }

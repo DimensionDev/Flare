@@ -10,6 +10,7 @@ import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.bluesky.BlueskyDataSource
 import dev.dimension.flare.data.datasource.microblog.ListDataSource
+import dev.dimension.flare.data.datasource.misskey.MisskeyDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -40,6 +41,10 @@ public class PinnableTimelineTabPresenter(
             ) : Tab
 
             public data class Feed(
+                override val data: PagingState<UiList>,
+            ) : Tab
+
+            public data class Antenna(
                 override val data: PagingState<UiList>,
             ) : Tab
         }
@@ -73,6 +78,16 @@ public class PinnableTimelineTabPresenter(
                     }
                 }.toPagingState()
 
+        val antenna =
+            serviceState
+                .mapNotNull {
+                    it as? MisskeyDataSource
+                }.mapNotNull { service ->
+                    remember(service) {
+                        service.antennasList(scope = scope)
+                    }.collectAsLazyPagingItems()
+                }.toPagingState()
+
         val tabs =
             serviceState.map { service ->
                 remember(
@@ -88,6 +103,11 @@ public class PinnableTimelineTabPresenter(
                         },
                         if (service is ListDataSource) {
                             State.Tab.List(items)
+                        } else {
+                            null
+                        },
+                        if (service is MisskeyDataSource) {
+                            State.Tab.Antenna(antenna)
                         } else {
                             null
                         },

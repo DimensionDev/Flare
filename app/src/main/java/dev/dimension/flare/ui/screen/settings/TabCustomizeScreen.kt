@@ -70,9 +70,11 @@ import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.Bluesky
+import dev.dimension.flare.data.model.Bluesky.FeedTabItem
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.IconType.Mixed
 import dev.dimension.flare.data.model.ListTimelineTabItem
+import dev.dimension.flare.data.model.Misskey
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TimelineTabItem
@@ -81,6 +83,7 @@ import dev.dimension.flare.data.model.resId
 import dev.dimension.flare.data.model.toIcon
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.AccountType.Specific
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -335,8 +338,12 @@ internal fun TabCustomizeScreen(onBack: () -> Unit) {
                                                 tab.extraTabs
                                                     .map {
                                                         when (it) {
-                                                            is PinnableTimelineTabPresenter.State.Tab.Feed -> R.string.tab_settings_feed
-                                                            is PinnableTimelineTabPresenter.State.Tab.List -> R.string.tab_settings_list
+                                                            is PinnableTimelineTabPresenter.State.Tab.Feed ->
+                                                                R.string.tab_settings_feed
+                                                            is PinnableTimelineTabPresenter.State.Tab.List ->
+                                                                R.string.tab_settings_list
+                                                            is PinnableTimelineTabPresenter.State.Tab.Antenna ->
+                                                                R.string.home_tab_antennas_title
                                                         }
                                                     }.map { stringResource(id = it) }
                                         ButtonGroup(
@@ -384,34 +391,52 @@ internal fun TabCustomizeScreen(onBack: () -> Unit) {
 }
 
 internal fun UiList.toTabItem(accountKey: MicroBlogKey) =
-    if (type == UiList.Type.Feed) {
-        Bluesky.FeedTabItem(
-            account = AccountType.Specific(accountKey),
-            uri = id,
-            metaData =
-                TabMetaData(
-                    title = TitleType.Text(title),
-                    icon =
-                        IconType.Mixed(
-                            icon = IconType.Material.MaterialIcon.List,
-                            userKey = accountKey,
-                        ),
-                ),
-        )
-    } else {
-        ListTimelineTabItem(
-            account = AccountType.Specific(accountKey),
-            listId = id,
-            metaData =
-                TabMetaData(
-                    title = TitleType.Text(title),
-                    icon =
-                        IconType.Mixed(
-                            icon = IconType.Material.MaterialIcon.List,
-                            userKey = accountKey,
-                        ),
-                ),
-        )
+    when (type) {
+        UiList.Type.Feed -> {
+            FeedTabItem(
+                account = Specific(accountKey),
+                uri = id,
+                metaData =
+                    TabMetaData(
+                        title = TitleType.Text(title),
+                        icon =
+                            Mixed(
+                                icon = IconType.Material.MaterialIcon.List,
+                                userKey = accountKey,
+                            ),
+                    ),
+            )
+        }
+
+        UiList.Type.List ->
+            ListTimelineTabItem(
+                account = AccountType.Specific(accountKey),
+                listId = id,
+                metaData =
+                    TabMetaData(
+                        title = TitleType.Text(title),
+                        icon =
+                            IconType.Mixed(
+                                icon = IconType.Material.MaterialIcon.List,
+                                userKey = accountKey,
+                            ),
+                    ),
+            )
+
+        UiList.Type.Antenna ->
+            Misskey.AntennasTimelineTabItem(
+                account = AccountType.Specific(accountKey),
+                id = id,
+                metaData =
+                    TabMetaData(
+                        title = TitleType.Text(title),
+                        icon =
+                            IconType.Mixed(
+                                icon = IconType.Material.MaterialIcon.Rss,
+                                userKey = accountKey,
+                            ),
+                    ),
+            )
     }
 
 @Composable

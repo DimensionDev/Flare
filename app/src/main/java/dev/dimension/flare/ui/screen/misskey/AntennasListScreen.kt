@@ -1,42 +1,27 @@
-package dev.dimension.flare.ui.screen.list
+package dev.dimension.flare.ui.screen.misskey
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.EllipsisVertical
-import compose.icons.fontawesomeicons.solid.List
-import compose.icons.fontawesomeicons.solid.Pen
-import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Thumbtack
 import compose.icons.fontawesomeicons.solid.ThumbtackSlash
-import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
+import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.IconType
-import dev.dimension.flare.data.model.ListTimelineTabItem
+import dev.dimension.flare.data.model.Misskey
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.repository.SettingsRepository
@@ -53,69 +38,32 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.list.AllListPresenter
-import dev.dimension.flare.ui.presenter.list.AllListState
+import dev.dimension.flare.ui.presenter.list.AntennasListPresenter
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-@Composable
-internal fun ListDetailPlaceholder(modifier: Modifier = Modifier) {
-    FlareScaffold(
-        modifier = modifier,
-    ) {
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .padding(it),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp, alignment = Alignment.CenterVertically),
-        ) {
-            FAIcon(
-                FontAwesomeIcons.Solid.List,
-                contentDescription = null,
-                modifier = Modifier.size(64.dp),
-            )
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ListScreen(
+internal fun AntennasListScreen(
     accountType: AccountType,
-    toList: (UiList) -> Unit,
-    createList: () -> Unit,
-    editList: (UiList) -> Unit,
-    deleteList: (UiList) -> Unit,
+    toTimeline: (UiList) -> Unit,
 ) {
-    val state by producePresenter {
+    val state by producePresenter("antennas_list_$accountType") {
         presenter(accountType)
     }
+
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     FlareScaffold(
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         topBar = {
             FlareTopAppBar(
                 title = {
-                    Text(text = stringResource(id = R.string.home_tab_list_title))
+                    Text(text = stringResource(id = R.string.home_tab_antennas_title))
                 },
                 scrollBehavior = topAppBarScrollBehavior,
-                actions = {
-                    IconButton(
-                        onClick = {
-                            createList.invoke()
-                        },
-                    ) {
-                        FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.Plus,
-                            contentDescription = stringResource(id = R.string.list_add),
-                        )
-                    }
-                },
             )
         },
     ) { contentPadding ->
@@ -124,15 +72,15 @@ internal fun ListScreen(
                 Modifier
                     .fillMaxSize(),
             indicatorPadding = contentPadding,
-            isRefreshing = state.isRefreshing,
+            isRefreshing = state.data.isRefreshing,
             onRefresh = state::refresh,
             content = {
                 LazyColumn(
                     contentPadding = contentPadding,
                 ) {
                     uiListItemComponent(
-                        state.items,
-                        toList,
+                        state.data,
+                        toTimeline,
                         trailingContent = { item ->
                             state.currentTabs.onSuccess { currentTabs ->
                                 val isPinned =
@@ -166,58 +114,6 @@ internal fun ListScreen(
                                     }
                                 }
                             }
-                            if (!item.readonly) {
-                                var showDropdown by remember {
-                                    mutableStateOf(false)
-                                }
-                                IconButton(onClick = { showDropdown = true }) {
-                                    FAIcon(
-                                        imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
-                                        contentDescription = stringResource(id = R.string.more),
-                                    )
-                                    DropdownMenu(
-                                        expanded = showDropdown,
-                                        onDismissRequest = { showDropdown = false },
-                                    ) {
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(
-                                                    text = stringResource(id = R.string.list_edit),
-                                                )
-                                            },
-                                            onClick = {
-                                                editList(item)
-                                                showDropdown = false
-                                            },
-                                            leadingIcon = {
-                                                FAIcon(
-                                                    imageVector = FontAwesomeIcons.Solid.Pen,
-                                                    contentDescription = stringResource(id = R.string.list_edit),
-                                                )
-                                            },
-                                        )
-                                        DropdownMenuItem(
-                                            text = {
-                                                Text(
-                                                    text = stringResource(id = R.string.list_delete),
-                                                    color = MaterialTheme.colorScheme.error,
-                                                )
-                                            },
-                                            onClick = {
-                                                deleteList(item)
-                                                showDropdown = false
-                                            },
-                                            leadingIcon = {
-                                                FAIcon(
-                                                    imageVector = FontAwesomeIcons.Solid.Trash,
-                                                    contentDescription = stringResource(id = R.string.list_delete),
-                                                    tint = MaterialTheme.colorScheme.error,
-                                                )
-                                            },
-                                        )
-                                    }
-                                }
-                            }
                         },
                     )
                 }
@@ -244,18 +140,20 @@ private fun presenter(
         accountState.user.flatMap { user ->
             tabSettings.map {
                 it.homeTabs
-                    .getOrDefault(user.key, listOf(HomeTimelineTabItem(accountType = AccountType.Specific(user.key))))
-                    .filterIsInstance<ListTimelineTabItem>()
-                    .map { it.listId }
+                    .getOrDefault(
+                        user.key,
+                        listOf(HomeTimelineTabItem(accountType = AccountType.Specific(user.key))),
+                    ).filterIsInstance<Misskey.AntennasTimelineTabItem>()
+                    .map { it.id }
                     .toImmutableList()
             }
         }
     val state =
         remember(accountType) {
-            AllListPresenter(accountType)
+            AntennasListPresenter(accountType)
         }.invoke()
 
-    object : AllListState by state {
+    object : AntennasListPresenter.State by state {
         val currentTabs = currentTabs
 
         fun pinList(item: UiList) {
@@ -274,9 +172,9 @@ private fun presenter(
                                                         HomeTimelineTabItem(accountType),
                                                     ),
                                             ).plus(
-                                                ListTimelineTabItem(
+                                                Misskey.AntennasTimelineTabItem(
                                                     account = AccountType.Specific(user.key),
-                                                    listId = item.id,
+                                                    id = item.id,
                                                     metaData =
                                                         TabMetaData(
                                                             title = TitleType.Text(item.title),
@@ -299,6 +197,7 @@ private fun presenter(
                             homeTabs =
                                 homeTabs + (
                                     user.key to
+
                                         homeTabs
                                             .getOrDefault(
                                                 user.key,
@@ -307,8 +206,8 @@ private fun presenter(
                                                         HomeTimelineTabItem(accountType),
                                                     ),
                                             ).filter {
-                                                if (it is ListTimelineTabItem) {
-                                                    it.listId != item.id
+                                                if (it is Misskey.AntennasTimelineTabItem) {
+                                                    it.id != item.id
                                                 } else {
                                                     true
                                                 }

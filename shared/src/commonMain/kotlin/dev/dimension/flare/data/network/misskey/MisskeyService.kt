@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network.misskey
 
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.misskey.api.AccountApi
+import dev.dimension.flare.data.network.misskey.api.AntennasApi
 import dev.dimension.flare.data.network.misskey.api.DriveApi
 import dev.dimension.flare.data.network.misskey.api.FollowingApi
 import dev.dimension.flare.data.network.misskey.api.HashtagsApi
@@ -11,6 +12,7 @@ import dev.dimension.flare.data.network.misskey.api.NotesApi
 import dev.dimension.flare.data.network.misskey.api.ReactionsApi
 import dev.dimension.flare.data.network.misskey.api.UsersApi
 import dev.dimension.flare.data.network.misskey.api.createAccountApi
+import dev.dimension.flare.data.network.misskey.api.createAntennasApi
 import dev.dimension.flare.data.network.misskey.api.createDriveApi
 import dev.dimension.flare.data.network.misskey.api.createFollowingApi
 import dev.dimension.flare.data.network.misskey.api.createHashtagsApi
@@ -59,7 +61,8 @@ internal class MisskeyService(
     ReactionsApi by config(baseUrl, token).createReactionsApi(),
     FollowingApi by config(baseUrl, token).createFollowingApi(),
     HashtagsApi by config(baseUrl, token).createHashtagsApi(),
-    ListsApi by config(baseUrl, token).createListsApi() {
+    ListsApi by config(baseUrl, token).createListsApi(),
+    AntennasApi by config(baseUrl, token).createAntennasApi() {
     suspend fun upload(
         data: ByteArray,
         name: String,

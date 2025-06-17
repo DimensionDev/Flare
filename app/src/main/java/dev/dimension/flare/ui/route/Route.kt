@@ -328,6 +328,23 @@ internal sealed interface Route : NavKey {
     }
 
     @Serializable
+    sealed interface Misskey : Route {
+        @Serializable
+        data class AntennasList(
+            override val accountType: AccountType,
+        ) : Misskey,
+            WithAccountType
+
+        @Serializable
+        data class AntennaTimeline(
+            override val accountType: AccountType,
+            val antennaId: String,
+            val title: String,
+        ) : Misskey,
+            WithAccountType
+    }
+
+    @Serializable
     sealed interface Compose : Route {
         @Serializable
         data class New(

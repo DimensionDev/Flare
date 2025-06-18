@@ -45,7 +45,7 @@ struct SensitiveContentSettings: Codable, Changeable {
     var timeRange: SensitiveContentTimeRange?
     var hideInTimeline: Bool = true
     var isCollapsed: Bool = false
-    var isShowingTimePicker: Bool? = false owing
+    var isShowingTimePicker: Bool? = false
 
     init() {}
 }

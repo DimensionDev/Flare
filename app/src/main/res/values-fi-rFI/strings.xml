@@ -256,4 +256,6 @@
     <string name="podcast_leave">Poistu</string>
     <string name="podcast_ended">Podcast päättyi</string>
     <string name="podcast_living">Elävä Podcast</string>
+    <string name="home_tab_antennas_title">Antenni</string>
+    <string name="antennas_empty">Ei antennia</string>
 </resources>

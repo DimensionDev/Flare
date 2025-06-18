@@ -255,4 +255,6 @@
     <string name="podcast_leave">Залишити</string>
     <string name="podcast_ended">Подкаст закінчився</string>
     <string name="podcast_living">Подкаст в реальному часі</string>
+    <string name="home_tab_antennas_title">Антена</string>
+    <string name="antennas_empty">Немає антени</string>
 </resources>

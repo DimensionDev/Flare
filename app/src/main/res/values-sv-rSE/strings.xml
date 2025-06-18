@@ -256,4 +256,6 @@
     <string name="podcast_leave">Lämna</string>
     <string name="podcast_ended">Podcast avslutad</string>
     <string name="podcast_living">Podcast live</string>
+    <string name="home_tab_antennas_title">Antenn</string>
+    <string name="antennas_empty">Inga antenner</string>
 </resources>

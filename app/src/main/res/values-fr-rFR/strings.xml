@@ -256,4 +256,6 @@
     <string name="podcast_leave">Quitter</string>
     <string name="podcast_ended">Podcast terminé</string>
     <string name="podcast_living">Podcast en direct</string>
+    <string name="home_tab_antennas_title">Antenne</string>
+    <string name="antennas_empty">Aucune antenne</string>
 </resources>

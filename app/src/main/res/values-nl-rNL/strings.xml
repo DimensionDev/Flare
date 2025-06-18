@@ -255,4 +255,6 @@
     <string name="podcast_leave">Verlaat</string>
     <string name="podcast_ended">Podcast beëindigd</string>
     <string name="podcast_living">Podcast live</string>
+    <string name="home_tab_antennas_title">Antenne</string>
+    <string name="antennas_empty">Geen antennes</string>
 </resources>

@@ -7,7 +7,7 @@
 
 ![badge-Platform](https://img.shields.io/badge/Supported%20Platform-Mastodon%20|%20Misskey%20|%20Bluesky%20-black)
 
-![badge-Android](https://img.shields.io/badge/Android-7.0-3DDC84)
+![badge-Android](https://img.shields.io/badge/Android-5.0-3DDC84)
 ![badge-iOS](https://img.shields.io/badge/iOS-18.0-black)
 
 

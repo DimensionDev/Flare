@@ -137,6 +137,7 @@ internal fun BlueskyFeedsScreen(
                     }
                     uiListItemComponent(
                         state.myFeeds,
+                        onClicked = toFeed,
                         trailingContent = { item ->
                             state.currentTabs.onSuccess { currentTabs ->
                                 val isPinned =
@@ -231,7 +232,8 @@ internal fun BlueskyFeedsScreen(
                                                     .background(
                                                         color = MaterialTheme.colorScheme.primaryContainer,
                                                         shape = MaterialTheme.shapes.medium,
-                                                    ),
+                                                    ).padding(8.dp),
+                                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                         )
                                     }
                                 },

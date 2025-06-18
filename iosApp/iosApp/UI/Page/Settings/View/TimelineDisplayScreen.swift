@@ -1,7 +1,8 @@
 import shared
 import SwiftUI
+import UIKit
 
-struct AppearanceUIScreen: View {
+struct TimelineDisplayScreen: View {
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareTheme.self) private var theme
     @State private var presenter = AppearancePresenter()
@@ -27,8 +28,11 @@ struct AppearanceUIScreen: View {
                 Section {
                     themeAutoSection
                 }.listRowBackground(theme.primaryBackgroundColor)
+
                 // Font部分
-                Section { fontSection }.listRowBackground(theme.primaryBackgroundColor)
+                Section {
+                    fontSection
+                }.listRowBackground(theme.primaryBackgroundColor)
 
                 // 渲染引擎选择部分
                 Section("Text Render Engine") {
@@ -45,27 +49,9 @@ struct AppearanceUIScreen: View {
                     })
                 }.listRowBackground(theme.primaryBackgroundColor)
 
-                Section("settings_appearance_generic") {
-                    // 注释原主题选择
-                    /*
-                     Picker(selection: Binding(get: {
-                         appSettings.appearanceSettings.theme
-                     }, set: { value in
-                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.theme, to: value))
-                     }), content: {
-                         Text("settings_appearance_theme_auto")
-                             .tag(Theme.auto)
-                         Text("settings_appearance_theme_dark")
-                             .tag(Theme.dark)
-                         Text("settings_appearance_theme_light")
-                             .tag(Theme.light)
-                     }, label: {
-                         Text("settings_appearance_theme_color")
-                         Text("settings_appearance_theme_color_description")
-                     })
-                     */
-
-                    // 保留其他设置
+                // 界面元素设置
+                Section("Interface Elements") {
+                    // 头像形状
                     Picker(selection: Binding(get: {
                         appSettings.appearanceSettings.avatarShape
                     }, set: { value in
@@ -80,7 +66,7 @@ struct AppearanceUIScreen: View {
                         Text("settings_appearance_avatar_shape_description")
                     })
 
-                    // 保留其他设置项
+                    // 显示操作按钮
                     Toggle(isOn: Binding(get: {
                         appSettings.appearanceSettings.showActions
                     }, set: { value in
@@ -89,6 +75,8 @@ struct AppearanceUIScreen: View {
                         Text("settings_appearance_show_actions")
                         Text("settings_appearance_show_actions_description")
                     }
+
+                    // 显示数字统计 (依赖于显示操作按钮)
                     if appSettings.appearanceSettings.showActions {
                         Toggle(isOn: Binding(get: {
                             appSettings.appearanceSettings.showNumbers
@@ -99,40 +87,8 @@ struct AppearanceUIScreen: View {
                             Text("settings_appearance_show_numbers_description")
                         }
                     }
-                    Toggle(isOn: Binding(get: {
-                        appSettings.appearanceSettings.showLinkPreview
-                    }, set: { value in
-                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showLinkPreview, to: value))
-                    })) {
-                        Text("settings_appearance_show_link_previews")
-                        Text("settings_appearance_show_link_previews_description")
-                    }
-                    Toggle(isOn: Binding(get: {
-                        appSettings.appearanceSettings.showMedia
-                    }, set: { value in
-                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showMedia, to: value))
-                    })) {
-                        Text("settings_appearance_show_media")
-                        Text("settings_appearance_show_media_description")
-                    }
-                    if appSettings.appearanceSettings.showMedia {
-                        Toggle(isOn: Binding(get: {
-                            appSettings.appearanceSettings.showSensitiveContent
-                        }, set: { value in
-                            appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showSensitiveContent, to: value))
-                        })) {
-                            Text("settings_appearance_show_cw_img")
-                            Text("settings_appearance_show_cw_img_description")
-                        }
-                    }
-                    Toggle(isOn: Binding(get: {
-                        appSettings.appearanceSettings.enableFullSwipePop
-                    }, set: { value in
-                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.enableFullSwipePop, to: value))
-                    })) {
-                        Text("Full Swipe Back")
-                        Text("Allow swiping back from anywhere on the screen")
-                    }
+
+                    // 隐藏返回顶部按钮
                     Toggle(isOn: Binding(get: {
                         appSettings.appearanceSettings.hideScrollToTopButton
                     }, set: { value in
@@ -142,11 +98,24 @@ struct AppearanceUIScreen: View {
                         Text("Hide the floating scroll to top button")
                     }
                 }.listRowBackground(theme.primaryBackgroundColor)
+
+                // 交互行为设置
+                Section("Interaction Behavior") {
+                    // 全屏滑动返回
+                    Toggle(isOn: Binding(get: {
+                        appSettings.appearanceSettings.enableFullSwipePop
+                    }, set: { value in
+                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.enableFullSwipePop, to: value))
+                    })) {
+                        Text("Full Swipe Back")
+                        Text("Allow swiping back from anywhere on the screen")
+                    }
+                }.listRowBackground(theme.primaryBackgroundColor)
                     .buttonStyle(.plain)
             }
             .scrollContentBackground(.hidden)
             .background(theme.secondaryBackgroundColor)
-            .navigationTitle("settings_appearance_title")
+            .navigationTitle("Timeline & Display")
             .navigationBarTitleDisplayMode(.inline)
             .task(id: localValues.tintColor) {
                 do { try await Task.sleep(for: .microseconds(500)) } catch {}
@@ -208,20 +177,6 @@ struct AppearanceUIScreen: View {
                 set: { theme.followSystemColorScheme = $0 }
             ))
             themeSelectorButton
-            // Group {
-            //     ColorPicker("Tint Color", selection: $localValues.tintColor)
-            //     ColorPicker("Background", selection: $localValues.primaryBackgroundColor)
-            //     ColorPicker("Secondary Background", selection: $localValues.secondaryBackgroundColor)
-            //     ColorPicker("Text Color", selection: $localValues.labelColor)
-            // }
-            // .disabled(theme.followSystemColorScheme)
-            // .opacity(theme.followSystemColorScheme ? 0.5 : 1.0)
-            // .onChange(of: theme.selectedSet) { _, _ in
-            //     localValues.tintColor = theme.tintColor
-            //     localValues.primaryBackgroundColor = theme.primaryBackgroundColor
-            //     localValues.secondaryBackgroundColor = theme.secondaryBackgroundColor
-            //     localValues.labelColor = theme.labelColor
-            // }
         }
     }
 
@@ -293,26 +248,4 @@ struct AppearanceUIScreen: View {
             }
         }
     }
-
-    // private var themeSelectorButton: some View {
-    //     // router.navigate(to: .messages(accountType: accountType))
-    //     NavigationLink(destination: ThemePreviewView()) {
-    //         HStack {
-    //             Text("Theme")
-    //             Spacer()
-    //             Text(theme.selectedSet.rawValue)
-    //         }
-    //     }
-    // }
-}
-
-// 辅助类，用于存储设置值
-@MainActor
-@Observable class DisplaySettingsLocalValues {
-    var tintColor = FlareTheme.shared.tintColor
-    var primaryBackgroundColor = FlareTheme.shared.primaryBackgroundColor
-    var secondaryBackgroundColor = FlareTheme.shared.secondaryBackgroundColor
-    var labelColor = FlareTheme.shared.labelColor
-    var lineSpacing = FlareTheme.shared.lineSpacing
-    var fontSizeScale = FlareTheme.shared.fontSizeScale
 }

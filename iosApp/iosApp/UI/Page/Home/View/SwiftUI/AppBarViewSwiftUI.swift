@@ -8,6 +8,7 @@ struct AppBarViewSwiftUI: View {
     let accountType: AccountType
     let onAvatarTap: () -> Void
     let onSettingsTap: () -> Void
+    let onScrollToTop: (String) -> Void
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
@@ -30,7 +31,8 @@ struct AppBarViewSwiftUI: View {
             // 标签栏
             TabItemsViewSwiftUI(
                 selection: $selectedHomeAppBarTab,
-                items: tabs
+                items: tabs,
+                onScrollToTop: onScrollToTop
             )
 
             // 设置按钮 - 仅在 登录模式 下显示

@@ -2,6 +2,7 @@ package dev.dimension.flare.data.network.bluesky
 
 import com.atproto.server.RefreshSessionResponse
 import dev.dimension.flare.common.JSON
+import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -146,7 +147,7 @@ internal class XrpcAuthPlugin(
                             plugin.refreshToken?.let { bearerAuth(it) }
                         }
                     if (StatusCode.fromCode(refreshResponse.status.value) == StatusCode.Okay) {
-                        val refreshed = refreshResponse.body<RefreshSessionResponse>()
+                        val refreshed = refreshResponse.body<String>().decodeJson<RefreshSessionResponse>()
                         val newAccessToken = refreshed.accessJwt
                         val newRefreshToken = refreshed.refreshJwt
 

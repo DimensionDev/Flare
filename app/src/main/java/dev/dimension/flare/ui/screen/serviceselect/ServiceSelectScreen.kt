@@ -3,30 +3,29 @@ package dev.dimension.flare.ui.screen.serviceselect
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -35,8 +34,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -53,12 +52,14 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.logoUrl
 import dev.dimension.flare.ui.common.OnNewIntent
-import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.platform.isBigScreen
+import dev.dimension.flare.ui.component.status.AdaptiveCard
+import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.model.UiInstance
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
@@ -86,8 +87,11 @@ internal fun ServiceSelectScreen(
     val state by producePresenter {
         serviceSelectPresenter(onBack)
     }
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     FlareScaffold(
-        modifier = modifier,
+        modifier =
+            modifier
+                .nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             if (onBack != null) {
                 FlareTopAppBar(
@@ -96,280 +100,298 @@ internal fun ServiceSelectScreen(
                     navigationIcon = {
                         BackButton(onBack = onBack)
                     },
+                    scrollBehavior = scrollBehavior,
                 )
             }
         },
-    ) {
-        Column(
+    ) { contentPadding ->
+        LazyStatusVerticalStaggeredGrid(
             modifier =
-                Modifier
-                    .padding(
-                        PaddingValues(
-                            top = it.calculateTopPadding(),
-                            start = it.calculateStartPadding(LocalLayoutDirection.current),
-                            end = it.calculateEndPadding(LocalLayoutDirection.current),
-                        ) + PaddingValues(horizontal = screenHorizontalPadding),
-                    ).fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+                Modifier.fillMaxSize(),
+            columns = StaggeredGridCells.Adaptive(300.dp),
+            horizontalArrangement =
+                Arrangement.spacedBy(
+                    8.dp,
+                    Alignment.CenterHorizontally,
+                ),
+            verticalItemSpacing = 0.dp,
+            contentPadding = contentPadding,
         ) {
-            Text(
-                text = stringResource(id = R.string.service_select_welcome_title),
-                style = MaterialTheme.typography.headlineMedium,
-            )
-            Text(
-                text = stringResource(id = R.string.service_select_welcome_message),
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center,
-            )
-            OutlinedTextField(
-                state = state.instanceInputState,
-                placeholder = {
-                    Text(
-                        text = stringResource(id = R.string.service_select_instance_input_placeholder),
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                },
-                trailingIcon = {
-                    IconButton(onClick = {
-                        if (state.instanceInputState.text.any()) {
-                            state.clearInstance()
-                        }
-                    }) {
-                        if (state.instanceInputState.text.any()) {
-                            FAIcon(
-                                imageVector = FontAwesomeIcons.Solid.Xmark,
-                                contentDescription = null,
-                            )
-                        } else {
-                            FAIcon(
-                                imageVector = FontAwesomeIcons.Solid.MagnifyingGlass,
-                                contentDescription = null,
-                            )
-                        }
-                    }
-                },
-                modifier = Modifier.width(300.dp),
-                leadingIcon = {
-                    state.detectedPlatformType
-                        .onSuccess {
-                            NetworkImage(
-                                it.logoUrl,
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }.onError {
-                            FAIcon(
-                                imageVector = FontAwesomeIcons.Solid.CircleQuestion,
-                                contentDescription = null,
-                            )
-                        }.onLoading {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
-                },
-                enabled = !state.loading,
-                lineLimits = TextFieldLineLimits.SingleLine,
-            )
-            AnimatedVisibility(state.canNext && state.detectedPlatformType.isSuccess) {
+            item(
+                span = StaggeredGridItemSpan.FullLine,
+            ) {
                 Column(
+                    modifier =
+                        Modifier
+                            .padding(
+                                horizontal = screenHorizontalPadding,
+                            ),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
-                    when (state.detectedPlatformType.takeSuccess()) {
-                        null -> Unit
-                        PlatformType.Bluesky -> {
-                            OutlinedTextField(
-                                state = state.blueskyInputState.username,
-                                label = {
-                                    Text(text = stringResource(id = R.string.bluesky_login_username_hint))
-                                },
-                                enabled = !state.blueskyLoginState.loading,
-                                modifier =
-                                    Modifier
-                                        .width(300.dp),
-                                lineLimits = TextFieldLineLimits.SingleLine,
+                    Text(
+                        text = stringResource(id = R.string.service_select_welcome_title),
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                    Text(
+                        text = stringResource(id = R.string.service_select_welcome_message),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                    )
+                    OutlinedTextField(
+                        state = state.instanceInputState,
+                        placeholder = {
+                            Text(
+                                text = stringResource(id = R.string.service_select_instance_input_placeholder),
+                                style = MaterialTheme.typography.bodyMedium,
                             )
-                            OutlinedSecureTextField(
-                                state = state.blueskyInputState.password,
-                                label = {
-                                    Text(text = stringResource(id = R.string.bluesky_login_password_hint))
-                                },
-                                enabled = !state.blueskyLoginState.loading,
-                                modifier =
-                                    Modifier
-                                        .width(300.dp),
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                if (state.instanceInputState.text.any()) {
+                                    state.clearInstance()
+                                }
+                            }) {
+                                if (state.instanceInputState.text.any()) {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.Xmark,
+                                        contentDescription = null,
+                                    )
+                                } else {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.MagnifyingGlass,
+                                        contentDescription = null,
+                                    )
+                                }
+                            }
+                        },
+                        modifier = Modifier.width(300.dp),
+                        leadingIcon = {
+                            state.detectedPlatformType
+                                .onSuccess {
+                                    NetworkImage(
+                                        it.logoUrl,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                }.onError {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.Solid.CircleQuestion,
+                                        contentDescription = null,
+                                    )
+                                }.onLoading {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                }
+                        },
+                        enabled = !state.loading,
+                        lineLimits = TextFieldLineLimits.SingleLine,
+                    )
+                    AnimatedVisibility(state.canNext && state.detectedPlatformType.isSuccess) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp),
+                        ) {
+                            when (state.detectedPlatformType.takeSuccess()) {
+                                null -> Unit
+                                PlatformType.Bluesky -> {
+                                    OutlinedTextField(
+                                        state = state.blueskyInputState.username,
+                                        label = {
+                                            Text(text = stringResource(id = R.string.bluesky_login_username_hint))
+                                        },
+                                        enabled = !state.blueskyLoginState.loading,
+                                        modifier =
+                                            Modifier
+                                                .width(300.dp),
+                                        lineLimits = TextFieldLineLimits.SingleLine,
+                                    )
+                                    OutlinedSecureTextField(
+                                        state = state.blueskyInputState.password,
+                                        label = {
+                                            Text(text = stringResource(id = R.string.bluesky_login_password_hint))
+                                        },
+                                        enabled = !state.blueskyLoginState.loading,
+                                        modifier =
+                                            Modifier
+                                                .width(300.dp),
 //                                lineLimits = TextFieldLineLimits.SingleLine,
-                                onKeyboardAction = {
-                                    state.blueskyLoginState.login(
-                                        "https://${state.instanceInputState.text}",
-                                        state.blueskyInputState.username.text
-                                            .toString(),
-                                        state.blueskyInputState.password.text
-                                            .toString(),
+                                        onKeyboardAction = {
+                                            state.blueskyLoginState.login(
+                                                "https://${state.instanceInputState.text}",
+                                                state.blueskyInputState.username.text
+                                                    .toString(),
+                                                state.blueskyInputState.password.text
+                                                    .toString(),
+                                            )
+                                        },
                                     )
-                                },
-                            )
-                            Button(
-                                onClick = {
-                                    state.blueskyLoginState.login(
-                                        "https://${state.instanceInputState.text}",
-                                        state.blueskyInputState.username.text
-                                            .toString(),
-                                        state.blueskyInputState.password.text
-                                            .toString(),
-                                    )
-                                },
-                                modifier = Modifier.width(300.dp),
-                                enabled = state.blueskyInputState.canLogin && !state.blueskyLoginState.loading,
-                            ) {
-                                Text(text = stringResource(id = R.string.login_button))
-                            }
-                        }
+                                    Button(
+                                        onClick = {
+                                            state.blueskyLoginState.login(
+                                                "https://${state.instanceInputState.text}",
+                                                state.blueskyInputState.username.text
+                                                    .toString(),
+                                                state.blueskyInputState.password.text
+                                                    .toString(),
+                                            )
+                                        },
+                                        modifier = Modifier.width(300.dp),
+                                        enabled = state.blueskyInputState.canLogin && !state.blueskyLoginState.loading,
+                                    ) {
+                                        Text(text = stringResource(id = R.string.login_button))
+                                    }
+                                }
 
-                        PlatformType.Misskey -> {
-                            OnNewIntent {
-                                state.misskeyLoginState.resume(it.dataString.orEmpty())
-                            }
-                            state.misskeyLoginState.resumedState
-                                ?.onLoading {
-                                    Text(
-                                        text = stringResource(id = R.string.mastodon_login_verify_message),
-                                    )
-                                    CircularProgressIndicator()
-                                }?.onError {
-                                    Text(text = it.message ?: "Unknown error")
-                                } ?: run {
-                                Button(
-                                    onClick = {
-                                        state.misskeyLoginState.login(
-                                            state.instanceInputState.text.toString(),
-                                            launchUrl = uriHandler::openUri,
+                                PlatformType.Misskey -> {
+                                    OnNewIntent {
+                                        state.misskeyLoginState.resume(it.dataString.orEmpty())
+                                    }
+                                    state.misskeyLoginState.resumedState
+                                        ?.onLoading {
+                                            Text(
+                                                text = stringResource(id = R.string.mastodon_login_verify_message),
+                                            )
+                                            CircularProgressIndicator()
+                                        }?.onError {
+                                            Text(text = it.message ?: "Unknown error")
+                                        } ?: run {
+                                        Button(
+                                            onClick = {
+                                                state.misskeyLoginState.login(
+                                                    state.instanceInputState.text.toString(),
+                                                    launchUrl = uriHandler::openUri,
+                                                )
+                                            },
+                                            modifier = Modifier.width(300.dp),
+                                            enabled = !state.misskeyLoginState.loading,
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.service_select_next_button),
+                                            )
+                                        }
+                                        state.misskeyLoginState.error?.let {
+                                            Text(text = it)
+                                        }
+                                    }
+                                }
+
+                                PlatformType.Mastodon -> {
+                                    OnNewIntent {
+                                        state.mastodonLoginState.resume(it.dataString.orEmpty())
+                                    }
+                                    state.mastodonLoginState.resumedState
+                                        ?.onLoading {
+                                            Text(
+                                                text = stringResource(id = R.string.mastodon_login_verify_message),
+                                            )
+                                            CircularProgressIndicator()
+                                        }?.onError {
+                                            Text(text = it.message ?: "Unknown error")
+                                        } ?: run {
+                                        Button(
+                                            onClick = {
+                                                state.mastodonLoginState.login(
+                                                    state.instanceInputState.text.toString(),
+                                                    launchUrl = uriHandler::openUri,
+                                                )
+                                            },
+                                            modifier = Modifier.width(300.dp),
+                                            enabled = !state.mastodonLoginState.loading,
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.service_select_next_button),
+                                            )
+                                        }
+                                        state.mastodonLoginState.error?.let {
+                                            Text(text = it)
+                                        }
+                                    }
+                                }
+
+                                PlatformType.xQt -> {
+                                    Button(
+                                        onClick = {
+                                            onXQT.invoke()
+                                        },
+                                        modifier = Modifier.width(300.dp),
+                                    ) {
+                                        Text(
+                                            text = stringResource(id = R.string.service_select_next_button),
                                         )
-                                    },
-                                    modifier = Modifier.width(300.dp),
-                                    enabled = !state.misskeyLoginState.loading,
-                                ) {
-                                    Text(
-                                        text = stringResource(id = R.string.service_select_next_button),
-                                    )
+                                    }
                                 }
-                                state.misskeyLoginState.error?.let {
-                                    Text(text = it)
-                                }
-                            }
-                        }
 
-                        PlatformType.Mastodon -> {
-                            OnNewIntent {
-                                state.mastodonLoginState.resume(it.dataString.orEmpty())
-                            }
-                            state.mastodonLoginState.resumedState
-                                ?.onLoading {
-                                    Text(
-                                        text = stringResource(id = R.string.mastodon_login_verify_message),
-                                    )
-                                    CircularProgressIndicator()
-                                }?.onError {
-                                    Text(text = it.message ?: "Unknown error")
-                                } ?: run {
-                                Button(
-                                    onClick = {
-                                        state.mastodonLoginState.login(
-                                            state.instanceInputState.text.toString(),
-                                            launchUrl = uriHandler::openUri,
+                                PlatformType.VVo -> {
+                                    Button(
+                                        onClick = {
+                                            onVVO.invoke()
+                                        },
+                                        modifier = Modifier.width(300.dp),
+                                    ) {
+                                        Text(
+                                            text = stringResource(id = R.string.service_select_next_button),
                                         )
-                                    },
-                                    modifier = Modifier.width(300.dp),
-                                    enabled = !state.mastodonLoginState.loading,
-                                ) {
-                                    Text(
-                                        text = stringResource(id = R.string.service_select_next_button),
-                                    )
+                                    }
                                 }
-                                state.mastodonLoginState.error?.let {
-                                    Text(text = it)
-                                }
-                            }
-                        }
-
-                        PlatformType.xQt -> {
-                            Button(
-                                onClick = {
-                                    onXQT.invoke()
-                                },
-                                modifier = Modifier.width(300.dp),
-                            ) {
-                                Text(
-                                    text = stringResource(id = R.string.service_select_next_button),
-                                )
-                            }
-                        }
-
-                        PlatformType.VVo -> {
-                            Button(
-                                onClick = {
-                                    onVVO.invoke()
-                                },
-                                modifier = Modifier.width(300.dp),
-                            ) {
-                                Text(
-                                    text = stringResource(id = R.string.service_select_next_button),
-                                )
                             }
                         }
                     }
                 }
             }
-            LazyVerticalStaggeredGrid(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .padding(horizontal = 16.dp),
-                columns = StaggeredGridCells.Adaptive(300.dp),
-                horizontalArrangement =
-                    Arrangement.spacedBy(
-                        8.dp,
-                        Alignment.CenterHorizontally,
-                    ),
-                verticalItemSpacing = 8.dp,
-                contentPadding =
-                    PaddingValues(
-                        bottom = it.calculateBottomPadding(),
-                    ),
+
+            item(
+                span = StaggeredGridItemSpan.FullLine,
             ) {
-                state.instances
-                    .onSuccess {
-                        items(
-                            count = itemCount,
-                        ) {
-                            val instance = get(it)
+                Column {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    if (!isBigScreen()) {
+                        HorizontalDivider()
+                    }
+                }
+            }
+
+            state.instances
+                .onSuccess {
+                    items(
+                        count = itemCount,
+                    ) {
+                        val instance = get(it)
+                        Column {
                             ServiceSelectItem(
                                 instance = instance,
-                                modifier =
-                                    Modifier.clickable {
-                                        if (instance != null) {
-                                            state.selectInstance(instance)
-                                        }
-                                    },
+                                onClick = {
+                                    if (instance != null) {
+                                        state.selectInstance(instance)
+                                    }
+                                },
                             )
-                        }
-                    }.onLoading {
-                        items(10) {
-                            ServiceSelectItem(
-                                instance = null,
-                            )
-                        }
-                    }.onEmpty {
-                        items(1) {
-                            Text(
-                                text = stringResource(id = R.string.service_select_empty_message),
-                                style = MaterialTheme.typography.titleMedium,
-                            )
+                            if (!isBigScreen()) {
+                                HorizontalDivider()
+                            }
                         }
                     }
-            }
+                }.onLoading {
+                    items(10) {
+                        Column {
+                            ServiceSelectItem(
+                                instance = null,
+                                onClick = {},
+                            )
+                            if (!isBigScreen()) {
+                                HorizontalDivider()
+                            }
+                        }
+                    }
+                }.onEmpty {
+                    items(1) {
+                        Text(
+                            text = stringResource(id = R.string.service_select_empty_message),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+                }
         }
     }
 }
@@ -377,61 +399,63 @@ internal fun ServiceSelectScreen(
 @Composable
 private fun ServiceSelectItem(
     instance: UiInstance?,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Card(
+    AdaptiveCard(
         modifier = modifier,
     ) {
-        Box {
+        Column(
+            modifier =
+                Modifier
+                    .clickable {
+                        onClick.invoke()
+                    }.fillMaxWidth()
+                    .padding(8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             instance?.bannerUrl?.let {
                 NetworkImage(
                     it,
                     contentDescription = null,
                     modifier =
                         Modifier
-                            .matchParentSize()
-                            .alpha(0.15f),
+                            .clip(MaterialTheme.shapes.medium),
                 )
             }
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
+                if (instance?.iconUrl.isNullOrEmpty() != true) {
                     NetworkImage(
-                        instance?.iconUrl ?: "",
+                        instance.iconUrl,
                         contentDescription = null,
                         modifier =
                             Modifier
-                                .size(24.dp)
-                                .placeholder(instance == null),
-                    )
-                    Text(
-                        text = instance?.name ?: "Loading...",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.placeholder(instance == null),
+                                .size(24.dp),
                     )
                 }
                 Text(
-                    text = instance?.domain ?: "Loading...",
-                    style = MaterialTheme.typography.bodySmall,
+                    text = instance?.name ?: "Loading...",
+                    style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.placeholder(instance == null),
-                )
-                Text(
-                    text =
-                        instance?.description
-                            ?: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.placeholder(instance == null),
-                    maxLines = 3,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
                 )
             }
+            Text(
+                text = instance?.domain ?: "Loading...",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.placeholder(instance == null),
+            )
+            Text(
+                text =
+                    instance?.description
+                        ?: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.placeholder(instance == null),
+                maxLines = 3,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            )
         }
     }
 }

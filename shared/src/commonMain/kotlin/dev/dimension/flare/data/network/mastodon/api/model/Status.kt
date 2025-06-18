@@ -1,8 +1,10 @@
 package dev.dimension.flare.data.network.mastodon.api.model
 
+import dev.dimension.flare.common.JSON
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
 
 @Serializable
 internal data class Status(
@@ -49,7 +51,29 @@ internal data class Status(
     // compatibility layer for Pleroma/Akkoma
     @SerialName("quotes_count")
     val quotesCount: Long? = null,
-    // compatibility layer for Pleroma/Akkoma
     @SerialName("quote")
-    val quote: Status? = null,
+    val json_quote: JsonObject? = null,
+) {
+    val quote: Status?
+        get() =
+            json_quote?.let {
+                if (it.containsKey("state")) {
+                    // Mastodon quote
+                    JSON
+                        .decodeFromJsonElement(
+                            MastodonQuote.serializer(),
+                            it,
+                        ).quoted_status
+                } else {
+                    // Pleroma/Akkoma quote
+                    JSON.decodeFromJsonElement(Status.serializer(), it)
+                }
+            }
+}
+
+@Serializable
+internal data class MastodonQuote(
+    val state: String? = null,
+    @SerialName("quoted_status")
+    val quoted_status: Status? = null,
 )

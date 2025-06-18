@@ -255,4 +255,6 @@
     <string name="podcast_leave">المغادرة</string>
     <string name="podcast_ended">تم إنهاء Podcast</string>
     <string name="podcast_living">Podcast مباشرة</string>
+    <string name="home_tab_antennas_title">هوائي</string>
+    <string name="antennas_empty">لا هوائيات</string>
 </resources>

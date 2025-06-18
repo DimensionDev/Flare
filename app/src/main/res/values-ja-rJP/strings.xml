@@ -258,4 +258,6 @@
     <string name="podcast_leave">退出する</string>
     <string name="podcast_ended">ポッドキャスト終了</string>
     <string name="podcast_living">ポッドキャストライブ</string>
+    <string name="home_tab_antennas_title">アンテナ</string>
+    <string name="antennas_empty">アンテナがありません</string>
 </resources>

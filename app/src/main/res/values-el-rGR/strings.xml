@@ -255,4 +255,6 @@
     <string name="podcast_leave">Αποχώρηση</string>
     <string name="podcast_ended">Το Podcast τελείωσε</string>
     <string name="podcast_living">Podcast ζωντανά</string>
+    <string name="home_tab_antennas_title">Κεραία</string>
+    <string name="antennas_empty">Καμία κεραία</string>
 </resources>

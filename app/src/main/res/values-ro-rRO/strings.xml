@@ -256,4 +256,6 @@
     <string name="podcast_leave">Părăsește</string>
     <string name="podcast_ended">Podcast terminat</string>
     <string name="podcast_living">Podcast în direct</string>
+    <string name="home_tab_antennas_title">Antenă</string>
+    <string name="antennas_empty">Fără antene</string>
 </resources>

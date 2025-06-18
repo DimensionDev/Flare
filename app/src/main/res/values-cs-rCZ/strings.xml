@@ -256,4 +256,6 @@
     <string name="podcast_leave">Opustit</string>
     <string name="podcast_ended">Podcast ukončen</string>
     <string name="podcast_living">Podcast živě</string>
+    <string name="home_tab_antennas_title">Antény</string>
+    <string name="antennas_empty">Žádné antény</string>
 </resources>

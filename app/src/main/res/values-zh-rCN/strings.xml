@@ -244,9 +244,10 @@
     <string name="empty_rss_sources">无 rss 源</string>
     <string name="rss_detail_open_in_browser">在浏览器中打开</string>
     <string name="rss_detail_share">分享</string>
-    <string name="rss_detail_tldr">Summarize</string>
-    <string name="rss_detail_tldr_title">Summary</string>
+    <string name="rss_detail_tldr">总结摘要</string>
+    <string name="rss_detail_tldr_title">摘要</string>
     <string name="rss_detail_tldr_error">摘要失败</string>
+    <string name="rss_detail_tldr_loading">正在总结…</string>
     <string name="emoji_picker_recent">最近的</string>
     <string name="emoji_picker_search">搜索</string>
     <string name="changelog_title">欢迎回来！</string>
@@ -258,4 +259,6 @@
     <string name="podcast_leave">退出</string>
     <string name="podcast_ended">播客已结束</string>
     <string name="podcast_living">实时播报</string>
+    <string name="home_tab_antennas_title">天线</string>
+    <string name="antennas_empty">无天线</string>
 </resources>

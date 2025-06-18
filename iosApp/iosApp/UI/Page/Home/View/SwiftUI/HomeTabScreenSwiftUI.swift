@@ -12,6 +12,7 @@ struct HomeTabScreenSwiftUI: View {
     @State private var selectedHomeAppBarTabKey: String = ""
     @State private var showAppbarSettings = false
     @State private var showLogin = false
+    @State private var tabScrollTriggers: [String: Bool] = [:]
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
@@ -26,6 +27,16 @@ struct HomeTabScreenSwiftUI: View {
                 },
                 onSettingsTap: {
                     showAppbarSettings = true
+                },
+                onScrollToTop: { tabKey in
+                    print("[HomeTabScreenSwiftUI] Triggering scroll to top for tab: \(tabKey)")
+                    // 切换指定标签的滚动触发器
+                    tabScrollTriggers[tabKey] = !(tabScrollTriggers[tabKey] ?? false)
+
+                    // 同时触发旧的 scrollToTopTrigger 以支持浮动按钮
+                    if tabKey == selectedHomeAppBarTabKey {
+                        scrollToTopTrigger.toggle()
+                    }
                 }
             )
             .frame(height: 44)
@@ -33,7 +44,7 @@ struct HomeTabScreenSwiftUI: View {
             TabContentViewSwiftUI(
                 tabStore: tabStore,
                 selectedTab: $selectedHomeAppBarTabKey,
-                scrollToTopTrigger: $scrollToTopTrigger,
+                tabScrollTriggers: $tabScrollTriggers,
                 showFloatingButton: $showFloatingButton
             )
         }.toolbarVisibility(.hidden, for: .navigationBar) // 隐藏，避免滑动返回 appbar 高度增加
@@ -42,6 +53,11 @@ struct HomeTabScreenSwiftUI: View {
                     selectedHomeAppBarTabKey = firstTab.key
                     tabStore.updateSelectedTab(firstTab)
                 }
+            }
+            .onChange(of: scrollToTopTrigger) { _, _ in
+                // 当浮动按钮触发 scrollToTopTrigger 时，同步到当前标签的 tabScrollTriggers
+                print("[HomeTabScreenSwiftUI] FloatingButton triggered scroll to top for current tab: \(selectedHomeAppBarTabKey)")
+                tabScrollTriggers[selectedHomeAppBarTabKey] = !(tabScrollTriggers[selectedHomeAppBarTabKey] ?? false)
             }
             .onChange(of: selectedHomeAppBarTabKey) { _, newValue in
                 if let tab = tabStore.availableAppBarTabsItems.first(where: { $0.key == newValue }) {

@@ -14,29 +14,17 @@ struct AISettingsScreen: View {
     var body: some View {
         List {
             Section {
-                Toggle(isOn: Binding(
-                    get: {
-                        isSystemAnalysisEnabled && appSettings.otherSettings.sensitiveContentAnalysisEnabled
-                    },
-                    set: { newValue in
-                        if isSystemAnalysisEnabled {
-                            appSettings.updateOther(newValue: appSettings.otherSettings.also { settings in
-                                settings.sensitiveContentAnalysisEnabled = newValue
-                            })
-                        }
-                    }
-                )) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Sensitive Content Analysis")
-                            .font(.body)
-                        Text(isSystemAnalysisEnabled ?
-                            "Automatically detect and blur sensitive images using Apple's Sensitive Content Analysis framework runs locally on your device" :
-                            "No feature enabled that is requiring Sensitive Analysis on device, analysis will be disabled. Please enable it in System Settings > Privacy & Security > Sensitive Content Warning.")
-                            .font(.caption)
-                            .foregroundColor(isSystemAnalysisEnabled ? .secondary : .orange)
-                    }
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("AI Features")
+                        .font(.headline)
+                    Text("AI-powered features will be added here in future updates.")
+                        .font(.body)
+                        .foregroundColor(.secondary)
+                    Text("Note: Sensitive Content Analysis has been moved to Media & Content settings for better organization.")
+                        .font(.caption)
+                        .foregroundColor(.orange)
                 }
-                .disabled(!isSystemAnalysisEnabled)
+                .padding(.vertical, 8)
             }
         }
         .scrollContentBackground(.hidden)

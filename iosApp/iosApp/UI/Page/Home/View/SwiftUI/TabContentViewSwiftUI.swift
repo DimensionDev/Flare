@@ -5,7 +5,7 @@ import SwiftUIIntrospect
 struct TabContentViewSwiftUI: View {
     @ObservedObject var tabStore: AppBarTabSettingStore
     @Binding var selectedTab: String
-    @Binding var scrollToTopTrigger: Bool
+    @Binding var tabScrollTriggers: [String: Bool]
     @Binding var showFloatingButton: Bool
 
     @State private var scrollPositions: [String: String] = [:]
@@ -27,7 +27,12 @@ struct TabContentViewSwiftUI: View {
                                 }
                             }
                         ),
-                        scrollToTopTrigger: $scrollToTopTrigger,
+                        scrollToTopTrigger: Binding(
+                            get: { tabScrollTriggers[tab.key] ?? false },
+                            set: { newValue in
+                                tabScrollTriggers[tab.key] = newValue
+                            }
+                        ),
                         isCurrentTab: selectedTab == tab.key,
                         showFloatingButton: $showFloatingButton
                     )

@@ -18,6 +18,7 @@ struct HomeTabViewContent: View {
     @Namespace private var tabBarNamespace
 
     @Environment(FlareTheme.self) private var theme
+    @Environment(\.appSettings) private var appSettings
 
     @State private var scrollToTopTrigger = false
 
@@ -106,7 +107,7 @@ struct HomeTabViewContent: View {
                     .padding(.bottom, 0)
             }
 
-            if selectedTab == .timeline {
+            if selectedTab == .timeline, !appSettings.appearanceSettings.hideScrollToTopButton {
                 FloatingScrollToTopButton(
                     isVisible: $showFloatingButton,
                     scrollToTopTrigger: $scrollToTopTrigger

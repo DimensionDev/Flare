@@ -5,6 +5,7 @@ import SwiftUI
 struct TabItemsViewSwiftUI: View {
     @Binding var selection: String
     let items: [FLTabItem]
+    let onScrollToTop: (String) -> Void
     @Namespace private var tabNamespace
     @State private var scrollPosition: String?
     @Environment(FlareTheme.self) private var theme
@@ -19,8 +20,16 @@ struct TabItemsViewSwiftUI: View {
                                 .id(item.key)
                                 .onTapGesture {
                                     withAnimation(.spring()) {
-                                        selection = item.key
-                                        scrollPosition = item.key
+                                        // 如果点击的是当前已选中的标签，触发返回顶部
+                                        if selection == item.key {
+                                            print("[TabItemsViewSwiftUI] Same tab tapped, triggering scroll to top for: \(item.key)")
+                                            onScrollToTop(item.key)
+                                        } else {
+                                            // 否则正常切换标签
+                                            print("[TabItemsViewSwiftUI] Switching to tab: \(item.key)")
+                                            selection = item.key
+                                            scrollPosition = item.key
+                                        }
                                     }
                                 }
 

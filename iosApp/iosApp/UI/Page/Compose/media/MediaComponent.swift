@@ -19,8 +19,15 @@ struct MediaComponent: View {
             media is UiMediaImage || media is UiMediaVideo
         } && (sensitive || aiDetectedSensitive)
 
-        // 如果原本就是敏感内容或AI检测到敏感内容，则应用模糊
-        // 在截图模式下，为了避免渲染错误，禁用模糊效果
+        // MARK: - 媒体遮罩逻辑
+
+        // 决定是否对媒体内容应用模糊遮罩
+        // 逻辑：
+        // 1. 截图模式下禁用模糊（避免渲染错误）
+        // 2. 原本敏感内容 + 用户开启遮罩 → 应用模糊
+        // 3. AI检测敏感 + 用户开启AI分析 → 应用模糊
+        // 注意：时间范围的敏感内容过滤在 StatusItemView.shouldHideInTimeline 中处理
+        //      这里只负责媒体遮罩层的显示/隐藏
         let shouldBlur = !isInCaptureMode && (hideSensitive || (aiDetectedSensitive && appSettings.otherSettings.sensitiveContentAnalysisEnabled))
 
         ZStack(alignment: .topLeading) {

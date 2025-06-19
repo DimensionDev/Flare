@@ -319,4 +319,14 @@
 
     <string name="home_tab_antennas_title">Antenna</string>
     <string name="antennas_empty">No antennas</string>
+
+    <string name="changelog_current">
+        <![CDATA[
+            <span>Version %1$s:</span>
+            <ul>
+                <li>Added support for Misskey Antennas</li>
+                <li>Bug fixes and performance improvements</li>
+            </ul>
+        ]]>
+    </string>
 </resources>

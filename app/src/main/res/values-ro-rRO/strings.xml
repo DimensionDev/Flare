@@ -258,4 +258,10 @@
     <string name="podcast_living">Podcast în direct</string>
     <string name="home_tab_antennas_title">Antenă</string>
     <string name="antennas_empty">Fără antene</string>
+    <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
+            <ul>
+                <li>Suport adăugat pentru Misskey Antennas</li>
+                <li>Remedierea erorilor şi îmbunătăţirea performanţei</li>
+            </ul>
+        ]]></string>
 </resources>

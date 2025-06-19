@@ -23,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryScrollableTabRow
@@ -64,6 +65,7 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalBottomBarShowing
 import dev.dimension.flare.ui.component.RefreshContainer
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
@@ -263,33 +265,38 @@ internal fun TimelineItemContent(
                     state.changeLog?.let { changelog ->
                         if (it) {
                             item {
-                                AdaptiveCard {
-                                    Column(
-                                        modifier =
-                                            Modifier
-                                                .padding(
-                                                    horizontal = screenHorizontalPadding,
-                                                ).padding(top = 16.dp, bottom = 8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    ) {
-                                        Text(
-                                            stringResource(R.string.changelog_title),
-                                            style = MaterialTheme.typography.titleMedium,
-                                        )
-                                        Text(
-                                            stringResource(R.string.changelog_message),
-                                            style = MaterialTheme.typography.bodySmall,
-                                        )
-                                        Text(changelog)
-                                        Button(
-                                            onClick = {
-                                                state.dismissChangeLog()
-                                            },
+                                Column {
+                                    AdaptiveCard {
+                                        Column(
+                                            modifier =
+                                                Modifier
+                                                    .padding(
+                                                        horizontal = screenHorizontalPadding,
+                                                    ).padding(top = 16.dp, bottom = 8.dp),
+                                            verticalArrangement = Arrangement.spacedBy(8.dp),
                                         ) {
                                             Text(
-                                                stringResource(android.R.string.ok),
+                                                stringResource(R.string.changelog_title),
+                                                style = MaterialTheme.typography.titleMedium,
                                             )
+                                            Text(
+                                                stringResource(R.string.changelog_message),
+                                                style = MaterialTheme.typography.bodySmall,
+                                            )
+                                            Text(changelog)
+                                            Button(
+                                                onClick = {
+                                                    state.dismissChangeLog()
+                                                },
+                                            ) {
+                                                Text(
+                                                    stringResource(android.R.string.ok),
+                                                )
+                                            }
                                         }
+                                    }
+                                    if (!isBigScreen()) {
+                                        HorizontalDivider()
                                     }
                                 }
                             }
@@ -436,6 +443,7 @@ internal fun timelineItemPresenter(timelineTabItem: TimelineTabItem): TimelineIt
                 state.refresh()
             }
             badge.refresh()
+            changeLogState.dismissChangeLog()
         }
     }
 }

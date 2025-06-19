@@ -174,7 +174,7 @@ internal fun EntryProviderBuilder<NavKey>.settingsSelectEntryBuilder(
     }
 
     entry<Route.Settings.LocalFilterEdit>(
-        metadata = ListDetailSceneStrategy.detailPane(
+        metadata = ListDetailSceneStrategy.extraPane(
             sceneKey = "Settings"
         )
     ) { args ->

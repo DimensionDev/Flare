@@ -194,7 +194,7 @@ commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.17.0
 
 jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version = "3.9.1" }
 
-jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.9.0-beta02" }
+jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.9.0-beta03" }
 krypto = { module = "com.soywiz.korlibs.krypto:krypto", version = "4.0.10" }
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }

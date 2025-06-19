@@ -258,4 +258,10 @@
     <string name="podcast_living">Podcast en direct</string>
     <string name="home_tab_antennas_title">Antenne</string>
     <string name="antennas_empty">Aucune antenne</string>
+    <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
+            <ul>
+                <li>Ajout du support pour les Antennes Misskey</li>
+                <li>Corrections de bugs et améliorations des performances</li>
+            </ul>
+        ]]></string>
 </resources>

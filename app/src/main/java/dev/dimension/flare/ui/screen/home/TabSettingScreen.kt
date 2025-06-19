@@ -123,26 +123,18 @@ internal fun TabSettingScreen(
             contentPadding = it,
         ) {
             items(state.currentTabs, key = { it.key }) { item ->
-                var shouldDismiss by remember { mutableStateOf(false) }
                 val swipeState =
-                    rememberSwipeToDismissBoxState(
-                        confirmValueChange = {
-                            if (it != SwipeToDismissBoxValue.Settled) {
-                                shouldDismiss = true
-                            }
-                            it != SwipeToDismissBoxValue.Settled
-                        },
-                    )
-                LaunchedEffect(shouldDismiss) {
-                    if (shouldDismiss) {
+                    rememberSwipeToDismissBoxState()
+
+                LaunchedEffect(swipeState.settledValue) {
+                    if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {
                         delay(AnimationConstants.DefaultDurationMillis.toLong())
                         state.deleteTab(item)
-                        shouldDismiss = false
                     }
                 }
                 ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
                     AnimatedVisibility(
-                        visible = !shouldDismiss,
+                        visible = swipeState.settledValue == SwipeToDismissBoxValue.Settled,
                         exit =
                             shrinkVertically(
                                 animationSpec = tween(),

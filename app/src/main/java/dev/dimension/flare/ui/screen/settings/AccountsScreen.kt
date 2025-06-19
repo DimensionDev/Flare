@@ -21,6 +21,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -99,18 +100,25 @@ internal fun AccountsScreen(
                 is UiState.Success -> {
                     items(accountState.data.size) { index ->
                         val (account, data) = accountState.data[index]
+                        val swipeState =
+                            rememberSwipeToDismissBoxState(
+//                                    confirmValueChange = {
+//                                        if (it == SwipeToDismissBoxValue.EndToStart) {
+//                                            state.removeAccount(account.accountKey)
+//                                            true
+//                                        } else {
+//                                            false
+//                                        }
+//                                    },
+                            )
+
+                        LaunchedEffect(swipeState.settledValue) {
+                            if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {
+                                state.removeAccount(account.accountKey)
+                            }
+                        }
                         SwipeToDismissBox(
-                            state =
-                                rememberSwipeToDismissBoxState(
-                                    confirmValueChange = {
-                                        if (it == SwipeToDismissBoxValue.EndToStart) {
-                                            state.removeAccount(account.accountKey)
-                                            true
-                                        } else {
-                                            false
-                                        }
-                                    },
-                                ),
+                            state = swipeState,
                             backgroundContent = {
                                 Box(
                                     modifier =

@@ -31,7 +31,7 @@ import androidx.savedstate.savedState
 internal inline fun <reified T : NavKey> rememberSavedStateNavEntryDecorator2(
     saveableStateHolder: SaveableStateHolder = rememberSaveableStateHolder(),
     crossinline shouldRemoveState: (key: T) -> Boolean = { true },
-): NavEntryDecorator<T> = remember { savedStateNavEntryDecorator2<T>(saveableStateHolder, shouldRemoveState) }
+): NavEntryDecorator<T> = remember { savedStateNavEntryDecorator<T>(saveableStateHolder, shouldRemoveState) }
 
 /**
  * Wraps the content of a [NavEntry] with a [SaveableStateHolder.SaveableStateProvider] to ensure
@@ -42,41 +42,37 @@ internal inline fun <reified T : NavKey> rememberSavedStateNavEntryDecorator2(
  * This [NavEntryDecorator] is the only one that is **required** as saving state is considered a
  * non-optional feature.
  */
-internal inline fun <reified T : NavKey> savedStateNavEntryDecorator2(
+private inline fun <reified T : NavKey> savedStateNavEntryDecorator(
     saveableStateHolder: SaveableStateHolder,
     crossinline shouldRemoveState: (key: T) -> Boolean = { true },
 ): NavEntryDecorator<T> {
-    val registryMap = mutableMapOf<String, EntrySavedStateRegistry>()
+    val registryMap = mutableMapOf<Any, EntrySavedStateRegistry>()
 
-    val onPop: (Any) -> Unit = { key ->
+    val onPop: (Any) -> Unit = { contentKey ->
         val shouldRemove =
-            if (key is T) {
-                shouldRemoveState(key)
+            if (contentKey is T) {
+                shouldRemoveState(contentKey)
             } else {
                 // If the key is not of type T, we assume we should not remove the state
                 false
             }
-        val id = getIdForKey(key)
-        if (registryMap.contains(id) && shouldRemove) {
+        if (registryMap.contains(contentKey) && shouldRemove) {
             // saveableStateHolder onPop
-            saveableStateHolder.removeState(id)
+            saveableStateHolder.removeState(contentKey)
 
             // saved state onPop
             val savedState = savedState()
-            val childRegistry = registryMap.getValue(id)
+            val childRegistry = registryMap.getValue(contentKey)
             childRegistry.savedStateRegistryController.performSave(savedState)
             childRegistry.savedState = savedState
             childRegistry.lifecycle.currentState = Lifecycle.State.DESTROYED
         }
     }
 
-    return navEntryDecorator<T>(onPop = onPop) { entry ->
-        val key = entry.key
-        val id = getIdForKey(key)
-
+    return navEntryDecorator(onPop = onPop) { entry ->
         val childRegistry by
             rememberSaveable(
-                key,
+                entry.contentKey,
                 stateSaver =
                     Saver(
                         save = { it.savedState },
@@ -85,11 +81,11 @@ internal inline fun <reified T : NavKey> savedStateNavEntryDecorator2(
             ) {
                 mutableStateOf(EntrySavedStateRegistry())
             }
-        registryMap.put(id, childRegistry)
+        registryMap.put(entry.contentKey, childRegistry)
 
-        saveableStateHolder.SaveableStateProvider(id) {
+        saveableStateHolder.SaveableStateProvider(entry.contentKey) {
             CompositionLocalProvider(LocalSavedStateRegistryOwner provides childRegistry) {
-                entry.content.invoke(entry.key)
+                entry.Content()
             }
         }
         DisposableEffect(childRegistry) {
@@ -103,14 +99,13 @@ internal inline fun <reified T : NavKey> savedStateNavEntryDecorator2(
     }
 }
 
-internal fun getIdForKey(key: Any): String = "${key::class.qualifiedName}:$key"
-
 internal class EntrySavedStateRegistry : SavedStateRegistryOwner {
     override val lifecycle: LifecycleRegistry = LifecycleRegistry(this)
     val savedStateRegistryController: SavedStateRegistryController =
         SavedStateRegistryController.create(this)
     override val savedStateRegistry: SavedStateRegistry =
         savedStateRegistryController.savedStateRegistry
+
     var savedState: SavedState? = null
 
     init {

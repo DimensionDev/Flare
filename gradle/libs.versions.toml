@@ -2,7 +2,7 @@
 clikt = "5.0.3"
 collection = "1.5.0"
 compileSdk = "36"
-lifecycleViewmodelCompose = "2.9.0"
+lifecycleViewmodelCompose = "2.9.1"
 minSdk = "21"
 java = "21"
 agp = "8.10.1"

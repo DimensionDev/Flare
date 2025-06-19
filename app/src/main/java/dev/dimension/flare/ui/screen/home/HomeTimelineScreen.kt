@@ -103,14 +103,23 @@ internal fun HomeTimelineScreen(
     val scope = rememberCoroutineScope()
     state.pagerState.onSuccess { pagerState ->
         state.tabState.onSuccess { tabState ->
-            val currentTab = tabState[pagerState.currentPage]
-            val lazyListState = currentTab.lazyListState
-            RegisterTabCallback(
-                lazyListState = lazyListState,
-                onRefresh = {
-                    currentTab.refreshSync()
-                },
-            )
+            LaunchedEffect(pagerState.currentPage >= tabState.size) {
+                if (pagerState.currentPage >= tabState.size) {
+                    scope.launch {
+                        pagerState.scrollToPage(0)
+                    }
+                }
+            }
+            val currentTab = tabState.elementAtOrNull(pagerState.currentPage)
+            if (currentTab != null) {
+                val lazyListState = currentTab.lazyListState
+                RegisterTabCallback(
+                    lazyListState = lazyListState,
+                    onRefresh = {
+                        currentTab.refreshSync()
+                    },
+                )
+            }
         }
     }
 
@@ -123,7 +132,7 @@ internal fun HomeTimelineScreen(
                         state.tabState.onSuccess { tabs ->
                             if (tabs.size > 1) {
                                 SecondaryScrollableTabRow(
-                                    selectedTabIndex = pagerState.currentPage,
+                                    selectedTabIndex = minOf(pagerState.currentPage, tabs.lastIndex),
                                     edgePadding = 0.dp,
                                     divider = {},
                                     modifier = Modifier.fillMaxWidth(),

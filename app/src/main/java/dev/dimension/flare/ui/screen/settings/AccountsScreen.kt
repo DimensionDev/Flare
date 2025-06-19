@@ -101,16 +101,7 @@ internal fun AccountsScreen(
                     items(accountState.data.size) { index ->
                         val (account, data) = accountState.data[index]
                         val swipeState =
-                            rememberSwipeToDismissBoxState(
-//                                    confirmValueChange = {
-//                                        if (it == SwipeToDismissBoxValue.EndToStart) {
-//                                            state.removeAccount(account.accountKey)
-//                                            true
-//                                        } else {
-//                                            false
-//                                        }
-//                                    },
-                            )
+                            rememberSwipeToDismissBoxState()
 
                         LaunchedEffect(swipeState.settledValue) {
                             if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {

@@ -481,8 +481,7 @@ private fun LazyListScope.tabItem(
 ) {
     item(key = item.tabItem.key) {
         val swipeState =
-            rememberSwipeToDismissBoxState(
-            )
+            rememberSwipeToDismissBoxState()
 
         LaunchedEffect(swipeState.settledValue) {
             if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {

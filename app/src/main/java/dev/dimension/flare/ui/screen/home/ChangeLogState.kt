@@ -33,11 +33,12 @@ internal fun changeLogPresenter(
         remember(BuildConfig.VERSION_NAME) {
             runCatching {
                 context.getString(R.string.changelog_current, BuildConfig.VERSION_NAME)
-            }.getOrNull()?.takeIf {
-                it.isNotBlank() && it.isNotEmpty()
-            }?.let {
-                AnnotatedString.fromHtml(it)
-            }
+            }.getOrNull()
+                ?.takeIf {
+                    it.isNotBlank() && it.isNotEmpty()
+                }?.let {
+                    AnnotatedString.fromHtml(it)
+                }
         }
     return object : ChangeLogState {
         override val shouldShowChangeLog: UiState<Boolean> = shouldShowChangeLog

@@ -77,6 +77,7 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Page/Compose/Timeline/TimelineStatus/CommonTimelineStatusComponent.bak,
+				Page/Home/View/SwiftUI/TimelineViewSwiftUI_bak.swift.bak,
 				Page/Home/View/SwiftUI/TimelineViewSwiftUI.bak,
 				Page/Home/View/UIKit/HomeTabController.swift.bak,
 				Page/Home/View/UIKit/HomeTabScreen.swift.bak,
@@ -91,6 +92,7 @@
 			buildPhase = 7555FF77242A565900829871 /* Sources */;
 			membershipExceptions = (
 				Page/Compose/Timeline/TimelineStatus/CommonTimelineStatusComponent.bak,
+				Page/Home/View/SwiftUI/TimelineViewSwiftUI_bak.swift.bak,
 				Page/Home/View/SwiftUI/TimelineViewSwiftUI.bak,
 				Page/Home/View/UIKit/HomeTabController.swift.bak,
 				Page/Home/View/UIKit/HomeTabScreen.swift.bak,

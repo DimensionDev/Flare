@@ -55,14 +55,10 @@ struct FloatingWindowControlPanel: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            // 标题
-            Text("Floating Performance Window")
-                .font(.headline)
-                .foregroundColor(.primary)
+          
             
             // 控制按钮
-            VStack(spacing: 12) {
-                HStack {
+                 HStack {
                     Button(action: {
                         if PerformanceConfig.isVerboseLoggingEnabled {
                             print("[FloatingWindowControl] 🔘 Show/Hide button tapped")
@@ -101,7 +97,7 @@ struct FloatingWindowControlPanel: View {
                     }) {
                         HStack {
                             Image(systemName: windowManager.state.isVisible ? "eye.slash" : "eye")
-                            Text(windowManager.state.isVisible ? "Hide Window" : "Show Window")
+                            Text(windowManager.state.isVisible ? "Hide Monitor Window" : "Show Monitor Window")
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -111,68 +107,66 @@ struct FloatingWindowControlPanel: View {
                     }
                 }
                 
-
-            }
+ 
             
-            // 状态信息
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Window Status")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                
-                HStack {
-                    Text("State:")
-                    Spacer()
-                    Text(windowManager.state.rawValue.capitalized)
-                        .foregroundColor(stateColor)
-                        .fontWeight(.medium)
-                }
-                
-                HStack {
-                    Text("Position:")
-                    Spacer()
-                    Text("(\(Int(windowManager.position.x)), \(Int(windowManager.position.y)))")
-                        .font(.system(.caption, design: .monospaced))
-                        .foregroundColor(.secondary)
-                }
-                
-                if windowManager.state == .expanded {
-                    HStack {
-                        Text("Selected Chart:")
-                        Spacer()
-                        Text(chartName)
-                            .foregroundColor(.blue)
-                            .fontWeight(.medium)
-                    }
-                }
-            }
-            .padding()
-            .background(Color.gray.opacity(0.1))
-            .cornerRadius(10)
-            
-            // 使用说明
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Usage Instructions")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                
-                Text("• Tap to expand/minimize")
-                Text("• Drag to move position")
-                Text("• Auto-snaps to screen edges")
-                Text("• Position is saved automatically")
-            }
-            .font(.caption)
-            .foregroundColor(.secondary)
-            .padding()
-            .background(Color.blue.opacity(0.1))
-            .cornerRadius(10)
+//            // 状态信息
+//            VStack(alignment: .leading, spacing: 8) {
+//                Text("Window Status")
+//                    .font(.subheadline)
+//                    .fontWeight(.medium)
+//                
+//                HStack {
+//                    Text("State:")
+//                    Spacer()
+//                    Text(windowManager.state.rawValue.capitalized)
+//                        .foregroundColor(stateColor)
+//                        .fontWeight(.medium)
+//                }
+//                
+//                HStack {
+//                    Text("Position:")
+//                    Spacer()
+//                    Text("(\(Int(windowManager.position.x)), \(Int(windowManager.position.y)))")
+//                        .font(.system(.caption, design: .monospaced))
+//                        .foregroundColor(.secondary)
+//                }
+//                
+//                if windowManager.state == .expanded {
+//                    HStack {
+//                        Text("Selected Chart:")
+//                        Spacer()
+//                        Text(chartName)
+//                            .foregroundColor(.blue)
+//                            .fontWeight(.medium)
+//                    }
+//                }
+//            }
+//            .padding()
+//             .cornerRadius(10)
+//            
+//            // 使用说明
+//            VStack(alignment: .leading, spacing: 4) {
+//                Text("Usage Instructions")
+//                    .font(.subheadline)
+//                    .fontWeight(.medium)
+//                
+//                Text("• Tap to expand/minimize")
+//                Text("• Drag to move position")
+//                Text("• Auto-snaps to screen edges")
+//                Text("• Position is saved automatically")
+//            }
+//            .font(.caption)
+//            .foregroundColor(.secondary)
+//            .padding()
+//            .background(Color.blue.opacity(0.1))
+//            .cornerRadius(10)
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(.background)
-                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
-        )
+//        .background(
+//            RoundedRectangle(cornerRadius: 12)
+//                .fill(.background)
+//                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+//        )
     }
     
     // MARK: - Computed Properties

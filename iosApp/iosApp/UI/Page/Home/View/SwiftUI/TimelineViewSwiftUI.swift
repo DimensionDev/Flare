@@ -41,7 +41,7 @@ struct TimelineViewSwiftUI: View {
         Group {
             switch versionManager.currentVersion {
             case .base:
-                TimelineViewSwiftUI_Base(
+                TimelineViewSwiftUIBase(
                     tab: tab,
                     store: store,
                     scrollPositionID: $scrollPositionID,
@@ -50,7 +50,7 @@ struct TimelineViewSwiftUI: View {
                     showFloatingButton: $showFloatingButton
                 )
             case .v1_1:
-                TimelineViewSwiftUI_1_1(
+                TimelineViewSwiftUI1(
                     tab: tab,
                     store: store,
                     scrollPositionID: $scrollPositionID,
@@ -59,7 +59,7 @@ struct TimelineViewSwiftUI: View {
                     showFloatingButton: $showFloatingButton
                 )
             case .v1_1_1_2:
-                TimelineViewSwiftUI_1_1_1_2(
+                    TimelineViewSwiftUI1And2(
                     tab: tab,
                     store: store,
                     scrollPositionID: $scrollPositionID,
@@ -81,7 +81,7 @@ struct TimelineViewSwiftUI: View {
 
 /// Timeline基准版本实现
 /// Timeline base version implementation
-struct TimelineViewSwiftUI_Base: View {
+struct TimelineViewSwiftUIBase: View {
     let tab: FLTabItem
     @ObservedObject var store: AppBarTabSettingStore
     @State private var presenter: TimelinePresenter?
@@ -203,7 +203,7 @@ struct TimelineViewSwiftUI_Base: View {
 
 /// Timeline 1.1版本实现（仅稳定ID优化）
 /// Timeline 1.1 version implementation (Stable ID optimization only)
-struct TimelineViewSwiftUI_1_1: View {
+struct TimelineViewSwiftUI1: View {
     let tab: FLTabItem
     @ObservedObject var store: AppBarTabSettingStore
     @State private var presenter: TimelinePresenter?
@@ -436,7 +436,7 @@ struct TimelineViewSwiftUI_1_1: View {
 
 /// Timeline 1.1+1.2版本实现（稳定ID + 状态观察优化）
 /// Timeline 1.1+1.2 version implementation (Stable ID + State observation optimization)
-struct TimelineViewSwiftUI_1_1_1_2: View {
+struct TimelineViewSwiftUI1And2: View {
     let tab: FLTabItem
     @ObservedObject var store: AppBarTabSettingStore
     @State private var presenter: TimelinePresenter?

@@ -418,7 +418,7 @@ struct TimelinePerformanceTestSection: View {
             TimelineVersionPicker()
 
             // 性能测试控制（简化版）
-            HStack(spacing: 6) {
+            HStack(spacing: 12) {
                 Text("Test")
                     .font(.caption)
                     .fontWeight(.medium)

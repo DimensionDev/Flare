@@ -11,6 +11,7 @@ struct FlareMenuView: View {
     @State private var showLists = false
     @State private var showFeeds = false
     @State private var showSettings = false
+    @State private var showPerformanceTest = false
 //    let accountType: AccountType
 //    let user: UiUserV2?
 
@@ -21,6 +22,7 @@ struct FlareMenuView: View {
     @EnvironmentObject private var router: FlareRouter
     @EnvironmentObject private var appState: FlareAppState
     @Environment(FlareTheme.self) private var theme
+    @StateObject private var monitor = TimelinePerformanceMonitor.shared
 
 //    init(accountType: AccountType, user: UiUserV2? = nil) {
 //        self.accountType = accountType
@@ -188,6 +190,8 @@ struct FlareMenuView: View {
             .padding(.top, 20)
 
             Spacer()
+
+            FloatingWindowControlPanel()
 
             settingsButton
                 .padding(.horizontal, 20)

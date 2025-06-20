@@ -28,28 +28,3 @@ struct TranslateButton: View {
         }
     }
 }
-
-#Preview {
-    VStack {
-        TranslateButton(
-            text: "Hello World",
-            onTranslate: {},
-            isTranslating: false,
-            isTranslated: false
-        )
-
-        TranslateButton(
-            text: "Hello World",
-            onTranslate: {},
-            isTranslating: true,
-            isTranslated: false
-        )
-
-        TranslateButton(
-            text: "Hello World",
-            onTranslate: {},
-            isTranslating: false,
-            isTranslated: true
-        )
-    }
-}

@@ -55,6 +55,8 @@ struct FlareApp: SwiftUI.App {
                         }
                         .withFlareTheme()
                         .environmentObject(router)
+                        .floatingPerformanceWindow()
+
                 #endif
 
                 // --- Global Floating Player Overlay ---

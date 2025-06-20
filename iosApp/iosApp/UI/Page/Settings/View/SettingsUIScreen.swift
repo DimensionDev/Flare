@@ -84,14 +84,14 @@ struct SettingsUIScreen: View {
                             .tag(SettingsDestination.about)
 
                             // Feature Requests
-                            Label {
-                                Text(SettingsDestination.support.title)
-                                    .foregroundColor(theme.labelColor)
-                            } icon: {
-                                Image(systemName: SettingsDestination.support.icon)
-                                    .foregroundColor(theme.tintColor)
-                            }
-                            .tag(SettingsDestination.support)
+//                            Label {
+//                                Text(SettingsDestination.support.title)
+//                                    .foregroundColor(theme.labelColor)
+//                            } icon: {
+//                                Image(systemName: SettingsDestination.support.icon)
+//                                    .foregroundColor(theme.tintColor)
+//                            }
+//                            .tag(SettingsDestination.support)
                         }.listRowBackground(theme.primaryBackgroundColor)
                     }
                     .background(theme.secondaryBackgroundColor)

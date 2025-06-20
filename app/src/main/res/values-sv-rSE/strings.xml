@@ -258,4 +258,10 @@
     <string name="podcast_living">Podcast live</string>
     <string name="home_tab_antennas_title">Antenn</string>
     <string name="antennas_empty">Inga antenner</string>
+    <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
+            <ul>
+                <li>Stöd för Misskey Antenner</li>
+                <li>Felrättelser och prestandaförbättringar</li>
+            </ul>
+        ]]></string>
 </resources>

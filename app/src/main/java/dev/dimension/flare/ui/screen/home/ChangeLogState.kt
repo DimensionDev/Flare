@@ -8,6 +8,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.fromHtml
 import dev.dimension.flare.BuildConfig
+import dev.dimension.flare.R
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -31,11 +32,13 @@ internal fun changeLogPresenter(
     val changeLog =
         remember(BuildConfig.VERSION_NAME) {
             runCatching {
-                val id = context.resources.getIdentifier("changelog_${BuildConfig.VERSION_NAME}", "string", context.packageName)
-                context.getString(id)
-            }.getOrNull()?.let {
-                AnnotatedString.fromHtml(it)
-            }
+                context.getString(R.string.changelog_current, BuildConfig.VERSION_NAME)
+            }.getOrNull()
+                ?.takeIf {
+                    it.isNotBlank() && it.isNotEmpty()
+                }?.let {
+                    AnnotatedString.fromHtml(it)
+                }
         }
     return object : ChangeLogState {
         override val shouldShowChangeLog: UiState<Boolean> = shouldShowChangeLog

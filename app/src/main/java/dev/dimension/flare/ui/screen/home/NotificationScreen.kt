@@ -75,7 +75,13 @@ internal fun NotificationScreen(
                     if (!windowInfo.windowSizeClass.isCompat()) {
                         state.state.allTypes.onSuccess {
                             if (it.size > 1) {
-                                NotificationFilterSelector(it, state.state)
+                                NotificationFilterSelector(
+                                    it,
+                                    state.state,
+                                    modifier =
+                                        Modifier
+                                            .padding(horizontal = screenHorizontalPadding),
+                                )
                             }
                         }
                     }

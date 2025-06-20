@@ -2,7 +2,7 @@
 clikt = "5.0.3"
 collection = "1.5.0"
 compileSdk = "36"
-lifecycleViewmodelCompose = "2.9.0"
+lifecycleViewmodelCompose = "2.9.1"
 minSdk = "21"
 java = "21"
 agp = "8.10.1"
@@ -13,7 +13,7 @@ androidx-test-ext-junit = "1.2.1"
 espresso-core = "3.6.1"
 lifecycle-runtime-ktx = "2.9.1"
 activity-compose = "1.10.1"
-compose-bom = "2025.06.00"
+compose-bom = "2025.06.01"
 ksp = "2.1.21-2.0.2"
 openaiClient = "4.0.1"
 paging = "3.3.6"
@@ -46,11 +46,11 @@ firebase-bom = "33.15.0"
 google-services = "4.4.2"
 firebase-crashlytics = "3.0.4"
 materialKolor = "2.1.1"
-room = "2.7.1"
-sqlite = "2.5.1"
-compose-multiplatform = "1.8.1"
+room = "2.7.2"
+sqlite = "2.5.2"
+compose-multiplatform = "1.8.2"
 logback = "1.5.18"
-navigation3 = "1.0.0-alpha03"
+navigation3 = "1.0.0-alpha04"
 zoomable = "0.16.0"
 
 [libraries]
@@ -79,7 +79,7 @@ ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.4.0-alpha15" }
+material3 = { group = "androidx.compose.material3", name = "material3", version = "1.4.0-alpha16" }
 material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
 material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive" }
@@ -194,13 +194,13 @@ commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.17.0
 
 jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version = "3.9.1" }
 
-jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.9.0-beta02" }
+jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.9.0-beta03" }
 krypto = { module = "com.soywiz.korlibs.krypto:krypto", version = "4.0.10" }
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version = "1.0.0-SNAPSHOT" }
-androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version = "1.0.0-alpha01" }
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version = "1.0.0-alpha02" }
 
 ### Server ###
 ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }

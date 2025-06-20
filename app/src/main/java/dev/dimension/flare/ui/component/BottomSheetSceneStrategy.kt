@@ -12,7 +12,7 @@ import androidx.navigation3.ui.SceneStrategy
 internal class BottomSheetScene<T : Any>
     @OptIn(ExperimentalMaterial3Api::class)
     constructor(
-        override val key: T,
+        override val key: Any,
         override val previousEntries: List<NavEntry<T>>,
         override val overlaidEntries: List<NavEntry<T>>,
         private val properties: ModalBottomSheetProperties,
@@ -27,7 +27,7 @@ internal class BottomSheetScene<T : Any>
                 onDismissRequest = { onBack(1) },
                 properties = properties,
             ) {
-                entry.content(key)
+                entry.Content()
             }
         }
     }
@@ -43,7 +43,7 @@ internal class BottomSheetSceneStrategy<T : Any> : SceneStrategy<T> {
         val properties = lastEntry?.metadata?.get(BOTTOMSHEET_KEY) as? ModalBottomSheetProperties
         return properties?.let { properties ->
             BottomSheetScene(
-                key = lastEntry.key,
+                key = lastEntry.contentKey,
                 previousEntries = entries.dropLast(1),
                 overlaidEntries = entries.dropLast(1),
                 entry = lastEntry,

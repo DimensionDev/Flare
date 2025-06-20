@@ -261,4 +261,10 @@
     <string name="podcast_living">实时播报</string>
     <string name="home_tab_antennas_title">天线</string>
     <string name="antennas_empty">无天线</string>
+    <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
+            <ul>
+                <li>支持 Misskey Antennas</li>
+                <li>Bug 修复和性能改进</li>
+            </ul>
+        ]]></string>
 </resources>

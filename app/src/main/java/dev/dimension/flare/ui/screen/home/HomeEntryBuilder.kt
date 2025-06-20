@@ -1,19 +1,25 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.route.Route
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3AdaptiveApi::class)
 internal fun EntryProviderBuilder<NavKey>.homeEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit,
     openDrawer: () -> Unit,
 ) {
-    entry<Route.Home> { args ->
+    entry<Route.Home>(
+        metadata = ListDetailSceneStrategy.listPane(
+            "home",
+        )
+    ) { args ->
         HomeTimelineScreen(
             accountType = args.accountType,
             toCompose = {
@@ -71,7 +77,11 @@ internal fun EntryProviderBuilder<NavKey>.homeEntryBuilder(
             onUserClick = { navigate(Route.Profile.User(args.accountType, it)) },
         )
     }
-    entry<Route.TabSettings> { args ->
+    entry<Route.TabSettings>(
+        metadata = ListDetailSceneStrategy.extraPane(
+            "home",
+        )
+    ) { args ->
         TabSettingScreen(
             accountType = args.accountType,
             onBack = onBack,

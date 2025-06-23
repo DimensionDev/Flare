@@ -22,7 +22,7 @@ import dev.dimension.flare.model.ReferenceType
 internal data class DbPagingTimeline(
     @PrimaryKey
     val _id: String,
-    val accountKey: MicroBlogKey,
+    val accountKey: MicroBlogKey?,
     val pagingKey: String,
     val statusKey: MicroBlogKey,
     val sortId: Long,

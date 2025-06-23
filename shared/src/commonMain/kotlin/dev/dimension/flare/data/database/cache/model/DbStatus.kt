@@ -13,12 +13,12 @@ import dev.dimension.flare.model.MicroBlogKey
 )
 internal data class DbStatus(
     val statusKey: MicroBlogKey,
-    val accountKey: MicroBlogKey,
+    val accountKey: MicroBlogKey?,
     val userKey: MicroBlogKey?,
     val content: StatusContent,
     val text: String?, // For Searching
     @PrimaryKey
-    val id: String = "${accountKey}_$statusKey",
+    val id: String = if (accountKey != null) "${accountKey}_$statusKey" else statusKey.toString(),
 )
 
 internal class StatusContentConverters {

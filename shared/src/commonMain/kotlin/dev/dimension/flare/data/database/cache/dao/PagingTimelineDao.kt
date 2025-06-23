@@ -16,10 +16,12 @@ import dev.dimension.flare.model.MicroBlogKey
 @Dao
 internal interface PagingTimelineDao {
     @Transaction
-    @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountKey = :accountKey ORDER BY sortId DESC")
+    @Query(
+        "SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND (accountKey = :accountKey OR (:accountKey IS NULL AND accountKey IS NULL)) ORDER BY sortId DESC",
+    )
     fun getPagingSource(
         pagingKey: String,
-        accountKey: MicroBlogKey,
+        accountKey: MicroBlogKey?,
     ): PagingSource<Int, DbPagingTimelineWithStatus>
 
     @Transaction
@@ -37,11 +39,11 @@ internal interface PagingTimelineDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(timeline: List<DbPagingTimeline>)
 
-    @Query("SELECT EXISTS(SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountKey = :accountKey)")
-    suspend fun exists(
-        pagingKey: String,
-        accountKey: MicroBlogKey,
-    ): Boolean
+//    @Query("SELECT EXISTS(SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND (accountKey = :accountKey OR (:accountKey IS NULL AND accountKey IS NULL)))")
+//    suspend fun exists(
+//        pagingKey: String,
+//        accountKey: MicroBlogKey?,
+//    ): Boolean
 
     @Delete
     suspend fun delete(timeline: List<DbPagingTimeline>)

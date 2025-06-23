@@ -196,10 +196,9 @@ internal class BlueskyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 HomeTimelineRemoteMediator(
                     service,
@@ -219,10 +218,9 @@ internal class BlueskyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forNotification = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forNotification = true),
             mediator =
                 when (type) {
                     NotificationFilter.All ->
@@ -309,10 +307,9 @@ internal class BlueskyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 UserTimelineRemoteMediator(
                     service,
@@ -333,10 +330,9 @@ internal class BlueskyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey,
@@ -376,7 +372,7 @@ internal class BlueskyDataSource(
                 database
                     .statusDao()
                     .get(statusKey, accountKey)
-                    .mapNotNull { it?.content?.render(accountKey, this) }
+                    .mapNotNull { it?.content?.render(this) }
             },
         )
     }
@@ -966,10 +962,9 @@ internal class BlueskyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forSearch = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forSearch = true),
             mediator =
                 SearchStatusRemoteMediator(
                     service,
@@ -1183,10 +1178,9 @@ internal class BlueskyDataSource(
         return timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 FeedTimelineRemoteMediator(
                     service = service,
@@ -1416,10 +1410,9 @@ internal class BlueskyDataSource(
         return timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 ListTimelineRemoteMediator(
                     service = service,
@@ -2234,10 +2227,9 @@ internal class BlueskyDataSource(
                     timelinePager(
                         pageSize = pagingSize,
                         pagingKey = "user_timeline_$userKey",
-                        accountKey = accountKey,
                         database = database,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
                         scope = scope,
+                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
                         mediator =
                             UserTimelineRemoteMediator(
                                 service = service,
@@ -2256,10 +2248,9 @@ internal class BlueskyDataSource(
                     timelinePager(
                         pageSize = pagingSize,
                         pagingKey = "user_timeline_replies_$userKey",
-                        accountKey = accountKey,
                         database = database,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
                         scope = scope,
+                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
                         mediator =
                             UserTimelineRemoteMediator(
                                 service,
@@ -2279,10 +2270,9 @@ internal class BlueskyDataSource(
                         timelinePager(
                             pageSize = pagingSize,
                             pagingKey = "user_timeline_likes_$userKey",
-                            accountKey = accountKey,
                             database = database,
-                            filterFlow = localFilterRepository.getFlow(forTimeline = true),
                             scope = scope,
+                            filterFlow = localFilterRepository.getFlow(forTimeline = true),
                             mediator =
                                 UserLikesTimelineRemoteMediator(
                                     service,

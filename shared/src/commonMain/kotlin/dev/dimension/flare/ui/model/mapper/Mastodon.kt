@@ -148,7 +148,6 @@ internal fun Notification.render(
 internal fun Status.renderGuest(host: String) =
     render(
         host = host,
-        accountKey = null,
         event = null,
         references =
             reblog
@@ -161,10 +160,10 @@ internal fun Status.renderGuest(host: String) =
 
 internal fun Status.render(
     host: String,
-    accountKey: MicroBlogKey?,
     event: StatusEvent.Mastodon?,
     references: Map<ReferenceType, StatusContent> = mapOf(),
 ): UiTimeline {
+    val accountKey = event?.accountKey
     requireNotNull(account) { "account is null" }
     val user = account.render(accountKey, host)
     val currentStatus = this.renderStatus(host, accountKey, event)

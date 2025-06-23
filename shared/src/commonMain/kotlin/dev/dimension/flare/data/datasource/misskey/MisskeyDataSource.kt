@@ -107,10 +107,9 @@ internal class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 HomeTimelineRemoteMediator(
                     accountKey,
@@ -128,10 +127,9 @@ internal class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 LocalTimelineRemoteMediator(
                     accountKey,
@@ -149,10 +147,9 @@ internal class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 PublicTimelineRemoteMediator(
                     accountKey,
@@ -171,10 +168,9 @@ internal class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forNotification = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forNotification = true),
             mediator =
                 when (type) {
                     NotificationFilter.All ->
@@ -275,10 +271,9 @@ internal class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 UserTimelineRemoteMediator(
                     accountKey,
@@ -299,10 +294,9 @@ internal class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey,
@@ -335,7 +329,7 @@ internal class MisskeyDataSource(
                     .statusDao()
                     .get(statusKey, accountKey)
                     .distinctUntilChanged()
-                    .mapNotNull { it?.content?.render(accountKey, this) }
+                    .mapNotNull { it?.content?.render(this) }
             },
         )
     }
@@ -746,10 +740,9 @@ internal class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forSearch = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forSearch = true),
             mediator =
                 SearchStatusRemoteMediator(
                     service,
@@ -793,10 +786,9 @@ internal class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 DiscoverStatusRemoteMediator(
                     service,
@@ -1018,10 +1010,9 @@ internal class MisskeyDataSource(
                     timelinePager(
                         pageSize = pagingSize,
                         pagingKey = "user_timeline_$userKey",
-                        accountKey = accountKey,
                         database = database,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
                         scope = scope,
+                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
                         mediator =
                             UserTimelineRemoteMediator(
                                 accountKey = accountKey,
@@ -1039,10 +1030,9 @@ internal class MisskeyDataSource(
                     timelinePager(
                         pageSize = pagingSize,
                         pagingKey = "user_timeline_replies_$userKey",
-                        accountKey = accountKey,
                         database = database,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
                         scope = scope,
+                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
                         mediator =
                             UserTimelineRemoteMediator(
                                 service = service,
@@ -1065,10 +1055,9 @@ internal class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 FavouriteTimelineRemoteMediator(
                     service = service,
@@ -1344,10 +1333,9 @@ internal class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = "list_${accountKey}_$listId",
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 ListTimelineRemoteMediator(
                     listId,
@@ -1475,10 +1463,9 @@ internal class MisskeyDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = "antennas_$id",
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 AntennasTimelineRemoteMediator(
                     service = service,

@@ -12,9 +12,9 @@ import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
+import kotlin.coroutines.CoroutineContext
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -27,13 +27,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalPagingApi::class)
 internal fun StatusEvent.timelinePager(
     pageSize: Int,
     pagingKey: String,
-    accountKey: MicroBlogKey,
     database: CacheDatabase,
     scope: CoroutineScope,
     filterFlow: Flow<List<String>>,

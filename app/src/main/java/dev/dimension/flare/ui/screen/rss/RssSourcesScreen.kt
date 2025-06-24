@@ -34,6 +34,7 @@ import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.presenter.home.rss.RssSourcesPresenter
 import dev.dimension.flare.ui.presenter.invoke
@@ -107,6 +108,13 @@ internal fun RssSourcesScreen(
                     },
                     supportingContent = {
                         Text(it.url)
+                    },
+                    leadingContent = {
+                        NetworkImage(
+                            model = it.favIcon,
+                            contentDescription = it.title,
+                            modifier = Modifier.size(24.dp),
+                        )
                     },
                     trailingContent = {
                         var showDropdown by remember {

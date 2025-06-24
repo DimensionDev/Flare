@@ -1,15 +1,15 @@
-import SwiftUI
 import Combine
+import SwiftUI
 
 /// 浮动窗口状态枚举
 enum FloatingWindowState: String, CaseIterable {
-    case hidden = "hidden"
-    case minimized = "minimized"
-    case expanded = "expanded"
-    case dragging = "dragging"
-    
+    case hidden
+    case minimized
+    case expanded
+    case dragging
+
     var isVisible: Bool {
-        return self != .hidden
+        self != .hidden
     }
 }
 
@@ -17,29 +17,29 @@ enum FloatingWindowState: String, CaseIterable {
 /// 管理浮动性能监控窗口的状态、位置和行为
 class FloatingWindowManager: ObservableObject {
     static let shared = FloatingWindowManager()
-    
+
     // MARK: - Published Properties
-    
+
     @Published var state: FloatingWindowState = .hidden
-    @Published var position: CGPoint = CGPoint(x: 50, y: 100)
+    @Published var position: CGPoint = .init(x: 50, y: 100)
     @Published var isDragging: Bool = false
     @Published var opacity: Double = 0.9
     @Published var selectedChart: Int = 0 // 0: CPU, 1: Memory, 2: Frame Rate
-    
+
     // MARK: - Private Properties
 
     private var screenSize: CGSize = .zero
     private let edgeMargin: CGFloat = PerformanceConfig.FloatingWindow.Layout.edgeMargin
     private let snapDistance: CGFloat = PerformanceConfig.FloatingWindow.Layout.snapDistance
-    
+
     // MARK: - Initialization
-    
+
     private init() {
         loadPersistedState()
     }
-    
+
     // MARK: - Public Methods
-    
+
     /// 显示浮动窗口（展开状态）
     func show() {
         // 添加调试日志
@@ -85,7 +85,7 @@ class FloatingWindowManager: ObservableObject {
     func toggleExpanded() {
         hide()
     }
-    
+
     /// 开始拖拽
     func startDragging() {
         isDragging = true
@@ -110,28 +110,28 @@ class FloatingWindowManager: ObservableObject {
 
         savePosition()
     }
-    
+
     /// 更新拖拽位置
     func updatePosition(_ newPosition: CGPoint) {
         let constrainedPosition = constrainToScreen(newPosition)
         position = constrainedPosition
     }
-    
+
     /// 设置屏幕尺寸
     func setScreenSize(_ size: CGSize) {
         screenSize = size
         // 确保当前位置在屏幕范围内
         position = constrainToScreen(position)
     }
-    
+
     /// 选择图表类型
     func selectChart(_ index: Int) {
         selectedChart = index
         UserDefaults.standard.set(index, forKey: PerformanceConfig.FloatingWindow.UserDefaultsKeys.selectedChart)
     }
-    
+
     // MARK: - Private Methods
-    
+
     /// 约束位置到屏幕范围内（仅Y轴，X轴固定为0）
     private func constrainToScreen(_ point: CGPoint) -> CGPoint {
         guard screenSize != .zero else { return point }
@@ -145,7 +145,7 @@ class FloatingWindowManager: ObservableObject {
             y: max(minY, min(maxY, point.y))
         )
     }
-    
+
     /// 边缘吸附（仅上下边缘）
     private func snapToEdge(_ point: CGPoint) -> CGPoint {
         guard screenSize != .zero else { return point }
@@ -173,19 +173,19 @@ class FloatingWindowManager: ObservableObject {
 
         return snappedPoint
     }
-    
+
     /// 获取窗口尺寸
     private func getWindowSize() -> CGSize {
         switch state {
         case .minimized, .dragging:
-            return PerformanceConfig.FloatingWindow.Size.minimized
+            PerformanceConfig.FloatingWindow.Size.minimized
         case .expanded:
-            return PerformanceConfig.FloatingWindow.Size.expanded
+            PerformanceConfig.FloatingWindow.Size.expanded
         case .hidden:
-            return .zero
+            .zero
         }
     }
-    
+
     /// 保存状态到UserDefaults
     private func saveState() {
         UserDefaults.standard.set(state.rawValue, forKey: PerformanceConfig.FloatingWindow.UserDefaultsKeys.state)
@@ -219,21 +219,21 @@ class FloatingWindowManager: ObservableObject {
 extension FloatingWindowManager {
     /// 当前窗口尺寸
     var currentWindowSize: CGSize {
-        return getWindowSize()
+        getWindowSize()
     }
-    
+
     /// 是否可以拖拽
     var canDrag: Bool {
-        return state.isVisible && !isDragging
+        state.isVisible && !isDragging
     }
-    
+
     /// 窗口透明度
     var currentOpacity: Double {
-        return state == .hidden ? 0 : opacity
+        state == .hidden ? 0 : opacity
     }
 
     /// 是否应该显示浮动窗口（Debug模式检查）
     var shouldShowFloatingWindow: Bool {
-        return PerformanceConfig.isDebugModeEnabled
+        PerformanceConfig.isDebugModeEnabled
     }
 }

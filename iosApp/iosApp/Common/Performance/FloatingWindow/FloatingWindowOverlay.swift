@@ -4,7 +4,7 @@ import SwiftUI
 /// 全局覆盖层，用于在任何页面上显示浮动性能监控窗口
 struct FloatingWindowOverlay: View {
     @StateObject private var windowManager = FloatingWindowManager.shared
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -43,7 +43,7 @@ struct FloatingWindowModifier: ViewModifier {
 extension View {
     /// 添加浮动性能监控窗口
     func floatingPerformanceWindow() -> some View {
-        self.modifier(FloatingWindowModifier())
+        modifier(FloatingWindowModifier())
     }
 }
 
@@ -52,69 +52,65 @@ extension View {
 struct FloatingWindowControlPanel: View {
     @StateObject private var windowManager = FloatingWindowManager.shared
     @StateObject private var monitor = TimelinePerformanceMonitor.shared
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-          
-            
             // 控制按钮
-                 HStack {
-                    Button(action: {
-                        if PerformanceConfig.isVerboseLoggingEnabled {
-                            print("[FloatingWindowControl] 🔘 Show/Hide button tapped")
-                            print("[FloatingWindowControl] Current state: \(windowManager.state)")
-                            print("[FloatingWindowControl] Is visible: \(windowManager.state.isVisible)")
-                        }
-
-                        if windowManager.state.isVisible {
-                            if PerformanceConfig.isVerboseLoggingEnabled {
-                                print("[FloatingWindowControl] 👁️ Hiding window")
-                            }
-                            windowManager.hide()
-                        } else {
-                            if PerformanceConfig.isVerboseLoggingEnabled {
-                                print("[FloatingWindowControl] 👁️ Showing window")
-                                print("[FloatingWindowControl] Monitor is monitoring: \(monitor.isMonitoring)")
-                            }
-
-                            if !monitor.isMonitoring {
-                                if PerformanceConfig.isVerboseLoggingEnabled {
-                                    print("[FloatingWindowControl] 🚀 Starting monitoring")
-                                }
-                                monitor.startMonitoring()
-                            }
-
-                            if PerformanceConfig.isVerboseLoggingEnabled {
-                                print("[FloatingWindowControl] 📱 Calling windowManager.show()")
-                            }
-                            windowManager.show()
-
-                            if PerformanceConfig.isVerboseLoggingEnabled {
-                                print("[FloatingWindowControl] ✅ windowManager.show() completed")
-                                print("[FloatingWindowControl] New state: \(windowManager.state)")
-                            }
-                        }
-                    }) {
-                        HStack {
-                            Image(systemName: windowManager.state.isVisible ? "eye.slash" : "eye")
-                            Text(windowManager.state.isVisible ? "Hide Monitor Window" : "Show Monitor Window")
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(windowManager.state.isVisible ? Color.red : Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+            HStack {
+                Button(action: {
+                    if PerformanceConfig.isVerboseLoggingEnabled {
+                        print("[FloatingWindowControl] 🔘 Show/Hide button tapped")
+                        print("[FloatingWindowControl] Current state: \(windowManager.state)")
+                        print("[FloatingWindowControl] Is visible: \(windowManager.state.isVisible)")
                     }
+
+                    if windowManager.state.isVisible {
+                        if PerformanceConfig.isVerboseLoggingEnabled {
+                            print("[FloatingWindowControl] 👁️ Hiding window")
+                        }
+                        windowManager.hide()
+                    } else {
+                        if PerformanceConfig.isVerboseLoggingEnabled {
+                            print("[FloatingWindowControl] 👁️ Showing window")
+                            print("[FloatingWindowControl] Monitor is monitoring: \(monitor.isMonitoring)")
+                        }
+
+                        if !monitor.isMonitoring {
+                            if PerformanceConfig.isVerboseLoggingEnabled {
+                                print("[FloatingWindowControl] 🚀 Starting monitoring")
+                            }
+                            monitor.startMonitoring()
+                        }
+
+                        if PerformanceConfig.isVerboseLoggingEnabled {
+                            print("[FloatingWindowControl] 📱 Calling windowManager.show()")
+                        }
+                        windowManager.show()
+
+                        if PerformanceConfig.isVerboseLoggingEnabled {
+                            print("[FloatingWindowControl] ✅ windowManager.show() completed")
+                            print("[FloatingWindowControl] New state: \(windowManager.state)")
+                        }
+                    }
+                }) {
+                    HStack {
+                        Image(systemName: windowManager.state.isVisible ? "eye.slash" : "eye")
+                        Text(windowManager.state.isVisible ? "Hide Monitor Window" : "Show Monitor Window")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(windowManager.state.isVisible ? Color.red : Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
                 }
-                
- 
-            
+            }
+
 //            // 状态信息
 //            VStack(alignment: .leading, spacing: 8) {
 //                Text("Window Status")
 //                    .font(.subheadline)
 //                    .fontWeight(.medium)
-//                
+//
 //                HStack {
 //                    Text("State:")
 //                    Spacer()
@@ -122,7 +118,7 @@ struct FloatingWindowControlPanel: View {
 //                        .foregroundColor(stateColor)
 //                        .fontWeight(.medium)
 //                }
-//                
+//
 //                HStack {
 //                    Text("Position:")
 //                    Spacer()
@@ -130,7 +126,7 @@ struct FloatingWindowControlPanel: View {
 //                        .font(.system(.caption, design: .monospaced))
 //                        .foregroundColor(.secondary)
 //                }
-//                
+//
 //                if windowManager.state == .expanded {
 //                    HStack {
 //                        Text("Selected Chart:")
@@ -143,13 +139,13 @@ struct FloatingWindowControlPanel: View {
 //            }
 //            .padding()
 //             .cornerRadius(10)
-//            
+//
 //            // 使用说明
 //            VStack(alignment: .leading, spacing: 4) {
 //                Text("Usage Instructions")
 //                    .font(.subheadline)
 //                    .fontWeight(.medium)
-//                
+//
 //                Text("• Tap to expand/minimize")
 //                Text("• Drag to move position")
 //                Text("• Auto-snaps to screen edges")
@@ -168,32 +164,32 @@ struct FloatingWindowControlPanel: View {
 //                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
 //        )
     }
-    
+
     // MARK: - Computed Properties
-    
+
     private var stateColor: Color {
         switch windowManager.state {
         case .hidden:
-            return .gray
+            .gray
         case .minimized:
-            return .green
+            .green
         case .expanded:
-            return .blue
+            .blue
         case .dragging:
-            return .orange
+            .orange
         }
     }
-    
+
     private var chartName: String {
         switch windowManager.selectedChart {
         case 0:
-            return "CPU Usage"
+            "CPU Usage"
         case 1:
-            return "Memory Usage"
+            "Memory Usage"
         case 2:
-            return "Frame Rate"
+            "Frame Rate"
         default:
-            return "Unknown"
+            "Unknown"
         }
     }
 }
@@ -203,7 +199,7 @@ struct FloatingWindowControlPanel: View {
 #Preview {
     VStack(spacing: 20) {
         FloatingWindowControlPanel()
-        
+
         Spacer()
     }
     .padding()

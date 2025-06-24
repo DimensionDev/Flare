@@ -1,38 +1,43 @@
 import Foundation
-import UIKit
 import os.log
+import UIKit
 
 // MARK: - Timeline Performance Monitor
 
 class TimelinePerformanceMonitor: ObservableObject {
     static let shared = TimelinePerformanceMonitor()
-    
+
     // MARK: - Performance Metrics
+
     @Published var currentCPUUsage: Double = 0
     @Published var currentMemoryUsage: UInt64 = 0
     @Published var currentFrameRate: Double = 0
-    
+
     // MARK: - Monitoring State
-    internal var isMonitoring = false
+
+    var isMonitoring = false
     private var monitoringTimer: Timer?
     private var frameRateMonitor: CADisplayLink?
     private var frameCount = 0
     private var lastFrameTime: CFTimeInterval = 0
 
     // MARK: - Scroll Performance Tracking (Integrated)
+
     private var scrollFrameRates: [Double] = []
     private var scrollStutterCount = 0
-    
+
     // MARK: - Performance History
+
     private var cpuHistory: [Double] = []
     private var memoryHistory: [UInt64] = []
     private var frameRateHistory: [Double] = []
-    
+
     // MARK: - Performance Thresholds
+
     private let cpuThreshold: Double = PerformanceConfig.Thresholds.cpuUsage
     private let memoryThreshold: UInt64 = PerformanceConfig.Thresholds.memoryUsage
     private let frameRateThreshold: Double = PerformanceConfig.Thresholds.frameRate
-    
+
     private init() {
         setupNotificationObservers()
     }
@@ -83,7 +88,7 @@ class TimelinePerformanceMonitor: ObservableObject {
     }
 
     @objc private func handleAppDidEnterBackground() {
-        if isMonitoring && PerformanceConfig.Lifecycle.stopMonitoringOnBackground {
+        if isMonitoring, PerformanceConfig.Lifecycle.stopMonitoringOnBackground {
             stopMonitoring()
             if PerformanceConfig.isVerboseLoggingEnabled {
                 print("[PerformanceMonitor] Stopped monitoring due to app entering background")
@@ -92,7 +97,7 @@ class TimelinePerformanceMonitor: ObservableObject {
     }
 
     @objc private func handleAppWillEnterForeground() {
-        if !isMonitoring && PerformanceConfig.Lifecycle.resumeMonitoringOnForeground {
+        if !isMonitoring, PerformanceConfig.Lifecycle.resumeMonitoringOnForeground {
             startMonitoring()
             if PerformanceConfig.isVerboseLoggingEnabled {
                 print("[PerformanceMonitor] Resumed monitoring due to app entering foreground")
@@ -107,9 +112,9 @@ class TimelinePerformanceMonitor: ObservableObject {
         scrollFrameRates.removeAll()
         scrollStutterCount = 0
     }
-    
+
     // MARK: - Monitoring Control
-    
+
     func startMonitoring() {
         guard !isMonitoring else {
             if PerformanceConfig.isVerboseLoggingEnabled {
@@ -161,7 +166,7 @@ class TimelinePerformanceMonitor: ObservableObject {
             print("[PerformanceMonitor] ✅ Frame Rate monitor started")
         }
     }
-    
+
     func stopMonitoring() {
         guard isMonitoring else {
             if PerformanceConfig.isVerboseLoggingEnabled {
@@ -182,9 +187,9 @@ class TimelinePerformanceMonitor: ObservableObject {
         }
         os_log("Stopped Timeline performance monitoring", log: .performance, type: .info)
     }
-    
+
     // MARK: - Metrics Update
-    
+
     private func updateCPUAndMemoryMetrics() {
         currentCPUUsage = getCurrentCPUUsage()
         currentMemoryUsage = getCurrentMemoryUsage()
@@ -207,7 +212,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         // Check for performance issues
         checkPerformanceThresholds()
     }
-    
+
     @objc private func updateFrameRate(_ displayLink: CADisplayLink) {
         frameCount += 1
 
@@ -252,8 +257,6 @@ class TimelinePerformanceMonitor: ObservableObject {
             }
         }
     }
-    
-
 
     // MARK: - Scroll Performance Analysis (Integrated with Frame Rate Monitoring)
 
@@ -267,7 +270,7 @@ class TimelinePerformanceMonitor: ObservableObject {
     }
 
     var currentScrollFrameRate: Double {
-        return currentFrameRate // Use the current frame rate from the main monitoring
+        currentFrameRate // Use the current frame rate from the main monitoring
     }
 
     var scrollStutterRate: Double {
@@ -278,15 +281,15 @@ class TimelinePerformanceMonitor: ObservableObject {
     // MARK: - Data Access for Charts
 
     var cpuHistoryData: [Double] {
-        return cpuHistory
+        cpuHistory
     }
 
     var memoryHistoryData: [UInt64] {
-        return memoryHistory
+        memoryHistory
     }
 
     var frameRateHistoryData: [Double] {
-        return frameRateHistory
+        frameRateHistory
     }
 
     func generateScrollReport() -> ScrollPerformanceReport {
@@ -308,21 +311,21 @@ class TimelinePerformanceMonitor: ObservableObject {
     }
 
     // MARK: - Performance Analysis
-    
+
     private func checkPerformanceThresholds() {
         if currentCPUUsage > cpuThreshold {
-            //os_log("CPU usage above threshold: %.1f%%", log: .performance, type: .error, currentCPUUsage * 100)
+            // os_log("CPU usage above threshold: %.1f%%", log: .performance, type: .error, currentCPUUsage * 100)
         }
-        
+
         if currentMemoryUsage > memoryThreshold {
-           // os_log("Memory usage above threshold: %.1fMB", log: .performance, type: .error, Double(currentMemoryUsage) / 1_000_000)
+            // os_log("Memory usage above threshold: %.1fMB", log: .performance, type: .error, Double(currentMemoryUsage) / 1_000_000)
         }
-        
-        if currentFrameRate < frameRateThreshold && currentFrameRate > 0 {
-           // os_log("Frame rate below threshold: %.1ffps", log: .performance, type: .error, currentFrameRate)
+
+        if currentFrameRate < frameRateThreshold, currentFrameRate > 0 {
+            // os_log("Frame rate below threshold: %.1ffps", log: .performance, type: .error, currentFrameRate)
         }
     }
-    
+
     func generateReport() -> PerformanceReport {
         let averageCPU = cpuHistory.isEmpty ? 0 : cpuHistory.reduce(0, +) / Double(cpuHistory.count)
         let peakCPU = cpuHistory.max() ?? 0
@@ -341,9 +344,9 @@ class TimelinePerformanceMonitor: ObservableObject {
             timestamp: Date()
         )
     }
-    
+
     // MARK: - System Metrics Helpers
-    
+
     private func getCurrentCPUUsage() -> Double {
         var threadsList: thread_act_array_t?
         var threadsCount = mach_msg_type_number_t(0)
@@ -355,7 +358,7 @@ class TimelinePerformanceMonitor: ObservableObject {
 
         var totalCPU: Double = 0
 
-        for i in 0..<threadsCount {
+        for i in 0 ..< threadsCount {
             var threadInfo = thread_basic_info()
             var threadInfoCount = mach_msg_type_number_t(THREAD_INFO_MAX)
 
@@ -378,20 +381,20 @@ class TimelinePerformanceMonitor: ObservableObject {
 
         return totalCPU / 100.0 // Convert to 0-1 range
     }
-    
+
     private func getCurrentMemoryUsage() -> UInt64 {
         var info = mach_task_basic_info()
-        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size)/4
-        
+        var count = mach_msg_type_number_t(MemoryLayout<mach_task_basic_info>.size) / 4
+
         let kerr: kern_return_t = withUnsafeMutablePointer(to: &info) {
             $0.withMemoryRebound(to: integer_t.self, capacity: 1) {
                 task_info(mach_task_self_,
-                         task_flavor_t(MACH_TASK_BASIC_INFO),
-                         $0,
-                         &count)
+                          task_flavor_t(MACH_TASK_BASIC_INFO),
+                          $0,
+                          &count)
             }
         }
-        
+
         if kerr == KERN_SUCCESS {
             return UInt64(info.resident_size)
         }
@@ -409,15 +412,15 @@ struct PerformanceReport {
     let averageFrameRate: Double
     let minFrameRate: Double
     let timestamp: Date
-    
+
     var isWithinTargets: Bool {
-        return averageCPU < PerformanceConfig.Thresholds.cpuUsage &&
-               peakMemory < PerformanceConfig.Thresholds.memoryUsage &&
-               averageFrameRate > PerformanceConfig.Thresholds.frameRate
+        averageCPU < PerformanceConfig.Thresholds.cpuUsage &&
+            peakMemory < PerformanceConfig.Thresholds.memoryUsage &&
+            averageFrameRate > PerformanceConfig.Thresholds.frameRate
     }
-    
+
     var summary: String {
-        return """
+        """
         Performance Report (\(timestamp.formatted()))
         ================================================
         CPU Usage: Avg: \(PerformanceConfig.Formatting.formatCPU(averageCPU))%, Peak: \(PerformanceConfig.Formatting.formatCPU(peakCPU))%
@@ -428,7 +431,7 @@ struct PerformanceReport {
     }
 
     var details: String {
-        return """
+        """
         Detailed Performance Metrics
         ============================
         CPU Analysis:
@@ -462,19 +465,19 @@ struct ScrollPerformanceReport {
     let totalFrames: Int
 
     var performanceGrade: String {
-        if averageFrameRate >= 55 && stutterCount <= 2 {
-            return "优秀"
-        } else if averageFrameRate >= 45 && stutterCount <= 5 {
-            return "良好"
-        } else if averageFrameRate >= 30 && stutterCount <= 10 {
-            return "一般"
+        if averageFrameRate >= 55, stutterCount <= 2 {
+            "优秀"
+        } else if averageFrameRate >= 45, stutterCount <= 5 {
+            "良好"
+        } else if averageFrameRate >= 30, stutterCount <= 10 {
+            "一般"
         } else {
-            return "需要优化"
+            "需要优化"
         }
     }
 
     var summary: String {
-        return """
+        """
         Scroll Performance: \(performanceGrade)
         Duration: \(String(format: "%.2f", duration))s
         Avg FPS: \(String(format: "%.1f", averageFrameRate))
@@ -484,7 +487,7 @@ struct ScrollPerformanceReport {
     }
 
     var details: String {
-        return """
+        """
         Scroll Performance Analysis
         ==========================
         Duration: \(String(format: "%.2f", duration)) seconds

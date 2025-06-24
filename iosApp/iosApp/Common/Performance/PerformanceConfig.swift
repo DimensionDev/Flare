@@ -9,7 +9,7 @@ enum PerformanceConfig {
     /// 是否启用调试模式（只在Debug构建中启用性能监控）
     static var isDebugModeEnabled: Bool {
         // 临时强制启用用于测试
-        return true
+        true
 //        #if DEBUG
 //        // return true
 //        #else

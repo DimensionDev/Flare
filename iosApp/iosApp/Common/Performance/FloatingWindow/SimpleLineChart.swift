@@ -8,7 +8,7 @@ struct SimpleLineChart: View {
     let threshold: Double?
     let maxValue: Double
     let unit: String
-    
+
     init(data: [Double], color: Color, threshold: Double? = nil, maxValue: Double, unit: String = "%") {
         self.data = data
         self.color = color
@@ -16,17 +16,17 @@ struct SimpleLineChart: View {
         self.maxValue = maxValue
         self.unit = unit
     }
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 // Background
                 RoundedRectangle(cornerRadius: 8)
                     .fill(.gray.opacity(0.05))
-                
+
                 // Grid lines
                 VStack(spacing: 0) {
-                    ForEach(0..<5) { index in
+                    ForEach(0 ..< 5) { index in
                         if index > 0 {
                             Rectangle()
                                 .fill(.gray.opacity(0.2))
@@ -36,11 +36,11 @@ struct SimpleLineChart: View {
                     }
                 }
                 .padding(.horizontal, 8)
-                
+
                 // Y-axis labels
                 HStack {
                     VStack {
-                        ForEach(0..<5) { index in
+                        ForEach(0 ..< 5) { index in
                             let value = maxValue * (1.0 - Double(index) / 4.0)
                             Text("\(Int(value))\(unit)")
                                 .font(.caption2)
@@ -51,12 +51,12 @@ struct SimpleLineChart: View {
                         }
                     }
                     .frame(width: 40)
-                    
+
                     Spacer()
                 }
-                
+
                 // Threshold line
-                if let threshold = threshold {
+                if let threshold {
                     let thresholdY = geometry.size.height * (1.0 - threshold / maxValue)
                     Path { path in
                         path.move(to: CGPoint(x: 40, y: thresholdY))
@@ -64,12 +64,12 @@ struct SimpleLineChart: View {
                     }
                     .stroke(.red.opacity(0.6), style: StrokeStyle(lineWidth: 1, dash: [5, 5]))
                 }
-                
+
                 // Data line
                 if !data.isEmpty {
                     let chartWidth = geometry.size.width - 48
                     let chartHeight = geometry.size.height - 16
-                    
+
                     // Line path
                     Path { path in
                         let points = dataPoints(in: CGSize(width: chartWidth, height: chartHeight))
@@ -81,7 +81,7 @@ struct SimpleLineChart: View {
                         }
                     }
                     .stroke(color, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-                    
+
                     // Area fill
                     Path { path in
                         let points = dataPoints(in: CGSize(width: chartWidth, height: chartHeight))
@@ -102,9 +102,9 @@ struct SimpleLineChart: View {
                         startPoint: .top,
                         endPoint: .bottom
                     ))
-                    
+
                     // Data points
-                    ForEach(Array(dataPoints(in: CGSize(width: chartWidth, height: chartHeight)).enumerated()), id: \.offset) { index, point in
+                    ForEach(Array(dataPoints(in: CGSize(width: chartWidth, height: chartHeight)).enumerated()), id: \.offset) { _, point in
                         Circle()
                             .fill(color)
                             .frame(width: 4, height: 4)
@@ -115,12 +115,12 @@ struct SimpleLineChart: View {
         }
         .clipped()
     }
-    
+
     private func dataPoints(in size: CGSize) -> [CGPoint] {
         guard !data.isEmpty else { return [] }
-        
+
         let stepX = size.width / max(1, Double(data.count - 1))
-        
+
         return data.enumerated().map { index, value in
             let x = Double(index) * stepX
             let normalizedValue = min(max(value / maxValue, 0), 1)
@@ -142,7 +142,7 @@ struct SimpleLineChart: View {
             unit: "%"
         )
         .frame(height: 120)
-        
+
         SimpleLineChart(
             data: [120, 150, 180, 160, 200, 175, 220, 190, 170, 210],
             color: .blue,

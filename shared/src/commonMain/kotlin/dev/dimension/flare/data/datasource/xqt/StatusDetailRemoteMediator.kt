@@ -18,6 +18,7 @@ import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
@@ -46,13 +47,13 @@ internal class StatusDetailRemoteMediator(
     ): MediatorResult {
         if (loadType == LoadType.REFRESH) {
             if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
-                database.statusDao().get(statusKey, accountKey).firstOrNull()?.let {
+                database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
                     database
                         .pagingTimelineDao()
                         .insertAll(
                             listOf(
                                 DbPagingTimeline(
-                                    accountKey = accountKey,
+                                    accountType = AccountType.Specific(accountKey),
                                     statusKey = statusKey,
                                     pagingKey = pagingKey,
                                     sortId = 0,
@@ -97,7 +98,7 @@ internal class StatusDetailRemoteMediator(
                     val result =
                         database
                             .statusDao()
-                            .get(statusKey, accountKey)
+                            .get(statusKey, AccountType.Specific(accountKey))
                             .firstOrNull()
                             ?.content
                             ?.let { it as? StatusContent.XQT }

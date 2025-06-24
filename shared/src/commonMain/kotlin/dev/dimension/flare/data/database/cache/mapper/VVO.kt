@@ -8,6 +8,7 @@ import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.data.network.vvo.model.Comment
 import dev.dimension.flare.data.network.vvo.model.Status
 import dev.dimension.flare.data.network.vvo.model.User
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
@@ -75,7 +76,7 @@ private fun Status.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUse
 private fun Status.toDbStatus(accountKey: MicroBlogKey): DbStatus =
     DbStatus(
         statusKey = MicroBlogKey(id = id, host = vvoHost),
-        accountKey = accountKey,
+        accountType = AccountType.Specific(accountKey),
         userKey = user?.id?.let { MicroBlogKey(id = it.toString(), host = vvoHost) },
         content =
             dev.dimension.flare.data.database.cache.model.StatusContent
@@ -111,7 +112,7 @@ private fun Comment.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUs
 private fun Comment.toDbStatus(accountKey: MicroBlogKey): DbStatus =
     DbStatus(
         statusKey = MicroBlogKey(id = id, host = vvoHost),
-        accountKey = accountKey,
+        accountType = AccountType.Specific(accountKey),
         userKey = user?.id?.let { MicroBlogKey(id = it.toString(), host = vvoHost) },
         content =
             dev.dimension.flare.data.database.cache.model.StatusContent

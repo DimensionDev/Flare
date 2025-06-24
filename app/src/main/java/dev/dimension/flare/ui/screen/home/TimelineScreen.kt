@@ -41,7 +41,7 @@ internal fun TimelineScreen(
     tabItem: TimelineTabItem,
     toCompose: () -> Unit,
     toQuickMenu: () -> Unit,
-    toLogin: () -> Unit,
+    toLogin: (() -> Unit)? = null,
 ) {
     val state by producePresenter(key = "timeline_${tabItem.key}") {
         timelinePresenter(tabItem)
@@ -72,12 +72,14 @@ internal fun TimelineScreen(
                     }
                 },
                 actions = {
-                    state.user
-                        .onError {
-                            TextButton(onClick = toLogin) {
-                                Text(text = stringResource(id = R.string.login_button))
+                    if (toLogin != null) {
+                        state.user
+                            .onError {
+                                TextButton(onClick = toLogin) {
+                                    Text(text = stringResource(id = R.string.login_button))
+                                }
                             }
-                        }
+                    }
                 },
             )
         },

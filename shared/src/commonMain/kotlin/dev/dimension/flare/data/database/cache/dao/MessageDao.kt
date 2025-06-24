@@ -11,28 +11,29 @@ import dev.dimension.flare.data.database.cache.model.DbMessageItem
 import dev.dimension.flare.data.database.cache.model.DbMessageItemWithUser
 import dev.dimension.flare.data.database.cache.model.DbMessageRoom
 import dev.dimension.flare.data.database.cache.model.DbMessageRoomReference
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 internal interface MessageDao {
     @Transaction
-    @Query("SELECT * FROM DbDirectMessageTimeline WHERE accountKey = :accountKey ORDER BY sortId DESC")
-    fun getRoomPagingSource(accountKey: MicroBlogKey): PagingSource<Int, DbDirectMessageTimelineWithRoom>
+    @Query("SELECT * FROM DbDirectMessageTimeline WHERE accountType = :accountType ORDER BY sortId DESC")
+    fun getRoomPagingSource(accountType: AccountType): PagingSource<Int, DbDirectMessageTimelineWithRoom>
 
     @Transaction
-    @Query("SELECT * FROM DbDirectMessageTimeline WHERE accountKey = :accountKey ORDER BY sortId DESC")
-    fun getRoomTimeline(accountKey: MicroBlogKey): Flow<List<DbDirectMessageTimelineWithRoom>>
+    @Query("SELECT * FROM DbDirectMessageTimeline WHERE accountType = :accountType ORDER BY sortId DESC")
+    fun getRoomTimeline(accountType: AccountType): Flow<List<DbDirectMessageTimelineWithRoom>>
 
     @Transaction
     @Query("SELECT * FROM DbMessageItem WHERE roomKey = :roomKey ORDER BY timestamp DESC")
     fun getRoomMessagesPagingSource(roomKey: MicroBlogKey): PagingSource<Int, DbMessageItemWithUser>
 
     @Transaction
-    @Query("SELECT * FROM DbDirectMessageTimeline WHERE roomKey = :roomKey AND accountKey = :accountKey")
+    @Query("SELECT * FROM DbDirectMessageTimeline WHERE roomKey = :roomKey AND accountType = :accountType")
     fun getRoomInfo(
         roomKey: MicroBlogKey,
-        accountKey: MicroBlogKey,
+        accountType: AccountType,
     ): Flow<DbDirectMessageTimelineWithRoom?>
 
     @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
@@ -59,19 +60,19 @@ internal interface MessageDao {
     @Query("SELECT * FROM DbMessageItem WHERE roomKey = :roomKey AND isLocal = 0 ORDER BY timestamp DESC")
     suspend fun getLatestMessage(roomKey: MicroBlogKey): DbMessageItem?
 
-    @Query("DELETE FROM DbDirectMessageTimeline WHERE accountKey = :accountKey")
-    suspend fun clearMessageTimeline(accountKey: MicroBlogKey)
+    @Query("DELETE FROM DbDirectMessageTimeline WHERE accountType = :accountType")
+    suspend fun clearMessageTimeline(accountType: AccountType)
 
-    @Query("UPDATE DbDirectMessageTimeline SET unreadCount = 0 WHERE roomKey = :roomKey AND accountKey = :accountKey")
+    @Query("UPDATE DbDirectMessageTimeline SET unreadCount = 0 WHERE roomKey = :roomKey AND accountType = :accountType")
     suspend fun clearUnreadCount(
         roomKey: MicroBlogKey,
-        accountKey: MicroBlogKey,
+        accountType: AccountType,
     )
 
-    @Query("DELETE FROM DbDirectMessageTimeline WHERE roomKey = :roomKey AND accountKey = :accountKey")
+    @Query("DELETE FROM DbDirectMessageTimeline WHERE roomKey = :roomKey AND accountType = :accountType")
     suspend fun deleteRoomTimeline(
         roomKey: MicroBlogKey,
-        accountKey: MicroBlogKey,
+        accountType: AccountType,
     )
 
     @Query("DELETE FROM DbMessageRoom WHERE roomKey = :roomKey")

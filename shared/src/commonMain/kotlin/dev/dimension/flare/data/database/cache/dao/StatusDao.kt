@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.StatusContent
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.Flow
 
@@ -17,23 +18,23 @@ internal interface StatusDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(statuses: List<DbStatus>)
 
-    @Query("SELECT * FROM DbStatus WHERE statusKey = :statusKey AND accountKey = :accountKey")
+    @Query("SELECT * FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")
     fun get(
         statusKey: MicroBlogKey,
-        accountKey: MicroBlogKey,
+        accountType: AccountType,
     ): Flow<DbStatus?>
 
-    @Query("UPDATE DbStatus SET content = :content WHERE statusKey = :statusKey AND accountKey = :accountKey")
+    @Query("UPDATE DbStatus SET content = :content WHERE statusKey = :statusKey AND accountType = :accountType")
     suspend fun update(
         statusKey: MicroBlogKey,
-        accountKey: MicroBlogKey,
+        accountType: AccountType,
         content: StatusContent,
     )
 
-    @Query("DELETE FROM DbStatus WHERE statusKey = :statusKey AND accountKey = :accountKey")
+    @Query("DELETE FROM DbStatus WHERE statusKey = :statusKey AND accountType = :accountType")
     suspend fun delete(
         statusKey: MicroBlogKey,
-        accountKey: MicroBlogKey,
+        accountType: AccountType,
     )
 
     @Query("SELECT COUNT(*) FROM DbStatus")

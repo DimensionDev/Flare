@@ -48,7 +48,7 @@ public class EmojiHistoryPresenter(
                     value =
                         cacheDatabase
                             .emojiDao()
-                            .getHistory(account.accountKey)
+                            .getHistory(AccountType.Specific(account.accountKey))
                             .mapNotNull { history ->
                                 emojis.firstOrNull { emoji -> emoji.shortcode == history.shortCode }
                             }.toImmutableList()
@@ -65,7 +65,7 @@ public class EmojiHistoryPresenter(
                     scope.launch {
                         cacheDatabase.emojiDao().insertHistory(
                             dev.dimension.flare.data.database.cache.model.DbEmojiHistory(
-                                accountKey = account.accountKey,
+                                accountType = AccountType.Specific(account.accountKey),
                                 shortCode = emoji.shortcode,
                                 lastUse = Clock.System.now().toEpochMilliseconds(),
                             ),

@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.presenter.home.rss
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
@@ -20,16 +21,17 @@ import dev.dimension.flare.ui.presenter.home.TimelineState
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.getValue
 
 public class RssTimelinePresenter(
     private val url: String,
 ) : TimelinePresenter() {
     @Composable
-    override fun listState(): PagingState<UiTimeline> =
-        remember(url) {
-            RssDataSource.fetch(url)
+    override fun listState(): PagingState<UiTimeline> {
+        val scope = rememberCoroutineScope()
+        return remember(url) {
+            RssDataSource.fetch(url, scope)
         }.collectAsLazyPagingItems().toPagingState()
+    }
 }
 
 public class RssSourcePresenter(

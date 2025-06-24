@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.isBigScreen
+import dev.dimension.flare.ui.model.ClickContext
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -27,7 +28,9 @@ internal fun FeedComponent(
         modifier =
             Modifier
                 .clickable {
-                    uriHandler.openUri(data.url)
+                    data.onClicked.invoke(
+                        ClickContext(uriHandler::openUri),
+                    )
                 }.let {
                     if (bigScreen) {
                         it

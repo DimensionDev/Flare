@@ -22,26 +22,22 @@ import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.datetime.Instant
 
-internal fun DbPagingTimelineWithStatus.render(event: StatusEvent): UiTimeline =
+internal fun DbPagingTimelineWithStatus.render(event: StatusEvent?): UiTimeline =
     status.status.data.content.render(
         event,
         references =
-            status.references
-                .map { it.reference.referenceType to it.status.data.content }
-                .toMap(),
+            status.references.associate { it.reference.referenceType to it.status.data.content },
     )
 
-internal fun DbStatusWithReference.render(event: StatusEvent): UiTimeline =
+internal fun DbStatusWithReference.render(event: StatusEvent?): UiTimeline =
     status.data.content.render(
         event,
         references =
-            references
-                .map { it.reference.referenceType to it.status.data.content }
-                .toMap(),
+            references.associate { it.reference.referenceType to it.status.data.content },
     )
 
 internal fun StatusContent.render(
-    event: StatusEvent,
+    event: StatusEvent?,
     references: Map<ReferenceType, StatusContent> = emptyMap(),
 ) = when (this) {
     is StatusContent.Mastodon ->
@@ -53,63 +49,67 @@ internal fun StatusContent.render(
 
     is StatusContent.MastodonNotification ->
         data.render(
-            accountKey = event.accountKey,
             event = event as StatusEvent.Mastodon,
+            accountKey = event.accountKey,
             references = references,
         )
 
     is StatusContent.Misskey ->
         data.render(
-            accountKey = event.accountKey,
             event = event as StatusEvent.Misskey,
+            accountKey = event.accountKey,
             references = references,
         )
 
     is StatusContent.MisskeyNotification ->
         data.render(
-            accountKey = event.accountKey,
             event = event as StatusEvent.Misskey,
+            accountKey = event.accountKey,
             references = references,
         )
 
     is StatusContent.BlueskyReason ->
         reason.render(
-            accountKey = event.accountKey,
             event = event as StatusEvent.Bluesky,
+            accountKey = event.accountKey,
             references = references,
         )
 
     is StatusContent.Bluesky ->
         data.render(
-            accountKey = event.accountKey,
             event = event as StatusEvent.Bluesky,
+            accountKey = event.accountKey,
         )
 
     is StatusContent.BlueskyNotification ->
         renderBlueskyNotification(
-            accountKey = event.accountKey,
             event = event as StatusEvent.Bluesky,
+            accountKey = event.accountKey,
             references = references,
         )
 
     is StatusContent.XQT ->
         data.render(
-            accountKey = event.accountKey,
             event = event as StatusEvent.XQT,
+            accountKey = event.accountKey,
             references = references,
         )
 
     is StatusContent.VVO ->
         data.render(
-            accountKey = event.accountKey,
             event = event as StatusEvent.VVO,
+            accountKey = event.accountKey,
         )
 
     is StatusContent.VVOComment ->
         data.render(
-            accountKey = event.accountKey,
             event = event as StatusEvent.VVO,
+            accountKey = event.accountKey,
         )
+
+    is StatusContent.RSS.Atom -> data.render()
+    is StatusContent.RSS.RDF -> data.render()
+    is StatusContent.RSS.Rss20 -> data.render()
 }
 
 internal fun DbUser.render(accountKey: MicroBlogKey) =

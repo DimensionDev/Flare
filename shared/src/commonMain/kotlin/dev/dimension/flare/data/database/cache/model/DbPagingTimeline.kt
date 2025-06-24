@@ -8,13 +8,14 @@ import androidx.room.Relation
 import androidx.room.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 
 @Entity(
     indices = [
         Index(
-            value = ["accountKey", "statusKey", "pagingKey"],
+            value = ["accountType", "statusKey", "pagingKey"],
             unique = true,
         ),
     ],
@@ -22,7 +23,7 @@ import dev.dimension.flare.model.ReferenceType
 internal data class DbPagingTimeline(
     @PrimaryKey
     val _id: String,
-    val accountKey: MicroBlogKey?,
+    val accountType: AccountType,
     val pagingKey: String,
     val statusKey: MicroBlogKey,
     val sortId: Long,

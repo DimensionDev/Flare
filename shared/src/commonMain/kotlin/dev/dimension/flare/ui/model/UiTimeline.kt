@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model
 
 import androidx.compose.runtime.Immutable
+import dev.dimension.flare.common.AppDeepLink
 import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
@@ -64,6 +65,9 @@ public data class UiTimeline internal constructor(
             val url: String,
             val image: String?,
             val createdAt: UiDateTime?,
+            val onClicked: ClickContext.() -> Unit = {
+                launcher.launch(AppDeepLink.RSS.invoke(url))
+            },
         ) : ItemContent {
             override val itemKey: String
                 get() = "Feed_$url"

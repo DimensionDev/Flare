@@ -93,6 +93,7 @@ import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -371,7 +372,7 @@ internal class BlueskyDataSource(
             cacheSource = {
                 database
                     .statusDao()
-                    .get(statusKey, accountKey)
+                    .get(statusKey, accountType = AccountType.Specific(accountKey))
                     .mapNotNull { it?.content?.render(this) }
             },
         )
@@ -762,7 +763,7 @@ internal class BlueskyDataSource(
             // delete status from cache
             database.statusDao().delete(
                 statusKey = statusKey,
-                accountKey = accountKey,
+                accountType = AccountType.Specific(accountKey),
             )
             database.pagingTimelineDao().deleteStatus(
                 accountKey = accountKey,
@@ -1847,7 +1848,7 @@ internal class BlueskyDataSource(
                 ),
             pagingSourceFactory = {
                 database.messageDao().getRoomPagingSource(
-                    accountKey = accountKey,
+                    accountType = AccountType.Specific(accountKey),
                 )
             },
         ).flow
@@ -1901,7 +1902,7 @@ internal class BlueskyDataSource(
                     .messageDao()
                     .getRoomInfo(
                         roomKey = roomKey,
-                        accountKey = accountKey,
+                        accountType = AccountType.Specific(accountKey),
                     ).distinctUntilChanged()
                     .mapNotNull {
                         it?.render(
@@ -2114,7 +2115,7 @@ internal class BlueskyDataSource(
             cacheSource = {
                 database
                     .messageDao()
-                    .getRoomTimeline(accountKey = accountKey)
+                    .getRoomTimeline(accountType = AccountType.Specific(accountKey))
                     .distinctUntilChanged()
                     .map {
                         it.sumOf { it.timeline.unreadCount.toInt() }
@@ -2124,7 +2125,7 @@ internal class BlueskyDataSource(
 
     private fun clearDirectMessageBadgeCount(roomKey: MicroBlogKey) {
         coroutineScope.launch {
-            database.messageDao().clearUnreadCount(roomKey, accountKey = accountKey)
+            database.messageDao().clearUnreadCount(roomKey, accountType = AccountType.Specific(accountKey))
         }
     }
 
@@ -2138,7 +2139,7 @@ internal class BlueskyDataSource(
                         ),
                 )
             }.onSuccess {
-                database.messageDao().deleteRoomTimeline(roomKey, accountKey = accountKey)
+                database.messageDao().deleteRoomTimeline(roomKey, AccountType.Specific(accountKey))
                 database.messageDao().deleteRoom(roomKey)
                 database.messageDao().deleteRoomReference(roomKey)
                 database.messageDao().deleteRoomMessages(roomKey)

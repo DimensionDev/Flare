@@ -8,6 +8,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimelineWithRoom
 import dev.dimension.flare.data.network.xqt.XQTService
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
@@ -31,7 +32,7 @@ internal class DMListRemoteMediator(
         }
         if (loadType == LoadType.REFRESH) {
             val response = service.getDMUserUpdates().inboxInitialState
-            database.messageDao().clearMessageTimeline(accountKey = accountKey)
+            database.messageDao().clearMessageTimeline(accountType = AccountType.Specific(accountKey))
             cursor = response?.inboxTimelines?.trusted?.minEntryId
             XQT.saveDM(
                 accountKey = accountKey,

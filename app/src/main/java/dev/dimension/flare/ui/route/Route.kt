@@ -132,6 +132,8 @@ internal sealed interface Route : NavKey {
         @Serializable
         data class Timeline(
             val id: Int,
+            val url: String,
+            val title: String?,
         ) : Rss
 
         @Serializable
@@ -570,6 +572,11 @@ internal sealed interface Route : NavKey {
                 "AltText" -> {
                     val text = data.segments.getOrNull(0) ?: return null
                     Route.Status.AltText(text)
+                }
+
+                "RSS" -> {
+                    val feedUrl = data.segments.getOrNull(0) ?: return null
+                    Route.Rss.Detail(feedUrl)
                 }
 
                 else -> null

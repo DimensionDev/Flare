@@ -38,6 +38,7 @@ import dev.dimension.flare.data.network.xqt.model.UserResultCore
 import dev.dimension.flare.data.network.xqt.model.UserResults
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
@@ -97,7 +98,7 @@ internal object XQT {
         val timeline =
             trustedConversations.map { conversation ->
                 DbDirectMessageTimeline(
-                    accountKey = accountKey,
+                    accountType = AccountType.Specific(accountKey),
                     roomKey = MicroBlogKey(conversation.conversationId.orEmpty(), accountKey.host),
                     sortId = conversation.sortTimestamp?.toLongOrNull() ?: 0L,
                     unreadCount =
@@ -269,7 +270,7 @@ private fun toDbStatusWithUser(
                     ),
                 content = StatusContent.XQT(tweet),
                 userKey = user.userKey,
-                accountKey = accountKey,
+                accountType = AccountType.Specific(accountKey),
                 text = tweet.legacy?.fullText,
             ),
         user = user,

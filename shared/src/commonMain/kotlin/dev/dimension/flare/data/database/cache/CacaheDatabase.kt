@@ -6,7 +6,7 @@ import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
 
-internal const val CACHE_DATABASE_VERSION = 18
+internal const val CACHE_DATABASE_VERSION = 19
 
 @Database(
     entities = [
@@ -28,6 +28,7 @@ internal const val CACHE_DATABASE_VERSION = 18
 @TypeConverters(
     dev.dimension.flare.data.database.adapter.MicroBlogKeyConverter::class,
     dev.dimension.flare.data.database.adapter.PlatformTypeConverter::class,
+    dev.dimension.flare.data.database.adapter.AccountTypeConverter::class,
     dev.dimension.flare.data.database.cache.model.EmojiContentConverter::class,
     dev.dimension.flare.data.database.cache.model.StatusConverter::class,
     dev.dimension.flare.data.database.cache.model.UserContentConverters::class,

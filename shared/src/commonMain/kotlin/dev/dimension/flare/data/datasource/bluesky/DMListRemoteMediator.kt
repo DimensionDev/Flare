@@ -9,6 +9,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimelineWithRoom
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
@@ -52,7 +53,7 @@ internal class DMListRemoteMediator(
                 }
             }
         if (loadType == LoadType.REFRESH) {
-            database.messageDao().clearMessageTimeline(accountKey = accountKey)
+            database.messageDao().clearMessageTimeline(AccountType.Specific(accountKey))
         }
         cursor = response.cursor
         Bluesky.saveDM(

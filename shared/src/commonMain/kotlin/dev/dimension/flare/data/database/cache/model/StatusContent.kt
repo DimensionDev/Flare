@@ -3,6 +3,8 @@ package dev.dimension.flare.data.database.cache.model
 import app.bsky.feed.FeedViewPostReasonUnion
 import app.bsky.feed.PostView
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.network.rss.model.Feed
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.SerialName
@@ -85,6 +87,27 @@ internal sealed interface StatusContent {
     data class VVOComment internal constructor(
         internal val data: dev.dimension.flare.data.network.vvo.model.Comment,
     ) : StatusContent
+
+    @Serializable
+    sealed interface RSS : StatusContent {
+        @Serializable
+        @SerialName("rss-atom")
+        data class Atom internal constructor(
+            internal val data: Feed.Atom.Entry,
+        ) : RSS
+
+        @Serializable
+        @SerialName("rss-rss20")
+        data class Rss20 internal constructor(
+            internal val data: Feed.Rss20.Item,
+        ) : RSS
+
+        @Serializable
+        @SerialName("rss-rdf")
+        data class RDF internal constructor(
+            internal val data: Feed.RDF.Item,
+        ) : RSS
+    }
 }
 
 internal suspend inline fun <reified T : StatusContent> updateStatusUseCase(
@@ -93,11 +116,11 @@ internal suspend inline fun <reified T : StatusContent> updateStatusUseCase(
     cacheDatabase: CacheDatabase,
     update: (content: T) -> T,
 ) {
-    val status = cacheDatabase.statusDao().get(statusKey, accountKey).firstOrNull()
+    val status = cacheDatabase.statusDao().get(statusKey, accountType = AccountType.Specific(accountKey)).firstOrNull()
     if (status != null && status.content is T) {
         cacheDatabase.statusDao().update(
             statusKey = statusKey,
-            accountKey = accountKey,
+            accountType = AccountType.Specific(accountKey),
             content = update(status.content),
         )
     }

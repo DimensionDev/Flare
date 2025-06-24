@@ -8,6 +8,7 @@ import androidx.room.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.xqt.model.InboxMessageData
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import kotlinx.serialization.SerialName
@@ -16,18 +17,18 @@ import kotlinx.serialization.Serializable
 @Entity(
     indices = [
         androidx.room.Index(
-            value = ["accountKey", "roomKey"],
+            value = ["accountType", "roomKey"],
             unique = true,
         ),
     ],
 )
 internal data class DbDirectMessageTimeline(
-    val accountKey: MicroBlogKey,
+    val accountType: AccountType,
     val roomKey: MicroBlogKey,
     val sortId: Long,
     val unreadCount: Long,
     @PrimaryKey
-    val _id: String = "$accountKey-$roomKey",
+    val _id: String = "$accountType-$roomKey",
 )
 
 internal data class DbDirectMessageTimelineWithRoom(
@@ -40,17 +41,6 @@ internal data class DbDirectMessageTimelineWithRoom(
     )
     val room: DbMessageRoomWithLastMessageAndUser,
 )
-
-// data class DbDirectMessageTimelineWithRoom(
-//    @Embedded
-//    val timeline: DbDirectMessageTimeline,
-//    @Relation(
-//        parentColumn = "accountKey",
-//        entityColumn = "accountKey",
-//        entity = DbDirectMessageTimelineReference::class,
-//    )
-//    val rooms: List<DbDirectMessageTimelineReferenceWithRoom>,
-// )
 
 @Entity
 internal data class DbMessageRoom(

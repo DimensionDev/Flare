@@ -42,6 +42,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiEmoji
@@ -367,7 +368,7 @@ internal open class MastodonDataSource(
             cacheSource = {
                 database
                     .statusDao()
-                    .get(statusKey, accountKey)
+                    .get(statusKey, AccountType.Specific(accountKey))
                     .distinctUntilChanged()
                     .mapNotNull { it?.content?.render(this) }
             },
@@ -591,7 +592,7 @@ internal open class MastodonDataSource(
             // delete status from cache
             database.statusDao().delete(
                 statusKey = statusKey,
-                accountKey = accountKey,
+                accountType = AccountType.Specific(accountKey),
             )
             database.pagingTimelineDao().deleteStatus(
                 accountKey = accountKey,

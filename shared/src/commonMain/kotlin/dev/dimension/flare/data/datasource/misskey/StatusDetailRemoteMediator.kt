@@ -11,6 +11,7 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.firstOrNull
 import kotlin.uuid.Uuid
@@ -36,13 +37,13 @@ internal class StatusDetailRemoteMediator(
             )
         }
         if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
-            database.statusDao().get(statusKey, accountKey).firstOrNull()?.let {
+            database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
                 database
                     .pagingTimelineDao()
                     .insertAll(
                         listOf(
                             DbPagingTimeline(
-                                accountKey = accountKey,
+                                accountType = AccountType.Specific(accountKey),
                                 statusKey = statusKey,
                                 pagingKey = pagingKey,
                                 sortId = 0,

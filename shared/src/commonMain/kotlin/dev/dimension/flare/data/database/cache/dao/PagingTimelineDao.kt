@@ -11,17 +11,18 @@ import androidx.room.Transaction
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 
 @Dao
 internal interface PagingTimelineDao {
     @Transaction
     @Query(
-        "SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND (accountKey = :accountKey OR (:accountKey IS NULL AND accountKey IS NULL)) ORDER BY sortId DESC",
+        "SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountType = :accountType ORDER BY sortId DESC",
     )
     fun getPagingSource(
         pagingKey: String,
-        accountKey: MicroBlogKey?,
+        accountType: AccountType,
     ): PagingSource<Int, DbPagingTimelineWithStatus>
 
     @Transaction
@@ -39,32 +40,56 @@ internal interface PagingTimelineDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(timeline: List<DbPagingTimeline>)
 
-//    @Query("SELECT EXISTS(SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND (accountKey = :accountKey OR (:accountKey IS NULL AND accountKey IS NULL)))")
-//    suspend fun exists(
-//        pagingKey: String,
-//        accountKey: MicroBlogKey?,
-//    ): Boolean
-
     @Delete
     suspend fun delete(timeline: List<DbPagingTimeline>)
 
-    @Query("DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountKey = :accountKey")
+    @Query("DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountType = :accountType")
+    suspend fun delete(
+        pagingKey: String,
+        accountType: AccountType,
+    )
+
     suspend fun delete(
         pagingKey: String,
         accountKey: MicroBlogKey,
-    )
+    ) {
+        delete(pagingKey, AccountType.Specific(accountKey))
+    }
 
-    @Query("DELETE FROM DbPagingTimeline WHERE accountKey = :accountKey AND statusKey = :statusKey")
+    /**
+     * Should be used to delete a specific paging timeline by its key.
+     */
+    @Query("DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey")
+    suspend fun delete(pagingKey: String)
+
+    @Query("DELETE FROM DbPagingTimeline WHERE accountType = :accountType AND statusKey = :statusKey")
     suspend fun deleteStatus(
-        accountKey: MicroBlogKey,
+        accountType: AccountType,
         statusKey: MicroBlogKey,
     )
 
-    @Query("SELECT EXISTS(SELECT 1 FROM DbPagingTimeline WHERE accountKey = :account_key AND pagingKey = :paging_key)")
+    suspend fun deleteStatus(
+        statusKey: MicroBlogKey,
+        accountKey: MicroBlogKey,
+    ) = deleteStatus(
+        accountType = AccountType.Specific(accountKey),
+        statusKey = statusKey,
+    )
+
+    @Query("SELECT EXISTS(SELECT 1 FROM DbPagingTimeline WHERE accountType = :accountType AND pagingKey = :paging_key)")
+    suspend fun existsPaging(
+        accountType: AccountType,
+        paging_key: String,
+    ): Boolean
+
     suspend fun existsPaging(
         account_key: MicroBlogKey,
         paging_key: String,
-    ): Boolean
+    ): Boolean =
+        existsPaging(
+            accountType = AccountType.Specific(account_key),
+            paging_key = paging_key,
+        )
 
     @Query("DELETE FROM DbPagingTimeline")
     suspend fun clear()

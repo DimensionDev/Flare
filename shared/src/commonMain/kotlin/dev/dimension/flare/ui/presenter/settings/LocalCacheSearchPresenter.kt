@@ -14,6 +14,7 @@ import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.repository.AccountRepository
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
@@ -71,8 +72,14 @@ public class LocalCacheSearchPresenter :
                             .getStatusHistoryPagingSource(pagingKey = LogStatusHistoryPresenter.PAGING_KEY)
                     }.flow.map {
                         it.map {
-                            val accountKey = it.status.status.data.accountKey
-                            val event = accounts.first { it.accountKey == accountKey }.dataSource as StatusEvent
+                            val event =
+                                if (it.status.status.data.accountType is AccountType.Specific) {
+                                    accounts
+                                        .firstOrNull { account -> account.accountKey == it.status.status.data.accountType.accountKey }
+                                        ?.dataSource as? StatusEvent
+                                } else {
+                                    null
+                                }
                             it.render(event)
                         }
                     }
@@ -86,8 +93,14 @@ public class LocalCacheSearchPresenter :
                     paging.map { pagingData ->
                         pagingData.map {
                             it.map {
-                                val accountKey = it.status.data.accountKey
-                                val event = accounts.first { it.accountKey == accountKey }.dataSource as StatusEvent
+                                val event =
+                                    if (it.status.data.accountType is AccountType.Specific) {
+                                        accounts
+                                            .firstOrNull { account -> account.accountKey == it.status.data.accountType.accountKey }
+                                            ?.dataSource as? StatusEvent
+                                    } else {
+                                        null
+                                    }
                                 it.render(event)
                             }
                         }
@@ -105,7 +118,8 @@ public class LocalCacheSearchPresenter :
                     database.userDao().getUserHistory()
                 }.flow.map {
                     it.map {
-                        it.user.render(it.data.accountKey) as UiUserV2
+                        require(it.data.accountType is AccountType.Specific)
+                        it.user.render(it.data.accountType.accountKey) as UiUserV2
                     }
                 }
             }.collectAsLazyPagingItems().toPagingState()
@@ -123,7 +137,8 @@ public class LocalCacheSearchPresenter :
                         }.flow.map {
                             it.map { user ->
                                 // TODO: potential bug: after logout, there might be no such a platform type for this user
-                                val account = accounts.first { it.platformType == user.platformType }
+                                val account =
+                                    accounts.first { it.platformType == user.platformType }
                                 user.render(account.accountKey) as UiUserV2
                             }
                         }

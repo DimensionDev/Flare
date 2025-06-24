@@ -28,6 +28,7 @@ import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.database.cache.model.StatusContent.BlueskyNotification.Post
 import dev.dimension.flare.data.database.cache.model.StatusContent.BlueskyNotification.UserList
 import dev.dimension.flare.data.database.cache.model.UserContent
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
@@ -249,7 +250,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                         id = items.joinToString("_") { it.uri.atUri } + idSuffix,
                                         host = accountKey.host,
                                     ),
-                                accountKey = accountKey,
+                                accountType = AccountType.Specific(accountKey),
                                 userKey = null,
                                 content = content,
                                 text = null,
@@ -283,7 +284,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                         id = items.joinToString("_") { it.uri.atUri } + "_follow",
                                         host = accountKey.host,
                                     ),
-                                accountKey = accountKey,
+                                accountType = AccountType.Specific(accountKey),
                                 userKey = null,
                                 content = content,
                                 text = null,
@@ -315,7 +316,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                             id = it.uri.atUri,
                                             host = accountKey.host,
                                         ),
-                                    accountKey = accountKey,
+                                    accountType = AccountType.Specific(accountKey),
                                     userKey = user.userKey,
                                     content = content,
                                     text = null,
@@ -356,7 +357,7 @@ private fun ListNotificationsNotification.toDbStatus(accountKey: MicroBlogKey): 
             ),
         userKey = user.userKey,
         content = StatusContent.BlueskyNotification.Normal(this),
-        accountKey = accountKey,
+        accountType = AccountType.Specific(accountKey),
         text = null,
     )
 }
@@ -390,7 +391,7 @@ internal fun List<FeedViewPost>.toDbPagingTimeline(
                                         .toDbUser(accountKey.host)
                                         .userKey,
                                 content = StatusContent.BlueskyReason(data),
-                                accountKey = accountKey,
+                                accountType = AccountType.Specific(accountKey),
                                 text = null,
                             ),
                     )
@@ -409,7 +410,7 @@ internal fun List<FeedViewPost>.toDbPagingTimeline(
                                     ),
                                 userKey = status.user?.userKey,
                                 content = StatusContent.BlueskyReason(data),
-                                accountKey = accountKey,
+                                accountType = AccountType.Specific(accountKey),
                                 text = status.data.text,
                             ),
                     )
@@ -453,7 +454,7 @@ private fun PostView.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithU
                 ),
             content = StatusContent.Bluesky(this),
             userKey = user.userKey,
-            accountKey = accountKey,
+            accountType = AccountType.Specific(accountKey),
             text = parseBlueskyJson(record, accountKey).raw,
         )
     return DbStatusWithUser(
@@ -540,7 +541,7 @@ internal fun ProfileViewDetailed.toDbUser(host: String) =
 private fun ConvoView.toDbDirectMessageTimeline(accountKey: MicroBlogKey): DbDirectMessageTimeline {
     val roomKey = toDbMessageRoom(accountKey.host).roomKey
     return DbDirectMessageTimeline(
-        accountKey = accountKey,
+        accountType = AccountType.Specific(accountKey),
         roomKey = roomKey,
         sortId =
             lastMessage?.toDbMessageItem(roomKey)?.timestamp

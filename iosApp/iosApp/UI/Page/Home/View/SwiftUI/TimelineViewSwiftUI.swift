@@ -59,7 +59,7 @@ struct TimelineViewSwiftUI: View {
                     showFloatingButton: $showFloatingButton
                 )
             case .v1_1_1_2:
-                    TimelineViewSwiftUI1And2(
+                TimelineViewSwiftUI1And2(
                     tab: tab,
                     store: store,
                     scrollPositionID: $scrollPositionID,

@@ -8,6 +8,7 @@ import chat.bsky.convo.GetMessagesResponseMessageUnion
 import chat.bsky.convo.UpdateReadRequest
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.DbMessageItemWithUser
 import dev.dimension.flare.data.network.bluesky.BlueskyService
@@ -64,20 +65,22 @@ internal class DMConversationRemoteMediator(
                     )
                 }
             }.requireResponse()
-        if (loadType == LoadType.REFRESH) {
-            database.messageDao().clearRoomMessage(roomKey = roomKey)
-        }
         cursor = response.cursor
-        Bluesky.saveMessage(
-            accountKey = accountKey,
-            database = database,
-            // TODO: handle deleted messages
-            data =
-                response.messages.filterIsInstance<GetMessagesResponseMessageUnion.MessageView>().map {
-                    it.value
-                },
-            roomKey = roomKey,
-        )
+        database.connect {
+            if (loadType == LoadType.REFRESH) {
+                database.messageDao().clearRoomMessage(roomKey = roomKey)
+            }
+            Bluesky.saveMessage(
+                accountKey = accountKey,
+                database = database,
+                // TODO: handle deleted messages
+                data =
+                    response.messages.filterIsInstance<GetMessagesResponseMessageUnion.MessageView>().map {
+                        it.value
+                    },
+                roomKey = roomKey,
+            )
+        }
         return MediatorResult.Success(
             endOfPaginationReached = cursor == null,
         )

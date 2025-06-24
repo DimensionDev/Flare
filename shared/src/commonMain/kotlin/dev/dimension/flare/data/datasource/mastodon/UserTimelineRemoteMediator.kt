@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Mastodon
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
@@ -44,12 +45,7 @@ internal class UserTimelineRemoteMediator(
                             limit = state.config.pageSize,
                             only_media = onlyMedia,
                             exclude_replies = !withReplies,
-                        ).also {
-                            database.pagingTimelineDao().delete(
-                                pagingKey = pagingKey,
-                                accountKey = accountKey,
-                            )
-                        } + pinned
+                        ) + pinned
                 }
 
                 LoadType.PREPEND -> {
@@ -79,12 +75,20 @@ internal class UserTimelineRemoteMediator(
                 }
             }
 
-        Mastodon.save(
-            database = database,
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            data = response,
-        )
+        database.connect {
+            if (loadType == LoadType.REFRESH) {
+                database.pagingTimelineDao().delete(
+                    pagingKey = pagingKey,
+                    accountKey = accountKey,
+                )
+            }
+            Mastodon.save(
+                database = database,
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                data = response,
+            )
+        }
 
         return MediatorResult.Success(
             endOfPaginationReached = response.isEmpty(),

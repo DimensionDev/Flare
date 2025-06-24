@@ -7,6 +7,7 @@ import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.VVO
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
@@ -40,9 +41,7 @@ internal class HomeTimelineRemoteMediator(
         val response =
             when (loadType) {
                 LoadType.REFRESH -> {
-                    service.getFriendsTimeline().also {
-                        database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                    }
+                    service.getFriendsTimeline()
                 }
 
                 LoadType.PREPEND -> {
@@ -63,12 +62,17 @@ internal class HomeTimelineRemoteMediator(
                 }
             }
 
-        VVO.saveStatus(
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            database = database,
-            statuses = response.data?.statuses.orEmpty(),
-        )
+        database.connect {
+            if (loadType == LoadType.REFRESH) {
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+            }
+            VVO.saveStatus(
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                database = database,
+                statuses = response.data?.statuses.orEmpty(),
+            )
+        }
 
         return MediatorResult.Success(
             endOfPaginationReached = response.data?.nextCursorStr == null,

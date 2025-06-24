@@ -3,10 +3,9 @@ package dev.dimension.flare.data.datasource.rss
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import androidx.room.immediateTransaction
-import androidx.room.useWriterConnection
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.createDbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -107,11 +106,9 @@ internal class RssTimelineRemoteMediator(
                         references = mapOf(),
                     )
                 }
-            cacheDatabase.useWriterConnection {
-                it.immediateTransaction {
-                    cacheDatabase.pagingTimelineDao().delete(pagingKey = pagingKey)
-                    saveToDatabase(cacheDatabase, content)
-                }
+            cacheDatabase.connect {
+                cacheDatabase.pagingTimelineDao().delete(pagingKey = pagingKey)
+                saveToDatabase(cacheDatabase, content)
             }
             MediatorResult.Success(endOfPaginationReached = true)
         } catch (e: Exception) {

@@ -10,6 +10,7 @@ import app.bsky.feed.ThreadViewPostParentUnion
 import app.bsky.feed.ThreadViewPostReplieUnion
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
@@ -96,13 +97,15 @@ internal class StatusDetailRemoteMediator(
                     else -> emptyList()
                 }
             }
-        Bluesky.savePost(
-            accountKey,
-            pagingKey,
-            database,
-            result,
-        ) {
-            -result.indexOf(it).toLong()
+        database.connect {
+            Bluesky.savePost(
+                accountKey,
+                pagingKey,
+                database,
+                result,
+            ) {
+                -result.indexOf(it).toLong()
+            }
         }
         return MediatorResult.Success(
             endOfPaginationReached = true,

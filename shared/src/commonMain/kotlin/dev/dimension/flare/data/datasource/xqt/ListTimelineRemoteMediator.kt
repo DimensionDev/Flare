@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
@@ -47,9 +48,7 @@ internal class ListTimelineRemoteMediator(
                                     listID = listId,
                                     count = state.config.pageSize.toLong(),
                                 ).encodeJson(),
-                        ).also {
-                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                        }
+                        )
                 }
                 LoadType.PREPEND -> {
                     return MediatorResult.Success(
@@ -70,12 +69,17 @@ internal class ListTimelineRemoteMediator(
             }.body()?.data?.list?.tweetsTimeline?.timeline?.instructions.orEmpty()
         cursor = response.cursor()
         val result = response.tweets()
-        XQT.save(
-            database = database,
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            tweet = result,
-        )
+        database.connect {
+            if (loadType == LoadType.REFRESH) {
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+            }
+            XQT.save(
+                database = database,
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                tweet = result,
+            )
+        }
 
         return MediatorResult.Success(
             endOfPaginationReached = response.isEmpty(),

@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.isBottomEnd
@@ -48,19 +49,21 @@ internal class StatusDetailRemoteMediator(
         if (loadType == LoadType.REFRESH) {
             if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
                 database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
-                    database
-                        .pagingTimelineDao()
-                        .insertAll(
-                            listOf(
-                                DbPagingTimeline(
-                                    accountType = AccountType.Specific(accountKey),
-                                    statusKey = statusKey,
-                                    pagingKey = pagingKey,
-                                    sortId = 0,
-                                    _id = Uuid.random().toString(),
+                    database.connect {
+                        database
+                            .pagingTimelineDao()
+                            .insertAll(
+                                listOf(
+                                    DbPagingTimeline(
+                                        accountType = AccountType.Specific(accountKey),
+                                        statusKey = statusKey,
+                                        pagingKey = pagingKey,
+                                        sortId = 0,
+                                        _id = Uuid.random().toString(),
+                                    ),
                                 ),
-                            ),
-                        )
+                            )
+                    }
                 }
             }
         }
@@ -82,12 +85,14 @@ internal class StatusDetailRemoteMediator(
             val tweet = response.tweets()
             val item = tweet.firstOrNull { it.id == statusKey.id }
             if (item != null) {
-                XQT.save(
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                    database = database,
-                    tweet = listOf(item),
-                )
+                database.connect {
+                    XQT.save(
+                        accountKey = accountKey,
+                        pagingKey = pagingKey,
+                        database = database,
+                        tweet = listOf(item),
+                    )
+                }
             }
             return MediatorResult.Success(
                 endOfPaginationReached = true,
@@ -205,14 +210,16 @@ internal class StatusDetailRemoteMediator(
 
             cursor = actualResponse.cursor()
 
-            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+            database.connect {
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
 
-            XQT.save(
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                database = database,
-                tweet = actualTweet,
-            )
+                XQT.save(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                    database = database,
+                    tweet = actualTweet,
+                )
+            }
             return MediatorResult.Success(
                 endOfPaginationReached = actualResponse.isBottomEnd() || actualTweet.size == 1 || cursor == null,
             )

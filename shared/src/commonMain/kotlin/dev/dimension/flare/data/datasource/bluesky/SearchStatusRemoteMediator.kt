@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import app.bsky.feed.SearchPostsQueryParams
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
@@ -53,12 +54,14 @@ internal class SearchStatusRemoteMediator(
             }.requireResponse()
         cursor = response.cursor
 
-        Bluesky.savePost(
-            accountKey,
-            pagingKey,
-            database,
-            response.posts,
-        )
+        database.connect {
+            Bluesky.savePost(
+                accountKey,
+                pagingKey,
+                database,
+                response.posts,
+            )
+        }
 
         return MediatorResult.Success(
             endOfPaginationReached = cursor == null,

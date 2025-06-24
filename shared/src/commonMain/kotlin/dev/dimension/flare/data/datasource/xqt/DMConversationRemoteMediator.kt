@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.model.DbMessageItemWithUser
 import dev.dimension.flare.data.network.xqt.XQTService
@@ -31,8 +32,20 @@ internal class DMConversationRemoteMediator(
         }
         val response = service.getDMConversationTimeline(conversationId = roomKey.id, maxId = cursor)
         cursor = response.conversationTimeline?.minEntryId
+        database.connect {
+            if (loadType == LoadType.REFRESH) {
+                database.messageDao().clearRoomMessage(roomKey = roomKey)
+            }
+            XQT.saveDM(
+                accountKey = accountKey,
+                database = database,
+                propertyEntries = response.conversationTimeline?.propertyEntries,
+                users = response.conversationTimeline?.users,
+                updateRoom = false,
+                conversations = response.conversationTimeline?.conversations,
+            )
+        }
         if (loadType == LoadType.REFRESH) {
-            database.messageDao().clearRoomMessage(roomKey = roomKey)
             clearBadge.invoke(roomKey, response.conversationTimeline?.maxEntryId.orEmpty())
             service.postDMConversationMarkRead(
                 conversationId = roomKey.id,
@@ -40,14 +53,6 @@ internal class DMConversationRemoteMediator(
                 lastReadEventId = response.conversationTimeline?.maxEntryId.orEmpty(),
             )
         }
-        XQT.saveDM(
-            accountKey = accountKey,
-            database = database,
-            propertyEntries = response.conversationTimeline?.propertyEntries,
-            users = response.conversationTimeline?.users,
-            updateRoom = false,
-            conversations = response.conversationTimeline?.conversations,
-        )
         return MediatorResult.Success(
             endOfPaginationReached = response.conversationTimeline?.status == "AT_END",
         )

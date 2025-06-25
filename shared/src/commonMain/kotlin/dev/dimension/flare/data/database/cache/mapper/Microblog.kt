@@ -7,6 +7,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.DbStatusReferenceWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import kotlin.uuid.Uuid
@@ -39,7 +40,7 @@ internal suspend fun saveToDatabase(
 }
 
 internal fun createDbPagingTimelineWithStatus(
-    accountKey: MicroBlogKey,
+    accountType: AccountType,
     pagingKey: String,
     sortId: Long,
     status: DbStatusWithUser,
@@ -48,7 +49,7 @@ internal fun createDbPagingTimelineWithStatus(
     val timeline =
         DbPagingTimeline(
             _id = Uuid.random().toString(),
-            accountKey = accountKey,
+            accountType = accountType,
             statusKey = status.data.statusKey,
             pagingKey = pagingKey,
             sortId = sortId,
@@ -65,6 +66,21 @@ internal fun createDbPagingTimelineWithStatus(
             ),
     )
 }
+
+internal fun createDbPagingTimelineWithStatus(
+    accountKey: MicroBlogKey,
+    pagingKey: String,
+    sortId: Long,
+    status: DbStatusWithUser,
+    references: Map<ReferenceType, DbStatusWithUser>,
+): DbPagingTimelineWithStatus =
+    createDbPagingTimelineWithStatus(
+        accountType = AccountType.Specific(accountKey),
+        pagingKey = pagingKey,
+        sortId = sortId,
+        status = status,
+        references = references,
+    )
 
 private fun DbStatusWithUser.toDbStatusReference(
     statusKey: MicroBlogKey,

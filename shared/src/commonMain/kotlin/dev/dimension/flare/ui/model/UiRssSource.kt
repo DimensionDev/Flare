@@ -12,4 +12,8 @@ public data class UiRssSource(
     val host: String by lazy {
         Url(url).host
     }
+    val favIcon: String by lazy {
+        val url = Url(url)
+        "https://${url.host}/favicon.ico"
+    }
 }

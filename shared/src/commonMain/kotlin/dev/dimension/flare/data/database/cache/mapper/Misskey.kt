@@ -15,6 +15,7 @@ import dev.dimension.flare.data.network.misskey.api.model.Note
 import dev.dimension.flare.data.network.misskey.api.model.Notification
 import dev.dimension.flare.data.network.misskey.api.model.User
 import dev.dimension.flare.data.network.misskey.api.model.UserLite
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
@@ -142,7 +143,7 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
             ),
         userKey = user?.userKey,
         content = StatusContent.MisskeyNotification(this),
-        accountKey = accountKey,
+        accountType = AccountType.Specific(accountKey),
         text = null,
     )
 }
@@ -189,7 +190,7 @@ private fun Note.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser 
                 ),
             content = StatusContent.Misskey(this),
             userKey = user.userKey,
-            accountKey = accountKey,
+            accountType = AccountType.Specific(accountKey),
             text = text,
         )
     return DbStatusWithUser(

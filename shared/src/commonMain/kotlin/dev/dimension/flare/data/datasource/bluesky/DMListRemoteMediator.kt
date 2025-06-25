@@ -6,9 +6,11 @@ import androidx.paging.PagingState
 import chat.bsky.convo.ListConvosQueryParams
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.DbDirectMessageTimelineWithRoom
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
@@ -51,15 +53,17 @@ internal class DMListRemoteMediator(
                         ).requireResponse()
                 }
             }
-        if (loadType == LoadType.REFRESH) {
-            database.messageDao().clearMessageTimeline(accountKey = accountKey)
-        }
         cursor = response.cursor
-        Bluesky.saveDM(
-            accountKey = accountKey,
-            database = database,
-            data = response.convos,
-        )
+        database.connect {
+            if (loadType == LoadType.REFRESH) {
+                database.messageDao().clearMessageTimeline(AccountType.Specific(accountKey))
+            }
+            Bluesky.saveDM(
+                accountKey = accountKey,
+                database = database,
+                data = response.convos,
+            )
+        }
         return MediatorResult.Success(
             endOfPaginationReached = response.cursor == null,
         )

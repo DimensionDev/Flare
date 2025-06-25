@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.VVO
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
@@ -41,9 +42,7 @@ internal class StatusCommentRemoteMediator(
                             id = statusKey.id,
                             mid = statusKey.id,
                             maxId = null,
-                        ).also {
-                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                        }
+                        )
                 }
                 LoadType.PREPEND -> {
                     return MediatorResult.Success(
@@ -64,16 +63,21 @@ internal class StatusCommentRemoteMediator(
         maxId = response.data?.maxID?.takeIf { it != 0L }
         val status =
             response.data?.data.orEmpty()
-        VVO.saveComment(
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            database = database,
-            statuses = response.data?.data.orEmpty(),
-            sortIdProvider = {
-                val index = status.indexOf(it)
-                -(index + page * state.config.pageSize).toLong()
-            },
-        )
+        database.connect {
+            if (loadType == LoadType.REFRESH) {
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+            }
+            VVO.saveComment(
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                database = database,
+                statuses = response.data?.data.orEmpty(),
+                sortIdProvider = {
+                    val index = status.indexOf(it)
+                    -(index + page * state.config.pageSize).toLong()
+                },
+            )
+        }
         return MediatorResult.Success(
             endOfPaginationReached = maxId == null,
         )

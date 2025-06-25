@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
@@ -32,9 +33,7 @@ internal class MentionRemoteMediator(
                     service
                         .getNotificationsMentions(
                             count = state.config.pageSize,
-                        ).also {
-                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                        }
+                        )
                 }
                 LoadType.PREPEND -> {
                     return MediatorResult.Success(
@@ -52,12 +51,17 @@ internal class MentionRemoteMediator(
         val tweets = response.tweets()
         cursor = response.cursor()
 
-        XQT.save(
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            database = database,
-            tweet = tweets,
-        )
+        database.connect {
+            if (loadType == LoadType.REFRESH) {
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+            }
+            XQT.save(
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                database = database,
+                tweet = tweets,
+            )
+        }
 
         return MediatorResult.Success(
             endOfPaginationReached = tweets.isEmpty(),

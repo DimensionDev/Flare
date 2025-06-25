@@ -11,6 +11,7 @@ import app.bsky.notification.ListNotificationsReason
 import app.bsky.notification.UpdateSeenRequest
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
@@ -99,13 +100,15 @@ internal class NotificationRemoteMediator(
                 .associateBy { it.uri }
                 .toImmutableMap()
         cursor = response.cursor
-        Bluesky.saveNotification(
-            accountKey,
-            pagingKey,
-            database,
-            response.notifications,
-            references = references,
-        )
+        database.connect {
+            Bluesky.saveNotification(
+                accountKey,
+                pagingKey,
+                database,
+                response.notifications,
+                references = references,
+            )
+        }
 
         return MediatorResult.Success(
             endOfPaginationReached = cursor == null,

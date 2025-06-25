@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.isBottomEnd
@@ -18,6 +19,7 @@ import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
 import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
@@ -46,20 +48,22 @@ internal class StatusDetailRemoteMediator(
     ): MediatorResult {
         if (loadType == LoadType.REFRESH) {
             if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
-                database.statusDao().get(statusKey, accountKey).firstOrNull()?.let {
-                    database
-                        .pagingTimelineDao()
-                        .insertAll(
-                            listOf(
-                                DbPagingTimeline(
-                                    accountKey = accountKey,
-                                    statusKey = statusKey,
-                                    pagingKey = pagingKey,
-                                    sortId = 0,
-                                    _id = Uuid.random().toString(),
+                database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
+                    database.connect {
+                        database
+                            .pagingTimelineDao()
+                            .insertAll(
+                                listOf(
+                                    DbPagingTimeline(
+                                        accountType = AccountType.Specific(accountKey),
+                                        statusKey = statusKey,
+                                        pagingKey = pagingKey,
+                                        sortId = 0,
+                                        _id = Uuid.random().toString(),
+                                    ),
                                 ),
-                            ),
-                        )
+                            )
+                    }
                 }
             }
         }
@@ -81,12 +85,14 @@ internal class StatusDetailRemoteMediator(
             val tweet = response.tweets()
             val item = tweet.firstOrNull { it.id == statusKey.id }
             if (item != null) {
-                XQT.save(
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                    database = database,
-                    tweet = listOf(item),
-                )
+                database.connect {
+                    XQT.save(
+                        accountKey = accountKey,
+                        pagingKey = pagingKey,
+                        database = database,
+                        tweet = listOf(item),
+                    )
+                }
             }
             return MediatorResult.Success(
                 endOfPaginationReached = true,
@@ -97,7 +103,7 @@ internal class StatusDetailRemoteMediator(
                     val result =
                         database
                             .statusDao()
-                            .get(statusKey, accountKey)
+                            .get(statusKey, AccountType.Specific(accountKey))
                             .firstOrNull()
                             ?.content
                             ?.let { it as? StatusContent.XQT }
@@ -204,14 +210,16 @@ internal class StatusDetailRemoteMediator(
 
             cursor = actualResponse.cursor()
 
-            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+            database.connect {
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
 
-            XQT.save(
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                database = database,
-                tweet = actualTweet,
-            )
+                XQT.save(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                    database = database,
+                    tweet = actualTweet,
+                )
+            }
             return MediatorResult.Success(
                 endOfPaginationReached = actualResponse.isBottomEnd() || actualTweet.size == 1 || cursor == null,
             )

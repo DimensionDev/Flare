@@ -4,6 +4,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.Flow
 
 internal sealed interface StatusEvent {
+    val accountKey: MicroBlogKey
+
     interface Mastodon : StatusEvent {
         fun reblog(
             statusKey: MicroBlogKey,

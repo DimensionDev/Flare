@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Misskey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
@@ -51,15 +52,17 @@ internal class LocalTimelineRemoteMediator(
             } ?: return MediatorResult.Success(
                 endOfPaginationReached = true,
             )
-        if (loadType == LoadType.REFRESH) {
-            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+        database.connect {
+            if (loadType == LoadType.REFRESH) {
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+            }
+            Misskey.save(
+                database = database,
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                data = response,
+            )
         }
-        Misskey.save(
-            database = database,
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            data = response,
-        )
         return MediatorResult.Success(
             endOfPaginationReached = response.isEmpty(),
         )

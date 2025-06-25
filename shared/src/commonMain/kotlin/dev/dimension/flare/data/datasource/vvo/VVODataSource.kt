@@ -31,6 +31,7 @@ import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiAccount
@@ -78,10 +79,9 @@ internal class VVODataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 HomeTimelineRemoteMediator(
                     service,
@@ -104,10 +104,9 @@ internal class VVODataSource(
                 timelinePager(
                     pageSize = pageSize,
                     pagingKey = pagingKey,
-                    accountKey = accountKey,
                     database = database,
-                    filterFlow = localFilterRepository.getFlow(forTimeline = true),
                     scope = scope,
+                    filterFlow = localFilterRepository.getFlow(forTimeline = true),
                     mediator =
                         MentionRemoteMediator(
                             service,
@@ -237,10 +236,9 @@ internal class VVODataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 UserTimelineRemoteMediator(
                     userKey = userKey,
@@ -296,9 +294,9 @@ internal class VVODataSource(
             cacheSource = {
                 database
                     .statusDao()
-                    .get(statusKey, accountKey)
+                    .get(statusKey, accountType = AccountType.Specific(accountKey))
                     .distinctUntilChanged()
-                    .mapNotNull { it?.content?.render(accountKey, this) }
+                    .mapNotNull { it?.content?.render(this) }
             },
         )
     }
@@ -326,9 +324,9 @@ internal class VVODataSource(
             cacheSource = {
                 database
                     .statusDao()
-                    .get(statusKey, accountKey)
+                    .get(statusKey, accountType = AccountType.Specific(accountKey))
                     .distinctUntilChanged()
-                    .mapNotNull { it?.content?.render(accountKey, event = this) }
+                    .mapNotNull { it?.content?.render(event = this) }
             },
         )
     }
@@ -418,10 +416,9 @@ internal class VVODataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forSearch = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forSearch = true),
             mediator =
                 SearchStatusRemoteMediator(
                     service,
@@ -459,10 +456,9 @@ internal class VVODataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 DiscoverStatusRemoteMediator(
                     service,
@@ -570,10 +566,9 @@ internal class VVODataSource(
         return timelinePager(
             pageSize = 20,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 StatusCommentRemoteMediator(
                     service = service,
@@ -593,10 +588,9 @@ internal class VVODataSource(
         return timelinePager(
             pageSize = 20,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 StatusRepostRemoteMediator(
                     service = service,
@@ -616,10 +610,9 @@ internal class VVODataSource(
         return timelinePager(
             pageSize = 20,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 CommentChildRemoteMediator(
                     service = service,

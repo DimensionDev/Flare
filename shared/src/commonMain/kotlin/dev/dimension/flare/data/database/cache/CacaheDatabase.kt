@@ -5,8 +5,10 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
+import androidx.room.immediateTransaction
+import androidx.room.useWriterConnection
 
-internal const val CACHE_DATABASE_VERSION = 18
+internal const val CACHE_DATABASE_VERSION = 19
 
 @Database(
     entities = [
@@ -28,6 +30,7 @@ internal const val CACHE_DATABASE_VERSION = 18
 @TypeConverters(
     dev.dimension.flare.data.database.adapter.MicroBlogKeyConverter::class,
     dev.dimension.flare.data.database.adapter.PlatformTypeConverter::class,
+    dev.dimension.flare.data.database.adapter.AccountTypeConverter::class,
     dev.dimension.flare.data.database.cache.model.EmojiContentConverter::class,
     dev.dimension.flare.data.database.cache.model.StatusConverter::class,
     dev.dimension.flare.data.database.cache.model.UserContentConverters::class,
@@ -52,4 +55,12 @@ internal abstract class CacheDatabase : RoomDatabase() {
 @Suppress("NO_ACTUAL_FOR_EXPECT")
 internal expect object CacheDatabaseConstructor : RoomDatabaseConstructor<CacheDatabase> {
     override fun initialize(): CacheDatabase
+}
+
+internal suspend fun RoomDatabase.connect(block: suspend () -> Unit) {
+    useWriterConnection {
+        it.immediateTransaction {
+            block.invoke()
+        }
+    }
 }

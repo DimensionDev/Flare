@@ -781,6 +781,21 @@ public object Bluesky {
     }
 }
 
+public data class RssTimelineTabItem(
+    val feedUrl: String,
+    override val metaData: TabMetaData,
+) : TimelineTabItem {
+    // This is a special case for RSS feeds, which are not tied to a specific account.
+    override val account: AccountType = AccountType.Guest
+    override val key: String = "rss_$feedUrl"
+
+    override fun createPresenter(): TimelinePresenter =
+        dev.dimension.flare.ui.presenter.home.rss
+            .RssTimelinePresenter(feedUrl)
+
+    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+}
+
 @Serializable
 public data class ProfileTabItem(
     override val account: AccountType,

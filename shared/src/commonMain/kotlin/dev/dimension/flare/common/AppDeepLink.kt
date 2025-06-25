@@ -219,4 +219,10 @@ public object AppDeepLink {
             id: String,
         ): String = "$APPSCHEMA://Podcast/${accountKey.toString().encodeURLPathPart()}/${id.encodeURLPathPart()}"
     }
+
+    public object RSS {
+        public const val ROUTE: String = "$APPSCHEMA://RSS/{feedUrl}"
+
+        public operator fun invoke(feedUrl: String): String = "$APPSCHEMA://RSS/${feedUrl.encodeURLPathPart()}"
+    }
 }

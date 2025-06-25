@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import app.bsky.feed.GetListFeedQueryParams
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
@@ -58,12 +59,14 @@ internal class ListTimelineRemoteMediator(
             )
 
         cursor = response.cursor
-        Bluesky.saveFeed(
-            accountKey,
-            pagingKey,
-            database,
-            response.feed,
-        )
+        database.connect {
+            Bluesky.saveFeed(
+                accountKey,
+                pagingKey,
+                database,
+                response.feed,
+            )
+        }
 
         return MediatorResult.Success(
             endOfPaginationReached = cursor == null,

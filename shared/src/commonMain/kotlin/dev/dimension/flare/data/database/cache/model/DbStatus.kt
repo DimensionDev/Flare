@@ -6,19 +6,20 @@ import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 
 @Entity(
-    indices = [Index(value = ["statusKey", "accountKey"], unique = true)],
+    indices = [Index(value = ["statusKey", "accountType"], unique = true)],
 )
 internal data class DbStatus(
     val statusKey: MicroBlogKey,
-    val accountKey: MicroBlogKey,
+    val accountType: AccountType,
     val userKey: MicroBlogKey?,
     val content: StatusContent,
     val text: String?, // For Searching
     @PrimaryKey
-    val id: String = "${accountKey}_$statusKey",
+    val id: String = "${accountType}_$statusKey",
 )
 
 internal class StatusContentConverters {

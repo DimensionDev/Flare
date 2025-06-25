@@ -12,7 +12,7 @@ import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.collections.immutable.ImmutableList
@@ -33,7 +33,6 @@ import kotlin.coroutines.CoroutineContext
 internal fun StatusEvent.timelinePager(
     pageSize: Int,
     pagingKey: String,
-    accountKey: MicroBlogKey,
     database: CacheDatabase,
     scope: CoroutineScope,
     filterFlow: Flow<List<String>>,
@@ -45,7 +44,7 @@ internal fun StatusEvent.timelinePager(
             remoteMediator = mediator,
             pagingSourceFactory = {
                 database.pagingTimelineDao().getPagingSource(
-                    accountKey = accountKey,
+                    accountType = AccountType.Specific(accountKey),
                     pagingKey = pagingKey,
                 )
             },

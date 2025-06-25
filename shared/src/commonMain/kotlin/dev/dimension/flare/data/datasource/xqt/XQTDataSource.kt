@@ -72,6 +72,7 @@ import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
@@ -140,10 +141,9 @@ internal class XQTDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 HomeTimelineRemoteMediator(
                     service,
@@ -161,10 +161,9 @@ internal class XQTDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 FeaturedTimelineRemoteMediator(
                     service,
@@ -182,10 +181,9 @@ internal class XQTDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 BookmarkTimelineRemoteMediator(
                     service,
@@ -219,10 +217,9 @@ internal class XQTDataSource(
             return timelinePager(
                 pageSize = pageSize,
                 pagingKey = pagingKey,
-                accountKey = accountKey,
                 database = database,
-                filterFlow = localFilterRepository.getFlow(forNotification = true),
                 scope = scope,
+                filterFlow = localFilterRepository.getFlow(forNotification = true),
                 mediator =
                     MentionRemoteMediator(
                         service,
@@ -330,10 +327,9 @@ internal class XQTDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 if (mediaOnly) {
                     UserMediaTimelineRemoteMediator(
@@ -363,10 +359,9 @@ internal class XQTDataSource(
         timelinePager(
             pageSize = 1,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey = statusKey,
@@ -412,9 +407,9 @@ internal class XQTDataSource(
             cacheSource = {
                 database
                     .statusDao()
-                    .get(statusKey, accountKey)
+                    .get(statusKey, accountType = AccountType.Specific(accountKey))
                     .distinctUntilChanged()
-                    .mapNotNull { it?.content?.render(accountKey, this) }
+                    .mapNotNull { it?.content?.render(this) }
             },
         )
     }
@@ -594,7 +589,7 @@ internal class XQTDataSource(
             // delete status from cache
             database.statusDao().delete(
                 statusKey = statusKey,
-                accountKey = accountKey,
+                accountType = AccountType.Specific(accountKey),
             )
             database.pagingTimelineDao().deleteStatus(
                 accountKey = accountKey,
@@ -612,10 +607,9 @@ internal class XQTDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = pagingKey,
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forSearch = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forSearch = true),
             mediator =
                 SearchStatusPagingSource(
                     service,
@@ -1171,10 +1165,9 @@ internal class XQTDataSource(
                     timelinePager(
                         pageSize = pagingSize,
                         pagingKey = "user_timeline_replies_$userKey",
-                        accountKey = accountKey,
                         database = database,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
                         scope = scope,
+                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
                         mediator =
                             UserRepliesTimelineRemoteMediator(
                                 service = service,
@@ -1193,10 +1186,9 @@ internal class XQTDataSource(
                         timelinePager(
                             pageSize = pagingSize,
                             pagingKey = "user_timeline_likes_$userKey",
-                            accountKey = accountKey,
                             database = database,
-                            filterFlow = localFilterRepository.getFlow(forTimeline = true),
                             scope = scope,
+                            filterFlow = localFilterRepository.getFlow(forTimeline = true),
                             mediator =
                                 UserLikesTimelineRemoteMediator(
                                     service = service,
@@ -1572,10 +1564,9 @@ internal class XQTDataSource(
         timelinePager(
             pageSize = pageSize,
             pagingKey = "list_${accountKey}_$listId",
-            accountKey = accountKey,
             database = database,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             scope = scope,
+            filterFlow = localFilterRepository.getFlow(forTimeline = true),
             mediator =
                 ListTimelineRemoteMediator(
                     listId,
@@ -1597,7 +1588,7 @@ internal class XQTDataSource(
                 ),
             pagingSourceFactory = {
                 database.messageDao().getRoomPagingSource(
-                    accountKey = accountKey,
+                    accountType = AccountType.Specific(accountKey),
                 )
             },
         ).flow
@@ -1752,7 +1743,7 @@ internal class XQTDataSource(
                     .messageDao()
                     .getRoomInfo(
                         roomKey = roomKey,
-                        accountKey = accountKey,
+                        accountType = AccountType.Specific(accountKey),
                     ).distinctUntilChanged()
                     .mapNotNull {
                         it?.render(
@@ -1810,7 +1801,7 @@ internal class XQTDataSource(
                     conversationId = roomKey.id,
                 )
             }.onSuccess {
-                database.messageDao().deleteRoomTimeline(roomKey, accountKey = accountKey)
+                database.messageDao().deleteRoomTimeline(roomKey, accountType = AccountType.Specific(accountKey))
                 database.messageDao().deleteRoom(roomKey)
                 database.messageDao().deleteRoomReference(roomKey)
                 database.messageDao().deleteRoomMessages(roomKey)

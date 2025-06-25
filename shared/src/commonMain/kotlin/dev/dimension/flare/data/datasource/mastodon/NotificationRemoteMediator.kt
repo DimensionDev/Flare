@@ -5,6 +5,7 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Mastodon
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
@@ -30,10 +31,9 @@ internal class NotificationRemoteMediator(
                     service
                         .notification(
                             limit = state.config.pageSize,
-                        ).also {
-                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                            it.firstOrNull()?.id?.let { it1 ->
-                                service.updateMarker(MarkerUpdate(notifications = UpdateContent(it1)))
+                        ).also { notifications ->
+                            notifications.firstOrNull()?.id?.let { id ->
+                                service.updateMarker(MarkerUpdate(notifications = UpdateContent(id)))
                                 onClearMarker.invoke()
                             }
                         }
@@ -60,12 +60,17 @@ internal class NotificationRemoteMediator(
                 }
             }
 
-        Mastodon.save(
-            database = database,
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            data = response,
-        )
+        database.connect {
+            if (loadType == LoadType.REFRESH) {
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+            }
+            Mastodon.save(
+                database = database,
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                data = response,
+            )
+        }
 
         return MediatorResult.Success(
             endOfPaginationReached = response.isEmpty(),

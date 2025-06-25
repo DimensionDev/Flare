@@ -11,6 +11,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.Emoji
 import dev.dimension.flare.data.network.mastodon.api.model.Notification
 import dev.dimension.flare.data.network.mastodon.api.model.Status
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
@@ -88,7 +89,7 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
             ),
         userKey = user.userKey,
         content = StatusContent.MastodonNotification(this),
-        accountKey = accountKey,
+        accountType = AccountType.Specific(accountKey),
         text = null,
     )
 }
@@ -131,7 +132,7 @@ private fun Status.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUse
                 dev.dimension.flare.data.database.cache.model.StatusContent
                     .Mastodon(this),
             userKey = user.userKey,
-            accountKey = accountKey,
+            accountType = AccountType.Specific(accountKey),
             text =
                 buildString {
                     if (spoilerText != null) {

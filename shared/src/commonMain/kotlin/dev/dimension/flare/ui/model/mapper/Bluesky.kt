@@ -277,7 +277,7 @@ internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
             )
         }
         is StatusContent.BlueskyNotification.Post ->
-            references[ReferenceType.Notification]?.render(accountKey, event) ?: post.render(accountKey, event = event)
+            references[ReferenceType.Notification]?.render(event) ?: post.render(accountKey, event = event)
         is StatusContent.BlueskyNotification.UserList -> {
             val reason = this.data.firstOrNull()?.reason
             val uri =

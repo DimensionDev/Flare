@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.tweets
@@ -40,9 +41,7 @@ internal class HomeTimelineRemoteMediator(
                                 HomeTimelineRequest(
                                     count = state.config.pageSize.toLong(),
                                 ).encodeJson(),
-                        ).also {
-                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                        }
+                        )
                 }
 
                 LoadType.PREPEND -> {
@@ -71,12 +70,17 @@ internal class HomeTimelineRemoteMediator(
         cursor = instructions.cursor()
         val tweet = instructions.tweets()
 
-        XQT.save(
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            database = database,
-            tweet = tweet,
-        )
+        database.connect {
+            if (loadType == LoadType.REFRESH) {
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+            }
+            XQT.save(
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                database = database,
+                tweet = tweet,
+            )
+        }
         return MediatorResult.Success(
             endOfPaginationReached = tweet.isEmpty(),
         )
@@ -106,9 +110,7 @@ internal class FeaturedTimelineRemoteMediator(
                                 HomeTimelineRequest(
                                     count = state.config.pageSize.toLong(),
                                 ).encodeJson(),
-                        ).also {
-                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                        }
+                        )
                 }
 
                 LoadType.PREPEND -> {
@@ -136,12 +138,17 @@ internal class FeaturedTimelineRemoteMediator(
                 .orEmpty()
         cursor = instructions.cursor()
         val tweet = instructions.tweets()
-        XQT.save(
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            database = database,
-            tweet = tweet,
-        )
+        database.connect {
+            if (loadType == LoadType.REFRESH) {
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+            }
+            XQT.save(
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                database = database,
+                tweet = tweet,
+            )
+        }
         return MediatorResult.Success(
             endOfPaginationReached = tweet.isEmpty(),
         )
@@ -171,9 +178,7 @@ internal class BookmarkTimelineRemoteMediator(
                                 HomeTimelineRequest(
                                     count = state.config.pageSize.toLong(),
                                 ).encodeJson(),
-                        ).also {
-                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                        }
+                        )
                 }
 
                 LoadType.PREPEND -> {
@@ -201,12 +206,17 @@ internal class BookmarkTimelineRemoteMediator(
                 .orEmpty()
         cursor = instructions.cursor()
         val tweet = instructions.tweets()
-        XQT.save(
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            database = database,
-            tweet = tweet,
-        )
+        database.connect {
+            if (loadType == LoadType.REFRESH) {
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+            }
+            XQT.save(
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                database = database,
+                tweet = tweet,
+            )
+        }
         return MediatorResult.Success(
             endOfPaginationReached = tweet.isEmpty(),
         )

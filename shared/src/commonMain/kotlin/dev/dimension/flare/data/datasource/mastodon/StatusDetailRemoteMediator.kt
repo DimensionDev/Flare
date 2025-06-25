@@ -5,10 +5,12 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Mastodon
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.firstOrNull
 import kotlin.uuid.Uuid
@@ -31,21 +33,25 @@ internal class StatusDetailRemoteMediator(
                 endOfPaginationReached = true,
             )
         }
-        if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
-            database.statusDao().get(statusKey, accountKey).firstOrNull()?.let {
-                database
-                    .pagingTimelineDao()
-                    .insertAll(
-                        listOf(
-                            DbPagingTimeline(
-                                accountKey = accountKey,
-                                statusKey = statusKey,
-                                pagingKey = pagingKey,
-                                sortId = 0,
-                                _id = Uuid.random().toString(),
+        val exists = database.pagingTimelineDao().existsPaging(accountKey, pagingKey)
+        if (!exists) {
+            val status = database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()
+            status?.let {
+                database.connect {
+                    database
+                        .pagingTimelineDao()
+                        .insertAll(
+                            listOf(
+                                DbPagingTimeline(
+                                    accountType = AccountType.Specific(accountKey),
+                                    statusKey = statusKey,
+                                    pagingKey = pagingKey,
+                                    sortId = 0,
+                                    _id = Uuid.random().toString(),
+                                ),
                             ),
-                        ),
-                    )
+                        )
+                }
             }
         }
         val result =
@@ -67,13 +73,15 @@ internal class StatusDetailRemoteMediator(
                 context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()
             }
 
-        Mastodon.save(
-            database = database,
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            data = result,
-        ) {
-            -result.indexOf(it).toLong()
+        database.connect {
+            Mastodon.save(
+                database = database,
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                data = result,
+            ) {
+                -result.indexOf(it).toLong()
+            }
         }
 
         return MediatorResult.Success(

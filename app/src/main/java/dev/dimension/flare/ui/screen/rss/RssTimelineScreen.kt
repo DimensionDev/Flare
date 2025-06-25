@@ -27,6 +27,8 @@ import moe.tlaster.precompose.molecule.producePresenter
 @Composable
 internal fun RssTimelineScreen(
     id: Int,
+    url: String,
+    title: String?,
     onBack: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()

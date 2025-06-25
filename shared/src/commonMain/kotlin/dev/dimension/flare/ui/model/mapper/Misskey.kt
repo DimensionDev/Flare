@@ -34,7 +34,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import moe.tlaster.mfm.parser.MFMParser
 import moe.tlaster.mfm.parser.tree.BoldNode
 import moe.tlaster.mfm.parser.tree.CashNode

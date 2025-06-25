@@ -1,13 +1,14 @@
 package dev.dimension.flare.data.network.vvo.model
 
 import dev.dimension.flare.common.JSON
-import kotlinx.datetime.Instant
 import kotlinx.datetime.UtcOffset
-import kotlinx.datetime.format.DateTimeComponents.Companion.Format
+import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.format.char
+import kotlinx.datetime.parse
+import kotlin.time.Instant
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -491,15 +492,16 @@ internal object VVODateSerializer : KSerializer<Instant> {
             Instant.parse(
                 str,
                 format =
-                    Format {
+                    DateTimeComponents.Format {
                         // EEE MMM dd HH:mm:ss Z yyyy
                         dayOfWeek(DayOfWeekNames.ENGLISH_ABBREVIATED)
                         char(' ')
                         monthName(MonthNames.ENGLISH_ABBREVIATED)
                         char(' ')
-                        dayOfMonth(Padding.NONE)
+                        day(padding = Padding.NONE)
                         char(' ')
                         hour()
+
                         char(':')
                         minute()
                         char(':')

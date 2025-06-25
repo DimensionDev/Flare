@@ -34,6 +34,7 @@ import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.mapper.parseBlueskyJson
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.datetime.toStdlibInstant
 import sh.christian.ozone.api.AtUri
 
 internal object Bluesky {
@@ -82,11 +83,11 @@ internal object Bluesky {
         sortIdProvider: (FeedViewPost) -> Long = {
             val reason = it.reason
             if (reason is FeedViewPostReasonUnion.ReasonRepost) {
-                reason.value.indexedAt.toEpochMilliseconds()
+                reason.value.indexedAt.toStdlibInstant().toEpochMilliseconds()
             } else if (reason is FeedViewPostReasonUnion.ReasonPin) {
                 Long.MAX_VALUE
             } else {
-                it.post.indexedAt.toEpochMilliseconds()
+                it.post.indexedAt.toStdlibInstant().toEpochMilliseconds()
             }
         },
     ) {
@@ -108,7 +109,7 @@ internal object Bluesky {
         pagingKey: String,
         database: CacheDatabase,
         data: List<PostView>,
-        sortIdProvider: (PostView) -> Long = { it.indexedAt.toEpochMilliseconds() },
+        sortIdProvider: (PostView) -> Long = { it.indexedAt.toStdlibInstant().toEpochMilliseconds() },
     ) {
         save(database, data.toDb(accountKey, pagingKey, sortIdProvider))
     }
@@ -207,7 +208,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                     createDbPagingTimelineWithStatus(
                         accountKey = accountKey,
                         pagingKey = pagingKey,
-                        sortId = it.indexedAt.toEpochMilliseconds(),
+                        sortId = it.indexedAt.toStdlibInstant().toEpochMilliseconds(),
                         status = it.toDbStatusWithUser(accountKey),
                         references = mapOf(),
                     )
@@ -259,7 +260,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                     createDbPagingTimelineWithStatus(
                         accountKey = accountKey,
                         pagingKey = pagingKey,
-                        sortId = items.first().indexedAt.toEpochMilliseconds(),
+                        sortId = items.first().indexedAt.toStdlibInstant().toEpochMilliseconds(),
                         status = data,
                         references =
                             listOfNotNull(
@@ -293,7 +294,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                     createDbPagingTimelineWithStatus(
                         accountKey = accountKey,
                         pagingKey = pagingKey,
-                        sortId = items.first().indexedAt.toEpochMilliseconds(),
+                        sortId = items.first().indexedAt.toStdlibInstant().toEpochMilliseconds(),
                         status = data,
                         references = mapOf(),
                     ),
@@ -324,7 +325,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                     createDbPagingTimelineWithStatus(
                         accountKey = accountKey,
                         pagingKey = pagingKey,
-                        sortId = it.indexedAt.toEpochMilliseconds(),
+                        sortId = it.indexedAt.toStdlibInstant().toEpochMilliseconds(),
                         status = data,
                         references =
                             mapOf(
@@ -584,7 +585,7 @@ private fun MessageView.toDbMessageItem(roomKey: MicroBlogKey) =
         messageKey = MicroBlogKey(id = id, host = roomKey.host),
         roomKey = roomKey,
         userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host),
-        timestamp = sentAt.toEpochMilliseconds(),
+        timestamp = sentAt.toStdlibInstant().toEpochMilliseconds(),
         content = MessageContent.Bluesky.Message(this),
         showSender = false,
     )
@@ -597,7 +598,7 @@ private fun ConvoViewLastMessageUnion.DeletedMessageView.toDbMessageItem(roomKey
             messageKey = MicroBlogKey(id = id, host = roomKey.host),
             roomKey = roomKey,
             userKey = MicroBlogKey(id = sender.did.did, host = roomKey.host),
-            timestamp = sentAt.toEpochMilliseconds(),
+            timestamp = sentAt.toStdlibInstant().toEpochMilliseconds(),
             content = MessageContent.Bluesky.Deleted(this),
             showSender = false,
         )

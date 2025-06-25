@@ -10,7 +10,7 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.AdminAdListRequest
 import dev.dimension.flare.model.MicroBlogKey
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 @OptIn(ExperimentalPagingApi::class)
 internal class FavouriteTimelineRemoteMediator(

@@ -1,6 +1,6 @@
 package dev.dimension.flare.data.network.mastodon.api.model
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

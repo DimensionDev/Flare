@@ -1,7 +1,7 @@
 package dev.dimension.flare.ui.render
 
-import kotlinx.datetime.Instant
-import kotlinx.datetime.toNSDate
+import kotlin.time.Instant
+import kotlin.time.toNSDate
 import platform.Foundation.NSDate
 
 public actual typealias UiDateTime = NSDate

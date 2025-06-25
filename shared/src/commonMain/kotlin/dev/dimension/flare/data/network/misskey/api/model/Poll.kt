@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.network.misskey.api.model
 
-import kotlinx.datetime.Instant
+import dev.dimension.flare.common.InstantSerializer
+import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -9,6 +10,7 @@ internal data class Poll(
     @SerialName("choices")
     val choices: List<Choice>,
     @SerialName("expiresAt")
+    @Serializable(with = InstantSerializer::class)
     val expiresAt: Instant? = null,
     @SerialName("multiple")
     val multiple: Boolean,

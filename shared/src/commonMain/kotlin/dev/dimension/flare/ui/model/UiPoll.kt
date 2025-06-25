@@ -5,8 +5,8 @@ import dev.dimension.flare.ui.humanizer.humanizePercentage
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Immutable
 public data class UiPoll internal constructor(

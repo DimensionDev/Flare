@@ -49,11 +49,11 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentMap
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import moe.tlaster.twitter.parser.TwitterParser
 import moe.tlaster.twitter.parser.UrlToken
 import kotlin.uuid.Uuid
@@ -738,7 +738,7 @@ internal fun GetProfileSpotlightsQuery200Response.toUi(muting: Boolean): UiRelat
 
 private fun String.replaceWithOriginImageUrl() = this.replace("_normal.", ".")
 
-private fun parseCustomDateTime(dateTimeStr: String): Instant? {
+private fun parseCustomDateTime(dateTimeStr: String): kotlin.time.Instant? {
     val months =
         mapOf(
             "Jan" to 1,

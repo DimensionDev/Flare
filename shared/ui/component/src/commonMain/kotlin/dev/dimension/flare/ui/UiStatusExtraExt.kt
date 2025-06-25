@@ -7,10 +7,10 @@ import dev.dimension.flare.ui.component.date_format_full
 import dev.dimension.flare.ui.component.date_format_month_day
 import dev.dimension.flare.ui.component.date_format_year_month_day
 import dev.dimension.flare.ui.render.LocalizedShortTime
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toJavaLocalDateTime
-import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Instant
+import kotlin.time.TimeZone
+import kotlin.time.toJavaLocalDateTime
+import kotlin.time.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import java.time.format.DateTimeFormatter
 

@@ -122,7 +122,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlinx.datetime.toDeprecatedInstant
+import kotlin.time.Clock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import sh.christian.ozone.api.AtUri
@@ -414,7 +415,7 @@ internal class BlueskyDataSource(
         val post =
             Post(
                 text = data.content,
-                createdAt = Clock.System.now(),
+                createdAt = Clock.System.now().toDeprecatedInstant(),
                 embed =
                     quoteId
                         ?.let {
@@ -579,7 +580,7 @@ internal class BlueskyDataSource(
                                                         uri = AtUri(uri),
                                                         cid = Cid(cid),
                                                     ),
-                                                createdAt = Clock.System.now(),
+                                                createdAt = Clock.System.now().toDeprecatedInstant(),
                                             ).bskyJson(),
                                 ),
                             ).requireResponse()
@@ -738,7 +739,7 @@ internal class BlueskyDataSource(
                                             uri = AtUri(uri),
                                             cid = Cid(cid),
                                         ),
-                                    createdAt = Clock.System.now(),
+                                    createdAt = Clock.System.now().toDeprecatedInstant(),
                                 ).bskyJson(),
                     ),
                 ).requireResponse()
@@ -829,7 +830,7 @@ internal class BlueskyDataSource(
                         app.bsky.graph
                             .Follow(
                                 subject = Did(userKey.id),
-                                createdAt = Clock.System.now(),
+                                createdAt = Clock.System.now().toDeprecatedInstant(),
                             ).bskyJson(),
                 ),
             )
@@ -862,7 +863,7 @@ internal class BlueskyDataSource(
                         app.bsky.graph
                             .Block(
                                 subject = Did(userKey.id),
-                                createdAt = Clock.System.now(),
+                                createdAt = Clock.System.now().toDeprecatedInstant(),
                             ).bskyJson(),
                 ),
             )
@@ -1449,7 +1450,7 @@ internal class BlueskyDataSource(
                     name = title,
                     description = description,
                     avatar = iconInfo?.blob,
-                    createdAt = Clock.System.now(),
+                    createdAt = Clock.System.now().toDeprecatedInstant(),
                 )
             service.createRecord(
                 request =
@@ -1683,7 +1684,7 @@ internal class BlueskyDataSource(
                             .Listitem(
                                 list = AtUri(listId),
                                 subject = Did(userKey.id),
-                                createdAt = Clock.System.now(),
+                                createdAt = Clock.System.now().toDeprecatedInstant(),
                             ).bskyJson(),
                 ),
             )

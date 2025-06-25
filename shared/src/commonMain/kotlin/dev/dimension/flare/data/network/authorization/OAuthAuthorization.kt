@@ -4,7 +4,7 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.http.URLBuilder
 import io.ktor.http.encodeOAuth
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import okio.Buffer
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8

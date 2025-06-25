@@ -1,6 +1,6 @@
 package dev.dimension.flare.ui.render
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import java.time.LocalDateTime
 
 internal expect fun Instant.shortTime(): LocalizedShortTime

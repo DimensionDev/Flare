@@ -8,7 +8,7 @@ import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.persistentListOf
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import moe.tlaster.twitter.parser.CashTagToken
 import moe.tlaster.twitter.parser.EmojiToken
 import moe.tlaster.twitter.parser.HashTagToken

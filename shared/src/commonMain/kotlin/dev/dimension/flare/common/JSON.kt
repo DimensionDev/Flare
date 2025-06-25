@@ -1,7 +1,12 @@
 package dev.dimension.flare.common
 
+import kotlinx.datetime.Instant
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
@@ -76,5 +81,18 @@ internal class SafePolymorphicSerializer<T : Any>(
         } catch (e: Exception) {
             return null
         }
+    }
+}
+
+internal object InstantSerializer : KSerializer<kotlin.time.Instant> {
+
+    override val descriptor: SerialDescriptor =
+        PrimitiveSerialDescriptor("kotlin.time.Instant", PrimitiveKind.STRING)
+
+    override fun deserialize(decoder: Decoder): kotlin.time.Instant =
+        kotlin.time.Instant.parse(decoder.decodeString())
+
+    override fun serialize(encoder: Encoder, value: kotlin.time.Instant) {
+        encoder.encodeString(value.toString())
     }
 }

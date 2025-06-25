@@ -4,7 +4,7 @@ import com.fleeksoft.ksoup.Ksoup
 import dev.dimension.flare.data.network.rss.model.Feed
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.render.toUi
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 internal fun Feed.render(): List<UiTimeline> =
     when (this) {

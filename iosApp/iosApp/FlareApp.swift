@@ -19,6 +19,8 @@ struct FlareApp: SwiftUI.App {
 
         KoinHelper.shared.start(inAppNotification: SwitUIInAppNotification())
 
+         FlareImageConfiguration.shared.configure()
+
         // 初始化UserManager
         UserManager.shared.initialize()
 
@@ -28,6 +30,9 @@ struct FlareApp: SwiftUI.App {
 
         // DownloadManager初始化
         _ = DownloadManager.shared
+
+        // 🚀 120fps优化配置
+        FrameRateOptimizer.configureForApp()
     }
 
     var body: some Scene {

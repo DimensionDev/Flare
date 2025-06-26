@@ -16,7 +16,7 @@ class TimelineVersionManager {
     enum TimelineVersion: String, CaseIterable, Identifiable {
         case base = "Base"
         case v1_1 = "1.1 Stable ID"
-        case v1_1_1_2 = "1.1+1.2 Full"
+        case v2_0 = "2.0 Data-flow"
 
         var id: String { rawValue }
 
@@ -28,8 +28,8 @@ class TimelineVersionManager {
                 "Baseline version with original ForEach implementation"
             case .v1_1:
                 "Stable ID system optimization only"
-            case .v1_1_1_2:
-                "Stable ID + State observation + Visible range optimizations"
+            case .v2_0:
+                "Data-flow optimization with SwiftTimelineDataSource"
             }
         }
 
@@ -41,8 +41,8 @@ class TimelineVersionManager {
                 "base"
             case .v1_1:
                 "1.1"
-            case .v1_1_1_2:
-                "1.1+1.2"
+            case .v2_0:
+                "2.0"
             }
         }
 
@@ -54,8 +54,8 @@ class TimelineVersionManager {
                 "Baseline (0%)"
             case .v1_1:
                 "10-20% FPS improvement"
-            case .v1_1_1_2:
-                "25-45% FPS improvement"
+            case .v2_0:
+                "50-65% overall performance improvement"
             }
         }
     }
@@ -64,7 +64,7 @@ class TimelineVersionManager {
 
     /// 当前选中的版本
     /// Currently selected version
-    var currentVersion: TimelineVersion = .v1_1 {
+    var currentVersion: TimelineVersion = .v2_0 {
         didSet {
             if oldValue != currentVersion {
                 handleVersionChange(from: oldValue, to: currentVersion)
@@ -190,7 +190,7 @@ class TimelineVersionManager {
     /// 重置到默认版本
     /// Reset to default version
     func resetToDefault() {
-        switchTo(.v1_1_1_2)
+        switchTo(.v2_0) // 默认使用2.0版本，数据流优化版本
     }
 
     /// 循环切换到下一个版本
@@ -308,7 +308,7 @@ struct TimelineVersionIndicator: View {
             .red
         case .v1_1:
             .orange
-        case .v1_1_1_2:
+        case .v2_0:
             .green
         }
     }

@@ -71,6 +71,29 @@ struct StatusViewModel {
 }
 
 enum ActionProcessor {
+    /***
+     🔍 [TimelineActionsView] Total actions count: 4
+     🔍 [TimelineActionsView] Action[0]: SharedStatusActionItemReply
+         📝 Reply Action - count: 2
+     🔍 [TimelineActionsView] Action[1]: SharedStatusActionGroup
+         📁 Group Action - displayItem: SharedStatusActionItemRetweet
+         📁 Group Actions count: 2
+             📁 SubAction[0]: SharedStatusActionItemRetweet
+                 🔄 Sub-Retweet Action - count: 5, retweeted: false
+         📁 SubAction[1]: SharedStatusActionItemQuote
+             ❓ Unknown Sub-Item: SharedStatusActionItemQuote
+     🔍 [TimelineActionsView] Action[2]: SharedStatusActionItemLike
+         ❤️ Like Action - count: 21, liked: false
+     🔍 [TimelineActionsView] Action[3]: SharedStatusActionGroup
+         📁 Group Action - displayItem: SharedStatusActionItemMore
+         📁 Group Actions count: 2
+             📁 SubAction[0]: SharedStatusActionItemBookmark
+                 🔖 Sub-Bookmark Action - count: 4, bookmarked: false
+            📁 SubAction[1]: SharedStatusActionItemReport
+                ❓ Unknown Sub-Item: SharedStatusActionItemReport
+
+     ***/
+
     static func processActions(_ actions: [StatusAction]) -> (mainActions: [StatusAction], moreActions: [StatusActionItem]) {
         var bottomMainActions: [StatusAction] = []
         var bottomMoreActions: [StatusActionItem] = []

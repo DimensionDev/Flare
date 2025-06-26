@@ -101,9 +101,7 @@ class PhotoBrowserManager {
                     cell.imageView.kf.setImage(
                         with: previewUrl,
                         placeholder: nil,
-                        options: [
-                            .transition(.fade(0.25)),
-                            .processor(DownsamplingImageProcessor(size: UIScreen.main.bounds.size)),
+                        options: FlareImageOptions.fullScreen(size: UIScreen.main.bounds.size) + [
                             .requestModifier(modifier),
                         ]
                     ) { result in

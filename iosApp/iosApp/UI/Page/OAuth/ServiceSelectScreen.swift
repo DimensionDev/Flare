@@ -253,11 +253,10 @@ struct ServiceSelectScreen: View {
                 if let bannerUrl = instance.bannerUrl {
                     GeometryReader { _ in
                         KFImage(URL(string: bannerUrl))
+                            .flareServiceIcon(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 160))
                             .placeholder { // 添加占位符
                                 ServiceIconBackground(url: instance.iconUrl ?? "", domain: instance.domain)
                             }
-                            .setProcessor(DownsamplingImageProcessor(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 160)))
-                            .fade(duration: 0.25)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                             // .frame(width: geometry.size.width)

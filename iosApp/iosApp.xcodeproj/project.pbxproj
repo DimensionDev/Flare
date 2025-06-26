@@ -77,8 +77,8 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Page/Compose/Timeline/TimelineStatus/CommonTimelineStatusComponent.bak,
-				Page/Home/View/SwiftUI/TimelineViewSwiftUI_bak.swift.bak,
-				Page/Home/View/SwiftUI/TimelineViewSwiftUI.bak,
+				Page/Home/View/SwiftUI/TimelineViewSwiftUI/TimelineViewSwiftUI_bak.swift.bak,
+				Page/Home/View/SwiftUI/TimelineViewSwiftUI/TimelineViewSwiftUI.bak,
 				Page/Home/View/UIKit/HomeTabController.swift.bak,
 				Page/Home/View/UIKit/HomeTabScreen.swift.bak,
 			);
@@ -92,8 +92,8 @@
 			buildPhase = 7555FF77242A565900829871 /* Sources */;
 			membershipExceptions = (
 				Page/Compose/Timeline/TimelineStatus/CommonTimelineStatusComponent.bak,
-				Page/Home/View/SwiftUI/TimelineViewSwiftUI_bak.swift.bak,
-				Page/Home/View/SwiftUI/TimelineViewSwiftUI.bak,
+				Page/Home/View/SwiftUI/TimelineViewSwiftUI/TimelineViewSwiftUI_bak.swift.bak,
+				Page/Home/View/SwiftUI/TimelineViewSwiftUI/TimelineViewSwiftUI.bak,
 				Page/Home/View/UIKit/HomeTabController.swift.bak,
 				Page/Home/View/UIKit/HomeTabScreen.swift.bak,
 			);
@@ -605,7 +605,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 2025062301;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = 7LFDZ96332;
 				ENABLE_PREVIEWS = YES;
@@ -623,7 +623,7 @@
 					"@executable_path/Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 0.0.5;
+				MARKETING_VERSION = 0.3.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-lsqlite3",
@@ -653,7 +653,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 2025062301;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
 				DEVELOPMENT_TEAM = 7LFDZ96332;
 				ENABLE_PREVIEWS = YES;
@@ -671,7 +671,7 @@
 					"@executable_path/Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
-				MARKETING_VERSION = 0.0.5;
+				MARKETING_VERSION = 0.3.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-lsqlite3",

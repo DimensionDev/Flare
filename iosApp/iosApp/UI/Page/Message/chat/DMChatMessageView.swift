@@ -143,10 +143,8 @@ struct DMChatMessageView: View {
         Group {
             if showAvatar {
                 KFImage(message.user.avatarURL)
-                    // Apply KFImage specific modifiers first
-                    .cacheOriginalImage()
-                    .appendProcessor(DownsamplingImageProcessor(size: CGSize(width: avatarSize * 2, height: avatarSize * 2)))
-                    .fade(duration: 0.25)
+                    // Apply Flare optimized avatar configuration
+                    .flareAvatar(size: CGSize(width: avatarSize * 2, height: avatarSize * 2))
                     .onFailure { error in
                         print("KFImage failed for avatar: \(error.localizedDescription)")
                     }

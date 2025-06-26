@@ -10,6 +10,7 @@ struct FullScreenImageViewer: View {
             switch onEnum(of: media) {
             case let .image(data):
                 KFImage(URL(string: data.url))
+                    .flareFullScreen(size: UIScreen.main.bounds.size)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
             case let .video(video):

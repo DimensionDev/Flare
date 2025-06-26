@@ -116,11 +116,3 @@ struct StatusHeaderView: View {
     }
 }
 
-// struct SmallIconModifier: ViewModifier {
-//     func body(content: Content) -> some View {
-//         content
-//             .imageScale(.small)
-//             .scaleEffect(0.8)
-//             .frame(width: 24, height: 24)
-//     }
-// }

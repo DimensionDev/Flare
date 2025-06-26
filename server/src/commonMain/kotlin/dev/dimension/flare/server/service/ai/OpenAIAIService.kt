@@ -69,10 +69,7 @@ internal class OpenAIAIService(
                 ),
             )
         )
-        response.choices.firstOrNull()?.message?.content?.let {
-            return it
-        } ?: run {
+        return response.choices.firstOrNull()?.message?.content ?:
             throw IllegalStateException("No response from OpenAI")
-        }
     }
 }

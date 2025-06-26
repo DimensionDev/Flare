@@ -9,6 +9,7 @@ import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.mapper.MisskeyAchievement
 import dev.dimension.flare.ui.render.UiDateTime
 import dev.dimension.flare.ui.render.UiRichText
+import io.ktor.http.Url
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
@@ -68,9 +69,14 @@ public data class UiTimeline internal constructor(
             val onClicked: ClickContext.() -> Unit = {
                 launcher.launch(AppDeepLink.RSS.invoke(url))
             },
+            val source: String,
         ) : ItemContent {
             override val itemKey: String
                 get() = "Feed_$url"
+            val sourceIcon: String by lazy {
+                val url = Url(url)
+                "https://${url.host}/favicon.ico"
+            }
         }
 
         public data class Status internal constructor(

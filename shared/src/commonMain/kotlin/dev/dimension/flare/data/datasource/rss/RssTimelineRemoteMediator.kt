@@ -17,6 +17,7 @@ import dev.dimension.flare.data.network.rss.model.Feed
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.mapper.fromRss
+import dev.dimension.flare.ui.model.mapper.title
 import dev.dimension.flare.ui.render.parseHtml
 
 @OptIn(ExperimentalPagingApi::class)
@@ -34,69 +35,88 @@ internal class RssTimelineRemoteMediator(
             val content =
                 when (response) {
                     is Feed.Atom ->
-                        response.entries.map { StatusContent.RSS.Atom(it) }.map {
-                            DbStatusWithUser(
-                                user = null,
-                                data =
-                                    DbStatus(
-                                        statusKey =
-                                            MicroBlogKey.fromRss(
-                                                it.data.links
-                                                    .first()
-                                                    .href,
-                                            ),
-                                        accountType = AccountType.Guest,
-                                        userKey = null,
-                                        content = it,
-                                        text =
-                                            it.data.content
-                                                ?.value
-                                                ?.let { html -> parseHtml(html) }
-                                                ?.wholeText(),
-                                    ),
-                            )
-                        }
+                        response.entries
+                            .map {
+                                StatusContent.Rss.RssContent.Atom(
+                                    it,
+                                    source = response.title.value,
+                                )
+                            }.map {
+                                DbStatusWithUser(
+                                    user = null,
+                                    data =
+                                        DbStatus(
+                                            statusKey =
+                                                MicroBlogKey.fromRss(
+                                                    it.data.links
+                                                        .first()
+                                                        .href,
+                                                ),
+                                            accountType = AccountType.Guest,
+                                            userKey = null,
+                                            content = StatusContent.Rss(it),
+                                            text =
+                                                it.data.content
+                                                    ?.value
+                                                    ?.let { html -> parseHtml(html) }
+                                                    ?.wholeText(),
+                                        ),
+                                )
+                            }
 
                     is Feed.RDF ->
-                        response.items.map { StatusContent.RSS.RDF(it) }.map {
-                            DbStatusWithUser(
-                                user = null,
-                                data =
-                                    DbStatus(
-                                        statusKey =
-                                            MicroBlogKey.fromRss(
-                                                it.data.link,
-                                            ),
-                                        accountType = AccountType.Guest,
-                                        userKey = null,
-                                        content = it,
-                                        text =
-                                            it.data.description
-                                                .let { html -> parseHtml(html) }
-                                                .wholeText(),
-                                    ),
-                            )
-                        }
+                        response.items
+                            .map {
+                                StatusContent.Rss.RssContent.RDF(
+                                    it,
+                                    source = response.title,
+                                )
+                            }.map {
+                                DbStatusWithUser(
+                                    user = null,
+                                    data =
+                                        DbStatus(
+                                            statusKey =
+                                                MicroBlogKey.fromRss(
+                                                    it.data.link,
+                                                ),
+                                            accountType = AccountType.Guest,
+                                            userKey = null,
+                                            content = StatusContent.Rss(it),
+                                            text =
+                                                it.data.description
+                                                    .let { html -> parseHtml(html) }
+                                                    .wholeText(),
+                                        ),
+                                )
+                            }
+
                     is Feed.Rss20 ->
-                        response.channel.items.map { StatusContent.RSS.Rss20(it) }.map {
-                            DbStatusWithUser(
-                                user = null,
-                                data =
-                                    DbStatus(
-                                        statusKey =
-                                            MicroBlogKey.fromRss(
-                                                it.data.link,
-                                            ),
-                                        accountType = AccountType.Guest,
-                                        userKey = null,
-                                        content = it,
-                                        text =
-                                            it.data.description
-                                                ?.let { html -> parseHtml(html) }
-                                                ?.wholeText(),
-                                    ),
-                            )
-                        }
+                        response.channel.items
+                            .map {
+                                StatusContent.Rss.RssContent.Rss20(
+                                    it,
+                                    source = response.title,
+                                )
+                            }.map {
+                                DbStatusWithUser(
+                                    user = null,
+                                    data =
+                                        DbStatus(
+                                            statusKey =
+                                                MicroBlogKey.fromRss(
+                                                    it.data.link,
+                                                ),
+                                            accountType = AccountType.Guest,
+                                            userKey = null,
+                                            content = StatusContent.Rss(it),
+                                            text =
+                                                it.data.description
+                                                    ?.let { html -> parseHtml(html) }
+                                                    ?.wholeText(),
+                                        ),
+                                )
+                            }
                 }.mapIndexed { index, status ->
                     createDbPagingTimelineWithStatus(
                         accountType = AccountType.Guest,

@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.model.mapper
 
 import com.fleeksoft.ksoup.Ksoup
+import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.network.rss.model.Feed
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
@@ -8,11 +9,11 @@ import dev.dimension.flare.ui.render.toUi
 import io.ktor.util.encodeBase64
 import kotlinx.datetime.Instant
 
-internal fun Feed.render(): List<UiTimeline> =
+internal fun StatusContent.Rss.RssContent.render(): UiTimeline =
     when (this) {
-        is Feed.Atom -> renderAtom()
-        is Feed.Rss20 -> renderRss20()
-        is Feed.RDF -> renderRdf()
+        is StatusContent.Rss.RssContent.Atom -> this.render()
+        is StatusContent.Rss.RssContent.Rss20 -> this.render()
+        is StatusContent.Rss.RssContent.RDF -> this.render()
     }
 
 internal val Feed.title: String
@@ -23,86 +24,77 @@ internal val Feed.title: String
             is Feed.RDF -> this.channel.title
         }
 
-private fun Feed.Atom.renderAtom(): List<UiTimeline> =
-    this.entries.map {
-        it.render()
+internal fun StatusContent.Rss.RssContent.Atom.render(): UiTimeline =
+    with(data) {
+        val descHtml =
+            content?.value?.let {
+                Ksoup.parse(it)
+            }
+        val img = descHtml?.select("img")?.firstOrNull()?.attr("src") ?: media?.thumbnail?.url
+        return UiTimeline(
+            topMessage = null,
+            content =
+                UiTimeline.ItemContent.Feed(
+                    title = title.value,
+                    description = descHtml?.text(),
+                    url = links.first().href,
+                    image = img,
+                    source = this@render.source,
+                    createdAt =
+                        published
+                            ?.let { input -> runCatching { Instant.parse(input) }.getOrNull() }
+                            ?.toUi(),
+                ),
+        )
     }
 
-internal fun Feed.Atom.Entry.render(): UiTimeline {
-    val descHtml =
-        content?.value?.let {
-            Ksoup.parse(it)
-        }
-    val img = descHtml?.select("img")?.firstOrNull()?.attr("src") ?: media?.thumbnail?.url
-    return UiTimeline(
-        topMessage = null,
-        content =
-            UiTimeline.ItemContent.Feed(
-                title = title.value,
-                description = descHtml?.text(),
-                url = links.first().href,
-                image = img,
-                createdAt =
-                    published
-                        ?.let { input -> runCatching { Instant.parse(input) }.getOrNull() }
-                        ?.toUi(),
-            ),
-    )
-}
-
-private fun Feed.Rss20.renderRss20(): List<UiTimeline> =
-    this.channel.items.map {
-        it.render()
+internal fun StatusContent.Rss.RssContent.Rss20.render(): UiTimeline =
+    with(data) {
+        val descHtml =
+            description?.let {
+                Ksoup.parse(it)
+            }
+        val img = descHtml?.select("img")?.firstOrNull()
+        return UiTimeline(
+            topMessage = null,
+            content =
+                UiTimeline.ItemContent.Feed(
+                    title = title,
+                    description = descHtml?.text(),
+                    url = link,
+                    image = img?.attr("src"),
+                    source = this@render.source,
+                    createdAt =
+                        pubDate
+                            ?.let { input -> runCatching { Instant.parse(input) }.getOrNull() }
+                            ?.toUi(),
+                ),
+        )
     }
 
-internal fun Feed.Rss20.Item.render(): UiTimeline {
-    val descHtml =
-        description?.let {
-            Ksoup.parse(it)
-        }
-    val img = descHtml?.select("img")?.firstOrNull()
-    return UiTimeline(
-        topMessage = null,
-        content =
-            UiTimeline.ItemContent.Feed(
-                title = title,
-                description = descHtml?.text(),
-                url = link,
-                image = img?.attr("src"),
-                createdAt =
-                    pubDate
-                        ?.let { input -> runCatching { Instant.parse(input) }.getOrNull() }
-                        ?.toUi(),
-            ),
-    )
-}
-
-private fun Feed.RDF.renderRdf(): List<UiTimeline> =
-    this.items.map {
-        it.render()
+internal fun StatusContent.Rss.RssContent.RDF.render(): UiTimeline =
+    with(data) {
+        val descHtml =
+            description.let {
+                Ksoup.parse(it)
+            }
+        val img = descHtml.select("img").firstOrNull()
+        return UiTimeline(
+            topMessage = null,
+            content =
+                UiTimeline.ItemContent.Feed(
+                    title = title,
+                    description = descHtml.text(),
+                    url = link,
+                    image = img?.attr("src"),
+                    source = source,
+                    createdAt =
+                        date
+                            ?.let { input -> runCatching { Instant.parse(input) }.getOrNull() }
+                            ?.toUi(),
+                ),
+        )
     }
-
-internal fun Feed.RDF.Item.render(): UiTimeline {
-    val descHtml =
-        description.let {
-            Ksoup.parse(it)
-        }
-    val img = descHtml.select("img").firstOrNull()
-    return UiTimeline(
-        topMessage = null,
-        content =
-            UiTimeline.ItemContent.Feed(
-                title = title,
-                description = descHtml.text(),
-                url = link,
-                image = img?.attr("src"),
-                createdAt =
-                    date
-                        ?.let { input -> runCatching { Instant.parse(input) }.getOrNull() }
-                        ?.toUi(),
-            ),
-    )
-}
 
 internal fun MicroBlogKey.Companion.fromRss(url: String) =
     MicroBlogKey(

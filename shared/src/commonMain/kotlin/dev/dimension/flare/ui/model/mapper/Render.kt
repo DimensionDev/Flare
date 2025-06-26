@@ -107,9 +107,7 @@ internal fun StatusContent.render(
             accountKey = event.accountKey,
         )
 
-    is StatusContent.RSS.Atom -> data.render()
-    is StatusContent.RSS.RDF -> data.render()
-    is StatusContent.RSS.Rss20 -> data.render()
+    is StatusContent.Rss -> data.render()
 }
 
 internal fun DbUser.render(accountKey: MicroBlogKey) =

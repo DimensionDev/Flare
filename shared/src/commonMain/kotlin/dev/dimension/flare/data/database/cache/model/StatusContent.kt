@@ -89,24 +89,32 @@ internal sealed interface StatusContent {
     ) : StatusContent
 
     @Serializable
-    sealed interface RSS : StatusContent {
+    data class Rss(
+        val data: RssContent,
+    ) : StatusContent {
         @Serializable
-        @SerialName("rss-atom")
-        data class Atom internal constructor(
-            internal val data: Feed.Atom.Entry,
-        ) : RSS
+        sealed interface RssContent {
+            @Serializable
+            @SerialName("atom")
+            data class Atom internal constructor(
+                internal val data: Feed.Atom.Entry,
+                internal val source: String,
+            ) : RssContent
 
-        @Serializable
-        @SerialName("rss-rss20")
-        data class Rss20 internal constructor(
-            internal val data: Feed.Rss20.Item,
-        ) : RSS
+            @Serializable
+            @SerialName("rss20")
+            data class Rss20 internal constructor(
+                internal val data: Feed.Rss20.Item,
+                internal val source: String,
+            ) : RssContent
 
-        @Serializable
-        @SerialName("rss-rdf")
-        data class RDF internal constructor(
-            internal val data: Feed.RDF.Item,
-        ) : RSS
+            @Serializable
+            @SerialName("rdf")
+            data class RDF internal constructor(
+                internal val data: Feed.RDF.Item,
+                internal val source: String,
+            ) : RssContent
+        }
     }
 }
 

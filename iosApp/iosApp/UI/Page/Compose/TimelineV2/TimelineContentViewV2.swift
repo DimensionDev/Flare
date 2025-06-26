@@ -1,8 +1,8 @@
  
 import Combine
 import Kingfisher
-import shared
 import SwiftUI
+import shared
 
   struct TimelineContentViewV2: View {
     let state: FlareTimelineState

@@ -1,8 +1,8 @@
 
 import Foundation
 import Generated
-import shared
 import SwiftUI
+import shared
 
  extension NSNotification.Name {
     static let timelineItemUpdated = NSNotification.Name("timelineItemUpdated")
@@ -98,6 +98,18 @@ struct TimelineActionsViewV2: View {
                     handleBookmarkAction()
                 }
                 .frame(maxWidth: .infinity)
+
+                // 5. 分享 - 使用ShareButtonV2
+                ShareButtonV2(
+                    item: item,
+                    view: TimelineStatusViewV2(
+                        item: item,
+                        index: 0,
+                        presenter: nil,
+                        scrollPositionID: .constant(nil),
+                        onError: { _ in }
+                    )
+                )
             }
             .padding(.vertical, 8)
             .padding(.horizontal, 16)
@@ -335,22 +347,7 @@ private struct ActionButtonV2: View {
 }
 
  
-struct ShareActionButton: View {
-    let item: TimelineItem
 
-    var body: some View {
-        Button(action: {
-             
-            print("📤 [ShareActionButton] Share clicked for item: \(item.id)")
-        }) {
-            HStack(spacing: 4) {
-                Image(systemName: "square.and.arrow.up")
-                    .foregroundColor(.primary)
-            }
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-}
 
  
 

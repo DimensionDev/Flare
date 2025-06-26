@@ -1,11 +1,10 @@
 
 import Combine
 import Kingfisher
-import shared
 import SwiftUI
+import shared
 
-
-   struct TimelineItemsViewV2: View {
+ struct TimelineItemsViewV2: View {
     let items: [TimelineItem]
     let hasMore: Bool
     let isRefreshing: Bool
@@ -15,7 +14,7 @@ import SwiftUI
     
     var body: some View {
         ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
-            TimelineItemRowViewV2(
+            TimelineStatusViewV2(
                 item: item,
                 index: index,
                 presenter: presenter,

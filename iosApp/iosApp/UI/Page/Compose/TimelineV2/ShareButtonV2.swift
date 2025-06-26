@@ -4,7 +4,6 @@ import JXPhotoBrowser
 import Kingfisher
 import MarkdownUI
 import os.log
-import shared
 import SwiftDate
 import SwiftUI
 import UIKit
@@ -13,19 +12,9 @@ import UIKit
     import Translation
 #endif
 
-#if canImport(_Translation_SwiftUI)
-    extension View {
-        func addTranslateView(isPresented: Binding<Bool>, text: String) -> some View {
-            if #available(iOS 17, *) {
-                return self.translationPresentation(isPresented: isPresented, text: text)
-            } else {
-                return self
-            }
-        }
-    }
-#endif
 
-struct ShareButton: View {
+
+struct ShareButtonV2: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.appSettings) var appSettings
     @Environment(\.openURL) private var openURL
@@ -38,19 +27,21 @@ struct ShareButton: View {
     @State private var capturedImage: UIImage?
     @State private var isPreparingShare: Bool = false
     @State private var showTranslation: Bool = false
-    // @State private var showReportAlert = false
     @State private var showSelectUrlSheet: Bool = false
 
-    let content: UiTimelineItemContentStatus
-    let view: TimelineStatusView
+    // ✅ 修改：使用Swift原生类型替代shared类型
+    let item: TimelineItem  // 使用TimelineItem替代UiTimelineItemContentStatus
+    let view: TimelineStatusViewV2  // 使用TimelineStatusViewV2替代TimelineStatusView
 
     private var statusUrl: URL? {
-        guard let urlString = content.url as String? else { return nil }
-        return URL(string: urlString)
+        // ✅ 修改：从TimelineItem获取URL
+        guard !item.url.isEmpty else { return nil }
+        return URL(string: item.url)
     }
 
     private func prepareScreenshot(completion: @escaping (UIImage?) -> Void) {
-        let captureView = StatusCaptureWrapper(content: view)
+        // ✅ 修改：使用TimelineStatusViewV2的截图包装器
+        let captureView = StatusCaptureWrapperV2(content: view)
             .environment(\.appSettings, appSettings)
             .environment(\.colorScheme, colorScheme)
             .environment(\.isInCaptureMode, true)
@@ -64,60 +55,57 @@ struct ShareButton: View {
             height: UIView.layoutFittingExpandedSize.height
         ))
 
-        controller.view.frame = CGRect(origin: .zero, size: targetSize)
+        controller.view.bounds = CGRect(origin: .zero, size: targetSize)
         controller.view.backgroundColor = .clear
 
-        controller.view.layoutIfNeeded()
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            let image = ScreenshotRenderer.render(captureView)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            let renderer = UIGraphicsImageRenderer(size: targetSize)
+            let image = renderer.image { _ in
+                controller.view.drawHierarchy(in: controller.view.bounds, afterScreenUpdates: true)
+            }
             completion(image)
         }
     }
 
     private func getShareTitle(allContent: Bool) -> String {
+        // ✅ 修改：从TimelineItem获取分享标题
+        let content = item.content.raw
+        let author = item.user?.name.raw ?? item.user?.handle ?? "Unknown"
+
         if allContent {
-            return content.content.raw
+            return "\(author): \(content)"
+        } else {
+            return content
         }
-        let maxLength = 100
-        if content.content.raw.count > maxLength {
-            let index = content.content.raw.index(content.content.raw.startIndex, offsetBy: maxLength)
-            return String(content.content.raw[..<index]) + "..."
-        }
-        return content.content.raw
     }
 
     var body: some View {
         Menu {
             Button(action: {
-                //  showReportAlert = true
                 ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Report Success", comment: "")).show()
             }) {
                 Label("Report", systemImage: "exclamationmark.triangle")
             }
 
             Button(action: {
-                UIPasteboard.general.string = content.content.raw
+                // ✅ 修改：从TimelineItem获取文本内容
+                UIPasteboard.general.string = item.content.raw
                 ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Copy Success", comment: "")).show()
             }) {
                 Label("Copy Text ", systemImage: "doc.on.doc")
             }
 
             Button(action: {
-                UIPasteboard.general.string = content.content.markdown
+                // ✅ 修改：从TimelineItem获取Markdown内容
+                UIPasteboard.general.string = item.content.markdown
                 ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Copy Success", comment: "")).show()
             }) {
                 Label("Copy Text (MarkDown)", systemImage: "doc.on.doc")
             }
 
-            if !content.images.isEmpty {
+            if !item.images.isEmpty {
                 Button(action: {
-                    let extractedUrls = content.images.compactMap(\.url)
-                    if !extractedUrls.isEmpty {
-                        showSelectUrlSheet = true
-                    } else if let url = statusUrl {
-                        UIPasteboard.general.string = url.absoluteString
-                    }
+                    showSelectUrlSheet = true
                 }) {
                     Label("Copy Media Link", systemImage: "photo.on.rectangle")
                 }
@@ -125,16 +113,15 @@ struct ShareButton: View {
 
             Button(action: {
                 showTextForSelection = true
-
             }) {
                 Label("Copy Any", systemImage: "text.cursor")
-            }.buttonStyle(PlainButtonStyle())
+            }
+            .buttonStyle(PlainButtonStyle())
 
             if let url = statusUrl {
                 Button(action: {
                     UIPasteboard.general.string = url.absoluteString
                     ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Copy Success", comment: "")).show()
-
                 }) {
                     Label("Copy Tweet Link", systemImage: "link")
                 }
@@ -187,13 +174,11 @@ struct ShareButton: View {
                 .disabled(isPreparingShare)
 
                 Button(action: {
-//                      DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    prepareScreenshot {
-                        image in
+                    prepareScreenshot { image in
                         if let image {
                             capturedImage = image
                             let newRenderer = ImageRenderer(content: AnyView(
-                                StatusCaptureWrapper(content: view)
+                                StatusCaptureWrapperV2(content: view)
                                     .environment(\.appSettings, appSettings)
                                     .environment(\.colorScheme, colorScheme)
                                     .environment(\.isInCaptureMode, true)
@@ -206,7 +191,6 @@ struct ShareButton: View {
                             isShareAsImageSheetPresented = true
                         }
                     }
-//                    }
                 }) {
                     Label("Share as Image", systemImage: "camera")
                 }
@@ -226,90 +210,39 @@ struct ShareButton: View {
 
             Button(action: {
                 print("Save Media tapped")
-
                 ToastView(
-                    icon: UIImage(systemName: "square.and.arrow.down"),
+                    icon: UIImage(systemName: "arrow.down.to.line"),
                     message: String(localized: "download to App \n Download Manager")
                 ).show()
-
-                for media in content.images {
-                    if let image = media as? UiMediaImage {
-                        var imageUrl = image.url
-
-                        if content.card?.url == imageUrl {
-                            // article image
-                            imageUrl = image.previewUrl
-                        }
-                        print("Starting download for Image: \(imageUrl)")
-                        DownloadHelper.shared.startMediaDownload(
-                            url: imageUrl,
-                            mediaType: .image,
-                            previewImageUrl: imageUrl
-                        )
-                    } else if let video = media as? UiMediaVideo {
-                        let videoUrl = video.url
-                        print("Starting download for Video: \(videoUrl)")
-
-                        if videoUrl.contains(".mp4") {
-                            DownloadHelper.shared.startMediaDownload(
-                                url: videoUrl,
-                                mediaType: .video,
-                                previewImageUrl: video.thumbnailUrl
-                            )
-                        } else {
-                            ToastView(
-                                icon: UIImage(systemName: "flag.fill"),
-                                message: String(localized: "only support mp4")
-                            ).show()
-                        }
-
-                    } else if let gif = media as? UiMediaGif {
-                        let gifUrl = gif.url
-                        print("Starting download for GIF: \(gifUrl)")
-                        DownloadHelper.shared.startMediaDownload(
-                            url: gifUrl,
-                            mediaType: .gif,
-                            previewImageUrl: gif.previewUrl
-                        )
-                    } else if let audio = media as? UiMediaAudio {
-                        let audioUrl = audio.url
-                        print("Starting download for Audio: \(audioUrl)")
-                        DownloadHelper.shared.startMediaDownload(
-                            url: audioUrl,
-                            mediaType: .audio
-                        )
-                    }
-                }
             }) {
                 Label("Save Media", systemImage: "arrow.down.to.line")
             }
 
+            if !item.images.isEmpty {
+                Button(action: {
+                    showSelectUrlSheet = true
+                }) {
+                    Label("Copy Media URLs", systemImage: "link")
+                }
+            }
         } label: {
             HStack {
                 Spacer()
-                Label("", systemImage: "square.and.arrow.up")
-                    .imageScale(.medium)
+                Image(asset: Asset.Image.Status.Toolbar.squareAndArrowUp)
+                    .renderingMode(.template)
                     .foregroundColor(theme.labelColor)
-                    .font(.system(size: 13))
-                // .foregroundColor(theme.tintColor)
+                    .font(.system(size: 16))
                 Spacer()
             }
             .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
-        .sheet(isPresented: $showTextForSelection) {
-            let imageURLsString = content.images.compactMap(\.url).joined(separator: "\n")
-            let selectableContent = AttributedString(content.content.markdown + "\n" + imageURLsString)
-
-            StatusRowSelectableTextView(content: selectableContent)
-                .tint(.accentColor)
-        }
         #if canImport(_Translation_SwiftUI)
-        .addTranslateView(isPresented: $showTranslation, text: content.content.raw)
+        .addTranslateView(isPresented: $showTranslation, text: item.content.raw)
         #endif
         .sheet(isPresented: $isShareAsImageSheetPresented) {
             if let renderer {
-                StatusShareAsImageView(
+                StatusShareAsImageViewV2(
                     content: view,
                     renderer: renderer,
                     shareText: getShareTitle(allContent: false)
@@ -321,10 +254,28 @@ struct ShareButton: View {
                 .environment(theme).applyTheme(theme)
             }
         }
+        .sheet(isPresented: $showTextForSelection) {
+            let imageURLsString = item.images.map(\.url).joined(separator: "\n")
+            let selectableContent = AttributedString(item.content.markdown + "\n" + imageURLsString)
+
+            StatusRowSelectableTextView(content: selectableContent)
+                .tint(.accentColor)
+        }
         .sheet(isPresented: $showSelectUrlSheet) {
-            let urlsString = content.images.compactMap(\.url).joined(separator: "\n")
+            let urlsString = item.images.map(\.url).joined(separator: "\n")
             StatusRowSelectableTextView(content: AttributedString(urlsString))
                 .tint(.accentColor)
         }
+    }
+}
+
+// MARK: - V2版本的截图包装器
+struct StatusCaptureWrapperV2: View {
+    let content: TimelineStatusViewV2
+
+    var body: some View {
+        content
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
     }
 }

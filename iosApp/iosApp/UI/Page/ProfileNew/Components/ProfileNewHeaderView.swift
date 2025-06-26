@@ -271,16 +271,11 @@ class ProfileNewHeaderView: UIView {
         // 设置用户handle
         handleLabel.text = "\(userInfo.profile.handleWithoutFirstAt)"
 
-        // 设置头像 - 使用 Kingfisher 缓存
+        // 设置头像 - 使用 Flare 优化的缓存配置
         if let url = URL(string: userInfo.profile.avatar) {
             avatarView.kf.setImage(
                 with: url,
-                options: [
-                    .transition(.fade(0.25)),
-                    .processor(DownsamplingImageProcessor(size: CGSize(width: 160, height: 160))),
-                    .scaleFactor(UIScreen.main.scale),
-                    .cacheOriginalImage,
-                ]
+                options: FlareImageOptions.avatar(size: CGSize(width: 160, height: 160))
             )
         }
 
@@ -291,12 +286,7 @@ class ProfileNewHeaderView: UIView {
         {
             bannerImageView.kf.setImage(
                 with: url,
-                options: [
-                    .transition(.fade(0.25)),
-                    .processor(DownsamplingImageProcessor(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 300))),
-                    .scaleFactor(UIScreen.main.scale),
-                    .cacheOriginalImage,
-                ]
+                options: FlareImageOptions.banner(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 300))
             ) { result in
                 switch result {
                 case let .success(imageResult):
@@ -442,12 +432,7 @@ class ProfileNewHeaderView: UIView {
 
         bannerImageView.kf.setImage(
             with: url,
-            options: [
-                .transition(.fade(0.25)),
-                .processor(DownsamplingImageProcessor(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 300))),
-                .scaleFactor(UIScreen.main.scale),
-                .cacheOriginalImage,
-            ]
+            options: FlareImageOptions.banner(size: CGSize(width: UIScreen.main.bounds.width * 2, height: 300))
         ) { [weak self] _ in
             self?.blurEffectView.alpha = 0.7 // 增加模糊效果
         }

@@ -14,11 +14,11 @@ struct DMSingleMediaView: View {
             ZStack {
                 if let previewUrl = viewModel.previewUrl {
                     KFImage(previewUrl)
+                        .flareMediaPreview(size: CGSize(width: geometry.size.width * 2, height: geometry.size.height * 2))
                         .placeholder {
                             Rectangle()
                                 .foregroundColor(.gray.opacity(0.2))
                         }
-                        .setProcessor(DefaultImageProcessor.default)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                         .frame(width: geometry.size.width, height: geometry.size.height)

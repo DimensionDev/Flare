@@ -97,7 +97,13 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
 internal fun List<Status>.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (Status) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0 },
+    sortIdProvider: (Status) -> Long = {
+        if (it.pinned == true) {
+            Long.MAX_VALUE
+        } else {
+            it.createdAt?.toEpochMilliseconds() ?: 0
+        }
+    },
 ): List<DbPagingTimelineWithStatus> =
     this.map {
         createDbPagingTimelineWithStatus(

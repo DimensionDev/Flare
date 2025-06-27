@@ -5,12 +5,12 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import app.bsky.feed.GetAuthorFeedFilter
 import app.bsky.feed.GetAuthorFeedQueryParams
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.Bluesky
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import sh.christian.ozone.api.Did
 
@@ -23,13 +23,18 @@ internal class UserTimelineRemoteMediator(
     private val pagingKey: String,
     private val onlyMedia: Boolean = false,
     private val withReplies: Boolean = false,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseTimelineRemoteMediator(
+        database = database,
+        clearWhenRefresh = false,
+        pagingKey = pagingKey,
+        accountType = AccountType.Specific(accountKey),
+    ) {
     var cursor: String? = null
 
-    override suspend fun doLoad(
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         val filter =
             when {
                 onlyMedia -> GetAuthorFeedFilter.PostsWithMedia
@@ -50,7 +55,7 @@ internal class UserTimelineRemoteMediator(
                         ).maybeResponse()
 
                 LoadType.PREPEND -> {
-                    return MediatorResult.Success(
+                    return Result(
                         endOfPaginationReached = true,
                     )
                 }
@@ -67,21 +72,19 @@ internal class UserTimelineRemoteMediator(
                             ),
                         ).maybeResponse()
                 }
-            } ?: return MediatorResult.Success(
+            } ?: return Result(
                 endOfPaginationReached = true,
             )
 
         cursor = response.cursor
-        database.connect {
-            Bluesky.saveFeed(
-                accountKey,
-                pagingKey,
-                database,
-                response.feed,
-            )
-        }
-        return MediatorResult.Success(
+        return Result(
             endOfPaginationReached = cursor == null,
+            data =
+                Bluesky.saveFeed(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                    data = response.feed,
+                ),
         )
     }
 }

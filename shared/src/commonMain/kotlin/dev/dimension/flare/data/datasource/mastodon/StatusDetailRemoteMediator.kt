@@ -3,10 +3,10 @@ package dev.dimension.flare.data.datasource.mastodon
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.Mastodon
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
@@ -23,13 +23,18 @@ internal class StatusDetailRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val statusOnly: Boolean,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
-    override suspend fun doLoad(
+) : BaseTimelineRemoteMediator(
+        database = database,
+        clearWhenRefresh = false,
+        pagingKey = pagingKey,
+        accountType = AccountType.Specific(accountKey),
+    ) {
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         if (loadType != LoadType.REFRESH) {
-            return MediatorResult.Success(
+            return Result(
                 endOfPaginationReached = true,
             )
         }
@@ -73,19 +78,15 @@ internal class StatusDetailRemoteMediator(
                 context.ancestors.orEmpty() + listOf(current) + context.descendants.orEmpty()
             }
 
-        database.connect {
-            Mastodon.save(
-                database = database,
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                data = result,
-            ) {
-                -result.indexOf(it).toLong()
-            }
-        }
-
-        return MediatorResult.Success(
+        return Result(
             endOfPaginationReached = true,
+            data =
+                result.toDbPagingTimeline(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                ) {
+                    -result.indexOf(it).toLong()
+                },
         )
     }
 }

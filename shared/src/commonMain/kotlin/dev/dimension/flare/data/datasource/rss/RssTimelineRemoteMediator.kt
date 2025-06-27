@@ -3,11 +3,9 @@ package dev.dimension.flare.data.datasource.rss
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.createDbPagingTimelineWithStatus
-import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
@@ -25,11 +23,16 @@ internal class RssTimelineRemoteMediator(
     private val url: String,
     private val pagingKey: String,
     private val cacheDatabase: CacheDatabase,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
-    override suspend fun doLoad(
+) : BaseTimelineRemoteMediator(
+        database = cacheDatabase,
+        clearWhenRefresh = true,
+        pagingKey = pagingKey,
+        accountType = AccountType.Guest,
+    ) {
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult =
+    ): Result =
         try {
             val response = RssService.fetch(url)
             val content =
@@ -126,12 +129,15 @@ internal class RssTimelineRemoteMediator(
                         references = mapOf(),
                     )
                 }
-            cacheDatabase.connect {
-                cacheDatabase.pagingTimelineDao().delete(pagingKey = pagingKey)
-                saveToDatabase(cacheDatabase, content)
-            }
-            MediatorResult.Success(endOfPaginationReached = true)
+
+            Result(
+                endOfPaginationReached = true,
+                data = content,
+            )
         } catch (e: Exception) {
-            MediatorResult.Error(e)
+            Result(
+                endOfPaginationReached = true,
+                data = emptyList(),
+            )
         }
 }

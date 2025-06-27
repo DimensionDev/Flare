@@ -3,11 +3,12 @@ package dev.dimension.flare.data.datasource.mastodon
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.Mastodon
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
@@ -17,15 +18,20 @@ internal class SearchStatusPagingSource(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val query: String,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
-    override suspend fun doLoad(
+) : BaseTimelineRemoteMediator(
+        database = database,
+        clearWhenRefresh = true,
+        pagingKey = pagingKey,
+        accountType = AccountType.Specific(accountKey),
+    ) {
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         val response =
             when (loadType) {
                 LoadType.PREPEND -> {
-                    return MediatorResult.Success(
+                    return Result(
                         endOfPaginationReached = true,
                     )
                 }
@@ -43,15 +49,13 @@ internal class SearchStatusPagingSource(
                                 limit = state.config.pageSize,
                                 type = "statuses",
                             ).statuses
-                    }.also {
-                        database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
                     }
                 }
 
                 LoadType.APPEND -> {
                     val lastItem =
                         database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return MediatorResult.Success(
+                            ?: return Result(
                                 endOfPaginationReached = true,
                             )
                     if (query.startsWith("#")) {
@@ -72,15 +76,13 @@ internal class SearchStatusPagingSource(
                 }
             } ?: emptyList()
 
-        Mastodon.save(
-            database = database,
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            data = response,
-        )
-
-        return MediatorResult.Success(
+        return Result(
             endOfPaginationReached = response.isEmpty(),
+            data =
+                response.toDbPagingTimeline(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                ),
         )
     }
 }

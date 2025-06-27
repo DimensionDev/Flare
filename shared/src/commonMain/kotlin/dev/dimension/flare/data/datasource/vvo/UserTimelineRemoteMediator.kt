@@ -3,13 +3,13 @@ package dev.dimension.flare.data.datasource.vvo
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.VVO
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.vvo
 
@@ -21,26 +21,29 @@ internal class UserTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val mediaOnly: Boolean,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseTimelineRemoteMediator(
+        database = database,
+        clearWhenRefresh = true,
+        pagingKey = pagingKey,
+        accountType = AccountType.Specific(accountKey),
+    ) {
     private var containerid: String? = null
     var page = 0
 
-    override suspend fun doLoad(
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         if (mediaOnly) {
             // Not supported yet
-            return MediatorResult.Success(
+            return Result(
                 endOfPaginationReached = true,
             )
         }
 
         val config = service.config()
         if (config.data?.login != true) {
-            return MediatorResult.Error(
-                LoginExpiredException,
-            )
+            throw LoginExpiredException
         }
         if (containerid == null) {
             containerid =
@@ -66,7 +69,7 @@ internal class UserTimelineRemoteMediator(
                 }
 
                 LoadType.PREPEND -> {
-                    return MediatorResult.Success(
+                    return Result(
                         endOfPaginationReached = true,
                     )
                 }
@@ -75,7 +78,7 @@ internal class UserTimelineRemoteMediator(
                     page++
                     val lastItem =
                         database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return MediatorResult.Success(
+                            ?: return Result(
                                 endOfPaginationReached = true,
                             )
                     service.getContainerIndex(
@@ -92,23 +95,21 @@ internal class UserTimelineRemoteMediator(
                 ?.mapNotNull { it.mblog }
                 .orEmpty()
 
-        database.connect {
-            if (loadType == LoadType.REFRESH) {
-                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+        val data =
+            status.map { statusItem ->
+                statusItem.toDbPagingTimeline(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                    sortIdProvider = {
+                        val index = status.indexOf(it)
+                        -(index + page * state.config.pageSize).toLong()
+                    },
+                )
             }
-            VVO.saveStatus(
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                database = database,
-                statuses = status,
-                sortIdProvider = {
-                    val index = status.indexOf(it)
-                    -(index + page * state.config.pageSize).toLong()
-                },
-            )
-        }
-        return MediatorResult.Success(
+
+        return Result(
             endOfPaginationReached = response.data?.cardlistInfo?.sinceID == null,
+            data = data,
         )
     }
 }

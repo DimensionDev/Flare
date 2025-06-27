@@ -91,7 +91,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         if isMonitoring, PerformanceConfig.Lifecycle.stopMonitoringOnBackground {
             stopMonitoring()
             if PerformanceConfig.isVerboseLoggingEnabled {
-                print("[PerformanceMonitor] Stopped monitoring due to app entering background")
+                FlareLog.debug("PerformanceMonitor Stopped monitoring due to app entering background")
             }
         }
     }
@@ -100,7 +100,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         if !isMonitoring, PerformanceConfig.Lifecycle.resumeMonitoringOnForeground {
             startMonitoring()
             if PerformanceConfig.isVerboseLoggingEnabled {
-                print("[PerformanceMonitor] Resumed monitoring due to app entering foreground")
+                FlareLog.debug("PerformanceMonitor Resumed monitoring due to app entering foreground")
             }
         }
     }
@@ -118,7 +118,7 @@ class TimelinePerformanceMonitor: ObservableObject {
     func startMonitoring() {
         guard !isMonitoring else {
             if PerformanceConfig.isVerboseLoggingEnabled {
-                print("[PerformanceMonitor] Already monitoring, skipping start")
+                FlareLog.debug("PerformanceMonitor Already monitoring, skipping start")
             }
             return
         }
@@ -126,7 +126,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         // 只在Debug模式下启用监控
         guard PerformanceConfig.isDebugModeEnabled else {
             if PerformanceConfig.isVerboseLoggingEnabled {
-                print("[PerformanceMonitor] Performance monitoring disabled in release mode")
+                FlareLog.debug("PerformanceMonitor Performance monitoring disabled in release mode")
             }
             return
         }
@@ -134,7 +134,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         isMonitoring = true
 
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("[PerformanceMonitor] ✅ Starting Timeline performance monitoring")
+            FlareLog.debug("PerformanceMonitor Starting Timeline performance monitoring")
         }
         os_log("Starting Timeline performance monitoring", log: .performance, type: .info)
 
@@ -142,35 +142,35 @@ class TimelinePerformanceMonitor: ObservableObject {
         let testCPU = getCurrentCPUUsage()
         let testMemory = getCurrentMemoryUsage()
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("[PerformanceMonitor] Initial test - CPU: \(PerformanceConfig.Formatting.formatCPU(testCPU))%, Memory: \(PerformanceConfig.Formatting.formatMemoryMB(testMemory))MB")
+            FlareLog.performance("PerformanceMonitor Initial test - CPU: \(PerformanceConfig.Formatting.formatCPU(testCPU))%, Memory: \(PerformanceConfig.Formatting.formatMemoryMB(testMemory))MB")
         }
 
         // Start CPU and Memory monitoring
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("[PerformanceMonitor] Setting up CPU/Memory timer (\(PerformanceConfig.cpuMemoryUpdateInterval)s interval)...")
+            FlareLog.performance("PerformanceMonitor Setting up CPU/Memory timer (\(PerformanceConfig.cpuMemoryUpdateInterval)s interval)...")
         }
         monitoringTimer = Timer.scheduledTimer(withTimeInterval: PerformanceConfig.cpuMemoryUpdateInterval, repeats: true) { [weak self] _ in
             self?.updateCPUAndMemoryMetrics()
         }
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("[PerformanceMonitor] ✅ CPU/Memory timer started")
+            FlareLog.debug("PerformanceMonitor CPU/Memory timer started")
         }
 
         // Start Frame Rate monitoring
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("[PerformanceMonitor] Setting up Frame Rate monitor...")
+            FlareLog.debug("PerformanceMonitor Setting up Frame Rate monitor...")
         }
         frameRateMonitor = CADisplayLink(target: self, selector: #selector(updateFrameRate))
         frameRateMonitor?.add(to: .main, forMode: .common)
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("[PerformanceMonitor] ✅ Frame Rate monitor started")
+            FlareLog.debug("PerformanceMonitor Frame Rate monitor started")
         }
     }
 
     func stopMonitoring() {
         guard isMonitoring else {
             if PerformanceConfig.isVerboseLoggingEnabled {
-                print("[PerformanceMonitor] Not monitoring, skipping stop")
+                FlareLog.debug("PerformanceMonitor Not monitoring, skipping stop")
             }
             return
         }
@@ -183,7 +183,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         frameRateMonitor = nil
 
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("[PerformanceMonitor] Stopped Timeline performance monitoring")
+            FlareLog.debug("PerformanceMonitor Stopped Timeline performance monitoring")
         }
         os_log("Stopped Timeline performance monitoring", log: .performance, type: .info)
     }
@@ -196,7 +196,7 @@ class TimelinePerformanceMonitor: ObservableObject {
 
         // Debug output
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("[PerformanceMonitor] CPU: \(PerformanceConfig.Formatting.formatCPU(currentCPUUsage))%, Memory: \(PerformanceConfig.Formatting.formatMemoryMB(currentMemoryUsage))MB")
+            FlareLog.performance("PerformanceMonitor CPU: \(PerformanceConfig.Formatting.formatCPU(currentCPUUsage))%, Memory: \(PerformanceConfig.Formatting.formatMemoryMB(currentMemoryUsage))MB")
         }
 
         // Store history
@@ -240,7 +240,7 @@ class TimelinePerformanceMonitor: ObservableObject {
             }
 
             if PerformanceConfig.isVerboseLoggingEnabled {
-                print("[PerformanceMonitor] Frame rate: \(PerformanceConfig.Formatting.formatFrameRate(currentFrameRate)) fps")
+                FlareLog.performance("PerformanceMonitor Frame rate: \(PerformanceConfig.Formatting.formatFrameRate(currentFrameRate)) fps")
             }
 
             frameCount = 0
@@ -264,7 +264,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         scrollFrameRates.removeAll()
         scrollStutterCount = 0
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("[PerformanceMonitor] Scroll performance data reset")
+            FlareLog.performance("PerformanceMonitor Scroll performance data reset")
         }
         os_log("[PerformanceMonitor] Scroll performance data reset", log: OSLog.performance, type: .info)
     }

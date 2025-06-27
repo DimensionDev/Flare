@@ -83,7 +83,7 @@ class TimelineVersionManager {
     // Initialization
 
     private init() {
-        print("🔄 [TimelineVersionManager] Initialized with default version: \(currentVersion.rawValue)")
+        FlareLog.debug("TimelineVersionManager Initialized with default version: \(currentVersion.rawValue)")
     }
 
     // Version Switching
@@ -92,16 +92,16 @@ class TimelineVersionManager {
     /// Switch to specified version
     func switchTo(_ version: TimelineVersion) {
         guard version != currentVersion else {
-            print("🔄 [TimelineVersionManager] Already on version \(version.rawValue), no switch needed")
+            FlareLog.debug("TimelineVersionManager Already on version \(version.rawValue), no switch needed")
             return
         }
 
         guard !isSwitching else {
-            print("⚠️ [TimelineVersionManager] Version switch already in progress, ignoring request")
+            FlareLog.warning("TimelineVersionManager Version switch already in progress, ignoring request")
             return
         }
 
-        print("🔄 [TimelineVersionManager] Starting switch from \(currentVersion.rawValue) to \(version.rawValue)")
+        FlareLog.debug("TimelineVersionManager Starting switch from \(currentVersion.rawValue) to \(version.rawValue)")
 
         isSwitching = true
         let oldVersion = currentVersion
@@ -120,14 +120,14 @@ class TimelineVersionManager {
         // Delay reset of switching state
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             self.isSwitching = false
-            print("✅ [TimelineVersionManager] Version switch completed: \(version.rawValue)")
+            FlareLog.debug("TimelineVersionManager Version switch completed: \(version.rawValue)")
         }
     }
 
     /// 处理版本变化
     /// Handle version change
     private func handleVersionChange(from oldVersion: TimelineVersion, to newVersion: TimelineVersion) {
-        print("🔄 [TimelineVersionManager] Version changed: \(oldVersion.rawValue) → \(newVersion.rawValue)")
+        FlareLog.debug("TimelineVersionManager Version changed: \(oldVersion.rawValue) → \(newVersion.rawValue)")
 
         // 发送版本变化通知
         // Send version change notification
@@ -158,7 +158,7 @@ class TimelineVersionManager {
             switchHistory.removeFirst()
         }
 
-        print("📝 [TimelineVersionManager] Recorded switch: \(oldVersion.identifier) → \(newVersion.identifier)")
+        FlareLog.debug("TimelineVersionManager Recorded switch: \(oldVersion.identifier) → \(newVersion.identifier)")
     }
 
     /// 清理版本特定的缓存
@@ -166,7 +166,7 @@ class TimelineVersionManager {
     private func clearVersionSpecificCache() {
         // 这里可以添加清理逻辑，比如清理性能数据缓存等
         // Add cleanup logic here, such as clearing performance data cache
-        print("🧹 [TimelineVersionManager] Cleared version-specific cache")
+        FlareLog.debug("TimelineVersionManager Cleared version-specific cache")
     }
 
     // Utility Methods

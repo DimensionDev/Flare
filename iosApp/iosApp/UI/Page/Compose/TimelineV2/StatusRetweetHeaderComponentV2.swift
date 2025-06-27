@@ -47,14 +47,14 @@ struct StatusRetweetHeaderComponentV2: View {
     private func handleTopMessageTap() {
         // 🔥 实现转发头部点击跳转到执行操作的用户页面
         guard let user = topMessage.user else {
-            print("⚠️ [StatusRetweetHeader] No user in topMessage")
+            FlareLog.warning("StatusRetweetHeaderV2 No user in topMessage")
             return
         }
 
         let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
         let userKey = createMicroBlogKey(from: user)
 
-        print("🔗 [StatusRetweetHeader] Navigate to profile: \(user.key)")
+        FlareLog.debug("StatusRetweetHeaderV2 Navigate to profile: \(user.key)")
         router.navigate(to: .profile(
             accountType: accountType,
             userKey: userKey

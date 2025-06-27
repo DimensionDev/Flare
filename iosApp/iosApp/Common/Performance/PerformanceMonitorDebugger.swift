@@ -18,13 +18,13 @@ class PerformanceMonitorDebugger {
     // MARK: - 系统信息检查
 
     func checkSystemCapabilities() {
-        print("=== Performance Monitor System Check ===")
+        FlareLog.performance("=== Performance Monitor System Check ===")
 
         // 检查设备信息
         let device = UIDevice.current
-        print("Device: \(device.model)")
-        print("System: \(device.systemName) \(device.systemVersion)")
-        print("Process Info: \(ProcessInfo.processInfo.processName)")
+        FlareLog.performance("Device: \(device.model)")
+        FlareLog.performance("System: \(device.systemName) \(device.systemVersion)")
+        FlareLog.performance("Process Info: \(ProcessInfo.processInfo.processName)")
 
         // 检查日志系统
         checkLoggingSystem()
@@ -32,39 +32,39 @@ class PerformanceMonitorDebugger {
         // 检查性能监控权限
         checkPerformanceMonitoringCapabilities()
 
-        print("=== System Check Complete ===\n")
+        FlareLog.performance("=== System Check Complete ===")
     }
 
     private func checkLoggingSystem() {
-        print("\n--- Logging System Check ---")
+        FlareLog.performance("--- Logging System Check ---")
 
         // 测试OSLog
         let testLog = OSLog(subsystem: "dev.dimension.flare", category: "debug")
         os_log("OSLog test message", log: testLog, type: .info)
-        print("OSLog test message sent")
+        FlareLog.performance("OSLog test message sent")
 
         // 测试不同日志级别
         os_log("Debug level test", log: .performance, type: .debug)
         os_log("Info level test", log: .performance, type: .info)
         os_log("Error level test", log: .performance, type: .error)
 
-        print("Multiple log level tests sent")
+        FlareLog.performance("Multiple log level tests sent")
     }
 
     private func checkPerformanceMonitoringCapabilities() {
-        print("\n--- Performance Monitoring Capabilities ---")
+        FlareLog.performance("--- Performance Monitoring Capabilities ---")
 
         // 检查CPU监控
         let cpuUsage = testCPUMonitoring()
-        print("CPU monitoring test: \(cpuUsage > 0 ? "✅ Working" : "❌ Failed")")
+        FlareLog.performance("CPU monitoring test: \(cpuUsage > 0 ? "✅ Working" : "❌ Failed")")
 
         // 检查内存监控
         let memoryUsage = testMemoryMonitoring()
-        print("Memory monitoring test: \(memoryUsage > 0 ? "✅ Working" : "❌ Failed")")
+        FlareLog.performance("Memory monitoring test: \(memoryUsage > 0 ? "✅ Working" : "❌ Failed")")
 
         // 检查帧率监控
         let canMonitorFrameRate = testFrameRateMonitoring()
-        print("Frame rate monitoring test: \(canMonitorFrameRate ? "✅ Working" : "❌ Failed")")
+        FlareLog.performance("Frame rate monitoring test: \(canMonitorFrameRate ? "✅ Working" : "❌ Failed")")
     }
 
     // MARK: - 性能监控组件测试
@@ -75,11 +75,11 @@ class PerformanceMonitorDebugger {
         let threadsResult = task_threads(mach_task_self_, &threadsList, &threadsCount)
 
         guard threadsResult == KERN_SUCCESS else {
-            print("❌ CPU monitoring failed: Cannot get thread list")
+            FlareLog.error("CPU monitoring failed: Cannot get thread list")
             return 0
         }
 
-        print("✅ CPU monitoring: Found \(threadsCount) threads")
+        FlareLog.performance("CPU monitoring: Found \(threadsCount) threads")
 
         // 清理内存
         if let threadsList {
@@ -106,10 +106,10 @@ class PerformanceMonitorDebugger {
 
         if kerr == KERN_SUCCESS {
             let memoryMB = Double(info.resident_size) / (1024 * 1024)
-            print("✅ Memory monitoring: Current usage \(String(format: "%.1f", memoryMB))MB")
+            FlareLog.performance("Memory monitoring: Current usage \(String(format: "%.1f", memoryMB))MB")
             return info.resident_size
         } else {
-            print("❌ Memory monitoring failed: kern_return_t = \(kerr)")
+            FlareLog.error("Memory monitoring failed: kern_return_t = \(kerr)")
             return 0
         }
     }
@@ -122,7 +122,7 @@ class PerformanceMonitorDebugger {
         // 立即移除，只是测试创建
         displayLink.invalidate()
 
-        print("✅ Frame rate monitoring: CADisplayLink creation successful")
+        FlareLog.performance("Frame rate monitoring: CADisplayLink creation successful")
         return true
     }
 
@@ -133,49 +133,49 @@ class PerformanceMonitorDebugger {
     // MARK: - 性能监控器状态检查
 
     func checkPerformanceMonitorState() {
-        print("=== Performance Monitor State Check ===")
+        FlareLog.performance("=== Performance Monitor State Check ===")
 
         let monitor = TimelinePerformanceMonitor.shared
 
-        print("Monitor state:")
-        print("- Is monitoring: \(monitor.isMonitoring)")
-        print("- Current CPU: \(String(format: "%.1f", monitor.currentCPUUsage * 100))%")
-        print("- Current Memory: \(String(format: "%.1f", Double(monitor.currentMemoryUsage) / 1_000_000))MB")
-        print("- Current Frame Rate: \(String(format: "%.1f", monitor.currentFrameRate))fps")
+        FlareLog.performance("Monitor state:")
+        FlareLog.performance("- Is monitoring: \(monitor.isMonitoring)")
+        FlareLog.performance("- Current CPU: \(String(format: "%.1f", monitor.currentCPUUsage * 100))%")
+        FlareLog.performance("- Current Memory: \(String(format: "%.1f", Double(monitor.currentMemoryUsage) / 1_000_000))MB")
+        FlareLog.performance("- Current Frame Rate: \(String(format: "%.1f", monitor.currentFrameRate))fps")
 
-        print("=== State Check Complete ===\n")
+        FlareLog.performance("=== State Check Complete ===")
     }
 
     // MARK: - 强制性能监控测试
 
     func forcePerformanceMonitoringTest() {
-        print("=== Force Performance Monitoring Test ===")
+        FlareLog.performance("=== Force Performance Monitoring Test ===")
 
         let monitor = TimelinePerformanceMonitor.shared
 
-        print("1. Starting monitoring...")
+        FlareLog.performance("1. Starting monitoring...")
         monitor.startMonitoring()
 
         // 等待一秒让监控启动
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-            print("2. Checking state after 1 second...")
+            FlareLog.performance("2. Checking state after 1 second...")
             self.checkPerformanceMonitorState()
 
             // 跨平台调用功能已移除
-            print("3. Cross-platform call tracking has been removed from the system")
+            FlareLog.performance("3. Cross-platform call tracking has been removed from the system")
 
             // 再等待一秒
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                print("4. Final state check...")
+                FlareLog.performance("4. Final state check...")
                 self.checkPerformanceMonitorState()
 
-                print("5. Generating report...")
+                FlareLog.performance("5. Generating report...")
                 let report = monitor.generateReport()
-                print("Report generated:")
-                print("Summary: \(report.summary)")
-                print("Details: \(report.details)")
+                FlareLog.performance("Report generated:")
+                FlareLog.performance("Summary: \(report.summary)")
+                FlareLog.performance("Details: \(report.details)")
 
-                print("=== Force Test Complete ===\n")
+                FlareLog.performance("=== Force Test Complete ===")
             }
         }
     }
@@ -183,37 +183,37 @@ class PerformanceMonitorDebugger {
     // MARK: - 日志输出测试
 
     func testLogOutput() {
-        print("=== Log Output Test ===")
+        FlareLog.performance("=== Log Output Test ===")
 
         // 测试不同类型的日志输出
-        print("Testing print statements...")
-        print("[DEBUG] This is a print statement")
+        FlareLog.performance("Testing print statements...")
+        FlareLog.debug("[DEBUG] This is a print statement")
 
-        print("Testing OSLog with different levels...")
+        FlareLog.performance("Testing OSLog with different levels...")
         os_log("Debug message", log: .performance, type: .debug)
         os_log("Info message", log: .performance, type: .info)
         os_log("Default message", log: .performance, type: .default)
         os_log("Error message", log: .performance, type: .error)
         os_log("Fault message", log: .performance, type: .fault)
 
-        print("Testing custom subsystem...")
+        FlareLog.performance("Testing custom subsystem...")
         let customLog = OSLog(subsystem: "dev.dimension.flare.debug", category: "test")
         os_log("Custom subsystem message", log: customLog, type: .info)
 
-        print("=== Log Output Test Complete ===\n")
+        FlareLog.performance("=== Log Output Test Complete ===")
     }
 
     // MARK: - 完整诊断
 
     func runFullDiagnostic() {
-        print("\n🔍 === PERFORMANCE MONITOR FULL DIAGNOSTIC ===\n")
+        FlareLog.performance("🔍 === PERFORMANCE MONITOR FULL DIAGNOSTIC ===")
 
         checkSystemCapabilities()
         checkPerformanceMonitorState()
         testLogOutput()
         forcePerformanceMonitoringTest()
 
-        print("🎯 === DIAGNOSTIC COMPLETE ===\n")
+        FlareLog.performance("🎯 === DIAGNOSTIC COMPLETE ===")
     }
 }
 

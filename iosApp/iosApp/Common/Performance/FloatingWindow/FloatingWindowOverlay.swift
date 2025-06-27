@@ -59,37 +59,37 @@ struct FloatingWindowControlPanel: View {
             HStack {
                 Button(action: {
                     if PerformanceConfig.isVerboseLoggingEnabled {
-                        print("[FloatingWindowControl] 🔘 Show/Hide button tapped")
-                        print("[FloatingWindowControl] Current state: \(windowManager.state)")
-                        print("[FloatingWindowControl] Is visible: \(windowManager.state.isVisible)")
+                        FlareLog.debug("FloatingWindowControl Show/Hide button tapped")
+                        FlareLog.debug("FloatingWindowControl Current state: \(windowManager.state)")
+                        FlareLog.debug("FloatingWindowControl Is visible: \(windowManager.state.isVisible)")
                     }
 
                     if windowManager.state.isVisible {
                         if PerformanceConfig.isVerboseLoggingEnabled {
-                            print("[FloatingWindowControl] 👁️ Hiding window")
+                            FlareLog.debug("FloatingWindowControl Hiding window")
                         }
                         windowManager.hide()
                     } else {
                         if PerformanceConfig.isVerboseLoggingEnabled {
-                            print("[FloatingWindowControl] 👁️ Showing window")
-                            print("[FloatingWindowControl] Monitor is monitoring: \(monitor.isMonitoring)")
+                            FlareLog.debug("FloatingWindowControl Showing window")
+                            FlareLog.debug("FloatingWindowControl Monitor is monitoring: \(monitor.isMonitoring)")
                         }
 
                         if !monitor.isMonitoring {
                             if PerformanceConfig.isVerboseLoggingEnabled {
-                                print("[FloatingWindowControl] 🚀 Starting monitoring")
+                                FlareLog.debug("FloatingWindowControl Starting monitoring")
                             }
                             monitor.startMonitoring()
                         }
 
                         if PerformanceConfig.isVerboseLoggingEnabled {
-                            print("[FloatingWindowControl] 📱 Calling windowManager.show()")
+                            FlareLog.debug("FloatingWindowControl Calling windowManager.show()")
                         }
                         windowManager.show()
 
                         if PerformanceConfig.isVerboseLoggingEnabled {
-                            print("[FloatingWindowControl] ✅ windowManager.show() completed")
-                            print("[FloatingWindowControl] New state: \(windowManager.state)")
+                            FlareLog.debug("FloatingWindowControl windowManager.show() completed")
+                            FlareLog.debug("FloatingWindowControl New state: \(windowManager.state)")
                         }
                     }
                 }) {

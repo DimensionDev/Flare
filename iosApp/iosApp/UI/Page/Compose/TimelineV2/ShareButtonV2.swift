@@ -209,7 +209,7 @@ struct ShareButtonV2: View {
             Divider()
 
             Button(action: {
-                print("Save Media tapped")
+                FlareLog.debug("ShareButtonV2 Save Media tapped")
                 ToastView(
                     icon: UIImage(systemName: "arrow.down.to.line"),
                     message: String(localized: "download to App \n Download Manager")

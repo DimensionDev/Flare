@@ -151,7 +151,7 @@ private struct OfflineTranslationModifier: ViewModifier {
                         }
                     } catch {
                         if !Task.isCancelled {
-                            print("Translation error: \(error)")
+                            FlareLog.error("Translation error: \(error)")
                         }
                     }
                     if !Task.isCancelled {

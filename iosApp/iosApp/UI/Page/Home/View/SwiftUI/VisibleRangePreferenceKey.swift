@@ -146,7 +146,7 @@ class VisibleRangeManager {
 
         // 调试日志 / Debug logging
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("📍 [VisibleRangeManager] Range updated: \(newRange.startIndex)-\(newRange.endIndex), extended: \(newRange.extendedRange)")
+            FlareLog.performance("VisibleRangeManager Range updated: \(newRange.startIndex)-\(newRange.endIndex), extended: \(newRange.extendedRange)")
         }
     }
 

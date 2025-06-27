@@ -73,12 +73,12 @@ struct DMConversationView: View {
                         case .edit:
                             defaultActionClosure(message, .edit { editedText in
 
-                                print(editedText)
+                                FlareLog.debug("DMConversation Edit message: \(editedText)")
                             })
                         case .delete:
-                            print(message.text)
+                            FlareLog.debug("DMConversation Delete message: \(message.text)")
                         case .print:
-                            print(message.text)
+                            FlareLog.debug("DMConversation Print message: \(message.text)")
                         }
                     }
                     .setAvailableInputs([.text])
@@ -137,8 +137,8 @@ struct DMConversationView: View {
             if let message = success.peek(index: index) {
                 if let chatMessage = convertToChatMessage(message) {
                     messages.append(chatMessage)
-                    print(chatMessage.text)
-                    print(chatMessage.status)
+                    FlareLog.debug("DMConversation Message text: \(chatMessage.text)")
+                    FlareLog.debug("DMConversation Message status: \(chatMessage.status)")
                 }
 
                 success.get(index: index)
@@ -146,7 +146,7 @@ struct DMConversationView: View {
         }
 
         if messages.isEmpty {
-            print("No Message")
+            FlareLog.debug("DMConversation No Message")
         }
 
         return messages

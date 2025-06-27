@@ -460,11 +460,11 @@ struct TimelinePerformanceTestSection: View {
     // MARK: - Test Control Methods
 
     private func startPerformanceTest() {
-        print("🚀 [PerformanceTest] Starting performance test for \(versionManager.currentVersion.rawValue)")
+        FlareLog.performance("PerformanceTest Starting performance test for \(versionManager.currentVersion.rawValue)")
 
         // 确保性能监控正在运行
         if !monitor.isMonitoring {
-            print("📊 [PerformanceTest] Starting performance monitoring")
+            FlareLog.performance("PerformanceTest Starting performance monitoring")
             monitor.startMonitoring()
         }
 
@@ -477,11 +477,11 @@ struct TimelinePerformanceTestSection: View {
         // 启动数据收集定时器
         startDataCollection()
 
-        print("⏱️ [PerformanceTest] Test started - will run until manually stopped")
+        FlareLog.performance("PerformanceTest Test started - will run until manually stopped")
     }
 
     private func stopPerformanceTest() {
-        print("🛑 [PerformanceTest] Stopping performance test")
+        FlareLog.performance("PerformanceTest Stopping performance test")
 
         isTestRunning = false
         stopDataCollection()
@@ -490,14 +490,14 @@ struct TimelinePerformanceTestSection: View {
         showResults = true
 
         if let result {
-            print("📈 [PerformanceTest] Test completed - FPS: \(String(format: "%.1f", result.averageFPS)), Grade: \(result.performanceGrade)")
+            FlareLog.performance("PerformanceTest Test completed - FPS: \(String(format: "%.1f", result.averageFPS)), Grade: \(result.performanceGrade)")
         }
     }
 
     // MARK: - Data Collection
 
     private func startDataCollection() {
-        print("📊 [PerformanceTest] Starting data collection timer")
+        FlareLog.performance("PerformanceTest Starting data collection timer")
 
         // 使用标准化的数据收集间隔
         dataCollectionTimer = Timer.scheduledTimer(withTimeInterval: PerformanceConfig.performanceTestDataInterval, repeats: true) { _ in
@@ -506,7 +506,7 @@ struct TimelinePerformanceTestSection: View {
     }
 
     private func stopDataCollection() {
-        print("📊 [PerformanceTest] Stopping data collection timer")
+        FlareLog.performance("PerformanceTest Stopping data collection timer")
         dataCollectionTimer?.invalidate()
         dataCollectionTimer = nil
     }
@@ -524,7 +524,7 @@ struct TimelinePerformanceTestSection: View {
 
         // 调试输出（每10次输出一次，避免日志过多）
         if Int.random(in: 1 ... 20) == 1 {
-            print("📊 [PerformanceTest] Data: FPS=\(String(format: "%.1f", fps)), CPU=\(String(format: "%.1f", cpu))%, MEM=\(String(format: "%.1f", memoryMB))MB")
+            FlareLog.performance("PerformanceTest Data: FPS=\(String(format: "%.1f", fps)), CPU=\(String(format: "%.1f", cpu))%, MEM=\(String(format: "%.1f", memoryMB))MB")
         }
     }
 }

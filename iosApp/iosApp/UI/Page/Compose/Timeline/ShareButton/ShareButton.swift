@@ -225,7 +225,7 @@ struct ShareButton: View {
             Divider()
 
             Button(action: {
-                print("Save Media tapped")
+                FlareLog.debug("ShareButton Save Media tapped")
 
                 ToastView(
                     icon: UIImage(systemName: "square.and.arrow.down"),
@@ -240,7 +240,7 @@ struct ShareButton: View {
                             // article image
                             imageUrl = image.previewUrl
                         }
-                        print("Starting download for Image: \(imageUrl)")
+                        FlareLog.debug("ShareButton Starting download for Image: \(imageUrl)")
                         DownloadHelper.shared.startMediaDownload(
                             url: imageUrl,
                             mediaType: .image,
@@ -248,7 +248,7 @@ struct ShareButton: View {
                         )
                     } else if let video = media as? UiMediaVideo {
                         let videoUrl = video.url
-                        print("Starting download for Video: \(videoUrl)")
+                        FlareLog.debug("ShareButton Starting download for Video: \(videoUrl)")
 
                         if videoUrl.contains(".mp4") {
                             DownloadHelper.shared.startMediaDownload(
@@ -265,7 +265,7 @@ struct ShareButton: View {
 
                     } else if let gif = media as? UiMediaGif {
                         let gifUrl = gif.url
-                        print("Starting download for GIF: \(gifUrl)")
+                        FlareLog.debug("ShareButton Starting download for GIF: \(gifUrl)")
                         DownloadHelper.shared.startMediaDownload(
                             url: gifUrl,
                             mediaType: .gif,
@@ -273,7 +273,7 @@ struct ShareButton: View {
                         )
                     } else if let audio = media as? UiMediaAudio {
                         let audioUrl = audio.url
-                        print("Starting download for Audio: \(audioUrl)")
+                        FlareLog.debug("ShareButton Starting download for Audio: \(audioUrl)")
                         DownloadHelper.shared.startMediaDownload(
                             url: audioUrl,
                             mediaType: .audio

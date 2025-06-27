@@ -22,7 +22,7 @@ class SensitiveContentAnalyzer {
         do {
             return try await analyzeImageDownLocal(url: imageURL)
         } catch {
-            print("analyzeImageDownLocal error: \(error)")
+            FlareLog.error("SensitiveContentAnalyzer analyzeImageDownLocal error: \(error)")
             return false
         }
 
@@ -40,7 +40,7 @@ class SensitiveContentAnalyzer {
         //         cache.set(url: url, isSensitive: isSensitive)
         //         return isSensitive
         //     } catch {
-        //         print("Kingfisher cache fail: \(error)")
+        //         FlareLog.debug("Kingfisher cache fail: \(error)")
         //         return false
         //     }
         // }
@@ -61,7 +61,7 @@ class SensitiveContentAnalyzer {
 
         //     return isSensitive
         // } catch {
-        //     print("analyze NetworkImage check faile: \(error)")
+        //     FlareLog.debug("analyze NetworkImage check faile: \(error)")
         //     return false
         // }
     }
@@ -76,11 +76,11 @@ class SensitiveContentAnalyzer {
 
     private func getCachedImage(url: String) async -> UIImage? {
         await withCheckedContinuation { continuation in
-            print("[DEBUG] 开始检查缓存: \(url)")
+            FlareLog.debug("SensitiveContentAnalyzer 开始检查缓存: \(url)")
 
             // check custom cache
             if let cachedResult = cache.get(for: url) {
-                print("[DEBUG] 自定义缓存命中")
+                FlareLog.debug("SensitiveContentAnalyzer 自定义缓存命中")
                 continuation.resume(returning: nil)
                 return
             }
@@ -90,25 +90,25 @@ class SensitiveContentAnalyzer {
             let key = url // 改为使用absoluteString
 
             if let image = kingfisherCache.retrieveImageInMemoryCache(forKey: key) {
-                print("[DEBUG] 内存缓存命中: \(image)")
+                FlareLog.debug("SensitiveContentAnalyzer 内存缓存命中: \(image)")
                 continuation.resume(returning: image)
                 return
             }
 
-            print("[DEBUG] 检查磁盘缓存...")
+            FlareLog.debug("SensitiveContentAnalyzer 检查磁盘缓存...")
             kingfisherCache.retrieveImage(forKey: key, options: nil) { result in
                 switch result {
                 case let .success(value):
                     if let image = value.image {
-                        print("[DEBUG] 磁盘缓存成功: \(image)")
+                        FlareLog.debug("SensitiveContentAnalyzer 磁盘缓存成功: \(image)")
                         continuation.resume(returning: image)
                     } else {
-                        print("[DEBUG] 磁盘缓存损坏，清理缓存")
+                        FlareLog.debug("SensitiveContentAnalyzer 磁盘缓存损坏，清理缓存")
                         kingfisherCache.removeImage(forKey: key)
                         continuation.resume(returning: nil)
                     }
                 case let .failure(error):
-                    print("[DEBUG] 磁盘缓存失败: \(error)")
+                    FlareLog.debug("SensitiveContentAnalyzer 磁盘缓存失败: \(error)")
                     continuation.resume(returning: nil)
                 }
             }

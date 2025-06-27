@@ -29,13 +29,13 @@ struct ListMembersView: View {
                             if let member = successData.peek(index: Int32(index)) {
                                 memberRow(index: index, member: member)
                                     .onAppear {
-                                        print("🟢 Debug Info: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
+                                        FlareLog.debug("ListMembers Debug Info: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
 
                                         successData.get(index: Int32(index))
 
                                         lastKnownItemCount = Int(successData.itemCount)
 
-                                        print("🟡 Update: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
+                                        FlareLog.debug("ListMembers Update: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
                                     }
                             }
                         }

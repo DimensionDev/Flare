@@ -69,44 +69,44 @@ class UserManager {
     }
 
     private func fetchAndStoreInstanceMetadata(host: String, platformType: PlatformType) {
-        print("UserManager (PresenterBase Model): 初始化 \(host) 的元数据获取...")
+        FlareLog.debug("UserManager (PresenterBase Model): 初始化 \(host) 的元数据获取...")
         instanceMetadata = nil
 
         let presenter = InstanceMetadataPresenter(host: host, platformType: platformType)
         Task { @MainActor in
-            print("UserManager (PresenterBase Model): Task started for \(host)")
+            FlareLog.debug("UserManager (PresenterBase Model): Task started for \(host)")
 
             do {
                 for try await stateContainer in presenter.models {
                     if Task.isCancelled {
-                        print("UserManager (PresenterBase Model): Observation task cancelled for \(host).")
+                        FlareLog.debug("UserManager (PresenterBase Model): Observation task cancelled for \(host).")
 
                         break
                     }
 
                     let uiState = stateContainer.data
-                    print("UserManager (PresenterBase Model): Received state for \(host): \(uiState)")
+                    FlareLog.debug("UserManager (PresenterBase Model): Received state for \(host): \(uiState)")
 
                     // self.isLoadingInstanceMetadata = uiState is UiStateLoading<UiInstanceMetadata>
 
                     if let successState = uiState as? UiStateSuccess<UiInstanceMetadata> {
                         self.instanceMetadata = successState.data
-                        print("UserManager (PresenterBase Model): Success for \(host).")
+                        FlareLog.debug("UserManager (PresenterBase Model): Success for \(host).")
                         break
                     } else if let errorState = uiState as? UiStateError<UiInstanceMetadata> {
                         self.instanceMetadata = nil
                         let errorMessage = errorState.throwable.message ?? "An unknown error occurred."
-                        print("UserManager (PresenterBase Model): Error for \(host) - \(errorMessage).")
+                        FlareLog.error("UserManager (PresenterBase Model): Error for \(host) - \(errorMessage).")
                         break
                     } else if uiState is UiStateLoading<UiInstanceMetadata> {
-                        print("UserManager (PresenterBase Model): Still loading for \(host).")
+                        FlareLog.debug("UserManager (PresenterBase Model): Still loading for \(host).")
                     }
                 }
             } catch {
                 if Task.isCancelled {
-                    print("UserManager (PresenterBase Model): Observation task for \(host) caught cancellation error.")
+                    FlareLog.debug("UserManager (PresenterBase Model): Observation task for \(host) caught cancellation error.")
                 } else {
-                    print("UserManager (PresenterBase Model): Error observing \(host) metadata flow - \(error.localizedDescription)")
+                    FlareLog.error("UserManager (PresenterBase Model): Error observing \(host) metadata flow - \(error.localizedDescription)")
                 }
                 self.instanceMetadata = nil
             }

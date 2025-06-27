@@ -56,7 +56,7 @@ import SwiftUI
                 }
             }
             .onChange(of: scrollToTopTrigger) { _, _ in
-                print("[TimelineView_v2] ScrollToTop trigger changed for tab: \(tab.key)")
+                let _ = FlareLog.debug("TimelineView_v2 ScrollToTop trigger changed for tab: \(tab.key)")
                 guard isCurrentTab else { return }
 
                 withAnimation(.easeInOut(duration: 0.5)) {
@@ -72,7 +72,7 @@ import SwiftUI
             await setupDataSource()
         }
         .onReceive(NotificationCenter.default.publisher(for: .timelineItemUpdated)) { _ in
-            print("🔄 [TimelineView_v2] Received item update notification for tab: \(tab.key)")
+            FlareLog.debug("TimelineView_v2 Received item update notification for tab: \(tab.key)")
 
             // 🔥 防抖机制：取消之前的定时器，设置新的定时器
             refreshDebounceTimer?.invalidate()
@@ -96,10 +96,10 @@ import SwiftUI
 
 
      private func setupDataSource() async {
-        print("🏗️ [TimelineView_v2] Setting up direct data flow for tab: \(tab.key)")
+        FlareLog.debug("TimelineViewSwiftUI_v2 Setting up direct data flow for tab: \(tab.key)")
 
          guard let kmpPresenter = store.getOrCreatePresenter(for: tab) else {
-            print("❌ [TimelineView_v2] Failed to get presenter for tab: \(tab.key)")
+            FlareLog.error("TimelineViewSwiftUI_v2 Failed to get presenter for tab: \(tab.key)")
             await MainActor.run {
                 timelineState = .error(.data(.parsing))
             }
@@ -121,21 +121,21 @@ import SwiftUI
 
                          if newState != oldState {
                             self.timelineState = newState
-                            print("📊 [TimelineView_v2] State updated: \(newState.description)")
+                            FlareLog.debug("TimelineViewSwiftUI_v2 State updated: \(newState.description)")
                         }
                     }
                 }
             }
         }
 
-        print("✅ [TimelineView_v2] Direct data flow setup completed for tab: \(tab.key)")
+        FlareLog.debug("TimelineViewSwiftUI_v2 Direct data flow setup completed for tab: \(tab.key)")
     }
 
      private func handleRefresh() async {
-        print("🔄 [TimelineView_v2] Handling refresh for tab: \(tab.key)")
+        FlareLog.debug("TimelineViewSwiftUI_v2 Handling refresh for tab: \(tab.key)")
 
         guard let presenter else {
-            print("⚠️ [TimelineView_v2] No presenter available for refresh")
+            FlareLog.warning("TimelineViewSwiftUI_v2 No presenter available for refresh")
             return
         }
 
@@ -148,9 +148,9 @@ import SwiftUI
             if let timelineState = timelineState as? TimelineState {
                 try await timelineState.refresh()
             }
-            print("✅ [TimelineView_v2] Refresh completed for tab: \(tab.key)")
+            FlareLog.debug("TimelineViewSwiftUI_v2 Refresh completed for tab: \(tab.key)")
         } catch {
-            print("❌ [TimelineView_v2] Refresh failed: \(error)")
+            FlareLog.error("TimelineViewSwiftUI_v2 Refresh failed: \(error)")
         }
     }
 

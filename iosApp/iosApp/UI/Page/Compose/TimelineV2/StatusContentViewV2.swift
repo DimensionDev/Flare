@@ -43,19 +43,19 @@ struct StatusContentViewV2: View {
             )
             
             // Media
-            let _ = print("📱 [StatusContentViewV2] 检查媒体显示")
-            let _ = print("📱 [StatusContentViewV2] item.hasImages: \(item.hasImages)")
-            let _ = print("📱 [StatusContentViewV2] item.images.count: \(item.images.count)")
+            let _ = FlareLog.debug("StatusContentViewV2 检查媒体显示")
+            let _ = FlareLog.debug("StatusContentViewV2 item.hasImages: \(item.hasImages)")
+            let _ = FlareLog.debug("StatusContentViewV2 item.images.count: \(item.images.count)")
 
             if item.hasImages {
-                let _ = print("📱 [StatusContentViewV2] 显示StatusMediaViewV2")
+                let _ = FlareLog.debug("StatusContentViewV2 显示StatusMediaViewV2")
                 StatusMediaViewV2(
                     item: item,
                     appSettings: appSettings,
                     onMediaClick: onMediaClick
                 )
             } else {
-                let _ = print("📱 [StatusContentViewV2] 跳过媒体显示 - hasImages为false")
+                let _ = FlareLog.debug("StatusContentViewV2 跳过媒体显示 - hasImages为false")
             }
 
             // Card (Podcast or Link Preview)
@@ -107,12 +107,12 @@ struct StatusMediaViewV2: View {
 
     var body: some View {
         // 添加详细日志
-        let _ = print("🖼️ [StatusMediaViewV2] 开始渲染媒体")
-        let _ = print("🖼️ [StatusMediaViewV2] item.hasImages: \(item.hasImages)")
-        let _ = print("🖼️ [StatusMediaViewV2] item.images.count: \(item.images.count)")
-        let _ = print("🖼️ [StatusMediaViewV2] item.images: \(item.images)")
-        let _ = print("🖼️ [StatusMediaViewV2] item.sensitive: \(item.sensitive)")
-        let _ = print("🖼️ [StatusMediaViewV2] showSensitiveContent: \(appSettings.appearanceSettings.showSensitiveContent)")
+        let _ = FlareLog.debug("StatusMediaViewV2 开始渲染媒体")
+        let _ = FlareLog.debug("StatusMediaViewV2 item.hasImages: \(item.hasImages)")
+        let _ = FlareLog.debug("StatusMediaViewV2 item.images.count: \(item.images.count)")
+        let _ = FlareLog.debug("StatusMediaViewV2 item.images: \(item.images)")
+        let _ = FlareLog.debug("StatusMediaViewV2 item.sensitive: \(item.sensitive)")
+        let _ = FlareLog.debug("StatusMediaViewV2 showSensitiveContent: \(appSettings.appearanceSettings.showSensitiveContent)")
 
         Spacer().frame(height: 8)
 
@@ -121,7 +121,7 @@ struct StatusMediaViewV2: View {
             hideSensitive: item.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
             medias: item.images, // ✅ 修复：使用item.images而不是空数组
             onMediaClick: { index, media in
-                print("🖼️ [StatusMediaViewV2] 媒体点击: index=\(index), media=\(media)")
+                FlareLog.debug("StatusMediaViewV2 媒体点击: index=\(index), media=\(media)")
                 PhotoBrowserManagerV2.shared.showPhotoBrowser(
                     media: media,
                     images: item.images, // ✅ 修复：使用item.images而不是空数组

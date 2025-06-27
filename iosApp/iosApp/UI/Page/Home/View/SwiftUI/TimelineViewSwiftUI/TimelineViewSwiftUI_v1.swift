@@ -42,27 +42,27 @@ import SwiftUI
     }
     
      private func updateTimelineItemsIfNeeded(success: PagingStateSuccess<UiTimeline>) {
-        print("🔍 [TimelineViewSwiftUI_1.1] updateTimelineItemsIfNeeded called")
+        FlareLog.debug("TimelineViewSwiftUI_v1 updateTimelineItemsIfNeeded called")
         
         guard !isUpdatingItems else {
-            print("🔍 [TimelineViewSwiftUI_1.1] Already updating items, returning")
+            FlareLog.debug("TimelineViewSwiftUI_v1 Already updating items, returning")
             return
         }
         
         let currentItemCount = success.itemCount
         guard currentItemCount != lastKnownItemCount else {
-            print("🔍 [TimelineViewSwiftUI_1.1] Item count unchanged, returning")
+            FlareLog.debug("TimelineViewSwiftUI_v1 Item count unchanged, returning")
             return
         }
         
-        print("🔍 [TimelineViewSwiftUI_1.1] Starting update process")
+        FlareLog.debug("TimelineViewSwiftUI_v1 Starting update process")
         isUpdatingItems = true
         
         var newItems: [TimelineItemWrapper] = []
         let newItemCount = Int(currentItemCount)
         
         if lastKnownItemCount == 0 || timelineItems.isEmpty {
-            print("🔍 [TimelineViewSwiftUI_1.1] First load detected, creating all items")
+            FlareLog.debug("TimelineViewSwiftUI_v1 First load detected, creating all items")
             for index in 0 ..< newItemCount {
                 let status = success.peek(index: Int32(index))
                 let itemKey = status?.itemKey ?? ""
@@ -77,7 +77,7 @@ import SwiftUI
                 newItems.append(wrapper)
             }
         } else {
-            print("🔍 [TimelineViewSwiftUI_1.1] Incremental update detected")
+            FlareLog.debug("TimelineViewSwiftUI_v1 Incremental update detected")
             let oldItemCount = Int(lastKnownItemCount)
             
             for index in 0 ..< min(oldItemCount, newItemCount) {
@@ -112,12 +112,12 @@ import SwiftUI
             withAnimation(.none) {
                 timelineItems = newItems
                 lastKnownItemCount = currentItemCount
-                print("🔍 [TimelineViewSwiftUI_1.1] Update completed. timelineItems.count: \(timelineItems.count)")
+                FlareLog.debug("TimelineViewSwiftUI_v1 Update completed. timelineItems.count: \(timelineItems.count)")
             }
         }
         
         isUpdatingItems = false
-        print("🔍 [TimelineViewSwiftUI_1.1] updateTimelineItemsIfNeeded finished")
+        FlareLog.debug("TimelineViewSwiftUI_v1 updateTimelineItemsIfNeeded finished")
     }
     
     var body: some View {
@@ -140,11 +140,11 @@ import SwiftUI
                                case let .success(success) = onEnum(of: timelineState.listState)
                             {
                                 let _ = {
-                                    print("🔍 [TimelineViewSwiftUI_1.1] ObservePresenter success state detected")
+                                    let _ = FlareLog.debug("TimelineViewSwiftUI_1.1 ObservePresenter success state detected")
                                     updateTimelineItemsIfNeeded(success: success)
                                 }()
-                                
-                                let _ = print("📍 [TimelineViewSwiftUI_1.1] Rendering \(timelineItems.count) items with Stable ID")
+
+                                let _ = FlareLog.debug("TimelineViewSwiftUI_1.1 Rendering \(timelineItems.count) items with Stable ID")
                                 
                                 ForEach(timelineItems, id: \.stableID) { item in
                                     renderTimelineItem(item: item, success: success)
@@ -162,7 +162,7 @@ import SwiftUI
                 }
             }
             .onChange(of: scrollToTopTrigger) { _, _ in
-                print("[TimelineView_1.1] ScrollToTop trigger changed for tab: \(tab.key)")
+                let _ = FlareLog.debug("TimelineView_1.1 ScrollToTop trigger changed for tab: \(tab.key)")
                 guard isCurrentTab else { return }
                 
                 withAnimation(.easeInOut(duration: 0.5)) {

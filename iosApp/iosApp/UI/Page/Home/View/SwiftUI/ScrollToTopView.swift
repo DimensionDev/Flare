@@ -17,10 +17,10 @@ struct ScrollToTopView: View {
             .accessibilityHidden(true)
             .id(Constants.scrollToTop)
             .onAppear {
-                print("[ScrollToTopView] Anchor view appeared for tab: \(tabKey)")
+                let _ = FlareLog.debug("ScrollToTopView Anchor view appeared for tab: \(tabKey)")
             }
             .onDisappear {
-                print("[ScrollToTopView] Anchor view disappeared for tab: \(tabKey)")
+                let _ = FlareLog.debug("ScrollToTopView Anchor view disappeared for tab: \(tabKey)")
             }
     }
 }

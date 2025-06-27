@@ -72,13 +72,13 @@ struct TimelineStatusViewV2: View {
 
         // 第一步：检查是否开启timeline隐藏功能
         guard sensitiveSettings.hideInTimeline else {
-            print("🔒 [SensitiveContent] Timeline隐藏未开启 - item.id: \(item.id)")
+            FlareLog.debug("TimelineStatusViewV2 SensitiveContent Timeline隐藏未开启 - item.id: \(item.id)")
             return false
         }
 
         // 第二步：检查内容是否为敏感内容
         guard item.sensitive else {
-            print("🔒 [SensitiveContent] 内容非敏感 - item.id: \(item.id)")
+            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 内容非敏感 - item.id: \(item.id)")
             return false
         }
 
@@ -86,11 +86,11 @@ struct TimelineStatusViewV2: View {
         if let timeRange = sensitiveSettings.timeRange {
             // 有时间范围：只在时间范围内隐藏
             let shouldHide = timeRange.isCurrentTimeInRange()
-            print("🔒 [SensitiveContent] 时间范围检查 - item.id: \(item.id), shouldHide: \(shouldHide)")
+            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 时间范围检查 - item.id: \(item.id), shouldHide: \(shouldHide)")
             return shouldHide
         } else {
             // 没有时间范围：总是隐藏敏感内容
-            print("🔒 [SensitiveContent] 总是隐藏敏感内容 - item.id: \(item.id)")
+            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 总是隐藏敏感内容 - item.id: \(item.id)")
             return true
         }
     }
@@ -99,11 +99,11 @@ struct TimelineStatusViewV2: View {
 
     private var timelineContent: some View {
         // 添加详细日志
-        let _ = print("🏠 [TimelineStatusViewV2] 渲染Timeline项目")
-        let _ = print("🏠 [TimelineStatusViewV2] item.id: \(item.id)")
-        let _ = print("🏠 [TimelineStatusViewV2] item.hasImages: \(item.hasImages)")
-        let _ = print("🏠 [TimelineStatusViewV2] item.images.count: \(item.images.count)")
-        let _ = print("🏠 [TimelineStatusViewV2] item.images: \(item.images)")
+        let _ = FlareLog.debug("TimelineStatusViewV2 渲染Timeline项目")
+        let _ = FlareLog.debug("TimelineStatusViewV2 item.id: \(item.id)")
+        let _ = FlareLog.debug("TimelineStatusViewV2 item.hasImages: \(item.hasImages)")
+        let _ = FlareLog.debug("TimelineStatusViewV2 item.images.count: \(item.images.count)")
+        let _ = FlareLog.debug("TimelineStatusViewV2 item.images: \(item.images)")
 
         // 使用TimelineStatusView的结构
         return VStack(alignment: .leading) {
@@ -179,7 +179,7 @@ struct TimelineStatusViewV2: View {
             Task {
                 // 暂时使用简化的预加载逻辑
                 if index > 0 && index % 10 == 0 {
-                    print("🔄 [TimelineItemRowView] Simplified preload trigger at index: \(index)")
+                    FlareLog.debug("TimelineItemRowView Simplified preload trigger at index: \(index)")
                 }
             }
         }
@@ -194,7 +194,7 @@ struct TimelineStatusViewV2: View {
         // 构造MicroBlogKey - 需要从item.id和platformType构造
         let statusKey = createMicroBlogKey(from: item)
 
-        print("🔗 [TimelineStatusView] Navigate to status detail: \(item.id)")
+        FlareLog.debug("TimelineStatusView Navigate to status detail: \(item.id)")
         router.navigate(to: .statusDetail(
             accountType: accountType,
             statusKey: statusKey
@@ -204,11 +204,11 @@ struct TimelineStatusViewV2: View {
     private func handlePodcastCardTap(card: Card) {
         // 🔥 实现播客卡片点击处理
         if let route = AppDeepLinkHelper().parse(url: card.url) as? AppleRoute.Podcast {
-            print("🎵 [TimelineStatusView] Podcast Card Tapped, navigating to: podcastSheet(accountType: \(route.accountType), podcastId: \(route.id))")
+            FlareLog.debug("TimelineStatusViewV2 Podcast Card Tapped, navigating to: podcastSheet(accountType: \(route.accountType), podcastId: \(route.id))")
             router.navigate(to: .podcastSheet(accountType: route.accountType, podcastId: route.id))
         } else {
             let parsedRoute = AppDeepLinkHelper().parse(url: card.url)
-            print("❌ [TimelineStatusView] Error: Could not parse Podcast URL from card: \(card.url). Parsed type: \(type(of: parsedRoute))")
+            FlareLog.error("TimelineStatusViewV2 Error: Could not parse Podcast URL from card: \(card.url). Parsed type: \(type(of: parsedRoute)) Optional value: \(String(describing: parsedRoute))")
             // 降级处理：使用系统URL打开
             if let url = URL(string: card.url) {
                 openURL(url)
@@ -245,19 +245,19 @@ struct TimelineStatusViewV2: View {
     }
 
     private func handleTimelineAction(_ actionType: TimelineActionType, item: TimelineItem, at index: Int) {
-        print("🔄 [TimelineView_v2] Handling action \(actionType) for item: \(item.id) at index: \(index)")
-        print("🔍 [TimelineView_v2] Received updated item state:")
-        print("   - ID: \(item.id)")
-        print("   - Like count: \(item.likeCount)")
-        print("   - Is liked: \(item.isLiked)")
-        print("   - Retweet count: \(item.retweetCount)")
-        print("   - Is retweeted: \(item.isRetweeted)")
-        print("   - Bookmark count: \(item.bookmarkCount)")
-        print("   - Is bookmarked: \(item.isBookmarked)")
+        FlareLog.debug("TimelineView_v2 Handling action \(actionType) for item: \(item.id) at index: \(index)")
+        FlareLog.debug("TimelineView_v2 Received updated item state:")
+        FlareLog.debug("   - ID: \(item.id)")
+        FlareLog.debug("   - Like count: \(item.likeCount)")
+        FlareLog.debug("   - Is liked: \(item.isLiked)")
+        FlareLog.debug("   - Retweet count: \(item.retweetCount)")
+        FlareLog.debug("   - Is retweeted: \(item.isRetweeted)")
+        FlareLog.debug("   - Bookmark count: \(item.bookmarkCount)")
+        FlareLog.debug("   - Is bookmarked: \(item.isBookmarked)")
 
         Task {
-            print("🚀 [TimelineView_v2] Updating local state for index: \(index)")
-            print("✅ [TimelineView_v2] Local state update logged for index: \(index)")
+            FlareLog.debug("TimelineView_v2 Updating local state for index: \(index)")
+            FlareLog.debug("TimelineView_v2 Local state update logged for index: \(index)")
         }
     }
 }

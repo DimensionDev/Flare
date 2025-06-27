@@ -13,7 +13,7 @@ func swiftUIColorToUInt64(_ swiftUIColor: SwiftUI.Color) -> UInt64 {
         if swiftUIColor == .clear {
             return 0x0000_0000
         }
-        print("Warning: Could not extract RGBA components from SwiftUI.Color: \(swiftUIColor). Defaulting to opaque black.")
+        FlareLog.warning("Color+Hex Could not extract RGBA components from SwiftUI.Color: \(swiftUIColor). Defaulting to opaque black.")
         return 0xFF00_0000
     }
 

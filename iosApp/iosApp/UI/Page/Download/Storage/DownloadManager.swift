@@ -19,7 +19,7 @@ class DownloadManager {
 
             try FileManager.default.createDirectory(at: documentsURL, withIntermediateDirectories: true, attributes: nil)
         } catch {
-            print("Error creating Downloads directory: \(error), using default cache path")
+            FlareLog.error("DownloadManager Error creating Downloads directory: \(error), using default cache path")
             documentsURL = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("Downloads")
             try? FileManager.default.createDirectory(at: documentsURL, withIntermediateDirectories: true)
         }

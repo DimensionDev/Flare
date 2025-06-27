@@ -1224,7 +1224,7 @@ public extension FLTabSettingsStorage {
             let data = try JSONEncoder().encode(config)
             userDefaults.set(data, forKey: key)
         } catch {
-            NSLog("保存AppBar配置失败: \(error.localizedDescription)")
+            FlareLog.error("保存AppBar配置失败: \(error.localizedDescription)")
         }
     }
 
@@ -1236,7 +1236,7 @@ public extension FLTabSettingsStorage {
         do {
             return try JSONDecoder().decode(PlatformAppBarConfig.self, from: data)
         } catch {
-            NSLog("加载AppBar配置失败: \(error.localizedDescription)")
+            FlareLog.error("加载AppBar配置失败: \(error.localizedDescription)")
             return nil
         }
     }

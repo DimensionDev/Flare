@@ -248,27 +248,27 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         var bookmarkCount = 0
         var isBookmarked = false
 
-        print("🔍 [TimelineItem] Extracting state for item: \(id)")
-        print("🔍 [TimelineItem] Processing \(actions.count) actions")
+        FlareLog.debug("TimelineItem Extracting state for item: \(id)")
+        FlareLog.debug("TimelineItem Processing \(actions.count) actions")
 
         for (index, action) in actions.enumerated() {
             if case let .item(item) = onEnum(of: action) {
                 if let likeAction = item as? StatusActionItemLike {
                     likeCount = Int(likeAction.count)
                     isLiked = likeAction.liked
-                    print("📊 [TimelineItem] Action[\(index)] Like - count: \(likeCount), liked: \(isLiked)")
+                    FlareLog.debug("TimelineItem Action[\(index)] Like - count: \(likeCount), liked: \(isLiked)")
                 } else if let retweetAction = item as? StatusActionItemRetweet {
                     retweetCount = Int(retweetAction.count)
                     isRetweeted = retweetAction.retweeted
-                    print("📊 [TimelineItem] Action[\(index)] Retweet - count: \(retweetCount), retweeted: \(isRetweeted)")
+                    FlareLog.debug("TimelineItem Action[\(index)] Retweet - count: \(retweetCount), retweeted: \(isRetweeted)")
                 } else if let replyAction = item as? StatusActionItemReply {
                     replyCount = Int(replyAction.count)
-                    print("📊 [TimelineItem] Action[\(index)] Reply - count: \(replyCount)")
+                    FlareLog.debug("TimelineItem Action[\(index)] Reply - count: \(replyCount)")
                 } else {
-                    print("📊 [TimelineItem] Action[\(index)] Other - type: \(type(of: item))")
+                    FlareLog.debug("TimelineItem Action[\(index)] Other - type: \(type(of: item))")
                 }
             } else if case let .group(group) = onEnum(of: action) {
-                print("📊 [TimelineItem] Action[\(index)] Group - displayItem: \(type(of: group.displayItem))")
+                FlareLog.debug("TimelineItem Action[\(index)] Group - displayItem: \(type(of: group.displayItem))")
 
                 // 遍历Group中的所有SubActions来提取数据
                 for (subIndex, subAction) in group.actions.enumerated() {
@@ -277,19 +277,19 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
                         if let retweetItem = subItem as? StatusActionItemRetweet {
                             retweetCount = Int(retweetItem.count)
                             isRetweeted = retweetItem.retweeted
-                            print("📊 [TimelineItem] SubAction[\(subIndex)] Retweet - count: \(retweetCount), retweeted: \(isRetweeted)")
+                            FlareLog.debug("TimelineItem SubAction[\(subIndex)] Retweet - count: \(retweetCount), retweeted: \(isRetweeted)")
                         } else if let bookmarkItem = subItem as? StatusActionItemBookmark {
                             bookmarkCount = Int(bookmarkItem.count)
                             isBookmarked = bookmarkItem.bookmarked
-                            print("📊 [TimelineItem] SubAction[\(subIndex)] Bookmark - count: \(bookmarkCount), bookmarked: \(isBookmarked)")
+                            FlareLog.debug("TimelineItem SubAction[\(subIndex)] Bookmark - count: \(bookmarkCount), bookmarked: \(isBookmarked)")
                         } else if let quoteItem = subItem as? StatusActionItemQuote {
                             // Quote暂时不处理，但记录日志
-                            print("📊 [TimelineItem] SubAction[\(subIndex)] Quote - count: \(quoteItem.count)")
+                            FlareLog.debug("TimelineItem SubAction[\(subIndex)] Quote - count: \(quoteItem.count)")
                         }
                     case .group:
-                        print("📊 [TimelineItem] SubAction[\(subIndex)] Nested Group")
+                        FlareLog.debug("TimelineItem SubAction[\(subIndex)] Nested Group")
                     case .asyncActionItem:
-                        print("📊 [TimelineItem] SubAction[\(subIndex)] Async Action")
+                        FlareLog.debug("TimelineItem SubAction[\(subIndex)] Async Action")
                     }
                 }
             }
@@ -303,11 +303,11 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         self.bookmarkCount = bookmarkCount
         self.isBookmarked = isBookmarked
 
-        print("✅ [TimelineItem] Final state for \(id):")
-        print("   Like: \(likeCount) (liked: \(isLiked))")
-        print("   Retweet: \(retweetCount) (retweeted: \(isRetweeted))")
-        print("   Reply: \(replyCount)")
-        print("   Bookmark: \(bookmarkCount) (bookmarked: \(isBookmarked))")
+        FlareLog.debug("TimelineItem Final state for \(id):")
+        FlareLog.debug("   Like: \(likeCount) (liked: \(isLiked))")
+        FlareLog.debug("   Retweet: \(retweetCount) (retweeted: \(isRetweeted))")
+        FlareLog.debug("   Reply: \(replyCount)")
+        FlareLog.debug("   Bookmark: \(bookmarkCount) (bookmarked: \(isBookmarked))")
     }
 
      mutating func updateLikeState(liked: Bool) {
@@ -359,12 +359,12 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         if let statusContent = uiTimeline.content as? UiTimelineItemContentStatus {
             let status = statusContent
 
-            print("📊 [TimelineItem] Creating item \(status.statusKey.id) with \(status.actions.count) actions")
+            FlareLog.debug("TimelineItem Creating item \(status.statusKey.id) with \(status.actions.count) actions")
 
             // 🔥 新增：处理topMessage转换
             let topMessage = uiTimeline.topMessage?.toSwift()
             if let topMessage = topMessage {
-                print("📊 [TimelineItem] Found topMessage: \(topMessage.type)")
+                FlareLog.debug("TimelineItem Found topMessage: \(topMessage.type)")
             }
 
             return TimelineItem(

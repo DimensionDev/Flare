@@ -137,11 +137,11 @@ class PhotoBrowserManagerV2 {
                                         ])
                                     }
                                 case let .failure(error):
-                                    print("load original image failed: \(url), error: \(error.localizedDescription)")
+                                    FlareLog.error("PhotoBrowserManagerV2 load original image failed: \(url), error: \(error.localizedDescription)")
                                 }
                             }
                         case let .failure(error):
-                            print("load preview image failed: \(previewUrl), error: \(error.localizedDescription)")
+                            FlareLog.error("PhotoBrowserManagerV2 load preview image failed: \(previewUrl), error: \(error.localizedDescription)")
                         }
                     }
                 }
@@ -329,12 +329,12 @@ class PhotoBrowserManagerV2 {
                 }) { success, error in
                     completion(success)
                     if let error {
-                        print("save image failed: \(error.localizedDescription)")
+                        FlareLog.error("PhotoBrowserManagerV2 save image failed: \(error.localizedDescription)")
                     }
                 }
             default:
                 completion(false)
-                print("no album access permission")
+                FlareLog.warning("PhotoBrowserManagerV2 no album access permission")
             }
         }
     }

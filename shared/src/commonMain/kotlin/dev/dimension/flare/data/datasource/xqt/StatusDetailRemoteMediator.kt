@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
@@ -72,7 +71,6 @@ internal class StatusDetailRemoteMediator(
                                         statusKey = statusKey,
                                         pagingKey = pagingKey,
                                         sortId = 0,
-                                        _id = Uuid.random().toString(),
                                     ),
                                 ),
                             )

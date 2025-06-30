@@ -75,6 +75,7 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
         content = StatusContent.MisskeyNotification(this),
         accountType = AccountType.Specific(accountKey),
         text = null,
+        createdAt = Instant.parse(createdAt),
     )
 }
 
@@ -122,6 +123,7 @@ private fun Note.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser 
             userKey = user.userKey,
             accountType = AccountType.Specific(accountKey),
             text = text,
+            createdAt = Instant.parse(createdAt),
         )
     return DbStatusWithUser(
         data = status,

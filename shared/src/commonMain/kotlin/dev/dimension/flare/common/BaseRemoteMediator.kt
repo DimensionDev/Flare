@@ -38,7 +38,7 @@ internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMedia
 @OptIn(ExperimentalPagingApi::class)
 internal abstract class BaseTimelineRemoteMediator(
     private val database: CacheDatabase,
-    private val accountType: AccountType,
+    val accountType: AccountType,
 ) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     abstract val pagingKey: String
 

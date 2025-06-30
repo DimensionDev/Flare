@@ -15,7 +15,6 @@ import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.firstOrNull
-import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
@@ -62,7 +61,6 @@ internal class StatusDetailRemoteMediator(
                                     statusKey = statusKey,
                                     pagingKey = pagingKey,
                                     sortId = 0,
-                                    _id = Uuid.random().toString(),
                                 ),
                             ),
                         )

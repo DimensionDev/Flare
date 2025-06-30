@@ -17,6 +17,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.mapper.parseMastodonContent
 import dev.dimension.flare.ui.render.toUi
+import kotlinx.datetime.Clock
 
 internal object Mastodon {
     suspend fun save(
@@ -91,6 +92,7 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
         content = StatusContent.MastodonNotification(this),
         accountType = AccountType.Specific(accountKey),
         text = null,
+        createdAt = createdAt ?: Clock.System.now(),
     )
 }
 
@@ -153,6 +155,7 @@ private fun Status.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUse
                         ).toUi().raw,
                     )
                 },
+            createdAt = createdAt ?: Clock.System.now(),
         )
     return DbStatusWithUser(
         data = status,

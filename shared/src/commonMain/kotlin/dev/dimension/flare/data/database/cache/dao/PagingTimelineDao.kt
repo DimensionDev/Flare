@@ -26,6 +26,12 @@ internal interface PagingTimelineDao {
     ): PagingSource<Int, DbPagingTimelineWithStatus>
 
     @Transaction
+    @Query(
+        "SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId DESC",
+    )
+    fun getPagingSource(pagingKey: String): PagingSource<Int, DbPagingTimelineWithStatus>
+
+    @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query(
         "SELECT * FROM DbStatus " +

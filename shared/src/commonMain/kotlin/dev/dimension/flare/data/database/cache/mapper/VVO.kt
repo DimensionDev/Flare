@@ -13,6 +13,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.vvoHost
+import kotlinx.datetime.Clock
 
 internal object VVO {
     suspend fun saveStatus(
@@ -82,6 +83,7 @@ private fun Status.toDbStatus(accountKey: MicroBlogKey): DbStatus =
             dev.dimension.flare.data.database.cache.model.StatusContent
                 .VVO(data = this),
         text = rawText,
+        createdAt = createdAt ?: Clock.System.now(),
     )
 
 internal fun Comment.toDbPagingTimeline(
@@ -118,6 +120,7 @@ private fun Comment.toDbStatus(accountKey: MicroBlogKey): DbStatus =
             dev.dimension.flare.data.database.cache.model.StatusContent
                 .VVOComment(data = this),
         text = null,
+        createdAt = createdAt ?: Clock.System.now(),
     )
 
 internal fun User.toDbUser(): DbUser =

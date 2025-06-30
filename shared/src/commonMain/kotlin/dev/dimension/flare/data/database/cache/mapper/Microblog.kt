@@ -105,7 +105,6 @@ internal fun createDbPagingTimelineWithStatus(
 ): DbPagingTimelineWithStatus {
     val timeline =
         DbPagingTimeline(
-            _id = Uuid.random().toString(),
             accountType = accountType,
             statusKey = status.data.statusKey,
             pagingKey = pagingKey,

@@ -11,6 +11,8 @@ import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
+import kotlinx.datetime.Instant
+import kotlin.uuid.Uuid
 
 @Entity(
     indices = [
@@ -21,12 +23,12 @@ import dev.dimension.flare.model.ReferenceType
     ],
 )
 internal data class DbPagingTimeline(
-    @PrimaryKey
-    val _id: String,
     val accountType: AccountType,
     val pagingKey: String,
     val statusKey: MicroBlogKey,
     val sortId: Long,
+    @PrimaryKey
+    val _id: String = Uuid.random().toString(),
 )
 
 internal data class DbPagingTimelineWithStatus(
@@ -81,4 +83,10 @@ internal class StatusConverter {
 
     @TypeConverter
     fun toReferenceType(value: String): ReferenceType = ReferenceType.valueOf(value)
+
+    @TypeConverter
+    fun fromTimestamp(value: Instant): Long = value.toEpochMilliseconds()
+
+    @TypeConverter
+    fun toTimestamp(value: Long): Instant = Instant.fromEpochMilliseconds(value)
 }

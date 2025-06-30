@@ -379,7 +379,7 @@ internal fun Tweet.renderStatus(
                     ownVotes = persistentListOf(),
                     expiresAt =
                         cardLegacy.get("end_datetime_utc")?.stringValue?.let {
-                            parseCustomDateTime(
+                            parseXQTCustomDateTime(
                                 it,
                             )
                         }
@@ -480,7 +480,7 @@ internal fun Tweet.renderStatus(
 
     val isFromMe = user?.key == accountKey
     val createAt =
-        legacy?.createdAt?.let { parseCustomDateTime(it) } ?: Clock.System.now()
+        legacy?.createdAt?.let { parseXQTCustomDateTime(it) } ?: Clock.System.now()
     val statusKey =
         MicroBlogKey(
             id = legacy?.idStr ?: restId,
@@ -738,7 +738,7 @@ internal fun GetProfileSpotlightsQuery200Response.toUi(muting: Boolean): UiRelat
 
 private fun String.replaceWithOriginImageUrl() = this.replace("_normal.", ".")
 
-private fun parseCustomDateTime(dateTimeStr: String): Instant? {
+internal fun parseXQTCustomDateTime(dateTimeStr: String): Instant? {
     val months =
         mapOf(
             "Jan" to 1,

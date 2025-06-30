@@ -17,6 +17,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.mapper.fromRss
 import dev.dimension.flare.ui.model.mapper.title
 import dev.dimension.flare.ui.render.parseHtml
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 
 @OptIn(ExperimentalPagingApi::class)
 internal class RssTimelineRemoteMediator(
@@ -67,6 +69,9 @@ internal class RssTimelineRemoteMediator(
                                                     ?.value
                                                     ?.let { html -> parseHtml(html) }
                                                     ?.wholeText(),
+                                            createdAt =
+                                                it.data.published?.let { Instant.parse(it) }
+                                                    ?: Clock.System.now(),
                                         ),
                                 )
                             }
@@ -94,6 +99,9 @@ internal class RssTimelineRemoteMediator(
                                                 it.data.description
                                                     .let { html -> parseHtml(html) }
                                                     .wholeText(),
+                                            createdAt =
+                                                it.data.date?.let { Instant.parse(it) }
+                                                    ?: Clock.System.now(),
                                         ),
                                 )
                             }
@@ -121,6 +129,9 @@ internal class RssTimelineRemoteMediator(
                                                 it.data.description
                                                     ?.let { html -> parseHtml(html) }
                                                     ?.wholeText(),
+                                            createdAt =
+                                                it.data.pubDate?.let { Instant.parse(it) }
+                                                    ?: Clock.System.now(),
                                         ),
                                 )
                             }

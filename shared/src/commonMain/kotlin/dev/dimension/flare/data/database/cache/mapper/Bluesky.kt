@@ -225,6 +225,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                 userKey = null,
                                 content = content,
                                 text = null,
+                                createdAt = items.first().indexedAt,
                             ),
                     )
                 listOf(
@@ -259,6 +260,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                 userKey = null,
                                 content = content,
                                 text = null,
+                                createdAt = items.first().indexedAt,
                             ),
                     )
                 listOfNotNull(
@@ -291,6 +293,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                     userKey = user.userKey,
                                     content = content,
                                     text = null,
+                                    createdAt = it.indexedAt,
                                 ),
                         )
                     createDbPagingTimelineWithStatus(
@@ -330,6 +333,7 @@ private fun ListNotificationsNotification.toDbStatus(accountKey: MicroBlogKey): 
         content = StatusContent.BlueskyNotification.Normal(this),
         accountType = AccountType.Specific(accountKey),
         text = null,
+        createdAt = indexedAt,
     )
 }
 
@@ -378,6 +382,7 @@ internal fun List<FeedViewPost>.toDbPagingTimeline(
                                 content = StatusContent.BlueskyReason(data),
                                 accountType = AccountType.Specific(accountKey),
                                 text = null,
+                                createdAt = it.post.indexedAt,
                             ),
                     )
                 }
@@ -397,6 +402,7 @@ internal fun List<FeedViewPost>.toDbPagingTimeline(
                                 content = StatusContent.BlueskyReason(data),
                                 accountType = AccountType.Specific(accountKey),
                                 text = status.data.text,
+                                createdAt = it.post.indexedAt,
                             ),
                     )
                 }
@@ -441,6 +447,7 @@ private fun PostView.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithU
             userKey = user.userKey,
             accountType = AccountType.Specific(accountKey),
             text = parseBlueskyJson(record, accountKey).raw,
+            createdAt = indexedAt,
         )
     return DbStatusWithUser(
         data = status,

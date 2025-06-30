@@ -19,7 +19,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.firstOrNull
 import sh.christian.ozone.api.AtUri
-import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
@@ -63,7 +62,6 @@ internal class StatusDetailRemoteMediator(
                                 statusKey = statusKey,
                                 pagingKey = pagingKey,
                                 sortId = 0,
-                                _id = Uuid.random().toString(),
                             ),
                         ),
                     )

@@ -33,6 +33,8 @@ internal class NotificationRemoteMediator(
     private var cursor: String? = null
     override val pagingKey: String =
         buildString {
+            append("notification_")
+            append(accountKey.toString())
         }
 
     override suspend fun timeline(

@@ -9,8 +9,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberSavedStateNavEntryDecorator
 import androidx.navigation3.ui.DialogSceneStrategy
 import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.ui.rememberSceneSetupNavEntryDecorator
@@ -18,8 +20,6 @@ import dev.dimension.flare.ui.common.ProxyUriHandler
 import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.component.TopLevelBackStack
 import dev.dimension.flare.ui.component.platform.isBigScreen
-import dev.dimension.flare.ui.component.rememberSavedStateNavEntryDecorator2
-import dev.dimension.flare.ui.component.rememberViewModelStoreNavEntryDecorator2
 import dev.dimension.flare.ui.screen.bluesky.blueskyEntryBuilder
 import dev.dimension.flare.ui.screen.compose.composeEntryBuilder
 import dev.dimension.flare.ui.screen.dm.dmEntryBuilder
@@ -82,16 +82,8 @@ internal fun Router(
             entryDecorators =
                 listOf(
                     rememberSceneSetupNavEntryDecorator(),
-                    rememberSavedStateNavEntryDecorator2<Route>(
-                        shouldRemoveState = {
-                            !topLevelBackStack.isInBackStack(it)
-                        },
-                    ),
-                    rememberViewModelStoreNavEntryDecorator2<Route>(
-                        shouldRemoveState = {
-                            !topLevelBackStack.isInBackStack(it)
-                        },
-                    ),
+                    rememberSavedStateNavEntryDecorator(),
+                    rememberViewModelStoreNavEntryDecorator(),
                 ),
             backStack = topLevelBackStack.backStack,
             onBack = { onBack() },

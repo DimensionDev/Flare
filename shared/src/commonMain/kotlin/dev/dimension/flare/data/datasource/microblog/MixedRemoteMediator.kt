@@ -10,6 +10,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -49,6 +50,7 @@ internal class MixedRemoteMediator(
                                     it.timeline.copy(
                                         pagingKey = pagingKey,
                                         sortId = SnowflakeIdGenerator.nextId(),
+                                        _id = Uuid.random().toString(),
                                     ),
                             )
                         }

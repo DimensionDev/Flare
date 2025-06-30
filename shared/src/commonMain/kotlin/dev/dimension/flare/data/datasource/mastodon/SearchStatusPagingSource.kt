@@ -16,14 +16,18 @@ internal class SearchStatusPagingSource(
     private val service: MastodonService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
     private val query: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey: String =
+        buildString {
+            append("search_")
+            append(query)
+            append(accountKey.toString())
+        }
+
     override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,

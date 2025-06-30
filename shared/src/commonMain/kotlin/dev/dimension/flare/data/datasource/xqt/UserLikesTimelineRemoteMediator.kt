@@ -20,13 +20,11 @@ internal class UserLikesTimelineRemoteMediator(
     private val service: XQTService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey = "user_likes_${userKey}_$accountKey"
     private var cursor: String? = null
 
     override suspend fun timeline(

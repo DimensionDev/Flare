@@ -17,14 +17,12 @@ internal class MentionRemoteMediator(
     private val service: VVOService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
     private val onClearMarker: () -> Unit,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey = "mention_$accountKey"
     var page = 1
 
     override suspend fun timeline(

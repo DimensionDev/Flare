@@ -17,14 +17,18 @@ internal class SearchStatusRemoteMediator(
     private val service: VVOService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
     private val query: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey: String =
+        buildString {
+            append("search_")
+            append(query)
+            append(accountKey.toString())
+        }
+
     private var page = 1
     private val containerId by lazy {
         "100103type=1&q=$query&t="
@@ -49,6 +53,7 @@ internal class SearchStatusRemoteMediator(
                             pageType = "searchall",
                         )
                 }
+
                 LoadType.PREPEND -> {
                     return Result(
                         endOfPaginationReached = true,

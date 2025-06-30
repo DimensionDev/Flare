@@ -75,37 +75,6 @@ internal object Bluesky {
 //        database.messageDao().insert(room)
     }
 
-    fun saveFeed(
-        accountKey: MicroBlogKey,
-        pagingKey: String,
-        data: List<FeedViewPost>,
-        sortIdProvider: (FeedViewPost) -> Long = {
-            when (val reason = it.reason) {
-                is FeedViewPostReasonUnion.ReasonRepost -> {
-                    reason.value.indexedAt.toEpochMilliseconds()
-                }
-
-                is FeedViewPostReasonUnion.ReasonPin -> {
-                    Long.MAX_VALUE
-                }
-
-                else -> {
-                    it.post.indexedAt.toEpochMilliseconds()
-                }
-            }
-        },
-    ): List<DbPagingTimelineWithStatus> = data.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider)
-
-    suspend fun saveNotification(
-        accountKey: MicroBlogKey,
-        pagingKey: String,
-        database: CacheDatabase,
-        data: List<ListNotificationsNotification>,
-        references: ImmutableMap<AtUri, PostView>,
-    ) {
-        save(database, data.toDb(accountKey, pagingKey, references))
-    }
-
     suspend fun savePost(
         accountKey: MicroBlogKey,
         pagingKey: String,
@@ -177,10 +146,10 @@ internal object Bluesky {
     }
 }
 
-private fun List<PostView>.toDb(
+internal fun List<PostView>.toDb(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (PostView) -> Long,
+    sortIdProvider: (PostView) -> Long = { it.indexedAt.toEpochMilliseconds() },
 ): List<DbPagingTimelineWithStatus> =
     this.map {
         createDbPagingTimelineWithStatus(
@@ -367,7 +336,21 @@ private fun ListNotificationsNotification.toDbStatus(accountKey: MicroBlogKey): 
 internal fun List<FeedViewPost>.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (FeedViewPost) -> Long,
+    sortIdProvider: (FeedViewPost) -> Long = {
+        when (val reason = it.reason) {
+            is FeedViewPostReasonUnion.ReasonRepost -> {
+                reason.value.indexedAt.toEpochMilliseconds()
+            }
+
+            is FeedViewPostReasonUnion.ReasonPin -> {
+                Long.MAX_VALUE
+            }
+
+            else -> {
+                it.post.indexedAt.toEpochMilliseconds()
+            }
+        }
+    },
 ): List<DbPagingTimelineWithStatus> =
     this.map {
         val reply =

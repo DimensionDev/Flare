@@ -17,13 +17,12 @@ internal class HomeTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
     private val database: CacheDatabase,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey = "home_$accountKey"
+
     override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
@@ -33,6 +32,7 @@ internal class HomeTimelineRemoteMediator(
                 LoadType.PREPEND -> return Result(
                     endOfPaginationReached = true,
                 )
+
                 LoadType.REFRESH -> {
                     service.notesTimeline(
                         NotesHybridTimelineRequest(

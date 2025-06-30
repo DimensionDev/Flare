@@ -17,7 +17,6 @@ internal interface AuthenticatedMicroblogDataSource : MicroblogDataSource {
     fun notification(
         type: NotificationFilter = NotificationFilter.All,
         pageSize: Int = 20,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>>
 

@@ -17,14 +17,12 @@ internal class StatusRepostRemoteMediator(
     private val service: VVOService,
     private val statusKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
     private val database: CacheDatabase,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey: String = "status_reposts_${statusKey}_$accountKey"
     private var page = 1
 
     override suspend fun timeline(
@@ -46,6 +44,7 @@ internal class StatusRepostRemoteMediator(
                             page = page,
                         )
                 }
+
                 LoadType.PREPEND -> {
                     return Result(
                         endOfPaginationReached = true,

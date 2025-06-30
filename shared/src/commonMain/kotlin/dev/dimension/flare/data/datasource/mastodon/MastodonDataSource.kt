@@ -94,12 +94,10 @@ internal open class MastodonDataSource(
 
     override fun homeTimeline(
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -108,18 +106,15 @@ internal open class MastodonDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                 ),
         )
 
     fun localTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "local_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -128,19 +123,16 @@ internal open class MastodonDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                     local = true,
                 ),
         )
 
     fun bookmarkTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "bookmarked_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -149,18 +141,15 @@ internal open class MastodonDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                 ),
         )
 
     fun favouriteTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "favourite_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -169,7 +158,6 @@ internal open class MastodonDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                 ),
         )
 
@@ -180,7 +168,6 @@ internal open class MastodonDataSource(
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = "list_${accountKey}_$listId",
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -190,18 +177,15 @@ internal open class MastodonDataSource(
                     service,
                     database,
                     accountKey,
-                    "list_${accountKey}_$listId",
                 ),
         )
 
     fun publicTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "public_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -210,7 +194,6 @@ internal open class MastodonDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                     local = false,
                 ),
         )
@@ -218,12 +201,10 @@ internal open class MastodonDataSource(
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forNotification = true),
@@ -234,7 +215,6 @@ internal open class MastodonDataSource(
                             service,
                             database,
                             accountKey,
-                            pagingKey,
                             onClearMarker = {
                                 MemCacheable.update(notificationMarkerKey, 0)
                             },
@@ -245,7 +225,6 @@ internal open class MastodonDataSource(
                             service,
                             database,
                             accountKey,
-                            pagingKey,
                         )
 
                     else -> throw IllegalStateException("Unsupported notification type")
@@ -308,11 +287,9 @@ internal open class MastodonDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         mediaOnly: Boolean,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -322,7 +299,6 @@ internal open class MastodonDataSource(
                     database,
                     accountKey,
                     userKey,
-                    pagingKey,
                     onlyMedia = mediaOnly,
                 ),
         )
@@ -331,11 +307,9 @@ internal open class MastodonDataSource(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -345,7 +319,6 @@ internal open class MastodonDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                     statusOnly = false,
                 ),
         )
@@ -813,11 +786,9 @@ internal open class MastodonDataSource(
     override fun discoverStatuses(
         pageSize: Int,
         scope: CoroutineScope,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -826,7 +797,6 @@ internal open class MastodonDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                 ),
         )
 
@@ -843,11 +813,9 @@ internal open class MastodonDataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
@@ -856,7 +824,6 @@ internal open class MastodonDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                     query,
                 ),
         )
@@ -1300,7 +1267,6 @@ internal open class MastodonDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -1317,7 +1283,6 @@ internal open class MastodonDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -1341,7 +1306,6 @@ internal open class MastodonDataSource(
                 flow =
                     timelinePager(
                         pageSize = pagingSize,
-                        pagingKey = "user_timeline_$userKey",
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -1351,7 +1315,6 @@ internal open class MastodonDataSource(
                                 database = database,
                                 accountKey = accountKey,
                                 userKey = userKey,
-                                pagingKey = "user_timeline_$userKey",
                                 withPinned = true,
                             ),
                     ),
@@ -1361,7 +1324,6 @@ internal open class MastodonDataSource(
                 flow =
                     timelinePager(
                         pageSize = pagingSize,
-                        pagingKey = "user_timeline_replies_$userKey",
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -1371,7 +1333,6 @@ internal open class MastodonDataSource(
                                 accountKey = accountKey,
                                 database = database,
                                 userKey = userKey,
-                                pagingKey = "user_timeline_replies_$userKey",
                                 withReplies = true,
                             ),
                     ),

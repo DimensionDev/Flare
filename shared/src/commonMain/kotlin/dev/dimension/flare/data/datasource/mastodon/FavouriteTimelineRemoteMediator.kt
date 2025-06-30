@@ -16,13 +16,12 @@ internal class FavouriteTimelineRemoteMediator(
     private val service: MastodonService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey: String = "favourite_$accountKey"
+
     override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
@@ -35,6 +34,7 @@ internal class FavouriteTimelineRemoteMediator(
                             limit = state.config.pageSize,
                         )
                 }
+
                 LoadType.PREPEND -> {
                     return Result(
                         endOfPaginationReached = true,

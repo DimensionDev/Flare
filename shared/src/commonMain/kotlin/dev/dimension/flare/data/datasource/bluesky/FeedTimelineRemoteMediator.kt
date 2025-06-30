@@ -6,7 +6,7 @@ import androidx.paging.PagingState
 import app.bsky.feed.GetFeedQueryParams
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.Bluesky
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.AccountType
@@ -19,13 +19,11 @@ internal class FeedTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val database: CacheDatabase,
     private val uri: String,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = false,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey = "feed_timeline_$uri"
     var cursor: String? = null
 
     override suspend fun timeline(
@@ -42,11 +40,13 @@ internal class FeedTimelineRemoteMediator(
                                 limit = state.config.pageSize.toLong(),
                             ),
                         ).maybeResponse()
+
                 LoadType.PREPEND -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
+
                 LoadType.APPEND -> {
                     service
                         .getFeed(
@@ -65,10 +65,9 @@ internal class FeedTimelineRemoteMediator(
         return Result(
             endOfPaginationReached = cursor == null,
             data =
-                Bluesky.saveFeed(
+                response.feed.toDbPagingTimeline(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
-                    data = response.feed,
                 ),
         )
     }

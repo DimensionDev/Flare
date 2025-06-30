@@ -73,12 +73,10 @@ internal class VVODataSource(
 
     override fun homeTimeline(
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -87,7 +85,6 @@ internal class VVODataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                     inAppNotification,
                 ),
         )
@@ -95,7 +92,6 @@ internal class VVODataSource(
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         when (type) {
@@ -103,7 +99,6 @@ internal class VVODataSource(
             NotificationFilter.Mention ->
                 timelinePager(
                     pageSize = pageSize,
-                    pagingKey = pagingKey,
                     database = database,
                     scope = scope,
                     filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -112,7 +107,6 @@ internal class VVODataSource(
                             service,
                             database,
                             accountKey,
-                            pagingKey,
                             onClearMarker = {
                                 MemCacheable.update(notificationMarkerMentionKey, 0)
                             },
@@ -231,11 +225,9 @@ internal class VVODataSource(
         scope: CoroutineScope,
         pageSize: Int,
         mediaOnly: Boolean,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -245,7 +237,6 @@ internal class VVODataSource(
                     service = service,
                     database = database,
                     accountKey = accountKey,
-                    pagingKey = pagingKey,
                     mediaOnly = mediaOnly,
                 ),
         )
@@ -254,7 +245,6 @@ internal class VVODataSource(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> {
         TODO("Not yet implemented")
     }
@@ -411,11 +401,9 @@ internal class VVODataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
@@ -424,7 +412,6 @@ internal class VVODataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                     query,
                 ),
         )
@@ -451,11 +438,9 @@ internal class VVODataSource(
     override fun discoverStatuses(
         pageSize: Int,
         scope: CoroutineScope,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -464,7 +449,6 @@ internal class VVODataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                 ),
         )
 
@@ -565,7 +549,6 @@ internal class VVODataSource(
         val pagingKey = "status_comment_$statusKey"
         return timelinePager(
             pageSize = 20,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -574,7 +557,6 @@ internal class VVODataSource(
                     service = service,
                     accountKey = accountKey,
                     statusKey = statusKey,
-                    pagingKey = pagingKey,
                     database = database,
                 ),
         )
@@ -587,7 +569,6 @@ internal class VVODataSource(
         val pagingKey = "status_repost_$statusKey"
         return timelinePager(
             pageSize = 20,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -596,7 +577,6 @@ internal class VVODataSource(
                     service = service,
                     accountKey = accountKey,
                     statusKey = statusKey,
-                    pagingKey = pagingKey,
                     database = database,
                 ),
         )
@@ -609,7 +589,6 @@ internal class VVODataSource(
         val pagingKey = "comment_child_$commentKey"
         return timelinePager(
             pageSize = 20,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -618,7 +597,6 @@ internal class VVODataSource(
                     service = service,
                     accountKey = accountKey,
                     commentKey = commentKey,
-                    pagingKey = pagingKey,
                     database = database,
                 ),
         )
@@ -807,7 +785,6 @@ internal class VVODataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -823,7 +800,6 @@ internal class VVODataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),

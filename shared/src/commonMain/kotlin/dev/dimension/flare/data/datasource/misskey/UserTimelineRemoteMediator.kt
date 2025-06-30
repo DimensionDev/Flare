@@ -20,17 +20,31 @@ internal class UserTimelineRemoteMediator(
     private val service: MisskeyService,
     private val userKey: MicroBlogKey,
     private val database: CacheDatabase,
-    private val pagingKey: String,
     private val onlyMedia: Boolean = false,
     private val withReplies: Boolean = false,
     private val withPinned: Boolean = false,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
     var pinnedIds = emptyList<String>()
+
+    override val pagingKey: String
+        get() =
+            buildString {
+                append("user_timeline_")
+                if (withReplies) {
+                    append("replies")
+                }
+                if (withPinned) {
+                    append("pinned")
+                }
+                if (onlyMedia) {
+                    append("media")
+                }
+                append(accountKey.toString())
+                append(userKey.toString())
+            }
 
     override suspend fun timeline(
         loadType: LoadType,

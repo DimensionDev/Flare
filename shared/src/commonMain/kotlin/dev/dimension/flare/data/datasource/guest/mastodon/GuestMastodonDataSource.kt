@@ -46,7 +46,6 @@ internal class GuestMastodonDataSource(
 
     override fun homeTimeline(
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
@@ -109,7 +108,6 @@ internal class GuestMastodonDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         mediaOnly: Boolean,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
             GuestUserTimelinePagingSource(
@@ -124,7 +122,6 @@ internal class GuestMastodonDataSource(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
             GuestStatusDetailPagingSource(
@@ -152,7 +149,6 @@ internal class GuestMastodonDataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         Pager(PagingConfig(pageSize = pageSize)) {
             GuestSearchStatusPagingSource(host = host, query = query, service = service)
@@ -182,7 +178,6 @@ internal class GuestMastodonDataSource(
     override fun discoverStatuses(
         pageSize: Int,
         scope: CoroutineScope,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> = TODO()
 //        Pager(PagingConfig(pageSize = pageSize)) {
 //            GuestDiscoverStatusPagingSource(host = host, service = service)
@@ -201,7 +196,6 @@ internal class GuestMastodonDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -218,7 +212,6 @@ internal class GuestMastodonDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),

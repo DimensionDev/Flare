@@ -21,14 +21,18 @@ import dev.dimension.flare.ui.render.parseHtml
 @OptIn(ExperimentalPagingApi::class)
 internal class RssTimelineRemoteMediator(
     private val url: String,
-    private val pagingKey: String,
     private val cacheDatabase: CacheDatabase,
 ) : BaseTimelineRemoteMediator(
         database = cacheDatabase,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Guest,
     ) {
+    override val pagingKey: String
+        get() =
+            buildString {
+                append("rss_")
+                append(url)
+            }
+
     override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,

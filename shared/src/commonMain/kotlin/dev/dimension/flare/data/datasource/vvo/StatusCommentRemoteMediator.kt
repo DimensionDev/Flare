@@ -15,16 +15,14 @@ import dev.dimension.flare.model.MicroBlogKey
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusCommentRemoteMediator(
     private val database: CacheDatabase,
-    private val pagingKey: String,
     private val service: VVOService,
     private val statusKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey: String = "status_comments_${statusKey}_$accountKey"
     private var maxId: Long? = null
     private var page = 0
 
@@ -48,6 +46,7 @@ internal class StatusCommentRemoteMediator(
                             maxId = null,
                         )
                 }
+
                 LoadType.PREPEND -> {
                     return Result(
                         endOfPaginationReached = true,

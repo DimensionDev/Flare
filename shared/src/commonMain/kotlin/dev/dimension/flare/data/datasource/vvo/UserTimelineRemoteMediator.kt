@@ -19,14 +19,20 @@ internal class UserTimelineRemoteMediator(
     private val service: VVOService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
     private val mediaOnly: Boolean,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey =
+        buildString {
+            append("user_timeline")
+            if (mediaOnly) {
+                append("_mediaOnly")
+            }
+            append(accountKey.toString())
+            append(userKey.toString())
+        }
     private var containerid: String? = null
     var page = 0
 

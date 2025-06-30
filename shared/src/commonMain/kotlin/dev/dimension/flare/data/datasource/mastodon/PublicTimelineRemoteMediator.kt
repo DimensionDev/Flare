@@ -16,14 +16,20 @@ internal class PublicTimelineRemoteMediator(
     private val service: MastodonService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
     private val local: Boolean,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey: String =
+        buildString {
+            append("public_timeline")
+            if (local) {
+                append("_local")
+            }
+            append("_$accountKey")
+        }
+
     override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
@@ -37,6 +43,7 @@ internal class PublicTimelineRemoteMediator(
                             local = local,
                         )
                 }
+
                 LoadType.PREPEND -> {
                     return Result(
                         endOfPaginationReached = true,

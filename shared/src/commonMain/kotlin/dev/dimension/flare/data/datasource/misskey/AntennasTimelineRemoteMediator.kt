@@ -18,13 +18,12 @@ internal class AntennasTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val id: String,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey = "antennas_$id"
+
     override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
@@ -40,6 +39,7 @@ internal class AntennasTimelineRemoteMediator(
                             ),
                         )
                 }
+
                 LoadType.PREPEND -> {
                     return Result(
                         endOfPaginationReached = true,

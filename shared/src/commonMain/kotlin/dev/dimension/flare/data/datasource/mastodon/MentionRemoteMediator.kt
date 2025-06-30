@@ -17,13 +17,12 @@ internal class MentionRemoteMediator(
     private val service: MastodonService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey: String = "mention_$accountKey"
+
     override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
@@ -37,6 +36,7 @@ internal class MentionRemoteMediator(
                             exclude_types = NotificationTypes.entries.filter { it != NotificationTypes.Mention },
                         )
                 }
+
                 LoadType.PREPEND -> {
                     val firstItem = state.firstItemOrNull()
                     service.notification(

@@ -135,12 +135,10 @@ internal class XQTDataSource(
 
     override fun homeTimeline(
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -149,7 +147,6 @@ internal class XQTDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                 ),
         )
 
@@ -160,7 +157,6 @@ internal class XQTDataSource(
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -169,7 +165,6 @@ internal class XQTDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                 ),
         )
 
@@ -180,7 +175,6 @@ internal class XQTDataSource(
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -189,14 +183,12 @@ internal class XQTDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                 ),
         )
 
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> {
         if (type == NotificationFilter.All) {
@@ -216,7 +208,6 @@ internal class XQTDataSource(
         } else {
             return timelinePager(
                 pageSize = pageSize,
-                pagingKey = pagingKey,
                 database = database,
                 scope = scope,
                 filterFlow = localFilterRepository.getFlow(forNotification = true),
@@ -225,7 +216,6 @@ internal class XQTDataSource(
                         service,
                         database,
                         accountKey,
-                        pagingKey,
                     ),
             )
         }
@@ -322,11 +312,9 @@ internal class XQTDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         mediaOnly: Boolean,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -337,7 +325,6 @@ internal class XQTDataSource(
                         service,
                         database,
                         accountKey,
-                        pagingKey,
                     )
                 } else {
                     UserTimelineRemoteMediator(
@@ -345,7 +332,6 @@ internal class XQTDataSource(
                         service,
                         database,
                         accountKey,
-                        pagingKey,
                     )
                 },
         )
@@ -354,11 +340,9 @@ internal class XQTDataSource(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = 1,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -368,7 +352,6 @@ internal class XQTDataSource(
                     service = service,
                     database = database,
                     accountKey = accountKey,
-                    pagingKey = pagingKey,
                     statusOnly = false,
                     event = this,
                 ),
@@ -602,11 +585,9 @@ internal class XQTDataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
@@ -615,7 +596,6 @@ internal class XQTDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                     query,
                 ),
         )
@@ -648,7 +628,6 @@ internal class XQTDataSource(
     override fun discoverStatuses(
         pageSize: Int,
         scope: CoroutineScope,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> {
         // not supported
         throw UnsupportedOperationException("Bluesky does not support discover statuses")
@@ -1121,7 +1100,6 @@ internal class XQTDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -1137,7 +1115,6 @@ internal class XQTDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -1164,7 +1141,6 @@ internal class XQTDataSource(
                 flow =
                     timelinePager(
                         pageSize = pagingSize,
-                        pagingKey = "user_timeline_replies_$userKey",
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -1174,7 +1150,6 @@ internal class XQTDataSource(
                                 accountKey = accountKey,
                                 database = database,
                                 userKey = userKey,
-                                pagingKey = "user_timeline_replies_$userKey",
                             ),
                     ),
             ),
@@ -1185,7 +1160,6 @@ internal class XQTDataSource(
                     flow =
                         timelinePager(
                             pageSize = pagingSize,
-                            pagingKey = "user_timeline_likes_$userKey",
                             database = database,
                             scope = scope,
                             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -1195,7 +1169,6 @@ internal class XQTDataSource(
                                     accountKey = accountKey,
                                     database = database,
                                     userKey = userKey,
-                                    pagingKey = "user_timeline_likes_$userKey",
                                 ),
                         ),
                 )
@@ -1563,7 +1536,6 @@ internal class XQTDataSource(
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = "list_${accountKey}_$listId",
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -1573,7 +1545,6 @@ internal class XQTDataSource(
                     service,
                     database,
                     accountKey,
-                    "list_${accountKey}_$listId",
                 ),
         )
 

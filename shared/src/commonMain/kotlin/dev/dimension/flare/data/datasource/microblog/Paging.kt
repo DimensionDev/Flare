@@ -10,8 +10,8 @@ import androidx.paging.filter
 import androidx.paging.map
 import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
@@ -32,11 +32,10 @@ import kotlin.coroutines.CoroutineContext
 @OptIn(ExperimentalPagingApi::class)
 internal fun StatusEvent.timelinePager(
     pageSize: Int,
-    pagingKey: String,
     database: CacheDatabase,
     scope: CoroutineScope,
     filterFlow: Flow<List<String>>,
-    mediator: BaseRemoteMediator<Int, DbPagingTimelineWithStatus>,
+    mediator: BaseTimelineRemoteMediator,
 ): Flow<PagingData<UiTimeline>> {
     val pagerFlow =
         Pager(
@@ -45,7 +44,7 @@ internal fun StatusEvent.timelinePager(
             pagingSourceFactory = {
                 database.pagingTimelineDao().getPagingSource(
                     accountType = AccountType.Specific(accountKey),
-                    pagingKey = pagingKey,
+                    pagingKey = mediator.pagingKey,
                 )
             },
         ).flow.cachedIn(scope)

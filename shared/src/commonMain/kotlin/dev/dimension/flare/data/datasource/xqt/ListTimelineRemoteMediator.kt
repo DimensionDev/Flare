@@ -22,13 +22,12 @@ internal class ListTimelineRemoteMediator(
     private val service: XQTService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey = "list_${listId}_$accountKey"
+
     @Serializable
     data class Request(
         @SerialName("listId")
@@ -55,6 +54,7 @@ internal class ListTimelineRemoteMediator(
                                 ).encodeJson(),
                         )
                 }
+
                 LoadType.PREPEND -> {
                     return Result(
                         endOfPaginationReached = true,

@@ -8,7 +8,7 @@ import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.Bluesky
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.repository.LoginExpiredException
@@ -20,15 +20,13 @@ internal class HomeTimelineRemoteMediator(
     private val service: BlueskyService,
     private val accountKey: MicroBlogKey,
     private val database: CacheDatabase,
-    private val pagingKey: String,
     private val inAppNotification: InAppNotification,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
     var cursor: String? = null
+    override val pagingKey: String = "home_$accountKey"
 
     override suspend fun timeline(
         loadType: LoadType,
@@ -67,10 +65,9 @@ internal class HomeTimelineRemoteMediator(
         return Result(
             endOfPaginationReached = cursor == null,
             data =
-                Bluesky.saveFeed(
+                response.feed.toDbPagingTimeline(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
-                    data = response.feed,
                 ),
         )
     }

@@ -23,14 +23,12 @@ internal class SearchStatusPagingSource(
     private val service: XQTService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
     private val query: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey = "search_status_$query"
     private var cursor: String? = null
 
     override suspend fun timeline(
@@ -51,6 +49,7 @@ internal class SearchStatusPagingSource(
                             referer = "https://$xqtHost/search?q=${query.encodeURLQueryComponent()}",
                         )
                 }
+
                 LoadType.PREPEND -> {
                     return Result(
                         endOfPaginationReached = true,

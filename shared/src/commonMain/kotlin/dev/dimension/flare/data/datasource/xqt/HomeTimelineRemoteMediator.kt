@@ -21,13 +21,11 @@ internal class HomeTimelineRemoteMediator(
     private val service: XQTService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey = "home_$accountKey"
     private var cursor: String? = null
 
     override suspend fun initialize(): InitializeAction = InitializeAction.SKIP_INITIAL_REFRESH
@@ -89,13 +87,11 @@ internal class FeaturedTimelineRemoteMediator(
     private val service: XQTService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey = "featured_$accountKey"
     private var cursor: String? = null
 
     override suspend fun timeline(
@@ -155,13 +151,11 @@ internal class BookmarkTimelineRemoteMediator(
     private val service: XQTService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey = "bookmark_$accountKey"
     private var cursor: String? = null
 
     override suspend fun timeline(

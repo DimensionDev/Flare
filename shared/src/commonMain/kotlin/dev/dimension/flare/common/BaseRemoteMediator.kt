@@ -38,17 +38,17 @@ internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMedia
 @OptIn(ExperimentalPagingApi::class)
 internal abstract class BaseTimelineRemoteMediator(
     private val database: CacheDatabase,
-    private val clearWhenRefresh: Boolean,
-    private val pagingKey: String,
     private val accountType: AccountType,
 ) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+    abstract val pagingKey: String
+
     final override suspend fun doLoad(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
         val result = timeline(loadType, state)
         database.connect {
-            if (clearWhenRefresh && loadType == LoadType.REFRESH) {
+            if (loadType == LoadType.REFRESH) {
                 database.pagingTimelineDao().delete(pagingKey = pagingKey, accountType = accountType)
             }
             saveToDatabase(database, result.data)

@@ -17,13 +17,12 @@ internal class DiscoverStatusRemoteMediator(
     private val service: MisskeyService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey: String = "discover_status_$accountKey"
+
     override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
@@ -33,6 +32,7 @@ internal class DiscoverStatusRemoteMediator(
                 LoadType.REFRESH -> {
                     service.notesFeatured(NotesFeaturedRequest(limit = state.config.initialLoadSize))
                 }
+
                 LoadType.APPEND -> {
                     val lastItem =
                         database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
@@ -50,6 +50,7 @@ internal class DiscoverStatusRemoteMediator(
                         ),
                     )
                 }
+
                 else -> {
                     return Result(
                         endOfPaginationReached = true,

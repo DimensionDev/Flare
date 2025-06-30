@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.Flow
 internal interface MicroblogDataSource {
     fun homeTimeline(
         pageSize: Int = 20,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>>
 
@@ -27,14 +26,12 @@ internal interface MicroblogDataSource {
         scope: CoroutineScope,
         pageSize: Int = 20,
         mediaOnly: Boolean = false,
-        pagingKey: String = "user_${userKey}_${if (mediaOnly) "media" else "all"}",
     ): Flow<PagingData<UiTimeline>>
 
     fun context(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int = 20,
-        pagingKey: String = "status_$statusKey",
     ): Flow<PagingData<UiTimeline>>
 
     fun status(statusKey: MicroBlogKey): CacheData<UiTimeline>
@@ -43,7 +40,6 @@ internal interface MicroblogDataSource {
         query: String,
         scope: CoroutineScope,
         pageSize: Int = 20,
-        pagingKey: String = "search_$query",
     ): Flow<PagingData<UiTimeline>>
 
     fun searchUser(
@@ -57,7 +53,6 @@ internal interface MicroblogDataSource {
     fun discoverStatuses(
         pageSize: Int = 20,
         scope: CoroutineScope,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>>
 
     fun discoverHashtags(pageSize: Int = 20): Flow<PagingData<UiHashtag>>
@@ -66,14 +61,12 @@ internal interface MicroblogDataSource {
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int = 20,
-        pagingKey: String = "following_$userKey",
     ): Flow<PagingData<UiUserV2>>
 
     fun fans(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int = 20,
-        pagingKey: String = "fans_$userKey",
     ): Flow<PagingData<UiUserV2>>
 
     fun profileTabs(

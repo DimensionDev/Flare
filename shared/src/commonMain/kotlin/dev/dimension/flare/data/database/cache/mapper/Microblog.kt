@@ -11,8 +11,8 @@ import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.firstOrNull
+import kotlin.uuid.Uuid
 
 internal suspend fun saveToDatabase(
     database: CacheDatabase,

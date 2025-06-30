@@ -102,12 +102,10 @@ internal class MisskeyDataSource(
 
     override fun homeTimeline(
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -116,7 +114,6 @@ internal class MisskeyDataSource(
                     accountKey,
                     service,
                     database,
-                    pagingKey,
                 ),
         )
 
@@ -127,7 +124,6 @@ internal class MisskeyDataSource(
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -136,7 +132,6 @@ internal class MisskeyDataSource(
                     accountKey,
                     service,
                     database,
-                    pagingKey,
                 ),
         )
 
@@ -147,7 +142,6 @@ internal class MisskeyDataSource(
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -156,19 +150,16 @@ internal class MisskeyDataSource(
                     accountKey,
                     service,
                     database,
-                    pagingKey,
                 ),
         )
 
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forNotification = true),
@@ -179,7 +170,6 @@ internal class MisskeyDataSource(
                             accountKey,
                             service,
                             database,
-                            pagingKey,
                         )
 
                     NotificationFilter.Mention ->
@@ -187,7 +177,6 @@ internal class MisskeyDataSource(
                             accountKey,
                             service,
                             database,
-                            pagingKey,
                         )
 
                     else -> throw IllegalStateException("Unsupported notification type")
@@ -267,11 +256,9 @@ internal class MisskeyDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         mediaOnly: Boolean,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -281,7 +268,6 @@ internal class MisskeyDataSource(
                     service,
                     userKey,
                     database,
-                    pagingKey,
                     onlyMedia = mediaOnly,
                 ),
         )
@@ -290,11 +276,9 @@ internal class MisskeyDataSource(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -304,7 +288,6 @@ internal class MisskeyDataSource(
                     database,
                     accountKey,
                     service,
-                    pagingKey,
                     statusOnly = false,
                 ),
         )
@@ -736,11 +719,9 @@ internal class MisskeyDataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
@@ -749,7 +730,6 @@ internal class MisskeyDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                     query,
                 ),
         )
@@ -782,11 +762,9 @@ internal class MisskeyDataSource(
     override fun discoverStatuses(
         pageSize: Int,
         scope: CoroutineScope,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -795,7 +773,6 @@ internal class MisskeyDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                 ),
         )
 
@@ -971,7 +948,6 @@ internal class MisskeyDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -987,7 +963,6 @@ internal class MisskeyDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -1010,7 +985,6 @@ internal class MisskeyDataSource(
                 flow =
                     timelinePager(
                         pageSize = pagingSize,
-                        pagingKey = "user_timeline_$userKey",
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -1020,7 +994,6 @@ internal class MisskeyDataSource(
                                 service = service,
                                 userKey = userKey,
                                 database = database,
-                                pagingKey = "user_timeline_$userKey",
                                 withPinned = true,
                             ),
                     ),
@@ -1030,7 +1003,6 @@ internal class MisskeyDataSource(
                 flow =
                     timelinePager(
                         pageSize = pagingSize,
-                        pagingKey = "user_timeline_replies_$userKey",
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -1040,7 +1012,6 @@ internal class MisskeyDataSource(
                                 accountKey = accountKey,
                                 database = database,
                                 userKey = userKey,
-                                pagingKey = "user_timeline_replies_$userKey",
                                 withReplies = true,
                             ),
                     ),
@@ -1050,12 +1021,10 @@ internal class MisskeyDataSource(
 
     fun favouriteTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "favourite_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -1064,7 +1033,6 @@ internal class MisskeyDataSource(
                     service = service,
                     database = database,
                     accountKey = accountKey,
-                    pagingKey = pagingKey,
                 ),
         )
 
@@ -1333,7 +1301,6 @@ internal class MisskeyDataSource(
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = "list_${accountKey}_$listId",
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -1343,7 +1310,6 @@ internal class MisskeyDataSource(
                     service,
                     database,
                     accountKey,
-                    "list_${accountKey}_$listId",
                 ),
         )
 
@@ -1463,7 +1429,6 @@ internal class MisskeyDataSource(
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = "antennas_$id",
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -1473,7 +1438,6 @@ internal class MisskeyDataSource(
                     database = database,
                     accountKey = accountKey,
                     id = id,
-                    pagingKey = "antennas_$id",
                 ),
         )
 }

@@ -191,12 +191,10 @@ internal class BlueskyDataSource(
 
     override fun homeTimeline(
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -205,7 +203,6 @@ internal class BlueskyDataSource(
                     service,
                     accountKey,
                     database,
-                    pagingKey,
                     inAppNotification = inAppNotification,
                 ),
         )
@@ -213,12 +210,10 @@ internal class BlueskyDataSource(
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forNotification = true),
@@ -229,7 +224,6 @@ internal class BlueskyDataSource(
                             service,
                             accountKey,
                             database,
-                            pagingKey,
                             onClearMarker = {
                                 MemCacheable.update(notificationMarkerKey, 0)
                             },
@@ -303,11 +297,9 @@ internal class BlueskyDataSource(
         scope: CoroutineScope,
         pageSize: Int,
         mediaOnly: Boolean,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -317,7 +309,6 @@ internal class BlueskyDataSource(
                     accountKey,
                     database,
                     userKey,
-                    pagingKey,
                     onlyMedia = mediaOnly,
                 ),
         )
@@ -326,11 +317,9 @@ internal class BlueskyDataSource(
         statusKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -340,7 +329,6 @@ internal class BlueskyDataSource(
                     service,
                     accountKey,
                     database,
-                    pagingKey,
                     statusOnly = false,
                 ),
         )
@@ -958,11 +946,9 @@ internal class BlueskyDataSource(
         query: String,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
@@ -971,7 +957,6 @@ internal class BlueskyDataSource(
                     service,
                     database,
                     accountKey,
-                    pagingKey,
                     query,
                 ),
         )
@@ -1007,7 +992,6 @@ internal class BlueskyDataSource(
     override fun discoverStatuses(
         pageSize: Int,
         scope: CoroutineScope,
-        pagingKey: String,
     ): Flow<PagingData<UiTimeline>> = throw UnsupportedOperationException("Bluesky does not support discover statuses")
 
     override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
@@ -1174,11 +1158,9 @@ internal class BlueskyDataSource(
         uri: String,
         pageSize: Int = 20,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> {
-        val pagingKey = "feed_timeline_$uri"
-        return timelinePager(
+    ): Flow<PagingData<UiTimeline>> =
+        timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -1188,10 +1170,8 @@ internal class BlueskyDataSource(
                     accountKey = accountKey,
                     database = database,
                     uri = uri,
-                    pagingKey = pagingKey,
                 ),
         )
-    }
 
     suspend fun subscribeFeed(data: UiList) {
         MemCacheable.updateWith<ImmutableList<UiList>>(
@@ -1406,11 +1386,9 @@ internal class BlueskyDataSource(
         listId: String,
         scope: CoroutineScope,
         pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> {
-        val pagingKey = "list_timeline_$listId"
-        return timelinePager(
+    ): Flow<PagingData<UiTimeline>> =
+        timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -1420,10 +1398,8 @@ internal class BlueskyDataSource(
                     accountKey = accountKey,
                     database = database,
                     uri = listId,
-                    pagingKey = pagingKey,
                 ),
         )
-    }
 
     private suspend fun createList(
         title: String,
@@ -2188,7 +2164,6 @@ internal class BlueskyDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -2204,7 +2179,6 @@ internal class BlueskyDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -2227,7 +2201,6 @@ internal class BlueskyDataSource(
                 flow =
                     timelinePager(
                         pageSize = pagingSize,
-                        pagingKey = "user_timeline_$userKey",
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -2237,7 +2210,6 @@ internal class BlueskyDataSource(
                                 accountKey = accountKey,
                                 database = database,
                                 userKey = userKey,
-                                pagingKey = "user_timeline_$userKey",
                                 onlyMedia = false,
                                 withReplies = false,
                             ),
@@ -2248,7 +2220,6 @@ internal class BlueskyDataSource(
                 flow =
                     timelinePager(
                         pageSize = pagingSize,
-                        pagingKey = "user_timeline_replies_$userKey",
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -2258,7 +2229,6 @@ internal class BlueskyDataSource(
                                 accountKey,
                                 database,
                                 userKey,
-                                pagingKey = "user_timeline_replies_$userKey",
                                 withReplies = true,
                             ),
                     ),
@@ -2270,7 +2240,6 @@ internal class BlueskyDataSource(
                     flow =
                         timelinePager(
                             pageSize = pagingSize,
-                            pagingKey = "user_timeline_likes_$userKey",
                             database = database,
                             scope = scope,
                             filterFlow = localFilterRepository.getFlow(forTimeline = true),
@@ -2279,7 +2248,6 @@ internal class BlueskyDataSource(
                                     service,
                                     accountKey,
                                     database,
-                                    pagingKey = "user_timeline_likes_$userKey",
                                 ),
                         ),
                 )

@@ -18,13 +18,11 @@ internal class MentionRemoteMediator(
     private val service: XQTService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey = "mention_$accountKey"
     private var cursor: String? = null
 
     override suspend fun timeline(
@@ -40,6 +38,7 @@ internal class MentionRemoteMediator(
                             count = state.config.pageSize,
                         )
                 }
+
                 LoadType.PREPEND -> {
                     return Result(
                         endOfPaginationReached = true,

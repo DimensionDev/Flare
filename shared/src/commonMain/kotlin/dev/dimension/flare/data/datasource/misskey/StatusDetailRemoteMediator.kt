@@ -23,14 +23,21 @@ internal class StatusDetailRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
-    private val pagingKey: String,
     private val statusOnly: Boolean,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = false,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey: String =
+        buildString {
+            append("status_detail_")
+            if (statusOnly) {
+                append("status_only_")
+            }
+            append(statusKey.toString())
+            append("_")
+            append(accountKey.toString())
+        }
     private var page = 1
 
     override suspend fun timeline(

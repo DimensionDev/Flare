@@ -7,7 +7,7 @@ import app.bsky.feed.GetAuthorFeedFilter
 import app.bsky.feed.GetAuthorFeedQueryParams
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.Bluesky
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.AccountType
@@ -20,16 +20,25 @@ internal class UserTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val database: CacheDatabase,
     private val userKey: MicroBlogKey,
-    private val pagingKey: String,
     private val onlyMedia: Boolean = false,
     private val withReplies: Boolean = false,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = false,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
     var cursor: String? = null
+    override val pagingKey =
+        buildString {
+            append("user_timeline")
+            if (onlyMedia) {
+                append("media")
+            }
+            if (withReplies) {
+                append("replies")
+            }
+            append(accountKey.toString())
+            append(userKey.toString())
+        }
 
     override suspend fun timeline(
         loadType: LoadType,
@@ -80,10 +89,9 @@ internal class UserTimelineRemoteMediator(
         return Result(
             endOfPaginationReached = cursor == null,
             data =
-                Bluesky.saveFeed(
+                response.feed.toDbPagingTimeline(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
-                    data = response.feed,
                 ),
         )
     }

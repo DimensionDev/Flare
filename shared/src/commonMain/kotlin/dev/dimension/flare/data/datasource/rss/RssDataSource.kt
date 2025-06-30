@@ -28,7 +28,6 @@ internal object RssDataSource :
             RssTimelineRemoteMediator(
                 url = url,
                 cacheDatabase = database,
-                pagingKey = url,
             ),
         pagingSourceFactory = {
             database.pagingTimelineDao().getPagingSource(

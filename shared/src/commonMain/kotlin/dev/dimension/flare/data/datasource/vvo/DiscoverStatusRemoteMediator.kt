@@ -17,13 +17,11 @@ internal class DiscoverStatusRemoteMediator(
     private val service: VVOService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey: String = "discover_status_$accountKey"
     private var page = 0
     private val containerId = "102803"
 
@@ -48,6 +46,7 @@ internal class DiscoverStatusRemoteMediator(
                         endOfPaginationReached = true,
                     )
                 }
+
                 LoadType.APPEND -> {
                     page++
                     service.getContainerIndex(containerId = containerId, sinceId = page.toString())

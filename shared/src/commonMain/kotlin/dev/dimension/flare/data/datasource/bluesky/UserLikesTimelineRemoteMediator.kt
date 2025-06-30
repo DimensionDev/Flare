@@ -6,7 +6,7 @@ import androidx.paging.PagingState
 import app.bsky.feed.GetActorLikesQueryParams
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.Bluesky
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.AccountType
@@ -18,14 +18,13 @@ internal class UserLikesTimelineRemoteMediator(
     private val service: BlueskyService,
     private val accountKey: MicroBlogKey,
     private val database: CacheDatabase,
-    private val pagingKey: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = false,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
     var cursor: String? = null
+
+    override val pagingKey = "user_timeline_likes_$accountKey"
 
     override suspend fun timeline(
         loadType: LoadType,
@@ -66,10 +65,9 @@ internal class UserLikesTimelineRemoteMediator(
         return Result(
             endOfPaginationReached = cursor == null,
             data =
-                Bluesky.saveFeed(
+                response.feed.toDbPagingTimeline(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
-                    data = response.feed,
                 ),
         )
     }

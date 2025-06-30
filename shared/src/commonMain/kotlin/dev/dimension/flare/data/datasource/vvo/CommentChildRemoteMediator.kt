@@ -17,14 +17,12 @@ internal class CommentChildRemoteMediator(
     private val service: VVOService,
     private val commentKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
     private val database: CacheDatabase,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        clearWhenRefresh = true,
-        pagingKey = pagingKey,
         accountType = AccountType.Specific(accountKey),
     ) {
+    override val pagingKey: String = "status_comments_child_${commentKey}_$accountKey"
     private var maxId: Long? = null
     private var page = 0
 
@@ -46,6 +44,7 @@ internal class CommentChildRemoteMediator(
                             cid = commentKey.id,
                         )
                 }
+
                 LoadType.PREPEND -> {
                     return Result(
                         endOfPaginationReached = true,

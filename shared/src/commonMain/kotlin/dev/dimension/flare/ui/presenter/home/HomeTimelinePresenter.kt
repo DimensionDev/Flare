@@ -34,7 +34,7 @@ public class HomeTimelinePresenter(
                         } else {
                             "home"
                         }
-                    service.homeTimeline(scope = scope, pagingKey = pagingKey)
+                    service.homeTimeline(scope = scope)
                 }.collectAsLazyPagingItems()
             }.toPagingState()
     }

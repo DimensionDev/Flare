@@ -3,13 +3,13 @@ package dev.dimension.flare.data.datasource.vvo
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.VVO
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
@@ -19,22 +19,26 @@ internal class SearchStatusRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val pagingKey: String,
     private val query: String,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseTimelineRemoteMediator(
+        database = database,
+        clearWhenRefresh = true,
+        pagingKey = pagingKey,
+        accountType = AccountType.Specific(accountKey),
+    ) {
     private var page = 1
     private val containerId by lazy {
         "100103type=1&q=$query&t="
     }
 
-    override suspend fun doLoad(
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         val config = service.config()
         if (config.data?.login != true) {
-            return MediatorResult.Error(
-                LoginExpiredException,
-            )
+            throw LoginExpiredException
         }
+
         val response =
             when (loadType) {
                 LoadType.REFRESH -> {
@@ -46,7 +50,7 @@ internal class SearchStatusRemoteMediator(
                         )
                 }
                 LoadType.PREPEND -> {
-                    return MediatorResult.Success(
+                    return Result(
                         endOfPaginationReached = true,
                     )
                 }
@@ -60,30 +64,28 @@ internal class SearchStatusRemoteMediator(
                     )
                 }
             }
+
         val status =
             response.data
                 ?.cards
-                ?.flatMap { listOfNotNull(it.mblog) + it.cardGroup?.mapNotNull { it.mblog }.orEmpty() }
+                ?.flatMap { card -> listOfNotNull(card.mblog) + card.cardGroup?.mapNotNull { it.mblog }.orEmpty() }
                 .orEmpty()
 
-        database.connect {
-            if (loadType == LoadType.REFRESH) {
-                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+        val data =
+            status.map { statusItem ->
+                statusItem.toDbPagingTimeline(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                    sortIdProvider = { item ->
+                        val index = status.indexOf(item)
+                        -(index + page * state.config.pageSize).toLong()
+                    },
+                )
             }
-            VVO.saveStatus(
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                database = database,
-                statuses = status,
-                sortIdProvider = {
-                    val index = status.indexOf(it)
-                    -(index + page * state.config.pageSize).toLong()
-                },
-            )
-        }
 
-        return MediatorResult.Success(
+        return Result(
             endOfPaginationReached = status.isEmpty(),
+            data = data,
         )
     }
 }

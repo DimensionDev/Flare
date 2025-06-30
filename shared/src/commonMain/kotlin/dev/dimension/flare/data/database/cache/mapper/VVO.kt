@@ -44,7 +44,7 @@ internal object VVO {
     }
 }
 
-private fun Status.toDbPagingTimeline(
+internal fun Status.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: (Status) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0L },
@@ -84,7 +84,7 @@ private fun Status.toDbStatus(accountKey: MicroBlogKey): DbStatus =
         text = rawText,
     )
 
-private fun Comment.toDbPagingTimeline(
+internal fun Comment.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: (Comment) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0L },

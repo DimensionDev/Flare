@@ -214,7 +214,7 @@ private fun TweetUnion.getQuoted(): TweetUnion? =
         is TweetWithVisibilityResults -> this.tweet.quotedStatusResult?.result
     }
 
-private fun XQTTimeline.toDbPagingTimeline(
+internal fun XQTTimeline.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: (XQTTimeline) -> Long = { sortedIndex },

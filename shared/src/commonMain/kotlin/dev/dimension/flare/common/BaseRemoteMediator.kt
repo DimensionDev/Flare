@@ -5,11 +5,16 @@ import androidx.paging.LoadType
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
+import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.database.cache.connect
+import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.repository.DebugRepository
+import dev.dimension.flare.model.AccountType
 
 @OptIn(ExperimentalPagingApi::class)
 internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMediator<Key, Value>() {
-    override suspend fun load(
+    final override suspend fun load(
         loadType: LoadType,
         state: PagingState<Key, Value>,
     ): MediatorResult =
@@ -28,6 +33,40 @@ internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMedia
 
     protected open fun onError(e: Throwable) {
     }
+}
+
+@OptIn(ExperimentalPagingApi::class)
+internal abstract class BaseTimelineRemoteMediator(
+    private val database: CacheDatabase,
+    private val clearWhenRefresh: Boolean,
+    private val pagingKey: String,
+    private val accountType: AccountType,
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+    final override suspend fun doLoad(
+        loadType: LoadType,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
+    ): MediatorResult {
+        val result = timeline(loadType, state)
+        database.connect {
+            if (clearWhenRefresh && loadType == LoadType.REFRESH) {
+                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountType = accountType)
+            }
+            saveToDatabase(database, result.data)
+        }
+        return MediatorResult.Success(
+            endOfPaginationReached = result.endOfPaginationReached,
+        )
+    }
+
+    abstract suspend fun timeline(
+        loadType: LoadType,
+        state: PagingState<Int, DbPagingTimelineWithStatus>,
+    ): Result
+
+    data class Result(
+        val endOfPaginationReached: Boolean,
+        val data: List<DbPagingTimelineWithStatus> = emptyList(),
+    )
 }
 
 internal abstract class BasePagingSource<Key : Any, Value : Any> : PagingSource<Key, Value>() {

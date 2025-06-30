@@ -3,13 +3,13 @@ package dev.dimension.flare.data.datasource.vvo
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.VVO
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
@@ -19,20 +19,24 @@ internal class StatusCommentRemoteMediator(
     private val service: VVOService,
     private val statusKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseTimelineRemoteMediator(
+        database = database,
+        clearWhenRefresh = true,
+        pagingKey = pagingKey,
+        accountType = AccountType.Specific(accountKey),
+    ) {
     private var maxId: Long? = null
     private var page = 0
 
-    override suspend fun doLoad(
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         val config = service.config()
         if (config.data?.login != true) {
-            return MediatorResult.Error(
-                LoginExpiredException,
-            )
+            throw LoginExpiredException
         }
+
         val response =
             when (loadType) {
                 LoadType.REFRESH -> {
@@ -45,7 +49,7 @@ internal class StatusCommentRemoteMediator(
                         )
                 }
                 LoadType.PREPEND -> {
-                    return MediatorResult.Success(
+                    return Result(
                         endOfPaginationReached = true,
                     )
                 }
@@ -61,25 +65,23 @@ internal class StatusCommentRemoteMediator(
             }
 
         maxId = response.data?.maxID?.takeIf { it != 0L }
-        val status =
-            response.data?.data.orEmpty()
-        database.connect {
-            if (loadType == LoadType.REFRESH) {
-                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+        val comments = response.data?.data.orEmpty()
+
+        val data =
+            comments.map { comment ->
+                comment.toDbPagingTimeline(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                    sortIdProvider = { item ->
+                        val index = comments.indexOf(item)
+                        -(index + page * state.config.pageSize).toLong()
+                    },
+                )
             }
-            VVO.saveComment(
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                database = database,
-                statuses = response.data?.data.orEmpty(),
-                sortIdProvider = {
-                    val index = status.indexOf(it)
-                    -(index + page * state.config.pageSize).toLong()
-                },
-            )
-        }
-        return MediatorResult.Success(
+
+        return Result(
             endOfPaginationReached = maxId == null,
+            data = data,
         )
     }
 }

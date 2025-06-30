@@ -75,24 +75,26 @@ internal object Bluesky {
 //        database.messageDao().insert(room)
     }
 
-    suspend fun saveFeed(
+    fun saveFeed(
         accountKey: MicroBlogKey,
         pagingKey: String,
-        database: CacheDatabase,
         data: List<FeedViewPost>,
         sortIdProvider: (FeedViewPost) -> Long = {
-            val reason = it.reason
-            if (reason is FeedViewPostReasonUnion.ReasonRepost) {
-                reason.value.indexedAt.toEpochMilliseconds()
-            } else if (reason is FeedViewPostReasonUnion.ReasonPin) {
-                Long.MAX_VALUE
-            } else {
-                it.post.indexedAt.toEpochMilliseconds()
+            when (val reason = it.reason) {
+                is FeedViewPostReasonUnion.ReasonRepost -> {
+                    reason.value.indexedAt.toEpochMilliseconds()
+                }
+
+                is FeedViewPostReasonUnion.ReasonPin -> {
+                    Long.MAX_VALUE
+                }
+
+                else -> {
+                    it.post.indexedAt.toEpochMilliseconds()
+                }
             }
         },
-    ) {
-        save(database, data.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider))
-    }
+    ): List<DbPagingTimelineWithStatus> = data.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider)
 
     suspend fun saveNotification(
         accountKey: MicroBlogKey,

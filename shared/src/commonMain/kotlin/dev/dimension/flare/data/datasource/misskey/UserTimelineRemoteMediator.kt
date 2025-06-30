@@ -3,14 +3,14 @@ package dev.dimension.flare.data.datasource.misskey
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.Misskey
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.UsersNotesRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.datetime.Instant
 
@@ -24,16 +24,21 @@ internal class UserTimelineRemoteMediator(
     private val onlyMedia: Boolean = false,
     private val withReplies: Boolean = false,
     private val withPinned: Boolean = false,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseTimelineRemoteMediator(
+        database = database,
+        clearWhenRefresh = true,
+        pagingKey = pagingKey,
+        accountType = AccountType.Specific(accountKey),
+    ) {
     var pinnedIds = emptyList<String>()
 
-    override suspend fun doLoad(
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         val response =
             when (loadType) {
-                LoadType.PREPEND -> return MediatorResult.Success(
+                LoadType.PREPEND -> return Result(
                     endOfPaginationReached = true,
                 )
 
@@ -80,7 +85,7 @@ internal class UserTimelineRemoteMediator(
                 LoadType.APPEND -> {
                     val lastItem =
                         database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return MediatorResult.Success(
+                            ?: return Result(
                                 endOfPaginationReached = true,
                             )
                     service
@@ -106,31 +111,24 @@ internal class UserTimelineRemoteMediator(
                             it.id !in pinnedIds
                         }
                 }
-            } ?: return MediatorResult.Success(
+            } ?: return Result(
                 endOfPaginationReached = true,
             )
-        database.connect {
-            if (loadType == LoadType.REFRESH) {
-                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-            }
 
-            Misskey.save(
-                database = database,
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                data = response,
-                sortIdProvider = {
-                    if (it.id in pinnedIds) {
-                        Long.MAX_VALUE
-                    } else {
-                        Instant.parse(it.createdAt).toEpochMilliseconds()
-                    }
-                },
-            )
-        }
-
-        return MediatorResult.Success(
+        return Result(
             endOfPaginationReached = response.isEmpty(),
+            data =
+                response.toDbPagingTimeline(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                    sortIdProvider = {
+                        if (it.id in pinnedIds) {
+                            Long.MAX_VALUE
+                        } else {
+                            Instant.parse(it.createdAt).toEpochMilliseconds()
+                        }
+                    },
+                ),
         )
     }
 }

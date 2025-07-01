@@ -160,18 +160,18 @@ struct HomeTabViewContent: View {
     @ViewBuilder
     private func tabBarItem(for tab: FlareHomeTabs) -> some View {
         Button {
-            print("[HomeTabContent] Tab button tapped: \(tab), selectedTab: \(selectedTab)")
+            FlareLog.debug("HomeTabContent Tab button tapped: \(tab), selectedTab: \(selectedTab)")
 
             if selectedTab == tab {
-                print("[HomeTabContent] Same tab tapped again: \(tab)")
+                FlareLog.debug("HomeTabContent Same tab tapped again: \(tab)")
                 if tab == .timeline {
                     let oldValue = scrollToTopTrigger
                     scrollToTopTrigger.toggle()
-                    print("[HomeTabContent] Timeline scroll trigger toggled: \(oldValue) -> \(scrollToTopTrigger)")
+                    FlareLog.debug("HomeTabContent Timeline scroll trigger toggled: \(oldValue) -> \(scrollToTopTrigger)")
                 }
             } else {
                 selectedTab = tab
-                print("[HomeTabContent] Tab switched to: \(tab)")
+                FlareLog.debug("HomeTabContent Tab switched to: \(tab)")
             }
         } label: {
             VStack(spacing: 2) {

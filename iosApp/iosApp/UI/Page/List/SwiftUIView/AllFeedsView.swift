@@ -89,11 +89,11 @@ struct AllFeedsView: View {
                                         isPinned: tabSettingStore.pinnedListIds.contains(feed.id)
                                     )
                                     .onAppear {
-                                        print("🟢 Feed loading: itemCount=\(feedsData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
+                                        FlareLog.debug("Feed loading: itemCount=\(feedsData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
                                         feedsData.get(index: Int32(index))
 
                                         lastKnownItemCount = Int(feedsData.itemCount)
-                                        print("🟡 Feed updated: itemCount=\(feedsData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
+                                        FlareLog.debug("Feed updated: itemCount=\(feedsData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
                                     }
                                 }
                             }

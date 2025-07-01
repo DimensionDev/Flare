@@ -44,26 +44,26 @@ class FloatingWindowManager: ObservableObject {
     func show() {
         // 添加调试日志
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("[FloatingWindow] 🚀 Show window called, Debug mode enabled: \(PerformanceConfig.isDebugModeEnabled)")
+            FlareLog.debug("FloatingWindow Show window called, Debug mode enabled: \(PerformanceConfig.isDebugModeEnabled)")
         }
 
         // 只在Debug模式下显示
         guard PerformanceConfig.isDebugModeEnabled else {
             if PerformanceConfig.isVerboseLoggingEnabled {
-                print("[FloatingWindow] ❌ Debug mode disabled, window not shown")
+                FlareLog.debug("FloatingWindow Debug mode disabled, window not shown")
             }
             return
         }
 
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("[FloatingWindow] ✅ Showing floating window in expanded state")
+            FlareLog.debug("FloatingWindow Showing floating window in expanded state")
         }
 
         // 确保性能监控已启动
         let monitor = TimelinePerformanceMonitor.shared
         if !monitor.isMonitoring {
             if PerformanceConfig.isVerboseLoggingEnabled {
-                print("[FloatingWindow] 📊 Starting performance monitoring")
+                FlareLog.debug("FloatingWindow Starting performance monitoring")
             }
             monitor.startMonitoring()
         }

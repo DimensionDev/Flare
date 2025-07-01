@@ -57,7 +57,7 @@ struct ProfileMediaListScreen: View {
                             if !allImages.isEmpty,
                                let mediaIndex = allImages.firstIndex(where: { $0 === item.media })
                             {
-                                print("Debug: Opening browser with \(allImages.count) images at index \(mediaIndex)")
+                                FlareLog.debug("ProfileMediaListScreen Opening browser with \(allImages.count) images at index \(mediaIndex)")
                                 showPhotoBrowser(media: item.media, images: allImages, initialIndex: mediaIndex)
                             }
                         }
@@ -211,20 +211,20 @@ struct WaterfallCollectionView: UIViewRepresentable {
                     guard let item = success.peek(index: index) else { return nil }
                     return ProfileMediaGridItem(id: Int(index), media: item.media, mediaState: item.status)
                 }
-                print("Updated items count: \(items.count)")
+                FlareLog.debug("ProfileMediaListScreen Updated items count: \(items.count)")
             }
         }
 
         // - UICollectionViewDataSource
         func collectionView(_: UICollectionView, numberOfItemsInSection _: Int) -> Int {
-            print("numberOfItemsInSection: \(items.count)")
+            FlareLog.debug("ProfileMediaListScreen numberOfItemsInSection: \(items.count)")
             return items.count
         }
 
         func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "Cell", for: indexPath) as! HostingCell
             let item = items[indexPath.item]
-            print("Setting up cell at index: \(indexPath.item)")
+            FlareLog.debug("ProfileMediaListScreen Setting up cell at index: \(indexPath.item)")
             cell.setup(with: parent.content(item))
             return cell
         }
@@ -241,26 +241,26 @@ struct WaterfallCollectionView: UIViewRepresentable {
 
             switch onEnum(of: item.media) {
             case let .image(data):
-                print("Image size - width: \(data.width), height: \(data.height)")
+                FlareLog.debug("ProfileMediaListScreen Image size - width: \(data.width), height: \(data.height)")
                 let aspectRatio = CGFloat(data.width / (data.height == 0 ? 1 : data.height)).isZero ? 1 : CGFloat(data.width / data.height)
                 height = width / aspectRatio
             case let .video(data):
-                print("Video size - width: \(data.width), height: \(data.height)")
+                FlareLog.debug("ProfileMediaListScreen Video size - width: \(data.width), height: \(data.height)")
                 let aspectRatio = CGFloat(data.width / (data.height == 0 ? 1 : data.height)).isZero ? 1 : CGFloat(data.width / data.height)
                 height = width / aspectRatio
             case let .gif(data):
-                print("Gif size - width: \(data.width), height: \(data.height)")
+                FlareLog.debug("ProfileMediaListScreen Gif size - width: \(data.width), height: \(data.height)")
                 let aspectRatio = CGFloat(data.width / (data.height == 0 ? 1 : data.height)).isZero ? 1 : CGFloat(data.width / data.height)
                 height = width / aspectRatio
             case .audio:
-                print("Audio item")
+                FlareLog.debug("ProfileMediaListScreen Audio item")
                 height = width
             case .video:
-                print("Video item")
+                FlareLog.debug("ProfileMediaListScreen Video item")
                 height = width
             }
 
-            print("Calculated size - width: \(width), height: \(height)")
+            FlareLog.debug("ProfileMediaListScreen Calculated size - width: \(width), height: \(height)")
             return CGSize(width: width, height: height)
         }
 

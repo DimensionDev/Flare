@@ -82,7 +82,7 @@ struct TimelineViewSwiftUIBase: View {
                 }
             }
             .onChange(of: scrollToTopTrigger) { _, _ in
-                print("[TimelineView_Base] ScrollToTop trigger changed for tab: \(tab.key)")
+                FlareLog.debug("TimelineView_Base ScrollToTop trigger changed for tab: \(tab.key)")
                 guard isCurrentTab else { return }
                 
                 withAnimation(.easeInOut(duration: 0.5)) {

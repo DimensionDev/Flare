@@ -25,7 +25,7 @@ struct StatusTimelineComponent: View {
                     do {
                         return try success.peek(index: index)
                     } catch {
-                        print("Error peeking timeline data: \(error)")
+                        FlareLog.error("StatusTimelineBuilder Error peeking timeline data: \(error)")
                         return nil
                     }
                 }()

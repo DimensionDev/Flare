@@ -61,11 +61,11 @@ struct AllListsView: View {
                                     defaultUser: isMastodonUser ? currentUser : nil
                                 )
                                 .onAppear {
-                                    print("🟢 loading: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
+                                    FlareLog.debug("loading: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
                                     successData.get(index: Int32(index))
 
                                     lastKnownItemCount = Int(successData.itemCount)
-                                    print("🟡 list updated: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
+                                    FlareLog.debug("list updated: itemCount=\(successData.itemCount), index=\(index), lastKnownItemCount=\(lastKnownItemCount)")
                                 }
                             }
                         }

@@ -53,7 +53,7 @@ struct FlareApp: SwiftUI.App {
                     // AboutTestScreen().withFlareTheme().applyTheme(theme).environment(theme).applyRootTheme()
 
                     FlareRootView()
-                        .enableInjection()
+//                        .enableInjection()
                         // .preferredColorScheme(.light)
                         .onOpenURL { url in
                             router.handleDeepLink(url)

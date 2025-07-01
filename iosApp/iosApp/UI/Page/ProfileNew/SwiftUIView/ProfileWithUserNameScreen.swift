@@ -26,7 +26,7 @@ struct ProfileWithUserNameScreen: View {
                 case .error:
                     Text("error")
                         .onAppear {
-                            os_log("[📔][ProfileWithUserNameScreen]加载用户信息失败", log: .default, type: .error)
+                            FlareLog.error("ProfileWithUserNameScreen 加载用户信息失败")
                         }
                 case .loading:
                     List {
@@ -50,7 +50,7 @@ struct ProfileWithUserNameScreen: View {
                     .scrollContentBackground(.hidden)
                     .listRowBackground(theme.primaryBackgroundColor)
                     .onAppear {
-                        os_log("[📔][ProfileWithUserNameScreen]正在加载用户信息...", log: .default, type: .debug)
+                        FlareLog.debug("ProfileWithUserNameScreen 正在加载用户信息...")
                     }
                 case let .success(data):
                     // (lldb) po state dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter$body$1@1d3717a0

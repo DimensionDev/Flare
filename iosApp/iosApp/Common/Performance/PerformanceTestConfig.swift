@@ -161,10 +161,10 @@ class PerformanceTestConfig {
         }
 
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("🧪 [PerformanceTestConfig] Applied scenario: \(scenario.rawValue)")
-            print("   - Stable ID: \(enableStableIDSystem)")
-            print("   - State Opt: \(enableStateObservationOptimization)")
-            print("   - Visible Range: \(enableVisibleRangeDetection)")
+            FlareLog.debug("PerformanceTestConfig Applied scenario: \(scenario.rawValue)")
+            FlareLog.debug("   - Stable ID: \(enableStableIDSystem)")
+            FlareLog.debug("   - State Opt: \(enableStateObservationOptimization)")
+            FlareLog.debug("   - Visible Range: \(enableVisibleRangeDetection)")
         }
     }
 
@@ -175,7 +175,7 @@ class PerformanceTestConfig {
         testResults.removeAll()
 
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("🧪 [PerformanceTestConfig] Performance testing started")
+            FlareLog.debug("PerformanceTestConfig Performance testing started")
         }
     }
 
@@ -186,7 +186,7 @@ class PerformanceTestConfig {
         currentTestPhase = .idle
 
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("🧪 [PerformanceTestConfig] Performance testing ended")
+            FlareLog.debug("PerformanceTestConfig Performance testing ended")
         }
     }
 
@@ -196,8 +196,8 @@ class PerformanceTestConfig {
         testResults.append(result)
 
         if PerformanceConfig.isVerboseLoggingEnabled {
-            print("🧪 [PerformanceTestConfig] Test result added:")
-            print(result.summary)
+            FlareLog.debug("PerformanceTestConfig Test result added:")
+            FlareLog.debug(result.summary)
         }
     }
 

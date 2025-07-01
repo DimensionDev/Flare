@@ -55,12 +55,12 @@ struct DMChatMessageView: View {
             // Estimate text width (might need a proper AttributedString width calculation)
             let estimatedTextWidth = styledText.width(withConstrainedWidth: availableTextWidth, font: font)
             if estimatedTextWidth + timeWidth < availableTextWidth {
-                print("[\(message.id.prefix(4))] DateArrangement: hstack (estimated)")
+                FlareLog.debug("DMChatMessageView [\(message.id.prefix(4))] DateArrangement: hstack (estimated)")
                 return .hstack
             }
         }
 
-        print("[\(message.id.prefix(4))] DateArrangement: vstack (default/fallback)")
+        FlareLog.debug("DMChatMessageView [\(message.id.prefix(4))] DateArrangement: vstack (default/fallback)")
         return .vstack
     }
 
@@ -75,7 +75,7 @@ struct DMChatMessageView: View {
         let availableWidth = screenWidth - bubblePadding - sidePadding - textPaddings
 
         let finalWidth = message.attachments.isEmpty ? availableWidth : DMChatMessageView.widthWithMedia - textPaddings
-        print("[\(message.id.prefix(4))] Calculated availableTextWidth: \(finalWidth)")
+        FlareLog.debug("[\(message.id.prefix(4))] Calculated availableTextWidth: \(finalWidth)")
         return finalWidth
     }
 
@@ -111,8 +111,12 @@ struct DMChatMessageView: View {
                 // TODO: Add Reply Bubble View later if needed
                 bubbleView(message)
                     .sizeGetter($bubbleVStackSize)
-                    .onAppear { print("[\(message.id.prefix(4))] Bubble VStack Appeared Size: \(bubbleVStackSize)") }
-                    .onChange(of: bubbleVStackSize) { print("[\(message.id.prefix(4))] Bubble VStack Size Changed: \($0)") }
+                    .onAppear {
+                        let _ = FlareLog.debug("[\(message.id.prefix(4))] Bubble VStack Appeared Size: \(bubbleVStackSize)")
+                    }
+                    .onChange(of: bubbleVStackSize) {
+                        let _ = FlareLog.debug("[\(message.id.prefix(4))] Bubble VStack Size Changed: \($0)")
+                    }
             }
 
             // --- Status View (Right side for current user) ---
@@ -134,7 +138,9 @@ struct DMChatMessageView: View {
         // Then apply the bubble padding on the opposite side
         .padding(message.user.isCurrentUser ? .leading : .trailing, horizontalBubblePadding)
         .frame(maxWidth: .infinity, alignment: message.user.isCurrentUser ? .trailing : .leading)
-        .onAppear { print("[\(message.id.prefix(4))] Message Appeared. Text: '\(message.text)', Length: \(message.text.count)") }
+        .onAppear {
+            let _ = FlareLog.debug("[\(message.id.prefix(4))] Message Appeared. Text: '\(message.text)', Length: \(message.text.count)")
+        }
     }
 
     // --- Helper View Builders ---
@@ -146,7 +152,7 @@ struct DMChatMessageView: View {
                     // Apply Flare optimized avatar configuration
                     .flareAvatar(size: CGSize(width: avatarSize * 2, height: avatarSize * 2))
                     .onFailure { error in
-                        print("KFImage failed for avatar: \(error.localizedDescription)")
+                        FlareLog.error("DMChatMessageView KFImage failed for avatar: \(error.localizedDescription)")
                     }
                     // Then apply general SwiftUI modifiers
                     .resizable()

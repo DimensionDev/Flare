@@ -31,7 +31,7 @@ import shared
          if hasMore {
             TimelineLoadMoreViewV2(isRefreshing: isRefreshing)
                 .onAppear {
-                     print("🔄 [TimelineItemsView] Reached end of list, triggering next page load")
+                     FlareLog.debug("TimelineItemsViewV2 Reached end of list, triggering next page load")
                     Task {
                          if let presenter,
                            let timelineState = presenter.models.value as? TimelineState,
@@ -41,10 +41,10 @@ import shared
                             let nextPageIndex = items.count
                             
                              if nextPageIndex < currentItemCount {
-                                print("🔄 [TimelineItemsView] Safe next page load: requesting index=\(nextPageIndex), total=\(currentItemCount)")
+                                FlareLog.debug("TimelineItemsViewV2 Safe next page load: requesting index=\(nextPageIndex), total=\(currentItemCount)")
                                 _ = pagingState.get(index: Int32(nextPageIndex))
                             } else {
-                                print("🚫 [TimelineItemsView] Skipped next page load: index=\(nextPageIndex) >= total=\(currentItemCount)")
+                                FlareLog.debug("TimelineItemsViewV2 Skipped next page load: index=\(nextPageIndex) >= total=\(currentItemCount)")
                             }
                         }
                     }

@@ -311,11 +311,11 @@ class FlareRouter: ObservableObject {
                 }
             }
 
-            print("未能识别的Compose类型: \(type(of: route))")
+            FlareLog.warning("FlareRouter 未能识别的Compose类型: \(type(of: route))")
             return .search(accountType: AccountTypeGuest(), keyword: "")
 
         default:
-            print("FlareRouter: Unhandled AppleRoute type: \(type(of: route)) - Route Value: \(route)")
+            FlareLog.warning("FlareRouter Unhandled AppleRoute type: \(type(of: route)) - Route Value: \(route)")
             return .search(accountType: AccountTypeGuest(), keyword: "")
         }
     }

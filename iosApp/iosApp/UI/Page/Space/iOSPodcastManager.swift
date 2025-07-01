@@ -69,18 +69,16 @@ class IOSPodcastManager: ObservableObject {
     }
 
     func playPodcast(podcast: UiPodcast) {
-        print("=========================================")
-        print("[iOSPodcastManager] Request received: playPodcast")
-        print("  - ID: \(podcast.id)")
-        print("  - Title: \(podcast.title)")
-        print("  - Playback URL: \(podcast.playbackUrl ?? "Not Available")")
-        print("  - Is Ended: \(podcast.ended)")
-        print("=========================================")
+        FlareLog.debug("iOSPodcastManager Request received: playPodcast")
+        FlareLog.debug("iOSPodcastManager ID: \(podcast.id)")
+        FlareLog.debug("iOSPodcastManager Title: \(podcast.title)")
+        FlareLog.debug("iOSPodcastManager Playback URL: \(podcast.playbackUrl ?? "Not Available")")
+        FlareLog.debug("iOSPodcastManager Is Ended: \(podcast.ended)")
 
         stopPodcastInternal()
 
         guard let urlString = podcast.playbackUrl, let url = URL(string: urlString) else {
-            print("[iOSPodcastManager] Error: Invalid playback URL.")
+            FlareLog.error("iOSPodcastManager Error: Invalid playback URL.")
             DispatchQueue.main.async {
                 self.currentPodcast = podcast
                 self.playbackState = .failed(NSError(domain: "PodcastError", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid playback URL"]))
@@ -92,14 +90,14 @@ class IOSPodcastManager: ObservableObject {
 
         //  let urlString = "https://prod-fastly-ap-southeast-1.video.pscp.tv/Transcoding/v1/hls/kThmok5-gtIE6I8bO4uQySMbVRGxqsWF9vP8g3UYkRoKNJn0Y6l-qvqAp-JTQKavP5hM0v4YjSHtEmuMydejJA/non_transcode/ap-southeast-1/periscope-replay-direct-prod-ap-southeast-1-public/audio-space/playlist_16702103663266561072.m3u8?type=replay"
         guard let url = URL(string: urlString) else {
-            print("[iOSPodcastManager] Error: Hardcoded Replay URL is invalid?!")
+            FlareLog.error("iOSPodcastManager Error: Hardcoded Replay URL is invalid?!")
             DispatchQueue.main.async {
                 self.playbackState = .failed(NSError(domain: "PodcastError", code: 2, userInfo: [NSLocalizedDescriptionKey: "Hardcoded test URL invalid"]))
                 self.currentPodcast = podcast
             }
             return
         }
-        print("[iOSPodcastManager] Using HARDCODED Replay URL for testing: \(urlString)")
+        FlareLog.debug("iOSPodcastManager Using HARDCODED Replay URL for testing: \(urlString)")
 
         DispatchQueue.main.async {
             self.currentPodcast = podcast
@@ -123,9 +121,7 @@ class IOSPodcastManager: ObservableObject {
     }
 
     func stopPodcast() {
-        print("=========================================")
-        print("[iOSPodcastManager] Request received: stopPodcast")
-        print("=========================================")
+        FlareLog.debug("iOSPodcastManager Request received: stopPodcast")
         stopPodcastInternal()
         DispatchQueue.main.async {
             if let podcastId = self.currentPodcast?.id {
@@ -143,9 +139,9 @@ class IOSPodcastManager: ObservableObject {
     }
 
     func pause() {
-        print("[iOSPodcastManager] Pause requested")
+        FlareLog.debug("iOSPodcastManager Pause requested")
         guard player?.rate != 0 else {
-            print("[iOSPodcastManager] Player not playing, pause ignored.")
+            FlareLog.debug("iOSPodcastManager Player not playing, pause ignored.")
             return
         }
         player?.pause()
@@ -157,9 +153,9 @@ class IOSPodcastManager: ObservableObject {
     }
 
     func resume() {
-        print("[iOSPodcastManager] Resume requested")
+        FlareLog.debug("iOSPodcastManager Resume requested")
         guard player?.currentItem != nil else {
-            print("[iOSPodcastManager] No player item, resume ignored.")
+            FlareLog.debug("iOSPodcastManager No player item, resume ignored.")
             return
         }
         player?.play()
@@ -171,17 +167,17 @@ class IOSPodcastManager: ObservableObject {
     }
 
     func seek(to time: Double) {
-        print("[iOSPodcastManager] Seek requested to \(time)")
+        FlareLog.debug("iOSPodcastManager Seek requested to \(time)")
         guard canSeek else {
-            print("[iOSPodcastManager] Seek ignored: Item not seekable.")
+            FlareLog.debug("iOSPodcastManager Seek ignored: Item not seekable.")
             return
         }
         guard let player else {
-            print("[iOSPodcastManager] Seek ignored: Player not available.")
+            FlareLog.debug("iOSPodcastManager Seek ignored: Player not available.")
             return
         }
         guard time >= 0, duration == nil || time <= duration! else {
-            print("[iOSPodcastManager] Seek ignored: Target time out of bounds (0 - \(duration ?? -1)).")
+            FlareLog.debug("iOSPodcastManager Seek ignored: Target time out of bounds (0 - \(duration ?? -1)).")
             return
         }
 
@@ -197,14 +193,14 @@ class IOSPodcastManager: ObservableObject {
                 self.isSeeking = false
             }
             if completed {
-                print("[iOSPodcastManager] Seek completed successfully to \(time).")
+                FlareLog.debug("iOSPodcastManager Seek completed successfully to \(time).")
                 DispatchQueue.main.async {
                     self.currentTime = time
                     self.currentTimeSubject.send(time)
                     self.updateNowPlayingInfo()
                 }
             } else {
-                print("[iOSPodcastManager] Seek did not complete.")
+                FlareLog.warning("iOSPodcastManager Seek did not complete.")
             }
         }
     }
@@ -221,9 +217,9 @@ class IOSPodcastManager: ObservableObject {
         do {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
             try AVAudioSession.sharedInstance().setActive(true)
-            print("[iOSPodcastManager] Audio session configured for playback.")
+            FlareLog.debug("iOSPodcastManager Audio session configured for playback.")
         } catch {
-            print("[iOSPodcastManager] Error setting up audio session: \(error.localizedDescription)")
+            FlareLog.error("iOSPodcastManager Error setting up audio session: \(error.localizedDescription)")
         }
     }
 
@@ -233,15 +229,14 @@ class IOSPodcastManager: ObservableObject {
         playerItemStatusObserver = item.observe(\.status, options: [.new, .initial]) { [weak self] playerItem, _ in
             guard let self else { return }
             DispatchQueue.main.async {
-                print("-----------------------------------------")
-                print("[iOSPodcastManager] PlayerItem Status Changed")
+                FlareLog.debug("iOSPodcastManager PlayerItem Status Changed")
                 switch playerItem.status {
                 case .readyToPlay:
-                    print("  - Status: Ready to Play")
+                    FlareLog.debug("iOSPodcastManager Status: Ready to Play")
                     self.updateDuration(from: playerItem)
                     self.updateSeekability(from: playerItem)
 
-                    print("  - Initiating playback.")
+                    FlareLog.debug("iOSPodcastManager Initiating playback.")
                     self.player?.play()
                     self.playbackState = .playing
                     self.isPlaying = true
@@ -249,15 +244,15 @@ class IOSPodcastManager: ObservableObject {
                     self.updateNowPlayingInfo()
 
                 case .failed:
-                    print("  - Status: Failed")
-                    print("  - Error: \(playerItem.error?.localizedDescription ?? "Unknown error")")
+                    FlareLog.error("iOSPodcastManager Status: Failed")
+                    FlareLog.error("iOSPodcastManager Error: \(playerItem.error?.localizedDescription ?? "Unknown error")")
                     self.playbackState = .failed(playerItem.error)
                     self.isPlaying = false
                     self.removeTimeObserver()
                     self.updateNowPlayingInfo()
 
                 case .unknown:
-                    print("  - Status: Unknown")
+                    FlareLog.debug("iOSPodcastManager Status: Unknown")
 
                     if self.playbackState != .paused, self.playbackState != .stopped, self.playbackState == .loading {
                     } else if self.playbackState != .failed(nil), self.playbackState != .paused, self.playbackState != .stopped {
@@ -266,13 +261,13 @@ class IOSPodcastManager: ObservableObject {
                     }
 
                 @unknown default:
-                    print("  - Status: Unknown (default case)")
+                    FlareLog.debug("iOSPodcastManager Status: Unknown (default case)")
                     if self.playbackState != .paused, self.playbackState != .failed(nil), self.playbackState != .stopped {
                         self.playbackState = .loading
                         self.isPlaying = false
                     }
                 }
-                print("-----------------------------------------")
+
                 self.updateNowPlayingInfo()
             }
         }
@@ -295,10 +290,10 @@ class IOSPodcastManager: ObservableObject {
             object: item,
             queue: .main
         ) { [weak self] _ in
-            print("[iOSPodcastManager] Notification: AVPlayerItemDidPlayToEndTime received.")
+            FlareLog.debug("iOSPodcastManager Notification: AVPlayerItemDidPlayToEndTime received.")
             self?.handlePlaybackDidEnd()
         }
-        print("[iOSPodcastManager] AVPlayerItemDidPlayToEndTime observer added.")
+        FlareLog.debug("iOSPodcastManager AVPlayerItemDidPlayToEndTime observer added.")
     }
 
     private func removeObservers() {
@@ -311,11 +306,11 @@ class IOSPodcastManager: ObservableObject {
 
         removePlayerItemDidPlayToEndObserver()
 
-        print("[iOSPodcastManager] All observers removed.")
+        FlareLog.debug("iOSPodcastManager All observers removed.")
     }
 
     private func handlePlaybackDidEnd() {
-        print("[iOSPodcastManager] Handling playback end.")
+        FlareLog.debug("iOSPodcastManager Handling playback end.")
         DispatchQueue.main.async {
             self.playbackState = .paused
             self.isPlaying = false
@@ -332,7 +327,7 @@ class IOSPodcastManager: ObservableObject {
         if let observer = playerItemDidPlayToEndObserver {
             NotificationCenter.default.removeObserver(observer)
             playerItemDidPlayToEndObserver = nil
-            print("[iOSPodcastManager] AVPlayerItemDidPlayToEndTime observer removed.")
+            FlareLog.debug("iOSPodcastManager AVPlayerItemDidPlayToEndTime observer removed.")
         }
     }
 
@@ -356,14 +351,14 @@ class IOSPodcastManager: ObservableObject {
                 updateNowPlayingInfo()
             }
         }
-        print("[iOSPodcastManager] Periodic time observer added (interval: 1.0s)")
+        FlareLog.debug("iOSPodcastManager Periodic time observer added (interval: 1.0s)")
     }
 
     private func removeTimeObserver() {
         if let token = timeObserverToken {
             player?.removeTimeObserver(token)
             timeObserverToken = nil
-            print("[iOSPodcastManager] Periodic time observer removed.")
+            FlareLog.debug("iOSPodcastManager Periodic time observer removed.")
         }
     }
 
@@ -374,14 +369,14 @@ class IOSPodcastManager: ObservableObject {
 
         // Add handler for Play Command
         commandCenter.playCommand.addTarget { [unowned self] _ -> MPRemoteCommandHandlerStatus in
-            print("[RemoteCommand] Play command received")
+            FlareLog.debug("iOSPodcastManager RemoteCommand Play command received")
             resume()
             return .success
         }
 
         // Add handler for Pause Command
         commandCenter.pauseCommand.addTarget { [unowned self] _ -> MPRemoteCommandHandlerStatus in
-            print("[RemoteCommand] Pause command received")
+            FlareLog.debug("iOSPodcastManager RemoteCommand Pause command received")
             pause()
             return .success
         }
@@ -389,7 +384,7 @@ class IOSPodcastManager: ObservableObject {
         // Optional: Add handler for seek/change playback position
         // commandCenter.changePlaybackPositionCommand.addTarget { [unowned self] event -> MPRemoteCommandHandlerStatus in
         //     if let positionEvent = event as? MPChangePlaybackPositionCommandEvent {
-        //         print("[RemoteCommand] Change position to: \(positionEvent.positionTime)")
+        //         FlareLog.debug("[RemoteCommand] Change position to: \(positionEvent.positionTime)")
         //         self.seek(to: positionEvent.positionTime)
         //         return .success
         //     }
@@ -401,7 +396,7 @@ class IOSPodcastManager: ObservableObject {
         commandCenter.pauseCommand.isEnabled = true
         // commandCenter.changePlaybackPositionCommand.isEnabled = true // Enable if implemented
 
-        print("[iOSPodcastManager] Remote transport controls configured.")
+        FlareLog.debug("iOSPodcastManager Remote transport controls configured.")
     }
 
     private func updateNowPlayingInfo() {
@@ -429,53 +424,51 @@ class IOSPodcastManager: ObservableObject {
         // *** Add Artwork from cache if available ***
         if let artwork = artworkCache[podcast.id] {
             nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork
-            print("[iOSPodcastManager] Adding cached artwork to Now Playing Info.")
+            FlareLog.debug("iOSPodcastManager Adding cached artwork to Now Playing Info.")
         } else {
-            print("[iOSPodcastManager] Artwork not yet in cache for Now Playing Info.")
+            FlareLog.debug("iOSPodcastManager Artwork not yet in cache for Now Playing Info.")
             // Optional: Could trigger fetch here if needed, but playPodcast handles initial fetch
         }
 
         MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
         // Limit logging noise maybe
-        // print("[iOSPodcastManager] Now Playing Info Updated: Title=\(podcast.title), Time=\(self.currentTime)")
+        // FlareLog.debug("[iOSPodcastManager] Now Playing Info Updated: Title=\(podcast.title), Time=\(self.currentTime)")
     }
 
     private func updateDuration(from playerItem: AVPlayerItem) {
         let duration = playerItem.duration
         let seconds = CMTimeGetSeconds(duration)
         DispatchQueue.main.async {
-            print("-----------------------------------------")
-            print("[iOSPodcastManager] Duration Check")
+            FlareLog.debug("iOSPodcastManager Duration Check")
             if seconds.isNaN || seconds.isInfinite || seconds <= 0 {
-                print("  - Duration: Indefinite")
+                FlareLog.debug("iOSPodcastManager Duration: Indefinite")
                 if self.duration != nil { // Update only if changed
                     self.duration = nil
                     self.updateNowPlayingInfo() // Update lock screen if duration changes
                 }
             } else {
-                print("  - Duration: \(seconds) seconds")
+                FlareLog.debug("iOSPodcastManager Duration: \(seconds) seconds")
                 if self.duration != seconds { // Update only if changed
                     self.duration = seconds
                     self.updateNowPlayingInfo() // Update lock screen if duration changes
                 }
             }
-            print("-----------------------------------------")
+
         }
     }
 
     private func updateSeekability(from playerItem: AVPlayerItem) {
         let canCurrentlySeek = !playerItem.seekableTimeRanges.isEmpty && CMTimeGetSeconds(playerItem.duration) > 0 // Must have duration to be seekable
         DispatchQueue.main.async {
-            print("-----------------------------------------")
-            print("[iOSPodcastManager] Seekability Check")
+            FlareLog.debug("iOSPodcastManager Seekability Check")
             if self.canSeek != canCurrentlySeek { // Update only if changed
                 self.canSeek = canCurrentlySeek
-                print("  - Seekable: \(self.canSeek)")
+                FlareLog.debug("iOSPodcastManager Seekable: \(self.canSeek)")
                 // No need to update lock screen just for seekability change
             } else {
-                print("  - Seekable: \(self.canSeek) (Unchanged)")
+                FlareLog.debug("iOSPodcastManager Seekable: \(self.canSeek) (Unchanged)")
             }
-            print("-----------------------------------------")
+
         }
     }
 
@@ -484,18 +477,18 @@ class IOSPodcastManager: ObservableObject {
     private func fetchAndCacheArtwork(for podcast: UiPodcast) {
         let artworkUrlString = podcast.creator.avatar
         guard !artworkUrlString.isEmpty, let artworkUrl = URL(string: artworkUrlString) else {
-            print("[iOSPodcastManager] No valid artwork URL (or empty string) for podcast ID: \(podcast.id)")
+            FlareLog.debug("iOSPodcastManager No valid artwork URL (or empty string) for podcast ID: \(podcast.id)")
             return
         }
 
         artworkLoadingTasks[podcast.id]?.cancel()
 
-        print("[iOSPodcastManager] Starting artwork fetch for: \(artworkUrl)")
+        FlareLog.debug("iOSPodcastManager Starting artwork fetch for: \(artworkUrl)")
 
         let task = Task {
             do {
                 if artworkCache[podcast.id] != nil {
-                    print("[iOSPodcastManager] Artwork already cached before fetch completed. Skipping update.")
+                    FlareLog.debug("iOSPodcastManager Artwork already cached before fetch completed. Skipping update.")
                     artworkLoadingTasks.removeValue(forKey: podcast.id)
                     return
                 }
@@ -503,19 +496,19 @@ class IOSPodcastManager: ObservableObject {
                 let (data, response) = try await URLSession.shared.data(from: artworkUrl)
 
                 guard !Task.isCancelled else {
-                    print("[iOSPodcastManager] Artwork fetch cancelled for ID: \(podcast.id)")
+                    FlareLog.debug("iOSPodcastManager Artwork fetch cancelled for ID: \(podcast.id)")
                     artworkLoadingTasks.removeValue(forKey: podcast.id)
                     return
                 }
 
                 guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                    print("[iOSPodcastManager] Failed to download artwork, status code: \((response as? HTTPURLResponse)?.statusCode ?? -1)")
+                    FlareLog.error("iOSPodcastManager Failed to download artwork, status code: \((response as? HTTPURLResponse)?.statusCode ?? -1)")
                     artworkLoadingTasks.removeValue(forKey: podcast.id)
                     return
                 }
 
                 guard let image = UIImage(data: data) else {
-                    print("[iOSPodcastManager] Failed to create UIImage from downloaded data.")
+                    FlareLog.error("iOSPodcastManager Failed to create UIImage from downloaded data.")
                     artworkLoadingTasks.removeValue(forKey: podcast.id)
                     return
                 }
@@ -523,7 +516,7 @@ class IOSPodcastManager: ObservableObject {
                 let artwork = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
 
                 await MainActor.run {
-                    print("[iOSPodcastManager] Artwork fetched and cached for ID: \(podcast.id)")
+                    FlareLog.debug("iOSPodcastManager Artwork fetched and cached for ID: \(podcast.id)")
                     self.artworkCache[podcast.id] = artwork
                     self.artworkLoadingTasks.removeValue(forKey: podcast.id)
 
@@ -531,11 +524,11 @@ class IOSPodcastManager: ObservableObject {
                 }
 
             } catch let error as NSError where error.domain == NSURLErrorDomain && error.code == NSURLErrorCancelled {
-                print("[iOSPodcastManager] Artwork fetch task explicitly cancelled for ID: \(podcast.id).")
+                FlareLog.debug("iOSPodcastManager Artwork fetch task explicitly cancelled for ID: \(podcast.id).")
 
                 await MainActor.run { self.artworkLoadingTasks.removeValue(forKey: podcast.id) }
             } catch {
-                print("[iOSPodcastManager] Error fetching artwork: \(error.localizedDescription)")
+                FlareLog.error("iOSPodcastManager Error fetching artwork: \(error.localizedDescription)")
                 await MainActor.run { self.artworkLoadingTasks.removeValue(forKey: podcast.id) }
             }
         }

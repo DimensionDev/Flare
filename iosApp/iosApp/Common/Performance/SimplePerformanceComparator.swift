@@ -88,7 +88,7 @@ class SimplePerformanceComparator {
     // MARK: - Initialization
 
     private init() {
-        print("📊 [SimplePerformanceComparator] Initialized")
+        FlareLog.debug("SimplePerformanceComparator Initialized")
     }
 
     // MARK: - Test Session Control
@@ -104,14 +104,14 @@ class SimplePerformanceComparator {
             startTime: Date()
         )
 
-        print("🚀 [SimplePerformanceComparator] Started test session for \(version.rawValue): \(sessionID)")
+        FlareLog.performance("SimplePerformanceComparator Started test session for \(version.rawValue): \(sessionID)")
     }
 
     /// 记录性能数据点
     /// Record performance data point
     func recordPerformanceData(fps: Double, cpu: Double, memoryMB: Double) {
         guard var session = currentSession else {
-            print("⚠️ [SimplePerformanceComparator] No active session to record data")
+            FlareLog.warning("SimplePerformanceComparator No active session to record data")
             return
         }
 
@@ -122,7 +122,7 @@ class SimplePerformanceComparator {
         currentSession = session
 
         if session.fpsData.count % 10 == 0 {
-            print("📈 [SimplePerformanceComparator] Recorded \(session.fpsData.count) data points for \(session.version.rawValue)")
+            FlareLog.performance("SimplePerformanceComparator Recorded \(session.fpsData.count) data points for \(session.version.rawValue)")
         }
     }
 
@@ -130,7 +130,7 @@ class SimplePerformanceComparator {
     /// End performance test session
     func endTestSession() -> PerformanceTestResult? {
         guard var session = currentSession else {
-            print("⚠️ [SimplePerformanceComparator] No active session to end")
+            FlareLog.warning("SimplePerformanceComparator No active session to end")
             return nil
         }
 
@@ -148,8 +148,8 @@ class SimplePerformanceComparator {
         // 清理当前会话 / Clean up current session
         currentSession = nil
 
-        print("✅ [SimplePerformanceComparator] Ended test session for \(session.version.rawValue)")
-        print("📊 [SimplePerformanceComparator] Result: FPS \(String(format: "%.1f", result.averageFPS)), Grade \(result.performanceGrade)")
+        FlareLog.performance("SimplePerformanceComparator Ended test session for \(session.version.rawValue)")
+        FlareLog.performance("SimplePerformanceComparator Result: FPS \(String(format: "%.1f", result.averageFPS)), Grade \(result.performanceGrade)")
 
         return result
     }
@@ -296,7 +296,7 @@ class SimplePerformanceComparator {
     func clearAllData() {
         versionResults.removeAll()
         currentSession = nil
-        print("🧹 [SimplePerformanceComparator] Cleared all test data")
+        FlareLog.debug("SimplePerformanceComparator Cleared all test data")
     }
 
     /// 获取测试统计信息

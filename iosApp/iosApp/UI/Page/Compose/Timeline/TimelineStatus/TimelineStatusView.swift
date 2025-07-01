@@ -86,11 +86,11 @@ struct TimelineStatusView: View {
 
     private func handlePodcastCardTap(card: UiCard) {
         if let route = AppDeepLinkHelper().parse(url: card.url) as? AppleRoute.Podcast {
-            print("Podcast Card Tapped, navigating via router to: podcastSheet(accountType: \(route.accountType), podcastId: \(route.id))")
+            FlareLog.debug("TimelineStatusView Podcast Card Tapped, navigating via router to: podcastSheet(accountType: \(route.accountType), podcastId: \(route.id))")
             router.navigate(to: .podcastSheet(accountType: route.accountType, podcastId: route.id))
         } else {
             let parsedRoute = AppDeepLinkHelper().parse(url: card.url)
-            print("Error: Could not parse Podcast URL from card: \(card.url). Parsed type: \(type(of: parsedRoute)) Optional value: \(parsedRoute)")
+            FlareLog.error("TimelineStatusView Error: Could not parse Podcast URL from card: \(card.url). Parsed type: \(type(of: parsedRoute)) Optional value: \(String(describing: parsedRoute))")
         }
     }
 }

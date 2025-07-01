@@ -25,7 +25,7 @@ class PagingStateConverter {
 
  
     init() {
-        print("🏗️ [PagingStateConverter] Initialized")
+        FlareLog.debug("PagingStateConverter Initialized")
     }
 
     /// 将KMP的PagingState转换为Swift的FlareTimelineState
@@ -56,7 +56,7 @@ class PagingStateConverter {
             stats.successStates += 1
 
         default:
-            print("⚠️ [PagingStateConverter] Unknown PagingState type: \(type(of: pagingState))")
+            FlareLog.warning("PagingStateConverter Unknown PagingState type: \(type(of: pagingState))")
             result = .loading
             stats.unknownStates += 1
         }
@@ -71,7 +71,7 @@ class PagingStateConverter {
 
         // 记录状态变化
         if let lastState = lastConvertedState, lastState != result {
-            print("📊 [PagingStateConverter] State changed: \(result.changesSummary(from: lastState))")
+            FlareLog.debug("PagingStateConverter State changed: \(result.changesSummary(from: lastState))")
         }
 
         return result
@@ -84,14 +84,14 @@ class PagingStateConverter {
     /// 重置统计信息
     func resetStatistics() {
         stats = ConversionStats()
-        print("📊 [PagingStateConverter] Statistics reset")
+        FlareLog.debug("PagingStateConverter Statistics reset")
     }
 
     /// 重置转换器状态（用于刷新或切换数据源）
     func reset() {
         resetIncrementalState()
         lastConvertedState = nil
-        print("🔄 [PagingStateConverter] Converter reset")
+        FlareLog.debug("PagingStateConverter Converter reset")
     }
 
     // MARK: - Private Methods
@@ -116,11 +116,11 @@ class PagingStateConverter {
         // 生成状态签名 - 使用实际可用数量
         let currentStateSignature = "\(actualAvailableCount)_\(isRefreshing)_\(successState.appendState)"
 
-        print("🔄 [PagingStateConverter] KMP reports: \(kmpItemCount), Actually available: \(actualAvailableCount)")
+        FlareLog.debug("PagingStateConverter KMP reports: \(kmpItemCount), Actually available: \(actualAvailableCount)")
 
         // 检查是否需要重置（刷新或数据减少）
         if isRefreshing || actualAvailableCount < lastConvertedItemCount {
-            print("🔄 [PagingStateConverter] Resetting incremental state - refreshing: \(isRefreshing), available: \(actualAvailableCount) < converted: \(lastConvertedItemCount)")
+            FlareLog.debug("PagingStateConverter Resetting incremental state - refreshing: \(isRefreshing), available: \(actualAvailableCount) < converted: \(lastConvertedItemCount)")
             resetIncrementalState()
         }
 
@@ -128,7 +128,7 @@ class PagingStateConverter {
         if !shouldSkipConversion(currentStateSignature) {
             // 增量转换新数据
             if actualAvailableCount > lastConvertedItemCount {
-                print("🔄 [PagingStateConverter] Converting new items: \(lastConvertedItemCount) -> \(actualAvailableCount)")
+                FlareLog.debug("PagingStateConverter Converting new items: \(lastConvertedItemCount) -> \(actualAvailableCount)")
 
                 let newItems = convertItemsInRange(
                     from: lastConvertedItemCount,
@@ -144,10 +144,10 @@ class PagingStateConverter {
                 stats.totalItemsConverted += newItems.count
                 stats.averageItemsPerConversion = Double(stats.totalItemsConverted) / Double(stats.successStates)
 
-                print("🔄 [PagingStateConverter] Added \(newItems.count) new items, total: \(convertedItems.count)")
+                FlareLog.debug("PagingStateConverter Added \(newItems.count) new items, total: \(convertedItems.count)")
             } else if actualAvailableCount == lastConvertedItemCount, convertedItems.isEmpty {
                 // 首次转换或状态重置后的完整转换
-                print("🔄 [PagingStateConverter] Initial full conversion for \(actualAvailableCount) items")
+                FlareLog.debug("PagingStateConverter Initial full conversion for \(actualAvailableCount) items")
 
                 convertedItems = convertItemsInRange(
                     from: 0,
@@ -160,10 +160,10 @@ class PagingStateConverter {
                 stats.totalItemsConverted += convertedItems.count
                 stats.averageItemsPerConversion = Double(stats.totalItemsConverted) / Double(stats.successStates)
 
-                print("🔄 [PagingStateConverter] Initial conversion completed: \(convertedItems.count) items")
+                FlareLog.debug("PagingStateConverter Initial conversion completed: \(convertedItems.count) items")
             }
         } else {
-            print("🚫 [PagingStateConverter] Skipping duplicate conversion - signature: \(currentStateSignature)")
+            FlareLog.debug("PagingStateConverter Skipping duplicate conversion - signature: \(currentStateSignature)")
         }
 
         // 更新状态签名
@@ -205,7 +205,7 @@ class PagingStateConverter {
         lastConvertedItemCount = 0
         convertedItems.removeAll()
         lastStateSignature = nil
-        print("🔄 [PagingStateConverter] Incremental state reset")
+        FlareLog.debug("PagingStateConverter Incremental state reset")
     }
 
     /// 确定实际可转换的数量
@@ -251,7 +251,7 @@ class PagingStateConverter {
             }
         }
 
-        print("🔍 [PagingStateConverter] Determined actual count: \(actualCount) (KMP reported: \(maxCount))")
+        FlareLog.debug("PagingStateConverter Determined actual count: \(actualCount) (KMP reported: \(maxCount))")
         return actualCount
     }
 
@@ -276,7 +276,7 @@ class PagingStateConverter {
 
             // 如果数量增加，说明有新数据，不跳过
             if currentCount > lastCount {
-                print("🔄 [PagingStateConverter] Count increased: \(lastCount) -> \(currentCount), allowing conversion")
+                FlareLog.debug("PagingStateConverter Count increased: \(lastCount) -> \(currentCount), allowing conversion")
                 return false
             }
         }
@@ -297,7 +297,7 @@ class PagingStateConverter {
     ) -> [TimelineItem] {
         var items: [TimelineItem] = []
 
-        print("🔄 [PagingStateConverter] Converting range [\(startIndex), \(endIndex))")
+        FlareLog.debug("PagingStateConverter Converting range [\(startIndex), \(endIndex))")
 
         for index in startIndex ..< endIndex {
             var uiTimeline: UiTimeline?
@@ -315,13 +315,13 @@ class PagingStateConverter {
                 let timelineItem = TimelineItem.from(timeline)
                 items.append(timelineItem)
             } else {
-                print("⚠️ [PagingStateConverter] Failed to get item at index \(index)")
+                FlareLog.warning("PagingStateConverter Failed to get item at index \(index)")
                 // 遇到nil时停止转换，避免空洞
                 break
             }
         }
 
-        print("🔄 [PagingStateConverter] Converted \(items.count) items in range [\(startIndex), \(endIndex))")
+        FlareLog.debug("PagingStateConverter Converted \(items.count) items in range [\(startIndex), \(endIndex))")
         return items
     }
 

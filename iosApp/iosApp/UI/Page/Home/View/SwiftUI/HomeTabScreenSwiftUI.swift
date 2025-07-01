@@ -29,7 +29,7 @@ struct HomeTabScreenSwiftUI: View {
                     showAppbarSettings = true
                 },
                 onScrollToTop: { tabKey in
-                    print("[HomeTabScreenSwiftUI] Triggering scroll to top for tab: \(tabKey)")
+                    FlareLog.debug("HomeTabScreenSwiftUI Triggering scroll to top for tab: \(tabKey)")
                     // 切换指定标签的滚动触发器
                     tabScrollTriggers[tabKey] = !(tabScrollTriggers[tabKey] ?? false)
 
@@ -56,7 +56,7 @@ struct HomeTabScreenSwiftUI: View {
             }
             .onChange(of: scrollToTopTrigger) { _, _ in
                 // 当浮动按钮触发 scrollToTopTrigger 时，同步到当前标签的 tabScrollTriggers
-                print("[HomeTabScreenSwiftUI] FloatingButton triggered scroll to top for current tab: \(selectedHomeAppBarTabKey)")
+                FlareLog.debug("HomeTabScreenSwiftUI FloatingButton triggered scroll to top for current tab: \(selectedHomeAppBarTabKey)")
                 tabScrollTriggers[selectedHomeAppBarTabKey] = !(tabScrollTriggers[selectedHomeAppBarTabKey] ?? false)
             }
             .onChange(of: selectedHomeAppBarTabKey) { _, newValue in

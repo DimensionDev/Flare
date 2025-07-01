@@ -20,17 +20,17 @@ class FrameRateOptimizer {
 
      func startOptimization() {
         guard !isOptimizationActive else {
-            print("🚀 [FrameRateOptimizer] Already optimized")
+            FlareLog.debug("FrameRateOptimizer Already optimized")
             return
         }
-        
+
         setupFrameRateOptimization()
         isOptimizationActive = true
-        
+
         #if DEBUG
-        print("🚀 [FrameRateOptimizer] 120fps optimization started")
-        print("📱 [FrameRateOptimizer] Device max refresh rate: \(UIScreen.main.maximumFramesPerSecond)fps")
-        print("🔧 [FrameRateOptimizer] ProMotion support: \(UIScreen.main.maximumFramesPerSecond > 60 ? "✅ YES" : "❌ NO")")
+        FlareLog.performance("FrameRateOptimizer 120fps optimization started")
+        FlareLog.performance("FrameRateOptimizer Device max refresh rate: \(UIScreen.main.maximumFramesPerSecond)fps")
+        FlareLog.performance("FrameRateOptimizer ProMotion support: \(UIScreen.main.maximumFramesPerSecond > 60 ? "✅ YES" : "❌ NO")")
         #endif
     }
     
@@ -58,14 +58,14 @@ class FrameRateOptimizer {
             )
             
             #if DEBUG
-            print("🔧 [FrameRateOptimizer] Configured preferredFrameRateRange: 60-\(maxFrameRate)fps")
+            FlareLog.performance("FrameRateOptimizer Configured preferredFrameRateRange: 60-\(maxFrameRate)fps")
             #endif
         } else {
             // iOS 15以下版本的兼容处理
             frameRateDisplayLink?.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
             
             #if DEBUG
-            print("🔧 [FrameRateOptimizer] Configured preferredFramesPerSecond: \(UIScreen.main.maximumFramesPerSecond)fps")
+            FlareLog.performance("FrameRateOptimizer Configured preferredFramesPerSecond: \(UIScreen.main.maximumFramesPerSecond)fps")
             #endif
         }
         
@@ -99,8 +99,8 @@ extension FrameRateOptimizer {
         
         #if DEBUG
         let info = FrameRateOptimizer.shared.getDeviceFrameRateInfo()
-        print("""
-        📱 [FrameRateOptimizer] Device Configuration:
+        FlareLog.performance("""
+        FrameRateOptimizer Device Configuration:
            - Max FPS: \(info.maxFPS)
            - ProMotion: \(info.isProMotionSupported ? "✅" : "❌")
            - Platform: \(info.isSimulator ? "🖥️ Simulator" : "📱 Device")

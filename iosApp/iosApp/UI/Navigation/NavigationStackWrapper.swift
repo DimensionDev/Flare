@@ -93,16 +93,16 @@ private struct AttachGestureView: UIViewRepresentable {
                     // Check if the navigation stack has more than one view controller
                     if navigationDepth > 0 {
                         if let _ = navigationController.view.gestureRecognizers?.first(where: { $0.name == self.gesture.name }) {
-                            print("Already attached")
+                            FlareLog.debug("NavigationStackWrapper Already attached")
                         } else {
                             navigationController.addFullSwipeGesture(gesture)
-                            print("Attached")
+                            FlareLog.debug("NavigationStackWrapper Attached")
                         }
                     } else {
                         // Remove the gesture if the navigation stack count is below the threshold
                         if let existingGesture = navigationController.view.gestureRecognizers?.first(where: { $0.name == self.gesture.name }) {
                             navigationController.view.removeGestureRecognizer(existingGesture)
-                            print("Detached")
+                            FlareLog.debug("NavigationStackWrapper Detached")
                         }
                     }
                 }

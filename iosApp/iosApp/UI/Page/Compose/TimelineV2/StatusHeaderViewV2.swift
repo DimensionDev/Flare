@@ -82,7 +82,7 @@ struct UserComponentV2: View {
                 let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
                 let userKey = createMicroBlogKey(from: user)
 
-                print("🔗 [UserComponent] Navigate to profile: \(user.key)")
+                FlareLog.debug("UserComponent Navigate to profile: \(user.key)")
                 router.navigate(to: .profile(
                     accountType: accountType,
                     userKey: userKey

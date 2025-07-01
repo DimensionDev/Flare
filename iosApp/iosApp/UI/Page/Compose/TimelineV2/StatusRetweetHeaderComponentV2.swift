@@ -47,14 +47,14 @@ struct StatusRetweetHeaderComponentV2: View {
     private func handleTopMessageTap() {
         // 🔥 实现转发头部点击跳转到执行操作的用户页面
         guard let user = topMessage.user else {
-            print("⚠️ [StatusRetweetHeader] No user in topMessage")
+            FlareLog.warning("StatusRetweetHeaderV2 No user in topMessage")
             return
         }
 
         let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
         let userKey = createMicroBlogKey(from: user)
 
-        print("🔗 [StatusRetweetHeader] Navigate to profile: \(user.key)")
+        FlareLog.debug("StatusRetweetHeaderV2 Navigate to profile: \(user.key)")
         router.navigate(to: .profile(
             accountType: accountType,
             userKey: userKey
@@ -231,61 +231,4 @@ struct StatusRetweetHeaderComponentV2: View {
         }
     }
 }
-
-// MARK: - 预览
-
-#Preview {
-    VStack(spacing: 16) {
-        // 转发示例
-        StatusRetweetHeaderComponentV2(
-            topMessage: TopMessage(
-                user: User(
-                    key: "test",
-                    name: RichText(raw: "John Doe", markdown: "John Doe"),
-                    handle: "@johndoe",
-                    avatar: "",
-                    banner: nil,
-                    description: nil
-                ),
-                icon: .retweet,
-                type: .mastodon(.reblogged),
-                statusKey: "test"
-            )
-        )
-        
-        // 点赞示例
-        StatusRetweetHeaderComponentV2(
-            topMessage: TopMessage(
-                user: User(
-                    key: "test",
-                    name: RichText(raw: "Jane Smith", markdown: "Jane Smith"),
-                    handle: "@janesmith",
-                    avatar: "",
-                    banner: nil,
-                    description: nil
-                ),
-                icon: .favourite,
-                type: .mastodon(.favourite),
-                statusKey: "test"
-            )
-        )
-        
-        // 关注示例
-        StatusRetweetHeaderComponentV2(
-            topMessage: TopMessage(
-                user: User(
-                    key: "test",
-                    name: RichText(raw: "Alice Johnson", markdown: "Alice Johnson"),
-                    handle: "@alice",
-                    avatar: "",
-                    banner: nil,
-                    description: nil
-                ),
-                icon: .follow,
-                type: .mastodon(.follow),
-                statusKey: "test"
-            )
-        )
-    }
-    .padding()
-}
+ 

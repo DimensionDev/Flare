@@ -12,7 +12,7 @@ public final class FlareImageConfiguration {
         configureImageDownloader()
         setupMemoryPressureHandling()
 
-        print("🖼️ [FlareImageConfiguration] Image configuration applied successfully")
+        FlareLog.info("FlareImageConfiguration Image configuration applied successfully")
     }
 
     private func configureImageCache() {
@@ -29,7 +29,7 @@ public final class FlareImageConfiguration {
 
         cache.memoryStorage.config.expiration = .seconds(300)
 
-        print("🗂️ [ImageCache] Memory limit: \(memoryLimit / 1024 / 1024)MB, Disk limit: 100MB")
+        FlareLog.info("ImageCache Memory limit: \(memoryLimit / 1024 / 1024)MB, Disk limit: 100MB")
     }
 
     private func calculateOptimalMemoryLimit() -> UInt {
@@ -61,7 +61,7 @@ public final class FlareImageConfiguration {
 
          downloader.sessionConfiguration.httpMaximumConnectionsPerHost = 6
 
-        print("⬇️ [ImageDownloader] Timeout: 15s, Max connections: 6")
+        FlareLog.debug("ImageDownloader Timeout: 15s, Max connections: 6")
     }
 
     private func setupMemoryPressureHandling() {
@@ -87,7 +87,7 @@ public final class FlareImageConfiguration {
     }
 
     private func handleMemoryPressure() {
-        print("⚠️ [FlareImageConfiguration] Memory pressure detected, clearing cache")
+        FlareLog.warning("FlareImageConfiguration Memory pressure detected, clearing cache")
 
         ImageCache.default.clearMemoryCache()
 
@@ -95,7 +95,7 @@ public final class FlareImageConfiguration {
     }
 
     private func handleBackgroundCleanup() {
-        print("🧹 [FlareImageConfiguration] App entered background, performing cleanup")
+        FlareLog.info("FlareImageConfiguration App entered background, performing cleanup")
 
         ImageCache.default.cleanExpiredDiskCache()
     }

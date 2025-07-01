@@ -46,7 +46,7 @@ import SwiftUI
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .timelineVersionChanged)) { _ in
-            print("🔄 [TimelineViewSwiftUI] Received version change notification")
+            FlareLog.debug("TimelineViewSwiftUI Received version change notification")
         }
     }
 }

@@ -71,7 +71,7 @@ struct QuotedStatusV2: View {
             let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
             let statusKey = createMicroBlogKey(from: item)
 
-            print("🔗 [QuotedStatus] Navigate to status detail: \(item.id)")
+            FlareLog.debug("QuotedStatus Navigate to status detail: \(item.id)")
             router.navigate(to: .statusDetail(
                 accountType: accountType,
                 statusKey: statusKey

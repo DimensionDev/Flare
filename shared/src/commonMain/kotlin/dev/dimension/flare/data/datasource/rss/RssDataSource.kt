@@ -42,8 +42,9 @@ internal object RssDataSource :
             }.cachedIn(scope)
     }
 
-    fun fetchLoader(url: String) = RssTimelineRemoteMediator(
-        url = url,
-        cacheDatabase = database,
-    )
+    fun fetchLoader(url: String) =
+        RssTimelineRemoteMediator(
+            url = url,
+            cacheDatabase = database,
+        )
 }

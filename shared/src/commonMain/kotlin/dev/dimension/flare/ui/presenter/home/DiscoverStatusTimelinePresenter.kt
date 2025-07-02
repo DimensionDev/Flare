@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.presenter.home
 
-import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceFlow
 import dev.dimension.flare.model.AccountType
@@ -10,14 +9,14 @@ import org.koin.core.component.inject
 
 public class DiscoverStatusTimelinePresenter(
     private val accountType: AccountType,
-) : TimelinePresenter(), KoinComponent {
+) : TimelinePresenter(),
+    KoinComponent {
     private val accountRepository: AccountRepository by inject()
     override val loader by lazy {
         accountServiceFlow(
             accountType = accountType,
             repository = accountRepository,
         ).map { service ->
-            require(service is BaseTimelineLoader)
             service.discoverStatuses()
         }
     }

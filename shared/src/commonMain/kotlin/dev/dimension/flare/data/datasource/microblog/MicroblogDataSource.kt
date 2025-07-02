@@ -24,15 +24,11 @@ internal interface MicroblogDataSource {
         mediaOnly: Boolean = false,
     ): BaseTimelineLoader
 
-    fun context(
-        statusKey: MicroBlogKey,
-    ): BaseTimelineLoader
+    fun context(statusKey: MicroBlogKey): BaseTimelineLoader
 
     fun status(statusKey: MicroBlogKey): CacheData<UiTimeline>
 
-    fun searchStatus(
-        query: String,
-    ): BaseTimelineLoader
+    fun searchStatus(query: String): BaseTimelineLoader
 
     fun searchUser(
         query: String,
@@ -58,9 +54,5 @@ internal interface MicroblogDataSource {
         pageSize: Int = 20,
     ): Flow<PagingData<UiUserV2>>
 
-    fun profileTabs(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pagingSize: Int = 20,
-    ): ImmutableList<ProfileTab>
+    fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab>
 }

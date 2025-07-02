@@ -24,22 +24,22 @@ public class StatusContextPresenter(
 
     @Composable
     override fun body(): TimelineState {
-        val listState = remember(
-            accountType,
-            statusKey,
-        ) {
-            object : TimelinePresenter() {
-                override val loader: Flow<BaseTimelineLoader> by lazy {
-                    accountServiceFlow(
-                        accountType = accountType,
-                        repository = accountRepository,
-                    ).map { service ->
-                        require(service is BaseTimelineLoader)
-                        service.context(statusKey)
+        val listState =
+            remember(
+                accountType,
+                statusKey,
+            ) {
+                object : TimelinePresenter() {
+                    override val loader: Flow<BaseTimelineLoader> by lazy {
+                        accountServiceFlow(
+                            accountType = accountType,
+                            repository = accountRepository,
+                        ).map { service ->
+                            service.context(statusKey)
+                        }
                     }
                 }
-            }
-        }.body()
+            }.body()
         remember { LogStatusHistoryPresenter(accountType = accountType, statusKey = statusKey) }.body()
         return listState
     }

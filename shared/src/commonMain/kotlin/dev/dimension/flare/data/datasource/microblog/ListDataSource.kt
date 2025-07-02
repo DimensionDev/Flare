@@ -33,9 +33,7 @@ internal interface ListDataSource {
         userKey: MicroBlogKey,
     )
 
-    fun listTimeline(
-        listId: String,
-    ): BaseTimelineLoader
+    fun listTimeline(listId: String): BaseTimelineLoader
 
     suspend fun deleteList(listId: String)
 

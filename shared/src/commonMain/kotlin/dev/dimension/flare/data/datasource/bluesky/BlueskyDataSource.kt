@@ -2143,68 +2143,40 @@ internal class BlueskyDataSource(
             )
         }.flow.cachedIn(scope)
 
-    override fun profileTabs(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pagingSize: Int,
-    ): ImmutableList<ProfileTab> =
+    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         listOfNotNull(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
-                flow =
-                    timelinePager(
-                        pageSize = pagingSize,
+                loader =
+                    UserTimelineRemoteMediator(
+                        service = service,
+                        accountKey = accountKey,
                         database = database,
-                        scope = scope,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                        accountRepository = accountRepository,
-                        mediator =
-                            UserTimelineRemoteMediator(
-                                service = service,
-                                accountKey = accountKey,
-                                database = database,
-                                userKey = userKey,
-                                onlyMedia = false,
-                                withReplies = false,
-                            ),
+                        userKey = userKey,
+                        onlyMedia = false,
+                        withReplies = false,
                     ),
             ),
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.StatusWithReplies,
-                flow =
-                    timelinePager(
-                        pageSize = pagingSize,
-                        database = database,
-                        scope = scope,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                        accountRepository = accountRepository,
-                        mediator =
-                            UserTimelineRemoteMediator(
-                                service,
-                                accountKey,
-                                database,
-                                userKey,
-                                withReplies = true,
-                            ),
+                loader =
+                    UserTimelineRemoteMediator(
+                        service,
+                        accountKey,
+                        database,
+                        userKey,
+                        withReplies = true,
                     ),
             ),
             ProfileTab.Media,
             if (userKey == accountKey) {
                 ProfileTab.Timeline(
                     type = ProfileTab.Timeline.Type.Likes,
-                    flow =
-                        timelinePager(
-                            pageSize = pagingSize,
-                            database = database,
-                            scope = scope,
-                            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                            accountRepository = accountRepository,
-                            mediator =
-                                UserLikesTimelineRemoteMediator(
-                                    service,
-                                    accountKey,
-                                    database,
-                                ),
+                    loader =
+                        UserLikesTimelineRemoteMediator(
+                            service,
+                            accountKey,
+                            database,
                         ),
                 )
             } else {

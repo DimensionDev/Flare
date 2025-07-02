@@ -93,11 +93,12 @@ internal open class MastodonDataSource(
         )
     }
 
-    override fun homeTimeline() = HomeTimelineRemoteMediator(
-        service,
-        database,
-        accountKey,
-    )
+    override fun homeTimeline() =
+        HomeTimelineRemoteMediator(
+            service,
+            database,
+            accountKey,
+        )
 
     fun localTimeline(
         pageSize: Int = 20,
@@ -125,11 +126,12 @@ internal open class MastodonDataSource(
             mediator = bookmarkTimelineLoader(),
         )
 
-    fun bookmarkTimelineLoader() = BookmarkTimelineRemoteMediator(
-        service,
-        database,
-        accountKey,
-    )
+    fun bookmarkTimelineLoader() =
+        BookmarkTimelineRemoteMediator(
+            service,
+            database,
+            accountKey,
+        )
 
     fun favouriteTimeline(
         pageSize: Int = 20,
@@ -144,20 +146,20 @@ internal open class MastodonDataSource(
             mediator = favouriteTimelineLoader(),
         )
 
-    fun favouriteTimelineLoader() = FavouriteTimelineRemoteMediator(
-        service,
-        database,
-        accountKey,
-    )
+    fun favouriteTimelineLoader() =
+        FavouriteTimelineRemoteMediator(
+            service,
+            database,
+            accountKey,
+        )
 
-    override fun listTimeline(
-        listId: String,
-    ) = ListTimelineRemoteMediator(
-        listId,
-        service,
-        database,
-        accountKey,
-    )
+    override fun listTimeline(listId: String) =
+        ListTimelineRemoteMediator(
+            listId,
+            service,
+            database,
+            accountKey,
+        )
 
     fun publicTimeline(
         pageSize: Int = 20,
@@ -172,12 +174,13 @@ internal open class MastodonDataSource(
             mediator = publicTimelineLoader(local = false),
         )
 
-    fun publicTimelineLoader(local: Boolean) = PublicTimelineRemoteMediator(
-        service,
-        database,
-        accountKey,
-        local = local,
-    )
+    fun publicTimelineLoader(local: Boolean) =
+        PublicTimelineRemoteMediator(
+            service,
+            database,
+            accountKey,
+            local = local,
+        )
 
     override fun notification(
         type: NotificationFilter,
@@ -275,15 +278,14 @@ internal open class MastodonDataSource(
         onlyMedia = mediaOnly,
     )
 
-    override fun context(
-        statusKey: MicroBlogKey,
-    ) = StatusDetailRemoteMediator(
-        statusKey,
-        service,
-        database,
-        accountKey,
-        statusOnly = false,
-    )
+    override fun context(statusKey: MicroBlogKey) =
+        StatusDetailRemoteMediator(
+            statusKey,
+            service,
+            database,
+            accountKey,
+            statusOnly = false,
+        )
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
@@ -745,11 +747,12 @@ internal open class MastodonDataSource(
             )
         }.flow
 
-    override fun discoverStatuses() = DiscoverStatusRemoteMediator(
-        service,
-        database,
-        accountKey,
-    )
+    override fun discoverStatuses() =
+        DiscoverStatusRemoteMediator(
+            service,
+            database,
+            accountKey,
+        )
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         Pager(
@@ -760,14 +763,13 @@ internal open class MastodonDataSource(
             )
         }.flow
 
-    override fun searchStatus(
-        query: String,
-    ) = SearchStatusPagingSource(
-        service,
-        database,
-        accountKey,
-        query,
-    )
+    override fun searchStatus(query: String) =
+        SearchStatusPagingSource(
+            service,
+            database,
+            accountKey,
+            query,
+        )
 
     override fun searchUser(
         query: String,
@@ -1149,9 +1151,10 @@ internal open class MastodonDataSource(
                                             it.data.poll.options?.mapIndexed { index, option ->
                                                 if (options.contains(index)) {
                                                     option.copy(
-                                                        votesCount = option.votesCount?.plus(
-                                                            1
-                                                        )
+                                                        votesCount =
+                                                            option.votesCount?.plus(
+                                                                1,
+                                                            ),
                                                     )
                                                 } else {
                                                     option
@@ -1182,9 +1185,10 @@ internal open class MastodonDataSource(
                                                 it.data.poll.options?.mapIndexed { index, option ->
                                                     if (options.contains(index)) {
                                                         option.copy(
-                                                            votesCount = option.votesCount?.minus(
-                                                                1
-                                                            )
+                                                            votesCount =
+                                                                option.votesCount?.minus(
+                                                                    1,
+                                                                ),
                                                         )
                                                     } else {
                                                         option
@@ -1245,48 +1249,28 @@ internal open class MastodonDataSource(
             )
         }.flow.cachedIn(scope)
 
-    override fun profileTabs(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pagingSize: Int,
-    ): ImmutableList<ProfileTab> =
+    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         listOfNotNull(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
-                flow =
-                    timelinePager(
-                        pageSize = pagingSize,
+                loader =
+                    UserTimelineRemoteMediator(
+                        service = service,
                         database = database,
-                        scope = scope,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                        accountRepository = accountRepository,
-                        mediator =
-                            UserTimelineRemoteMediator(
-                                service = service,
-                                database = database,
-                                accountKey = accountKey,
-                                userKey = userKey,
-                                withPinned = true,
-                            ),
+                        accountKey = accountKey,
+                        userKey = userKey,
+                        withPinned = true,
                     ),
             ),
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.StatusWithReplies,
-                flow =
-                    timelinePager(
-                        pageSize = pagingSize,
+                loader =
+                    UserTimelineRemoteMediator(
+                        service = service,
+                        accountKey = accountKey,
                         database = database,
-                        scope = scope,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                        accountRepository = accountRepository,
-                        mediator =
-                            UserTimelineRemoteMediator(
-                                service = service,
-                                accountKey = accountKey,
-                                database = database,
-                                userKey = userKey,
-                                withReplies = true,
-                            ),
+                        userKey = userKey,
+                        withReplies = true,
                     ),
             ),
             ProfileTab.Media,

@@ -74,12 +74,13 @@ internal class VVODataSource(
         VVOService(credential.chocolate)
     }
 
-    override fun homeTimeline() = HomeTimelineRemoteMediator(
-        service,
-        database,
-        accountKey,
-        inAppNotification,
-    )
+    override fun homeTimeline() =
+        HomeTimelineRemoteMediator(
+            service,
+            database,
+            accountKey,
+            inAppNotification,
+        )
 
     override fun notification(
         type: NotificationFilter,
@@ -224,9 +225,7 @@ internal class VVODataSource(
         mediaOnly = mediaOnly,
     )
 
-    override fun context(
-        statusKey: MicroBlogKey,
-    ): BaseTimelineLoader {
+    override fun context(statusKey: MicroBlogKey): BaseTimelineLoader {
         TODO("Not yet implemented")
     }
 
@@ -378,14 +377,13 @@ internal class VVODataSource(
         )
     }
 
-    override fun searchStatus(
-        query: String,
-    ) = SearchStatusRemoteMediator(
-        service,
-        database,
-        accountKey,
-        query,
-    )
+    override fun searchStatus(query: String) =
+        SearchStatusRemoteMediator(
+            service,
+            database,
+            accountKey,
+            query,
+        )
 
     override fun searchUser(
         query: String,
@@ -406,11 +404,12 @@ internal class VVODataSource(
         TODO("Not yet implemented")
     }
 
-    override fun discoverStatuses() = DiscoverStatusRemoteMediator(
-        service,
-        database,
-        accountKey,
-    )
+    override fun discoverStatuses() =
+        DiscoverStatusRemoteMediator(
+            service,
+            database,
+            accountKey,
+        )
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         Pager(
@@ -774,22 +773,11 @@ internal class VVODataSource(
             )
         }.flow.cachedIn(scope)
 
-    override fun profileTabs(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pagingSize: Int,
-    ): ImmutableList<ProfileTab> =
+    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         persistentListOf(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
-                flow = timelinePager(
-                    pageSize = pagingSize,
-                    database = database,
-                    scope = scope,
-                    filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                    accountRepository = accountRepository,
-                    mediator = userTimeline(userKey, false),
-                ),
+                loader = userTimeline(userKey, false),
             ),
         )
 }

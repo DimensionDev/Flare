@@ -197,35 +197,27 @@ internal class GuestMastodonDataSource(
             )
         }.flow.cachedIn(scope)
 
-    override fun profileTabs(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pagingSize: Int,
-    ): ImmutableList<ProfileTab> =
+    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         persistentListOf(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
-                flow =
-                    Pager(PagingConfig(pageSize = pagingSize)) {
-                        GuestUserTimelinePagingSource(
-                            host = host,
-                            userId = userKey.id,
-                            service = service,
-                            withPinned = true,
-                        )
-                    }.flow.cachedIn(scope),
+                loader =
+                    GuestUserTimelinePagingSource(
+                        host = host,
+                        userId = userKey.id,
+                        service = service,
+                        withPinned = true,
+                    ),
             ),
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.StatusWithReplies,
-                flow =
-                    Pager(PagingConfig(pageSize = pagingSize)) {
-                        GuestUserTimelinePagingSource(
-                            host = host,
-                            userId = userKey.id,
-                            withReply = true,
-                            service = service,
-                        )
-                    }.flow.cachedIn(scope),
+                loader =
+                    GuestUserTimelinePagingSource(
+                        host = host,
+                        userId = userKey.id,
+                        withReply = true,
+                        service = service,
+                    ),
             ),
             ProfileTab.Media,
         )

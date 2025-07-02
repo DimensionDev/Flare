@@ -12,7 +12,8 @@ import org.koin.core.component.inject
 public class SearchStatusTimelinePresenter(
     private val accountType: AccountType,
     private val initialQuery: String = "",
-): TimelinePresenter(), KoinComponent {
+) : TimelinePresenter(),
+    KoinComponent {
     private val accountRepository: AccountRepository by inject()
 
     override val loader: Flow<BaseTimelineLoader> by lazy {

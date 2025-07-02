@@ -48,12 +48,13 @@ public class SearchPresenter(
                     }
                 }.toPagingState()
 
-        val status = remember(query) {
-            SearchStatusTimelinePresenter(
-                accountType = accountType,
-                initialQuery = query,
-            )
-        }.body().listState
+        val status =
+            remember(query) {
+                SearchStatusTimelinePresenter(
+                    accountType = accountType,
+                    initialQuery = query,
+                )
+            }.body().listState
         val isSearching = query.isNotEmpty()
 
         return object : SearchState {

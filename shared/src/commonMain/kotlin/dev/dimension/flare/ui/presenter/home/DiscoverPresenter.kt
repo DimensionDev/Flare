@@ -44,11 +44,12 @@ public class DiscoverPresenter(
                         }
                     }
                 }.toPagingState()
-        val status = remember(
-            accountType
-        ) {
-            DiscoverStatusTimelinePresenter(accountType)
-        }.body().listState
+        val status =
+            remember(
+                accountType,
+            ) {
+                DiscoverStatusTimelinePresenter(accountType)
+            }.body().listState
         val hashtags =
             accountState
                 .flatMap { dataSource ->
@@ -79,4 +80,3 @@ public interface DiscoverState {
     public val status: PagingState<UiTimeline>
     public val hashtags: PagingState<UiHashtag>
 }
-

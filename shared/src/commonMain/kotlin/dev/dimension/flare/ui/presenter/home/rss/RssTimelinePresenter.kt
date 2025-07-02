@@ -3,16 +3,11 @@ package dev.dimension.flare.ui.presenter.home.rss
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.BaseTimelineLoader
-import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.datasource.rss.RssDataSource
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapper.render

@@ -140,22 +140,21 @@ internal fun accountProvider(
 internal fun accountServiceProvider(
     accountType: AccountType,
     repository: AccountRepository,
-): UiState<MicroblogDataSource> {
-    return remember(
-        accountType
+): UiState<MicroblogDataSource> =
+    remember(
+        accountType,
     ) {
         accountServiceFlow(
             accountType = accountType,
             repository = repository,
         )
     }.collectAsUiState().value
-}
 
 internal fun accountServiceFlow(
     accountType: AccountType,
     repository: AccountRepository,
-): Flow<MicroblogDataSource> {
-    return when (accountType) {
+): Flow<MicroblogDataSource> =
+    when (accountType) {
         AccountType.Active -> {
             repository.activeAccount.mapNotNull {
                 it?.dataSource
@@ -175,13 +174,13 @@ internal fun accountServiceFlow(
             }
         }
         is AccountType.Specific -> {
-            repository.getFlow(accountType.accountKey)
+            repository
+                .getFlow(accountType.accountKey)
                 .mapNotNull {
                     it?.dataSource
                 }
         }
     }
-}
 
 @Composable
 internal fun allAccountsPresenter(repository: AccountRepository): State<UiState<ImmutableList<UiAccount>>> =

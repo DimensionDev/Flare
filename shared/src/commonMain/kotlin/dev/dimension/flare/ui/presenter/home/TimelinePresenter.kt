@@ -42,7 +42,6 @@ import org.koin.core.component.inject
 public abstract class TimelinePresenter :
     PresenterBase<TimelineState>(),
     KoinComponent {
-
     private val database: CacheDatabase by inject()
 
     private val accountRepository: AccountRepository by inject()
@@ -54,7 +53,7 @@ public abstract class TimelinePresenter :
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val pager by lazy {
+    protected val pager: Flow<PagingData<UiTimeline>> by lazy {
         loader.flatMapLatest {
             when (it) {
                 is BaseTimelinePagingSource<*> ->
@@ -74,15 +73,16 @@ public abstract class TimelinePresenter :
         mediator: BaseTimelineRemoteMediator,
         pageSize: Int = 20,
     ): Flow<PagingData<UiTimeline>> {
-        val pagerFlow = Pager(
-            config = PagingConfig(pageSize = pageSize),
-            remoteMediator = mediator,
-            pagingSourceFactory = {
-                database.pagingTimelineDao().getPagingSource(
-                    pagingKey = mediator.pagingKey,
-                )
-            },
-        ).flow
+        val pagerFlow =
+            Pager(
+                config = PagingConfig(pageSize = pageSize),
+                remoteMediator = mediator,
+                pagingSourceFactory = {
+                    database.pagingTimelineDao().getPagingSource(
+                        pagingKey = mediator.pagingKey,
+                    )
+                },
+            ).flow
 
         return combine(
             pagerFlow,
@@ -112,24 +112,23 @@ public abstract class TimelinePresenter :
     private fun networkPager(
         pagingSource: BaseTimelinePagingSource<*>,
         pageSize: Int = 20,
-    ): Flow<PagingData<UiTimeline>> {
-        return Pager(
+    ): Flow<PagingData<UiTimeline>> =
+        Pager(
             config = PagingConfig(pageSize = pageSize),
             pagingSourceFactory = {
                 pagingSource
             },
         ).flow
-    }
 
     @Composable
     final override fun body(): TimelineState {
         val scope = rememberCoroutineScope()
-        val listState = remember {
-            pager
-                .cachedIn(scope)
-        }
-            .collectAsLazyPagingItems()
-            .toPagingState()
+        val listState =
+            remember {
+                pager
+                    .cachedIn(scope)
+            }.collectAsLazyPagingItems()
+                .toPagingState()
 
         return object : TimelineState {
             override val listState = listState

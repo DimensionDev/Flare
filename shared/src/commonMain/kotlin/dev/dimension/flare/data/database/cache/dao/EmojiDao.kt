@@ -6,7 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import dev.dimension.flare.data.database.cache.model.DbEmoji
 import dev.dimension.flare.data.database.cache.model.DbEmojiHistory
-import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -24,8 +24,11 @@ internal interface EmojiDao {
     suspend fun insertHistory(emoji: DbEmojiHistory)
 
     @Query("SELECT * FROM DbEmojiHistory WHERE accountType = :accountType ORDER BY lastUse DESC")
-    suspend fun getHistory(accountType: AccountType): List<DbEmojiHistory>
+    suspend fun getHistory(accountType: DbAccountType): List<DbEmojiHistory>
 
     @Query("DELETE FROM DbEmojiHistory")
     suspend fun clearHistory()
+
+    @Query("DELETE FROM DbEmojiHistory WHERE accountType = :accountType")
+    suspend fun clearHistoryByAccountType(accountType: DbAccountType)
 }

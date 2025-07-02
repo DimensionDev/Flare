@@ -48,6 +48,7 @@ import dev.dimension.flare.data.network.misskey.api.model.UsersListsPullRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsShowRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersListsUpdateRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
@@ -93,6 +94,7 @@ internal class MisskeyDataSource(
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
+    private val accountRepository: AccountRepository by inject()
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
             baseUrl = "https://${credential.host}/api/",
@@ -109,6 +111,7 @@ internal class MisskeyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 HomeTimelineRemoteMediator(
                     accountKey,
@@ -127,6 +130,7 @@ internal class MisskeyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 LocalTimelineRemoteMediator(
                     accountKey,
@@ -145,6 +149,7 @@ internal class MisskeyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 PublicTimelineRemoteMediator(
                     accountKey,
@@ -163,6 +168,7 @@ internal class MisskeyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forNotification = true),
+            accountRepository = accountRepository,
             mediator =
                 when (type) {
                     NotificationFilter.All ->
@@ -262,6 +268,7 @@ internal class MisskeyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 UserTimelineRemoteMediator(
                     accountKey,
@@ -282,6 +289,7 @@ internal class MisskeyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey,
@@ -725,6 +733,7 @@ internal class MisskeyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
+            accountRepository = accountRepository,
             mediator =
                 SearchStatusRemoteMediator(
                     service,
@@ -768,6 +777,7 @@ internal class MisskeyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 DiscoverStatusRemoteMediator(
                     service,
@@ -988,6 +998,7 @@ internal class MisskeyDataSource(
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                        accountRepository = accountRepository,
                         mediator =
                             UserTimelineRemoteMediator(
                                 accountKey = accountKey,
@@ -1006,6 +1017,7 @@ internal class MisskeyDataSource(
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                        accountRepository = accountRepository,
                         mediator =
                             UserTimelineRemoteMediator(
                                 service = service,
@@ -1028,6 +1040,7 @@ internal class MisskeyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 FavouriteTimelineRemoteMediator(
                     service = service,
@@ -1304,6 +1317,7 @@ internal class MisskeyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 ListTimelineRemoteMediator(
                     listId,
@@ -1432,6 +1446,7 @@ internal class MisskeyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 AntennasTimelineRemoteMediator(
                     service = service,

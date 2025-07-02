@@ -91,6 +91,7 @@ import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
@@ -149,6 +150,7 @@ internal class BlueskyDataSource(
     private val appDatabase: AppDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
+    private val accountRepository: AccountRepository by inject()
     private val inAppNotification: InAppNotification by inject()
     private val service by lazy {
         BlueskyService(
@@ -198,6 +200,7 @@ internal class BlueskyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 HomeTimelineRemoteMediator(
                     service,
@@ -217,6 +220,7 @@ internal class BlueskyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forNotification = true),
+            accountRepository = accountRepository,
             mediator =
                 when (type) {
                     NotificationFilter.All ->
@@ -303,6 +307,7 @@ internal class BlueskyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 UserTimelineRemoteMediator(
                     service,
@@ -323,6 +328,7 @@ internal class BlueskyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey,
@@ -952,6 +958,7 @@ internal class BlueskyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
+            accountRepository = accountRepository,
             mediator =
                 SearchStatusRemoteMediator(
                     service,
@@ -1164,6 +1171,7 @@ internal class BlueskyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 FeedTimelineRemoteMediator(
                     service = service,
@@ -1392,6 +1400,7 @@ internal class BlueskyDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 ListTimelineRemoteMediator(
                     service = service,
@@ -2204,6 +2213,7 @@ internal class BlueskyDataSource(
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                        accountRepository = accountRepository,
                         mediator =
                             UserTimelineRemoteMediator(
                                 service = service,
@@ -2223,6 +2233,7 @@ internal class BlueskyDataSource(
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                        accountRepository = accountRepository,
                         mediator =
                             UserTimelineRemoteMediator(
                                 service,
@@ -2243,6 +2254,7 @@ internal class BlueskyDataSource(
                             database = database,
                             scope = scope,
                             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                            accountRepository = accountRepository,
                             mediator =
                                 UserLikesTimelineRemoteMediator(
                                     service,

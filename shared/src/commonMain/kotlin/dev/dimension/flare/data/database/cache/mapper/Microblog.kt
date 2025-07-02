@@ -9,6 +9,7 @@ import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
 import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import kotlinx.coroutines.flow.firstOrNull
@@ -97,7 +98,7 @@ internal suspend fun saveToDatabase(
 }
 
 internal fun createDbPagingTimelineWithStatus(
-    accountType: AccountType,
+    accountType: DbAccountType,
     pagingKey: String,
     sortId: Long,
     status: DbStatusWithUser,

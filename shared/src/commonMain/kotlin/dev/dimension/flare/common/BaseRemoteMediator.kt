@@ -10,7 +10,7 @@ import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.repository.DebugRepository
-import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 
 @OptIn(ExperimentalPagingApi::class)
 internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMediator<Key, Value>() {
@@ -38,7 +38,7 @@ internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMedia
 @OptIn(ExperimentalPagingApi::class)
 internal abstract class BaseTimelineRemoteMediator(
     private val database: CacheDatabase,
-    val accountType: AccountType,
+    private val accountType: DbAccountType,
 ) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
     abstract val pagingKey: String
 

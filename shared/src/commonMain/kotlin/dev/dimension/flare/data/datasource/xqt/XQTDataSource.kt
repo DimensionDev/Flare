@@ -70,6 +70,7 @@ import dev.dimension.flare.data.network.xqt.model.RemoveMemberRequest
 import dev.dimension.flare.data.network.xqt.model.UpdateListRequest
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
@@ -129,6 +130,7 @@ internal class XQTDataSource(
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
+    private val accountRepository: AccountRepository by inject()
     private val service by lazy {
         XQTService(chocolate = credential.chocolate)
     }
@@ -142,6 +144,7 @@ internal class XQTDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 HomeTimelineRemoteMediator(
                     service,
@@ -160,6 +163,7 @@ internal class XQTDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 FeaturedTimelineRemoteMediator(
                     service,
@@ -178,6 +182,7 @@ internal class XQTDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 BookmarkTimelineRemoteMediator(
                     service,
@@ -211,6 +216,7 @@ internal class XQTDataSource(
                 database = database,
                 scope = scope,
                 filterFlow = localFilterRepository.getFlow(forNotification = true),
+                accountRepository = accountRepository,
                 mediator =
                     MentionRemoteMediator(
                         service,
@@ -318,6 +324,7 @@ internal class XQTDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 if (mediaOnly) {
                     UserMediaTimelineRemoteMediator(
@@ -346,6 +353,7 @@ internal class XQTDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey = statusKey,
@@ -591,6 +599,7 @@ internal class XQTDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
+            accountRepository = accountRepository,
             mediator =
                 SearchStatusPagingSource(
                     service,
@@ -1144,6 +1153,7 @@ internal class XQTDataSource(
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                        accountRepository = accountRepository,
                         mediator =
                             UserRepliesTimelineRemoteMediator(
                                 service = service,
@@ -1163,6 +1173,7 @@ internal class XQTDataSource(
                             database = database,
                             scope = scope,
                             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                            accountRepository = accountRepository,
                             mediator =
                                 UserLikesTimelineRemoteMediator(
                                     service = service,
@@ -1539,6 +1550,7 @@ internal class XQTDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 ListTimelineRemoteMediator(
                     listId,

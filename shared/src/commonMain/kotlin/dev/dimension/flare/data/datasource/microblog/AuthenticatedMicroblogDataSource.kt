@@ -11,9 +11,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 
-internal interface AuthenticatedMicroblogDataSource : MicroblogDataSource {
-    val accountKey: MicroBlogKey
-
+internal interface AuthenticatedMicroblogDataSource :
+    MicroblogDataSource,
+    StatusEvent {
     fun notification(
         type: NotificationFilter = NotificationFilter.All,
         pageSize: Int = 20,

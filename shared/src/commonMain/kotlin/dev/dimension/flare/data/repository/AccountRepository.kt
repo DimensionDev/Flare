@@ -10,6 +10,7 @@ import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
+import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -35,6 +36,7 @@ internal class AccountRepository(
     private val appDatabase: AppDatabase,
     private val coroutineScope: CoroutineScope,
     internal val appDataStore: AppDataStore,
+    private val cacheDatabase: CacheDatabase,
 ) {
     val activeAccount: Flow<UiAccount?> by lazy {
         appDatabase.accountDao().activeAccount().map {
@@ -69,6 +71,21 @@ internal class AccountRepository(
 
     fun delete(accountKey: MicroBlogKey) =
         coroutineScope.launch {
+            cacheDatabase.pagingTimelineDao().deleteByAccountType(
+                AccountType.Specific(accountKey),
+            )
+            cacheDatabase.statusDao().deleteByAccountType(
+                AccountType.Specific(accountKey),
+            )
+            cacheDatabase.userDao().deleteHistoryByAccountType(
+                AccountType.Specific(accountKey),
+            )
+            cacheDatabase.emojiDao().clearHistoryByAccountType(
+                AccountType.Specific(accountKey),
+            )
+            cacheDatabase.messageDao().clearMessageTimeline(
+                AccountType.Specific(accountKey),
+            )
             appDatabase.accountDao().delete(accountKey)
         }
 

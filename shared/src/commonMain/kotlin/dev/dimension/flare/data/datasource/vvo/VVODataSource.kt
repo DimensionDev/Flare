@@ -28,6 +28,7 @@ import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.network.vvo.model.StatusDetailItem
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.data.repository.tryRun
@@ -66,6 +67,7 @@ internal class VVODataSource(
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
+    private val accountRepository: AccountRepository by inject()
     private val inAppNotification: InAppNotification by inject()
     private val service by lazy {
         VVOService(credential.chocolate)
@@ -80,6 +82,7 @@ internal class VVODataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 HomeTimelineRemoteMediator(
                     service,
@@ -102,6 +105,7 @@ internal class VVODataSource(
                     database = database,
                     scope = scope,
                     filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                    accountRepository = accountRepository,
                     mediator =
                         MentionRemoteMediator(
                             service,
@@ -231,6 +235,7 @@ internal class VVODataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 UserTimelineRemoteMediator(
                     userKey = userKey,
@@ -407,6 +412,7 @@ internal class VVODataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
+            accountRepository = accountRepository,
             mediator =
                 SearchStatusRemoteMediator(
                     service,
@@ -444,6 +450,7 @@ internal class VVODataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 DiscoverStatusRemoteMediator(
                     service,
@@ -552,6 +559,7 @@ internal class VVODataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 StatusCommentRemoteMediator(
                     service = service,
@@ -572,6 +580,7 @@ internal class VVODataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 StatusRepostRemoteMediator(
                     service = service,
@@ -592,6 +601,7 @@ internal class VVODataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 CommentChildRemoteMediator(
                     service = service,

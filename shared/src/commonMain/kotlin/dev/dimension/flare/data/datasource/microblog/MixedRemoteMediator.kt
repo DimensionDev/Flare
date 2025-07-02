@@ -10,10 +10,10 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlin.uuid.Uuid
 
 internal class MixedRemoteMediator(
     private val database: CacheDatabase,
@@ -34,7 +34,16 @@ internal class MixedRemoteMediator(
                 val response =
                     currentMediators
                         .map {
-                            async { it to it.timeline(loadType, state) }
+                            async {
+                                it to
+                                    runCatching { it.timeline(loadType, state) }
+                                        .getOrElse {
+                                            // TODO: Handle errors for each mediator
+                                            BaseTimelineRemoteMediator.Result(
+                                                endOfPaginationReached = true,
+                                            )
+                                        }
+                            }
                         }.awaitAll()
 
                 val timelineResult = response.flatMap { it.second.data }
@@ -58,9 +67,9 @@ internal class MixedRemoteMediator(
                 database.connect {
                     if (loadType == LoadType.REFRESH) {
                         currentMediators.forEach {
-                            database.pagingTimelineDao().delete(pagingKey = it.pagingKey, accountType = it.accountType)
-                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountType = it.accountType)
+                            database.pagingTimelineDao().delete(pagingKey = it.pagingKey)
                         }
+                        database.pagingTimelineDao().delete(pagingKey = pagingKey)
                     }
 
                     saveToDatabase(

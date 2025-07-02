@@ -22,7 +22,7 @@ internal class AntennasTimelineRemoteMediator(
         database = database,
         accountType = AccountType.Specific(accountKey),
     ) {
-    override val pagingKey = "antennas_$id"
+    override val pagingKey = "antennas_${id}_$accountKey"
 
     override suspend fun timeline(
         loadType: LoadType,

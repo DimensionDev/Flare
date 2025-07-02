@@ -8,7 +8,7 @@ import androidx.room.Relation
 import androidx.room.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
-import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
 import kotlinx.datetime.Instant
@@ -23,7 +23,7 @@ import kotlin.uuid.Uuid
     ],
 )
 internal data class DbPagingTimeline(
-    val accountType: AccountType,
+    val accountType: DbAccountType,
     val pagingKey: String,
     val statusKey: MicroBlogKey,
     val sortId: Long,

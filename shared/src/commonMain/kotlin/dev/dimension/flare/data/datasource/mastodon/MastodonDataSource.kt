@@ -40,6 +40,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
@@ -74,7 +75,6 @@ import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal open class MastodonDataSource(
-//    override val account: UiAccount.Mastodon,
     override val accountKey: MicroBlogKey,
     val instance: String,
     val accessToken: String,
@@ -85,6 +85,7 @@ internal open class MastodonDataSource(
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
+    private val accountRepository: AccountRepository by inject()
     private val service by lazy {
         MastodonService(
             baseUrl = "https://$instance/",
@@ -101,6 +102,7 @@ internal open class MastodonDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 HomeTimelineRemoteMediator(
                     service,
@@ -118,6 +120,7 @@ internal open class MastodonDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 PublicTimelineRemoteMediator(
                     service,
@@ -136,6 +139,7 @@ internal open class MastodonDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 BookmarkTimelineRemoteMediator(
                     service,
@@ -153,6 +157,7 @@ internal open class MastodonDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 FavouriteTimelineRemoteMediator(
                     service,
@@ -171,6 +176,7 @@ internal open class MastodonDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 ListTimelineRemoteMediator(
                     listId,
@@ -189,6 +195,7 @@ internal open class MastodonDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 PublicTimelineRemoteMediator(
                     service,
@@ -208,6 +215,7 @@ internal open class MastodonDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forNotification = true),
+            accountRepository = accountRepository,
             mediator =
                 when (type) {
                     NotificationFilter.All ->
@@ -293,6 +301,7 @@ internal open class MastodonDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 UserTimelineRemoteMediator(
                     service,
@@ -313,6 +322,7 @@ internal open class MastodonDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 StatusDetailRemoteMediator(
                     statusKey,
@@ -792,6 +802,7 @@ internal open class MastodonDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
+            accountRepository = accountRepository,
             mediator =
                 DiscoverStatusRemoteMediator(
                     service,
@@ -819,6 +830,7 @@ internal open class MastodonDataSource(
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forSearch = true),
+            accountRepository = accountRepository,
             mediator =
                 SearchStatusPagingSource(
                     service,
@@ -1309,6 +1321,7 @@ internal open class MastodonDataSource(
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                        accountRepository = accountRepository,
                         mediator =
                             UserTimelineRemoteMediator(
                                 service = service,
@@ -1327,6 +1340,7 @@ internal open class MastodonDataSource(
                         database = database,
                         scope = scope,
                         filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                        accountRepository = accountRepository,
                         mediator =
                             UserTimelineRemoteMediator(
                                 service = service,

@@ -3,11 +3,15 @@ package dev.dimension.flare.model
 import kotlinx.serialization.Serializable
 
 @Serializable
+internal sealed interface DbAccountType
+
+@Serializable
 public sealed interface AccountType {
     @Serializable
     public data class Specific(
         val accountKey: MicroBlogKey,
-    ) : AccountType {
+    ) : AccountType,
+        DbAccountType {
         override fun toString(): String = "specific_$accountKey"
     }
 
@@ -17,7 +21,7 @@ public sealed interface AccountType {
     }
 
     @Serializable
-    public data object Guest : AccountType {
+    public data object Guest : AccountType, DbAccountType {
         override fun toString(): String = "guest"
     }
 }

@@ -3,7 +3,7 @@ package dev.dimension.flare.data.database.cache.model
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.datetime.Instant
 
@@ -12,7 +12,7 @@ import kotlinx.datetime.Instant
 )
 internal data class DbStatus(
     val statusKey: MicroBlogKey,
-    val accountType: AccountType,
+    val accountType: DbAccountType,
     val userKey: MicroBlogKey?,
     val content: StatusContent,
     val text: String?, // For Searching

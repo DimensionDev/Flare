@@ -8,7 +8,7 @@ import androidx.room.TypeConverter
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.network.xqt.model.InboxMessageData
-import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import kotlinx.serialization.SerialName
@@ -23,7 +23,7 @@ import kotlinx.serialization.Serializable
     ],
 )
 internal data class DbDirectMessageTimeline(
-    val accountType: AccountType,
+    val accountType: DbAccountType,
     val roomKey: MicroBlogKey,
     val sortId: Long,
     val unreadCount: Long,

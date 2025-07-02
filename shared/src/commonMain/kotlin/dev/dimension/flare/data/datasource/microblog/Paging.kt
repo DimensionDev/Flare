@@ -12,6 +12,7 @@ import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
@@ -30,12 +31,13 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 @OptIn(ExperimentalPagingApi::class)
-internal fun StatusEvent.timelinePager(
+internal fun timelinePager(
     pageSize: Int,
     database: CacheDatabase,
     scope: CoroutineScope,
     filterFlow: Flow<List<String>>,
     mediator: BaseTimelineRemoteMediator,
+    accountRepository: AccountRepository,
 ): Flow<PagingData<UiTimeline>> {
     val pagerFlow =
         Pager(
@@ -43,16 +45,28 @@ internal fun StatusEvent.timelinePager(
             remoteMediator = mediator,
             pagingSourceFactory = {
                 database.pagingTimelineDao().getPagingSource(
-                    accountType = AccountType.Specific(accountKey),
                     pagingKey = mediator.pagingKey,
                 )
             },
         ).flow.cachedIn(scope)
-    return combine(pagerFlow, filterFlow) { pagingData, filters ->
+    return combine(
+        pagerFlow,
+        filterFlow,
+        accountRepository.allAccounts,
+    ) { pagingData, filters, accounts ->
         pagingData
-            .map {
+            .map { data ->
                 withContext(Dispatchers.IO) {
-                    it.render(this@timelinePager)
+                    val dataSource =
+                        when (data.timeline.accountType) {
+                            AccountType.Guest -> null
+                            is AccountType.Specific -> {
+                                accounts.first {
+                                    it.accountKey == data.timeline.accountType.accountKey
+                                }
+                            }
+                        }?.dataSource
+                    data.render(dataSource)
                 }
             }.filter {
                 !it.contains(filters)

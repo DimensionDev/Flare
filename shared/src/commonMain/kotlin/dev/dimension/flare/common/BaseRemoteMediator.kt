@@ -11,6 +11,7 @@ import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.repository.DebugRepository
 import dev.dimension.flare.model.DbAccountType
+import dev.dimension.flare.ui.model.UiTimeline
 
 @OptIn(ExperimentalPagingApi::class)
 internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMediator<Key, Value>() {
@@ -35,11 +36,14 @@ internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMedia
     }
 }
 
+internal sealed interface BaseTimelineLoader
+
 @OptIn(ExperimentalPagingApi::class)
 internal abstract class BaseTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val accountType: DbAccountType,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>(),
+    BaseTimelineLoader {
     abstract val pagingKey: String
 
     final override suspend fun doLoad(
@@ -49,7 +53,9 @@ internal abstract class BaseTimelineRemoteMediator(
         val result = timeline(loadType, state)
         database.connect {
             if (loadType == LoadType.REFRESH) {
-                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountType = accountType)
+                database
+                    .pagingTimelineDao()
+                    .delete(pagingKey = pagingKey, accountType = accountType)
             }
             saveToDatabase(database, result.data)
         }
@@ -68,6 +74,10 @@ internal abstract class BaseTimelineRemoteMediator(
         val data: List<DbPagingTimelineWithStatus> = emptyList(),
     )
 }
+
+internal abstract class BaseTimelinePagingSource<T : Any> :
+    BasePagingSource<T, UiTimeline>(),
+    BaseTimelineLoader
 
 internal abstract class BasePagingSource<Key : Any, Value : Any> : PagingSource<Key, Value>() {
     override suspend fun load(params: LoadParams<Key>): LoadResult<Key, Value> =

@@ -25,11 +25,7 @@ internal object RssDataSource :
         scope: CoroutineScope,
         pageSize: Int = 20,
     ): Flow<PagingData<UiTimeline>> {
-        val mediator =
-            RssTimelineRemoteMediator(
-                url = url,
-                cacheDatabase = database,
-            )
+        val mediator = fetchLoader(url)
         return Pager(
             config = PagingConfig(pageSize = pageSize),
             remoteMediator = mediator,
@@ -45,4 +41,9 @@ internal object RssDataSource :
                 }
             }.cachedIn(scope)
     }
+
+    fun fetchLoader(url: String) = RssTimelineRemoteMediator(
+        url = url,
+        cacheDatabase = database,
+    )
 }

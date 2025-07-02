@@ -44,21 +44,11 @@ public class DiscoverPresenter(
                         }
                     }
                 }.toPagingState()
-        val status =
-            accountState
-                .flatMap { dataSource ->
-                    remember(dataSource) {
-                        runCatching {
-                            dataSource.discoverStatuses(scope = scope)
-                        }.getOrNull()
-                    }?.collectAsLazyPagingItems().let {
-                        if (it == null) {
-                            UiState.Error(Throwable("No data"))
-                        } else {
-                            UiState.Success(it)
-                        }
-                    }
-                }.toPagingState()
+        val status = remember(
+            accountType
+        ) {
+            DiscoverStatusTimelinePresenter(accountType)
+        }.body().listState
         val hashtags =
             accountState
                 .flatMap { dataSource ->
@@ -89,3 +79,4 @@ public interface DiscoverState {
     public val status: PagingState<UiTimeline>
     public val hashtags: PagingState<UiHashtag>
 }
+

@@ -1,6 +1,7 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import androidx.paging.PagingData
+import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiHashtag
@@ -12,10 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 
 internal interface MicroblogDataSource {
-    fun homeTimeline(
-        pageSize: Int = 20,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>>
+    fun homeTimeline(): BaseTimelineLoader
 
     fun userByAcct(acct: String): CacheData<UiUserV2>
 
@@ -23,24 +21,18 @@ internal interface MicroblogDataSource {
 
     fun userTimeline(
         userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int = 20,
         mediaOnly: Boolean = false,
-    ): Flow<PagingData<UiTimeline>>
+    ): BaseTimelineLoader
 
     fun context(
         statusKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int = 20,
-    ): Flow<PagingData<UiTimeline>>
+    ): BaseTimelineLoader
 
     fun status(statusKey: MicroBlogKey): CacheData<UiTimeline>
 
     fun searchStatus(
         query: String,
-        scope: CoroutineScope,
-        pageSize: Int = 20,
-    ): Flow<PagingData<UiTimeline>>
+    ): BaseTimelineLoader
 
     fun searchUser(
         query: String,
@@ -50,10 +42,7 @@ internal interface MicroblogDataSource {
 
     fun discoverUsers(pageSize: Int = 20): Flow<PagingData<UiUserV2>>
 
-    fun discoverStatuses(
-        pageSize: Int = 20,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>>
+    fun discoverStatuses(): BaseTimelineLoader
 
     fun discoverHashtags(pageSize: Int = 20): Flow<PagingData<UiHashtag>>
 

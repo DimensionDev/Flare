@@ -191,23 +191,12 @@ internal class BlueskyDataSource(
         } ?: service
     }
 
-    override fun homeTimeline(
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                HomeTimelineRemoteMediator(
-                    service,
-                    accountKey,
-                    database,
-                    inAppNotification = inAppNotification,
-                ),
+    override fun homeTimeline() =
+        HomeTimelineRemoteMediator(
+            service,
+            accountKey,
+            database,
+            inAppNotification = inAppNotification,
         )
 
     override fun notification(
@@ -298,45 +287,22 @@ internal class BlueskyDataSource(
 
     override fun userTimeline(
         userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
         mediaOnly: Boolean,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                UserTimelineRemoteMediator(
-                    service,
-                    accountKey,
-                    database,
-                    userKey,
-                    onlyMedia = mediaOnly,
-                ),
-        )
+    ) = UserTimelineRemoteMediator(
+        service,
+        accountKey,
+        database,
+        userKey,
+        onlyMedia = mediaOnly,
+    )
 
-    override fun context(
-        statusKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                StatusDetailRemoteMediator(
-                    statusKey,
-                    service,
-                    accountKey,
-                    database,
-                    statusOnly = false,
-                ),
+    override fun context(statusKey: MicroBlogKey) =
+        StatusDetailRemoteMediator(
+            statusKey,
+            service,
+            accountKey,
+            database,
+            statusOnly = false,
         )
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
@@ -948,24 +914,12 @@ internal class BlueskyDataSource(
         }
     }
 
-    override fun searchStatus(
-        query: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forSearch = true),
-            accountRepository = accountRepository,
-            mediator =
-                SearchStatusRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    query,
-                ),
+    override fun searchStatus(query: String) =
+        SearchStatusRemoteMediator(
+            service,
+            database,
+            accountKey,
+            query,
         )
 
     override fun searchUser(
@@ -996,10 +950,7 @@ internal class BlueskyDataSource(
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         throw UnsupportedOperationException("Bluesky does not support discover hashtags")
 
-    override fun discoverStatuses(
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> = throw UnsupportedOperationException("Bluesky does not support discover statuses")
+    override fun discoverStatuses() = throw UnsupportedOperationException("Bluesky does not support discover statuses")
 
     override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
         ComposeConfig(
@@ -1172,13 +1123,15 @@ internal class BlueskyDataSource(
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             accountRepository = accountRepository,
-            mediator =
-                FeedTimelineRemoteMediator(
-                    service = service,
-                    accountKey = accountKey,
-                    database = database,
-                    uri = uri,
-                ),
+            mediator = feedTimelineLoader(uri),
+        )
+
+    fun feedTimelineLoader(uri: String) =
+        FeedTimelineRemoteMediator(
+            service = service,
+            accountKey = accountKey,
+            database = database,
+            uri = uri,
         )
 
     suspend fun subscribeFeed(data: UiList) {
@@ -1390,24 +1343,12 @@ internal class BlueskyDataSource(
                 .render(accountKey)
         }
 
-    override fun listTimeline(
-        listId: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
+    override fun listTimeline(listId: String) =
+        ListTimelineRemoteMediator(
+            service = service,
+            accountKey = accountKey,
             database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                ListTimelineRemoteMediator(
-                    service = service,
-                    accountKey = accountKey,
-                    database = database,
-                    uri = listId,
-                ),
+            uri = listId,
         )
 
     private suspend fun createList(
@@ -2054,6 +1995,7 @@ internal class BlueskyDataSource(
                         is LogDeleteMessageMessageUnion.Unknown -> Unit
                     }
                 }
+
                 else -> Unit
             }
         }
@@ -2110,7 +2052,9 @@ internal class BlueskyDataSource(
 
     private fun clearDirectMessageBadgeCount(roomKey: MicroBlogKey) {
         coroutineScope.launch {
-            database.messageDao().clearUnreadCount(roomKey, accountType = AccountType.Specific(accountKey))
+            database
+                .messageDao()
+                .clearUnreadCount(roomKey, accountType = AccountType.Specific(accountKey))
         }
     }
 

@@ -93,23 +93,11 @@ internal open class MastodonDataSource(
         )
     }
 
-    override fun homeTimeline(
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                HomeTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                ),
-        )
+    override fun homeTimeline() = HomeTimelineRemoteMediator(
+        service,
+        database,
+        accountKey,
+    )
 
     fun localTimeline(
         pageSize: Int = 20,
@@ -121,13 +109,7 @@ internal open class MastodonDataSource(
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             accountRepository = accountRepository,
-            mediator =
-                PublicTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    local = true,
-                ),
+            mediator = publicTimelineLoader(local = true),
         )
 
     fun bookmarkTimeline(
@@ -140,13 +122,14 @@ internal open class MastodonDataSource(
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             accountRepository = accountRepository,
-            mediator =
-                BookmarkTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                ),
+            mediator = bookmarkTimelineLoader(),
         )
+
+    fun bookmarkTimelineLoader() = BookmarkTimelineRemoteMediator(
+        service,
+        database,
+        accountKey,
+    )
 
     fun favouriteTimeline(
         pageSize: Int = 20,
@@ -158,33 +141,23 @@ internal open class MastodonDataSource(
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             accountRepository = accountRepository,
-            mediator =
-                FavouriteTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                ),
+            mediator = favouriteTimelineLoader(),
         )
+
+    fun favouriteTimelineLoader() = FavouriteTimelineRemoteMediator(
+        service,
+        database,
+        accountKey,
+    )
 
     override fun listTimeline(
         listId: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                ListTimelineRemoteMediator(
-                    listId,
-                    service,
-                    database,
-                    accountKey,
-                ),
-        )
+    ) = ListTimelineRemoteMediator(
+        listId,
+        service,
+        database,
+        accountKey,
+    )
 
     fun publicTimeline(
         pageSize: Int = 20,
@@ -196,14 +169,15 @@ internal open class MastodonDataSource(
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             accountRepository = accountRepository,
-            mediator =
-                PublicTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    local = false,
-                ),
+            mediator = publicTimelineLoader(local = false),
         )
+
+    fun publicTimelineLoader(local: Boolean) = PublicTimelineRemoteMediator(
+        service,
+        database,
+        accountKey,
+        local = local,
+    )
 
     override fun notification(
         type: NotificationFilter,
@@ -292,46 +266,24 @@ internal open class MastodonDataSource(
 
     override fun userTimeline(
         userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
         mediaOnly: Boolean,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                UserTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    userKey,
-                    onlyMedia = mediaOnly,
-                ),
-        )
+    ) = UserTimelineRemoteMediator(
+        service,
+        database,
+        accountKey,
+        userKey,
+        onlyMedia = mediaOnly,
+    )
 
     override fun context(
         statusKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                StatusDetailRemoteMediator(
-                    statusKey,
-                    service,
-                    database,
-                    accountKey,
-                    statusOnly = false,
-                ),
-        )
+    ) = StatusDetailRemoteMediator(
+        statusKey,
+        service,
+        database,
+        accountKey,
+        statusOnly = false,
+    )
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
@@ -793,23 +745,11 @@ internal open class MastodonDataSource(
             )
         }.flow
 
-    override fun discoverStatuses(
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                DiscoverStatusRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                ),
-        )
+    override fun discoverStatuses() = DiscoverStatusRemoteMediator(
+        service,
+        database,
+        accountKey,
+    )
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         Pager(
@@ -822,23 +762,12 @@ internal open class MastodonDataSource(
 
     override fun searchStatus(
         query: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forSearch = true),
-            accountRepository = accountRepository,
-            mediator =
-                SearchStatusPagingSource(
-                    service,
-                    database,
-                    accountKey,
-                    query,
-                ),
-        )
+    ) = SearchStatusPagingSource(
+        service,
+        database,
+        accountKey,
+        query,
+    )
 
     override fun searchUser(
         query: String,
@@ -1190,7 +1119,8 @@ internal open class MastodonDataSource(
         return MemCacheable(
             key = notificationMarkerKey,
             fetchSource = {
-                val marker = service.notificationMarkers().notifications?.lastReadID ?: return@MemCacheable 0
+                val marker =
+                    service.notificationMarkers().notifications?.lastReadID ?: return@MemCacheable 0
                 val timeline = service.notification(min_id = marker)
                 timeline.size
             },
@@ -1218,7 +1148,11 @@ internal open class MastodonDataSource(
                                         options =
                                             it.data.poll.options?.mapIndexed { index, option ->
                                                 if (options.contains(index)) {
-                                                    option.copy(votesCount = option.votesCount?.plus(1))
+                                                    option.copy(
+                                                        votesCount = option.votesCount?.plus(
+                                                            1
+                                                        )
+                                                    )
                                                 } else {
                                                     option
                                                 }
@@ -1247,7 +1181,11 @@ internal open class MastodonDataSource(
                                             options =
                                                 it.data.poll.options?.mapIndexed { index, option ->
                                                     if (options.contains(index)) {
-                                                        option.copy(votesCount = option.votesCount?.minus(1))
+                                                        option.copy(
+                                                            votesCount = option.votesCount?.minus(
+                                                                1
+                                                            )
+                                                        )
                                                     } else {
                                                         option
                                                     }

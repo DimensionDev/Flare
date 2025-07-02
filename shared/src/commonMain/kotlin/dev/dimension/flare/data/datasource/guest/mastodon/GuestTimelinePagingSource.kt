@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.datasource.guest.mastodon
 
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BasePagingSource
+import dev.dimension.flare.common.BaseTimelinePagingSource
 import dev.dimension.flare.data.network.mastodon.api.TrendsResources
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.renderGuest
@@ -9,7 +9,7 @@ import dev.dimension.flare.ui.model.mapper.renderGuest
 internal class GuestTimelinePagingSource(
     private val service: TrendsResources,
     private val host: String,
-) : BasePagingSource<Int, UiTimeline>() {
+) : BaseTimelinePagingSource<Int>() {
     override fun getRefreshKey(state: PagingState<Int, UiTimeline>): Int? = null
 
     override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiTimeline> {

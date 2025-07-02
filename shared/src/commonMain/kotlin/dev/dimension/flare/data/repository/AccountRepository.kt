@@ -3,7 +3,6 @@ package dev.dimension.flare.data.repository
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.Locale
@@ -21,7 +20,6 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.map
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -29,6 +27,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
@@ -142,11 +141,29 @@ internal fun accountServiceProvider(
     accountType: AccountType,
     repository: AccountRepository,
 ): UiState<MicroblogDataSource> {
-    if (accountType is AccountType.Guest) {
-        val guestData by repository.appDataStore.guestDataStore.data
-            .collectAsUiState()
-        return guestData.map {
-            remember(it) {
+    return remember(
+        accountType
+    ) {
+        accountServiceFlow(
+            accountType = accountType,
+            repository = repository,
+        )
+    }.collectAsUiState().value
+}
+
+internal fun accountServiceFlow(
+    accountType: AccountType,
+    repository: AccountRepository,
+): Flow<MicroblogDataSource> {
+    return when (accountType) {
+        AccountType.Active -> {
+            repository.activeAccount.mapNotNull {
+                it?.dataSource
+            }
+        }
+        AccountType.Guest -> {
+            val guestData = repository.appDataStore.guestDataStore.data
+            guestData.map {
                 when (it.platformType) {
                     PlatformType.Mastodon ->
                         GuestMastodonDataSource(
@@ -157,11 +174,11 @@ internal fun accountServiceProvider(
                 }
             }
         }
-    }
-    val account by accountProvider(accountType = accountType, repository = repository)
-    return account.map {
-        remember(it) {
-            it.dataSource
+        is AccountType.Specific -> {
+            repository.getFlow(accountType.accountKey)
+                .mapNotNull {
+                    it?.dataSource
+                }
         }
     }
 }

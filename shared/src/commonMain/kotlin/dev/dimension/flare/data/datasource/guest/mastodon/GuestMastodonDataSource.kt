@@ -44,13 +44,7 @@ internal class GuestMastodonDataSource(
     }
     private val database: CacheDatabase by inject()
 
-    override fun homeTimeline(
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        Pager(PagingConfig(pageSize = pageSize)) {
-            GuestTimelinePagingSource(host = host, service = service)
-        }.flow.cachedIn(scope)
+    override fun homeTimeline() = GuestTimelinePagingSource(host = host, service = service)
 
     override fun userByAcct(acct: String): CacheData<UiUserV2> {
         val (name, host) = MicroBlogKey.valueOf(acct)
@@ -105,32 +99,21 @@ internal class GuestMastodonDataSource(
 
     override fun userTimeline(
         userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
         mediaOnly: Boolean,
-    ): Flow<PagingData<UiTimeline>> =
-        Pager(PagingConfig(pageSize = pageSize)) {
-            GuestUserTimelinePagingSource(
-                host = host,
-                userId = userKey.id,
-                onlyMedia = mediaOnly,
-                service = service,
-            )
-        }.flow.cachedIn(scope)
+    ) = GuestUserTimelinePagingSource(
+        host = host,
+        userId = userKey.id,
+        onlyMedia = mediaOnly,
+        service = service,
+    )
 
-    override fun context(
-        statusKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        Pager(PagingConfig(pageSize = pageSize)) {
-            GuestStatusDetailPagingSource(
-                host = host,
-                statusKey = statusKey,
-                statusOnly = false,
-                service = service,
-            )
-        }.flow.cachedIn(scope)
+    override fun context(statusKey: MicroBlogKey) =
+        GuestStatusDetailPagingSource(
+            host = host,
+            statusKey = statusKey,
+            statusOnly = false,
+            service = service,
+        )
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
@@ -145,14 +128,7 @@ internal class GuestMastodonDataSource(
         )
     }
 
-    override fun searchStatus(
-        query: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        Pager(PagingConfig(pageSize = pageSize)) {
-            GuestSearchStatusPagingSource(host = host, query = query, service = service)
-        }.flow.cachedIn(scope)
+    override fun searchStatus(query: String) = GuestSearchStatusPagingSource(host = host, query = query, service = service)
 
     override fun searchUser(
         query: String,
@@ -175,10 +151,7 @@ internal class GuestMastodonDataSource(
         throw UnsupportedOperationException("Discover users not supported")
     }
 
-    override fun discoverStatuses(
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> = TODO()
+    override fun discoverStatuses() = TODO()
 //        Pager(PagingConfig(pageSize = pageSize)) {
 //            GuestDiscoverStatusPagingSource(host = host, service = service)
 //        }.flow.cachedIn(scope)

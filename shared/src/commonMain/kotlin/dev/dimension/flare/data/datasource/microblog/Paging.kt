@@ -74,7 +74,7 @@ internal fun timelinePager(
     }.cachedIn(scope)
 }
 
-private fun UiTimeline.contains(keywords: List<String>): Boolean {
+internal fun UiTimeline.contains(keywords: List<String>): Boolean {
     val text =
         if (content is UiTimeline.ItemContent.Status) {
             listOfNotNull(

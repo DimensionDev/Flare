@@ -5,6 +5,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.FileItem
@@ -73,24 +74,12 @@ internal class VVODataSource(
         VVOService(credential.chocolate)
     }
 
-    override fun homeTimeline(
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                HomeTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    inAppNotification,
-                ),
-        )
+    override fun homeTimeline() = HomeTimelineRemoteMediator(
+        service,
+        database,
+        accountKey,
+        inAppNotification,
+    )
 
     override fun notification(
         type: NotificationFilter,
@@ -226,31 +215,18 @@ internal class VVODataSource(
 
     override fun userTimeline(
         userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
         mediaOnly: Boolean,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                UserTimelineRemoteMediator(
-                    userKey = userKey,
-                    service = service,
-                    database = database,
-                    accountKey = accountKey,
-                    mediaOnly = mediaOnly,
-                ),
-        )
+    ) = UserTimelineRemoteMediator(
+        userKey = userKey,
+        service = service,
+        database = database,
+        accountKey = accountKey,
+        mediaOnly = mediaOnly,
+    )
 
     override fun context(
         statusKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> {
+    ): BaseTimelineLoader {
         TODO("Not yet implemented")
     }
 
@@ -404,23 +380,12 @@ internal class VVODataSource(
 
     override fun searchStatus(
         query: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forSearch = true),
-            accountRepository = accountRepository,
-            mediator =
-                SearchStatusRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    query,
-                ),
-        )
+    ) = SearchStatusRemoteMediator(
+        service,
+        database,
+        accountKey,
+        query,
+    )
 
     override fun searchUser(
         query: String,
@@ -441,23 +406,11 @@ internal class VVODataSource(
         TODO("Not yet implemented")
     }
 
-    override fun discoverStatuses(
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                DiscoverStatusRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                ),
-        )
+    override fun discoverStatuses() = DiscoverStatusRemoteMediator(
+        service,
+        database,
+        accountKey,
+    )
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         Pager(
@@ -829,7 +782,14 @@ internal class VVODataSource(
         persistentListOf(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
-                flow = userTimeline(userKey, scope, pagingSize),
+                flow = timelinePager(
+                    pageSize = pagingSize,
+                    database = database,
+                    scope = scope,
+                    filterFlow = localFilterRepository.getFlow(forTimeline = true),
+                    accountRepository = accountRepository,
+                    mediator = userTimeline(userKey, false),
+                ),
             ),
         )
 }

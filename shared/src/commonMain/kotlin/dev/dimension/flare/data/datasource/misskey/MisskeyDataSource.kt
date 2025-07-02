@@ -102,23 +102,11 @@ internal class MisskeyDataSource(
         )
     }
 
-    override fun homeTimeline(
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                HomeTimelineRemoteMediator(
-                    accountKey,
-                    service,
-                    database,
-                ),
-        )
+    override fun homeTimeline() = HomeTimelineRemoteMediator(
+        accountKey,
+        service,
+        database,
+    )
 
     fun localTimeline(
         pageSize: Int = 20,
@@ -131,13 +119,14 @@ internal class MisskeyDataSource(
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             accountRepository = accountRepository,
-            mediator =
-                LocalTimelineRemoteMediator(
-                    accountKey,
-                    service,
-                    database,
-                ),
+            mediator = localTimelineLoader(),
         )
+
+    fun localTimelineLoader() = LocalTimelineRemoteMediator(
+        accountKey,
+        service,
+        database,
+    )
 
     fun publicTimeline(
         pageSize: Int = 20,
@@ -150,13 +139,14 @@ internal class MisskeyDataSource(
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             accountRepository = accountRepository,
-            mediator =
-                PublicTimelineRemoteMediator(
-                    accountKey,
-                    service,
-                    database,
-                ),
+            mediator = publicTimelineLoader(),
         )
+
+    fun publicTimelineLoader() = PublicTimelineRemoteMediator(
+        accountKey,
+        service,
+        database,
+    )
 
     override fun notification(
         type: NotificationFilter,
@@ -259,46 +249,24 @@ internal class MisskeyDataSource(
 
     override fun userTimeline(
         userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
         mediaOnly: Boolean,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                UserTimelineRemoteMediator(
-                    accountKey,
-                    service,
-                    userKey,
-                    database,
-                    onlyMedia = mediaOnly,
-                ),
-        )
+    ) = UserTimelineRemoteMediator(
+        accountKey,
+        service,
+        userKey,
+        database,
+        onlyMedia = mediaOnly,
+    )
 
     override fun context(
         statusKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                StatusDetailRemoteMediator(
-                    statusKey,
-                    database,
-                    accountKey,
-                    service,
-                    statusOnly = false,
-                ),
-        )
+    ) = StatusDetailRemoteMediator(
+        statusKey,
+        database,
+        accountKey,
+        service,
+        statusOnly = false,
+    )
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
@@ -725,23 +693,12 @@ internal class MisskeyDataSource(
 
     override fun searchStatus(
         query: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forSearch = true),
-            accountRepository = accountRepository,
-            mediator =
-                SearchStatusRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    query,
-                ),
-        )
+    ) = SearchStatusRemoteMediator(
+        service,
+        database,
+        accountKey,
+        query,
+    )
 
     override fun searchUser(
         query: String,
@@ -768,23 +725,11 @@ internal class MisskeyDataSource(
             )
         }.flow
 
-    override fun discoverStatuses(
-        pageSize: Int,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                DiscoverStatusRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                ),
-        )
+    override fun discoverStatuses() = DiscoverStatusRemoteMediator(
+        service,
+        database,
+        accountKey,
+    )
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         Pager(
@@ -1041,13 +986,14 @@ internal class MisskeyDataSource(
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             accountRepository = accountRepository,
-            mediator =
-                FavouriteTimelineRemoteMediator(
-                    service = service,
-                    database = database,
-                    accountKey = accountKey,
-                ),
+            mediator = favouriteTimelineLoader(),
         )
+
+    fun favouriteTimelineLoader() = FavouriteTimelineRemoteMediator(
+        service = service,
+        database = database,
+        accountKey = accountKey,
+    )
 
     private val listKey: String
         get() = "allLists_$accountKey"
@@ -1309,23 +1255,12 @@ internal class MisskeyDataSource(
 
     override fun listTimeline(
         listId: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            accountRepository = accountRepository,
-            mediator =
-                ListTimelineRemoteMediator(
-                    listId,
-                    service,
-                    database,
-                    accountKey,
-                ),
-        )
+    ) = ListTimelineRemoteMediator(
+        listId,
+        service,
+        database,
+        accountKey,
+    )
 
     override fun listMemberCache(listId: String): Flow<ImmutableList<UiUserV2>> =
         MemoryPagingSource.getFlow<UiUserV2>(listMemberKey(listId))
@@ -1447,12 +1382,13 @@ internal class MisskeyDataSource(
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
             accountRepository = accountRepository,
-            mediator =
-                AntennasTimelineRemoteMediator(
-                    service = service,
-                    database = database,
-                    accountKey = accountKey,
-                    id = id,
-                ),
+            mediator = antennasTimelineLoader(id),
         )
+
+    fun antennasTimelineLoader(id: String) = AntennasTimelineRemoteMediator(
+        service = service,
+        database = database,
+        accountKey = accountKey,
+        id = id,
+    )
 }

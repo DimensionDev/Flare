@@ -11,7 +11,6 @@ import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.xqt.XQTService
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -24,7 +23,6 @@ internal class ListTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        accountType = AccountType.Specific(accountKey),
     ) {
     override val pagingKey = "list_${listId}_$accountKey"
 

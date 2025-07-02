@@ -11,7 +11,6 @@ import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.xqt.XQTService
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.xqtHost
 import io.ktor.http.encodeURLQueryComponent
@@ -26,7 +25,6 @@ internal class SearchStatusPagingSource(
     private val query: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        accountType = AccountType.Specific(accountKey),
     ) {
     override val pagingKey = "search_status_$query"
     private var cursor: String? = null

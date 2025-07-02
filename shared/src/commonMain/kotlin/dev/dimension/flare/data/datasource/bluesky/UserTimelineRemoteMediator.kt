@@ -10,7 +10,6 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import sh.christian.ozone.api.Did
 
@@ -24,7 +23,6 @@ internal class UserTimelineRemoteMediator(
     private val withReplies: Boolean = false,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        accountType = AccountType.Specific(accountKey),
     ) {
     var cursor: String? = null
     override val pagingKey =

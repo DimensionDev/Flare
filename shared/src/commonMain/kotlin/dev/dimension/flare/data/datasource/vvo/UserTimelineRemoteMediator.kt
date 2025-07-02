@@ -9,7 +9,6 @@ import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.vvo
 
@@ -22,7 +21,6 @@ internal class UserTimelineRemoteMediator(
     private val mediaOnly: Boolean,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        accountType = AccountType.Specific(accountKey),
     ) {
     override val pagingKey =
         buildString {

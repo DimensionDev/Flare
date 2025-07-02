@@ -23,7 +23,6 @@ internal class StatusDetailRemoteMediator(
     private val statusOnly: Boolean,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        accountType = AccountType.Specific(accountKey),
     ) {
     override val pagingKey: String =
         buildString {

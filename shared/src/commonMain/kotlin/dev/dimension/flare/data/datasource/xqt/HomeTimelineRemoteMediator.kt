@@ -11,7 +11,6 @@ import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.xqt.XQTService
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
@@ -23,7 +22,6 @@ internal class HomeTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        accountType = AccountType.Specific(accountKey),
     ) {
     override val pagingKey = "home_$accountKey"
     private var cursor: String? = null
@@ -89,7 +87,6 @@ internal class FeaturedTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        accountType = AccountType.Specific(accountKey),
     ) {
     override val pagingKey = "featured_$accountKey"
     private var cursor: String? = null
@@ -153,7 +150,6 @@ internal class BookmarkTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        accountType = AccountType.Specific(accountKey),
     ) {
     override val pagingKey = "bookmark_$accountKey"
     private var cursor: String? = null

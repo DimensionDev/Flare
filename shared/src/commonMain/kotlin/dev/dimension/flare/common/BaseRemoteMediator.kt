@@ -10,7 +10,6 @@ import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.repository.DebugRepository
-import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.ui.model.UiTimeline
 
 @OptIn(ExperimentalPagingApi::class)
@@ -41,7 +40,6 @@ internal sealed interface BaseTimelineLoader
 @OptIn(ExperimentalPagingApi::class)
 internal abstract class BaseTimelineRemoteMediator(
     private val database: CacheDatabase,
-    private val accountType: DbAccountType,
 ) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>(),
     BaseTimelineLoader {
     abstract val pagingKey: String
@@ -53,9 +51,11 @@ internal abstract class BaseTimelineRemoteMediator(
         val result = timeline(loadType, state)
         database.connect {
             if (loadType == LoadType.REFRESH) {
-                database
-                    .pagingTimelineDao()
-                    .delete(pagingKey = pagingKey, accountType = accountType)
+                result.data.groupBy { it.timeline.pagingKey }.keys.forEach { key ->
+                    database
+                        .pagingTimelineDao()
+                        .delete(pagingKey = key)
+                }
             }
             saveToDatabase(database, result.data)
         }

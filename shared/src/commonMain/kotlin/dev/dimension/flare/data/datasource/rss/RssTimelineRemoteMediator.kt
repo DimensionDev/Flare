@@ -26,7 +26,6 @@ internal class RssTimelineRemoteMediator(
     private val cacheDatabase: CacheDatabase,
 ) : BaseTimelineRemoteMediator(
         database = cacheDatabase,
-        accountType = AccountType.Guest,
     ) {
     override val pagingKey: String
         get() =

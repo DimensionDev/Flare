@@ -10,7 +10,6 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.MarkerUpdate
 import dev.dimension.flare.data.network.mastodon.api.model.UpdateContent
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
@@ -21,7 +20,6 @@ internal class NotificationRemoteMediator(
     private val onClearMarker: () -> Unit,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        accountType = AccountType.Specific(accountKey),
     ) {
     override val pagingKey: String = "notification_$accountKey"
 

@@ -10,7 +10,6 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.UsersNotesRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.datetime.Instant
 
@@ -25,7 +24,6 @@ internal class UserTimelineRemoteMediator(
     private val withPinned: Boolean = false,
 ) : BaseTimelineRemoteMediator(
         database = database,
-        accountType = AccountType.Specific(accountKey),
     ) {
     var pinnedIds = emptyList<String>()
 

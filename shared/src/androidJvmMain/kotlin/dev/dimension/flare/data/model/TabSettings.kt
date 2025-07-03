@@ -6,6 +6,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
+import dev.dimension.flare.ui.presenter.home.MixedTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
@@ -572,6 +573,31 @@ public data class HomeTimelineTabItem(
                     icon = IconType.Material(IconType.Material.MaterialIcon.Home),
                 ),
         )
+}
+
+@Serializable
+public data class MixedTimelineTabItem(
+    val subTimelineTabItem: List<TimelineTabItem>,
+    override val metaData: TabMetaData =
+        TabMetaData(
+            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
+            icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+        ),
+) : TimelineTabItem {
+    override fun createPresenter(): TimelinePresenter = MixedTimelinePresenter(subTimelineTabItem.map { it.createPresenter() })
+
+    override val account: AccountType
+        get() = AccountType.Guest
+    override val key: String
+        get() =
+            buildString {
+                append("mixed_timeline")
+                subTimelineTabItem.forEach { item ->
+                    append(item.key)
+                }
+            }
+
+    override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
 }
 
 @Serializable

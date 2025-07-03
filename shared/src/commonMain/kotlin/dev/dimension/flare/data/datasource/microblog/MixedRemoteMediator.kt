@@ -16,7 +16,13 @@ internal class MixedRemoteMediator(
     database: CacheDatabase,
     mediators: List<BaseTimelineRemoteMediator>,
 ) : BaseTimelineRemoteMediator(database = database) {
-    override val pagingKey = "mixed_timeline"
+    override val pagingKey =
+        buildString {
+            append("mixed_timeline")
+            mediators.forEach { mediator ->
+                append(mediator.pagingKey)
+            }
+        }
     private var currentMediators = mediators
 
     @OptIn(ExperimentalPagingApi::class)

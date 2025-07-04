@@ -1,25 +1,21 @@
 import Foundation
-import SwiftUI
-import shared
 import Kingfisher
-
+import shared
+import SwiftUI
 
 class TimelineImagePrefetcher {
- 
     static let shared = TimelineImagePrefetcher()
 
-     private let prefetchRadius = 7
-
+    private let prefetchRadius = 7
 
     private let prefetchQueue = DispatchQueue(label: "timeline.prefetch", qos: .utility)
-
 
     private var prefetchedRanges: Set<String> = []
     private let lock = NSLock()
 
     private init() {}
-    
-     func smartPrefetch(currentIndex: Int, timelineItems: [TimelineItem]) {
+
+    func smartPrefetch(currentIndex: Int, timelineItems: [TimelineItem]) {
         // 🔥 添加详细的入参日志
         FlareLog.debug("TimelineImagePrefetcher === smartPrefetch 开始 ===")
         FlareLog.debug("TimelineImagePrefetcher 传入参数 - currentIndex: \(currentIndex), timelineItems数量: \(timelineItems.count)")
@@ -38,18 +34,18 @@ class TimelineImagePrefetcher {
         }
 
         prefetchQueue.async { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
 
             // 🔥 改进边界检查日志
-            guard currentIndex >= 0 && currentIndex < timelineItems.count else {
+            guard currentIndex >= 0, currentIndex < timelineItems.count else {
                 FlareLog.warning("TimelineImagePrefetcher currentIndex 越界: \(currentIndex)/\(timelineItems.count)")
                 return
             }
 
             // 🔥 修复预取策略：预取所有传入的新数据，而不是只预取currentIndex周围的几个
             // 根据用户需求："每次获得到的新数据，比如有10个，10个传递进去缓存"
-            let startIndex = 0  // 从传入数据的开头开始
-            let endIndex = timelineItems.count - 1  // 到传入数据的结尾
+            let startIndex = 0 // 从传入数据的开头开始
+            let endIndex = timelineItems.count - 1 // 到传入数据的结尾
             let rangeKey = "range_\(startIndex)_\(endIndex)_count_\(timelineItems.count)"
 
             FlareLog.debug("TimelineImagePrefetcher === 预取策略分析 ===")
@@ -58,29 +54,28 @@ class TimelineImagePrefetcher {
             FlareLog.debug("TimelineImagePrefetcher 预取范围: 0 到 \(endIndex) (全部\(timelineItems.count)个items)")
             FlareLog.debug("TimelineImagePrefetcher rangeKey: \(rangeKey)")
 
-            guard startIndex <= endIndex && endIndex < timelineItems.count else {
+            guard startIndex <= endIndex, endIndex < timelineItems.count else {
                 FlareLog.warning("TimelineImagePrefetcher 范围计算错误: \(startIndex)...\(endIndex), timelineItems.count: \(timelineItems.count)")
                 return
             }
 
-
             // 🔥 改进重复预取检查日志
-            self.lock.lock()
-            let alreadyPrefetched = self.prefetchedRanges.contains(rangeKey)
+            lock.lock()
+            let alreadyPrefetched = prefetchedRanges.contains(rangeKey)
             if !alreadyPrefetched {
-                self.prefetchedRanges.insert(rangeKey)
+                prefetchedRanges.insert(rangeKey)
                 FlareLog.debug("TimelineImagePrefetcher 新增预取范围记录: \(rangeKey)")
             } else {
                 FlareLog.debug("TimelineImagePrefetcher 范围已预取过，跳过: \(rangeKey)")
             }
-            self.lock.unlock()
+            lock.unlock()
 
             guard !alreadyPrefetched else {
                 return
             }
 
             // 🔥 详细的预取items分析
-            let itemsToPreload = Array(timelineItems[startIndex...endIndex])
+            let itemsToPreload = Array(timelineItems[startIndex ... endIndex])
             FlareLog.debug("TimelineImagePrefetcher 提取预取items: \(itemsToPreload.count)个 (索引\(startIndex)到\(endIndex))")
 
             // 🔥 打印预取items的用户信息
@@ -97,8 +92,7 @@ class TimelineImagePrefetcher {
             FlareLog.debug("TimelineImagePrefetcher === 开始预取 ===")
             FlareLog.debug("TimelineImagePrefetcher 预取范围: \(rangeKey)")
             FlareLog.debug("TimelineImagePrefetcher 图片数量: \(imageUrls.count)")
-            FlareLog.debug("TimelineImagePrefetcher 前3个图片URL: \(imageUrls.prefix(3).map { $0.absoluteString })")
-
+            FlareLog.debug("TimelineImagePrefetcher 前3个图片URL: \(imageUrls.prefix(3).map(\.absoluteString))")
 
             // 🔥 创建Kingfisher预取器
             let prefetcher = ImagePrefetcher(
@@ -106,7 +100,7 @@ class TimelineImagePrefetcher {
                 options: [
                     .alsoPrefetchToMemory,
                     .backgroundDecode,
-                    .downloadPriority(0.3)
+                    .downloadPriority(0.3),
                 ],
                 progressBlock: nil,
                 completionHandler: { _, _, completed in
@@ -135,7 +129,7 @@ class TimelineImagePrefetcher {
 
     /// 清理预览URL，去掉?name=orig后缀
     private static func cleanPreviewUrl(_ url: String?, for type: TimelineMediaType) -> String? {
-        guard let url = url else { return nil }
+        guard let url else { return nil }
 
         switch type {
         case .image, .video, .gif:
@@ -148,7 +142,7 @@ class TimelineImagePrefetcher {
         }
     }
 
-    private static func extractImageUrls(from timelineItems: [TimelineItem], limit: Int) -> [URL] {
+    private static func extractImageUrls(from timelineItems: [TimelineItem], limit _: Int) -> [URL] {
         var urls: [URL] = []
         var avatarCount = 0
         var mediaCount = 0
@@ -166,7 +160,8 @@ class TimelineImagePrefetcher {
 
             // 提取用户头像
             if let user = item.user,
-               let avatarUrl = URL(string: user.avatar) {
+               let avatarUrl = URL(string: user.avatar)
+            {
                 urls.append(avatarUrl)
                 avatarCount += 1
                 FlareLog.debug("TimelineImagePrefetcher   - 添加头像: \(user.name.raw) -> \(user.avatar)")
@@ -190,7 +185,8 @@ class TimelineImagePrefetcher {
 
                 // 引用用户头像
                 if let quoteUser = quoteItem.user,
-                   let quoteAvatarUrl = URL(string: quoteUser.avatar) {
+                   let quoteAvatarUrl = URL(string: quoteUser.avatar)
+                {
                     urls.append(quoteAvatarUrl)
                     quoteAvatarCount += 1
                     FlareLog.debug("TimelineImagePrefetcher     - 添加引用头像: \(quoteUser.name.raw) -> \(quoteUser.avatar)")

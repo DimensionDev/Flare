@@ -11,17 +11,14 @@ struct TimelineViewSwiftUIV3: View {
     @Binding var showFloatingButton: Bool
     @Environment(FlareTheme.self) private var theme
 
- 
     @State private var viewModel = TimelineViewModel()
 
-   
     @State private var scrolledID: String?
 
     var body: some View {
         VStack {
             ScrollView {
                 LazyVStack(spacing: 0) {
-                 
                     switch viewModel.timelineState {
                     case .loading:
                         TimelineLoadingView()
@@ -68,7 +65,7 @@ struct TimelineViewSwiftUIV3: View {
             guard isCurrentTab else {
                 FlareLog.debug("TimelineV3 ScrollToTop skipped: not current tab")
                 return
-            } 
+            }
             guard let firstID = viewModel.getFirstItemID() else {
                 FlareLog.debug("TimelineV3 ScrollToTop skipped: no items")
                 return
@@ -80,5 +77,4 @@ struct TimelineViewSwiftUIV3: View {
             }
         }
     }
-
- }
+}

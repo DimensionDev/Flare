@@ -11,7 +11,7 @@ struct StatusRetweetHeaderComponentV2: View {
     var body: some View {
         let text = getLocalizedText(for: topMessage.type)
         let nameMarkdown = topMessage.user?.name.markdown ?? ""
-        
+
         Button(action: {
             handleTopMessageTap()
         }) {
@@ -40,7 +40,7 @@ struct StatusRetweetHeaderComponentV2: View {
         }
         .buttonStyle(.plain)
     }
-    
+
     // MARK: - 私有方法
 
     /// 处理转发头部点击事件
@@ -110,125 +110,124 @@ struct StatusRetweetHeaderComponentV2: View {
             Awesome.Classic.Solid.thumbtack.image
         }
     }
-    
+
     /// 根据消息类型获取本地化文本
     private func getLocalizedText(for messageType: TopMessageType) -> String {
         switch messageType {
         case let .bluesky(type):
-            return getBlueSkyText(for: type)
+            getBlueSkyText(for: type)
         case let .mastodon(type):
-            return getMastodonText(for: type)
+            getMastodonText(for: type)
         case let .misskey(type):
-            return getMisskeyText(for: type)
+            getMisskeyText(for: type)
         case let .vVO(type):
-            return getVVOText(for: type)
+            getVVOText(for: type)
         case let .xQT(type):
-            return getXQTText(for: type)
+            getXQTText(for: type)
         }
     }
-    
+
     /// BlueSky平台的本地化文本
     private func getBlueSkyText(for type: BlueSkyMessageType) -> String {
         switch type {
         case .follow:
-            return String(localized: "bluesky_notification_item_followed_you")
+            String(localized: "bluesky_notification_item_followed_you")
         case .like:
-            return String(localized: "bluesky_notification_item_favourited_your_status")
+            String(localized: "bluesky_notification_item_favourited_your_status")
         case .mention:
-            return String(localized: "bluesky_notification_item_mentioned_you")
+            String(localized: "bluesky_notification_item_mentioned_you")
         case .quote:
-            return String(localized: "bluesky_notification_item_quoted_your_status")
+            String(localized: "bluesky_notification_item_quoted_your_status")
         case .reply:
-            return String(localized: "bluesky_notification_item_replied_to_you")
+            String(localized: "bluesky_notification_item_replied_to_you")
         case .repost:
-            return String(localized: "bluesky_notification_item_reblogged_your_status")
+            String(localized: "bluesky_notification_item_reblogged_your_status")
         case .unKnown:
-            return String(localized: "bluesky_notification_item_unKnown")
+            String(localized: "bluesky_notification_item_unKnown")
         case .starterpackJoined:
-            return String(localized: "bluesky_notification_item_starterpack_joined")
+            String(localized: "bluesky_notification_item_starterpack_joined")
         case .pinned:
-            return String(localized: "bluesky_notification_item_pin")
+            String(localized: "bluesky_notification_item_pin")
         }
     }
-    
+
     /// Mastodon平台的本地化文本
     private func getMastodonText(for type: MastodonMessageType) -> String {
         switch type {
         case .favourite:
-            return String(localized: "mastodon_notification_item_favourited_your_status")
+            String(localized: "mastodon_notification_item_favourited_your_status")
         case .follow:
-            return String(localized: "mastodon_notification_item_followed_you")
+            String(localized: "mastodon_notification_item_followed_you")
         case .followRequest:
-            return String(localized: "mastodon_notification_item_requested_follow")
+            String(localized: "mastodon_notification_item_requested_follow")
         case .mention:
-            return String(localized: "mastodon_notification_item_mentioned_you")
+            String(localized: "mastodon_notification_item_mentioned_you")
         case .poll:
-            return String(localized: "mastodon_notification_item_poll_ended")
+            String(localized: "mastodon_notification_item_poll_ended")
         case .reblogged:
-            return String(localized: "mastodon_notification_item_reblogged_your_status")
+            String(localized: "mastodon_notification_item_reblogged_your_status")
         case .status:
-            return String(localized: "mastodon_notification_item_posted_status")
+            String(localized: "mastodon_notification_item_posted_status")
         case .update:
-            return String(localized: "mastodon_notification_item_updated_status")
+            String(localized: "mastodon_notification_item_updated_status")
         case .unKnown:
-            return String(localized: "mastodon_notification_item_updated_status")
+            String(localized: "mastodon_notification_item_updated_status")
         case .pinned:
-            return String(localized: "mastodon_item_pinned")
+            String(localized: "mastodon_item_pinned")
         }
     }
-    
+
     /// Misskey平台的本地化文本
     private func getMisskeyText(for type: MisskeyMessageType) -> String {
         switch type {
         case .achievementEarned:
-            return String(localized: "misskey_notification_achievement_earned")
+            String(localized: "misskey_notification_achievement_earned")
         case .app:
-            return String(localized: "misskey_notification_app")
+            String(localized: "misskey_notification_app")
         case .follow:
-            return String(localized: "misskey_notification_follow")
+            String(localized: "misskey_notification_follow")
         case .followRequestAccepted:
-            return String(localized: "misskey_notification_follow_request_accepted")
+            String(localized: "misskey_notification_follow_request_accepted")
         case .mention:
-            return String(localized: "misskey_notification_mention")
+            String(localized: "misskey_notification_mention")
         case .pollEnded:
-            return String(localized: "misskey_notification_poll_ended")
+            String(localized: "misskey_notification_poll_ended")
         case .quote:
-            return String(localized: "misskey_notification_quote")
+            String(localized: "misskey_notification_quote")
         case .reaction:
-            return String(localized: "misskey_notification_reaction")
+            String(localized: "misskey_notification_reaction")
         case .receiveFollowRequest:
-            return String(localized: "misskey_notification_receive_follow_request")
+            String(localized: "misskey_notification_receive_follow_request")
         case .renote:
-            return String(localized: "misskey_notification_renote")
+            String(localized: "misskey_notification_renote")
         case .reply:
-            return String(localized: "misskey_notification_reply")
+            String(localized: "misskey_notification_reply")
         case .unKnown:
-            return String(localized: "misskey_notification_unknown")
+            String(localized: "misskey_notification_unknown")
         case .pinned:
-            return String(localized: "misskey_item_pinned")
+            String(localized: "misskey_item_pinned")
         }
     }
-    
+
     /// vVO平台的本地化文本
     private func getVVOText(for type: VVOMessageType) -> String {
         switch type {
         case let .custom(message):
-            return message
+            message
         case .like:
-            return String(localized: "vvo_notification_like")
+            String(localized: "vvo_notification_like")
         }
     }
-    
+
     /// xQT平台的本地化文本
     private func getXQTText(for type: XQTMessageType) -> String {
         switch type {
         case let .custom(message):
-            return message
+            message
         case .mention:
-            return String(localized: "xqt_item_mention_status")
+            String(localized: "xqt_item_mention_status")
         case .retweet:
-            return String(localized: "xqt_item_reblogged_status")
+            String(localized: "xqt_item_reblogged_status")
         }
     }
 }
- 

@@ -453,7 +453,6 @@ class IOSPodcastManager: ObservableObject {
                     self.updateNowPlayingInfo() // Update lock screen if duration changes
                 }
             }
-
         }
     }
 
@@ -468,7 +467,6 @@ class IOSPodcastManager: ObservableObject {
             } else {
                 FlareLog.debug("iOSPodcastManager Seekable: \(self.canSeek) (Unchanged)")
             }
-
         }
     }
 

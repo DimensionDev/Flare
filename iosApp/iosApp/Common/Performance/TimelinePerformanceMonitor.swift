@@ -117,7 +117,7 @@ class TimelinePerformanceMonitor: ObservableObject {
 
     func startMonitoring() {
         return
-        
+
         guard !isMonitoring else {
             if PerformanceConfig.isVerboseLoggingEnabled {
                 FlareLog.debug("PerformanceMonitor Already monitoring, skipping start")

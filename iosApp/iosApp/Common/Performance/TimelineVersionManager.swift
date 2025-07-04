@@ -235,8 +235,6 @@ class TimelineVersionManager {
         switchTo(previousVersion)
     }
 
-     
-
     /// 从AppSettings加载版本设置
     /// Load version setting from AppSettings
     private func loadVersionFromSettings() {

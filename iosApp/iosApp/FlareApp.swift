@@ -19,7 +19,7 @@ struct FlareApp: SwiftUI.App {
 
         KoinHelper.shared.start(inAppNotification: SwitUIInAppNotification())
 
-         FlareImageConfiguration.shared.configure()
+        FlareImageConfiguration.shared.configure()
 
         // 初始化UserManager
         UserManager.shared.initialize()

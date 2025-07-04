@@ -42,7 +42,7 @@ struct StatusShareAsImageViewV2: View {
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
-    let content: TimelineStatusViewV2  // ✅ 修改：使用TimelineStatusViewV2
+    let content: TimelineStatusViewV2 // ✅ 修改：使用TimelineStatusViewV2
     let renderer: ImageRenderer<AnyView>
     @State private var capturedImage: UIImage?
     @State private var isImageReady: Bool = false

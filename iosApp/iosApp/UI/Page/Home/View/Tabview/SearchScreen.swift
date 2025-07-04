@@ -46,8 +46,8 @@ struct SearchScreen: View {
                         data: state.status,
                         detailKey: nil
                     )
-                     .listStyle(.plain)
-                     .listRowBackground(theme.primaryBackgroundColor)
+                    .listStyle(.plain)
+                    .listRowBackground(theme.primaryBackgroundColor)
                 }.listStyle(.plain).listRowBackground(theme.primaryBackgroundColor)
             }
         }

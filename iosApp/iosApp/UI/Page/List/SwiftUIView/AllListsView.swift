@@ -50,7 +50,6 @@ struct AllListsView: View {
                 case .loading:
                     loadingListsView
                 case let .success(successData):
-
                     ForEach(0 ..< successData.itemCount, id: \.self) { index in
                         if successData.itemCount > index {
                             if let list = successData.peek(index: Int32(index)) {

@@ -10,9 +10,9 @@ struct TimelineViewSwiftUIV4: View {
     let isCurrentTab: Bool
     @Binding var showFloatingButton: Bool
     @Environment(FlareTheme.self) private var theme
-    
+
     @State private var viewModel = TimelineViewModel()
- 
+
     // @State private var cancellables = Set<AnyCancellable>()
     @State private var refreshDebounceTimer: Timer?
 
@@ -26,7 +26,6 @@ struct TimelineViewSwiftUIV4: View {
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
 
- 
                     switch viewModel.timelineState {
                     case .loading:
                         TimelineLoadingView()
@@ -69,8 +68,8 @@ struct TimelineViewSwiftUIV4: View {
                 .background(theme.secondaryBackgroundColor)
                 .listStyle(.plain)
                 .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
-                    //FlareLog.debug("TimelineV4 scroll offset: \(geometry.contentOffset)")
-                    return geometry
+                    // FlareLog.debug("TimelineV4 scroll offset: \(geometry.contentOffset)")
+                    geometry
                 } action: { _, newValue in
                     // FlareLog.debug("TimelineV4 scroll geometry changed: \(oldValue.contentOffset) -> \(newValue.contentOffset)")
                     viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $showFloatingButton)
@@ -109,5 +108,4 @@ struct TimelineViewSwiftUIV4: View {
             //     Text(currentError?.localizedDescription ?? "Unknown error")
         }
     }
-
- }
+}

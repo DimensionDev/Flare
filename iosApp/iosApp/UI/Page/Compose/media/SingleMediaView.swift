@@ -11,39 +11,39 @@ public struct SingleMediaView: View {
 
     public var body: some View {
         GeometryReader { geometry in
-                ZStack {
-                    if let previewUrl = viewModel.previewUrl {
-                        KFImage(previewUrl)
-                            .placeholder {
-                                Rectangle()
-                                    .foregroundColor(.gray.opacity(0.2))
-                            }
-                            .resizable()
-                            .aspectRatio(fixedAspectRatio, contentMode: .fill)
+            ZStack {
+                if let previewUrl = viewModel.previewUrl {
+                    KFImage(previewUrl)
+                        .placeholder {
+                            Rectangle()
+                                .foregroundColor(.gray.opacity(0.2))
+                        }
+                        .resizable()
+                        .aspectRatio(fixedAspectRatio, contentMode: .fill)
                         .frame(width: geometry.size.width, height: geometry.size.height)
                         .clipped()
 
-                    } else {
-                        Rectangle()
-                            .foregroundColor(.gray.opacity(0.2))
-                    }
-                }
-                .contentShape(Rectangle())
-                .overlay {
-                    if viewModel.mediaKind == .video {
-                        Image(systemName: "play.circle.fill")
-                            .font(.system(size: isSingleVideo ? 38 : 24))
-                            .foregroundColor(theme.tintColor)
-                            .shadow(radius: 8)
-                            .padding(.bottom, 16)
-                            .cornerRadius(8)
-                            .padding(.leading, 16)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
-                    }
-                }
-                .onTapGesture {
-                    action()
+                } else {
+                    Rectangle()
+                        .foregroundColor(.gray.opacity(0.2))
                 }
             }
+            .contentShape(Rectangle())
+            .overlay {
+                if viewModel.mediaKind == .video {
+                    Image(systemName: "play.circle.fill")
+                        .font(.system(size: isSingleVideo ? 38 : 24))
+                        .foregroundColor(theme.tintColor)
+                        .shadow(radius: 8)
+                        .padding(.bottom, 16)
+                        .cornerRadius(8)
+                        .padding(.leading, 16)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                }
+            }
+            .onTapGesture {
+                action()
+            }
+        }
     }
 }

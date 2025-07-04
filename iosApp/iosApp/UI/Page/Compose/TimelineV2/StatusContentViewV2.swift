@@ -16,9 +16,9 @@ struct StatusContentViewV2: View {
     let appSettings: AppSettings
     let theme: FlareTheme
     let openURL: OpenURLAction
-    let onMediaClick: (Int, Media) -> Void      // 使用Swift Media类型
-    let onPodcastCardTap: (Card) -> Void        // 使用Swift Card类型
-    
+    let onMediaClick: (Int, Media) -> Void // 使用Swift Media类型
+    let onPodcastCardTap: (Card) -> Void // 使用Swift Card类型
+
     var body: some View {
         VStack(alignment: .leading) {
             // Reply content
@@ -41,7 +41,7 @@ struct StatusContentViewV2: View {
                 theme: theme,
                 openURL: openURL
             )
-            
+
             // Media
 //            let _ = FlareLog.debug("StatusContentViewV2 检查媒体显示")
 //            let _ = FlareLog.debug("StatusContentViewV2 item.hasImages: \(item.hasImages)")
@@ -87,7 +87,7 @@ struct StatusContentViewV2: View {
 }
 
 struct StatusReplyViewV2: View {
-    let aboveTextContent: AboveTextContent  // 使用Swift AboveTextContent类型
+    let aboveTextContent: AboveTextContent // 使用Swift AboveTextContent类型
 
     var body: some View {
         switch aboveTextContent {
@@ -101,12 +101,11 @@ struct StatusReplyViewV2: View {
 }
 
 struct StatusMediaViewV2: View {
-    let item: TimelineItem           // 使用TimelineItem替代StatusViewModel
+    let item: TimelineItem // 使用TimelineItem替代StatusViewModel
     let appSettings: AppSettings
-    let onMediaClick: (Int, Media) -> Void  // 使用Swift Media类型
+    let onMediaClick: (Int, Media) -> Void // 使用Swift Media类型
 
     var body: some View {
-         
 //        let _ = FlareLog.debug("StatusMediaViewV2 开始渲染媒体")
 //        let _ = FlareLog.debug("StatusMediaViewV2 item.hasImages: \(item.hasImages)")
 //        let _ = FlareLog.debug("StatusMediaViewV2 item.images.count: \(item.images.count)")
@@ -116,7 +115,6 @@ struct StatusMediaViewV2: View {
 
         Spacer().frame(height: 8)
 
-      
         MediaComponentV2(
             hideSensitive: item.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
             medias: item.images, // ✅ 修复：使用item.images而不是空数组
@@ -141,7 +139,6 @@ struct StatusCardViewV2: View {
 
     var body: some View {
         if item.isPodcastCard {
-             
             PodcastPreviewV2(card: card)
                 .onTapGesture {
                     onPodcastCardTap(card)
@@ -154,7 +151,7 @@ struct StatusCardViewV2: View {
 }
 
 struct StatusBottomContentViewV2: View {
-    let bottomContent: BottomContent  // 使用Swift BottomContent类型
+    let bottomContent: BottomContent // 使用Swift BottomContent类型
 
     var body: some View {
         switch bottomContent {
@@ -176,7 +173,7 @@ struct StatusBottomContentViewV2: View {
                                     } else {
                                         Text(reaction.name)
                                     }
-                                    Text("\(reaction.count)")  // 使用Swift Int类型
+                                    Text("\(reaction.count)") // 使用Swift Int类型
                                 }
                             }
                             .buttonStyle(.borderless)
@@ -190,7 +187,7 @@ struct StatusBottomContentViewV2: View {
 
 struct StatusDetailDateViewV2: View {
     let createdAt: Date
-    
+
     var body: some View {
         Spacer().frame(height: 4)
         HStack {
@@ -202,7 +199,7 @@ struct StatusDetailDateViewV2: View {
 }
 
 struct StatusContentWarningViewV2: View {
-    let contentWarning: RichText     // 使用Swift RichText类型
+    let contentWarning: RichText // 使用Swift RichText类型
     let theme: FlareTheme
     let openURL: OpenURLAction
 
@@ -253,15 +250,15 @@ struct StatusContentWarningViewV2: View {
 }
 
 struct StatusMainContentViewV2: View {
-    let item: TimelineItem           // 使用TimelineItem替代StatusViewModel
-    let enableTranslation: Bool      // 从StatusViewModel中提取
+    let item: TimelineItem // 使用TimelineItem替代StatusViewModel
+    let enableTranslation: Bool // 从StatusViewModel中提取
     let appSettings: AppSettings
     let theme: FlareTheme
     let openURL: OpenURLAction
 
     var body: some View {
         if item.hasContent {
-            let content = item.content  // 使用Swift RichText类型
+            let content = item.content // 使用Swift RichText类型
             FlareText(
                 content.raw,
                 content.markdown,

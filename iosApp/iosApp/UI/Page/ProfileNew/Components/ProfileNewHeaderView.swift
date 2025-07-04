@@ -274,7 +274,6 @@ class ProfileNewHeaderView: UIView {
         // 设置用户handle
         handleLabel.text = "\(userInfo.profile.handleWithoutFirstAt)"
 
-
         if let url = URL(string: userInfo.profile.avatar) {
             avatarView.kf.setImage(
                 with: url,

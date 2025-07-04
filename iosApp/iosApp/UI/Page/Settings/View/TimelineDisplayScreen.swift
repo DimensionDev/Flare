@@ -57,7 +57,7 @@ struct TimelineDisplayScreen: View {
                         // 更新设置
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.timelineVersion, to: value))
 
-                        // 同步到TimelineVersionManager 
+                        // 同步到TimelineVersionManager
                         let managerVersion = value.toManagerVersion()
                         TimelineVersionManager.shared.updateFromSettings(managerVersion)
                     }), content: {

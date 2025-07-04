@@ -10,13 +10,13 @@ struct MediaComponentV2: View {
     @Environment(\.appSettings) private var appSettings
     @Environment(\.isInCaptureMode) private var isInCaptureMode
 
-    let medias: [Media]              // 使用Swift Media类型
-    let onMediaClick: (Int, Media) -> Void  // 使用Swift Media类型
+    let medias: [Media] // 使用Swift Media类型
+    let onMediaClick: (Int, Media) -> Void // 使用Swift Media类型
     let sensitive: Bool
 
     var body: some View {
         let showSensitiveButton = medias.allSatisfy { media in
-            media.type == .image || media.type == .video  // 使用Swift Media类型判断
+            media.type == .image || media.type == .video // 使用Swift Media类型判断
         } && (sensitive || aiDetectedSensitive)
 
         // MARK: - 媒体遮罩逻辑
@@ -52,7 +52,7 @@ struct MediaComponentV2: View {
             TweetMediaGridView(
                 action: { ctx in
                     let media = medias[ctx.index]
-                    onMediaClick(ctx.index, media)  // 直接使用Swift Media类型
+                    onMediaClick(ctx.index, media) // 直接使用Swift Media类型
                 },
                 viewModels: mediaViewModels,
                 idealWidth: 600,
@@ -92,7 +92,7 @@ struct MediaComponentV2: View {
 
     private func analyzeMediaContent() async {
         for media in medias {
-            if media.type == .image {  // 使用Swift Media类型判断
+            if media.type == .image { // 使用Swift Media类型判断
                 let isSensitive = await SensitiveContentAnalyzer.shared.analyzeImage(url: media.url)
                 if isSensitive {
                     await MainActor.run {
@@ -106,6 +106,7 @@ struct MediaComponentV2: View {
 }
 
 // MARK: - FeedMediaViewModel扩展，添加从Swift Media转换的方法
+
 extension FeedMediaViewModel {
     /// 从Swift Media类型创建FeedMediaViewModel
     /// - Parameter media: Swift Media对象
@@ -149,6 +150,7 @@ extension FeedMediaViewModel {
 }
 
 // MARK: - FeedMediaViewModel自定义初始化器
+
 extension FeedMediaViewModel {
     /// 自定义初始化器，用于从Swift Media创建FeedMediaViewModel
     init(
@@ -171,6 +173,6 @@ extension FeedMediaViewModel {
         self.width = width
         self.height = height
         self.description = description
-        self.isActive = true
+        isActive = true
     }
 }

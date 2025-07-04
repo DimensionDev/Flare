@@ -63,6 +63,7 @@ public enum ColorSetName: String, Sendable {
     case threadsDark = "Threads - Dark"
 
     // MARK: - Flutter Themes (从TweetX移植)
+
     case freshSkyLight = "Fresh Sky - Light"
     case freshSkyDark = "Fresh Sky - Dark"
     case darkOceanLight = "Dark Ocean - Light"
@@ -303,9 +304,9 @@ public struct ThemeThreadsLight: ColorSet {
 public struct ThemeFreshSkyLight: ColorSet {
     public var name: ColorSetName = .freshSkyLight
     public var scheme: ColorScheme = .light
-    public var tintColor: Color = .init(hex: 0x216eee)
-    public var primaryBackgroundColor: Color = .init(hex: 0xffffff)
-    public var secondaryBackgroundColor: Color = .init(hex: 0xf8faff)
+    public var tintColor: Color = .init(hex: 0x216EEE)
+    public var primaryBackgroundColor: Color = .init(hex: 0xFFFFFF)
+    public var secondaryBackgroundColor: Color = .init(hex: 0xF8FAFF)
     public var labelColor: Color = .black
 
     public init() {}
@@ -314,9 +315,9 @@ public struct ThemeFreshSkyLight: ColorSet {
 public struct ThemeFreshSkyDark: ColorSet {
     public var name: ColorSetName = .freshSkyDark
     public var scheme: ColorScheme = .dark
-    public var tintColor: Color = .init(hex: 0x4b8bfd)
-    public var primaryBackgroundColor: Color = .init(hex: 0x0f1419)
-    public var secondaryBackgroundColor: Color = .init(hex: 0x1a2332)
+    public var tintColor: Color = .init(hex: 0x4B8BFD)
+    public var primaryBackgroundColor: Color = .init(hex: 0x0F1419)
+    public var secondaryBackgroundColor: Color = .init(hex: 0x1A2332)
     public var labelColor: Color = .white
 
     public init() {}

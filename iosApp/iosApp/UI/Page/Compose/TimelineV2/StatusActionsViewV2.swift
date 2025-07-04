@@ -1,15 +1,15 @@
-//import Awesome
-//import Generated
-//import JXPhotoBrowser
-//import Kingfisher
-//import MarkdownUI
-//import os.log
-//import SwiftDate
-//import SwiftUI
-//import UIKit
-//import shared
+// import Awesome
+// import Generated
+// import JXPhotoBrowser
+// import Kingfisher
+// import MarkdownUI
+// import os.log
+// import SwiftDate
+// import SwiftUI
+// import UIKit
+// import shared
 //
-//struct StatusActionsViewV2: View {
+// struct StatusActionsViewV2: View {
 //    let viewModel: StatusViewModel
 //    let appSettings: AppSettings
 //    let openURL: OpenURLAction
@@ -50,9 +50,9 @@
 //            .onTapGesture {}
 //        }
 //    }
-//}
+// }
 //
-//struct StatusActionButtonV2: View {
+// struct StatusActionButtonV2: View {
 //    let action: StatusAction
 //    let isDetail: Bool
 //    let openURL: OpenURLAction
@@ -97,10 +97,10 @@
 //            }
 //        }
 //    }
-//}
+// }
 //
 //// bottom action
-//struct StatusActionLabelV2: View {
+// struct StatusActionLabelV2: View {
 //    let item: StatusActionItem
 //    @Environment(\.colorScheme) var colorScheme
 //    @Environment(FlareTheme.self) private var theme
@@ -174,7 +174,7 @@
 //        }
 //        .foregroundStyle(theme.labelColor, theme.labelColor)
 //    }
-//}
+// }
 //
 //// TODO: 需要创建ShareButtonV2
 ////struct ShareButtonV2: View {

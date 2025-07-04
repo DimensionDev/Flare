@@ -140,7 +140,6 @@ private struct OfflineTranslationModifier: ViewModifier {
     func body(content: Content) -> some View {
         if isEnabled {
             content.translationTask(config) { session in
-
                 translationTask?.cancel()
                 translationTask = Task {
                     do {

@@ -1,8 +1,8 @@
+import FontAwesomeSwiftUI
+import Generated
 import os.log
 import shared
 import SwiftUI
-import FontAwesomeSwiftUI
-import Generated
 
 /// FlareTabBarV2 - 新的TabBar组件，基于Observable架构
 /// 保持Flare现有的UI样式和交互逻辑，使用iOS 17+的现代架构
@@ -11,20 +11,20 @@ struct FlareTabBarV2: View {
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
     @Environment(\.appSettings) private var appSettings
-    
+
     let accountType: AccountType
     @Binding var scrollToTopTrigger: Bool
     @Namespace private var tabBarNamespace
-    
+
     init(accountType: AccountType, scrollToTopTrigger: Binding<Bool>) {
         self.accountType = accountType
-        self._scrollToTopTrigger = scrollToTopTrigger
-        
+        _scrollToTopTrigger = scrollToTopTrigger
+
         os_log("[FlareTabBarV2] Initialized for account type: %{public}@",
                log: .default, type: .debug,
                String(describing: accountType))
     }
-    
+
     var body: some View {
         HStack {
             Spacer()
@@ -69,17 +69,17 @@ struct FlareTabBarV2: View {
             Spacer()
         }
     }
-    
+
     @ViewBuilder
     private func tabBarItem(for tab: FlareHomeTabs) -> some View {
         Button {
             FlareLog.debug("[FlareTabBarV2] Tab button tapped: \(tab), selectedTab: \(router.selectedTab)")
-            
+
             if router.selectedTab == tab {
                 FlareLog.debug("[FlareTabBarV2] Same tab tapped again: \(tab)")
                 // 双击同一个Tab的逻辑
                 router.popToRoot(for: tab)
-                
+
                 if tab == .timeline {
                     // Timeline特殊处理：触发滚动到顶部
                     let oldValue = scrollToTopTrigger
@@ -119,9 +119,9 @@ struct FlareTabBarV2: View {
         .frame(maxWidth: .infinity)
         .buttonStyle(PlainButtonStyle())
     }
-    
+
     @ViewBuilder
-    private func icon(for tab: FlareHomeTabs, isActive: Bool) -> some View {
+    private func icon(for tab: FlareHomeTabs, isActive _: Bool) -> some View {
         switch tab {
         case .menu:
             Text(AwesomeIcon.bars.rawValue)
@@ -170,12 +170,13 @@ struct FlareTabBarV2: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     @Previewable @State var scrollToTopTrigger = false
     @Previewable @State var router = FlareRouter()
     @Previewable @State var appState = FlareAppState()
     @Previewable @State var theme = FlareTheme.shared
-    
+
     VStack {
         Spacer()
         FlareTabBarV2(

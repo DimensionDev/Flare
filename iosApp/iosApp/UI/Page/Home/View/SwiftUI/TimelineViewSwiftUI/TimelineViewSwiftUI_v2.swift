@@ -4,30 +4,29 @@ import Kingfisher
 import shared
 import SwiftUI
 
- struct TimelineViewSwiftUIV2: View {
+struct TimelineViewSwiftUIV2: View {
     let tab: FLTabItem
     @ObservedObject var store: AppBarTabSettingStore
     @Binding var scrollPositionID: String?
     @Binding var scrollToTopTrigger: Bool
-     
+
     let isCurrentTab: Bool
-     
-     @Binding var showFloatingButton: Bool
 
-     @State private var presenter: TimelinePresenter?
+    @Binding var showFloatingButton: Bool
 
-     @State private var stateConverter = PagingStateConverter()
+    @State private var presenter: TimelinePresenter?
 
-     @State private var timelineState: FlareTimelineState = .loading
+    @State private var stateConverter = PagingStateConverter()
 
-     @State private var showErrorAlert = false
-     
-     @State private var currentError: FlareError?
- 
-     @State private var cancellables = Set<AnyCancellable>()
+    @State private var timelineState: FlareTimelineState = .loading
 
-     @State private var refreshDebounceTimer: Timer?
+    @State private var showErrorAlert = false
 
+    @State private var currentError: FlareError?
+
+    @State private var cancellables = Set<AnyCancellable>()
+
+    @State private var refreshDebounceTimer: Timer?
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -94,11 +93,10 @@ import SwiftUI
         }
     }
 
-
-     private func setupDataSource() async {
+    private func setupDataSource() async {
         FlareLog.debug("TimelineViewSwiftUI_v2 Setting up direct data flow for tab: \(tab.key)")
 
-         guard let kmpPresenter = store.getOrCreatePresenter(for: tab) else {
+        guard let kmpPresenter = store.getOrCreatePresenter(for: tab) else {
             FlareLog.error("TimelineViewSwiftUI_v2 Failed to get presenter for tab: \(tab.key)")
             await MainActor.run {
                 timelineState = .error(.data(.parsing))
@@ -109,7 +107,7 @@ import SwiftUI
         await MainActor.run {
             presenter = kmpPresenter
 
-             Task {
+            Task {
                 for await state in kmpPresenter.models {
                     await MainActor.run {
                         guard let timelineState = state as? TimelineState else {
@@ -119,7 +117,7 @@ import SwiftUI
                         let newState = stateConverter.convert(timelineState.listState)
                         let oldState = self.timelineState
 
-                         if newState != oldState {
+                        if newState != oldState {
                             self.timelineState = newState
                             FlareLog.debug("TimelineViewSwiftUI_v2 State updated: \(newState.description)")
                         }
@@ -131,7 +129,7 @@ import SwiftUI
         FlareLog.debug("TimelineViewSwiftUI_v2 Direct data flow setup completed for tab: \(tab.key)")
     }
 
-     private func handleRefresh() async {
+    private func handleRefresh() async {
         FlareLog.debug("TimelineViewSwiftUI_v2 Handling refresh for tab: \(tab.key)")
 
         guard let presenter else {
@@ -154,16 +152,9 @@ import SwiftUI
         }
     }
 
-     private func handleScrollOffsetChange(_ offset: CGFloat) {
-         if !showFloatingButton {
+    private func handleScrollOffsetChange(_: CGFloat) {
+        if !showFloatingButton {
             showFloatingButton = true
         }
     }
 }
-
-
-
-
-
-
-

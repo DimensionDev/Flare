@@ -124,7 +124,6 @@ struct DownloadManagerScreen: View {
         case .failed:
             DownloadManager.shared.resume(url: task.url.absoluteString)
         case .removed:
-
             break
         @unknown default:
             break

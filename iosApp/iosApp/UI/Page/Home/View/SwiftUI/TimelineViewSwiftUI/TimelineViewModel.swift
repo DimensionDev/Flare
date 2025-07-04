@@ -1,44 +1,40 @@
-import SwiftUI
 import Combine
 import shared
-
+import SwiftUI
 
 @MainActor
 @Observable
-class TimelineViewModel { 
+class TimelineViewModel {
     private(set) var timelineState: FlareTimelineState = .loading
     private(set) var showErrorAlert = false
     private(set) var currentError: FlareError?
-    
- 
-    private(set) var presenter: TimelinePresenter?  
-    private let stateConverter = PagingStateConverter() 
+
+    private(set) var presenter: TimelinePresenter?
+    private let stateConverter = PagingStateConverter()
     private var refreshDebounceTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
-    
- 
+
     var items: [TimelineItem] {
-        if case .loaded(let items, _, _) = timelineState {
+        if case let .loaded(items, _, _) = timelineState {
             return items
         }
         return []
     }
-    
+
     var hasMore: Bool {
-        if case .loaded(_, let hasMore, _) = timelineState {
+        if case let .loaded(_, hasMore, _) = timelineState {
             return hasMore
         }
         return false
     }
-    
+
     var isRefreshing: Bool {
-        if case .loaded(_, _, let isRefreshing) = timelineState {
+        if case let .loaded(_, _, isRefreshing) = timelineState {
             return isRefreshing
         }
         return false
     }
-    
- 
+
     func setupDataSource(for tab: FLTabItem, using store: AppBarTabSettingStore) async {
         FlareLog.debug("Timeline Setting up data source with cache for tab: \(tab.key)")
 
@@ -49,15 +45,14 @@ class TimelineViewModel {
             return
         }
 
-        if self.presenter === cachedPresenter {
+        if presenter === cachedPresenter {
             FlareLog.debug("Timeline Using existing presenter for tab: \(tab.key)")
             return
         }
 
         FlareLog.debug("Timeline Setting new cached presenter for tab: \(tab.key)")
-        self.presenter = cachedPresenter
+        presenter = cachedPresenter
 
-        
         Task {
             for await state in cachedPresenter.models {
                 let flareState = await Task.detached(priority: .userInitiated) { [stateConverter] in
@@ -69,12 +64,11 @@ class TimelineViewModel {
             }
         }
     }
-    
- 
+
     func handleRefresh() async {
         FlareLog.debug("Timeline Handling refresh")
 
-        guard let presenter = presenter else {
+        guard let presenter else {
             FlareLog.warning("Timeline No presenter available for refresh")
             return
         }
@@ -92,15 +86,14 @@ class TimelineViewModel {
         } catch {
             FlareLog.error("Timeline Refresh failed: \(error)")
             let flareError = await Task.detached(priority: .utility) {
-                return FlareError.from(error)
+                FlareError.from(error)
             }.value
 
             currentError = flareError
             showErrorAlert = true
         }
     }
-    
- 
+
     func getFirstItemID() -> String? {
         guard let firstID = items.first?.id else {
             FlareLog.debug("Timeline ScrollToTop skipped: no items")
@@ -110,14 +103,12 @@ class TimelineViewModel {
         FlareLog.debug("Timeline ScrollToTop available: firstID=\(firstID)")
         return firstID
     }
-    
-  
+
     func handleError(_ error: FlareError) {
         currentError = error
         showErrorAlert = true
     }
-    
- 
+
     func handleScrollOffsetChange(_ offsetY: CGFloat, showFloatingButton: Binding<Bool>) {
         let shouldShow = offsetY > 50
 
@@ -126,8 +117,6 @@ class TimelineViewModel {
         }
     }
 }
-
- 
 
 struct TimelineLoadingView: View {
     var body: some View {

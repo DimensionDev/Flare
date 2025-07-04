@@ -1,11 +1,10 @@
 import Foundation
 import shared
 
-
- struct RichText: Equatable, Hashable {
-    let raw: String        // 对应 UiRichText.raw
-    let markdown: String   // 对应 UiRichText.markdown
-    let isRTL: Bool       // 对应 UiRichText.isRTL
+struct RichText: Equatable, Hashable {
+    let raw: String // 对应 UiRichText.raw
+    let markdown: String // 对应 UiRichText.markdown
+    let isRTL: Bool // 对应 UiRichText.isRTL
 
     init(raw: String, markdown: String = "", isRTL: Bool = false) {
         self.raw = raw
@@ -16,11 +15,11 @@ import shared
 
 /// 用户信息结构 - 对应 shared.UiUserV2
 struct User: Equatable, Hashable {
-    let key: String           // 对应 UiUserV2.key (MicroBlogKey转换为String)
-    let name: RichText        // 对应 UiUserV2.name
-    let handle: String        // 对应 UiUserV2.handle
-    let avatar: String        // 对应 UiUserV2.avatar
-    let banner: String?       // 对应 UiUserV2.banner
+    let key: String // 对应 UiUserV2.key (MicroBlogKey转换为String)
+    let name: RichText // 对应 UiUserV2.name
+    let handle: String // 对应 UiUserV2.handle
+    let avatar: String // 对应 UiUserV2.avatar
+    let banner: String? // 对应 UiUserV2.banner
     let description: RichText? // 对应 UiUserV2.description
 
     var handleWithoutFirstAt: String {
@@ -30,36 +29,36 @@ struct User: Equatable, Hashable {
 
 /// 媒体类型枚举 - 对应 shared.UiMedia的子类型
 enum TimelineMediaType: String, CaseIterable, Equatable, Hashable {
-    case image = "image"      // 对应 UiMediaImage
-    case video = "video"      // 对应 UiMediaVideo
-    case gif = "gif"          // 对应 UiMediaGif
-    case audio = "audio"      // 对应 UiMediaAudio
+    case image // 对应 UiMediaImage
+    case video // 对应 UiMediaVideo
+    case gif // 对应 UiMediaGif
+    case audio // 对应 UiMediaAudio
 }
 
 /// 媒体信息结构 - 对应 shared.UiMedia
 struct Media: Equatable, Hashable {
-    let url: String           // 对应 UiMedia.url
-    let previewUrl: String?   // 对应 UiMedia.previewUrl
+    let url: String // 对应 UiMedia.url
+    let previewUrl: String? // 对应 UiMedia.previewUrl
     let type: TimelineMediaType // 对应 UiMedia类型
-    let altText: String?      // 对应 UiMedia.altText
-    let width: Int?           // 对应 UiMedia.width
-    let height: Int?          // 对应 UiMedia.height
+    let altText: String? // 对应 UiMedia.altText
+    let width: Int? // 对应 UiMedia.width
+    let height: Int? // 对应 UiMedia.height
 }
 
 /// 卡片信息结构 - 对应 shared.UiCard
 struct Card: Equatable, Hashable {
-    let url: String           // 对应 UiCard.url
-    let title: String?        // 对应 UiCard.title
-    let description: String?  // 对应 UiCard.description
-    let media: Media?         // 对应 UiCard.media
+    let url: String // 对应 UiCard.url
+    let title: String? // 对应 UiCard.title
+    let description: String? // 对应 UiCard.description
+    let media: Media? // 对应 UiCard.media
 }
 
 /// 转发头部消息结构 - 对应 shared.UiTimeline.TopMessage
 struct TopMessage: Equatable, Hashable {
-    let user: User?           // 对应 TopMessage.user
-    let icon: TopMessageIcon  // 对应 TopMessage.icon
-    let type: TopMessageType  // 对应 TopMessage.type
-    let statusKey: String     // 对应 TopMessage.statusKey.id
+    let user: User? // 对应 TopMessage.user
+    let icon: TopMessageIcon // 对应 TopMessage.icon
+    let type: TopMessageType // 对应 TopMessage.type
+    let statusKey: String // 对应 TopMessage.statusKey.id
 }
 
 /// 转发头部图标类型 - 对应 shared.UiTimeline.TopMessage.Icon
@@ -110,87 +109,94 @@ enum XQTMessageType: Equatable, Hashable {
 
 /// 回复内容结构 - 对应 shared.UiTimelineItemContentStatusAboveTextContent
 enum AboveTextContent: Equatable, Hashable {
-    case replyTo(handle: String)  // 对应 UiTimelineItemContentStatusAboveTextContentReplyTo
+    case replyTo(handle: String) // 对应 UiTimelineItemContentStatusAboveTextContentReplyTo
 }
 
 /// 底部内容结构 - 对应 shared.UiTimelineItemContentStatusBottomContent
 enum BottomContent: Equatable, Hashable {
-    case reaction(emojiReactions: [EmojiReaction])  // 对应 UiTimelineItemContentStatusBottomContentReaction
+    case reaction(emojiReactions: [EmojiReaction]) // 对应 UiTimelineItemContentStatusBottomContentReaction
 }
 
 /// 表情反应结构 - 对应 shared.UiTimelineItemContentStatusBottomContentReactionEmojiReaction
 struct EmojiReaction: Equatable, Hashable {
-    let name: String          // 对应 EmojiReaction.name
-    let url: String           // 对应 EmojiReaction.url
-    let count: Int            // 对应 EmojiReaction.count
-    let me: Bool              // 对应 EmojiReaction.me
-    let isUnicode: Bool       // 对应 EmojiReaction.isUnicode
+    let name: String // 对应 EmojiReaction.name
+    let url: String // 对应 EmojiReaction.url
+    let count: Int // 对应 EmojiReaction.count
+    let me: Bool // 对应 EmojiReaction.me
+    let isUnicode: Bool // 对应 EmojiReaction.isUnicode
     let isImageReaction: Bool // 对应 EmojiReaction.isImageReaction
 }
 
 /// 顶部结束内容结构 - 对应 shared.UiTimelineItemContentStatusTopEndContent
 enum TopEndContent: Equatable, Hashable {
-    case visibility(type: VisibilityType)  // 对应 UiTimelineItemContentStatusTopEndContentVisibility
+    case visibility(type: VisibilityType) // 对应 UiTimelineItemContentStatusTopEndContentVisibility
 }
 
 /// 可见性类型枚举 - 对应 shared.UiTimelineItemContentStatusTopEndContentVisibilityType
 enum VisibilityType: String, CaseIterable, Equatable, Hashable {
-    case publicType = "public"    // 对应 UiTimelineItemContentStatusTopEndContentVisibilityType.public_
-    case home = "home"            // 对应 UiTimelineItemContentStatusTopEndContentVisibilityType.home
-    case followers = "followers"  // 对应 UiTimelineItemContentStatusTopEndContentVisibilityType.followers
-    case specified = "specified"  // 对应 UiTimelineItemContentStatusTopEndContentVisibilityType.specified
+    case publicType = "public" // 对应 UiTimelineItemContentStatusTopEndContentVisibilityType.public_
+    case home // 对应 UiTimelineItemContentStatusTopEndContentVisibilityType.home
+    case followers // 对应 UiTimelineItemContentStatusTopEndContentVisibilityType.followers
+    case specified // 对应 UiTimelineItemContentStatusTopEndContentVisibilityType.specified
 }
 
 /// 投票结构 - 对应 shared.UiPoll
 struct Poll: Equatable, Hashable {
-    let options: [PollOption]     // 对应 UiPoll.options
-    let expiresAt: Date?          // 对应 UiPoll.expiresAt
-    let expired: Bool             // 对应 UiPoll.expired
-    let multiple: Bool            // 对应 UiPoll.multiple
-    let votesCount: Int           // 对应 UiPoll.votesCount
-    let votersCount: Int?         // 对应 UiPoll.votersCount
+    let options: [PollOption] // 对应 UiPoll.options
+    let expiresAt: Date? // 对应 UiPoll.expiresAt
+    let expired: Bool // 对应 UiPoll.expired
+    let multiple: Bool // 对应 UiPoll.multiple
+    let votesCount: Int // 对应 UiPoll.votesCount
+    let votersCount: Int? // 对应 UiPoll.votersCount
 }
 
 /// 投票选项结构 - 对应 shared.UiPollOption
 struct PollOption: Equatable, Hashable {
-    let title: String             // 对应 UiPollOption.title
-    let votesCount: Int           // 对应 UiPollOption.votesCount
-    let voted: Bool               // 对应 UiPollOption.voted
+    let title: String // 对应 UiPollOption.title
+    let votesCount: Int // 对应 UiPollOption.votesCount
+    let voted: Bool // 对应 UiPollOption.voted
 }
 
 struct TimelineItem: Identifiable, Equatable, Hashable {
     // MARK: - 核心标识字段
-    let id: String                    // 对应 UiTimelineItemContentStatus.statusKey.id
+
+    let id: String // 对应 UiTimelineItemContentStatus.statusKey.id
 
     // MARK: - 内容字段 (扩展为复杂结构)
-    let content: RichText             // 对应 UiTimelineItemContentStatus.content (UiRichText)
-    let user: User?                   // 对应 UiTimelineItemContentStatus.user (UiUserV2)
-    let timestamp: Date               // 对应 UiTimelineItemContentStatus.createdAt
-    let images: [Media]               // 对应 UiTimelineItemContentStatus.images ([UiMedia])
+
+    let content: RichText // 对应 UiTimelineItemContentStatus.content (UiRichText)
+    let user: User? // 对应 UiTimelineItemContentStatus.user (UiUserV2)
+    let timestamp: Date // 对应 UiTimelineItemContentStatus.createdAt
+    let images: [Media] // 对应 UiTimelineItemContentStatus.images ([UiMedia])
 
     // MARK: - 新增字段 (来自StatusViewModel需求)
-    let url: String                   // 对应 UiTimelineItemContentStatus.url
-    let platformType: String          // 对应 UiTimelineItemContentStatus.platformType.name
+
+    let url: String // 对应 UiTimelineItemContentStatus.url
+    let platformType: String // 对应 UiTimelineItemContentStatus.platformType.name
     let aboveTextContent: AboveTextContent? // 对应 UiTimelineItemContentStatus.aboveTextContent
-    let contentWarning: RichText?     // 对应 UiTimelineItemContentStatus.contentWarning
-    let card: Card?                   // 对应 UiTimelineItemContentStatus.card
-    let quote: [TimelineItem]         // 对应 UiTimelineItemContentStatus.quote (递归结构)
+    let contentWarning: RichText? // 对应 UiTimelineItemContentStatus.contentWarning
+    let card: Card? // 对应 UiTimelineItemContentStatus.card
+    let quote: [TimelineItem] // 对应 UiTimelineItemContentStatus.quote (递归结构)
     let bottomContent: BottomContent? // 对应 UiTimelineItemContentStatus.bottomContent
     let topEndContent: TopEndContent? // 对应 UiTimelineItemContentStatus.topEndContent
-    let poll: Poll?                   // 对应 UiTimelineItemContentStatus.poll
+    let poll: Poll? // 对应 UiTimelineItemContentStatus.poll
 
     // MARK: - 转发头部信息 (新增)
-    let topMessage: TopMessage?       // 对应 UiTimeline.topMessage
-    let sensitive: Bool               // 对应 UiTimelineItemContentStatus.sensitive
+
+    let topMessage: TopMessage? // 对应 UiTimeline.topMessage
+    let sensitive: Bool // 对应 UiTimelineItemContentStatus.sensitive
 
     // MARK: - 兼容性字段 (保持向后兼容)
-    let visibility: String            // 从topEndContent.visibility转换而来
-    let language: String?             // 暂时保留，未来可能从其他地方获取
+
+    let visibility: String // 从topEndContent.visibility转换而来
+    let language: String? // 暂时保留，未来可能从其他地方获取
 
     // MARK: - 操作相关字段
-    let actions: [StatusAction]       // 对应 UiTimelineItemContentStatus.actions
+
+    let actions: [StatusAction] // 对应 UiTimelineItemContentStatus.actions
 
     // MARK: - UI状态字段 (可变)
+
     var likeCount: Int
     var isLiked: Bool
     var retweetCount: Int
@@ -310,50 +316,49 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
 //        FlareLog.debug("   Bookmark: \(bookmarkCount) (bookmarked: \(isBookmarked))")
     }
 
-     mutating func updateLikeState(liked: Bool) {
+    mutating func updateLikeState(liked: Bool) {
         isLiked = liked
         likeCount += liked ? 1 : -1
         likeCount = max(0, likeCount) // 确保不为负数
     }
 
-     mutating func updateRetweetState(retweeted: Bool) {
+    mutating func updateRetweetState(retweeted: Bool) {
         isRetweeted = retweeted
         retweetCount += retweeted ? 1 : -1
         retweetCount = max(0, retweetCount) // 确保不为负数
     }
 
-     mutating func updateBookmarkState(bookmarked: Bool) {
+    mutating func updateBookmarkState(bookmarked: Bool) {
         isBookmarked = bookmarked
         bookmarkCount += bookmarked ? 1 : -1
         bookmarkCount = max(0, bookmarkCount) // 确保不为负数
     }
 
-     mutating func updateReplyCount(_ count: Int) {
+    mutating func updateReplyCount(_ count: Int) {
         replyCount = max(0, count)
     }
 
-     func withUpdatedLikeState(count: Int, isLiked: Bool) -> TimelineItem {
+    func withUpdatedLikeState(count: Int, isLiked: Bool) -> TimelineItem {
         var newItem = self
         newItem.likeCount = max(0, count)
         newItem.isLiked = isLiked
         return newItem
     }
 
-     func withUpdatedRetweetState(count: Int, isRetweeted: Bool) -> TimelineItem {
+    func withUpdatedRetweetState(count: Int, isRetweeted: Bool) -> TimelineItem {
         var newItem = self
         newItem.retweetCount = max(0, count)
         newItem.isRetweeted = isRetweeted
         return newItem
     }
 
-     func withUpdatedBookmarkState(count: Int, isBookmarked: Bool) -> TimelineItem {
+    func withUpdatedBookmarkState(count: Int, isBookmarked: Bool) -> TimelineItem {
         var newItem = self
         newItem.bookmarkCount = max(0, count)
         newItem.isBookmarked = isBookmarked
         return newItem
     }
 
- 
     static func from(_ uiTimeline: UiTimeline) -> TimelineItem {
         // 处理不同类型的content
         if let statusContent = uiTimeline.content as? UiTimelineItemContentStatus {
@@ -363,27 +368,27 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
 
             // 🔥 新增：处理topMessage转换
             let topMessage = uiTimeline.topMessage?.toSwift()
-            if let topMessage = topMessage {
+            if let topMessage {
                 FlareLog.debug("TimelineItem Found topMessage: \(topMessage.type)")
             }
 
             return TimelineItem(
                 id: status.statusKey.id,
-                content: status.content.toSwift(),                    // UiRichText -> RichText
-                user: status.user?.toSwift(),                         // UiUserV2? -> User?
+                content: status.content.toSwift(), // UiRichText -> RichText
+                user: status.user?.toSwift(), // UiUserV2? -> User?
                 timestamp: status.createdAt as Date,
-                images: status.images.map { $0.toSwift() },           // [UiMedia] -> [Media]
-                url: status.url,                                      // String
-                platformType: status.platformType.name,              // PlatformType.name -> String
+                images: status.images.map { $0.toSwift() }, // [UiMedia] -> [Media]
+                url: status.url, // String
+                platformType: status.platformType.name, // PlatformType.name -> String
                 aboveTextContent: status.aboveTextContent?.toSwift(), // AboveTextContent?
-                contentWarning: status.contentWarning?.toSwift(),    // UiRichText? -> RichText?
-                card: status.card?.toSwift(),                         // UiCard? -> Card?
+                contentWarning: status.contentWarning?.toSwift(), // UiRichText? -> RichText?
+                card: status.card?.toSwift(), // UiCard? -> Card?
                 quote: [], // 暂时为空，递归转换较复杂，后续完善
-                bottomContent: status.bottomContent?.toSwift(),       // BottomContent?
-                topEndContent: status.topEndContent?.toSwift(),       // TopEndContent?
-                poll: status.poll?.toSwift(),                         // UiPoll? -> Poll?
-                topMessage: topMessage,                               // 🔥 新增：TopMessage转换
-                sensitive: status.sensitive,                          // Bool
+                bottomContent: status.bottomContent?.toSwift(), // BottomContent?
+                topEndContent: status.topEndContent?.toSwift(), // TopEndContent?
+                poll: status.poll?.toSwift(), // UiPoll? -> Poll?
+                topMessage: topMessage, // 🔥 新增：TopMessage转换
+                sensitive: status.sensitive, // Bool
                 visibility: status.topEndContent?.extractVisibility() ?? "public", // 从topEndContent提取
                 language: nil, // TODO: 从实际状态获取
                 actions: status.actions // 🔥 保留完整的KMP StatusAction数组
@@ -457,14 +462,14 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
 
     /// 是否为播客卡片 - 对应 StatusViewModel.isPodcastCard
     var isPodcastCard: Bool {
-        guard let card = card,
+        guard let card,
               let url = URL(string: card.url) else { return false }
         return url.scheme == "flare" && url.host?.lowercased() == "podcast"
     }
 
     /// 是否应该显示链接预览 - 对应 StatusViewModel.shouldShowLinkPreview
     var shouldShowLinkPreview: Bool {
-        guard let card = card else { return false }
+        guard let card else { return false }
         return !isPodcastCard && card.media != nil
     }
 
@@ -510,35 +515,32 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         images.map(\.url)
     }
 
- 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
 
- 
     static func == (lhs: TimelineItem, rhs: TimelineItem) -> Bool {
         lhs.id == rhs.id
     }
 }
 
- enum FlareTimelineState: Equatable {
-     case loading
+enum FlareTimelineState: Equatable {
+    case loading
 
-     case loaded(items: [TimelineItem], hasMore: Bool, isRefreshing: Bool)
+    case loaded(items: [TimelineItem], hasMore: Bool, isRefreshing: Bool)
 
-     case error(FlareError)
+    case error(FlareError)
 
-     case empty
+    case empty
 
- 
-     var items: [TimelineItem] {
+    var items: [TimelineItem] {
         if case let .loaded(items, _, _) = self {
             return items
         }
         return []
     }
 
-     var isLoading: Bool {
+    var isLoading: Bool {
         switch self {
         case .loading:
             true
@@ -549,19 +551,17 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         }
     }
 
-     var hasMore: Bool {
+    var hasMore: Bool {
         if case let .loaded(_, hasMore, _) = self {
             return hasMore
         }
         return false
     }
 
- 
     var itemCount: Int {
         items.count
     }
 
- 
     var isEmpty: Bool {
         switch self {
         case .empty:
@@ -573,7 +573,6 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         }
     }
 
- 
     var isError: Bool {
         if case .error = self {
             return true
@@ -581,7 +580,6 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         return false
     }
 
- 
     var error: FlareError? {
         if case let .error(error) = self {
             return error
@@ -589,8 +587,6 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         return nil
     }
 
- 
- 
     func toLoading(preserveItems: Bool = false) -> FlareTimelineState {
         if preserveItems, case let .loaded(items, hasMore, _) = self {
             return .loaded(items: items, hasMore: hasMore, isRefreshing: true)
@@ -610,7 +606,6 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         return .loaded(items: updatedItems, hasMore: hasMore, isRefreshing: false)
     }
 
-   
     func replacingItems(_ newItems: [TimelineItem], hasMore: Bool) -> FlareTimelineState {
         if newItems.isEmpty {
             return .empty
@@ -618,7 +613,6 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         return .loaded(items: newItems, hasMore: hasMore, isRefreshing: false)
     }
 
- 
     func updatingItem(_ item: TimelineItem, at index: Int) -> FlareTimelineState {
         guard case .loaded(var items, let hasMore, let isRefreshing) = self,
               index >= 0, index < items.count
@@ -630,7 +624,6 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         return .loaded(items: items, hasMore: hasMore, isRefreshing: isRefreshing)
     }
 
- 
     func removingItem(at index: Int) -> FlareTimelineState {
         guard case .loaded(var items, let hasMore, let isRefreshing) = self,
               index >= 0, index < items.count
@@ -647,7 +640,6 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         return .loaded(items: items, hasMore: hasMore, isRefreshing: isRefreshing)
     }
 
- 
     func insertingItem(_ item: TimelineItem, at index: Int) -> FlareTimelineState {
         guard case .loaded(var items, let hasMore, let isRefreshing) = self else {
             return .loaded(items: [item], hasMore: hasMore, isRefreshing: false)
@@ -659,12 +651,10 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         return .loaded(items: items, hasMore: hasMore, isRefreshing: isRefreshing)
     }
 
-  
     func toError(_ error: FlareError) -> FlareTimelineState {
         .error(error)
     }
 
- 
     func stoppingRefresh() -> FlareTimelineState {
         if case let .loaded(items, hasMore, _) = self {
             return .loaded(items: items, hasMore: hasMore, isRefreshing: false)
@@ -706,14 +696,13 @@ extension FlareTimelineState: CustomStringConvertible {
     }
 }
 
-
 /// UiRichText -> RichText 转换
 extension UiRichText {
     func toSwift() -> RichText {
         RichText(
-            raw: self.raw,
-            markdown: self.markdown,
-            isRTL: self.isRTL
+            raw: raw,
+            markdown: markdown,
+            isRTL: isRTL
         )
     }
 }
@@ -722,10 +711,10 @@ extension UiRichText {
 extension UiUserV2 {
     func toSwift() -> User {
         User(
-            key: self.key.id, // MicroBlogKey.id
-            name: self.name.toSwift(),
-            handle: self.handle,
-            avatar: self.avatar,
+            key: key.id, // MicroBlogKey.id
+            name: name.toSwift(),
+            handle: handle,
+            avatar: avatar,
             banner: nil, // UiUserV2可能没有banner字段，暂时设为nil
             description: nil // UiUserV2可能没有description字段，暂时设为nil
         )
@@ -737,7 +726,7 @@ extension UiMedia {
     func toSwift() -> Media {
         // 根据具体的UiMedia子类型进行转换
         if let image = self as? UiMediaImage {
-            return Media(
+            Media(
                 url: image.url,
                 previewUrl: cleanPreviewUrl(image.url, for: .image),
                 type: .image,
@@ -746,7 +735,7 @@ extension UiMedia {
                 height: Int(image.height)
             )
         } else if let video = self as? UiMediaVideo {
-            return Media(
+            Media(
                 url: video.url,
                 previewUrl: cleanPreviewUrl(video.thumbnailUrl, for: .video), // ✅ 修复：使用thumbnailUrl作为previewUrl并清理
                 type: .video,
@@ -755,7 +744,7 @@ extension UiMedia {
                 height: Int(video.height)
             )
         } else if let gif = self as? UiMediaGif {
-            return Media(
+            Media(
                 url: gif.url,
                 previewUrl: cleanPreviewUrl(gif.previewUrl, for: .gif),
                 type: .gif,
@@ -764,7 +753,7 @@ extension UiMedia {
                 height: Int(gif.height)
             )
         } else if let audio = self as? UiMediaAudio {
-            return Media(
+            Media(
                 url: audio.url,
                 previewUrl: audio.previewUrl, // 音频不处理 previewUrl
                 type: .audio,
@@ -774,8 +763,8 @@ extension UiMedia {
             )
         } else {
             // 默认处理
-            return Media(
-                url: self.url,
+            Media(
+                url: url,
                 previewUrl: nil,
                 type: .image,
                 altText: nil,
@@ -785,20 +774,16 @@ extension UiMedia {
         }
     }
 
-
     private func cleanPreviewUrl(_ url: String?, for type: TimelineMediaType) -> String? {
-        guard let url = url else { return nil }
-
+        guard let url else { return nil }
 
         switch type {
         case .image, .video, .gif:
-
             if url.hasSuffix("?name=orig") {
                 return String(url.dropLast("?name=orig".count))
             }
             return url
         case .audio:
-
             return url
         }
     }
@@ -808,10 +793,10 @@ extension UiMedia {
 extension UiCard {
     func toSwift() -> Card {
         Card(
-            url: self.url,
-            title: self.title,
-            description: self.description_,
-            media: self.media?.toSwift()
+            url: url,
+            title: title,
+            description: description_,
+            media: media?.toSwift()
         )
     }
 }
@@ -822,7 +807,7 @@ extension UiTimelineItemContentStatusAboveTextContent {
         // 使用onEnum来处理sealed class
         switch onEnum(of: self) {
         case let .replyTo(replyTo):
-            return .replyTo(handle: replyTo.handle)
+            .replyTo(handle: replyTo.handle)
         }
     }
 }
@@ -852,12 +837,12 @@ extension UiTimelineItemContentStatusBottomContent {
 extension UiTimelineItemContentStatusTopEndContent {
     func toSwift() -> TopEndContent? {
         // 暂时返回默认值，后续完善
-        return .visibility(type: .publicType)
+        .visibility(type: .publicType)
     }
 
     func extractVisibility() -> String {
         // 暂时返回默认值，后续完善
-        return "public"
+        "public"
     }
 }
 
@@ -875,9 +860,7 @@ extension UiPoll {
     }
 }
 
- 
 extension FlareTimelineState {
- 
     func needsUIUpdate(from other: FlareTimelineState) -> Bool {
         // 如果状态类型不同，需要更新
         switch (other, self) {
@@ -914,7 +897,7 @@ extension FlareTimelineState {
         return self != other
     }
 
-     func changesSummary(from other: FlareTimelineState) -> String {
+    func changesSummary(from other: FlareTimelineState) -> String {
         switch (other, self) {
         case let (.loading, .loaded(items, _, _)):
             return "Loaded \(items.count) items"
@@ -939,22 +922,21 @@ extension FlareTimelineState {
     }
 }
 
-
 /// UiTimeline.TopMessage -> TopMessage 转换
 extension UiTimeline.TopMessage {
     func toSwift() -> TopMessage {
         TopMessage(
-            user: self.user?.toSwift(),
+            user: user?.toSwift(),
             icon: convertIcon(),
             type: convertMessageType(),
-            statusKey: self.statusKey.id
+            statusKey: statusKey.id
         )
     }
 
     /// 转换图标类型
     private func convertIcon() -> TopMessageIcon {
         // 使用字符串比较来避免类型桥接问题
-        let iconString = String(describing: self.icon)
+        let iconString = String(describing: icon)
         switch iconString {
         case "Retweet": return .retweet
         case "Follow": return .follow
@@ -973,7 +955,7 @@ extension UiTimeline.TopMessage {
     /// 转换消息类型
     private func convertMessageType() -> TopMessageType {
         // 使用字符串比较来避免复杂的类型桥接
-        let typeString = String(describing: self.type)
+        let typeString = String(describing: type)
 
         // 简化处理：根据字符串内容判断平台类型
         if typeString.contains("Mastodon") {
@@ -1010,5 +992,3 @@ extension UiTimeline.TopMessage {
         }
     }
 }
-
-

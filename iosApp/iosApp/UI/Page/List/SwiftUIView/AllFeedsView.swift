@@ -72,7 +72,6 @@ struct AllFeedsView: View {
         case .loading:
             loadingFeedsView
         case let .success(tabsData):
-
             let feedTab = findFeedTab(in: tabsData.data)
             if let feedTab {
                 switch onEnum(of: feedTab.data) {

@@ -54,7 +54,7 @@ struct AppearanceSettings: Codable, Changeable {
     var theme: Theme = .auto
     var avatarShape: AvatarShape = .circle
     var renderEngine: RenderEngine = .markdown
-    var timelineVersion: TimelineVersionSetting = .v4_0  // 新增Timeline版本设置
+    var timelineVersion: TimelineVersionSetting = .v4_0 // 新增Timeline版本设置
     var showActions: Bool = true
     var showNumbers: Bool = true
     var showLinkPreview: Bool = true
@@ -171,15 +171,15 @@ enum TimelineVersionSetting: String, Codable, CaseIterable, Identifiable {
     func toManagerVersion() -> TimelineVersionManager.TimelineVersion {
         switch self {
         case .base:
-            return .base
+            .base
         case .v1_1:
-            return .v1_1
+            .v1_1
         case .v2_0:
-            return .v2_0
+            .v2_0
         case .v3_0:
-            return .v3_0
+            .v3_0
         case .v4_0:
-            return .v4_0
+            .v4_0
         }
     }
 
@@ -187,15 +187,15 @@ enum TimelineVersionSetting: String, Codable, CaseIterable, Identifiable {
     static func from(_ managerVersion: TimelineVersionManager.TimelineVersion) -> TimelineVersionSetting {
         switch managerVersion {
         case .base:
-            return .base
+            .base
         case .v1_1:
-            return .v1_1
+            .v1_1
         case .v2_0:
-            return .v2_0
+            .v2_0
         case .v3_0:
-            return .v3_0
+            .v3_0
         case .v4_0:
-            return .v4_0
+            .v4_0
         }
     }
 }

@@ -1,7 +1,6 @@
 import shared
 import SwiftUI
 
- 
 struct TimelineItemsView: View {
     let items: [TimelineItem]
     let hasMore: Bool
@@ -27,8 +26,8 @@ struct TimelineItemsView: View {
                     FlareLog.debug("Timeline item \(item.id) became visible")
                 }
             }
-            .onAppear { 
-                if item.id == lastItemId && hasMore {
+            .onAppear {
+                if item.id == lastItemId, hasMore {
                     FlareLog.debug("Timeline Last item appeared, triggering load more")
                     handleLoadMore()
                 }
@@ -43,7 +42,6 @@ struct TimelineItemsView: View {
             updateLastItemId(items)
         }
 
-       
         if hasMore {
             TimelineLoadMoreView(isRefreshing: isRefreshing)
                 .onAppear {
@@ -56,7 +54,7 @@ struct TimelineItemsView: View {
     private func handleLoadMore() {
         FlareLog.debug("Timeline Handling load more")
 
-        guard let presenter = presenter else {
+        guard let presenter else {
             FlareLog.warning("Timeline No presenter available for load more")
             return
         }
@@ -77,13 +75,12 @@ struct TimelineItemsView: View {
         }
     }
 
- 
     private func updateItemIndexMap(_ items: [TimelineItem]) {
         var newIndexMap: [String: Int] = [:]
         var duplicateCount = 0
 
         for (index, item) in items.enumerated() {
-            if newIndexMap[item.id] != nil { 
+            if newIndexMap[item.id] != nil {
                 duplicateCount += 1
                 FlareLog.warning("Timeline Duplicate item ID found: \(item.id), using latest index: \(index)")
             }
@@ -99,8 +96,6 @@ struct TimelineItemsView: View {
         FlareLog.debug("Timeline Updated last item ID: \(lastItemId ?? "nil")")
     }
 }
-
- 
 
 struct TimelineLoadMoreView: View {
     let isRefreshing: Bool

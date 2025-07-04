@@ -14,11 +14,11 @@ struct HomeTabViewContentV2: View {
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
     @Environment(\.appSettings) private var appSettings
-    
+
     let accountType: AccountType
     @State private var scrollToTopTrigger = false
     @State private var showFloatingButton = false
-    
+
     private var visibleTabs: [FlareHomeTabs] {
         var tabs: [FlareHomeTabs] = [.menu, .timeline]
         if !(accountType is AccountTypeGuest) { tabs.append(.notification) }
@@ -26,15 +26,15 @@ struct HomeTabViewContentV2: View {
         if !(accountType is AccountTypeGuest) { tabs.append(.profile) }
         return tabs
     }
-    
+
     init(accountType: AccountType) {
         self.accountType = accountType
-        
+
         os_log("[HomeTabViewContentV2] Initialized for account type: %{public}@",
                log: .default, type: .debug,
                String(describing: accountType))
     }
-    
+
     var body: some View {
         os_log(
             "[HomeTabViewContentV2] Using router: %{public}@, selectedTab: %{public}@",
@@ -42,7 +42,7 @@ struct HomeTabViewContentV2: View {
             String(describing: ObjectIdentifier(router)),
             String(describing: router.selectedTab)
         )
-        
+
         return ZStack(alignment: .bottom) {
             // 主TabView内容 - 恢复TabView架构以保持状态
             TabView(selection: Binding(
@@ -110,7 +110,7 @@ struct HomeTabViewContentV2: View {
                 }
             }
             .toolbar(.hidden, for: .tabBar) // 隐藏系统TabBar
-            
+
             // 自定义TabBar - 使用FlareTabBarV2
             if !appState.isCustomTabBarHidden {
                 VStack(spacing: 0) {
@@ -118,7 +118,7 @@ struct HomeTabViewContentV2: View {
                         accountType: accountType,
                         scrollToTopTrigger: $scrollToTopTrigger
                     )
-                    
+
                     // 底部安全区域
                     Rectangle()
                         .fill(theme.primaryBackgroundColor)
@@ -126,7 +126,7 @@ struct HomeTabViewContentV2: View {
                         .ignoresSafeArea(.container, edges: .bottom)
                 }
             }
-            
+
             // 浮动滚动到顶部按钮
             if router.selectedTab == .timeline, !appSettings.appearanceSettings.hideScrollToTopButton {
                 FloatingScrollToTopButton(
@@ -147,11 +147,12 @@ struct HomeTabViewContentV2: View {
 }
 
 // MARK: - Preview
+
 #Preview {
     @Previewable @State var router = FlareRouter()
     @Previewable @State var appState = FlareAppState()
     @Previewable @State var theme = FlareTheme.shared
-    
+
     HomeTabViewContentV2(accountType: AccountTypeGuest())
         .environment(router)
         .environment(appState)

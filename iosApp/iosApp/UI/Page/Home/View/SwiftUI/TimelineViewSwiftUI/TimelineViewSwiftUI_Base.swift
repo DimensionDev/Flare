@@ -2,7 +2,6 @@ import os
 import shared
 import SwiftUI
 
- 
 struct TimelineViewSwiftUIBase: View {
     let tab: FLTabItem
     @ObservedObject var store: AppBarTabSettingStore
@@ -11,7 +10,7 @@ struct TimelineViewSwiftUIBase: View {
     @Binding var scrollToTopTrigger: Bool
     let isCurrentTab: Bool
     @Binding var showFloatingButton: Bool
-    
+
     var body: some View {
         // 使用Base版本的实现（从TimelineViewSwiftUI_base.swift复制）
         // Use Base version implementation (copied from TimelineViewSwiftUI_base.swift)
@@ -27,14 +26,13 @@ struct TimelineViewSwiftUIBase: View {
                                                 value: geometry.frame(in: .global).minY)
                             }
                         )
-                    
+
                     if let presenter {
                         ObservePresenter(presenter: presenter) { state in
                             if let timelineState = state as? TimelineState,
                                case let .success(success) = onEnum(of: timelineState.listState)
                             {
                                 ForEach(0 ..< success.itemCount, id: \.self) { index in
-                                    
                                     if let status = success.peek(index: index) {
                                         let statusID = status.itemKey
                                         StatusItemView(data: status, detailKey: nil)
@@ -64,7 +62,7 @@ struct TimelineViewSwiftUIBase: View {
                                             .padding(.vertical, 8)
                                             .padding(.horizontal, 16)
                                     }
-                                    
+
                                     if index < success.itemCount - 1 {
                                         Divider()
                                             .padding(.horizontal, 16)
@@ -84,7 +82,7 @@ struct TimelineViewSwiftUIBase: View {
             .onChange(of: scrollToTopTrigger) { _, _ in
                 FlareLog.debug("TimelineView_Base ScrollToTop trigger changed for tab: \(tab.key)")
                 guard isCurrentTab else { return }
-                
+
                 withAnimation(.easeInOut(duration: 0.5)) {
                     proxy.scrollTo(ScrollToTopView.Constants.scrollToTop, anchor: .top)
                 }
@@ -108,16 +106,15 @@ struct TimelineViewSwiftUIBase: View {
             handleScrollOffsetChange(offset)
         }
     }
-    
+
     private func handleScrollOffsetChange(_ offset: CGFloat) {
         guard isCurrentTab else { return }
         handleFloatingButtonVisibility(offset)
     }
-    
+
     private func handleFloatingButtonVisibility(_: CGFloat) {
         if !showFloatingButton {
             showFloatingButton = true
         }
     }
 }
-

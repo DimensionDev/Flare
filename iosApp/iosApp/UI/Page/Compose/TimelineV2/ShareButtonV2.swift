@@ -12,8 +12,6 @@ import UIKit
     import Translation
 #endif
 
-
-
 struct ShareButtonV2: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.appSettings) var appSettings
@@ -30,8 +28,8 @@ struct ShareButtonV2: View {
     @State private var showSelectUrlSheet: Bool = false
 
     // ✅ 修改：使用Swift原生类型替代shared类型
-    let item: TimelineItem  // 使用TimelineItem替代UiTimelineItemContentStatus
-    let view: TimelineStatusViewV2  // 使用TimelineStatusViewV2替代TimelineStatusView
+    let item: TimelineItem // 使用TimelineItem替代UiTimelineItemContentStatus
+    let view: TimelineStatusViewV2 // 使用TimelineStatusViewV2替代TimelineStatusView
 
     private var statusUrl: URL? {
         // ✅ 修改：从TimelineItem获取URL
@@ -270,6 +268,7 @@ struct ShareButtonV2: View {
 }
 
 // MARK: - V2版本的截图包装器
+
 struct StatusCaptureWrapperV2: View {
     let content: TimelineStatusViewV2
 

@@ -15,7 +15,6 @@ enum FlareError: Error, Equatable, LocalizedError {
     /// 未知错误
     case unknown(String)
 
- 
     enum NetworkError: Equatable {
         case noConnection
         case timeout
@@ -24,7 +23,6 @@ enum FlareError: Error, Equatable, LocalizedError {
         // These specific error types were never used in practice
     }
 
- 
     enum DataError: Equatable {
         case parsing
         case corruption
@@ -32,14 +30,12 @@ enum FlareError: Error, Equatable, LocalizedError {
         // These specific error types were never used in practice
     }
 
- 
     enum AuthError: Equatable {
         case unauthorized
         // 🗑️ Removed: tokenExpired, accountSuspended, invalidCredentials, accountNotFound, permissionDenied
         // These specific error types were never used in practice
     }
 
- 
     enum BusinessError: Equatable {
         case timelineNotFound
         case userNotFound
@@ -49,7 +45,6 @@ enum FlareError: Error, Equatable, LocalizedError {
         case contentBlocked
     }
 
- 
     enum SystemError: Equatable {
         case memoryWarning
         case diskSpaceLow
@@ -58,7 +53,6 @@ enum FlareError: Error, Equatable, LocalizedError {
         case deviceNotSupported
     }
 
- 
     var errorDescription: String? {
         switch self {
         case let .network(networkError):

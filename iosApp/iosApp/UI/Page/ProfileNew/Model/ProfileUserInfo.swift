@@ -70,12 +70,13 @@ struct ProfileUserInfo: Equatable {
     }
 
     // MARK: - Equatable
+
     static func == (lhs: ProfileUserInfo, rhs: ProfileUserInfo) -> Bool {
         // 比较关键字段，避免复杂对象比较
-        return lhs.profile.key.description == rhs.profile.key.description &&
-               lhs.isMe == rhs.isMe &&
-               lhs.followCount == rhs.followCount &&
-               lhs.fansCount == rhs.fansCount &&
-               lhs.canSendMessage == rhs.canSendMessage
+        lhs.profile.key.description == rhs.profile.key.description &&
+            lhs.isMe == rhs.isMe &&
+            lhs.followCount == rhs.followCount &&
+            lhs.fansCount == rhs.fansCount &&
+            lhs.canSendMessage == rhs.canSendMessage
     }
 }

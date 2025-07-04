@@ -23,7 +23,7 @@ class FlareRouter {
 
     var isDialogPresented: Bool = false
 
-    var previousPageSnapshot: UIImage? = nil
+    var previousPageSnapshot: UIImage?
 
     // 新增：Tab选择管理
     var selectedTab: FlareHomeTabs = .timeline {
@@ -96,12 +96,10 @@ class FlareRouter {
         }
     }
 
-   
     subscript(tab: FlareHomeTabs) -> Binding<NavigationPath> {
         navigationPathFor(tab)
     }
 
- 
     func popToRoot(for tab: FlareHomeTabs) {
         switch tab {
         case .menu: menuNavigationPath = NavigationPath()
@@ -218,7 +216,6 @@ class FlareRouter {
             isDialogPresented = false
             activeDestination = nil
         case .push:
-
             switch activeTab {
             case .menu:
                 if !menuNavigationPath.isEmpty {
@@ -314,7 +311,6 @@ class FlareRouter {
             return .deleteStatus(accountType: route.accountType, statusKey: route.statusKey)
 
         case is AppleRoute.Compose:
-
             let routeType = String(describing: type(of: route))
 
             if routeType.contains("New") {

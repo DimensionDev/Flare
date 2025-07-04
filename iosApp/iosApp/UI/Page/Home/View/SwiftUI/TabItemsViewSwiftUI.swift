@@ -33,9 +33,8 @@ struct TabItemsViewSwiftUI: View {
                                     }
                                 }
 
-
                             let isSelected = selection == item.key ||
-                                           (selection.isEmpty && item.key == items.first?.key)
+                                (selection.isEmpty && item.key == items.first?.key)
 
                             if isSelected {
                                 Rectangle()

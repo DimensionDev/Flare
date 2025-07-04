@@ -15,7 +15,7 @@ struct PageLabel {
 @resultBuilder
 struct PageLabelBuilder {
     static func buildBlock(_ components: PageLabel...) -> [PageLabel] {
-        components.compactMap { $0 }
+        components.compactMap(\.self)
     }
 }
 

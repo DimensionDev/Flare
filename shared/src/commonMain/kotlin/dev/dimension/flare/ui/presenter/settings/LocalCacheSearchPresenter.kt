@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.filter
 import androidx.paging.map
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
@@ -117,10 +118,13 @@ public class LocalCacheSearchPresenter :
                 ) {
                     database.userDao().getUserHistory()
                 }.flow.map {
-                    it.map {
-                        require(it.data.accountType is AccountType.Specific)
-                        it.user.render(it.data.accountType.accountKey) as UiUserV2
-                    }
+                    it
+                        .filter {
+                            it.data.accountType is AccountType.Specific
+                        }.map {
+                            require(it.data.accountType is AccountType.Specific)
+                            it.user.render(it.data.accountType.accountKey) as UiUserV2
+                        }
                 }
             }.collectAsLazyPagingItems().toPagingState()
 

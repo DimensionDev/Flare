@@ -56,6 +56,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
+import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
@@ -342,18 +343,25 @@ private fun timelinePresenter(
                 userKey = null,
             )
         }.invoke()
+
     val tabs by remember {
         settingsRepository.tabSettings
             .map { settings ->
-                listOfNotNull(
-                    if (settings.enableMixedTimeline) {
-                        MixedTimelineTabItem(
-                            subTimelineTabItem = settings.mainTabs,
-                        )
-                    } else {
-                        null
-                    },
-                ) + settings.mainTabs
+                if (accountType == AccountType.Guest) {
+                    listOf(
+                        HomeTimelineTabItem(AccountType.Guest),
+                    )
+                } else {
+                    listOfNotNull(
+                        if (settings.enableMixedTimeline) {
+                            MixedTimelineTabItem(
+                                subTimelineTabItem = settings.mainTabs,
+                            )
+                        } else {
+                            null
+                        },
+                    ) + settings.mainTabs
+                }
             }.map {
                 it.toImmutableList()
             }

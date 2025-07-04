@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.presenter.profile
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,6 +29,7 @@ import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.model.toUi
@@ -140,7 +140,7 @@ public class ProfilePresenter(
     override fun body(): ProfileState {
         val scope = rememberCoroutineScope()
         val accountServiceState = accountServiceProvider(accountType = accountType, repository = accountRepository)
-        val userState by userStateFlow.collectAsState(UiState.Loading())
+        val userState by userStateFlow.flattenUiState()
         accountServiceState.onSuccess {
             val userKey = userKey ?: if (it is AuthenticatedMicroblogDataSource) it.accountKey else null
             if (userKey != null) {
@@ -152,7 +152,7 @@ public class ProfilePresenter(
             remember {
                 ProfileMediaPresenter(accountType = accountType, userKey = userKey)
             }.body().mediaState
-        val relationState by relationStateFlow.collectAsState(UiState.Loading())
+        val relationState by relationStateFlow.flattenUiState()
         val isMe by isMeFlow.collectAsUiState()
         val actions by profileActionsFlow.collectAsUiState()
         val canSendMessage by canSendMessageFlow.collectAsUiState()

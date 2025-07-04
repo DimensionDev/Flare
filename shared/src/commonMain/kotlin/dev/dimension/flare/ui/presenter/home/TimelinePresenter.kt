@@ -33,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.withContext
@@ -131,6 +132,9 @@ public abstract class TimelinePresenter :
             remember {
                 createPager(scope)
                     .cachedIn(scope)
+                    .catch {
+                        it.printStackTrace()
+                    }
             }.collectAsLazyPagingItems()
                 .toPagingState()
 

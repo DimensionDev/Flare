@@ -66,6 +66,6 @@ public extension AttributedString {
         runs[\.link].map { link, _ in
             link?.absoluteURL
         }
-        .compactMap { $0 }
+        .compactMap(\.self)
     }
 }

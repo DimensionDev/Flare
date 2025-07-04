@@ -2,8 +2,7 @@ import os
 import shared
 import SwiftUI
 
-
- struct TimelineViewSwiftUI: View {
+struct TimelineViewSwiftUI: View {
     let tab: FLTabItem
     @ObservedObject var store: AppBarTabSettingStore
     @Binding var scrollPositionID: String?
@@ -35,13 +34,30 @@ import SwiftUI
                     showFloatingButton: $showFloatingButton
                 )
             case .v2_0:
-                    TimelineViewSwiftUIV2(
-                        tab: tab,
-                        store: store,
-                        scrollPositionID: $scrollPositionID,
-                        scrollToTopTrigger: $scrollToTopTrigger,
-                        isCurrentTab: isCurrentTab,
-                        showFloatingButton: $showFloatingButton
+                TimelineViewSwiftUIV2(
+                    tab: tab,
+                    store: store,
+                    scrollPositionID: $scrollPositionID,
+                    scrollToTopTrigger: $scrollToTopTrigger,
+                    isCurrentTab: isCurrentTab,
+                    showFloatingButton: $showFloatingButton
+                )
+            case .v3_0:
+                TimelineViewSwiftUIV3(
+                    tab: tab,
+                    store: store,
+                    scrollPositionID: $scrollPositionID,
+                    scrollToTopTrigger: $scrollToTopTrigger,
+                    isCurrentTab: isCurrentTab,
+                    showFloatingButton: $showFloatingButton
+                )
+            case .v4_0:
+                TimelineViewSwiftUIV4(
+                    tab: tab,
+                    store: store,
+                    scrollToTopTrigger: $scrollToTopTrigger,
+                    isCurrentTab: isCurrentTab,
+                    showFloatingButton: $showFloatingButton
                 )
             }
         }
@@ -50,4 +66,3 @@ import SwiftUI
         }
     }
 }
-

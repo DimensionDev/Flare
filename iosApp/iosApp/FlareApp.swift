@@ -9,7 +9,7 @@ struct FlareApp: SwiftUI.App {
     #else
         @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     #endif
-    @StateObject private var router = FlareRouter()
+    @State private var router = FlareRouter()
     @StateObject private var podcastManager = IOSPodcastManager.shared
     @State var theme = FlareTheme.shared
 
@@ -19,7 +19,7 @@ struct FlareApp: SwiftUI.App {
 
         KoinHelper.shared.start(inAppNotification: SwitUIInAppNotification())
 
-         FlareImageConfiguration.shared.configure()
+        FlareImageConfiguration.shared.configure()
 
         // 初始化UserManager
         UserManager.shared.initialize()
@@ -59,7 +59,7 @@ struct FlareApp: SwiftUI.App {
                             router.handleDeepLink(url)
                         }
                         .withFlareTheme()
-                        .environmentObject(router)
+                        .environment(router)
                         .floatingPerformanceWindow()
 
                 #endif
@@ -68,7 +68,7 @@ struct FlareApp: SwiftUI.App {
                 if podcastManager.currentPodcast != nil {
                     DraggablePlayerOverlay()
                         .animation(.spring(), value: podcastManager.currentPodcast?.id)
-                        .environmentObject(router)
+                        .environment(router)
                 }
             }.environment(theme).withFlareTheme().applyTheme(theme).environment(theme)
         }

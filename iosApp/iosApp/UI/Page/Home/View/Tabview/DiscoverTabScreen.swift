@@ -17,7 +17,6 @@ struct DiscoverTabScreen: View {
     var body: some View {
         ObservePresenter(presenter: searchPresenter) { searchState in
             ObservePresenter(presenter: presenter) { state in
-
                 List {
                     if searchState.searching {
                         switch onEnum(of: searchState.users) {

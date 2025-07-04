@@ -4,8 +4,8 @@ import SwiftUI
 struct MessageScreen: View {
     let accountType: AccountType
 
-    @EnvironmentObject private var router: FlareRouter
-    @EnvironmentObject private var appState: FlareAppState
+    @Environment(FlareRouter.self) private var router
+    @Environment(FlareAppState.self) private var appState
 
     var body: some View {
         DMListView(accountType: accountType)

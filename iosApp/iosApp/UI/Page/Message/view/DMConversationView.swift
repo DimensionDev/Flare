@@ -72,7 +72,6 @@ struct DMConversationView: View {
                             defaultActionClosure(message, .reply)
                         case .edit:
                             defaultActionClosure(message, .edit { editedText in
-
                                 FlareLog.debug("DMConversation Edit message: \(editedText)")
                             })
                         case .delete:
@@ -245,7 +244,6 @@ struct DMConversationView: View {
                 }
 
             default:
-
                 message.text = "Unsupported media type: \(type(of: mediaContent.media))"
             }
 

@@ -2,7 +2,7 @@ import Foundation
 import shared
 
 // 整合所有用户资料页需要的信息
-struct ProfileUserInfo {
+struct ProfileUserInfo: Equatable {
     let profile: UiProfile
     let relation: UiRelation?
     let isMe: Bool
@@ -67,5 +67,16 @@ struct ProfileUserInfo {
             fields: fields,
             canSendMessage: canSendMessage
         )
+    }
+
+    // MARK: - Equatable
+
+    static func == (lhs: ProfileUserInfo, rhs: ProfileUserInfo) -> Bool {
+        // 比较关键字段，避免复杂对象比较
+        lhs.profile.key.description == rhs.profile.key.description &&
+            lhs.isMe == rhs.isMe &&
+            lhs.followCount == rhs.followCount &&
+            lhs.fansCount == rhs.fansCount &&
+            lhs.canSendMessage == rhs.canSendMessage
     }
 }

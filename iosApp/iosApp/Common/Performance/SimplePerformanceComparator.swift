@@ -302,9 +302,9 @@ class SimplePerformanceComparator {
     /// 获取测试统计信息
     /// Get test statistics
     func getTestStatistics() -> (totalTests: Int, versionsWithData: Int, latestTestDate: Date?) {
-        let totalTests = versionResults.values.flatMap { $0 }.count
+        let totalTests = versionResults.values.flatMap(\.self).count
         let versionsWithData = versionResults.filter { !$0.value.isEmpty }.count
-        let latestTestDate = versionResults.values.flatMap { $0 }.map(\.timestamp).max()
+        let latestTestDate = versionResults.values.flatMap(\.self).map(\.timestamp).max()
 
         return (totalTests: totalTests, versionsWithData: versionsWithData, latestTestDate: latestTestDate)
     }

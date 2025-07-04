@@ -7,7 +7,7 @@ struct QuotedStatus: View {
     @State private var showMedia: Bool = false
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
     let data: UiTimelineItemContentStatus

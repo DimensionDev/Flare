@@ -7,7 +7,7 @@ struct UserComponent: View {
     let user: UiUserV2
     let topEndContent: UiTimelineItemContentStatusTopEndContent?
 
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
 
     var body: some View {
         Button(

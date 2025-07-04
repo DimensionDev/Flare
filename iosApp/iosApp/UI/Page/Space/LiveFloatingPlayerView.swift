@@ -4,7 +4,7 @@ import SwiftUI
 
 struct LiveFloatingPlayerView: View {
     @StateObject private var manager = IOSPodcastManager.shared
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
 
     @State private var showPodcastSheet: Bool = false
 

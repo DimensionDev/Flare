@@ -60,7 +60,7 @@ struct NotificationTabScreen: View {
                     }
                 }
             }
-            //  .listStyle(.plain)
+            .listStyle(.plain)
             .navigationTitle("home_tab_notifications_title")
             .listRowBackground(theme.primaryBackgroundColor)
         }.navigationBarTitleDisplayMode(.inline)

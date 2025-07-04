@@ -10,14 +10,15 @@ import SwiftUI
 import UIKit
 
 // MARK: - Swift原生AccountType定义
-//enum SwiftAccountType {
+
+// enum SwiftAccountType {
 //    case specific(accountKey: String)  // 简化版，使用String代替MicroBlogKey
 //    case active
 //    case guest
-//}
+// }
 //
 //// MARK: - Swift原生MicroBlogKey定义
-//struct SwiftMicroBlogKey {
+// struct SwiftMicroBlogKey {
 //    let id: String
 //    let host: String
 //
@@ -25,15 +26,15 @@ import UIKit
 //        self.id = id
 //        self.host = host
 //    }
-//}
+// }
 
 struct StatusHeaderViewV2: View {
     // 修改参数：使用TimelineItem替代StatusViewModel
     let item: TimelineItem
     let isDetailView: Bool
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
-    
+
     var body: some View {
         HStack(alignment: .top) {
             HStack(alignment: .center, spacing: 1) {
@@ -44,7 +45,7 @@ struct StatusHeaderViewV2: View {
                         topEndContent: item.topEndContent
                     )
                     .id("UserComponent_\(user.key)")
-                    .environmentObject(router)
+                    .environment(router)
                 }
 
                 Spacer()
@@ -70,10 +71,10 @@ struct StatusHeaderViewV2: View {
 // MARK: - UserComponentV2 (适配Swift数据类型)
 
 struct UserComponentV2: View {
-    let user: User                    // 使用Swift User类型
+    let user: User // 使用Swift User类型
     let topEndContent: TopEndContent? // 使用Swift TopEndContent类型
 
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
 
     var body: some View {
         Button(
@@ -110,7 +111,7 @@ struct UserComponentV2: View {
                                 .foregroundColor(.gray)
 
                             // 显示可见性图标 - 使用Swift TopEndContent
-                            if let topEndContent = topEndContent {
+                            if let topEndContent {
                                 switch topEndContent {
                                 case let .visibility(visibilityType):
                                     StatusVisibilityComponentV2(visibility: visibilityType)
@@ -171,4 +172,3 @@ struct StatusVisibilityComponentV2: View {
         }
     }
 }
- 

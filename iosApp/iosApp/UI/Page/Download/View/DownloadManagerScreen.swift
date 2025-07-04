@@ -17,17 +17,16 @@ struct ShareableFile: Identifiable {
 
 @MainActor
 struct DownloadManagerScreen: View {
-    @ObservedObject var router: FlareRouter
-    @EnvironmentObject private var menuState: FlareAppState
+    @Environment(FlareRouter.self) private var router
+    @Environment(FlareAppState.self) private var menuState
 
     let accountType: AccountType
     @State private var downloadTasks: [DownloadTask] = []
     @State private var itemToShare: ShareableFile? = nil
     @Environment(FlareTheme.self) private var theme
 
-    init(accountType: AccountType, router: FlareRouter) {
+    init(accountType: AccountType) {
         self.accountType = accountType
-        self.router = router
     }
 
     var body: some View {
@@ -59,8 +58,8 @@ struct DownloadManagerScreen: View {
             }
 //        .toolbarBackground(FColors.Background.swiftUIPrimary, for: .navigationBar)
 //        .toolbarBackground(.visible, for: .navigationBar)
-            .environmentObject(router)
-            .environmentObject(menuState)
+            .environment(router)
+            .environment(menuState)
             .task {
                 loadDownloadTasks()
             }
@@ -125,7 +124,6 @@ struct DownloadManagerScreen: View {
         case .failed:
             DownloadManager.shared.resume(url: task.url.absoluteString)
         case .removed:
-
             break
         @unknown default:
             break

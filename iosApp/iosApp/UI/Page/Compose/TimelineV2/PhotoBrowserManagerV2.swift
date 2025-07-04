@@ -13,8 +13,8 @@ class PhotoBrowserManagerV2 {
 
     @MainActor
     func showPhotoBrowser(
-        media _: Media,              // 使用Swift Media类型
-        images: [Media],             // 使用Swift Media类型
+        media _: Media, // 使用Swift Media类型
+        images: [Media], // 使用Swift Media类型
         initialIndex: Int,
         headers: [String: String] = [:],
         onDismiss: (() -> Void)? = nil
@@ -31,7 +31,7 @@ class PhotoBrowserManagerV2 {
 
         browser.cellClassAtIndex = { index in
             let media = images[index]
-            switch media.type {  // 使用Swift Media类型判断
+            switch media.type { // 使用Swift Media类型判断
             case .video:
                 return MediaBrowserVideoCell.self
             case .gif:
@@ -52,7 +52,7 @@ class PhotoBrowserManagerV2 {
             let media = images[context.index]
             let headers = currentHeaders ?? [:]
 
-            switch media.type {  // 使用Swift Media类型判断
+            switch media.type { // 使用Swift Media类型判断
             case .video:
                 if let url = URL(string: media.url),
                    let cell = context.cell as? MediaBrowserVideoCell
@@ -100,7 +100,11 @@ class PhotoBrowserManagerV2 {
                     cell.imageView.kf.setImage(
                         with: previewUrl,
                         placeholder: nil,
-                        options: FlareImageOptions.fullScreen(size: UIScreen.main.bounds.size) + [
+                        options: [
+                            .processor(DownsamplingImageProcessor(size: UIScreen.main.bounds.size)),
+                            .scaleFactor(UIScreen.main.scale),
+                            .memoryCacheExpiration(.seconds(180)), // 3分钟内存缓存
+                            .diskCacheExpiration(.days(14)), // 14天磁盘缓存
                             .requestModifier(modifier),
                         ]
                     ) { result in
@@ -153,7 +157,7 @@ class PhotoBrowserManagerV2 {
 
         browser.cellWillAppear = { [weak self] cell, index in
             let media = images[index]
-            switch media.type {  // 使用Swift Media类型判断
+            switch media.type { // 使用Swift Media类型判断
             case .video:
                 if let videoCell = cell as? MediaBrowserVideoCell {
                     self?.currentVideoCell = videoCell
@@ -280,7 +284,7 @@ class PhotoBrowserManagerV2 {
 
         browser.cellWillDisappear = { [weak self] cell, index in
             let media = images[index]
-            switch media.type {  // 使用Swift Media类型判断
+            switch media.type { // 使用Swift Media类型判断
             case .video, .gif:
                 if let videoCell = cell as? MediaBrowserVideoCell {
                     videoCell.didEndDisplaying()

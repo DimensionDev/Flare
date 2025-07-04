@@ -1,0 +1,73 @@
+import Kingfisher
+import SwiftUI
+
+ 
+public struct SingleMediaView: View {
+    let viewModel: FeedMediaViewModel
+    let isSingleVideo: Bool
+    let fixedAspectRatio: CGFloat?
+    let action: () -> Void
+    @Environment(FlareTheme.self) private var theme
+
+     private var intelligentDownloadSize: CGSize {
+         let containerWidth: CGFloat = 600  
+        let containerHeight: CGFloat = 280  
+
+        if isSingleVideo {
+             return CGSize(width: containerWidth, height: containerHeight)
+        } else { 
+            let gridSpacing: CGFloat = 8 
+            let gridItemWidth = (containerWidth - gridSpacing) / 2
+            let gridItemHeight = (containerHeight - gridSpacing) / 2
+            return CGSize(width: gridItemWidth, height: gridItemHeight)
+        }
+    }
+
+    public var body: some View {
+        //  AsyncImage(url: viewModel.previewUrl) { image in
+        //         image.resizable()
+        //     } placeholder: {
+        //         ProgressView()
+        //     }
+        Rectangle()
+            .foregroundColor(.clear)
+            .overlay {
+                // GeometryReader { geometry in
+                ZStack {
+                    if let previewUrl = viewModel.previewUrl {
+                        KFImage(previewUrl) 
+                            .flareTimelineMedia(size: intelligentDownloadSize)
+                            .placeholder {
+                                Rectangle()
+                                    .foregroundColor(.gray.opacity(0.2))
+                            }
+                            .resizable()
+                            .aspectRatio(fixedAspectRatio, contentMode: .fill)
+                        // .frame(width: geometry.size.width, height: geometry.size.height)
+                        // .clipped()
+
+                    } else {
+                        Rectangle()
+                            .foregroundColor(.gray.opacity(0.2))
+                    }
+                }
+                .clipped()
+                .contentShape(Rectangle())
+                .overlay {
+                    if viewModel.mediaKind == .video {
+                        Image(systemName: "play.circle.fill")
+                            .font(.system(size: isSingleVideo ? 38 : 24))
+                            .foregroundColor(theme.tintColor)
+                            .shadow(radius: 8)
+                            .padding(.bottom, 16)
+                            .cornerRadius(8)
+                            .padding(.leading, 16)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomLeading)
+                    }
+                }
+                .onTapGesture {
+                    action()
+                }
+            }
+    }
+}

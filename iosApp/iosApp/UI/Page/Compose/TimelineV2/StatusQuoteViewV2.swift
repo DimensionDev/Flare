@@ -10,6 +10,7 @@ import SwiftUI
 import UIKit
 
 // MARK: - Swift原生AccountType定义
+
 enum SwiftAccountType {
     case specific(accountKey: String)
     case active
@@ -17,6 +18,7 @@ enum SwiftAccountType {
 }
 
 // MARK: - Swift原生MicroBlogKey定义
+
 struct SwiftMicroBlogKey {
     let id: String
     let host: String
@@ -28,8 +30,8 @@ struct SwiftMicroBlogKey {
 }
 
 struct StatusQuoteViewV2: View {
-    let quotes: [TimelineItem]       // 使用Swift TimelineItem类型
-    let onMediaClick: (Int, Media) -> Void  // 使用Swift Media类型
+    let quotes: [TimelineItem] // 使用Swift TimelineItem类型
+    let onMediaClick: (Int, Media) -> Void // 使用Swift Media类型
 
     var body: some View {
         Spacer().frame(height: 10)
@@ -37,7 +39,7 @@ struct StatusQuoteViewV2: View {
         VStack {
             ForEach(0 ..< quotes.count, id: \.self) { index in
                 let quote = quotes[index]
-                QuotedStatusV2(item: quote, onMediaClick: onMediaClick)  // 使用item参数
+                QuotedStatusV2(item: quote, onMediaClick: onMediaClick) // 使用item参数
                     .foregroundColor(.gray)
 
                 if index != quotes.count - 1 {
@@ -59,11 +61,11 @@ struct QuotedStatusV2: View {
     @State private var showMedia: Bool = false
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
-    let item: TimelineItem           // 使用Swift TimelineItem类型
-    let onMediaClick: (Int, Media) -> Void  // 使用Swift Media类型
+    let item: TimelineItem // 使用Swift TimelineItem类型
+    let onMediaClick: (Int, Media) -> Void // 使用Swift Media类型
 
     var body: some View {
         Button(action: {
@@ -92,7 +94,7 @@ struct QuotedStatusV2: View {
                             .font(.subheadline)
                             .foregroundColor(.gray)
                         Spacer()
-                        dateFormatter(item.timestamp)  // 使用TimelineItem的timestamp
+                        dateFormatter(item.timestamp) // 使用TimelineItem的timestamp
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
@@ -169,17 +171,17 @@ struct QuotedStatusV2: View {
         // 根据platformType推断默认host
         switch platformType.lowercased() {
         case "mastodon":
-            return "mastodon.social" // 默认Mastodon实例
+            "mastodon.social" // 默认Mastodon实例
         case "bluesky":
-            return "bsky.app"
+            "bsky.app"
         case "misskey":
-            return "misskey.io"
+            "misskey.io"
         case "xqt", "twitter":
-            return "x.com"
+            "x.com"
         case "vvo":
-            return "weibo.com"
+            "weibo.com"
         default:
-            return "unknown.host"
+            "unknown.host"
         }
     }
 }

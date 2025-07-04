@@ -3,8 +3,8 @@ import shared
 import SwiftUI
 
 struct FlareRootView: View {
-    @StateObject var appState = FlareAppState()
-    @StateObject private var router = FlareRouter()
+    @State var appState = FlareAppState()
+    @State private var router = FlareRouter()
     @StateObject private var composeManager = ComposeManager.shared
     @State private var presenter = ActiveAccountPresenter()
     @Environment(\.appSettings) private var appSettings
@@ -30,27 +30,28 @@ struct FlareRootView: View {
                                        log: .default, type: .debug,
                                        String(describing: ObjectIdentifier(router)))
 
-                        HomeTabViewContent(accountType: accountType)
+                        HomeTabViewContentV2(accountType: accountType)
                             .environment(theme).applyTheme(theme)
-                            .environmentObject(appState)
-                            .environmentObject(router)
+                            .environment(appState)
+                            .environment(router)
                             .sheet(isPresented: $router.isSheetPresented) {
                                 if let destination = router.activeDestination {
                                     FlareDestinationView(
                                         destination: destination,
-                                        router: router,
-                                        appState: appState
+                                        router: router
                                     ).environment(theme).applyTheme(theme)
+                                        .environment(appState)
                                 }
                             }
                             .fullScreenCover(isPresented: $router.isFullScreenPresented) {
                                 if let destination = router.activeDestination {
-                                    FlareDestinationView(destination: destination, router: router, appState: appState)
+                                    FlareDestinationView(destination: destination, router: router)
                                         .modifier(SwipeToDismissModifier(onDismiss: {
                                             router.dismissFullScreenCover()
                                         }))
                                         .environment(theme).applyTheme(theme)
                                         .environment(\.appSettings, appSettings)
+                                        .environment(appState)
                                 }
                             }
                             .alert(isPresented: $router.isDialogPresented) {
@@ -70,8 +71,8 @@ struct FlareRootView: View {
                                             status: convertToSharedComposeStatus(composeManager.composeStatus)
                                         )
                                         .environment(theme).applyTheme(theme)
-                                        .environmentObject(router)
-                                        .environmentObject(appState)
+                                        .environment(router)
+                                        .environment(appState)
                                         .environment(\.appSettings, appSettings)
                                     }
                                 }

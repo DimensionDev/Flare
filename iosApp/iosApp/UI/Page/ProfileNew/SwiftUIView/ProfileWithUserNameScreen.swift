@@ -9,7 +9,7 @@ struct ProfileWithUserNameScreen: View {
     @State private var presenter: ProfileWithUserNameAndHostPresenter
     private let accountType: AccountType
     let toProfileMedia: (MicroBlogKey) -> Void
-    @EnvironmentObject var router: FlareRouter
+    @Environment(FlareRouter.self) var router
     @Environment(FlareTheme.self) private var theme
 
     init(accountType: AccountType, userName: String, host: String, toProfileMedia: @escaping (MicroBlogKey) -> Void) {

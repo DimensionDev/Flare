@@ -7,14 +7,13 @@ struct StatusDetailScreen: View {
     @State private var presenter: StatusContextPresenter
     private let statusKey: MicroBlogKey
 
-    @ObservedObject var router: FlareRouter
-    @EnvironmentObject private var menuState: FlareAppState
+    @Environment(FlareRouter.self) private var router
+    @Environment(FlareAppState.self) private var menuState
     @Environment(FlareTheme.self) private var theme
 
-    init(accountType: AccountType, statusKey: MicroBlogKey, router: FlareRouter) {
+    init(accountType: AccountType, statusKey: MicroBlogKey) {
         presenter = .init(accountType: accountType, statusKey: statusKey)
         self.statusKey = statusKey
-        self.router = router
     }
 
     var body: some View {
@@ -47,8 +46,8 @@ struct StatusDetailScreen: View {
             }
         }
         // 确保同时传递router和menuState
-        .environmentObject(router)
-        .environmentObject(menuState)
+        .environment(router)
+        .environment(menuState)
         // 使用新的导航手势修饰符
         // .navigationBarTitleDisplayMode(.inline)
         // .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)

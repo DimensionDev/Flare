@@ -365,6 +365,7 @@ public final class FlareTheme {
 
     public static var allColorSet: [ColorSet] {
         [
+            // 原有主题
             ThemeDark(),
             ThemeLight(),
             ThemeNeonDark(),
@@ -379,6 +380,44 @@ public final class FlareTheme {
             ThemeConstellationDark(),
             ThemeThreadsLight(),
             ThemeThreadsDark(),
+
+            // Flutter主题 (从TweetX移植)
+            ThemeFreshSkyLight(),
+            ThemeFreshSkyDark(),
+            ThemeDarkOceanLight(),
+            ThemeDarkOceanDark(),
+            ThemeMysticNightLight(),
+            ThemeMysticNightDark(),
+            ThemeSunsetGlowLight(),
+            ThemeSunsetGlowDark(),
+            ThemeEnchantedForestLight(),
+            ThemeEnchantedForestDark(),
+            ThemeAutumnWhisperLight(),
+            ThemeAutumnWhisperDark(),
+            ThemeArcticFrostLight(),
+            ThemeArcticFrostDark(),
+            ThemeCherryBlossomLight(),
+            ThemeCherryBlossomDark(),
+            ThemePristineEleganceLight(),
+            ThemePristineEleganceDark(),
+            ThemeNocturnalDepthsLight(),
+            ThemeNocturnalDepthsDark(),
+            ThemeObsidianGraceLight(),
+            ThemeObsidianGraceDark(),
+            ThemeJadeLagoonLight(),
+            ThemeJadeLagoonDark(),
+            ThemeTimberEssenceLight(),
+            ThemeTimberEssenceDark(),
+            ThemeRusticCanvasLight(),
+            ThemeRusticCanvasDark(),
+            ThemePlumBlossomLight(),
+            ThemePlumBlossomDark(),
+            ThemeNaturalLinenLight(),
+            ThemeNaturalLinenDark(),
+            ThemePristineSnowLight(),
+            ThemePristineSnowDark(),
+            ThemeEmeraldDepthsLight(),
+            ThemeEmeraldDepthsDark(),
         ]
     }
 

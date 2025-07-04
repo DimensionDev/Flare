@@ -2,9 +2,10 @@ import Combine
 import shared
 import SwiftUI
 
-class FlareAppState: ObservableObject {
+@Observable
+class FlareAppState {
     // hidden  home custom tabbar
-    @Published var isCustomTabBarHidden: Bool = false
+    var isCustomTabBarHidden: Bool = false
 
 //    @Published var selectedTab: Int = 0
 //    @Published var previousTab: Int = 0

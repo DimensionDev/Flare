@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct LinkPreviewV2: View {
-    let card: Card  // 使用Swift Card类型
+    let card: Card // 使用Swift Card类型
     var body: some View {
         Link(destination: URL(string: card.url)!) {
             HStack {
@@ -11,9 +11,9 @@ struct LinkPreviewV2: View {
                         .frame(width: 64, height: 64)
                 }
                 VStack(alignment: .leading) {
-                    Text(card.title ?? "")  // 处理可选值
+                    Text(card.title ?? "") // 处理可选值
                         .lineLimit(1)
-                    if let desc = card.description, !desc.isEmpty {  // 确保description不为空
+                    if let desc = card.description, !desc.isEmpty { // 确保description不为空
                         Text(desc)
                             .font(.caption)
                             .foregroundStyle(.gray)

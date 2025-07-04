@@ -1,13 +1,12 @@
 
 import Foundation
 import Generated
-import SwiftUI
 import shared
+import SwiftUI
 
- extension NSNotification.Name {
+extension NSNotification.Name {
     static let timelineItemUpdated = NSNotification.Name("timelineItemUpdated")
 }
-
 
 struct TimelineActionsViewV2: View {
     let item: TimelineItem
@@ -31,11 +30,11 @@ struct TimelineActionsViewV2: View {
 
     var body: some View {
         // 🔍 UI渲染日志 - 使用更明显的标识
-        let _ = FlareLog.debug("TimelineActionsViewV2 RENDERING UI FOR ITEM: \(item.id)")
-        let _ = FlareLog.debug("TimelineActionsViewV2 UI STATE - Like: \(displayLikeCount) (liked: \(displayIsLiked)), Retweet: \(displayRetweetCount) (retweeted: \(displayIsRetweeted))")
- 
-        return VStack(spacing: 0) {
-            if let errorMessage = errorMessage {
+//        let _ = FlareLog.debug("TimelineActionsViewV2 RENDERING UI FOR ITEM: \(item.id)")
+//        let _ = FlareLog.debug("TimelineActionsViewV2 UI STATE - Like: \(displayLikeCount) (liked: \(displayIsLiked)), Retweet: \(displayRetweetCount) (retweeted: \(displayIsRetweeted))")
+
+        VStack(spacing: 0) {
+            if let errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
                     .font(.caption)
@@ -43,7 +42,7 @@ struct TimelineActionsViewV2: View {
                     .padding(.bottom, 4)
             }
 
-             HStack(spacing: 0) {
+            HStack(spacing: 0) {
                 // 1. 回复
                 ActionButtonV2(
                     iconImage: Image(asset: Asset.Image.Status.Toolbar.chatBubbleOutline),
@@ -68,7 +67,7 @@ struct TimelineActionsViewV2: View {
                 .confirmationDialog("转发选项", isPresented: $showRetweetMenu) {
                     Button("转发") { performRetweetAction(isQuote: false) }
                     Button("引用转发") { performRetweetAction(isQuote: true) }
-                    Button("取消", role: .cancel) { }
+                    Button("取消", role: .cancel) {}
                 }
 
                 // 3. 点赞
@@ -119,19 +118,18 @@ struct TimelineActionsViewV2: View {
             // 🔥 初始化显示状态
             syncDisplayStateFromItem()
             itemId = item.id
-            FlareLog.debug("TimelineActionsView onAppear for item: \(item.id)")
-            FlareLog.debug("TimelineActionsView Initial display state - Like: \(displayLikeCount) (liked: \(displayIsLiked)), Retweet: \(displayRetweetCount) (retweeted: \(displayIsRetweeted)), Bookmark: \(displayBookmarkCount) (bookmarked: \(displayIsBookmarked))")
+//            FlareLog.debug("TimelineActionsView onAppear for item: \(item.id)")
+//            FlareLog.debug("TimelineActionsView Initial display state - Like: \(displayLikeCount) (liked: \(displayIsLiked)), Retweet: \(displayRetweetCount) (retweeted: \(displayIsRetweeted)), Bookmark: \(displayBookmarkCount) (bookmarked: \(displayIsBookmarked))")
         }
         .onChange(of: item.id) { newId in
             // 🔥 当item变化时，同步显示状态
             syncDisplayStateFromItem()
             itemId = newId
-            FlareLog.debug("TimelineActionsViewV2 Item changed to: \(newId)")
-            FlareLog.debug("TimelineActionsViewV2 Updated display state - Like: \(displayLikeCount) (liked: \(displayIsLiked)), Retweet: \(displayRetweetCount) (retweeted: \(displayIsRetweeted)), Bookmark: \(displayBookmarkCount) (bookmarked: \(displayIsBookmarked))")
+//            FlareLog.debug("TimelineActionsViewV2 Item changed to: \(newId)")
+//            FlareLog.debug("TimelineActionsViewV2 Updated display state - Like: \(displayLikeCount) (liked: \(displayIsLiked)), Retweet: \(displayRetweetCount) (retweeted: \(displayIsRetweeted)), Bookmark: \(displayBookmarkCount) (bookmarked: \(displayIsBookmarked))")
         }
     }
 
- 
     /// 🔥 同步显示状态从item
     private func syncDisplayStateFromItem() {
         displayLikeCount = item.likeCount
@@ -143,7 +141,6 @@ struct TimelineActionsViewV2: View {
         FlareLog.debug("TimelineActionsView Synced display state from item: Like \(displayLikeCount) (liked: \(displayIsLiked)), Retweet \(displayRetweetCount) (retweeted: \(displayIsRetweeted)), Bookmark \(displayBookmarkCount) (bookmarked: \(displayIsBookmarked))")
     }
 
- 
     /// 处理点赞操作
     private func handleLikeAction() {
         FlareLog.debug("TimelineActionsView LIKE BUTTON CLICKED! Item: \(item.id)")
@@ -239,7 +236,7 @@ struct TimelineActionsViewV2: View {
         performKMPAction(actionType: .reply)
     }
 
-     private func handleBookmarkAction() {
+    private func handleBookmarkAction() {
         FlareLog.debug("TimelineActionsView BOOKMARK BUTTON CLICKED! Item: \(item.id)")
 
         // 🎯 乐观更新：立即更新显示状态
@@ -284,9 +281,9 @@ struct TimelineActionsViewV2: View {
 
         // 找到对应的StatusAction并调用KMP
         for (index, action) in item.actions.enumerated() {
-            if case .item(let actionItem) = onEnum(of: action),
-               let clickable = actionItem as? StatusActionItemClickable {
-
+            if case let .item(actionItem) = onEnum(of: action),
+               let clickable = actionItem as? StatusActionItemClickable
+            {
                 // 根据类型匹配
                 let shouldExecute = switch actionType {
                 case .like: actionItem is StatusActionItemLike
@@ -319,7 +316,6 @@ struct TimelineActionsViewV2: View {
     }
 }
 
- 
 private struct ActionButtonV2: View {
     let iconImage: Image
     let count: Int
@@ -335,7 +331,7 @@ private struct ActionButtonV2: View {
                     .foregroundColor(isActive ? activeColor : .primary)
 
                 if count > 0 {
-                    Text("\(count)")
+                    Text("\(formatCount(Int64(count)))")
                         .foregroundColor(isActive ? activeColor : .primary)
                         .font(.caption)
                 }
@@ -345,11 +341,6 @@ private struct ActionButtonV2: View {
         .buttonStyle(BorderlessButtonStyle())
     }
 }
-
- 
-
-
- 
 
 enum TimelineActionType {
     case like

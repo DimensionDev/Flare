@@ -4,7 +4,7 @@ import SwiftUI
 
 struct SpaceScreen: View {
     let accountType: AccountType
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @State private var presenter: PodcastListPresenter
     @Environment(FlareTheme.self) private var theme
 
@@ -97,7 +97,7 @@ struct SpaceScreen: View {
 private struct PodcastRowView: View {
     let podcast: UiPodcast
     let accountType: AccountType
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {

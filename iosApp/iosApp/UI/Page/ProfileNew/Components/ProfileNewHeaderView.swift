@@ -23,6 +23,9 @@ class ProfileNewHeaderView: UIView {
     // 添加关注按钮回调
     var onFollowClick: ((UiRelation) -> Void)?
 
+    // 防重复设置事件的标志
+    private var hasSetupEvents = false
+
     private let bannerImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -271,11 +274,10 @@ class ProfileNewHeaderView: UIView {
         // 设置用户handle
         handleLabel.text = "\(userInfo.profile.handleWithoutFirstAt)"
 
-        // 设置头像 - 使用 Flare 优化的缓存配置
         if let url = URL(string: userInfo.profile.avatar) {
             avatarView.kf.setImage(
                 with: url,
-                options: FlareImageOptions.avatar(size: CGSize(width: 160, height: 160))
+                options: FlareImageOptions.timelineAvatar(size: CGSize(width: 160, height: 160))
             )
         }
 
@@ -463,12 +465,16 @@ class ProfileNewHeaderView: UIView {
     }
 
     private func setupEventHandlers() {
+        // 防止重复设置事件 - 检查是否已经有target
+        let existingTargets = followButton.allTargets
+        if !existingTargets.isEmpty {
+            os_log("[ProfileNewHeaderView] Button events already setup, skipping", log: .default, type: .debug)
+            return
+        }
+
         // 确保按钮可以响应事件
         followButton.isEnabled = true
         followButton.isUserInteractionEnabled = true
-
-        // 移除现有的目标，避免重复添加
-        followButton.removeTarget(nil, action: nil, for: .allEvents)
 
         // 添加按钮事件
         followButton.addTarget(self, action: #selector(handleFollowButtonTap), for: .touchUpInside)

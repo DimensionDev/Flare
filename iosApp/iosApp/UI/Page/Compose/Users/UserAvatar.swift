@@ -14,7 +14,7 @@ struct UserAvatar: View {
         case .square: RoundedRectangle(cornerRadius: 8)
         }
         KFImage(URL(string: data))
-            .flareAvatar(size: CGSize(width: size * 2, height: size * 2))
+            .flareTimelineAvatar(size: CGSize(width: size, height: size))
             .resizable()
             .scaledToFit()
             .frame(width: size, height: size)

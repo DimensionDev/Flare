@@ -11,13 +11,14 @@ import SwiftUI
 import UIKit
 
 // MARK: - Swift原生类型定义
-//enum SwiftAccountType {
+
+// enum SwiftAccountType {
 //    case specific(accountKey: String)
 //    case active
 //    case guest
-//}
+// }
 //
-//struct SwiftMicroBlogKey {
+// struct SwiftMicroBlogKey {
 //    let id: String
 //    let host: String
 //
@@ -25,7 +26,7 @@ import UIKit
 //        self.id = id
 //        self.host = host
 //    }
-//}
+// }
 
 struct TimelineStatusViewV2: View {
     let item: TimelineItem
@@ -42,7 +43,7 @@ struct TimelineStatusViewV2: View {
 
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
     // 媒体点击回调 - 使用Swift Media类型
@@ -52,9 +53,9 @@ struct TimelineStatusViewV2: View {
     private var viewModel: StatusViewModel? {
         // 暂时返回nil，后续需要从TimelineItem转换为StatusViewModel
         // 或者直接修改组件使用TimelineItem
-        return nil
+        nil
     }
-    
+
     var body: some View {
         // 🔥 新增：Timeline级别敏感内容隐藏检查
         if shouldHideInTimeline {
@@ -72,13 +73,13 @@ struct TimelineStatusViewV2: View {
 
         // 第一步：检查是否开启timeline隐藏功能
         guard sensitiveSettings.hideInTimeline else {
-            FlareLog.debug("TimelineStatusViewV2 SensitiveContent Timeline隐藏未开启 - item.id: \(item.id)")
+//            FlareLog.debug("TimelineStatusViewV2 SensitiveContent Timeline隐藏未开启 - item.id: \(item.id)")
             return false
         }
 
         // 第二步：检查内容是否为敏感内容
         guard item.sensitive else {
-            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 内容非敏感 - item.id: \(item.id)")
+//            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 内容非敏感 - item.id: \(item.id)")
             return false
         }
 
@@ -86,33 +87,31 @@ struct TimelineStatusViewV2: View {
         if let timeRange = sensitiveSettings.timeRange {
             // 有时间范围：只在时间范围内隐藏
             let shouldHide = timeRange.isCurrentTimeInRange()
-            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 时间范围检查 - item.id: \(item.id), shouldHide: \(shouldHide)")
+//            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 时间范围检查 - item.id: \(item.id), shouldHide: \(shouldHide)")
             return shouldHide
         } else {
             // 没有时间范围：总是隐藏敏感内容
-            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 总是隐藏敏感内容 - item.id: \(item.id)")
+//            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 总是隐藏敏感内容 - item.id: \(item.id)")
             return true
         }
     }
 
-    // MARK: - Timeline内容视图
-
     private var timelineContent: some View {
         // 添加详细日志
-        let _ = FlareLog.debug("TimelineStatusViewV2 渲染Timeline项目")
-        let _ = FlareLog.debug("TimelineStatusViewV2 item.id: \(item.id)")
-        let _ = FlareLog.debug("TimelineStatusViewV2 item.hasImages: \(item.hasImages)")
-        let _ = FlareLog.debug("TimelineStatusViewV2 item.images.count: \(item.images.count)")
-        let _ = FlareLog.debug("TimelineStatusViewV2 item.images: \(item.images)")
+//        let _ = FlareLog.debug("TimelineStatusViewV2 渲染Timeline项目")
+//        let _ = FlareLog.debug("TimelineStatusViewV2 item.id: \(item.id)")
+//        let _ = FlareLog.debug("TimelineStatusViewV2 item.hasImages: \(item.hasImages)")
+//        let _ = FlareLog.debug("TimelineStatusViewV2 item.images.count: \(item.images.count)")
+//        let _ = FlareLog.debug("TimelineStatusViewV2 item.images: \(item.images)")
 
         // 使用TimelineStatusView的结构
-        return VStack(alignment: .leading) {
+        VStack(alignment: .leading) {
             Spacer().frame(height: 2)
 
             // 🔥 新增：转发头部显示 - 条件显示topMessage
             if let topMessage = item.topMessage {
                 StatusRetweetHeaderComponentV2(topMessage: topMessage)
-                    .environmentObject(router)
+                    .environment(router)
                     .padding(.horizontal, 16)
                     .padding(.bottom, 4)
             }
@@ -131,7 +130,7 @@ struct TimelineStatusViewV2: View {
                 appSettings: appSettings,
                 theme: theme,
                 openURL: openURL,
-                onMediaClick: { index, media in
+                onMediaClick: { _, _ in
                     // TODO: 需要适配Swift Media类型的回调
                     // onMediaClick(index, media)
                 },
@@ -150,18 +149,18 @@ struct TimelineStatusViewV2: View {
 //                    parentView: self
 //                )
 //            } else {
-                // 暂时使用现有的V2 Actions (当viewModel为nil时)
-                TimelineActionsViewV2(
-                    item: item,
-                    onAction: { actionType, updatedItem in
-                        handleTimelineAction(actionType, item: updatedItem, at: index)
-                    }
-                )
+            // 暂时使用现有的V2 Actions (当viewModel为nil时)
+            TimelineActionsViewV2(
+                item: item,
+                onAction: { actionType, updatedItem in
+                    handleTimelineAction(actionType, item: updatedItem, at: index)
+                }
+            )
 //            }
 
             // Spacer().frame(height: 3)
         }
-         .padding(.horizontal, 16)
+        .padding(.horizontal, 16)
         .frame(alignment: .leading)
         .contentShape(Rectangle())
         .onTapGesture {
@@ -178,13 +177,13 @@ struct TimelineStatusViewV2: View {
             // 原逻辑依赖TimelineState和PagingStateSuccess，需要Swift原生实现
             Task {
                 // 暂时使用简化的预加载逻辑
-                if index > 0 && index % 10 == 0 {
+                if index > 0, index % 10 == 0 {
                     FlareLog.debug("TimelineItemRowView Simplified preload trigger at index: \(index)")
                 }
             }
         }
     }
-    
+
     // MARK: - 从TimelineStatusView复制的方法
 
     private func handleStatusTap() {
@@ -230,17 +229,17 @@ struct TimelineStatusViewV2: View {
         // 根据platformType推断默认host
         switch platformType.lowercased() {
         case "mastodon":
-            return "mastodon.social" // 默认Mastodon实例
+            "mastodon.social" // 默认Mastodon实例
         case "bluesky":
-            return "bsky.app"
+            "bsky.app"
         case "misskey":
-            return "misskey.io"
+            "misskey.io"
         case "xqt", "twitter":
-            return "x.com"
+            "x.com"
         case "vvo":
-            return "weibo.com"
+            "weibo.com"
         default:
-            return "unknown.host"
+            "unknown.host"
         }
     }
 
@@ -261,4 +260,3 @@ struct TimelineStatusViewV2: View {
         }
     }
 }
-

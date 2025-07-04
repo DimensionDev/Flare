@@ -5,24 +5,32 @@ import shared
 import SwiftUI
 import UIKit
 
-class FlareRouter: ObservableObject {
+@Observable
+class FlareRouter {
     public var appState: FlareAppState
 
-    @Environment(\.appSettings) private var appSettings
+    // 注意：@Observable类中不能使用@Environment，需要通过其他方式获取appSettings
 
     private var cancellables = Set<AnyCancellable>()
 
-    @Published var activeDestination: FlareDestination?
+    var activeDestination: FlareDestination?
 
-    @Published var presentationType: FlarePresentationType = .push
+    var presentationType: FlarePresentationType = .push
 
-    @Published var isSheetPresented: Bool = false
+    var isSheetPresented: Bool = false
 
-    @Published var isFullScreenPresented: Bool = false
+    var isFullScreenPresented: Bool = false
 
-    @Published var isDialogPresented: Bool = false
+    var isDialogPresented: Bool = false
 
-    @Published var previousPageSnapshot: UIImage? = nil
+    var previousPageSnapshot: UIImage?
+
+    // 新增：Tab选择管理
+    var selectedTab: FlareHomeTabs = .timeline {
+        didSet {
+            activeTab = selectedTab
+        }
+    }
 
     var navigationDepth: Int {
         let depth = switch activeTab {
@@ -42,13 +50,13 @@ class FlareRouter: ObservableObject {
         return depth
     }
 
-    @Published var menuNavigationPath = NavigationPath()
-    @Published var timelineNavigationPath = NavigationPath()
-    @Published var discoverNavigationPath = NavigationPath()
-    @Published var notificationNavigationPath = NavigationPath()
-    @Published var profileNavigationPath = NavigationPath()
+    var menuNavigationPath = NavigationPath()
+    var timelineNavigationPath = NavigationPath()
+    var discoverNavigationPath = NavigationPath()
+    var notificationNavigationPath = NavigationPath()
+    var profileNavigationPath = NavigationPath()
 
-    @Published var activeTab: FlareHomeTabs = .timeline
+    var activeTab: FlareHomeTabs = .timeline
 
     var navigationPath: NavigationPath {
         get { currentNavigationPath }
@@ -86,6 +94,24 @@ class FlareRouter: ObservableObject {
         case .profile: Binding(get: { self.profileNavigationPath }, set: { self.profileNavigationPath = $0 })
         case .compose: Binding(get: { NavigationPath() }, set: { _ in }) // 为compose返回空绑定
         }
+    }
+
+    subscript(tab: FlareHomeTabs) -> Binding<NavigationPath> {
+        navigationPathFor(tab)
+    }
+
+    func popToRoot(for tab: FlareHomeTabs) {
+        switch tab {
+        case .menu: menuNavigationPath = NavigationPath()
+        case .timeline: timelineNavigationPath = NavigationPath()
+        case .discover: discoverNavigationPath = NavigationPath()
+        case .notification: notificationNavigationPath = NavigationPath()
+        case .profile: profileNavigationPath = NavigationPath()
+        case .compose: break // Compose不需要导航路径
+        }
+
+        os_log("[FlareRouter] Popped to root for tab %{public}@",
+               log: .default, type: .debug, String(describing: tab))
     }
 
     init(appState: FlareAppState = FlareAppState()) {
@@ -190,7 +216,6 @@ class FlareRouter: ObservableObject {
             isDialogPresented = false
             activeDestination = nil
         case .push:
-
             switch activeTab {
             case .menu:
                 if !menuNavigationPath.isEmpty {
@@ -251,15 +276,11 @@ class FlareRouter: ObservableObject {
         }
 
         // 根据设置决定使用哪种浏览器打开
-        if appSettings.otherSettings.preferredBrowser == .inAppSafari {
-            Task { @MainActor in
-                _ = await SafariManager.shared.open(url)
-            }
-            return true
-        } else {
-            UIApplication.shared.open(url)
-            return true
+        // 注意：@Observable类中无法直接使用@Environment，暂时使用默认的应用内Safari
+        Task { @MainActor in
+            _ = await SafariManager.shared.open(url)
         }
+        return true
     }
 
     private func convertRouteToDestination(_ route: AppleRoute) -> FlareDestination {
@@ -290,7 +311,6 @@ class FlareRouter: ObservableObject {
             return .deleteStatus(accountType: route.accountType, statusKey: route.statusKey)
 
         case is AppleRoute.Compose:
-
             let routeType = String(describing: type(of: route))
 
             if routeType.contains("New") {

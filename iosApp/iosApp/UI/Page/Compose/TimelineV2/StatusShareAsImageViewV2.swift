@@ -39,10 +39,10 @@ struct StatusShareAsImageViewV2: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.appSettings) private var appSettings
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
-    let content: TimelineStatusViewV2  // ✅ 修改：使用TimelineStatusViewV2
+    let content: TimelineStatusViewV2 // ✅ 修改：使用TimelineStatusViewV2
     let renderer: ImageRenderer<AnyView>
     @State private var capturedImage: UIImage?
     @State private var isImageReady: Bool = false
@@ -109,7 +109,7 @@ struct StatusShareAsImageViewV2: View {
                 .environment(\.appSettings, appSettings)
                 .environment(\.colorScheme, colorScheme)
                 .environment(\.isInCaptureMode, true)
-                .environmentObject(router)
+                .environment(router)
                 .environment(theme).applyTheme(theme)
 
             // 增加延迟时间，确保敏感内容和媒体完全加载后再截图

@@ -199,9 +199,6 @@ public class ProfilePresenter(
             tabs = tabs,
         ) {
             override suspend fun refresh() {
-//                userState.onSuccess {
-//                    it.refresh()
-//                }
                 tabs.onSuccess {
                     it.toImmutableList().forEach {
                         when (it) {

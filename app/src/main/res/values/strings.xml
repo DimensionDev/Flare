@@ -43,8 +43,8 @@
     <string name="settings_storage_subtitle">Manage Flare\'s storage</string>
     <string name="settings_about_title">About</string>
     <string name="settings_about_subtitle">Learn more about Flare</string>
-    <string name="settings_tab_customization">Tab customization</string>
-    <string name="settings_tab_customization_description">Customize the tabs on the home screen</string>
+    <string name="settings_side_panel">Side Panel customization</string>
+    <string name="settings_side_panel_description">Customize the side panel</string>
     <string name="settings_local_filter_title">Local filter</string>
     <string name="settings_local_filter_description">Local filter settings for timeline</string>
     <string name="settings_guest_setting_title">Guest Mode Host</string>
@@ -182,6 +182,7 @@
     <string name="media_save_fail">Failed to save</string>
     <string name="media_alt_text">Alt text</string>
 
+    <string name="settings_side_panel_empty">Default will display side panel depends on the account platform.</string>
     <string name="tab_settings_add">Add</string>
     <string name="tab_settings_drag">Drag</string>
     <string name="tab_settings_edit">Edit</string>

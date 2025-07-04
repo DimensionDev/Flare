@@ -8,7 +8,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -44,6 +46,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -52,6 +55,7 @@ import compose.icons.fontawesomeicons.solid.CircleMinus
 import compose.icons.fontawesomeicons.solid.CirclePlus
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.TableList
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.Bluesky.FeedTabItem
@@ -61,7 +65,6 @@ import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.Misskey
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TabMetaData
-import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.resId
 import dev.dimension.flare.data.model.toIcon
@@ -77,7 +80,6 @@ import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
@@ -128,7 +130,7 @@ internal fun TabCustomizeScreen(
         topBar = {
             FlareTopAppBar(
                 title = {
-                    Text(text = stringResource(id = R.string.settings_tab_customization))
+                    Text(text = stringResource(id = R.string.settings_side_panel))
                 },
                 navigationIcon = {
                     BackButton(onBack = onBack)
@@ -154,66 +156,50 @@ internal fun TabCustomizeScreen(
                 state.moveTab(from.key, to.key)
                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
             }
+        if (state.tabs.isEmpty()) {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+            ) {
+                FAIcon(
+                    FontAwesomeIcons.Solid.TableList,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                )
+                Text(
+                    stringResource(R.string.settings_side_panel_empty),
+                    style = MaterialTheme.typography.titleSmall,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        }
         LazyColumn(
             state = lazyListState,
             contentPadding = it,
         ) {
             items(
                 state.tabs,
-                key = { item ->
-                    when (item) {
-                        is ActualTabItem -> item.key
-                        PrimaryTabItemState -> "primary"
-                        SecondaryTabItemState -> SecondaryTabItemState.key
-                    }
-                },
+                key = { item -> item.key },
             ) { item ->
-                when (item) {
-                    is ActualTabItem -> {
-                        TabCustomItem(
-                            item = item.tabItem,
-                            deleteTab = state::deleteTab,
-                            editTab = {
-                                state.setEditTab(it)
-                            },
-                            reorderableLazyColumnState = reorderableLazyColumnState,
-                            canSwipeToDelete = state.canSwipeToDelete,
-                        )
-                    }
-
-                    PrimaryTabItemState -> {
-                        ListItem(
-                            headlineContent = {
-                                Text(text = stringResource(id = R.string.tab_settings_primary))
-                            },
-                        )
-                    }
-
-                    SecondaryTabItemState -> {
-                        ReorderableItem(
-                            state = reorderableLazyColumnState,
-                            key = SecondaryTabItemState.key,
-                        ) {
-                            ListItem(
-                                headlineContent = {
-                                    Text(text = stringResource(id = R.string.tab_settings_secondary))
-                                },
-                            )
-                        }
-                    }
-                }
+                TabCustomItem(
+                    item = item,
+                    deleteTab = state::deleteTab,
+                    editTab = {
+                        state.setEditTab(it)
+                    },
+                    reorderableLazyColumnState = reorderableLazyColumnState,
+                    canSwipeToDelete = state.canSwipeToDelete,
+                )
             }
         }
     }
     if (state.showAddTab) {
         TabAddBottomSheet(
-            tabs =
-                remember(state.tabs) {
-                    state.tabs
-                        .filterIsInstance<ActualTabItem>()
-                        .map { it.tabItem }
-                        .toImmutableList()
-                },
+            tabs = state.tabs.toImmutableList(),
             allTabs = state.allTabs,
             onDismissRequest = {
                 state.setAddTab(false)
@@ -544,27 +530,17 @@ private fun presenter(
     val tabSettings by repository.tabSettings.collectAsUiState()
     val cacheTabs =
         remember {
-            mutableStateListOf<TabItemState>()
+            mutableStateListOf<TabItem>()
         }
     var showAddTab by remember { mutableStateOf(false) }
     var selectedEditTab by remember { mutableStateOf<TabItem?>(null) }
     tabSettings
         .onSuccess {
-//            LaunchedEffect(it.items.size) {
-//                cacheTabs.clear()
-//                cacheTabs.add(PrimaryTabItemState)
-//                cacheTabs.addAll(it.items.map { ActualTabItem(it) })
-//                cacheTabs.add(SecondaryTabItemState)
-//                it.secondaryItems?.let { secondaryItems ->
-//                    cacheTabs.addAll(secondaryItems.map { ActualTabItem(it) })
-//                }
-//            }
-        }.onError {
-            LaunchedEffect(Unit) {
+            LaunchedEffect(it.secondaryItems?.size) {
                 cacheTabs.clear()
-                cacheTabs.add(PrimaryTabItemState)
-                cacheTabs.addAll(TimelineTabItem.default.map { ActualTabItem(it) })
-                cacheTabs.add(SecondaryTabItemState)
+                it.secondaryItems?.let { secondaryItems ->
+                    cacheTabs.addAll(secondaryItems)
+                }
             }
         }
 //    val except = remember(cacheTabs) {
@@ -576,7 +552,7 @@ private fun presenter(
         val tabs = cacheTabs
         val allTabs = allTabs
         val showAddTab = showAddTab
-        val canSwipeToDelete = cacheTabs.filterIsInstance<ActualTabItem>().size > 1
+        val canSwipeToDelete = true
         val selectedEditTab = selectedEditTab
 
         fun moveTab(
@@ -590,25 +566,16 @@ private fun presenter(
 
         fun commit() {
             appScope.launch {
-//                repository.updateTabSettings {
-//                    copy(
-//                        items =
-//                            cacheTabs
-//                                .subList(1, cacheTabs.indexOfFirst { it is SecondaryTabItemState })
-//                                .map { (it as ActualTabItem).tabItem }
-//                                .toImmutableList(),
-//                        secondaryItems =
-//                            cacheTabs
-//                                .subList(
-//                                    cacheTabs.indexOfFirst { it is SecondaryTabItemState } + 1,
-//                                    cacheTabs.size,
-//                                ).map { (it as ActualTabItem).tabItem }
-//                                .toImmutableList()
-//                                .takeIf {
-//                                    it.isNotEmpty()
-//                                },
-//                    )
-//                }
+                repository.updateTabSettings {
+                    copy(
+                        secondaryItems =
+                            cacheTabs
+                                .toImmutableList()
+                                .takeIf {
+                                    it.isNotEmpty()
+                                },
+                    )
+                }
             }
         }
 
@@ -625,7 +592,7 @@ private fun presenter(
         }
 
         fun addTab(tab: TabItem) {
-            cacheTabs.add(ActualTabItem(tab))
+            cacheTabs.add(tab)
         }
 
         fun setEditTab(tab: TabItem?) {
@@ -634,34 +601,9 @@ private fun presenter(
 
         fun updateTab(tab: TabItem) {
             val index = cacheTabs.indexOfFirst { it.key == tab.key }
-            cacheTabs[index] = ActualTabItem(tab)
+            cacheTabs[index] = tab
         }
     }
-}
-
-@Immutable
-private sealed interface TabItemState {
-    val key: String
-}
-
-@Immutable
-private data object PrimaryTabItemState : TabItemState {
-    override val key: String
-        get() = "primary"
-}
-
-@Immutable
-private data object SecondaryTabItemState : TabItemState {
-    override val key: String
-        get() = "secondary"
-}
-
-@Immutable
-private data class ActualTabItem(
-    val tabItem: TabItem,
-) : TabItemState {
-    override val key: String
-        get() = tabItem.key
 }
 
 @Immutable

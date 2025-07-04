@@ -6,7 +6,7 @@ import SwiftUI
 struct StatusRetweetHeaderComponentV2: View {
     let topMessage: TopMessage
     @Environment(FlareTheme.self) private var theme
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
 
     var body: some View {
         let text = getLocalizedText(for: topMessage.type)

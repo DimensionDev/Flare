@@ -8,9 +8,9 @@ private let logger = Logger(subsystem: "com.flare.app", category: "AllListsView"
 
 struct AllListsView: View {
     @State private var presenter: AllListPresenter
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @Environment(\.appSettings) private var appSettings
-    @EnvironmentObject private var appState: FlareAppState
+    @Environment(FlareAppState.self) private var appState
     @State private var lastKnownItemCount: Int = 0
     @State private var currentUser: UiUserV2?
     @State private var isMastodonUser: Bool = false
@@ -119,7 +119,7 @@ struct AllListsView: View {
 private struct EnhancedListRowView: View {
     let list: UiList
     @State private var isPinned: Bool
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     let accountType: AccountType
     let defaultUser: UiUserV2?
     @Environment(FlareTheme.self) private var theme

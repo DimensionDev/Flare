@@ -3,31 +3,30 @@ import shared
 import SwiftUI
 
 struct FlareTabItem<Content: View>: View {
-    @ObservedObject var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
 
     let tabType: FlareHomeTabs
 
-    let content: (FlareRouter) -> Content
+    let content: () -> Content
 
-    @EnvironmentObject private var appState: FlareAppState
+    @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
 
-    init(router: FlareRouter, tabType: FlareHomeTabs, @ViewBuilder content: @escaping (FlareRouter) -> Content) {
-        self.router = router
+    init(tabType: FlareHomeTabs, @ViewBuilder content: @escaping () -> Content) {
         self.tabType = tabType
         self.content = content
 
-        os_log("[FlareTabItem] Initialized with router: %{public}@, tab: %{public}@",
+        os_log("[FlareTabItem] Initialized with tab: %{public}@",
                log: .default, type: .debug,
-               String(describing: ObjectIdentifier(router)),
                String(describing: tabType))
     }
 
     var body: some View {
         NavigationStackWrapper(path: router.navigationPathFor(tabType)) {
-            content(router)
+            content()
                 .navigationDestination(for: FlareDestination.self) { destination in
-                    FlareDestinationView(destination: destination, router: router, appState: appState)
+                    FlareDestinationView(destination: destination, router: router)
+                        .environment(appState)
                 }
                 .background(theme.primaryBackgroundColor)
                 .foregroundColor(theme.labelColor)
@@ -47,6 +46,6 @@ struct FlareTabItem<Content: View>: View {
                 .systemAction
             }
         })
-        .environmentObject(router)
+        .environment(router)
     }
 }

@@ -9,8 +9,8 @@ struct TabContentViewSwiftUI: View {
     @Binding var showFloatingButton: Bool
 
     @State private var scrollPositions: [String: String] = [:]
-    @EnvironmentObject private var appState: FlareAppState
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareAppState.self) private var appState
+    @Environment(FlareRouter.self) private var router
 
     var body: some View {
         ZStack {

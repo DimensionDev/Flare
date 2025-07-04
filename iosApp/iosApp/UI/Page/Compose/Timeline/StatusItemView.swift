@@ -4,7 +4,7 @@ import SwiftUI
 struct StatusItemView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
 
     let data: UiTimeline
     let detailKey: MicroBlogKey?

@@ -12,8 +12,8 @@ struct HomeTabViewContent: View {
 
     let accountType: AccountType
 
-    @StateObject private var appState = FlareAppState()
-    @EnvironmentObject private var router: FlareRouter
+    @State private var appState = FlareAppState()
+    @Environment(FlareRouter.self) private var router
 
     @Namespace private var tabBarNamespace
 
@@ -42,15 +42,15 @@ struct HomeTabViewContent: View {
 
         return ZStack(alignment: .bottom) {
             TabView(selection: $selectedTab) {
-                Tab(value: .menu) {
-                    FlareTabItem(router: router, tabType: .menu) { _ in
+                Tab(value: FlareHomeTabs.menu) {
+                    FlareTabItem(tabType: .menu) {
                         FlareMenuView()
                     }.id("FlareTabItem_menu")
-                        .environmentObject(appState)
+                        .environment(appState)
                 }.customizationID("tabview_menu")
 
-                Tab(value: .timeline) {
-                    FlareTabItem(router: router, tabType: .timeline) { _ in
+                Tab(value: FlareHomeTabs.timeline) {
+                    FlareTabItem(tabType: .timeline) {
                         HomeTabScreenSwiftUI(
                             accountType: accountType,
                             scrollToTopTrigger: $scrollToTopTrigger,
@@ -62,39 +62,38 @@ struct HomeTabViewContent: View {
                             }
                         )
                     }.id("FlareTabItem_home")
-                        .environmentObject(appState)
+                        .environment(appState)
                 }.customizationID("tabview_home")
 
                 if !(accountType is AccountTypeGuest) {
-                    Tab(value: .notification) {
-                        FlareTabItem(router: router, tabType: .notification) {
-                            _ in NotificationTabScreen(accountType: accountType)
+                    Tab(value: FlareHomeTabs.notification) {
+                        FlareTabItem(tabType: .notification) {
+                            NotificationTabScreen(accountType: accountType)
                         }
                         .id("FlareTabItem_notification")
-                        .environmentObject(
-                            appState)
+                        .environment(appState)
                     }.customizationID("tabview_notification")
                 }
 
-                Tab(value: .discover) {
-                    FlareTabItem(router: router, tabType: .discover) { _ in
+                Tab(value: FlareHomeTabs.discover) {
+                    FlareTabItem(tabType: .discover) {
                         DiscoverTabScreen(
                             accountType: accountType
                         )
                     }.id("FlareTabItem_discover")
-                        .environmentObject(appState)
+                        .environment(appState)
                 }.customizationID("tabview_discover")
 
                 if !(accountType is AccountTypeGuest) {
-                    Tab(value: .profile) {
-                        FlareTabItem(router: router, tabType: .profile) { _ in
+                    Tab(value: FlareHomeTabs.profile) {
+                        FlareTabItem(tabType: .profile) {
                             ProfileTabScreenUikit(
                                 accountType: accountType, userKey: nil,
                                 toProfileMedia: { _ in }
                             )
                         }
                         .id("FlareTabItem_profile")
-                        .environmentObject(appState)
+                        .environment(appState)
                     }.customizationID("tabview_profile")
                 }
             }

@@ -11,7 +11,7 @@ import UIKit
 
 struct StatusHeaderView: View {
     let viewModel: StatusViewModel
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
@@ -23,7 +23,7 @@ struct StatusHeaderView: View {
                         topEndContent: viewModel.statusData.topEndContent as? UiTimelineItemContentStatusTopEndContent
                     )
                     .id("UserComponent_\(user.key)")
-                    .environmentObject(router)
+                    .environment(router)
                 }
 
                 Spacer()

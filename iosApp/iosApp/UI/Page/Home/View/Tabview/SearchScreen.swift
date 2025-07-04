@@ -45,8 +45,10 @@ struct SearchScreen: View {
                     StatusTimelineComponent(
                         data: state.status,
                         detailKey: nil
-                    ).listRowBackground(theme.primaryBackgroundColor)
-                }.listRowBackground(theme.primaryBackgroundColor)
+                    )
+                     .listStyle(.plain)
+                     .listRowBackground(theme.primaryBackgroundColor)
+                }.listStyle(.plain).listRowBackground(theme.primaryBackgroundColor)
             }
         }
     }

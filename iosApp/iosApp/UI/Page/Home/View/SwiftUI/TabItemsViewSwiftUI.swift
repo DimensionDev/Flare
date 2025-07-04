@@ -33,19 +33,15 @@ struct TabItemsViewSwiftUI: View {
                                     }
                                 }
 
-                            if selection == item.key {
+
+                            let isSelected = selection == item.key ||
+                                           (selection.isEmpty && item.key == items.first?.key)
+
+                            if isSelected {
                                 Rectangle()
                                     .fill(theme.tintColor)
                                     .frame(height: 2)
                                     .matchedGeometryEffect(id: "activeTab", in: tabNamespace)
-                            } else if selection == "", item.key == items.first?.key {
-                                // first key , show active tab ,home
-
-                                Rectangle()
-                                    .fill(theme.tintColor)
-                                    .frame(height: 2)
-                                    .matchedGeometryEffect(id: "activeTab", in: tabNamespace)
-
                             } else {
                                 Rectangle()
                                     .fill(Color.clear)

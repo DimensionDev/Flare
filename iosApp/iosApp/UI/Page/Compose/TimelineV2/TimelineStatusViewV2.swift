@@ -42,7 +42,7 @@ struct TimelineStatusViewV2: View {
 
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
     // 媒体点击回调 - 使用Swift Media类型
@@ -72,13 +72,13 @@ struct TimelineStatusViewV2: View {
 
         // 第一步：检查是否开启timeline隐藏功能
         guard sensitiveSettings.hideInTimeline else {
-            FlareLog.debug("TimelineStatusViewV2 SensitiveContent Timeline隐藏未开启 - item.id: \(item.id)")
+//            FlareLog.debug("TimelineStatusViewV2 SensitiveContent Timeline隐藏未开启 - item.id: \(item.id)")
             return false
         }
 
         // 第二步：检查内容是否为敏感内容
         guard item.sensitive else {
-            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 内容非敏感 - item.id: \(item.id)")
+//            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 内容非敏感 - item.id: \(item.id)")
             return false
         }
 
@@ -86,24 +86,23 @@ struct TimelineStatusViewV2: View {
         if let timeRange = sensitiveSettings.timeRange {
             // 有时间范围：只在时间范围内隐藏
             let shouldHide = timeRange.isCurrentTimeInRange()
-            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 时间范围检查 - item.id: \(item.id), shouldHide: \(shouldHide)")
+//            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 时间范围检查 - item.id: \(item.id), shouldHide: \(shouldHide)")
             return shouldHide
         } else {
             // 没有时间范围：总是隐藏敏感内容
-            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 总是隐藏敏感内容 - item.id: \(item.id)")
+//            FlareLog.debug("TimelineStatusViewV2 SensitiveContent 总是隐藏敏感内容 - item.id: \(item.id)")
             return true
         }
     }
 
-    // MARK: - Timeline内容视图
 
     private var timelineContent: some View {
         // 添加详细日志
-        let _ = FlareLog.debug("TimelineStatusViewV2 渲染Timeline项目")
-        let _ = FlareLog.debug("TimelineStatusViewV2 item.id: \(item.id)")
-        let _ = FlareLog.debug("TimelineStatusViewV2 item.hasImages: \(item.hasImages)")
-        let _ = FlareLog.debug("TimelineStatusViewV2 item.images.count: \(item.images.count)")
-        let _ = FlareLog.debug("TimelineStatusViewV2 item.images: \(item.images)")
+//        let _ = FlareLog.debug("TimelineStatusViewV2 渲染Timeline项目")
+//        let _ = FlareLog.debug("TimelineStatusViewV2 item.id: \(item.id)")
+//        let _ = FlareLog.debug("TimelineStatusViewV2 item.hasImages: \(item.hasImages)")
+//        let _ = FlareLog.debug("TimelineStatusViewV2 item.images.count: \(item.images.count)")
+//        let _ = FlareLog.debug("TimelineStatusViewV2 item.images: \(item.images)")
 
         // 使用TimelineStatusView的结构
         return VStack(alignment: .leading) {
@@ -112,7 +111,7 @@ struct TimelineStatusViewV2: View {
             // 🔥 新增：转发头部显示 - 条件显示topMessage
             if let topMessage = item.topMessage {
                 StatusRetweetHeaderComponentV2(topMessage: topMessage)
-                    .environmentObject(router)
+                    .environment(router)
                     .padding(.horizontal, 16)
                     .padding(.bottom, 4)
             }

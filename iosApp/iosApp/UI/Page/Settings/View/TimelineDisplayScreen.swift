@@ -49,6 +49,33 @@ struct TimelineDisplayScreen: View {
                     })
                 }.listRowBackground(theme.primaryBackgroundColor)
 
+                // Timeline版本选择部分
+                Section("Timeline Version") {
+                    Picker(selection: Binding(get: {
+                        appSettings.appearanceSettings.timelineVersion
+                    }, set: { value in
+                        // 更新设置
+                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.timelineVersion, to: value))
+
+                        // 同步到TimelineVersionManager 
+                        let managerVersion = value.toManagerVersion()
+                        TimelineVersionManager.shared.updateFromSettings(managerVersion)
+                    }), content: {
+                        ForEach(TimelineVersionSetting.allCases, id: \.self) { version in
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(version.title)
+                                    .font(.body)
+                                Text(version.description)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .tag(version)
+                        }
+                    }, label: {
+                        Text("Timeline Version")
+                    })
+                }.listRowBackground(theme.primaryBackgroundColor)
+
                 // 界面元素设置
                 Section("Interface Elements") {
                     // 头像形状

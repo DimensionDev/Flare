@@ -18,7 +18,7 @@ struct TimelineStatusView: View {
 
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
     let onMediaClick: (Int, UiMedia) -> Void

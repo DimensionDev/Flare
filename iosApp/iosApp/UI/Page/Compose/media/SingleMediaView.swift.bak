@@ -1,7 +1,7 @@
 import Kingfisher
 import SwiftUI
 
-// tweet 方格 单个 Media View ，最底层的了
+ 
 public struct SingleMediaView: View {
     let viewModel: FeedMediaViewModel
     let isSingleVideo: Bool
@@ -9,25 +9,49 @@ public struct SingleMediaView: View {
     let action: () -> Void
     @Environment(FlareTheme.self) private var theme
 
+     private var intelligentDownloadSize: CGSize {
+         let containerWidth: CGFloat = 600  
+        let containerHeight: CGFloat = 280  
+
+        if isSingleVideo {
+             return CGSize(width: containerWidth, height: containerHeight)
+        } else { 
+            let gridSpacing: CGFloat = 8 
+            let gridItemWidth = (containerWidth - gridSpacing) / 2
+            let gridItemHeight = (containerHeight - gridSpacing) / 2
+            return CGSize(width: gridItemWidth, height: gridItemHeight)
+        }
+    }
+
     public var body: some View {
-        GeometryReader { geometry in
+        //  AsyncImage(url: viewModel.previewUrl) { image in
+        //         image.resizable()
+        //     } placeholder: {
+        //         ProgressView()
+        //     }
+        Rectangle()
+            .foregroundColor(.clear)
+            .overlay {
+                // GeometryReader { geometry in
                 ZStack {
                     if let previewUrl = viewModel.previewUrl {
-                        KFImage(previewUrl)
+                        KFImage(previewUrl) 
+                            .flareTimelineMedia(size: intelligentDownloadSize)
                             .placeholder {
                                 Rectangle()
                                     .foregroundColor(.gray.opacity(0.2))
                             }
                             .resizable()
                             .aspectRatio(fixedAspectRatio, contentMode: .fill)
-                        .frame(width: geometry.size.width, height: geometry.size.height)
-                        .clipped()
+                        // .frame(width: geometry.size.width, height: geometry.size.height)
+                        // .clipped()
 
                     } else {
                         Rectangle()
                             .foregroundColor(.gray.opacity(0.2))
                     }
                 }
+                .clipped()
                 .contentShape(Rectangle())
                 .overlay {
                     if viewModel.mediaKind == .video {

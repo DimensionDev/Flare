@@ -8,9 +8,9 @@ private let logger = Logger(subsystem: "com.flare.app", category: "AllFeedsView"
 
 struct AllFeedsView: View {
     @State private var presenter: PinnableTimelineTabPresenter
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @Environment(\.appSettings) private var appSettings
-    @EnvironmentObject private var appState: FlareAppState
+    @Environment(FlareAppState.self) private var appState
     @State private var lastKnownItemCount: Int = 0
     @State private var currentUser: UiUserV2?
     @State private var isMissingFeedData: Bool = false
@@ -178,7 +178,7 @@ struct AllFeedsView: View {
 private struct EnhancedFeedRowView: View {
     let list: UiList
     @State private var isPinned: Bool
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     let accountType: AccountType
 
     init(list: UiList, accountType: AccountType, isPinned: Bool) {

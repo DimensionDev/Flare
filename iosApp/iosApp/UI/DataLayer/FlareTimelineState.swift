@@ -248,24 +248,24 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         var bookmarkCount = 0
         var isBookmarked = false
 
-        FlareLog.debug("TimelineItem Extracting state for item: \(id)")
-        FlareLog.debug("TimelineItem Processing \(actions.count) actions")
+//        FlareLog.debug("TimelineItem Extracting state for item: \(id)")
+//        FlareLog.debug("TimelineItem Processing \(actions.count) actions")
 
         for (index, action) in actions.enumerated() {
             if case let .item(item) = onEnum(of: action) {
                 if let likeAction = item as? StatusActionItemLike {
                     likeCount = Int(likeAction.count)
                     isLiked = likeAction.liked
-                    FlareLog.debug("TimelineItem Action[\(index)] Like - count: \(likeCount), liked: \(isLiked)")
+//                    FlareLog.debug("TimelineItem Action[\(index)] Like - count: \(likeCount), liked: \(isLiked)")
                 } else if let retweetAction = item as? StatusActionItemRetweet {
                     retweetCount = Int(retweetAction.count)
                     isRetweeted = retweetAction.retweeted
-                    FlareLog.debug("TimelineItem Action[\(index)] Retweet - count: \(retweetCount), retweeted: \(isRetweeted)")
+//                    FlareLog.debug("TimelineItem Action[\(index)] Retweet - count: \(retweetCount), retweeted: \(isRetweeted)")
                 } else if let replyAction = item as? StatusActionItemReply {
                     replyCount = Int(replyAction.count)
-                    FlareLog.debug("TimelineItem Action[\(index)] Reply - count: \(replyCount)")
+//                    FlareLog.debug("TimelineItem Action[\(index)] Reply - count: \(replyCount)")
                 } else {
-                    FlareLog.debug("TimelineItem Action[\(index)] Other - type: \(type(of: item))")
+//                    FlareLog.debug("TimelineItem Action[\(index)] Other - type: \(type(of: item))")
                 }
             } else if case let .group(group) = onEnum(of: action) {
                 FlareLog.debug("TimelineItem Action[\(index)] Group - displayItem: \(type(of: group.displayItem))")
@@ -277,19 +277,19 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
                         if let retweetItem = subItem as? StatusActionItemRetweet {
                             retweetCount = Int(retweetItem.count)
                             isRetweeted = retweetItem.retweeted
-                            FlareLog.debug("TimelineItem SubAction[\(subIndex)] Retweet - count: \(retweetCount), retweeted: \(isRetweeted)")
+//                            FlareLog.debug("TimelineItem SubAction[\(subIndex)] Retweet - count: \(retweetCount), retweeted: \(isRetweeted)")
                         } else if let bookmarkItem = subItem as? StatusActionItemBookmark {
                             bookmarkCount = Int(bookmarkItem.count)
                             isBookmarked = bookmarkItem.bookmarked
-                            FlareLog.debug("TimelineItem SubAction[\(subIndex)] Bookmark - count: \(bookmarkCount), bookmarked: \(isBookmarked)")
+//                            FlareLog.debug("TimelineItem SubAction[\(subIndex)] Bookmark - count: \(bookmarkCount), bookmarked: \(isBookmarked)")
                         } else if let quoteItem = subItem as? StatusActionItemQuote {
                             // Quote暂时不处理，但记录日志
-                            FlareLog.debug("TimelineItem SubAction[\(subIndex)] Quote - count: \(quoteItem.count)")
+//                            FlareLog.debug("TimelineItem SubAction[\(subIndex)] Quote - count: \(quoteItem.count)")
                         }
                     case .group:
-                        FlareLog.debug("TimelineItem SubAction[\(subIndex)] Nested Group")
+                        break // FlareLog.debug("TimelineItem SubAction[\(subIndex)] Nested Group")
                     case .asyncActionItem:
-                        FlareLog.debug("TimelineItem SubAction[\(subIndex)] Async Action")
+                        break // FlareLog.debug("TimelineItem SubAction[\(subIndex)] Async Action")
                     }
                 }
             }
@@ -303,11 +303,11 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         self.bookmarkCount = bookmarkCount
         self.isBookmarked = isBookmarked
 
-        FlareLog.debug("TimelineItem Final state for \(id):")
-        FlareLog.debug("   Like: \(likeCount) (liked: \(isLiked))")
-        FlareLog.debug("   Retweet: \(retweetCount) (retweeted: \(isRetweeted))")
-        FlareLog.debug("   Reply: \(replyCount)")
-        FlareLog.debug("   Bookmark: \(bookmarkCount) (bookmarked: \(isBookmarked))")
+//        FlareLog.debug("TimelineItem Final state for \(id):")
+//        FlareLog.debug("   Like: \(likeCount) (liked: \(isLiked))")
+//        FlareLog.debug("   Retweet: \(retweetCount) (retweeted: \(isRetweeted))")
+//        FlareLog.debug("   Reply: \(replyCount)")
+//        FlareLog.debug("   Bookmark: \(bookmarkCount) (bookmarked: \(isBookmarked))")
     }
 
      mutating func updateLikeState(liked: Bool) {
@@ -359,7 +359,7 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         if let statusContent = uiTimeline.content as? UiTimelineItemContentStatus {
             let status = statusContent
 
-            FlareLog.debug("TimelineItem Creating item \(status.statusKey.id) with \(status.actions.count) actions")
+//            FlareLog.debug("TimelineItem Creating item \(status.statusKey.id) with \(status.actions.count) actions")
 
             // 🔥 新增：处理topMessage转换
             let topMessage = uiTimeline.topMessage?.toSwift()
@@ -739,7 +739,7 @@ extension UiMedia {
         if let image = self as? UiMediaImage {
             return Media(
                 url: image.url,
-                previewUrl: image.url,
+                previewUrl: cleanPreviewUrl(image.url, for: .image),
                 type: .image,
                 altText: image.description_,
                 width: Int(image.width),
@@ -748,7 +748,7 @@ extension UiMedia {
         } else if let video = self as? UiMediaVideo {
             return Media(
                 url: video.url,
-                previewUrl: video.thumbnailUrl, // ✅ 修复：使用thumbnailUrl作为previewUrl
+                previewUrl: cleanPreviewUrl(video.thumbnailUrl, for: .video), // ✅ 修复：使用thumbnailUrl作为previewUrl并清理
                 type: .video,
                 altText: video.description_,
                 width: Int(video.width),
@@ -757,7 +757,7 @@ extension UiMedia {
         } else if let gif = self as? UiMediaGif {
             return Media(
                 url: gif.url,
-                previewUrl: gif.previewUrl,
+                previewUrl: cleanPreviewUrl(gif.previewUrl, for: .gif),
                 type: .gif,
                 altText: gif.description_,
                 width: Int(gif.width),
@@ -766,7 +766,7 @@ extension UiMedia {
         } else if let audio = self as? UiMediaAudio {
             return Media(
                 url: audio.url,
-                previewUrl: audio.previewUrl,
+                previewUrl: audio.previewUrl, // 音频不处理 previewUrl
                 type: .audio,
                 altText: audio.description_,
                 width: nil,
@@ -782,6 +782,24 @@ extension UiMedia {
                 width: nil,
                 height: nil
             )
+        }
+    }
+
+
+    private func cleanPreviewUrl(_ url: String?, for type: TimelineMediaType) -> String? {
+        guard let url = url else { return nil }
+
+
+        switch type {
+        case .image, .video, .gif:
+
+            if url.hasSuffix("?name=orig") {
+                return String(url.dropLast("?name=orig".count))
+            }
+            return url
+        case .audio:
+
+            return url
         }
     }
 }

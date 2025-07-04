@@ -43,6 +43,23 @@ import SwiftUI
                         isCurrentTab: isCurrentTab,
                         showFloatingButton: $showFloatingButton
                 )
+            case .v3_0:
+                 TimelineViewSwiftUIV3(
+                        tab: tab,
+                        store: store,
+                        scrollPositionID: $scrollPositionID,
+                        scrollToTopTrigger: $scrollToTopTrigger,
+                        isCurrentTab: isCurrentTab,
+                        showFloatingButton: $showFloatingButton
+                    )
+            case .v4_0:
+                    TimelineViewSwiftUIV4(
+                        tab: tab,
+                        store: store,
+                        scrollToTopTrigger: $scrollToTopTrigger,
+                        isCurrentTab: isCurrentTab,
+                        showFloatingButton: $showFloatingButton
+                    )
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: .timelineVersionChanged)) { _ in

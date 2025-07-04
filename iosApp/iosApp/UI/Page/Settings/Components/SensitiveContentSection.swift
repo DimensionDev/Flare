@@ -77,6 +77,9 @@ struct SensitiveContentSection: View {
                             set: { value in
                                 let newSettings = appSettings.appearanceSettings.sensitiveContentSettings.changing(path: \.hideInTimeline, to: value)
                                 appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.sensitiveContentSettings, to: newSettings))
+
+
+                                NotificationCenter.default.post(name: .sensitiveContentSettingsChanged, object: nil)
                             }
                         ))
                         .labelsHidden()

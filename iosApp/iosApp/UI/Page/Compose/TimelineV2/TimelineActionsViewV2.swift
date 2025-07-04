@@ -31,8 +31,8 @@ struct TimelineActionsViewV2: View {
 
     var body: some View {
         // 🔍 UI渲染日志 - 使用更明显的标识
-        let _ = FlareLog.debug("TimelineActionsViewV2 RENDERING UI FOR ITEM: \(item.id)")
-        let _ = FlareLog.debug("TimelineActionsViewV2 UI STATE - Like: \(displayLikeCount) (liked: \(displayIsLiked)), Retweet: \(displayRetweetCount) (retweeted: \(displayIsRetweeted))")
+//        let _ = FlareLog.debug("TimelineActionsViewV2 RENDERING UI FOR ITEM: \(item.id)")
+//        let _ = FlareLog.debug("TimelineActionsViewV2 UI STATE - Like: \(displayLikeCount) (liked: \(displayIsLiked)), Retweet: \(displayRetweetCount) (retweeted: \(displayIsRetweeted))")
  
         return VStack(spacing: 0) {
             if let errorMessage = errorMessage {
@@ -119,15 +119,15 @@ struct TimelineActionsViewV2: View {
             // 🔥 初始化显示状态
             syncDisplayStateFromItem()
             itemId = item.id
-            FlareLog.debug("TimelineActionsView onAppear for item: \(item.id)")
-            FlareLog.debug("TimelineActionsView Initial display state - Like: \(displayLikeCount) (liked: \(displayIsLiked)), Retweet: \(displayRetweetCount) (retweeted: \(displayIsRetweeted)), Bookmark: \(displayBookmarkCount) (bookmarked: \(displayIsBookmarked))")
+//            FlareLog.debug("TimelineActionsView onAppear for item: \(item.id)")
+//            FlareLog.debug("TimelineActionsView Initial display state - Like: \(displayLikeCount) (liked: \(displayIsLiked)), Retweet: \(displayRetweetCount) (retweeted: \(displayIsRetweeted)), Bookmark: \(displayBookmarkCount) (bookmarked: \(displayIsBookmarked))")
         }
         .onChange(of: item.id) { newId in
             // 🔥 当item变化时，同步显示状态
             syncDisplayStateFromItem()
             itemId = newId
-            FlareLog.debug("TimelineActionsViewV2 Item changed to: \(newId)")
-            FlareLog.debug("TimelineActionsViewV2 Updated display state - Like: \(displayLikeCount) (liked: \(displayIsLiked)), Retweet: \(displayRetweetCount) (retweeted: \(displayIsRetweeted)), Bookmark: \(displayBookmarkCount) (bookmarked: \(displayIsBookmarked))")
+//            FlareLog.debug("TimelineActionsViewV2 Item changed to: \(newId)")
+//            FlareLog.debug("TimelineActionsViewV2 Updated display state - Like: \(displayLikeCount) (liked: \(displayIsLiked)), Retweet: \(displayRetweetCount) (retweeted: \(displayIsRetweeted)), Bookmark: \(displayBookmarkCount) (bookmarked: \(displayIsBookmarked))")
         }
     }
 
@@ -335,7 +335,7 @@ private struct ActionButtonV2: View {
                     .foregroundColor(isActive ? activeColor : .primary)
 
                 if count > 0 {
-                    Text("\(count)")
+                    Text("\(formatCount(Int64(count)))")
                         .foregroundColor(isActive ? activeColor : .primary)
                         .font(.caption)
                 }

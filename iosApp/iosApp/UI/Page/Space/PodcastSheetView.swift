@@ -3,7 +3,7 @@ import SwiftUI
 
 struct PodcastSheetView: View {
     @Environment(\.dismiss) private var dismiss
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareTheme.self) private var theme
 
@@ -49,7 +49,7 @@ struct PodcastSheetView: View {
 
 struct PodcastDetailContent: View {
     let podcast: UiPodcast
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     let accountType: AccountType
     @Environment(FlareTheme.self) private var theme
 

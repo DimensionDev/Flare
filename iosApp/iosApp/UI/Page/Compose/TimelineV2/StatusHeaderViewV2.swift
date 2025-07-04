@@ -31,7 +31,7 @@ struct StatusHeaderViewV2: View {
     // 修改参数：使用TimelineItem替代StatusViewModel
     let item: TimelineItem
     let isDetailView: Bool
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
     
     var body: some View {
@@ -44,7 +44,7 @@ struct StatusHeaderViewV2: View {
                         topEndContent: item.topEndContent
                     )
                     .id("UserComponent_\(user.key)")
-                    .environmentObject(router)
+                    .environment(router)
                 }
 
                 Spacer()
@@ -73,7 +73,7 @@ struct UserComponentV2: View {
     let user: User                    // 使用Swift User类型
     let topEndContent: TopEndContent? // 使用Swift TopEndContent类型
 
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
 
     var body: some View {
         Button(

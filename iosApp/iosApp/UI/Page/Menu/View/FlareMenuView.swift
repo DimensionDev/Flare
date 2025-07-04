@@ -19,8 +19,8 @@ struct FlareMenuView: View {
 
     @State private var accountType: AccountType = AccountTypeGuest()
 
-    @EnvironmentObject private var router: FlareRouter
-    @EnvironmentObject private var appState: FlareAppState
+    @Environment(FlareRouter.self) private var router
+    @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
     @StateObject private var monitor = TimelinePerformanceMonitor.shared
 

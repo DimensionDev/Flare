@@ -54,6 +54,7 @@ struct AppearanceSettings: Codable, Changeable {
     var theme: Theme = .auto
     var avatarShape: AvatarShape = .circle
     var renderEngine: RenderEngine = .markdown
+    var timelineVersion: TimelineVersionSetting = .v4_0  // 新增Timeline版本设置
     var showActions: Bool = true
     var showNumbers: Bool = true
     var showLinkPreview: Bool = true
@@ -121,6 +122,80 @@ enum RenderEngine: Codable, CaseIterable {
             "TextViewMarkdown"
         case .emojiText:
             "EmojiText"
+        }
+    }
+}
+
+/// Timeline版本设置枚举
+/// 与TimelineVersionManager.TimelineVersion保持一致，但独立定义以避免循环依赖
+enum TimelineVersionSetting: String, Codable, CaseIterable, Identifiable {
+    case base = "Base"
+    case v1_1 = "1.1 Stable ID"
+    case v2_0 = "2.0 Data-flow"
+    case v3_0 = "3.0"
+    case v4_0 = "4 ScrollViewReader + List"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .base:
+            "Base (Original)"
+        case .v1_1:
+            "v1.1 (Stable ID)"
+        case .v2_0:
+            "v2.0 (Data-flow)"
+        case .v3_0:
+            "v3.0 (ScrollView + LazyVStack)"
+        case .v4_0:
+            "v4.0 (List + ScrollViewReader)"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .base:
+            "Baseline version with original ForEach implementation"
+        case .v1_1:
+            "Stable ID system optimization only"
+        case .v2_0:
+            "Data-flow optimization with SwiftTimelineDataSource"
+        case .v3_0:
+            "ScrollView + LazyVStack with scrollPosition API"
+        case .v4_0:
+            "List + ScrollViewReader with iOS 18+ optimization"
+        }
+    }
+
+    /// 转换为TimelineVersionManager.TimelineVersion
+    func toManagerVersion() -> TimelineVersionManager.TimelineVersion {
+        switch self {
+        case .base:
+            return .base
+        case .v1_1:
+            return .v1_1
+        case .v2_0:
+            return .v2_0
+        case .v3_0:
+            return .v3_0
+        case .v4_0:
+            return .v4_0
+        }
+    }
+
+    /// 从TimelineVersionManager.TimelineVersion创建
+    static func from(_ managerVersion: TimelineVersionManager.TimelineVersion) -> TimelineVersionSetting {
+        switch managerVersion {
+        case .base:
+            return .base
+        case .v1_1:
+            return .v1_1
+        case .v2_0:
+            return .v2_0
+        case .v3_0:
+            return .v3_0
+        case .v4_0:
+            return .v4_0
         }
     }
 }

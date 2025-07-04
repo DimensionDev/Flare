@@ -1,6 +1,10 @@
 import Foundation
 import shared
 
+extension Notification.Name {
+     static let sensitiveContentSettingsChanged = Notification.Name("sensitiveContentSettingsChanged")
+}
+
  
 class PagingStateConverter {
  
@@ -26,72 +30,89 @@ class PagingStateConverter {
  
     init() {
         FlareLog.debug("PagingStateConverter Initialized")
+        setupNotificationObservers()
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     /// 将KMP的PagingState转换为Swift的FlareTimelineState
     /// - Parameter pagingState: KMP的PagingState
     /// - Returns: 转换后的FlareTimelineState
     func convert(_ pagingState: PagingState<UiTimeline>) -> FlareTimelineState {
-        let startTime = CFAbsoluteTimeGetCurrent()
-        stats.totalConversions += 1
+        // 🔥 线程安全修复：使用串行队列同步执行，确保所有共享状态访问都是线程安全的
+        return conversionQueue.sync {
+            let startTime = CFAbsoluteTimeGetCurrent()
+            stats.totalConversions += 1
 
-        let result: FlareTimelineState
+            let result: FlareTimelineState
 
-        switch pagingState {
-        case is PagingStateLoading<UiTimeline>:
-            result = .loading
-            stats.loadingStates += 1
+            switch pagingState {
+            case is PagingStateLoading<UiTimeline>:
+                result = .loading
+                stats.loadingStates += 1
 
-        case let errorState as PagingStateError<UiTimeline>:
-            let flareError = FlareError.from(errorState.error)
-            result = .error(flareError)
-            stats.errorStates += 1
+            case let errorState as PagingStateError<UiTimeline>:
+                let flareError = FlareError.from(errorState.error)
+                result = .error(flareError)
+                stats.errorStates += 1
 
-        case is PagingStateEmpty<UiTimeline>:
-            result = .empty
-            stats.emptyStates += 1
+            case is PagingStateEmpty<UiTimeline>:
+                result = .empty
+                stats.emptyStates += 1
 
-        case let successState as PagingStateSuccess<UiTimeline>:
-            result = convertSuccessState(successState)
-            stats.successStates += 1
+            case let successState as PagingStateSuccess<UiTimeline>:
+                result = convertSuccessState(successState)
+                stats.successStates += 1
 
-        default:
-            FlareLog.warning("PagingStateConverter Unknown PagingState type: \(type(of: pagingState))")
-            result = .loading
-            stats.unknownStates += 1
+            default:
+                FlareLog.warning("PagingStateConverter Unknown PagingState type: \(type(of: pagingState))")
+                result = .loading
+                stats.unknownStates += 1
+            }
+
+            // 更新统计
+            let duration = CFAbsoluteTimeGetCurrent() - startTime
+            stats.totalDuration += duration
+            stats.averageDuration = stats.totalDuration / Double(stats.totalConversions)
+
+            // 缓存结果
+            lastConvertedState = result
+
+            // 记录状态变化
+            if let lastState = lastConvertedState, lastState != result {
+                FlareLog.debug("PagingStateConverter State changed: \(result.changesSummary(from: lastState))")
+            }
+
+            return result
         }
-
-        // 更新统计
-        let duration = CFAbsoluteTimeGetCurrent() - startTime
-        stats.totalDuration += duration
-        stats.averageDuration = stats.totalDuration / Double(stats.totalConversions)
-
-        // 缓存结果
-        lastConvertedState = result
-
-        // 记录状态变化
-        if let lastState = lastConvertedState, lastState != result {
-            FlareLog.debug("PagingStateConverter State changed: \(result.changesSummary(from: lastState))")
-        }
-
-        return result
     }
 
      var statistics: ConversionStats {
-        stats
+        // 🔥 线程安全修复：读取统计信息也需要同步保护
+        conversionQueue.sync {
+            stats
+        }
     }
 
     /// 重置统计信息
     func resetStatistics() {
-        stats = ConversionStats()
-        FlareLog.debug("PagingStateConverter Statistics reset")
+        // 🔥 线程安全修复：重置操作需要同步保护
+        conversionQueue.sync {
+            stats = ConversionStats()
+            FlareLog.debug("PagingStateConverter Statistics reset")
+        }
     }
 
     /// 重置转换器状态（用于刷新或切换数据源）
     func reset() {
-        resetIncrementalState()
-        lastConvertedState = nil
-        FlareLog.debug("PagingStateConverter Converter reset")
+        // 🔥 线程安全修复：重置操作需要同步保护
+        conversionQueue.sync {
+            resetIncrementalState()
+            lastConvertedState = nil
+            FlareLog.debug("PagingStateConverter Converter reset")
+        }
     }
 
     // MARK: - Private Methods
@@ -110,13 +131,18 @@ class PagingStateConverter {
             return .empty
         }
 
-        // 🔥 关键修复：确定实际可转换的数量
+        // 确定实际可转换的数量
         let actualAvailableCount = determineActualAvailableCount(successState, maxCount: kmpItemCount)
 
         // 生成状态签名 - 使用实际可用数量
         let currentStateSignature = "\(actualAvailableCount)_\(isRefreshing)_\(successState.appendState)"
 
+        // 🔥 调试日志：分析分页流的数据状态
+        FlareLog.debug("PagingStateConverter === convertSuccessState 开始分析 ===")
         FlareLog.debug("PagingStateConverter KMP reports: \(kmpItemCount), Actually available: \(actualAvailableCount)")
+        FlareLog.debug("PagingStateConverter isRefreshing: \(isRefreshing), hasMore: \(hasMore)")
+        FlareLog.debug("PagingStateConverter 上次转换的items数量: \(lastConvertedItemCount)")
+        FlareLog.debug("PagingStateConverter 当前已转换items数量: \(convertedItems.count)")
 
         // 检查是否需要重置（刷新或数据减少）
         if isRefreshing || actualAvailableCount < lastConvertedItemCount {
@@ -128,7 +154,13 @@ class PagingStateConverter {
         if !shouldSkipConversion(currentStateSignature) {
             // 增量转换新数据
             if actualAvailableCount > lastConvertedItemCount {
+                let newItemsStartIndex = lastConvertedItemCount
+                let newItemsCount = actualAvailableCount - lastConvertedItemCount
+
+                FlareLog.debug("PagingStateConverter === 增量转换分析 ===")
                 FlareLog.debug("PagingStateConverter Converting new items: \(lastConvertedItemCount) -> \(actualAvailableCount)")
+                FlareLog.debug("PagingStateConverter 新增items起始索引: \(newItemsStartIndex)")
+                FlareLog.debug("PagingStateConverter 新增items数量: \(newItemsCount)")
 
                 let newItems = convertItemsInRange(
                     from: lastConvertedItemCount,
@@ -145,8 +177,24 @@ class PagingStateConverter {
                 stats.averageItemsPerConversion = Double(stats.totalItemsConverted) / Double(stats.successStates)
 
                 FlareLog.debug("PagingStateConverter Added \(newItems.count) new items, total: \(convertedItems.count)")
+
+                // 🔥 智能预取：只预取新增的数据
+                if !newItems.isEmpty {
+                    FlareLog.debug("PagingStateConverter === 预取策略分析（增量） ===")
+                    FlareLog.debug("PagingStateConverter 预取新增items: \(newItems.count)个")
+                    FlareLog.debug("PagingStateConverter 新增items ID范围: \(newItems.first?.id ?? "nil") ~ \(newItems.last?.id ?? "nil")")
+                    FlareLog.debug("PagingStateConverter 预取currentIndex设为0（新数据中的起始位置）")
+
+                    DispatchQueue.global(qos: .utility).async {
+                        TimelineImagePrefetcher.shared.smartPrefetch(
+                            currentIndex: 0,  // 🔥 修复：在新数据中从0开始预取
+                            timelineItems: newItems
+                        )
+                    }
+                }
             } else if actualAvailableCount == lastConvertedItemCount, convertedItems.isEmpty {
                 // 首次转换或状态重置后的完整转换
+                FlareLog.debug("PagingStateConverter === 首次转换分析 ===")
                 FlareLog.debug("PagingStateConverter Initial full conversion for \(actualAvailableCount) items")
 
                 convertedItems = convertItemsInRange(
@@ -161,6 +209,21 @@ class PagingStateConverter {
                 stats.averageItemsPerConversion = Double(stats.totalItemsConverted) / Double(stats.successStates)
 
                 FlareLog.debug("PagingStateConverter Initial conversion completed: \(convertedItems.count) items")
+
+                // 🔥 智能预取：首次加载从0开始预取
+                if !convertedItems.isEmpty {
+                    FlareLog.debug("PagingStateConverter === 预取策略分析（首次） ===")
+                    FlareLog.debug("PagingStateConverter 预取首次加载items: \(convertedItems.count)个")
+                    FlareLog.debug("PagingStateConverter 首次items ID范围: \(convertedItems.first?.id ?? "nil") ~ \(convertedItems.last?.id ?? "nil")")
+                    FlareLog.debug("PagingStateConverter 预取currentIndex设为0（首次加载）")
+
+                    DispatchQueue.global(qos: .utility).async {
+                        TimelineImagePrefetcher.shared.smartPrefetch(
+                            currentIndex: 0,
+                            timelineItems: self.convertedItems
+                        )
+                    }
+                }
             }
         } else {
             FlareLog.debug("PagingStateConverter Skipping duplicate conversion - signature: \(currentStateSignature)")
@@ -173,12 +236,28 @@ class PagingStateConverter {
             return .empty
         }
 
+        //   sensitive
+        let originalCount = convertedItems.count
+        convertedItems = TimelineContentFilter.filterSensitiveContent(convertedItems)
+        let filteredCount = originalCount - convertedItems.count
+
+        if filteredCount > 0 {
+            FlareLog.debug("PagingStateConverter 敏感内容过滤: 原始\(originalCount)项 -> 过滤\(filteredCount)项 -> 剩余\(convertedItems.count)项")
+        }
+
+
+        if convertedItems.isEmpty {
+            return .empty
+        }
+
+
+        // 🔥 预取逻辑已移到增量转换和首次转换的具体分支中，避免重复预取
+        FlareLog.debug("PagingStateConverter === convertSuccessState 分析结束 ===")
+
         return .loaded(items: convertedItems, hasMore: hasMore, isRefreshing: isRefreshing)
     }
 
-    /// 检查是否有更多数据可加载
-    /// - Parameter successState: KMP的成功状态
-    /// - Returns: 是否有更多数据
+
     private func checkHasMoreData(_ successState: PagingStateSuccess<UiTimeline>) -> Bool {
         // 基于appendState判断是否有更多数据
         let appendState = successState.appendState
@@ -421,5 +500,30 @@ extension PagingStateConverter {
         let distribution = stateDistribution
         let maxType = distribution.max { $0.value < $1.value }
         return maxType?.key ?? "unknown"
+    }
+}
+
+
+extension PagingStateConverter {
+
+    private func setupNotificationObservers() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleSensitiveContentSettingsChanged),
+            name: .sensitiveContentSettingsChanged,
+            object: nil
+        )
+        FlareLog.debug("PagingStateConverter 已设置敏感内容设置变更监听器")
+    }
+
+    @objc private func handleSensitiveContentSettingsChanged() {
+        FlareLog.debug("PagingStateConverter 收到敏感内容设置变更通知，重置转换器状态")
+
+        // 🔥 线程安全修复：reset()方法已经包含了同步保护，直接调用即可
+        reset()
+
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: .timelineItemUpdated, object: nil)
+        }
     }
 }

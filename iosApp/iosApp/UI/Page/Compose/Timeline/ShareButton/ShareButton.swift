@@ -29,7 +29,7 @@ struct ShareButton: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.appSettings) var appSettings
     @Environment(\.openURL) private var openURL
-    @EnvironmentObject var router: FlareRouter
+    @Environment(FlareRouter.self) var router
     @Environment(FlareTheme.self) private var theme
 
     @State private var isShareAsImageSheetPresented: Bool = false
@@ -54,7 +54,7 @@ struct ShareButton: View {
             .environment(\.appSettings, appSettings)
             .environment(\.colorScheme, colorScheme)
             .environment(\.isInCaptureMode, true)
-            .environmentObject(router)
+            .environment(router)
             .environment(theme).applyTheme(theme)
 
         let controller = UIHostingController(rootView: captureView)
@@ -65,7 +65,7 @@ struct ShareButton: View {
         ))
 
         controller.view.frame = CGRect(origin: .zero, size: targetSize)
-        controller.view.backgroundColor = .clear
+        controller.view.backgroundColor = UIColor.clear
 
         controller.view.layoutIfNeeded()
 
@@ -198,7 +198,7 @@ struct ShareButton: View {
                                     .environment(\.colorScheme, colorScheme)
                                     .environment(\.isInCaptureMode, true)
                                     .environment(theme).applyTheme(theme)
-                                    .environmentObject(router)
+                                    .environment(router)
                             ))
                             newRenderer.scale = 3.0
                             newRenderer.isOpaque = true
@@ -317,7 +317,7 @@ struct ShareButton: View {
                 .environment(\.appSettings, appSettings)
                 .environment(\.colorScheme, colorScheme)
                 .environment(\.isInCaptureMode, true)
-                .environmentObject(router)
+                .environment(router)
                 .environment(theme).applyTheme(theme)
             }
         }

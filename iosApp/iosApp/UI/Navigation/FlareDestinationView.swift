@@ -8,7 +8,7 @@ struct FlareDestinationView: View {
     let destination: FlareDestination
     let router: FlareRouter
 
-    @ObservedObject var appState: FlareAppState
+    @Environment(FlareAppState.self) private var appState
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareTheme.self) private var theme
 
@@ -27,7 +27,7 @@ struct FlareDestinationView: View {
                     userKey: userKey,
                     toProfileMedia: { _ in }
                 )
-                .environmentObject(router)
+                .environment(router)
 
             case let .profileWithNameAndHost(accountType, userName, host):
                 ProfileWithUserNameScreen(
@@ -36,10 +36,10 @@ struct FlareDestinationView: View {
                     host: host,
                     toProfileMedia: { _ in }
                 )
-                .environmentObject(router)
+                .environment(router)
 
             case let .statusDetail(accountType, statusKey):
-                StatusDetailScreen(accountType: accountType, statusKey: statusKey, router: router)
+                StatusDetailScreen(accountType: accountType, statusKey: statusKey)
 
             case let .search(accountType, keyword):
                 SearchScreen(
@@ -117,36 +117,36 @@ struct FlareDestinationView: View {
 
             case let .messages(accountType):
                 MessageScreen(accountType: accountType)
-                    .environmentObject(router)
+                    .environment(router)
 
             case let .download(accountType):
-                DownloadManagerScreen(accountType: accountType, router: router)
-                    .environmentObject(router)
-                    .environmentObject(appState)
+                DownloadManagerScreen(accountType: accountType)
+                    .environment(router)
+                    .environment(appState)
 
             case let .instanceScreen(host, _):
                 InstanceScreen(host: host)
-                    .environmentObject(router)
-                    .environmentObject(appState)
+                    .environment(router)
+                    .environment(appState)
 
             case let .podcastSheet(accountType, podcastId):
                 PodcastSheetView(accountType: accountType, podcastId: podcastId)
-                    .environmentObject(router)
-                    .environmentObject(appState)
+                    .environment(router)
+                    .environment(appState)
                     .environment(\.appSettings, appSettings)
 
             case let .spaces(accountType):
                 SpaceScreen(accountType: accountType)
-                    .environmentObject(router)
-                    .environmentObject(appState)
+                    .environment(router)
+                    .environment(appState)
 
             default:
                 Text("page not found for destination: \(String(describing: destination))")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .environmentObject(router)
-        .environmentObject(appState)
+        .environment(router)
+        .environment(appState)
         .background(theme.primaryBackgroundColor)
         .foregroundColor(theme.labelColor)
     }
@@ -156,7 +156,7 @@ struct AddReactionView: View {
     let accountType: AccountType
     let statusKey: MicroBlogKey
 
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
 
     var body: some View {
         AddReactionSheet(
@@ -237,7 +237,7 @@ struct DeleteStatusView: View {
     @State private var presenter: DeleteStatusPresenter
     @State private var showConfirmation = true
 
-    @EnvironmentObject private var router: FlareRouter
+    @Environment(FlareRouter.self) private var router
 
     init(accountType: AccountType, statusKey: MicroBlogKey) {
         self.accountType = accountType

@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Zarządzaj pamięcią Flara</string>
     <string name="settings_about_title">O programie</string>
     <string name="settings_about_subtitle">Dowiedz się więcej o Flarze</string>
-    <string name="settings_tab_customization">Dostosowanie karty</string>
-    <string name="settings_tab_customization_description">Dostosuj karty na ekranie głównym</string>
     <string name="settings_local_filter_title">Filtr lokalny</string>
     <string name="settings_local_filter_description">Lokalne ustawienia filtra dla osi czasu</string>
     <string name="settings_guest_setting_title">Host trybu gościa</string>

@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Hallitse Flare-tallennustilaa</string>
     <string name="settings_about_title">Tietoja</string>
     <string name="settings_about_subtitle">Lue lisää Floresta</string>
-    <string name="settings_tab_customization">Välilehden räätälöinti</string>
-    <string name="settings_tab_customization_description">Muokkaa aloitusnäytöllä olevia välilehtiä</string>
     <string name="settings_local_filter_title">Paikallinen suodatin</string>
     <string name="settings_local_filter_description">Paikallisen suodattimen asetukset aikajanalle</string>
     <string name="settings_guest_setting_title">Vierailevan Tilan Isäntä</string>

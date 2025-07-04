@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Gestisci la memoria di Flare</string>
     <string name="settings_about_title">Informazioni</string>
     <string name="settings_about_subtitle">Scopri di più su Flare</string>
-    <string name="settings_tab_customization">Personalizzazione scheda</string>
-    <string name="settings_tab_customization_description">Personalizza le schede nella schermata home</string>
     <string name="settings_local_filter_title">Filtro locale</string>
     <string name="settings_local_filter_description">Impostazioni del filtro locale per la timeline</string>
     <string name="settings_guest_setting_title">Ospite Modalità Ospite</string>

@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">إدارة تخزين اللعب</string>
     <string name="settings_about_title">حول</string>
     <string name="settings_about_subtitle">تعرف على المزيد حول Ffluy</string>
-    <string name="settings_tab_customization">تخصيص علامة التبويب</string>
-    <string name="settings_tab_customization_description">تخصيص علامات التبويب على الشاشة الرئيسية</string>
     <string name="settings_local_filter_title">الفلتر المحلي</string>
     <string name="settings_local_filter_description">إعدادات الفلتر المحلي للخيط الزمني</string>
     <string name="settings_guest_setting_title">مضيف وضع الضيف</string>

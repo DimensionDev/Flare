@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Gerenciar armazenamento do Sinalizador</string>
     <string name="settings_about_title">SOBRE</string>
     <string name="settings_about_subtitle">Saiba mais sobre sinalizador</string>
-    <string name="settings_tab_customization">Personalização de aba</string>
-    <string name="settings_tab_customization_description">Personalizar as abas na tela inicial</string>
     <string name="settings_local_filter_title">Filtro local</string>
     <string name="settings_local_filter_description">Configurações de filtro local para timeline</string>
     <string name="settings_guest_setting_title">format@@0 Guest Mode Host</string>

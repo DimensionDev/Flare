@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Správa Flareho úložiště</string>
     <string name="settings_about_title">O aplikaci</string>
     <string name="settings_about_subtitle">Zjistěte více o Flare</string>
-    <string name="settings_tab_customization">Přizpůsobení záložek</string>
-    <string name="settings_tab_customization_description">Přizpůsobit panely na domovské obrazovce</string>
     <string name="settings_local_filter_title">Místní filtr</string>
     <string name="settings_local_filter_description">Místní nastavení filtru pro timeline</string>
     <string name="settings_guest_setting_title">Hostitel režimu hostování</string>

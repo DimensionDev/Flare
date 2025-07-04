@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Beheer Flare\'s opslag</string>
     <string name="settings_about_title">Informatie</string>
     <string name="settings_about_subtitle">Meer informatie over Flare</string>
-    <string name="settings_tab_customization">Tabblad aanpassen</string>
-    <string name="settings_tab_customization_description">De tabbladen op het startscherm aanpassen</string>
     <string name="settings_local_filter_title">Lokaal filter</string>
     <string name="settings_local_filter_description">Lokale filterinstellingen voor tijdlijn</string>
     <string name="settings_guest_setting_title">Gast modus host</string>

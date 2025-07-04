@@ -7,14 +7,14 @@ import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlin.uuid.Uuid
 
 internal class MixedRemoteMediator(
     database: CacheDatabase,
-    mediators: List<BaseTimelineRemoteMediator>,
+    private val mediators: List<BaseTimelineRemoteMediator>,
 ) : BaseTimelineRemoteMediator(database = database) {
     override val pagingKey =
         buildString {
@@ -34,12 +34,16 @@ internal class MixedRemoteMediator(
             if (loadType == LoadType.PREPEND) {
                 Result(endOfPaginationReached = true)
             } else {
+                if (loadType == LoadType.REFRESH) {
+                    currentMediators = mediators
+                }
                 val response =
                     currentMediators
                         .map {
                             async {
                                 it to
                                     runCatching { it.timeline(loadType, state) }
+                                        .onFailure { it.printStackTrace() }
                                         .getOrElse {
                                             // TODO: Handle errors for each mediator
                                             Result(

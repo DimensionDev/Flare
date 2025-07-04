@@ -19,6 +19,7 @@ import dev.dimension.flare.ui.model.mapper.title
 import dev.dimension.flare.ui.render.parseHtml
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.format.DateTimeComponents
 
 @OptIn(ExperimentalPagingApi::class)
 internal class RssTimelineRemoteMediator(
@@ -37,121 +38,121 @@ internal class RssTimelineRemoteMediator(
     override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): Result =
-        try {
-            val response = RssService.fetch(url)
-            val content =
-                when (response) {
-                    is Feed.Atom ->
-                        response.entries
-                            .map {
-                                StatusContent.Rss.RssContent.Atom(
-                                    it,
-                                    source = response.title.value,
-                                )
-                            }.map {
-                                DbStatusWithUser(
-                                    user = null,
-                                    data =
-                                        DbStatus(
-                                            statusKey =
-                                                MicroBlogKey.fromRss(
-                                                    it.data.links
-                                                        .first()
-                                                        .href,
-                                                ),
-                                            accountType = AccountType.Guest,
-                                            userKey = null,
-                                            content = StatusContent.Rss(it),
-                                            text =
-                                                it.data.content
-                                                    ?.value
-                                                    ?.let { html -> parseHtml(html) }
-                                                    ?.wholeText(),
-                                            createdAt =
-                                                it.data.published?.let { Instant.parse(it) }
-                                                    ?: Clock.System.now(),
-                                        ),
-                                )
-                            }
+    ): Result {
+        val response = RssService.fetch(url)
+        val content =
+            when (response) {
+                is Feed.Atom ->
+                    response.entries
+                        .map {
+                            StatusContent.Rss.RssContent.Atom(
+                                it,
+                                source = response.title.value,
+                            )
+                        }.map {
+                            DbStatusWithUser(
+                                user = null,
+                                data =
+                                    DbStatus(
+                                        statusKey =
+                                            MicroBlogKey.fromRss(
+                                                it.data.links
+                                                    .first()
+                                                    .href,
+                                            ),
+                                        accountType = AccountType.Guest,
+                                        userKey = null,
+                                        content = StatusContent.Rss(it),
+                                        text =
+                                            it.data.content
+                                                ?.value
+                                                ?.let { html -> parseHtml(html) }
+                                                ?.wholeText(),
+                                        createdAt =
+                                            it.data.published?.let { Instant.parse(it) }
+                                                ?: Clock.System.now(),
+                                    ),
+                            )
+                        }
 
-                    is Feed.RDF ->
-                        response.items
-                            .map {
-                                StatusContent.Rss.RssContent.RDF(
-                                    it,
-                                    source = response.title,
-                                )
-                            }.map {
-                                DbStatusWithUser(
-                                    user = null,
-                                    data =
-                                        DbStatus(
-                                            statusKey =
-                                                MicroBlogKey.fromRss(
-                                                    it.data.link,
-                                                ),
-                                            accountType = AccountType.Guest,
-                                            userKey = null,
-                                            content = StatusContent.Rss(it),
-                                            text =
-                                                it.data.description
-                                                    .let { html -> parseHtml(html) }
-                                                    .wholeText(),
-                                            createdAt =
-                                                it.data.date?.let { Instant.parse(it) }
-                                                    ?: Clock.System.now(),
-                                        ),
-                                )
-                            }
+                is Feed.RDF ->
+                    response.items
+                        .map {
+                            StatusContent.Rss.RssContent.RDF(
+                                it,
+                                source = response.title,
+                            )
+                        }.map {
+                            DbStatusWithUser(
+                                user = null,
+                                data =
+                                    DbStatus(
+                                        statusKey =
+                                            MicroBlogKey.fromRss(
+                                                it.data.link,
+                                            ),
+                                        accountType = AccountType.Guest,
+                                        userKey = null,
+                                        content = StatusContent.Rss(it),
+                                        text =
+                                            it.data.description
+                                                .let { html -> parseHtml(html) }
+                                                .wholeText(),
+                                        createdAt =
+                                            it.data.date?.let { Instant.parse(it) }
+                                                ?: Clock.System.now(),
+                                    ),
+                            )
+                        }
 
-                    is Feed.Rss20 ->
-                        response.channel.items
-                            .map {
-                                StatusContent.Rss.RssContent.Rss20(
-                                    it,
-                                    source = response.title,
-                                )
-                            }.map {
-                                DbStatusWithUser(
-                                    user = null,
-                                    data =
-                                        DbStatus(
-                                            statusKey =
-                                                MicroBlogKey.fromRss(
-                                                    it.data.link,
-                                                ),
-                                            accountType = AccountType.Guest,
-                                            userKey = null,
-                                            content = StatusContent.Rss(it),
-                                            text =
-                                                it.data.description
-                                                    ?.let { html -> parseHtml(html) }
-                                                    ?.wholeText(),
-                                            createdAt =
-                                                it.data.pubDate?.let { Instant.parse(it) }
-                                                    ?: Clock.System.now(),
-                                        ),
-                                )
-                            }
-                }.mapIndexed { index, status ->
-                    createDbPagingTimelineWithStatus(
-                        accountType = AccountType.Guest,
-                        pagingKey = pagingKey,
-                        sortId = -index.toLong(),
-                        status = status,
-                        references = mapOf(),
-                    )
-                }
+                is Feed.Rss20 ->
+                    response.channel.items
+                        .map {
+                            StatusContent.Rss.RssContent.Rss20(
+                                it,
+                                source = response.title,
+                            )
+                        }.map {
+                            DbStatusWithUser(
+                                user = null,
+                                data =
+                                    DbStatus(
+                                        statusKey =
+                                            MicroBlogKey.fromRss(
+                                                it.data.link,
+                                            ),
+                                        accountType = AccountType.Guest,
+                                        userKey = null,
+                                        content = StatusContent.Rss(it),
+                                        text =
+                                            it.data.description
+                                                ?.let { html -> parseHtml(html) }
+                                                ?.wholeText(),
+                                        createdAt =
+                                            it.data.pubDate
+                                                ?.let {
+                                                    Instant.parse(
+                                                        it,
+                                                        DateTimeComponents.Formats.RFC_1123,
+                                                    )
+                                                }
+                                                ?: Clock.System.now(),
+                                    ),
+                            )
+                        }
+            }.mapIndexed { index, status ->
+                createDbPagingTimelineWithStatus(
+                    accountType = AccountType.Guest,
+                    pagingKey = pagingKey,
+                    sortId = -index.toLong(),
+                    status = status,
+                    references = mapOf(),
+                )
+            }
 
-            Result(
-                endOfPaginationReached = true,
-                data = content,
-            )
-        } catch (e: Exception) {
-            Result(
-                endOfPaginationReached = true,
-                data = emptyList(),
-            )
-        }
+        return Result(
+            endOfPaginationReached = true,
+            data = content,
+        )
+    }
 }

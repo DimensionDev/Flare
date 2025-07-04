@@ -3,6 +3,8 @@ package dev.dimension.flare.ui.presenter.profile
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.flatMap
 import dev.dimension.flare.common.BaseTimelineLoader
@@ -18,6 +20,7 @@ import dev.dimension.flare.ui.model.UiMedia
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
@@ -30,9 +33,10 @@ public class ProfileMediaPresenter(
     KoinComponent {
     @Composable
     override fun body(): ProfileMediaState {
+        val scope = rememberCoroutineScope()
         val state =
             remember(accountType, userKey) {
-                MediaTimelinePresenter(accountType, userKey).transformedPager
+                MediaTimelinePresenter(accountType, userKey).createTransformedPager(scope)
             }.collectAsLazyPagingItems()
                 .toPagingState()
         return object : ProfileMediaState {
@@ -63,8 +67,8 @@ private class MediaTimelinePresenter(
                 )
             }
 
-    val transformedPager by lazy {
-        pager.map { data ->
+    fun createTransformedPager(scope: CoroutineScope): Flow<PagingData<ProfileMedia>> =
+        createPager(scope).map { data ->
             data.flatMap { status ->
                 val content = status.content
                 if (content is UiTimeline.ItemContent.Status) {
@@ -80,7 +84,6 @@ private class MediaTimelinePresenter(
                 }
             }
         }
-    }
 }
 
 @Immutable

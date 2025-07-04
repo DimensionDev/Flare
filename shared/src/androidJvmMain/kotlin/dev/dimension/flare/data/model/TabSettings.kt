@@ -4,6 +4,7 @@ import androidx.datastore.core.Serializer
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.home.HomeTimelinePresenter
 import dev.dimension.flare.ui.presenter.home.MixedTimelinePresenter
@@ -24,9 +25,9 @@ import java.io.OutputStream
 
 @Serializable
 public data class TabSettings(
-    val items: List<TabItem> = TimelineTabItem.default,
     val secondaryItems: List<TabItem>? = null,
-    val homeTabs: Map<MicroBlogKey, List<TimelineTabItem>> = mapOf(),
+    val enableMixedTimeline: Boolean = false,
+    val mainTabs: List<TimelineTabItem> = listOf(HomeTimelineTabItem(AccountType.Active)),
 )
 
 @Serializable
@@ -72,6 +73,7 @@ public sealed interface TitleType {
             DirectMessage,
             Rss,
             Antenna,
+            MixedTimeline,
         }
     }
 }
@@ -163,15 +165,6 @@ public sealed interface TimelineTabItem : TabItem {
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
                             icon = IconType.Material(IconType.Material.MaterialIcon.Search),
-                        ),
-                ),
-                ProfileTabItem(
-                    account = AccountType.Active,
-                    userKey = AccountType.Active,
-                    metaData =
-                        TabMetaData(
-                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Me),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.Profile),
                         ),
                 ),
             )
@@ -580,8 +573,8 @@ public data class MixedTimelineTabItem(
     val subTimelineTabItem: List<TimelineTabItem>,
     override val metaData: TabMetaData =
         TabMetaData(
-            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
-            icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+            title = TitleType.Localized(TitleType.Localized.LocalizedKey.MixedTimeline),
+            icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
         ),
 ) : TimelineTabItem {
     override fun createPresenter(): TimelinePresenter = MixedTimelinePresenter(subTimelineTabItem.map { it.createPresenter() })
@@ -807,6 +800,7 @@ public object Bluesky {
     }
 }
 
+@Serializable
 public data class RssTimelineTabItem(
     val feedUrl: String,
     override val metaData: TabMetaData,
@@ -820,6 +814,15 @@ public data class RssTimelineTabItem(
             .RssTimelinePresenter(feedUrl)
 
     override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+
+    public constructor(data: UiRssSource) : this(
+        data.url,
+        metaData =
+            TabMetaData(
+                title = TitleType.Text(data.title ?: data.url),
+                icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+            ),
+    )
 }
 
 @Serializable

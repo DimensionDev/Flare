@@ -133,7 +133,7 @@ private fun presenter(tabItem: TimelineTabItem) =
 @Composable
 internal fun timelineItemPresenter(timelineTabItem: TimelineTabItem): TimelineItemState {
     val state =
-        remember(timelineTabItem) {
+        remember(timelineTabItem.key) {
             timelineTabItem.createPresenter()
         }.invoke()
     val badge =

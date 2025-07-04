@@ -28,6 +28,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.IO
@@ -53,24 +54,30 @@ public abstract class TimelinePresenter :
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    protected val pager: Flow<PagingData<UiTimeline>> by lazy {
+    protected fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimeline>> =
         loader.flatMapLatest {
             when (it) {
                 is BaseTimelinePagingSource<*> ->
                     networkPager(
                         pagingSource = it,
+                        scope = scope,
                     )
 
                 is BaseTimelineRemoteMediator ->
                     cachePager(
                         mediator = it,
+                        scope = scope,
                     )
+            }.combine(filterFlow) { pager, filterList ->
+                pager.filter {
+                    !it.contains(filterList)
+                }
             }
         }
-    }
 
     private fun cachePager(
         mediator: BaseTimelineRemoteMediator,
+        scope: CoroutineScope,
         pageSize: Int = 20,
     ): Flow<PagingData<UiTimeline>> {
         val pagerFlow =
@@ -82,13 +89,11 @@ public abstract class TimelinePresenter :
                         pagingKey = mediator.pagingKey,
                     )
                 },
-            ).flow
-
+            ).flow.cachedIn(scope)
         return combine(
             pagerFlow,
-            filterFlow,
             accountRepository.allAccounts,
-        ) { pagingData, filters, accounts ->
+        ) { pagingData, accounts ->
             pagingData
                 .map { data ->
                     withContext(Dispatchers.IO) {
@@ -103,14 +108,13 @@ public abstract class TimelinePresenter :
                             }?.dataSource
                         data.render(dataSource)
                     }
-                }.filter {
-                    !it.contains(filters)
                 }
         }
     }
 
     private fun networkPager(
         pagingSource: BaseTimelinePagingSource<*>,
+        scope: CoroutineScope,
         pageSize: Int = 20,
     ): Flow<PagingData<UiTimeline>> =
         Pager(
@@ -118,14 +122,14 @@ public abstract class TimelinePresenter :
             pagingSourceFactory = {
                 pagingSource
             },
-        ).flow
+        ).flow.cachedIn(scope)
 
     @Composable
     final override fun body(): TimelineState {
         val scope = rememberCoroutineScope()
         val listState =
             remember {
-                pager
+                createPager(scope)
                     .cachedIn(scope)
             }.collectAsLazyPagingItems()
                 .toPagingState()

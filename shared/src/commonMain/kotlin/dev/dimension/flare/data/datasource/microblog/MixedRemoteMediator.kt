@@ -61,7 +61,7 @@ internal class MixedRemoteMediator(
                                 timeline =
                                     it.timeline.copy(
                                         pagingKey = pagingKey,
-                                        sortId = SnowflakeIdGenerator.nextId(),
+                                        sortId = -SnowflakeIdGenerator.nextId(),
                                         _id = Uuid.random().toString(),
                                     ),
                             )

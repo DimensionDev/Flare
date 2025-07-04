@@ -15,7 +15,7 @@ import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.home.TimelineState
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -24,7 +24,7 @@ public class RssTimelinePresenter(
     private val url: String,
 ) : TimelinePresenter() {
     override val loader: Flow<BaseTimelineLoader> by lazy {
-        flow { emit(RssDataSource.fetchLoader(url)) }
+        flowOf(RssDataSource.fetchLoader(url))
     }
 }
 

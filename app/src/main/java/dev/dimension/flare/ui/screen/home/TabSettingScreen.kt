@@ -172,11 +172,9 @@ internal fun TabSettingScreen(
                 if (tabItem is TimelineTabItem) {
                     state.addTab(tabItem)
                 }
-                state.setAddTab(false)
             },
             onDeleteTab = { key ->
                 state.deleteTab(key)
-                state.setAddTab(false)
             },
             toAddRssSource = toAddRssSource,
         )

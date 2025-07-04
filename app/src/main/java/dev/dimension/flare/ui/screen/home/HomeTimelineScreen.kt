@@ -36,6 +36,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -361,12 +362,16 @@ private fun timelinePresenter(
         tabs.map {
             it
                 .map {
-                    timelineItemPresenter(it)
+                    // use key inorder to force update when the list is changed
+                    key(it.key) {
+                        timelineItemPresenter(it)
+                    }
                 }.toImmutableList()
         }
-    val pagerState = tabState.map {
-        rememberPagerState { it.size }
-    }
+    val pagerState =
+        tabState.map {
+            rememberPagerState { it.size }
+        }
 
     object : UserState by accountState {
         val pagerState = pagerState

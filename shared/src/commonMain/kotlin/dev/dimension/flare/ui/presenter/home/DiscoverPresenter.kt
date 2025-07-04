@@ -7,7 +7,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.compose.collectAsLazyPagingItems
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
-import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataSource
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
 import dev.dimension.flare.model.AccountType
@@ -46,26 +45,11 @@ public class DiscoverPresenter(
                     }
                 }.toPagingState()
         val status =
-            accountState
-                .flatMap { dataSource ->
-                    remember(dataSource) {
-                        val pagingKey =
-                            if (dataSource is AuthenticatedMicroblogDataSource) {
-                                "discover_status_${dataSource.accountKey}"
-                            } else {
-                                "discover"
-                            }
-                        runCatching {
-                            dataSource.discoverStatuses(scope = scope, pagingKey = pagingKey)
-                        }.getOrNull()
-                    }?.collectAsLazyPagingItems().let {
-                        if (it == null) {
-                            UiState.Error(Throwable("No data"))
-                        } else {
-                            UiState.Success(it)
-                        }
-                    }
-                }.toPagingState()
+            remember(
+                accountType,
+            ) {
+                DiscoverStatusTimelinePresenter(accountType)
+            }.body().listState
         val hashtags =
             accountState
                 .flatMap { dataSource ->

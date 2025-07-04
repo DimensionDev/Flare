@@ -1,30 +1,15 @@
 package dev.dimension.flare.ui.screen.home
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.AnimationConstants
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Surface
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -32,24 +17,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Bars
 import compose.icons.fontawesomeicons.solid.Plus
-import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.HomeTimelineTabItem
+import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -60,17 +41,16 @@ import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
-import dev.dimension.flare.ui.screen.settings.ListTabItem
-import dev.dimension.flare.ui.screen.settings.TabTitle
-import dev.dimension.flare.ui.screen.settings.toTabItem
+import dev.dimension.flare.ui.screen.settings.EditTabDialog
+import dev.dimension.flare.ui.screen.settings.TabAddBottomSheet
+import dev.dimension.flare.ui.screen.settings.TabCustomItem
+import dev.dimension.flare.ui.screen.settings.allTabsPresenter
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
-import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -78,6 +58,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 internal fun TabSettingScreen(
     accountType: AccountType,
     onBack: () -> Unit,
+    toAddRssSource: () -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
     val state by producePresenter {
@@ -87,6 +68,20 @@ internal fun TabSettingScreen(
         onDispose {
             state.commit()
         }
+    }
+    state.selectedEditTab?.let {
+        EditTabDialog(
+            tabItem = it,
+            onDismissRequest = {
+                state.setEditTab(null)
+            },
+            onConfirm = {
+                state.setEditTab(null)
+                if (it is TimelineTabItem) {
+                    state.updateTab(it)
+                }
+            },
+        )
     }
     FlareScaffold(
         topBar = {
@@ -122,134 +117,67 @@ internal fun TabSettingScreen(
             state = lazyListState,
             contentPadding = it,
         ) {
-            items(state.currentTabs, key = { it.key }) { item ->
-                val swipeState =
-                    rememberSwipeToDismissBoxState()
-
-                LaunchedEffect(swipeState.settledValue) {
-                    if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {
-                        delay(AnimationConstants.DefaultDurationMillis.toLong())
-                        state.deleteTab(item)
-                    }
-                }
-                ReorderableItem(reorderableLazyColumnState, key = item.key) { isDragging ->
-                    AnimatedVisibility(
-                        visible = swipeState.settledValue == SwipeToDismissBoxValue.Settled,
-                        exit =
-                            shrinkVertically(
-                                animationSpec = tween(),
-                                shrinkTowards = Alignment.Top,
-                            ) + fadeOut(),
-                    ) {
-                        val elevation by animateDpAsState(if (isDragging) 4.dp else 0.dp)
-                        Surface(
-                            shadowElevation = elevation,
-                        ) {
-                            SwipeToDismissBox(
-                                state = swipeState,
-                                enableDismissFromEndToStart = state.canSwipeToDelete,
-                                enableDismissFromStartToEnd = state.canSwipeToDelete,
-                                backgroundContent = {
-                                    val alignment =
-                                        when (swipeState.dismissDirection) {
-                                            SwipeToDismissBoxValue.StartToEnd -> Alignment.CenterStart
-                                            SwipeToDismissBoxValue.EndToStart -> Alignment.CenterEnd
-                                            SwipeToDismissBoxValue.Settled -> Alignment.Center
-                                        }
-                                    Box(
-                                        modifier =
-                                            Modifier
-                                                .fillMaxSize()
-                                                .background(MaterialTheme.colorScheme.error)
-                                                .padding(16.dp),
-                                    ) {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.Trash,
-                                            contentDescription = stringResource(id = R.string.tab_settings_remove),
-                                            modifier =
-                                                Modifier
-//                                            .size(24.dp)
-                                                    .align(alignment),
-                                            tint = MaterialTheme.colorScheme.onError,
-                                        )
-                                    }
+            state.enableMixedTimeline.onSuccess { enabled ->
+                item("header") {
+                    ListItem(
+                        headlineContent = {
+                            Text(stringResource(R.string.tab_settings_mixed_timeline))
+                        },
+                        trailingContent = {
+                            Switch(
+                                checked = enabled,
+                                onCheckedChange = {
+                                    state.setEnableMixedTimeline(it)
                                 },
-                            ) {
-                                ListItem(
-                                    headlineContent = {
-                                        TabTitle(item.metaData.title)
-                                    },
-                                    trailingContent = {
-                                        IconButton(
-                                            modifier =
-                                                Modifier.draggableHandle(
-                                                    onDragStarted = {
-                                                        haptics.performHapticFeedback(
-                                                            HapticFeedbackType.LongPress,
-                                                        )
-                                                    },
-                                                    onDragStopped = {
-                                                        haptics.performHapticFeedback(
-                                                            HapticFeedbackType.LongPress,
-                                                        )
-                                                    },
-                                                ),
-                                            onClick = {},
-                                        ) {
-                                            FAIcon(
-                                                FontAwesomeIcons.Solid.Bars,
-                                                contentDescription = stringResource(id = R.string.tab_settings_drag),
-                                            )
-                                        }
-                                    },
-                                )
-                            }
-                        }
-                    }
+                            )
+                        },
+                        supportingContent = {
+                            Text(stringResource(R.string.tab_settings_mixed_timeline_desc))
+                        },
+                        modifier =
+                            Modifier.clickable {
+                                state.setEnableMixedTimeline(!enabled)
+                            },
+                    )
                 }
+            }
+            items(state.currentTabs, key = { it.key }) { item ->
+                TabCustomItem(
+                    item = item,
+                    deleteTab = {
+                        if (it is TimelineTabItem) {
+                            state.deleteTab(item)
+                        }
+                    },
+                    editTab = {
+                        if (it is TimelineTabItem) {
+                            state.setEditTab(it)
+                        }
+                    },
+                    reorderableLazyColumnState = reorderableLazyColumnState,
+                    canSwipeToDelete = state.canSwipeToDelete,
+                )
             }
         }
     }
 
     if (state.showAddTab) {
-        ModalBottomSheet(
+        TabAddBottomSheet(
+            tabs = state.currentTabs.toImmutableList(),
+            allTabs = state.allTabsState,
             onDismissRequest = {
                 state.setAddTab(false)
             },
-        ) {
-            @Composable
-            fun TabItem(tabItem: TimelineTabItem) {
-                ListTabItem(
-                    data = tabItem,
-                    isAdded = state.currentTabs.any { tab -> tabItem.key == tab.key },
-                    modifier =
-                        Modifier.clickable {
-                            if (state.currentTabs.any { tab -> tabItem.key == tab.key }) {
-                                state.deleteTab(tabItem.key)
-                            } else {
-                                state.addTab(tabItem)
-                            }
-                            state.setAddTab(false)
-                        },
-                )
-            }
-            LazyColumn {
-                state.tabs.onSuccess { tabs ->
-                    items(tabs) {
-                        TabItem(it)
-                    }
+            onAddTab = { tabItem ->
+                if (tabItem is TimelineTabItem) {
+                    state.addTab(tabItem)
                 }
-                state.extraTabs.onSuccess { extraTabs ->
-                    state.accountState.user.onSuccess { user ->
-                        extraTabs.forEach { tab ->
-                            items(tab.data) { item ->
-                                TabItem(remember(item) { item.toTabItem(accountKey = user.key) })
-                            }
-                        }
-                    }
-                }
-            }
-        }
+            },
+            onDeleteTab = { key ->
+                state.deleteTab(key)
+            },
+            toAddRssSource = toAddRssSource,
+        )
     }
 }
 
@@ -259,6 +187,7 @@ private fun presenter(
     settingsRepository: SettingsRepository = koinInject(),
     appScope: CoroutineScope = koinInject(),
 ) = run {
+    val scope = rememberCoroutineScope()
     val accountState =
         remember(accountType) {
             UserPresenter(
@@ -266,6 +195,8 @@ private fun presenter(
                 userKey = null,
             )
         }.invoke()
+    var selectedEditTab by remember { mutableStateOf<TabItem?>(null) }
+    val allTabsState = allTabsPresenter(filterIsTimeline = true)
     val tabSettings by settingsRepository.tabSettings.collectAsUiState()
     val cacheTabs =
         remember {
@@ -274,8 +205,7 @@ private fun presenter(
     val currentTabs =
         accountState.user.flatMap { user ->
             tabSettings.map {
-                it.homeTabs
-                    .getOrDefault(user.key, listOf(HomeTimelineTabItem(accountType = AccountType.Specific(user.key))))
+                it.mainTabs
                     .toImmutableList()
             }
         }
@@ -286,35 +216,34 @@ private fun presenter(
                 cacheTabs.addAll(it)
             }
         }
-    val tabs =
-        accountState
-            .user
-            .map { user ->
-                remember(user.key) {
-                    TimelineTabItem
-                        .defaultPrimary(user)
-                        .plus(
-                            TimelineTabItem.defaultSecondary(
-                                user,
-                            ),
-                        ).filterIsInstance<TimelineTabItem>()
-                        .toImmutableList()
-                }
-            }
-    val extraTabs =
-        remember(accountType) {
-            PinnableTimelineTabPresenter(accountType = accountType)
-        }.invoke().tabs.map {
-            it.toImmutableList()
-        }
+    val enableMixedTimeline by remember {
+        settingsRepository.tabSettings.map { it.enableMixedTimeline }
+    }.collectAsUiState()
     var showAddTab by remember { mutableStateOf(false) }
     object {
-        val accountState = accountState
-        val currentTabs = cacheTabs.toImmutableList()
-        val tabs = tabs
-        val extraTabs = extraTabs
+        val currentTabs = cacheTabs
+        val allTabsState = allTabsState
         val canSwipeToDelete = cacheTabs.size > 1
         val showAddTab = showAddTab
+        val selectedEditTab = selectedEditTab
+        val enableMixedTimeline = enableMixedTimeline
+
+        fun setEnableMixedTimeline(enable: Boolean) {
+            scope.launch {
+                settingsRepository.updateTabSettings {
+                    copy(enableMixedTimeline = enable)
+                }
+            }
+        }
+
+        fun setEditTab(tab: TimelineTabItem?) {
+            selectedEditTab = tab
+        }
+
+        fun updateTab(tab: TimelineTabItem) {
+            val index = cacheTabs.indexOfFirst { it.key == tab.key }
+            cacheTabs[index] = tab
+        }
 
         fun moveTab(
             from: Any,
@@ -330,7 +259,7 @@ private fun presenter(
                 appScope.launch {
                     settingsRepository.updateTabSettings {
                         copy(
-                            homeTabs = homeTabs + (user.key to cacheTabs),
+                            mainTabs = cacheTabs,
                         )
                     }
                 }

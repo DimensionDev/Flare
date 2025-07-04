@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Διαχείριση χώρου αποθήκευσης Flare</string>
     <string name="settings_about_title">Σχετικά</string>
     <string name="settings_about_subtitle">Μάθετε περισσότερα για το Flare</string>
-    <string name="settings_tab_customization">Προσαρμογή καρτέλας</string>
-    <string name="settings_tab_customization_description">Προσαρμόστε τις καρτέλες στην αρχική οθόνη</string>
     <string name="settings_local_filter_title">Τοπικό φίλτρο</string>
     <string name="settings_local_filter_description">Ρυθμίσεις τοπικού φίλτρου για το χρονολόγιο</string>
     <string name="settings_guest_setting_title">Εξυπηρετητής Λειτουργίας Επισκέπτη</string>

@@ -116,15 +116,13 @@ public class HomeTabsPresenter(
                             UiState.Success(
                                 State.HomeTabState(
                                     primary =
-                                        tabSettings.items
+                                        TimelineTabItem.default
                                             .map {
                                                 HomeTabItem(it)
                                             }.toImmutableList(),
                                     secondary =
                                         secondary
-                                            .filter {
-                                                tabSettings.items.none { item -> item.key == it.key }
-                                            }.map {
+                                            .map {
                                                 HomeTabItem(it)
                                             }.toImmutableList(),
                                     extraProfileRoute =
@@ -153,6 +151,7 @@ public class HomeTabsPresenter(
                                                     item.tabItem.account,
                                                 ),
                                         )
+
                                     is DirectMessageTabItem ->
                                         item.copy(
                                             badgeCountState =
@@ -160,6 +159,7 @@ public class HomeTabsPresenter(
                                                     item.tabItem.account,
                                                 ),
                                         )
+
                                     else -> item
                                 }
                             }.toImmutableList(),

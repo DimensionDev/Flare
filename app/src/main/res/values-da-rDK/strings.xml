@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Håndtér Flare\'s lagerplads</string>
     <string name="settings_about_title">Om</string>
     <string name="settings_about_subtitle">Læs mere om Flare</string>
-    <string name="settings_tab_customization">Tilpasning af faneblad</string>
-    <string name="settings_tab_customization_description">Tilpas fanerne på startskærmen</string>
     <string name="settings_local_filter_title">Lokalt filter</string>
     <string name="settings_local_filter_description">Lokale filterindstillinger for tidslinje</string>
     <string name="settings_guest_setting_title">Gæst Tilstand Vært</string>

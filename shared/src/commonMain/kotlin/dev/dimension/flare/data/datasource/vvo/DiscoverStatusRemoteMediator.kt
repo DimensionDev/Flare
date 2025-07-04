@@ -3,10 +3,9 @@ package dev.dimension.flare.data.datasource.vvo
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.VVO
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
@@ -17,21 +16,22 @@ internal class DiscoverStatusRemoteMediator(
     private val service: VVOService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseTimelineRemoteMediator(
+        database = database,
+    ) {
+    override val pagingKey: String = "discover_status_$accountKey"
     private var page = 0
     private val containerId = "102803"
 
-    override suspend fun doLoad(
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         val config = service.config()
         if (config.data?.login != true) {
-            return MediatorResult.Error(
-                LoginExpiredException,
-            )
+            throw LoginExpiredException
         }
+
         val response =
             when (loadType) {
                 LoadType.REFRESH -> {
@@ -40,10 +40,11 @@ internal class DiscoverStatusRemoteMediator(
                 }
 
                 LoadType.PREPEND -> {
-                    return MediatorResult.Success(
+                    return Result(
                         endOfPaginationReached = true,
                     )
                 }
+
                 LoadType.APPEND -> {
                     page++
                     service.getContainerIndex(containerId = containerId, sinceId = page.toString())
@@ -56,24 +57,21 @@ internal class DiscoverStatusRemoteMediator(
                 ?.mapNotNull { it.mblog }
                 .orEmpty()
 
-        database.connect {
-            if (loadType == LoadType.REFRESH) {
-                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
+        val data =
+            status.map { statusItem ->
+                statusItem.toDbPagingTimeline(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                    sortIdProvider = {
+                        val index = status.indexOf(it)
+                        -(index + page * state.config.pageSize).toLong()
+                    },
+                )
             }
-            VVO.saveStatus(
-                database = database,
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                statuses = status,
-                sortIdProvider = {
-                    val index = status.indexOf(it)
-                    -(index + page * state.config.pageSize).toLong()
-                },
-            )
-        }
 
-        return MediatorResult.Success(
+        return Result(
             endOfPaginationReached = status.isEmpty(),
+            data = data,
         )
     }
 }

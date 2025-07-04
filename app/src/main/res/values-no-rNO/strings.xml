@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Behandle flammetall lagring</string>
     <string name="settings_about_title">Om</string>
     <string name="settings_about_subtitle">Lær mer om Flare</string>
-    <string name="settings_tab_customization">tilpasning av fane</string>
-    <string name="settings_tab_customization_description">Tilpass fanene på hjemmeskjermen</string>
     <string name="settings_local_filter_title">Lokalt filter</string>
     <string name="settings_local_filter_description">Lokale filterinnstillinger for tidslinjen</string>
     <string name="settings_guest_setting_title">Vert for gjestemodus</string>

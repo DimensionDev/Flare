@@ -3,11 +3,11 @@ package dev.dimension.flare.data.datasource.xqt
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.XQT
 import dev.dimension.flare.data.database.cache.mapper.cursor
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.xqt.XQTService
@@ -22,15 +22,17 @@ internal class SearchStatusPagingSource(
     private val service: XQTService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
     private val query: String,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseTimelineRemoteMediator(
+        database = database,
+    ) {
+    override val pagingKey = "search_status_$query"
     private var cursor: String? = null
 
-    override suspend fun doLoad(
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         val response =
             when (loadType) {
                 LoadType.REFRESH -> {
@@ -43,12 +45,11 @@ internal class SearchStatusPagingSource(
                                     count = state.config.pageSize.toLong(),
                                 ).encodeJson(),
                             referer = "https://$xqtHost/search?q=${query.encodeURLQueryComponent()}",
-                        ).also {
-                            database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-                        }
+                        )
                 }
+
                 LoadType.PREPEND -> {
-                    return MediatorResult.Success(
+                    return Result(
                         endOfPaginationReached = true,
                     )
                 }
@@ -68,15 +69,11 @@ internal class SearchStatusPagingSource(
         val tweets = response.tweets()
         cursor = response.cursor()
 
-        XQT.save(
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            database = database,
-            tweet = tweets,
-        )
+        val data = tweets.map { it.toDbPagingTimeline(accountKey, pagingKey) }
 
-        return MediatorResult.Success(
+        return Result(
             endOfPaginationReached = tweets.isEmpty(),
+            data = data,
         )
     }
 }

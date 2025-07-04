@@ -32,7 +32,7 @@ import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.Robot
-import compose.icons.fontawesomeicons.solid.Table
+import compose.icons.fontawesomeicons.solid.TableList
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -179,16 +179,16 @@ internal fun SettingsScreen(
             state.user.onSuccess {
                 ListItem(
                     headlineContent = {
-                        Text(text = stringResource(id = R.string.settings_tab_customization))
+                        Text(text = stringResource(id = R.string.settings_side_panel))
                     },
                     leadingContent = {
                         FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.Table,
+                            imageVector = FontAwesomeIcons.Solid.TableList,
                             contentDescription = null,
                         )
                     },
                     supportingContent = {
-                        Text(text = stringResource(id = R.string.settings_tab_customization_description))
+                        Text(text = stringResource(id = R.string.settings_side_panel_description))
                     },
                     modifier =
                         Modifier.clickable {

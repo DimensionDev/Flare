@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Hantera flare\'s lagring</string>
     <string name="settings_about_title">Om</string>
     <string name="settings_about_subtitle">Läs mer om Flare</string>
-    <string name="settings_tab_customization">Fliken anpassning</string>
-    <string name="settings_tab_customization_description">Anpassa flikarna på startskärmen</string>
     <string name="settings_local_filter_title">Lokalt filter</string>
     <string name="settings_local_filter_description">Lokala filterinställningar för tidslinje</string>
     <string name="settings_guest_setting_title">Värd för gästläge</string>

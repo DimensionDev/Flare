@@ -7,9 +7,12 @@ import dev.dimension.flare.data.database.cache.model.DbStatusReference
 import dev.dimension.flare.data.database.cache.model.DbStatusReferenceWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.data.database.cache.model.DbStatusWithUser
+import dev.dimension.flare.data.database.cache.model.UserContent
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.ReferenceType
+import kotlinx.coroutines.flow.firstOrNull
 import kotlin.uuid.Uuid
 
 internal suspend fun saveToDatabase(
@@ -21,8 +24,63 @@ internal suspend fun saveToDatabase(
             items
                 .flatMap { it.status.references }
                 .mapNotNull { it.status.user }
-    ).let {
-        database.userDao().insertAll(it)
+    ).let { allUsers ->
+        val exsitingUsers =
+            database
+                .userDao()
+                .findByKeys(allUsers.map { it.userKey })
+                .firstOrNull()
+                .orEmpty()
+                .map {
+                    when (val content = it.content) {
+                        is UserContent.Bluesky -> {
+                            val user =
+                                allUsers.find { user ->
+                                    user.userKey == it.userKey
+                                }
+                            if (user != null && user.content is UserContent.BlueskyLite) {
+                                it.copy(
+                                    content =
+                                        content.copy(
+                                            data =
+                                                content.data.copy(
+                                                    handle = user.content.data.handle,
+                                                    displayName = user.content.data.displayName,
+                                                    avatar = user.content.data.avatar,
+                                                ),
+                                        ),
+                                )
+                            } else {
+                                it
+                            }
+                        }
+                        is UserContent.Misskey -> {
+                            val user =
+                                allUsers.find { user ->
+                                    user.userKey == it.userKey
+                                }
+                            if (user != null && user.content is UserContent.MisskeyLite) {
+                                it.copy(
+                                    content =
+                                        content.copy(
+                                            data =
+                                                content.data.copy(
+                                                    name = user.content.data.name,
+                                                    username = user.content.data.username,
+                                                    avatarUrl = user.content.data.avatarUrl,
+                                                ),
+                                        ),
+                                )
+                            } else {
+                                it
+                            }
+                        }
+                        else -> it
+                    }
+                }
+
+        val result = (exsitingUsers + allUsers).distinctBy { it.userKey }
+        database.userDao().insertAll(result)
     }
     (
         items.map { it.status.status.data } +
@@ -40,7 +98,7 @@ internal suspend fun saveToDatabase(
 }
 
 internal fun createDbPagingTimelineWithStatus(
-    accountType: AccountType,
+    accountType: DbAccountType,
     pagingKey: String,
     sortId: Long,
     status: DbStatusWithUser,
@@ -48,7 +106,6 @@ internal fun createDbPagingTimelineWithStatus(
 ): DbPagingTimelineWithStatus {
     val timeline =
         DbPagingTimeline(
-            _id = Uuid.random().toString(),
             accountType = accountType,
             statusKey = status.data.statusKey,
             pagingKey = pagingKey,

@@ -177,5 +177,8 @@ internal fun RssSourcesScreen(
 @Composable
 private fun presenter() =
     run {
-        remember { RssSourcesPresenter() }.invoke()
+        val state = remember { RssSourcesPresenter() }.invoke()
+
+        object : RssSourcesPresenter.State by state {
+        }
     }

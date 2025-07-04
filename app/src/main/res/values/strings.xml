@@ -43,8 +43,8 @@
     <string name="settings_storage_subtitle">Manage Flare\'s storage</string>
     <string name="settings_about_title">About</string>
     <string name="settings_about_subtitle">Learn more about Flare</string>
-    <string name="settings_tab_customization">Tab customization</string>
-    <string name="settings_tab_customization_description">Customize the tabs on the home screen</string>
+    <string name="settings_side_panel">Side Panel customization</string>
+    <string name="settings_side_panel_description">Customize the side panel</string>
     <string name="settings_local_filter_title">Local filter</string>
     <string name="settings_local_filter_description">Local filter settings for timeline</string>
     <string name="settings_guest_setting_title">Guest Mode Host</string>
@@ -182,6 +182,7 @@
     <string name="media_save_fail">Failed to save</string>
     <string name="media_alt_text">Alt text</string>
 
+    <string name="settings_side_panel_empty">Default will display side panel depends on the account platform.</string>
     <string name="tab_settings_add">Add</string>
     <string name="tab_settings_drag">Drag</string>
     <string name="tab_settings_edit">Edit</string>
@@ -319,6 +320,9 @@
 
     <string name="home_tab_antennas_title">Antenna</string>
     <string name="antennas_empty">No antennas</string>
+    <string name="home_tab_mixed_timeline_title">Mixed</string>
+    <string name="tab_settings_mixed_timeline">Add mixed timeline tab</string>
+    <string name="tab_settings_mixed_timeline_desc">Mixed timeline will mix all tabs timeline result in one tab</string>
 
     <string name="changelog_current">
         <![CDATA[

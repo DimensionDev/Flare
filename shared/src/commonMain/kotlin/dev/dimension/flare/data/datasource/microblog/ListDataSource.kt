@@ -1,12 +1,12 @@
 package dev.dimension.flare.data.datasource.microblog
 
 import androidx.paging.PagingData
+import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiList
-import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.UiUserV2
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -33,11 +33,7 @@ internal interface ListDataSource {
         userKey: MicroBlogKey,
     )
 
-    fun listTimeline(
-        listId: String,
-        scope: CoroutineScope,
-        pageSize: Int = 20,
-    ): Flow<PagingData<UiTimeline>>
+    fun listTimeline(listId: String): BaseTimelineLoader
 
     suspend fun deleteList(listId: String)
 

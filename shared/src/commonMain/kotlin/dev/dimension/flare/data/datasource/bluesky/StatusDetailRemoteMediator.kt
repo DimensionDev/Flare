@@ -8,10 +8,9 @@ import app.bsky.feed.GetPostThreadResponseThreadUnion
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.ThreadViewPostParentUnion
 import app.bsky.feed.ThreadViewPostReplieUnion
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.Bluesky
+import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
@@ -20,7 +19,6 @@ import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.flow.firstOrNull
 import sh.christian.ozone.api.AtUri
-import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
@@ -28,15 +26,27 @@ internal class StatusDetailRemoteMediator(
     private val service: BlueskyService,
     private val accountKey: MicroBlogKey,
     private val database: CacheDatabase,
-    private val pagingKey: String,
     private val statusOnly: Boolean,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
-    override suspend fun doLoad(
+) : BaseTimelineRemoteMediator(
+        database = database,
+    ) {
+    override val pagingKey: String =
+        buildString {
+            append("status_detail_")
+            if (statusOnly) {
+                append("status_only_")
+            }
+            append(statusKey.toString())
+            append("_")
+            append(accountKey.toString())
+        }
+
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         if (loadType != LoadType.REFRESH) {
-            return MediatorResult.Success(
+            return Result(
                 endOfPaginationReached = true,
             )
         }
@@ -51,7 +61,6 @@ internal class StatusDetailRemoteMediator(
                                 statusKey = statusKey,
                                 pagingKey = pagingKey,
                                 sortId = 0,
-                                _id = Uuid.random().toString(),
                             ),
                         ),
                     )
@@ -97,18 +106,15 @@ internal class StatusDetailRemoteMediator(
                     else -> emptyList()
                 }
             }
-        database.connect {
-            Bluesky.savePost(
-                accountKey,
-                pagingKey,
-                database,
-                result,
-            ) {
-                -result.indexOf(it).toLong()
-            }
-        }
-        return MediatorResult.Success(
+        return Result(
             endOfPaginationReached = true,
+            data =
+                result.toDb(
+                    accountKey,
+                    pagingKey,
+                ) {
+                    -result.indexOf(it).toLong()
+                },
         )
     }
 }

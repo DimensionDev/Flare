@@ -3,10 +3,9 @@ package dev.dimension.flare.data.datasource.mastodon
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.Mastodon
+import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.data.network.mastodon.api.model.MarkerUpdate
@@ -18,13 +17,16 @@ internal class NotificationRemoteMediator(
     private val service: MastodonService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
     private val onClearMarker: () -> Unit,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
-    override suspend fun doLoad(
+) : BaseTimelineRemoteMediator(
+        database = database,
+    ) {
+    override val pagingKey: String = "notification_$accountKey"
+
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         val response =
             when (loadType) {
                 LoadType.REFRESH -> {
@@ -50,7 +52,7 @@ internal class NotificationRemoteMediator(
                 LoadType.APPEND -> {
                     val lastItem =
                         database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return MediatorResult.Success(
+                            ?: return Result(
                                 endOfPaginationReached = true,
                             )
                     service.notification(
@@ -60,20 +62,13 @@ internal class NotificationRemoteMediator(
                 }
             }
 
-        database.connect {
-            if (loadType == LoadType.REFRESH) {
-                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-            }
-            Mastodon.save(
-                database = database,
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                data = response,
-            )
-        }
-
-        return MediatorResult.Success(
+        return Result(
             endOfPaginationReached = response.isEmpty(),
+            data =
+                response.toDb(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                ),
         )
     }
 }

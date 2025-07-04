@@ -3,13 +3,13 @@ package dev.dimension.flare.data.repository
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.Locale
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
+import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.guest.mastodon.GuestMastodonDataSource
 import dev.dimension.flare.data.datasource.microblog.MicroblogDataSource
 import dev.dimension.flare.data.datastore.AppDataStore
@@ -20,7 +20,6 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.map
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
@@ -28,6 +27,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 
@@ -35,6 +35,7 @@ internal class AccountRepository(
     private val appDatabase: AppDatabase,
     private val coroutineScope: CoroutineScope,
     internal val appDataStore: AppDataStore,
+    private val cacheDatabase: CacheDatabase,
 ) {
     val activeAccount: Flow<UiAccount?> by lazy {
         appDatabase.accountDao().activeAccount().map {
@@ -69,6 +70,21 @@ internal class AccountRepository(
 
     fun delete(accountKey: MicroBlogKey) =
         coroutineScope.launch {
+            cacheDatabase.pagingTimelineDao().deleteByAccountType(
+                AccountType.Specific(accountKey),
+            )
+            cacheDatabase.statusDao().deleteByAccountType(
+                AccountType.Specific(accountKey),
+            )
+            cacheDatabase.userDao().deleteHistoryByAccountType(
+                AccountType.Specific(accountKey),
+            )
+            cacheDatabase.emojiDao().clearHistoryByAccountType(
+                AccountType.Specific(accountKey),
+            )
+            cacheDatabase.messageDao().clearMessageTimeline(
+                AccountType.Specific(accountKey),
+            )
             appDatabase.accountDao().delete(accountKey)
         }
 
@@ -124,12 +140,29 @@ internal fun accountProvider(
 internal fun accountServiceProvider(
     accountType: AccountType,
     repository: AccountRepository,
-): UiState<MicroblogDataSource> {
-    if (accountType is AccountType.Guest) {
-        val guestData by repository.appDataStore.guestDataStore.data
-            .collectAsUiState()
-        return guestData.map {
-            remember(it) {
+): UiState<MicroblogDataSource> =
+    remember(
+        accountType,
+    ) {
+        accountServiceFlow(
+            accountType = accountType,
+            repository = repository,
+        )
+    }.collectAsUiState().value
+
+internal fun accountServiceFlow(
+    accountType: AccountType,
+    repository: AccountRepository,
+): Flow<MicroblogDataSource> =
+    when (accountType) {
+        AccountType.Active -> {
+            repository.activeAccount.mapNotNull {
+                it?.dataSource
+            }
+        }
+        AccountType.Guest -> {
+            val guestData = repository.appDataStore.guestDataStore.data
+            guestData.map {
                 when (it.platformType) {
                     PlatformType.Mastodon ->
                         GuestMastodonDataSource(
@@ -140,14 +173,14 @@ internal fun accountServiceProvider(
                 }
             }
         }
-    }
-    val account by accountProvider(accountType = accountType, repository = repository)
-    return account.map {
-        remember(it) {
-            it.dataSource
+        is AccountType.Specific -> {
+            repository
+                .getFlow(accountType.accountKey)
+                .mapNotNull {
+                    it?.dataSource
+                }
         }
     }
-}
 
 @Composable
 internal fun allAccountsPresenter(repository: AccountRepository): State<UiState<ImmutableList<UiAccount>>> =

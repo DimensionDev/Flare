@@ -10,6 +10,7 @@ import dev.dimension.flare.data.database.cache.model.DbUser
 import dev.dimension.flare.data.database.cache.model.DbUserHistory
 import dev.dimension.flare.data.database.cache.model.DbUserHistoryWithUser
 import dev.dimension.flare.data.database.cache.model.UserContent
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import kotlinx.coroutines.flow.Flow
@@ -60,4 +61,7 @@ internal interface UserDao {
             "WHERE DbUser.name like :query OR DbUser.handle like :query",
     )
     fun searchUser(query: String): PagingSource<Int, DbUser>
+
+    @Query("DELETE FROM DbUserHistory WHERE accountType = :accountType")
+    suspend fun deleteHistoryByAccountType(accountType: DbAccountType)
 }

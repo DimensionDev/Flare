@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">管理Flare的存储</string>
     <string name="settings_about_title">关于</string>
     <string name="settings_about_subtitle">了解更多关于Flare的信息</string>
-    <string name="settings_tab_customization">选项卡自定义</string>
-    <string name="settings_tab_customization_description">自定义主屏幕上的选项卡</string>
     <string name="settings_local_filter_title">本地过滤器</string>
     <string name="settings_local_filter_description">时间轴的本地过滤器设置</string>
     <string name="settings_guest_setting_title">访客模式主机</string>

@@ -9,10 +9,9 @@ import app.bsky.feed.Repost
 import app.bsky.notification.ListNotificationsQueryParams
 import app.bsky.notification.ListNotificationsReason
 import app.bsky.notification.UpdateSeenRequest
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.Bluesky
+import dev.dimension.flare.data.database.cache.mapper.toDb
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
@@ -25,15 +24,21 @@ internal class NotificationRemoteMediator(
     private val service: BlueskyService,
     private val accountKey: MicroBlogKey,
     private val database: CacheDatabase,
-    private val pagingKey: String,
     private val onClearMarker: () -> Unit,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseTimelineRemoteMediator(
+        database = database,
+    ) {
     private var cursor: String? = null
+    override val pagingKey: String =
+        buildString {
+            append("notification_")
+            append(accountKey.toString())
+        }
 
-    override suspend fun doLoad(
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         val response =
             when (loadType) {
                 LoadType.REFRESH -> {
@@ -60,11 +65,11 @@ internal class NotificationRemoteMediator(
                 }
 
                 else -> {
-                    return MediatorResult.Success(
+                    return Result(
                         endOfPaginationReached = true,
                     )
                 }
-            } ?: return MediatorResult.Success(
+            } ?: return Result(
                 endOfPaginationReached = true,
             )
 
@@ -100,18 +105,14 @@ internal class NotificationRemoteMediator(
                 .associateBy { it.uri }
                 .toImmutableMap()
         cursor = response.cursor
-        database.connect {
-            Bluesky.saveNotification(
-                accountKey,
-                pagingKey,
-                database,
-                response.notifications,
-                references = references,
-            )
-        }
-
-        return MediatorResult.Success(
+        return Result(
             endOfPaginationReached = cursor == null,
+            data =
+                response.notifications.toDb(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                    references = references,
+                ),
         )
     }
 }

@@ -40,6 +40,7 @@ import dev.dimension.flare.data.network.mastodon.api.model.PostReport
 import dev.dimension.flare.data.network.mastodon.api.model.PostStatus
 import dev.dimension.flare.data.network.mastodon.api.model.PostVote
 import dev.dimension.flare.data.network.mastodon.api.model.Visibility
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
@@ -74,7 +75,6 @@ import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal open class MastodonDataSource(
-//    override val account: UiAccount.Mastodon,
     override val accountKey: MicroBlogKey,
     val instance: String,
     val accessToken: String,
@@ -85,6 +85,7 @@ internal open class MastodonDataSource(
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
+    private val accountRepository: AccountRepository by inject()
     private val service by lazy {
         MastodonService(
             baseUrl = "https://$instance/",
@@ -92,141 +93,106 @@ internal open class MastodonDataSource(
         )
     }
 
-    override fun homeTimeline(
-        pageSize: Int,
-        pagingKey: String,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                HomeTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    pagingKey,
-                ),
+    override fun homeTimeline() =
+        HomeTimelineRemoteMediator(
+            service,
+            database,
+            accountKey,
         )
 
     fun localTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "local_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                PublicTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    pagingKey,
-                    local = true,
-                ),
+            accountRepository = accountRepository,
+            mediator = publicTimelineLoader(local = true),
         )
 
     fun bookmarkTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "bookmarked_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                BookmarkTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    pagingKey,
-                ),
+            accountRepository = accountRepository,
+            mediator = bookmarkTimelineLoader(),
+        )
+
+    fun bookmarkTimelineLoader() =
+        BookmarkTimelineRemoteMediator(
+            service,
+            database,
+            accountKey,
         )
 
     fun favouriteTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "favourite_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                FavouriteTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    pagingKey,
-                ),
+            accountRepository = accountRepository,
+            mediator = favouriteTimelineLoader(),
         )
 
-    override fun listTimeline(
-        listId: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = "list_${accountKey}_$listId",
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                ListTimelineRemoteMediator(
-                    listId,
-                    service,
-                    database,
-                    accountKey,
-                    "list_${accountKey}_$listId",
-                ),
+    fun favouriteTimelineLoader() =
+        FavouriteTimelineRemoteMediator(
+            service,
+            database,
+            accountKey,
+        )
+
+    override fun listTimeline(listId: String) =
+        ListTimelineRemoteMediator(
+            listId,
+            service,
+            database,
+            accountKey,
         )
 
     fun publicTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "public_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                PublicTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    pagingKey,
-                    local = false,
-                ),
+            accountRepository = accountRepository,
+            mediator = publicTimelineLoader(local = false),
+        )
+
+    fun publicTimelineLoader(local: Boolean) =
+        PublicTimelineRemoteMediator(
+            service,
+            database,
+            accountKey,
+            local = local,
         )
 
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forNotification = true),
+            accountRepository = accountRepository,
             mediator =
                 when (type) {
                     NotificationFilter.All ->
@@ -234,7 +200,6 @@ internal open class MastodonDataSource(
                             service,
                             database,
                             accountKey,
-                            pagingKey,
                             onClearMarker = {
                                 MemCacheable.update(notificationMarkerKey, 0)
                             },
@@ -245,7 +210,6 @@ internal open class MastodonDataSource(
                             service,
                             database,
                             accountKey,
-                            pagingKey,
                         )
 
                     else -> throw IllegalStateException("Unsupported notification type")
@@ -305,49 +269,22 @@ internal open class MastodonDataSource(
 
     override fun userTimeline(
         userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
         mediaOnly: Boolean,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                UserTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    userKey,
-                    pagingKey,
-                    onlyMedia = mediaOnly,
-                ),
-        )
+    ) = UserTimelineRemoteMediator(
+        service,
+        database,
+        accountKey,
+        userKey,
+        onlyMedia = mediaOnly,
+    )
 
-    override fun context(
-        statusKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                StatusDetailRemoteMediator(
-                    statusKey,
-                    service,
-                    database,
-                    accountKey,
-                    pagingKey,
-                    statusOnly = false,
-                ),
+    override fun context(statusKey: MicroBlogKey) =
+        StatusDetailRemoteMediator(
+            statusKey,
+            service,
+            database,
+            accountKey,
+            statusOnly = false,
         )
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
@@ -810,24 +747,11 @@ internal open class MastodonDataSource(
             )
         }.flow
 
-    override fun discoverStatuses(
-        pageSize: Int,
-        scope: CoroutineScope,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                DiscoverStatusRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    pagingKey,
-                ),
+    override fun discoverStatuses() =
+        DiscoverStatusRemoteMediator(
+            service,
+            database,
+            accountKey,
         )
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
@@ -839,26 +763,12 @@ internal open class MastodonDataSource(
             )
         }.flow
 
-    override fun searchStatus(
-        query: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forSearch = true),
-            mediator =
-                SearchStatusPagingSource(
-                    service,
-                    database,
-                    accountKey,
-                    pagingKey,
-                    query,
-                ),
+    override fun searchStatus(query: String) =
+        SearchStatusPagingSource(
+            service,
+            database,
+            accountKey,
+            query,
         )
 
     override fun searchUser(
@@ -1211,7 +1121,8 @@ internal open class MastodonDataSource(
         return MemCacheable(
             key = notificationMarkerKey,
             fetchSource = {
-                val marker = service.notificationMarkers().notifications?.lastReadID ?: return@MemCacheable 0
+                val marker =
+                    service.notificationMarkers().notifications?.lastReadID ?: return@MemCacheable 0
                 val timeline = service.notification(min_id = marker)
                 timeline.size
             },
@@ -1239,7 +1150,12 @@ internal open class MastodonDataSource(
                                         options =
                                             it.data.poll.options?.mapIndexed { index, option ->
                                                 if (options.contains(index)) {
-                                                    option.copy(votesCount = option.votesCount?.plus(1))
+                                                    option.copy(
+                                                        votesCount =
+                                                            option.votesCount?.plus(
+                                                                1,
+                                                            ),
+                                                    )
                                                 } else {
                                                     option
                                                 }
@@ -1268,7 +1184,12 @@ internal open class MastodonDataSource(
                                             options =
                                                 it.data.poll.options?.mapIndexed { index, option ->
                                                     if (options.contains(index)) {
-                                                        option.copy(votesCount = option.votesCount?.minus(1))
+                                                        option.copy(
+                                                            votesCount =
+                                                                option.votesCount?.minus(
+                                                                    1,
+                                                                ),
+                                                        )
                                                     } else {
                                                         option
                                                     }
@@ -1300,7 +1221,6 @@ internal open class MastodonDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -1317,7 +1237,6 @@ internal open class MastodonDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -1330,50 +1249,28 @@ internal open class MastodonDataSource(
             )
         }.flow.cachedIn(scope)
 
-    override fun profileTabs(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pagingSize: Int,
-    ): ImmutableList<ProfileTab> =
+    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         listOfNotNull(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
-                flow =
-                    timelinePager(
-                        pageSize = pagingSize,
-                        pagingKey = "user_timeline_$userKey",
+                loader =
+                    UserTimelineRemoteMediator(
+                        service = service,
                         database = database,
-                        scope = scope,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                        mediator =
-                            UserTimelineRemoteMediator(
-                                service = service,
-                                database = database,
-                                accountKey = accountKey,
-                                userKey = userKey,
-                                pagingKey = "user_timeline_$userKey",
-                                withPinned = true,
-                            ),
+                        accountKey = accountKey,
+                        userKey = userKey,
+                        withPinned = true,
                     ),
             ),
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.StatusWithReplies,
-                flow =
-                    timelinePager(
-                        pageSize = pagingSize,
-                        pagingKey = "user_timeline_replies_$userKey",
+                loader =
+                    UserTimelineRemoteMediator(
+                        service = service,
+                        accountKey = accountKey,
                         database = database,
-                        scope = scope,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                        mediator =
-                            UserTimelineRemoteMediator(
-                                service = service,
-                                accountKey = accountKey,
-                                database = database,
-                                userKey = userKey,
-                                pagingKey = "user_timeline_replies_$userKey",
-                                withReplies = true,
-                            ),
+                        userKey = userKey,
+                        withReplies = true,
                     ),
             ),
             ProfileTab.Media,

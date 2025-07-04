@@ -3,10 +3,10 @@ package dev.dimension.flare.data.datasource.misskey
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.Misskey
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
@@ -15,7 +15,6 @@ import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.firstOrNull
-import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusDetailRemoteMediator(
@@ -23,17 +22,28 @@ internal class StatusDetailRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
-    private val pagingKey: String,
     private val statusOnly: Boolean,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
+) : BaseTimelineRemoteMediator(
+        database = database,
+    ) {
+    override val pagingKey: String =
+        buildString {
+            append("status_detail_")
+            if (statusOnly) {
+                append("status_only_")
+            }
+            append(statusKey.toString())
+            append("_")
+            append(accountKey.toString())
+        }
     private var page = 1
 
-    override suspend fun doLoad(
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         if (loadType == LoadType.PREPEND) {
-            return MediatorResult.Success(
+            return Result(
                 endOfPaginationReached = true,
             )
         }
@@ -50,7 +60,6 @@ internal class StatusDetailRemoteMediator(
                                     statusKey = statusKey,
                                     pagingKey = pagingKey,
                                     sortId = 0,
-                                    _id = Uuid.random().toString(),
                                 ),
                             ),
                         )
@@ -92,20 +101,18 @@ internal class StatusDetailRemoteMediator(
                         ).orEmpty()
                 listOfNotNull(current?.reply, current) + children
             }.filterNotNull()
-        database.connect {
-            Misskey.save(
-                database = database,
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                data = result,
-                sortIdProvider = {
-                    val index = result.indexOf(it)
-                    -(index + page * state.config.pageSize).toLong()
-                },
-            )
-        }
-        return MediatorResult.Success(
+
+        return Result(
             endOfPaginationReached = true,
+            data =
+                result.toDbPagingTimeline(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                    sortIdProvider = {
+                        val index = result.indexOf(it)
+                        -(index + page * state.config.pageSize).toLong()
+                    },
+                ),
         )
     }
 }

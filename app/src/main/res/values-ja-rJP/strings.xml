@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Flareのストレージを管理する</string>
     <string name="settings_about_title">このアプリについて</string>
     <string name="settings_about_subtitle">Flareについての詳細</string>
-    <string name="settings_tab_customization">タブのカスタマイズ</string>
-    <string name="settings_tab_customization_description">ホーム画面のタブを編集する</string>
     <string name="settings_local_filter_title">ローカルフィルター</string>
     <string name="settings_local_filter_description">タイムラインのローカルフィルターを設定する</string>
     <string name="settings_guest_setting_title">ゲストモードホスト</string>

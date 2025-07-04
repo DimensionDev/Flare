@@ -91,6 +91,7 @@ import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.data.network.bluesky.model.DidDoc
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
@@ -149,6 +150,7 @@ internal class BlueskyDataSource(
     private val appDatabase: AppDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
+    private val accountRepository: AccountRepository by inject()
     private val inAppNotification: InAppNotification by inject()
     private val service by lazy {
         BlueskyService(
@@ -189,39 +191,25 @@ internal class BlueskyDataSource(
         } ?: service
     }
 
-    override fun homeTimeline(
-        pageSize: Int,
-        pagingKey: String,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                HomeTimelineRemoteMediator(
-                    service,
-                    accountKey,
-                    database,
-                    pagingKey,
-                    inAppNotification = inAppNotification,
-                ),
+    override fun homeTimeline() =
+        HomeTimelineRemoteMediator(
+            service,
+            accountKey,
+            database,
+            inAppNotification = inAppNotification,
         )
 
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forNotification = true),
+            accountRepository = accountRepository,
             mediator =
                 when (type) {
                     NotificationFilter.All ->
@@ -229,7 +217,6 @@ internal class BlueskyDataSource(
                             service,
                             accountKey,
                             database,
-                            pagingKey,
                             onClearMarker = {
                                 MemCacheable.update(notificationMarkerKey, 0)
                             },
@@ -300,49 +287,22 @@ internal class BlueskyDataSource(
 
     override fun userTimeline(
         userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
         mediaOnly: Boolean,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                UserTimelineRemoteMediator(
-                    service,
-                    accountKey,
-                    database,
-                    userKey,
-                    pagingKey,
-                    onlyMedia = mediaOnly,
-                ),
-        )
+    ) = UserTimelineRemoteMediator(
+        service,
+        accountKey,
+        database,
+        userKey,
+        onlyMedia = mediaOnly,
+    )
 
-    override fun context(
-        statusKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                StatusDetailRemoteMediator(
-                    statusKey,
-                    service,
-                    accountKey,
-                    database,
-                    pagingKey,
-                    statusOnly = false,
-                ),
+    override fun context(statusKey: MicroBlogKey) =
+        StatusDetailRemoteMediator(
+            statusKey,
+            service,
+            accountKey,
+            database,
+            statusOnly = false,
         )
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
@@ -954,26 +914,12 @@ internal class BlueskyDataSource(
         }
     }
 
-    override fun searchStatus(
-        query: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forSearch = true),
-            mediator =
-                SearchStatusRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    pagingKey,
-                    query,
-                ),
+    override fun searchStatus(query: String) =
+        SearchStatusRemoteMediator(
+            service,
+            database,
+            accountKey,
+            query,
         )
 
     override fun searchUser(
@@ -1004,11 +950,7 @@ internal class BlueskyDataSource(
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         throw UnsupportedOperationException("Bluesky does not support discover hashtags")
 
-    override fun discoverStatuses(
-        pageSize: Int,
-        scope: CoroutineScope,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> = throw UnsupportedOperationException("Bluesky does not support discover statuses")
+    override fun discoverStatuses() = throw UnsupportedOperationException("Bluesky does not support discover statuses")
 
     override fun composeConfig(statusKey: MicroBlogKey?): ComposeConfig =
         ComposeConfig(
@@ -1174,24 +1116,23 @@ internal class BlueskyDataSource(
         uri: String,
         pageSize: Int = 20,
         scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> {
-        val pagingKey = "feed_timeline_$uri"
-        return timelinePager(
+    ): Flow<PagingData<UiTimeline>> =
+        timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                FeedTimelineRemoteMediator(
-                    service = service,
-                    accountKey = accountKey,
-                    database = database,
-                    uri = uri,
-                    pagingKey = pagingKey,
-                ),
+            accountRepository = accountRepository,
+            mediator = feedTimelineLoader(uri),
         )
-    }
+
+    fun feedTimelineLoader(uri: String) =
+        FeedTimelineRemoteMediator(
+            service = service,
+            accountKey = accountKey,
+            database = database,
+            uri = uri,
+        )
 
     suspend fun subscribeFeed(data: UiList) {
         MemCacheable.updateWith<ImmutableList<UiList>>(
@@ -1402,28 +1343,13 @@ internal class BlueskyDataSource(
                 .render(accountKey)
         }
 
-    override fun listTimeline(
-        listId: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> {
-        val pagingKey = "list_timeline_$listId"
-        return timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
+    override fun listTimeline(listId: String) =
+        ListTimelineRemoteMediator(
+            service = service,
+            accountKey = accountKey,
             database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                ListTimelineRemoteMediator(
-                    service = service,
-                    accountKey = accountKey,
-                    database = database,
-                    uri = listId,
-                    pagingKey = pagingKey,
-                ),
+            uri = listId,
         )
-    }
 
     private suspend fun createList(
         title: String,
@@ -2069,6 +1995,7 @@ internal class BlueskyDataSource(
                         is LogDeleteMessageMessageUnion.Unknown -> Unit
                     }
                 }
+
                 else -> Unit
             }
         }
@@ -2125,7 +2052,9 @@ internal class BlueskyDataSource(
 
     private fun clearDirectMessageBadgeCount(roomKey: MicroBlogKey) {
         coroutineScope.launch {
-            database.messageDao().clearUnreadCount(roomKey, accountType = AccountType.Specific(accountKey))
+            database
+                .messageDao()
+                .clearUnreadCount(roomKey, accountType = AccountType.Specific(accountKey))
         }
     }
 
@@ -2188,7 +2117,6 @@ internal class BlueskyDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -2204,7 +2132,6 @@ internal class BlueskyDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -2216,71 +2143,40 @@ internal class BlueskyDataSource(
             )
         }.flow.cachedIn(scope)
 
-    override fun profileTabs(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pagingSize: Int,
-    ): ImmutableList<ProfileTab> =
+    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         listOfNotNull(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
-                flow =
-                    timelinePager(
-                        pageSize = pagingSize,
-                        pagingKey = "user_timeline_$userKey",
+                loader =
+                    UserTimelineRemoteMediator(
+                        service = service,
+                        accountKey = accountKey,
                         database = database,
-                        scope = scope,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                        mediator =
-                            UserTimelineRemoteMediator(
-                                service = service,
-                                accountKey = accountKey,
-                                database = database,
-                                userKey = userKey,
-                                pagingKey = "user_timeline_$userKey",
-                                onlyMedia = false,
-                                withReplies = false,
-                            ),
+                        userKey = userKey,
+                        onlyMedia = false,
+                        withReplies = false,
                     ),
             ),
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.StatusWithReplies,
-                flow =
-                    timelinePager(
-                        pageSize = pagingSize,
-                        pagingKey = "user_timeline_replies_$userKey",
-                        database = database,
-                        scope = scope,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                        mediator =
-                            UserTimelineRemoteMediator(
-                                service,
-                                accountKey,
-                                database,
-                                userKey,
-                                pagingKey = "user_timeline_replies_$userKey",
-                                withReplies = true,
-                            ),
+                loader =
+                    UserTimelineRemoteMediator(
+                        service,
+                        accountKey,
+                        database,
+                        userKey,
+                        withReplies = true,
                     ),
             ),
             ProfileTab.Media,
             if (userKey == accountKey) {
                 ProfileTab.Timeline(
                     type = ProfileTab.Timeline.Type.Likes,
-                    flow =
-                        timelinePager(
-                            pageSize = pagingSize,
-                            pagingKey = "user_timeline_likes_$userKey",
-                            database = database,
-                            scope = scope,
-                            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                            mediator =
-                                UserLikesTimelineRemoteMediator(
-                                    service,
-                                    accountKey,
-                                    database,
-                                    pagingKey = "user_timeline_likes_$userKey",
-                                ),
+                    loader =
+                        UserLikesTimelineRemoteMediator(
+                            service,
+                            accountKey,
+                            database,
                         ),
                 )
             } else {

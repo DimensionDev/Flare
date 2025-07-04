@@ -34,7 +34,6 @@ import compose.icons.fontawesomeicons.solid.Thumbtack
 import compose.icons.fontawesomeicons.solid.ThumbtackSlash
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
@@ -243,8 +242,7 @@ private fun presenter(
     val currentTabs =
         accountState.user.flatMap { user ->
             tabSettings.map {
-                it.homeTabs
-                    .getOrDefault(user.key, listOf(HomeTimelineTabItem(accountType = AccountType.Specific(user.key))))
+                it.mainTabs
                     .filterIsInstance<ListTimelineTabItem>()
                     .map { it.listId }
                     .toImmutableList()
@@ -263,28 +261,17 @@ private fun presenter(
                 appScope.launch {
                     settingsRepository.updateTabSettings {
                         copy(
-                            homeTabs =
-                                homeTabs + (
-                                    user.key to
-                                        homeTabs
-                                            .getOrDefault(
-                                                user.key,
-                                                defaultValue =
-                                                    listOf(
-                                                        HomeTimelineTabItem(accountType),
-                                                    ),
-                                            ).plus(
-                                                ListTimelineTabItem(
-                                                    account = AccountType.Specific(user.key),
-                                                    listId = item.id,
-                                                    metaData =
-                                                        TabMetaData(
-                                                            title = TitleType.Text(item.title),
-                                                            icon = IconType.Material(IconType.Material.MaterialIcon.List),
-                                                        ),
-                                                ),
-                                            )
-                                ),
+                            mainTabs =
+                                mainTabs +
+                                    ListTimelineTabItem(
+                                        account = AccountType.Specific(user.key),
+                                        listId = item.id,
+                                        metaData =
+                                            TabMetaData(
+                                                title = TitleType.Text(item.title),
+                                                icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                                            ),
+                                    ),
                         )
                     }
                 }
@@ -296,24 +283,14 @@ private fun presenter(
                 appScope.launch {
                     settingsRepository.updateTabSettings {
                         copy(
-                            homeTabs =
-                                homeTabs + (
-                                    user.key to
-                                        homeTabs
-                                            .getOrDefault(
-                                                user.key,
-                                                defaultValue =
-                                                    listOf(
-                                                        HomeTimelineTabItem(accountType),
-                                                    ),
-                                            ).filter {
-                                                if (it is ListTimelineTabItem) {
-                                                    it.listId != item.id
-                                                } else {
-                                                    true
-                                                }
-                                            }
-                                ),
+                            mainTabs =
+                                mainTabs.filter {
+                                    if (it is ListTimelineTabItem) {
+                                        it.listId != item.id
+                                    } else {
+                                        true
+                                    }
+                                },
                         )
                     }
                 }

@@ -75,35 +75,6 @@ internal object Bluesky {
 //        database.messageDao().insert(room)
     }
 
-    suspend fun saveFeed(
-        accountKey: MicroBlogKey,
-        pagingKey: String,
-        database: CacheDatabase,
-        data: List<FeedViewPost>,
-        sortIdProvider: (FeedViewPost) -> Long = {
-            val reason = it.reason
-            if (reason is FeedViewPostReasonUnion.ReasonRepost) {
-                reason.value.indexedAt.toEpochMilliseconds()
-            } else if (reason is FeedViewPostReasonUnion.ReasonPin) {
-                Long.MAX_VALUE
-            } else {
-                it.post.indexedAt.toEpochMilliseconds()
-            }
-        },
-    ) {
-        save(database, data.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider))
-    }
-
-    suspend fun saveNotification(
-        accountKey: MicroBlogKey,
-        pagingKey: String,
-        database: CacheDatabase,
-        data: List<ListNotificationsNotification>,
-        references: ImmutableMap<AtUri, PostView>,
-    ) {
-        save(database, data.toDb(accountKey, pagingKey, references))
-    }
-
     suspend fun savePost(
         accountKey: MicroBlogKey,
         pagingKey: String,
@@ -175,10 +146,10 @@ internal object Bluesky {
     }
 }
 
-private fun List<PostView>.toDb(
+internal fun List<PostView>.toDb(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (PostView) -> Long,
+    sortIdProvider: (PostView) -> Long = { it.indexedAt.toEpochMilliseconds() },
 ): List<DbPagingTimelineWithStatus> =
     this.map {
         createDbPagingTimelineWithStatus(
@@ -254,6 +225,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                 userKey = null,
                                 content = content,
                                 text = null,
+                                createdAt = items.first().indexedAt,
                             ),
                     )
                 listOf(
@@ -288,6 +260,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                 userKey = null,
                                 content = content,
                                 text = null,
+                                createdAt = items.first().indexedAt,
                             ),
                     )
                 listOfNotNull(
@@ -320,6 +293,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                                     userKey = user.userKey,
                                     content = content,
                                     text = null,
+                                    createdAt = it.indexedAt,
                                 ),
                         )
                     createDbPagingTimelineWithStatus(
@@ -359,13 +333,28 @@ private fun ListNotificationsNotification.toDbStatus(accountKey: MicroBlogKey): 
         content = StatusContent.BlueskyNotification.Normal(this),
         accountType = AccountType.Specific(accountKey),
         text = null,
+        createdAt = indexedAt,
     )
 }
 
 internal fun List<FeedViewPost>.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (FeedViewPost) -> Long,
+    sortIdProvider: (FeedViewPost) -> Long = {
+        when (val reason = it.reason) {
+            is FeedViewPostReasonUnion.ReasonRepost -> {
+                reason.value.indexedAt.toEpochMilliseconds()
+            }
+
+            is FeedViewPostReasonUnion.ReasonPin -> {
+                Long.MAX_VALUE
+            }
+
+            else -> {
+                it.post.indexedAt.toEpochMilliseconds()
+            }
+        }
+    },
 ): List<DbPagingTimelineWithStatus> =
     this.map {
         val reply =
@@ -393,6 +382,7 @@ internal fun List<FeedViewPost>.toDbPagingTimeline(
                                 content = StatusContent.BlueskyReason(data),
                                 accountType = AccountType.Specific(accountKey),
                                 text = null,
+                                createdAt = it.post.indexedAt,
                             ),
                     )
                 }
@@ -412,6 +402,7 @@ internal fun List<FeedViewPost>.toDbPagingTimeline(
                                 content = StatusContent.BlueskyReason(data),
                                 accountType = AccountType.Specific(accountKey),
                                 text = status.data.text,
+                                createdAt = it.post.indexedAt,
                             ),
                     )
                 }
@@ -456,6 +447,7 @@ private fun PostView.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithU
             userKey = user.userKey,
             accountType = AccountType.Specific(accountKey),
             text = parseBlueskyJson(record, accountKey).raw,
+            createdAt = indexedAt,
         )
     return DbStatusWithUser(
         data = status,

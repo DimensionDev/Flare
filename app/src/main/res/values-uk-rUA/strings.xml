@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Керування сховищем Flare\'а</string>
     <string name="settings_about_title">Про програму</string>
     <string name="settings_about_subtitle">Дізнайтеся більше про Flare</string>
-    <string name="settings_tab_customization">Налаштування табуляції</string>
-    <string name="settings_tab_customization_description">Налаштування вкладок на головному екрані</string>
     <string name="settings_local_filter_title">Локальний фільтр</string>
     <string name="settings_local_filter_description">Налаштування локального фільтра для стрічки</string>
     <string name="settings_guest_setting_title">Гостьовий режим - Хост</string>

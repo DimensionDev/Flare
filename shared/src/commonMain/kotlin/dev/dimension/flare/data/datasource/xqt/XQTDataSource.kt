@@ -9,6 +9,7 @@ import androidx.paging.PagingState
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
@@ -70,6 +71,7 @@ import dev.dimension.flare.data.network.xqt.model.RemoveMemberRequest
 import dev.dimension.flare.data.network.xqt.model.UpdateListRequest
 import dev.dimension.flare.data.network.xqt.model.User
 import dev.dimension.flare.data.network.xqt.model.UserUnavailable
+import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
@@ -129,28 +131,16 @@ internal class XQTDataSource(
     private val database: CacheDatabase by inject()
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
+    private val accountRepository: AccountRepository by inject()
     private val service by lazy {
         XQTService(chocolate = credential.chocolate)
     }
 
-    override fun homeTimeline(
-        pageSize: Int,
-        pagingKey: String,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                HomeTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    pagingKey,
-                ),
+    override fun homeTimeline() =
+        HomeTimelineRemoteMediator(
+            service,
+            database,
+            accountKey,
         )
 
     fun featuredTimeline(
@@ -160,17 +150,18 @@ internal class XQTDataSource(
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                FeaturedTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    pagingKey,
-                ),
+            accountRepository = accountRepository,
+            mediator = featuredTimelineLoader(),
+        )
+
+    fun featuredTimelineLoader() =
+        FeaturedTimelineRemoteMediator(
+            service,
+            database,
+            accountKey,
         )
 
     fun bookmarkTimeline(
@@ -180,23 +171,23 @@ internal class XQTDataSource(
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
             pageSize = pageSize,
-            pagingKey = pagingKey,
             database = database,
             scope = scope,
             filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                BookmarkTimelineRemoteMediator(
-                    service,
-                    database,
-                    accountKey,
-                    pagingKey,
-                ),
+            accountRepository = accountRepository,
+            mediator = bookmarkTimelineLoader(),
+        )
+
+    fun bookmarkTimelineLoader() =
+        BookmarkTimelineRemoteMediator(
+            service,
+            database,
+            accountKey,
         )
 
     override fun notification(
         type: NotificationFilter,
         pageSize: Int,
-        pagingKey: String,
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> {
         if (type == NotificationFilter.All) {
@@ -216,16 +207,15 @@ internal class XQTDataSource(
         } else {
             return timelinePager(
                 pageSize = pageSize,
-                pagingKey = pagingKey,
                 database = database,
                 scope = scope,
                 filterFlow = localFilterRepository.getFlow(forNotification = true),
+                accountRepository = accountRepository,
                 mediator =
                     MentionRemoteMediator(
                         service,
                         database,
                         accountKey,
-                        pagingKey,
                     ),
             )
         }
@@ -319,59 +309,31 @@ internal class XQTDataSource(
 
     override fun userTimeline(
         userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
         mediaOnly: Boolean,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                if (mediaOnly) {
-                    UserMediaTimelineRemoteMediator(
-                        userKey,
-                        service,
-                        database,
-                        accountKey,
-                        pagingKey,
-                    )
-                } else {
-                    UserTimelineRemoteMediator(
-                        userKey,
-                        service,
-                        database,
-                        accountKey,
-                        pagingKey,
-                    )
-                },
+    ) = if (mediaOnly) {
+        UserMediaTimelineRemoteMediator(
+            userKey,
+            service,
+            database,
+            accountKey,
         )
+    } else {
+        UserTimelineRemoteMediator(
+            userKey,
+            service,
+            database,
+            accountKey,
+        )
+    }
 
-    override fun context(
-        statusKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = 1,
-            pagingKey = pagingKey,
+    override fun context(statusKey: MicroBlogKey) =
+        StatusDetailRemoteMediator(
+            statusKey = statusKey,
+            service = service,
             database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                StatusDetailRemoteMediator(
-                    statusKey = statusKey,
-                    service = service,
-                    database = database,
-                    accountKey = accountKey,
-                    pagingKey = pagingKey,
-                    statusOnly = false,
-                    event = this,
-                ),
+            accountKey = accountKey,
+            statusOnly = false,
+            event = this,
         )
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
@@ -598,26 +560,12 @@ internal class XQTDataSource(
         }
     }
 
-    override fun searchStatus(
-        query: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = pagingKey,
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forSearch = true),
-            mediator =
-                SearchStatusPagingSource(
-                    service,
-                    database,
-                    accountKey,
-                    pagingKey,
-                    query,
-                ),
+    override fun searchStatus(query: String) =
+        SearchStatusPagingSource(
+            service,
+            database,
+            accountKey,
+            query,
         )
 
     override fun searchUser(
@@ -645,11 +593,7 @@ internal class XQTDataSource(
             )
         }.flow
 
-    override fun discoverStatuses(
-        pageSize: Int,
-        scope: CoroutineScope,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> {
+    override fun discoverStatuses(): BaseTimelineLoader {
         // not supported
         throw UnsupportedOperationException("Bluesky does not support discover statuses")
     }
@@ -1121,7 +1065,6 @@ internal class XQTDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -1137,7 +1080,6 @@ internal class XQTDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -1149,54 +1091,32 @@ internal class XQTDataSource(
             )
         }.flow.cachedIn(scope)
 
-    override fun profileTabs(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pagingSize: Int,
-    ): ImmutableList<ProfileTab> =
+    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         listOfNotNull(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
-                flow = userTimeline(userKey, scope, pagingSize),
+                loader = userTimeline(userKey, false),
             ),
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.StatusWithReplies,
-                flow =
-                    timelinePager(
-                        pageSize = pagingSize,
-                        pagingKey = "user_timeline_replies_$userKey",
+                loader =
+                    UserRepliesTimelineRemoteMediator(
+                        service = service,
+                        accountKey = accountKey,
                         database = database,
-                        scope = scope,
-                        filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                        mediator =
-                            UserRepliesTimelineRemoteMediator(
-                                service = service,
-                                accountKey = accountKey,
-                                database = database,
-                                userKey = userKey,
-                                pagingKey = "user_timeline_replies_$userKey",
-                            ),
+                        userKey = userKey,
                     ),
             ),
             ProfileTab.Media,
             if (userKey == accountKey) {
                 ProfileTab.Timeline(
                     type = ProfileTab.Timeline.Type.Likes,
-                    flow =
-                        timelinePager(
-                            pageSize = pagingSize,
-                            pagingKey = "user_timeline_likes_$userKey",
+                    loader =
+                        UserLikesTimelineRemoteMediator(
+                            service = service,
+                            accountKey = accountKey,
                             database = database,
-                            scope = scope,
-                            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-                            mediator =
-                                UserLikesTimelineRemoteMediator(
-                                    service = service,
-                                    accountKey = accountKey,
-                                    database = database,
-                                    userKey = userKey,
-                                    pagingKey = "user_timeline_likes_$userKey",
-                                ),
+                            userKey = userKey,
                         ),
                 )
             } else {
@@ -1556,25 +1476,12 @@ internal class XQTDataSource(
     override val supportedMetaData: ImmutableList<ListMetaDataType>
         get() = persistentListOf(ListMetaDataType.TITLE, ListMetaDataType.DESCRIPTION)
 
-    override fun listTimeline(
-        listId: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-    ): Flow<PagingData<UiTimeline>> =
-        timelinePager(
-            pageSize = pageSize,
-            pagingKey = "list_${accountKey}_$listId",
-            database = database,
-            scope = scope,
-            filterFlow = localFilterRepository.getFlow(forTimeline = true),
-            mediator =
-                ListTimelineRemoteMediator(
-                    listId,
-                    service,
-                    database,
-                    accountKey,
-                    "list_${accountKey}_$listId",
-                ),
+    override fun listTimeline(listId: String) =
+        ListTimelineRemoteMediator(
+            listId,
+            service,
+            database,
+            accountKey,
         )
 
     override fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =

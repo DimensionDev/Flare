@@ -44,14 +44,7 @@ internal class GuestMastodonDataSource(
     }
     private val database: CacheDatabase by inject()
 
-    override fun homeTimeline(
-        pageSize: Int,
-        pagingKey: String,
-        scope: CoroutineScope,
-    ): Flow<PagingData<UiTimeline>> =
-        Pager(PagingConfig(pageSize = pageSize)) {
-            GuestTimelinePagingSource(host = host, service = service)
-        }.flow.cachedIn(scope)
+    override fun homeTimeline() = GuestTimelinePagingSource(host = host, service = service)
 
     override fun userByAcct(acct: String): CacheData<UiUserV2> {
         val (name, host) = MicroBlogKey.valueOf(acct)
@@ -106,34 +99,21 @@ internal class GuestMastodonDataSource(
 
     override fun userTimeline(
         userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
         mediaOnly: Boolean,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        Pager(PagingConfig(pageSize = pageSize)) {
-            GuestUserTimelinePagingSource(
-                host = host,
-                userId = userKey.id,
-                onlyMedia = mediaOnly,
-                service = service,
-            )
-        }.flow.cachedIn(scope)
+    ) = GuestUserTimelinePagingSource(
+        host = host,
+        userId = userKey.id,
+        onlyMedia = mediaOnly,
+        service = service,
+    )
 
-    override fun context(
-        statusKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pageSize: Int,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        Pager(PagingConfig(pageSize = pageSize)) {
-            GuestStatusDetailPagingSource(
-                host = host,
-                statusKey = statusKey,
-                statusOnly = false,
-                service = service,
-            )
-        }.flow.cachedIn(scope)
+    override fun context(statusKey: MicroBlogKey) =
+        GuestStatusDetailPagingSource(
+            host = host,
+            statusKey = statusKey,
+            statusOnly = false,
+            service = service,
+        )
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
@@ -148,15 +128,7 @@ internal class GuestMastodonDataSource(
         )
     }
 
-    override fun searchStatus(
-        query: String,
-        scope: CoroutineScope,
-        pageSize: Int,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> =
-        Pager(PagingConfig(pageSize = pageSize)) {
-            GuestSearchStatusPagingSource(host = host, query = query, service = service)
-        }.flow.cachedIn(scope)
+    override fun searchStatus(query: String) = GuestSearchStatusPagingSource(host = host, query = query, service = service)
 
     override fun searchUser(
         query: String,
@@ -179,11 +151,7 @@ internal class GuestMastodonDataSource(
         throw UnsupportedOperationException("Discover users not supported")
     }
 
-    override fun discoverStatuses(
-        pageSize: Int,
-        scope: CoroutineScope,
-        pagingKey: String,
-    ): Flow<PagingData<UiTimeline>> = TODO()
+    override fun discoverStatuses() = TODO()
 //        Pager(PagingConfig(pageSize = pageSize)) {
 //            GuestDiscoverStatusPagingSource(host = host, service = service)
 //        }.flow.cachedIn(scope)
@@ -201,7 +169,6 @@ internal class GuestMastodonDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -218,7 +185,6 @@ internal class GuestMastodonDataSource(
         userKey: MicroBlogKey,
         scope: CoroutineScope,
         pageSize: Int,
-        pagingKey: String,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
@@ -231,35 +197,27 @@ internal class GuestMastodonDataSource(
             )
         }.flow.cachedIn(scope)
 
-    override fun profileTabs(
-        userKey: MicroBlogKey,
-        scope: CoroutineScope,
-        pagingSize: Int,
-    ): ImmutableList<ProfileTab> =
+    override fun profileTabs(userKey: MicroBlogKey): ImmutableList<ProfileTab> =
         persistentListOf(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
-                flow =
-                    Pager(PagingConfig(pageSize = pagingSize)) {
-                        GuestUserTimelinePagingSource(
-                            host = host,
-                            userId = userKey.id,
-                            service = service,
-                            withPinned = true,
-                        )
-                    }.flow.cachedIn(scope),
+                loader =
+                    GuestUserTimelinePagingSource(
+                        host = host,
+                        userId = userKey.id,
+                        service = service,
+                        withPinned = true,
+                    ),
             ),
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.StatusWithReplies,
-                flow =
-                    Pager(PagingConfig(pageSize = pagingSize)) {
-                        GuestUserTimelinePagingSource(
-                            host = host,
-                            userId = userKey.id,
-                            withReply = true,
-                            service = service,
-                        )
-                    }.flow.cachedIn(scope),
+                loader =
+                    GuestUserTimelinePagingSource(
+                        host = host,
+                        userId = userKey.id,
+                        withReply = true,
+                        service = service,
+                    ),
             ),
             ProfileTab.Media,
         )

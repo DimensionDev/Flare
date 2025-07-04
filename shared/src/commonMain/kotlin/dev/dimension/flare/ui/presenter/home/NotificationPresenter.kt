@@ -64,11 +64,9 @@ public class NotificationPresenter(
                     } else {
                         UiState.Success(
                             remember(service, currentType) {
-                                val pagingKey = "notification_${currentType}_${service.accountKey}"
                                 service.notification(
                                     type = currentType,
                                     scope = scope,
-                                    pagingKey = pagingKey,
                                 )
                             }.collectAsLazyPagingItems(),
                         )

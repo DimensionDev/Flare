@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Administrar almacenamiento de bengalas</string>
     <string name="settings_about_title">Acerca de</string>
     <string name="settings_about_subtitle">Más información sobre Bengala</string>
-    <string name="settings_tab_customization">Personalización de la pestaña</string>
-    <string name="settings_tab_customization_description">Personalizar las pestañas en la pantalla de inicio</string>
     <string name="settings_local_filter_title">Filtro local</string>
     <string name="settings_local_filter_description">Ajustes de filtro local para la línea de tiempo</string>
     <string name="settings_guest_setting_title">Host del Modo Invitado</string>

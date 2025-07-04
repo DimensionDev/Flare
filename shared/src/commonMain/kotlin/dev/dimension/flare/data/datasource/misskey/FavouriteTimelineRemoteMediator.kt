@@ -3,10 +3,9 @@ package dev.dimension.flare.data.datasource.misskey
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.Misskey
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.AdminAdListRequest
@@ -18,15 +17,23 @@ internal class FavouriteTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
     private val database: CacheDatabase,
-    private val pagingKey: String,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
-    override suspend fun doLoad(
+) : BaseTimelineRemoteMediator(
+        database = database,
+    ) {
+    override val pagingKey: String
+        get() =
+            buildString {
+                append("favourite_")
+                append(accountKey.toString())
+            }
+
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         val response =
             when (loadType) {
-                LoadType.PREPEND -> return MediatorResult.Success(
+                LoadType.PREPEND -> return Result(
                     endOfPaginationReached = true,
                 )
 
@@ -41,7 +48,7 @@ internal class FavouriteTimelineRemoteMediator(
                 LoadType.APPEND -> {
                     val lastItem =
                         database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return MediatorResult.Success(
+                            ?: return Result(
                                 endOfPaginationReached = true,
                             )
                     service.iFavorites(
@@ -51,29 +58,25 @@ internal class FavouriteTimelineRemoteMediator(
                         ),
                     )
                 }
-            } ?: return MediatorResult.Success(
+            } ?: return Result(
                 endOfPaginationReached = true,
             )
-        database.connect {
-            if (loadType == LoadType.REFRESH) {
-                database.pagingTimelineDao().delete(pagingKey = pagingKey, accountKey = accountKey)
-            }
 
-            Misskey.save(
-                database = database,
+        val notes = response.map { it.note }
+        val data =
+            notes.toDbPagingTimeline(
                 accountKey = accountKey,
                 pagingKey = pagingKey,
-                data = response.map { it.note },
                 sortIdProvider = {
                     response.find { note -> note.noteId == it.id }?.createdAt?.let {
                         Instant.parse(it).toEpochMilliseconds()
                     } ?: 0
                 },
             )
-        }
 
-        return MediatorResult.Success(
+        return Result(
             endOfPaginationReached = response.isEmpty(),
+            data = data,
         )
     }
 }

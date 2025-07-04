@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Flottenspeicher verwalten</string>
     <string name="settings_about_title">Über</string>
     <string name="settings_about_subtitle">Erfahren Sie mehr über Flare</string>
-    <string name="settings_tab_customization">Tab-Anpassung</string>
-    <string name="settings_tab_customization_description">Tabs auf dem Startbildschirm anpassen</string>
     <string name="settings_local_filter_title">Lokaler Filter</string>
     <string name="settings_local_filter_description">Lokale Filtereinstellungen für Zeitleiste</string>
     <string name="settings_guest_setting_title">Gastmodus Host</string>

@@ -36,6 +36,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -55,7 +56,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.data.model.HomeTimelineTabItem
+import dev.dimension.flare.data.model.MixedTimelineTabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
@@ -69,10 +70,8 @@ import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
@@ -85,6 +84,7 @@ import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
@@ -218,25 +218,17 @@ internal fun HomeTimelineScreen(
     ) { contentPadding ->
         state.pagerState.onSuccess { pagerState ->
             state.tabState.onSuccess { tabs ->
-                if (tabs.size == 1) {
-                    // workaround for a bug in HorizontalPager with Drawer
-                    // https://issuetracker.google.com/issues/167408603
+                HorizontalPager(
+                    state = pagerState,
+                    key = { index ->
+                        tabs.getOrNull(index)?.timelineTabItem?.key ?: "timeline_$index"
+                    },
+                ) { index ->
                     TimelineItemContent(
-                        state = tabs[0],
+                        state = tabs[index],
                         contentPadding = contentPadding,
                         modifier = Modifier.fillMaxWidth(),
                     )
-                } else {
-                    HorizontalPager(
-                        state = pagerState,
-                    ) { index ->
-                        val tab = tabs[index]
-                        TimelineItemContent(
-                            state = tab,
-                            contentPadding = contentPadding,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    }
                 }
             }
         }
@@ -350,34 +342,35 @@ private fun timelinePresenter(
                 userKey = null,
             )
         }.invoke()
-    val tabSettings by settingsRepository.tabSettings.collectAsUiState()
-    val tabs =
-        remember(accountType, accountState, tabSettings) {
-            accountState.user.flatMap(
-                onError = {
-                    UiState.Success(
-                        listOf(HomeTimelineTabItem(accountType = AccountType.Guest)),
-                    )
-                },
-            ) { user ->
-                tabSettings.map {
-                    it.homeTabs.getOrDefault(
-                        user.key,
-                        listOf(HomeTimelineTabItem(accountType = AccountType.Specific(user.key))),
-                    )
-                }
+    val tabs by remember {
+        settingsRepository.tabSettings
+            .map { settings ->
+                listOfNotNull(
+                    if (settings.enableMixedTimeline) {
+                        MixedTimelineTabItem(
+                            subTimelineTabItem = settings.mainTabs,
+                        )
+                    } else {
+                        null
+                    },
+                ) + settings.mainTabs
+            }.map {
+                it.toImmutableList()
             }
-        }
-    val pagerState =
-        tabs.map {
-            rememberPagerState { it.size }
-        }
+    }.collectAsUiState()
     val tabState =
         tabs.map {
             it
                 .map {
-                    timelineItemPresenter(it)
+                    // use key inorder to force update when the list is changed
+                    key(it.key) {
+                        timelineItemPresenter(it)
+                    }
                 }.toImmutableList()
+        }
+    val pagerState =
+        tabState.map {
+            rememberPagerState { it.size }
         }
 
     object : UserState by accountState {
@@ -389,16 +382,15 @@ private fun timelinePresenter(
 @Composable
 internal fun timelineItemPresenter(timelineTabItem: TimelineTabItem): TimelineItemState {
     val changeLogState = changeLogPresenter()
-    val timelinePresenter =
-        remember(timelineTabItem) {
+    val state =
+        remember(timelineTabItem.key) {
             timelineTabItem.createPresenter()
-        }
+        }.invoke()
     val badge =
-        remember(timelineTabItem) {
+        remember(timelineTabItem.account) {
             NotificationBadgePresenter(timelineTabItem.account)
         }.invoke()
     val scope = rememberCoroutineScope()
-    val state = timelinePresenter()
     var showNewToots by remember { mutableStateOf(false) }
     state.listState.onSuccess {
         LaunchedEffect(Unit) {

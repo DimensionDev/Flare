@@ -41,7 +41,6 @@ import compose.icons.fontawesomeicons.solid.ThumbtackSlash
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.Bluesky
-import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
@@ -314,11 +313,8 @@ private fun presenter(
     val currentTabs =
         accountState.user.flatMap { user ->
             tabSettings.map {
-                it.homeTabs
-                    .getOrDefault(
-                        user.key,
-                        listOf(HomeTimelineTabItem(accountType = AccountType.Specific(user.key))),
-                    ).filterIsInstance<Bluesky.FeedTabItem>()
+                it.mainTabs
+                    .filterIsInstance<Bluesky.FeedTabItem>()
                     .map { it.uri }
                     .toImmutableList()
             }
@@ -349,28 +345,17 @@ private fun presenter(
                 appScope.launch {
                     settingsRepository.updateTabSettings {
                         copy(
-                            homeTabs =
-                                homeTabs + (
-                                    user.key to
-                                        homeTabs
-                                            .getOrDefault(
-                                                user.key,
-                                                defaultValue =
-                                                    listOf(
-                                                        HomeTimelineTabItem(accountType),
-                                                    ),
-                                            ).plus(
-                                                Bluesky.FeedTabItem(
-                                                    account = AccountType.Specific(user.key),
-                                                    uri = item.id,
-                                                    metaData =
-                                                        TabMetaData(
-                                                            title = TitleType.Text(item.title),
-                                                            icon = IconType.Material(IconType.Material.MaterialIcon.Feeds),
-                                                        ),
-                                                ),
-                                            )
-                                ),
+                            mainTabs =
+                                mainTabs +
+                                    Bluesky.FeedTabItem(
+                                        account = AccountType.Specific(user.key),
+                                        uri = item.id,
+                                        metaData =
+                                            TabMetaData(
+                                                title = TitleType.Text(item.title),
+                                                icon = IconType.Material(IconType.Material.MaterialIcon.Feeds),
+                                            ),
+                                    ),
                         )
                     }
                 }
@@ -382,24 +367,14 @@ private fun presenter(
                 appScope.launch {
                     settingsRepository.updateTabSettings {
                         copy(
-                            homeTabs =
-                                homeTabs + (
-                                    user.key to
-                                        homeTabs
-                                            .getOrDefault(
-                                                user.key,
-                                                defaultValue =
-                                                    listOf(
-                                                        HomeTimelineTabItem(accountType),
-                                                    ),
-                                            ).filter {
-                                                if (it is Bluesky.FeedTabItem) {
-                                                    it.uri != item.id
-                                                } else {
-                                                    true
-                                                }
-                                            }
-                                ),
+                            mainTabs =
+                                mainTabs.filter {
+                                    if (it is Bluesky.FeedTabItem) {
+                                        it.uri != item.id
+                                    } else {
+                                        true
+                                    }
+                                },
                         )
                     }
                 }

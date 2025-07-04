@@ -43,6 +43,8 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.xqtHost
+import dev.dimension.flare.ui.model.mapper.parseXQTCustomDateTime
+import kotlinx.datetime.Clock
 
 internal object XQT {
     suspend fun save(
@@ -214,7 +216,7 @@ private fun TweetUnion.getQuoted(): TweetUnion? =
         is TweetWithVisibilityResults -> this.tweet.quotedStatusResult?.result
     }
 
-private fun XQTTimeline.toDbPagingTimeline(
+internal fun XQTTimeline.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: (XQTTimeline) -> Long = { sortedIndex },
@@ -272,6 +274,7 @@ private fun toDbStatusWithUser(
                 userKey = user.userKey,
                 accountType = AccountType.Specific(accountKey),
                 text = tweet.legacy?.fullText,
+                createdAt = tweet.legacy?.createdAt?.let { parseXQTCustomDateTime(it) } ?: Clock.System.now(),
             ),
         user = user,
     )

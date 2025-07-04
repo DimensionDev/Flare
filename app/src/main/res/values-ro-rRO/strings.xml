@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Gestionează spațiul de stocare al Flare</string>
     <string name="settings_about_title">Despre</string>
     <string name="settings_about_subtitle">Află mai multe despre Flare</string>
-    <string name="settings_tab_customization">Personalizare filă</string>
-    <string name="settings_tab_customization_description">Personalizați filele de pe ecranul de pornire</string>
     <string name="settings_local_filter_title">Filtru local</string>
     <string name="settings_local_filter_description">Setări filtre locale pentru cronologie</string>
     <string name="settings_guest_setting_title">Gazda Modului de Oaspete</string>

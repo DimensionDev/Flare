@@ -19,7 +19,6 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.datetime.Instant
 
 internal object Misskey {
@@ -30,76 +29,7 @@ internal object Misskey {
         data: List<Note>,
         sortIdProvider: (Note) -> Long = { Instant.parse(it.createdAt).toEpochMilliseconds() },
     ) {
-        save(database, data.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider))
-    }
-
-    suspend fun save(
-        accountKey: MicroBlogKey,
-        pagingKey: String,
-        database: CacheDatabase,
-        data: List<Notification>,
-    ) {
-        save(database, data.toDb(accountKey, pagingKey))
-    }
-
-    private suspend fun save(
-        database: CacheDatabase,
-        timeline: List<DbPagingTimelineWithStatus>,
-    ) {
-        (
-            timeline.mapNotNull { it.status.status.user } +
-                timeline
-                    .flatMap { it.status.references }
-                    .mapNotNull { it.status.user }
-        ).let { allUsers ->
-            val exsitingUsers =
-                database
-                    .userDao()
-                    .findByKeys(allUsers.map { it.userKey })
-                    .firstOrNull()
-                    .orEmpty()
-                    .filter {
-                        it.content is UserContent.Misskey
-                    }.map {
-                        val content = it.content as UserContent.Misskey
-                        val user =
-                            allUsers.find { user ->
-                                user.userKey == it.userKey
-                            }
-
-                        if (user != null && user.content is UserContent.MisskeyLite) {
-                            it.copy(
-                                content =
-                                    content.copy(
-                                        data =
-                                            content.data.copy(
-                                                name = user.content.data.name,
-                                                username = user.content.data.username,
-                                                avatarUrl = user.content.data.avatarUrl,
-                                            ),
-                                    ),
-                            )
-                        } else {
-                            it
-                        }
-                    }
-
-            val result = (exsitingUsers + allUsers).distinctBy { it.userKey }
-            database.userDao().insertAll(result)
-        }
-        (
-            timeline.map { it.status.status.data } +
-                timeline
-                    .flatMap { it.status.references }
-                    .map { it.status.data }
-        ).let {
-            database.statusDao().insertAll(it)
-        }
-        timeline.flatMap { it.status.references }.map { it.reference }.let {
-            database.statusReferenceDao().delete(it.map { it.statusKey })
-            database.statusReferenceDao().insertAll(it)
-        }
-        database.pagingTimelineDao().insertAll(timeline.map { it.timeline })
+        saveToDatabase(database, data.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider))
     }
 }
 
@@ -145,10 +75,11 @@ private fun Notification.toDbStatus(accountKey: MicroBlogKey): DbStatus {
         content = StatusContent.MisskeyNotification(this),
         accountType = AccountType.Specific(accountKey),
         text = null,
+        createdAt = Instant.parse(createdAt),
     )
 }
 
-private fun List<Note>.toDbPagingTimeline(
+internal fun List<Note>.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: (Note) -> Long = { Instant.parse(it.createdAt).toEpochMilliseconds() },
@@ -192,6 +123,7 @@ private fun Note.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser 
             userKey = user.userKey,
             accountType = AccountType.Specific(accountKey),
             text = text,
+            createdAt = Instant.parse(createdAt),
         )
     return DbStatusWithUser(
         data = status,

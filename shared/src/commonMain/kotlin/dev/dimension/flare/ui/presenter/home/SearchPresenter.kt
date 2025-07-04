@@ -49,19 +49,12 @@ public class SearchPresenter(
                 }.toPagingState()
 
         val status =
-            accountState
-                .flatMap { service ->
-                    if (query.isEmpty()) {
-                        UiState.Error(IllegalStateException("Query is empty"))
-                    } else {
-                        UiState.Success(
-                            remember(service, query) {
-                                service.searchStatus(query, scope = scope)
-                            }.collectAsLazyPagingItems(),
-                        )
-                    }
-                }.toPagingState()
-
+            remember(query) {
+                SearchStatusTimelinePresenter(
+                    accountType = accountType,
+                    initialQuery = query,
+                )
+            }.body().listState
         val isSearching = query.isNotEmpty()
 
         return object : SearchState {

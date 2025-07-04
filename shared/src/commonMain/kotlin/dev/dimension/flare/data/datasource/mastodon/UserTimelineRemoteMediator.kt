@@ -3,10 +3,9 @@ package dev.dimension.flare.data.datasource.mastodon
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.Mastodon
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
@@ -17,15 +16,32 @@ internal class UserTimelineRemoteMediator(
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
-    private val pagingKey: String,
     private val onlyMedia: Boolean = false,
     private val withReplies: Boolean = false,
     private val withPinned: Boolean = false,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
-    override suspend fun doLoad(
+) : BaseTimelineRemoteMediator(
+        database = database,
+    ) {
+    override val pagingKey =
+        buildString {
+            append("user_timeline")
+            if (onlyMedia) {
+                append("media")
+            }
+            if (withReplies) {
+                append("replies")
+            }
+            if (withPinned) {
+                append("pinned")
+            }
+            append(accountKey.toString())
+            append(userKey.toString())
+        }
+
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         val response =
             when (loadType) {
                 LoadType.REFRESH -> {
@@ -62,7 +78,7 @@ internal class UserTimelineRemoteMediator(
                 LoadType.APPEND -> {
                     val lastItem =
                         database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return MediatorResult.Success(
+                            ?: return Result(
                                 endOfPaginationReached = true,
                             )
                     service.userTimeline(
@@ -75,23 +91,13 @@ internal class UserTimelineRemoteMediator(
                 }
             }
 
-        database.connect {
-            if (loadType == LoadType.REFRESH) {
-                database.pagingTimelineDao().delete(
-                    pagingKey = pagingKey,
-                    accountKey = accountKey,
-                )
-            }
-            Mastodon.save(
-                database = database,
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                data = response,
-            )
-        }
-
-        return MediatorResult.Success(
+        return Result(
             endOfPaginationReached = response.isEmpty(),
+            data =
+                response.toDbPagingTimeline(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                ),
         )
     }
 }

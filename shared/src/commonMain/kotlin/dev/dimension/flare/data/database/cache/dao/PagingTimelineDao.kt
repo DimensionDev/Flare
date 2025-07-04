@@ -12,6 +12,7 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 
 @Dao
@@ -22,8 +23,14 @@ internal interface PagingTimelineDao {
     )
     fun getPagingSource(
         pagingKey: String,
-        accountType: AccountType,
+        accountType: DbAccountType,
     ): PagingSource<Int, DbPagingTimelineWithStatus>
+
+    @Transaction
+    @Query(
+        "SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId DESC",
+    )
+    fun getPagingSource(pagingKey: String): PagingSource<Int, DbPagingTimelineWithStatus>
 
     @Transaction
     @RewriteQueriesToDropUnusedColumns
@@ -46,7 +53,7 @@ internal interface PagingTimelineDao {
     @Query("DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey AND accountType = :accountType")
     suspend fun delete(
         pagingKey: String,
-        accountType: AccountType,
+        accountType: DbAccountType,
     )
 
     suspend fun delete(
@@ -62,9 +69,12 @@ internal interface PagingTimelineDao {
     @Query("DELETE FROM DbPagingTimeline WHERE pagingKey = :pagingKey")
     suspend fun delete(pagingKey: String)
 
+    @Query("DELETE FROM DbPagingTimeline WHERE accountType = :accountType")
+    suspend fun deleteByAccountType(accountType: DbAccountType)
+
     @Query("DELETE FROM DbPagingTimeline WHERE accountType = :accountType AND statusKey = :statusKey")
     suspend fun deleteStatus(
-        accountType: AccountType,
+        accountType: DbAccountType,
         statusKey: MicroBlogKey,
     )
 
@@ -78,7 +88,7 @@ internal interface PagingTimelineDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM DbPagingTimeline WHERE accountType = :accountType AND pagingKey = :paging_key)")
     suspend fun existsPaging(
-        accountType: AccountType,
+        accountType: DbAccountType,
         paging_key: String,
     ): Boolean
 

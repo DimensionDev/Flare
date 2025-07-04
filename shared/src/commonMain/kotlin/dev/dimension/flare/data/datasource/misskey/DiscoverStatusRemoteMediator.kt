@@ -3,10 +3,9 @@ package dev.dimension.flare.data.datasource.misskey
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseRemoteMediator
+import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.connect
-import dev.dimension.flare.data.database.cache.mapper.Misskey
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.NotesFeaturedRequest
@@ -17,21 +16,25 @@ internal class DiscoverStatusRemoteMediator(
     private val service: MisskeyService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
-    private val pagingKey: String,
-) : BaseRemoteMediator<Int, DbPagingTimelineWithStatus>() {
-    override suspend fun doLoad(
+) : BaseTimelineRemoteMediator(
+        database = database,
+    ) {
+    override val pagingKey: String = "discover_status_$accountKey"
+
+    override suspend fun timeline(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
-    ): MediatorResult {
+    ): Result {
         val response =
             when (loadType) {
                 LoadType.REFRESH -> {
                     service.notesFeatured(NotesFeaturedRequest(limit = state.config.initialLoadSize))
                 }
+
                 LoadType.APPEND -> {
                     val lastItem =
                         database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return MediatorResult.Success(
+                            ?: return Result(
                                 endOfPaginationReached = true,
                             )
                     service.notesFeatured(
@@ -45,24 +48,21 @@ internal class DiscoverStatusRemoteMediator(
                         ),
                     )
                 }
+
                 else -> {
-                    return MediatorResult.Success(
+                    return Result(
                         endOfPaginationReached = true,
                     )
                 }
             } ?: emptyList()
 
-        database.connect {
-            Misskey.save(
-                database = database,
-                accountKey = accountKey,
-                pagingKey = pagingKey,
-                data = response,
-            )
-        }
-
-        return MediatorResult.Success(
+        return Result(
             endOfPaginationReached = true,
+            data =
+                response.toDbPagingTimeline(
+                    accountKey = accountKey,
+                    pagingKey = pagingKey,
+                ),
         )
     }
 }

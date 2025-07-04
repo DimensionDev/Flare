@@ -36,8 +36,6 @@
     <string name="settings_storage_subtitle">Gérer le stockage de Fusée éclairante</string>
     <string name="settings_about_title">À propos de</string>
     <string name="settings_about_subtitle">En savoir plus sur Fusée éclairante</string>
-    <string name="settings_tab_customization">Personnalisation des onglets</string>
-    <string name="settings_tab_customization_description">Personnaliser les onglets sur l\'écran d\'accueil</string>
     <string name="settings_local_filter_title">Filtre local</string>
     <string name="settings_local_filter_description">Paramètres de filtre local pour la timeline</string>
     <string name="settings_guest_setting_title">Hôte en mode invité</string>

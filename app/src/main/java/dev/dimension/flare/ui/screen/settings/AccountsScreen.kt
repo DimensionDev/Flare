@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,7 +35,10 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FileCircleExclamation
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
+import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.data.repository.SettingsRepository
+import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
@@ -52,8 +56,11 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
+import dev.dimension.flare.ui.presenter.settings.AccountsState
 import io.github.fornewid.placeholder.material3.placeholder
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,7 +112,7 @@ internal fun AccountsScreen(
 
                         LaunchedEffect(swipeState.settledValue) {
                             if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {
-                                state.removeAccount(account.accountKey)
+                                state.logout(account.accountKey)
                             }
                         }
                         SwipeToDismissBox(
@@ -248,9 +255,42 @@ fun <T : UiUserV2> AccountItem(
 }
 
 @Composable
-private fun accountsPresenter() =
+private fun accountsPresenter(settingsRepository: SettingsRepository = koinInject()) =
     run {
-        remember {
-            AccountsPresenter()
-        }.invoke()
+        val scope = rememberCoroutineScope()
+        val state =
+            remember {
+                AccountsPresenter()
+            }.invoke()
+
+        object : AccountsState by state {
+            fun logout(accountKey: MicroBlogKey) {
+                accounts.onSuccess { accountList ->
+                    if (accountList.size == 1) {
+                        // is Last account
+                        scope.launch {
+                            settingsRepository.updateTabSettings {
+                                TabSettings()
+                            }
+                        }
+                    } else {
+                        scope.launch {
+                            settingsRepository.updateTabSettings {
+                                copy(
+                                    secondaryItems =
+                                        secondaryItems?.filter {
+                                            (it.account as? AccountType.Specific)?.accountKey != accountKey
+                                        },
+                                    mainTabs =
+                                        mainTabs.filter {
+                                            (it.account as? AccountType.Specific)?.accountKey != accountKey
+                                        },
+                                )
+                            }
+                        }
+                    }
+                }
+                removeAccount(accountKey)
+            }
+        }
     }

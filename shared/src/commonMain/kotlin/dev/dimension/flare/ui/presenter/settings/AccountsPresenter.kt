@@ -49,10 +49,10 @@ public class AccountsPresenter :
                     }.toImmutableList()
                     .toImmutableListWrapper()
             }
-        return object : AccountsState(
-            accounts = user,
-            activeAccount = activeAccount,
-        ) {
+        return object : AccountsState {
+            override val accounts = user
+            override val activeAccount = activeAccount
+
             override fun setActiveAccount(accountKey: MicroBlogKey) {
                 accountRepository.setActiveAccount(accountKey)
             }
@@ -65,10 +65,10 @@ public class AccountsPresenter :
 }
 
 @Immutable
-public abstract class AccountsState(
-    public val accounts: UiState<ImmutableListWrapper<Pair<UiAccount, UiState<UiProfile>>>>,
-    public val activeAccount: UiState<UiAccount>,
-) {
+public interface AccountsState {
+    public val accounts: UiState<ImmutableListWrapper<Pair<UiAccount, UiState<UiProfile>>>>
+    public val activeAccount: UiState<UiAccount>
+
     public abstract fun setActiveAccount(accountKey: MicroBlogKey)
 
     public abstract fun removeAccount(accountKey: MicroBlogKey)

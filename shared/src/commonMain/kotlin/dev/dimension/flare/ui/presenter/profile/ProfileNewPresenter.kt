@@ -24,6 +24,7 @@ import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapNotNull
 import dev.dimension.flare.ui.model.onSuccess
@@ -82,7 +83,7 @@ public class ProfileNewPresenter(
                 val actualUserKey = userKey ?: service.accountKey
                 remember(service, userKey) {
                     service.relation(actualUserKey)
-                }.collectAsUiState().value.flatMap { it }
+                }.flattenUiState().value
             }
 
         val isMe =

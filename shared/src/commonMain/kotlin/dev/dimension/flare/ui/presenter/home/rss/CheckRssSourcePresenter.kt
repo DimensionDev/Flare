@@ -8,8 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import dev.dimension.flare.data.network.rss.RssService
 import dev.dimension.flare.ui.model.UiState
-import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapper.title
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -31,7 +30,7 @@ public class CheckRssSourcePresenter : PresenterBase<CheckRssSourcePresenter.Sta
     @Composable
     override fun body(): State {
         var url by remember { mutableStateOf("") }
-        val feedData =
+        val feedData by
             remember {
                 snapshotFlow { url }
                     .debounce(500)
@@ -47,7 +46,7 @@ public class CheckRssSourcePresenter : PresenterBase<CheckRssSourcePresenter.Sta
                             }
                         }
                     }
-            }.collectAsUiState().value.flatMap { it }
+            }.flattenUiState()
 
         val isValid =
             remember(feedData) {

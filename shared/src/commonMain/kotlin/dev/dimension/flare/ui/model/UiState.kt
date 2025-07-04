@@ -122,6 +122,20 @@ public fun <T : Any> Flow<T>.collectAsUiState(initial: UiState<T> = UiState.Load
         }
     }
 
+@OptIn(ExperimentalObjCRefinement::class)
+@Composable
+@HiddenFromObjC
+public fun <T : Any> Flow<UiState<T>>.flattenUiState(initial: UiState<T> = UiState.Loading()): State<UiState<T>> =
+    produceState(initial, this) {
+        onStart {
+            value = UiState.Loading()
+        }.catch {
+            value = UiState.Error(it)
+        }.collect {
+            value = it
+        }
+    }
+
 internal fun <T : Any> CacheableState<T>.toUi(): UiState<T> =
     data?.let {
         UiState.Success(it)

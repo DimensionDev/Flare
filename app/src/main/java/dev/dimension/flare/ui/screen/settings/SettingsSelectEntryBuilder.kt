@@ -107,7 +107,10 @@ internal fun EntryProviderBuilder<NavKey>.settingsSelectEntryBuilder(
         )
     ) {
         TabCustomizeScreen(
-            onBack = onBack
+            onBack = onBack,
+            toAddRssSource = {
+                navigate(Route.Rss.Create)
+            }
         )
     }
 

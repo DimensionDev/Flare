@@ -85,6 +85,9 @@ internal fun EntryProviderBuilder<NavKey>.homeEntryBuilder(
         TabSettingScreen(
             accountType = args.accountType,
             onBack = onBack,
+            toAddRssSource = {
+                navigate(Route.Rss.Create)
+            }
         )
     }
     entry<Route.AccountSelection>(

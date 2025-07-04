@@ -101,7 +101,10 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
     ExperimentalMaterial3ExpressiveApi::class,
 )
 @Composable
-internal fun TabCustomizeScreen(onBack: () -> Unit) {
+internal fun TabCustomizeScreen(
+    onBack: () -> Unit,
+    toAddRssSource: () -> Unit,
+) {
     val haptics = LocalHapticFeedback.current
     val state by producePresenter { presenter() }
     DisposableEffect(Unit) {
@@ -223,6 +226,7 @@ internal fun TabCustomizeScreen(onBack: () -> Unit) {
                 state.deleteTab(key)
                 state.setAddTab(false)
             },
+            toAddRssSource = toAddRssSource,
         )
     }
 }

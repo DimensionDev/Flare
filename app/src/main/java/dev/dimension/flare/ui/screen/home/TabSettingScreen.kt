@@ -58,6 +58,7 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 internal fun TabSettingScreen(
     accountType: AccountType,
     onBack: () -> Unit,
+    toAddRssSource: () -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
     val state by producePresenter {
@@ -177,6 +178,7 @@ internal fun TabSettingScreen(
                 state.deleteTab(key)
                 state.setAddTab(false)
             },
+            toAddRssSource = toAddRssSource,
         )
     }
 }

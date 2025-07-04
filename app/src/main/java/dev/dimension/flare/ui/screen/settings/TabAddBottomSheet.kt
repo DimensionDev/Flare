@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.settings
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -71,6 +72,7 @@ internal fun TabAddBottomSheet(
     onDismissRequest: () -> Unit,
     onAddTab: (TabItem) -> Unit,
     onDeleteTab: (String) -> Unit,
+    toAddRssSource: () -> Unit,
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -185,14 +187,19 @@ internal fun TabAddBottomSheet(
                             items(
                                 allTabs.rssTabs,
                                 emptyContent = {
-                                    Button(
-                                        onClick = {},
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier.fillMaxWidth(),
                                     ) {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.Plus,
-                                            contentDescription = stringResource(R.string.add_rss_source),
-                                        )
-                                        Text(stringResource(R.string.add_rss_source))
+                                        Button(
+                                            onClick = toAddRssSource,
+                                        ) {
+                                            FAIcon(
+                                                FontAwesomeIcons.Solid.Plus,
+                                                contentDescription = stringResource(R.string.add_rss_source),
+                                            )
+                                            Text(stringResource(R.string.add_rss_source))
+                                        }
                                     }
                                 },
                             ) {
@@ -201,6 +208,22 @@ internal fun TabAddBottomSheet(
                                         RssTimelineTabItem(it)
                                     },
                                 )
+                            }
+                            item {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Button(
+                                        onClick = toAddRssSource,
+                                    ) {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.Plus,
+                                            contentDescription = stringResource(R.string.add_rss_source),
+                                        )
+                                        Text(stringResource(R.string.add_rss_source))
+                                    }
+                                }
                             }
                         }
                     } else {

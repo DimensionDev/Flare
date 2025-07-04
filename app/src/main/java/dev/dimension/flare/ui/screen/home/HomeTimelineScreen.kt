@@ -220,7 +220,7 @@ internal fun HomeTimelineScreen(
                 HorizontalPager(
                     state = pagerState,
                     key = { index ->
-                        tabs[index].timelineTabItem.key
+                        tabs.getOrNull(index)?.timelineTabItem?.key ?: "timeline_$index"
                     },
                 ) { index ->
                     TimelineItemContent(
@@ -341,27 +341,22 @@ private fun timelinePresenter(
                 userKey = null,
             )
         }.invoke()
-    val tabs by
-        remember {
-            settingsRepository.tabSettings
-                .map { settings ->
-                    listOfNotNull(
-                        if (settings.enableMixedTimeline) {
-                            MixedTimelineTabItem(
-                                subTimelineTabItem = settings.mainTabs,
-                            )
-                        } else {
-                            null
-                        },
-                    ) + settings.mainTabs
-                }.map {
-                    it.toImmutableList()
-                }
-        }.collectAsUiState()
-    val pagerState =
-        tabs.map {
-            rememberPagerState { it.size }
-        }
+    val tabs by remember {
+        settingsRepository.tabSettings
+            .map { settings ->
+                listOfNotNull(
+                    if (settings.enableMixedTimeline) {
+                        MixedTimelineTabItem(
+                            subTimelineTabItem = settings.mainTabs,
+                        )
+                    } else {
+                        null
+                    },
+                ) + settings.mainTabs
+            }.map {
+                it.toImmutableList()
+            }
+    }.collectAsUiState()
     val tabState =
         tabs.map {
             it
@@ -369,6 +364,9 @@ private fun timelinePresenter(
                     timelineItemPresenter(it)
                 }.toImmutableList()
         }
+    val pagerState = tabState.map {
+        rememberPagerState { it.size }
+    }
 
     object : UserState by accountState {
         val pagerState = pagerState

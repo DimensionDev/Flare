@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">Zarządzaj pamięcią Flara</string>
     <string name="settings_about_title">O programie</string>
     <string name="settings_about_subtitle">Dowiedz się więcej o Flarze</string>
+    <string name="settings_side_panel">Dostosowanie panelu bocznego</string>
+    <string name="settings_side_panel_description">Dostosuj panel boczny</string>
     <string name="settings_local_filter_title">Filtr lokalny</string>
     <string name="settings_local_filter_description">Lokalne ustawienia filtra dla osi czasu</string>
     <string name="settings_guest_setting_title">Host trybu gościa</string>
@@ -147,6 +149,7 @@
     <string name="media_save_success">Zapisano do pobrania</string>
     <string name="media_save_fail">Nie udało się zapisać</string>
     <string name="media_alt_text">Tekst alternatywny</string>
+    <string name="settings_side_panel_empty">Domyślnie wyświetlany będzie panel boczny zależy od platformy konta.</string>
     <string name="tab_settings_add">Dodaj</string>
     <string name="tab_settings_drag">Przeciągnij</string>
     <string name="tab_settings_edit">Edytuj</string>
@@ -256,6 +259,9 @@
     <string name="podcast_living">Podcast na żywo</string>
     <string name="home_tab_antennas_title">Antena</string>
     <string name="antennas_empty">Brak anten</string>
+    <string name="home_tab_mixed_timeline_title">Mieszane</string>
+    <string name="tab_settings_mixed_timeline">Dodaj mieszaną kartę osi czasu</string>
+    <string name="tab_settings_mixed_timeline_desc">Mieszana oś czasu połączy wszystkie karty na osi czasu w jednej karcie</string>
     <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
                 <li>Dodano wsparcie dla Misskey Antennas</li>

@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">Håndtér Flare\'s lagerplads</string>
     <string name="settings_about_title">Om</string>
     <string name="settings_about_subtitle">Læs mere om Flare</string>
+    <string name="settings_side_panel">Tilpasning af sidepanel</string>
+    <string name="settings_side_panel_description">Tilpas sidepanelet</string>
     <string name="settings_local_filter_title">Lokalt filter</string>
     <string name="settings_local_filter_description">Lokale filterindstillinger for tidslinje</string>
     <string name="settings_guest_setting_title">Gæst Tilstand Vært</string>
@@ -147,6 +149,7 @@
     <string name="media_save_success">Gemt i Downloads</string>
     <string name="media_save_fail">Kunne ikke gemme</string>
     <string name="media_alt_text">Alternativ tekst</string>
+    <string name="settings_side_panel_empty">Standard vil vise sidepanelet afhænger af kontoplatformen.</string>
     <string name="tab_settings_add">Tilføj</string>
     <string name="tab_settings_drag">Træk</string>
     <string name="tab_settings_edit">Rediger</string>
@@ -256,6 +259,9 @@
     <string name="podcast_living">Podcast live</string>
     <string name="home_tab_antennas_title">Antenne</string>
     <string name="antennas_empty">Ingen antenner</string>
+    <string name="home_tab_mixed_timeline_title">Blandet</string>
+    <string name="tab_settings_mixed_timeline">Tilføj blandet tidslinje fane</string>
+    <string name="tab_settings_mixed_timeline_desc">Blandet tidslinje vil blande alle faner tidslinje resultat i en fane</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
                 <li>Tilføjet understøttelse af Misskey Antennas</li>

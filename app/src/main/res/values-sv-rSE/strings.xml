@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">Hantera flare\'s lagring</string>
     <string name="settings_about_title">Om</string>
     <string name="settings_about_subtitle">Läs mer om Flare</string>
+    <string name="settings_side_panel">Anpassning av sidopanelen</string>
+    <string name="settings_side_panel_description">Anpassa sidopanel</string>
     <string name="settings_local_filter_title">Lokalt filter</string>
     <string name="settings_local_filter_description">Lokala filterinställningar för tidslinje</string>
     <string name="settings_guest_setting_title">Värd för gästläge</string>
@@ -147,6 +149,7 @@
     <string name="media_save_success">Sparad i hämtningar</string>
     <string name="media_save_fail">Det gick inte att spara</string>
     <string name="media_alt_text">Alt text</string>
+    <string name="settings_side_panel_empty">Standard kommer att visa sidopanel beror på kontoplattformen.</string>
     <string name="tab_settings_add">Lägg till</string>
     <string name="tab_settings_drag">Dra</string>
     <string name="tab_settings_edit">Redigera</string>
@@ -256,6 +259,9 @@
     <string name="podcast_living">Podcast live</string>
     <string name="home_tab_antennas_title">Antenn</string>
     <string name="antennas_empty">Inga antenner</string>
+    <string name="home_tab_mixed_timeline_title">Blandad</string>
+    <string name="tab_settings_mixed_timeline">Lägg till blandad tidslinje</string>
+    <string name="tab_settings_mixed_timeline_desc">Blandad tidslinje kommer att blanda alla flikar tidslinje resultat i en flik</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
                 <li>Stöd för Misskey Antenner</li>

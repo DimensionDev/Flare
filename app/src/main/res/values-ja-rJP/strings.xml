@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">Flareのストレージを管理する</string>
     <string name="settings_about_title">このアプリについて</string>
     <string name="settings_about_subtitle">Flareについての詳細</string>
+    <string name="settings_side_panel">サイドパネルのカスタマイズ</string>
+    <string name="settings_side_panel_description">サイドパネルを編集する</string>
     <string name="settings_local_filter_title">ローカルフィルター</string>
     <string name="settings_local_filter_description">タイムラインのローカルフィルターを設定する</string>
     <string name="settings_guest_setting_title">ゲストモードホスト</string>
@@ -149,6 +151,7 @@
     <string name="media_save_success">ダウンロードに保存しました</string>
     <string name="media_save_fail">保存に失敗しました</string>
     <string name="media_alt_text">Altテキスト</string>
+    <string name="settings_side_panel_empty">デフォルトでは、アカウントのプラットフォームによってサイドパネルが表示されます。</string>
     <string name="tab_settings_add">追加</string>
     <string name="tab_settings_drag">ドラッグ</string>
     <string name="tab_settings_edit">編集</string>
@@ -258,4 +261,7 @@
     <string name="podcast_living">ポッドキャストライブ</string>
     <string name="home_tab_antennas_title">アンテナ</string>
     <string name="antennas_empty">アンテナがありません</string>
+    <string name="home_tab_mixed_timeline_title">混在しました</string>
+    <string name="tab_settings_mixed_timeline">混合タイムラインタブを追加</string>
+    <string name="tab_settings_mixed_timeline_desc">混合されたタイムラインは、すべてのタブタイムラインの結果を1つのタブにミックスします</string>
 </resources>

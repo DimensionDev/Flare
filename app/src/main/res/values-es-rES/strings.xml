@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">Administrar almacenamiento de bengalas</string>
     <string name="settings_about_title">Acerca de</string>
     <string name="settings_about_subtitle">Más información sobre Bengala</string>
+    <string name="settings_side_panel">Personalización del panel lateral</string>
+    <string name="settings_side_panel_description">Personalizar el panel lateral</string>
     <string name="settings_local_filter_title">Filtro local</string>
     <string name="settings_local_filter_description">Ajustes de filtro local para la línea de tiempo</string>
     <string name="settings_guest_setting_title">Host del Modo Invitado</string>
@@ -147,6 +149,7 @@
     <string name="media_save_success">Guardado en descargas</string>
     <string name="media_save_fail">Error al guardar</string>
     <string name="media_alt_text">Texto Alt</string>
+    <string name="settings_side_panel_empty">El panel lateral por defecto dependerá de la plataforma de la cuenta.</string>
     <string name="tab_settings_add">Añadir</string>
     <string name="tab_settings_drag">Arrastre</string>
     <string name="tab_settings_edit">Editar</string>
@@ -256,6 +259,9 @@
     <string name="podcast_living">Podcast en vivo</string>
     <string name="home_tab_antennas_title">Antena</string>
     <string name="antennas_empty">No hay antenas</string>
+    <string name="home_tab_mixed_timeline_title">Mixto</string>
+    <string name="tab_settings_mixed_timeline">Añadir pestaña de cronología mixta</string>
+    <string name="tab_settings_mixed_timeline_desc">La línea de tiempo mezclada mezclará todas las pestañas que resulten en una pestaña</string>
     <string name="changelog_current"><![CDATA[            <span>Versión %1$s:</span>
             <ul>
                 <li>Añadido soporte para las Antenas de Misskey</li>

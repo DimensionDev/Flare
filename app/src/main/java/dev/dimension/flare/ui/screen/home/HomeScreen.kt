@@ -163,6 +163,9 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                     bottomBarAutoHideEnabled = state.navigationState.bottomBarAutoHideEnabled,
                     layoutType = layoutType,
                     showFab = userState.isSuccess,
+                    onFabClicked = {
+                        navigate(Route.Compose.New(accountType))
+                    },
                     navigationSuiteColors =
                         NavigationSuiteDefaults.colors(
                             navigationBarContainerColor = MaterialTheme.colorScheme.surface,

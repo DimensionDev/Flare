@@ -145,7 +145,6 @@ internal fun HomeTimelineScreen(
                                     edgePadding = 0.dp,
                                     divider = {},
                                     indicator = {
-                                        pagerState.currentPageOffsetFraction
                                         Box(
                                             Modifier
                                                 .tabIndicatorOffset(minOf(pagerState.currentPage, tabs.lastIndex))

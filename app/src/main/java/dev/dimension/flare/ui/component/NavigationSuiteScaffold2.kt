@@ -95,6 +95,7 @@ fun NavigationSuiteScaffold2(
     modifier: Modifier = Modifier,
     bottomBarAutoHideEnabled: Boolean = true,
     showFab: Boolean = true,
+    onFabClicked: () -> Unit = {},
     layoutType: NavigationSuiteType =
         NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo()),
     navigationSuiteColors: NavigationSuiteColors = NavigationSuiteDefaults.colors(),
@@ -354,8 +355,7 @@ fun NavigationSuiteScaffold2(
                                                             rememberSharedContentState("compose_fab"),
                                                             animatedVisibilityScope = this@AnimatedContent,
                                                         ),
-                                                onClick = {
-                                                },
+                                                onClick = onFabClicked,
                                             ) {
                                                 FAIcon(
                                                     imageVector = FontAwesomeIcons.Solid.Pen,
@@ -364,7 +364,7 @@ fun NavigationSuiteScaffold2(
                                             }
                                         } else {
                                             SmallFloatingActionButton(
-                                                onClick = {},
+                                                onClick = onFabClicked,
                                                 modifier =
                                                     Modifier
                                                         .sharedElement(

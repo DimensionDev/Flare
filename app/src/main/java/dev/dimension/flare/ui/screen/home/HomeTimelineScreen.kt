@@ -2,14 +2,15 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,15 +20,16 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LeadingIconTab
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SecondaryScrollableTabRow
-import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -47,10 +49,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
-import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Sliders
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
@@ -80,6 +82,7 @@ import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.screen.settings.TabIcon
 import dev.dimension.flare.ui.screen.settings.TabTitle
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
@@ -135,28 +138,56 @@ internal fun HomeTimelineScreen(
                         state.tabState.onSuccess { tabs ->
                             if (tabs.size > 1) {
                                 SecondaryScrollableTabRow(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth(),
                                     selectedTabIndex = minOf(pagerState.currentPage, tabs.lastIndex),
                                     edgePadding = 0.dp,
                                     divider = {},
-                                    modifier = Modifier.fillMaxWidth(),
+                                    indicator = {
+                                        pagerState.currentPageOffsetFraction
+                                        Box(
+                                            Modifier
+                                                .tabIndicatorOffset(minOf(pagerState.currentPage, tabs.lastIndex))
+                                                .fillMaxWidth()
+                                                .fillMaxHeight()
+                                                .background(
+                                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                                    shape = CircleShape,
+                                                ).zIndex(-1f),
+                                        )
+                                    },
                                 ) {
                                     state.tabState.onSuccess { tabs ->
                                         tabs.forEachIndexed { index, tab ->
-                                            Tab(
+                                            LeadingIconTab(
+                                                selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                                unselectedContentColor = LocalContentColor.current,
                                                 selected = index == pagerState.currentPage,
                                                 onClick = {
                                                     scope.launch {
                                                         pagerState.scrollToPage(index)
                                                     }
                                                 },
-                                            ) {
-                                                TabTitle(
-                                                    tab.timelineTabItem.metaData.title,
-                                                    modifier =
-                                                        Modifier
-                                                            .padding(8.dp),
-                                                )
-                                            }
+                                                text = {
+                                                    TabTitle(
+                                                        tab.timelineTabItem.metaData.title,
+//                                                        modifier =
+//                                                            Modifier
+//                                                                .padding(8.dp),
+                                                    )
+                                                },
+                                                icon = {
+                                                    TabIcon(
+                                                        accountType = tab.timelineTabItem.account,
+                                                        icon = tab.timelineTabItem.metaData.icon,
+                                                        title = tab.timelineTabItem.metaData.title,
+                                                    )
+                                                },
+//                                                colors = FilterChipDefaults.filterChipColors(
+//                                                    containerColor = MaterialTheme.colorScheme.surface,
+//                                                ),
+                                            )
                                         }
                                     }
                                 }
@@ -196,24 +227,6 @@ internal fun HomeTimelineScreen(
                         }
                 },
             )
-        },
-        floatingActionButton = {
-            state.user.onSuccess {
-                AnimatedVisibility(
-                    visible = topAppBarScrollBehavior.state.heightOffset == 0f && LocalBottomBarShowing.current,
-                    enter = scaleIn(),
-                    exit = scaleOut(),
-                ) {
-                    FloatingActionButton(
-                        onClick = toCompose,
-                    ) {
-                        FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.Pen,
-                            contentDescription = stringResource(id = R.string.compose_title),
-                        )
-                    }
-                }
-            }
         },
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->

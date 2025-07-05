@@ -1,11 +1,7 @@
 package dev.dimension.flare.ui.screen.home
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -17,13 +13,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.Pen
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.ui.component.AvatarComponent
-import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.LocalBottomBarShowing
@@ -82,24 +74,6 @@ internal fun TimelineScreen(
                     }
                 },
             )
-        },
-        floatingActionButton = {
-            state.user.onSuccess {
-                AnimatedVisibility(
-                    visible = topAppBarScrollBehavior.state.heightOffset == 0f && LocalBottomBarShowing.current,
-                    enter = scaleIn(),
-                    exit = scaleOut(),
-                ) {
-                    FloatingActionButton(
-                        onClick = toCompose,
-                    ) {
-                        FAIcon(
-                            imageVector = FontAwesomeIcons.Solid.Pen,
-                            contentDescription = stringResource(id = R.string.compose_title),
-                        )
-                    }
-                }
-            }
         },
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->

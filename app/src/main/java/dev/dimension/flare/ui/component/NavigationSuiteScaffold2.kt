@@ -1,13 +1,14 @@
 package dev.dimension.flare.ui.component
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -20,25 +21,26 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FlexibleBottomAppBar
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingToolbarDefaults.floatingToolbarVerticalNestedScroll
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalWideNavigationRail
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.ShortNavigationBarItem
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.WideNavigationRailState
 import androidx.compose.material3.WideNavigationRailValue
@@ -67,19 +69,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
+import compose.icons.fontawesomeicons.Solid
+import compose.icons.fontawesomeicons.solid.Pen
+import dev.dimension.flare.R
 
-private val bottomBarHeight = 56.dp
-
-val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { bottomBarHeight }
+val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { 0.dp }
 val LocalBottomBarShowing = androidx.compose.runtime.staticCompositionLocalOf<Boolean> { false }
 
 @OptIn(
     ExperimentalFoundationApi::class,
     ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalMaterial3Api::class,
+    ExperimentalSharedTransitionApi::class,
 )
 @ExperimentalMaterial3AdaptiveNavigationSuiteApi
 @Composable
@@ -89,7 +94,7 @@ fun NavigationSuiteScaffold2(
     wideNavigationRailState: WideNavigationRailState,
     modifier: Modifier = Modifier,
     bottomBarAutoHideEnabled: Boolean = true,
-    bottomBarDividerEnabled: Boolean = true,
+    showFab: Boolean = true,
     layoutType: NavigationSuiteType =
         NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo()),
     navigationSuiteColors: NavigationSuiteColors = NavigationSuiteDefaults.colors(),
@@ -99,14 +104,18 @@ fun NavigationSuiteScaffold2(
     footerItems: NavigationSuiteScope2.() -> Unit = {},
     content: @Composable () -> Unit = {},
 ) {
-    val scrollBehavior = BottomAppBarDefaults.exitAlwaysScrollBehavior()
     var isPodcastShowing by remember { mutableStateOf(false) }
+    var isBottomBarExpanded by remember { mutableStateOf(true) }
     Surface(
         modifier =
             modifier
                 .let {
                     if (bottomBarAutoHideEnabled) {
-                        it.nestedScroll(scrollBehavior.nestedScrollConnection)
+                        it.floatingToolbarVerticalNestedScroll(
+                            expanded = isBottomBarExpanded,
+                            onExpand = { isBottomBarExpanded = true },
+                            onCollapse = { isBottomBarExpanded = false },
+                        )
                     } else {
                         it
                     }
@@ -203,12 +212,12 @@ fun NavigationSuiteScaffold2(
             Box {
                 CompositionLocalProvider(
                     LocalBottomBarHeight provides
-                        if (layoutType == NavigationSuiteType.NavigationBar) {
-                            bottomBarHeight
+                        if (isPodcastShowing) {
+                            56.dp
                         } else {
                             0.dp
                         } +
-                        if (isPodcastShowing) {
+                        if (scope.itemList.any { item -> item.selected } && layoutType == NavigationSuiteType.NavigationBar) {
                             56.dp
                         } else {
                             0.dp
@@ -245,63 +254,132 @@ fun NavigationSuiteScaffold2(
                                 },
                     )
                     androidx.compose.animation.AnimatedVisibility(
-                        layoutType == NavigationSuiteType.NavigationBar,
+                        layoutType == NavigationSuiteType.NavigationBar &&
+                            scope.itemList.any { item -> item.selected },
                         enter = slideInVertically { it },
                         exit = slideOutVertically { it },
                     ) {
-                        Box {
-                            FlexibleBottomAppBar(
-                                expandedHeight = bottomBarHeight,
-                                scrollBehavior = scrollBehavior,
-                                contentColor = navigationSuiteColors.navigationBarContentColor,
-                                containerColor = navigationSuiteColors.navigationBarContainerColor,
-                            ) {
-                                scope.itemList.forEach {
-                                    Box(
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .windowInsetsPadding(
+                                        WindowInsets.systemBars.only(
+                                            WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom,
+                                        ),
+                                    ).padding(
+                                        horizontal = 16.dp,
+                                        vertical = 8.dp,
+                                    ),
+                        ) {
+                            SharedTransitionLayout {
+                                AnimatedContent(
+                                    isBottomBarExpanded,
+                                ) { isExpanded ->
+                                    Surface(
+                                        shape =
+                                            if (isExpanded) {
+                                                RoundedCornerShape(25)
+                                            } else {
+                                                RoundedCornerShape(50)
+                                            },
+                                        shadowElevation = 8.dp,
+                                        tonalElevation = 8.dp,
                                         modifier =
-                                            it.modifier
-                                                .weight(1f)
-                                                .combinedClickable(
-                                                    interactionSource = it.interactionSource,
-                                                    onClick = it.onClick,
-                                                    indication = LocalIndication.current,
-                                                    onLongClick = it.onLongClick,
-                                                ).height(bottomBarHeight),
-                                        contentAlignment = Alignment.Center,
+                                            Modifier
+                                                .sharedElement(
+                                                    rememberSharedContentState("bottom_surface"),
+                                                    animatedVisibilityScope = this@AnimatedContent,
+                                                ),
                                     ) {
-                                        val colors =
-                                            it.colors?.navigationBarItemColors
-                                                ?: NavigationBarItemDefaults.colors()
-                                        val color =
-                                            with(colors) {
-                                                when {
-                                                    !it.enabled -> disabledIconColor
-                                                    it.selected -> MaterialTheme.colorScheme.primary
-                                                    else -> unselectedIconColor
+                                        Row(
+                                            modifier =
+                                                Modifier
+                                                    .padding(
+                                                        horizontal = 12.dp,
+                                                        vertical = 4.dp,
+                                                    ),
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                        ) {
+                                            scope.itemList.forEachIndexed { index, it ->
+                                                if (isExpanded || it.selected) {
+                                                    ShortNavigationBarItem(
+                                                        modifier =
+                                                            it.modifier
+                                                                .sharedBounds(
+                                                                    rememberSharedContentState("item_$index"),
+                                                                    animatedVisibilityScope = this@AnimatedContent,
+                                                                    enter = fadeIn(),
+                                                                    exit = fadeOut(),
+                                                                ),
+                                                        selected = it.selected,
+                                                        onClick = it.onClick,
+                                                        icon = {
+                                                            Box(
+                                                                modifier =
+                                                                    Modifier
+                                                                        .sharedElement(
+                                                                            rememberSharedContentState("item_icon_$index"),
+                                                                            animatedVisibilityScope = this@AnimatedContent,
+                                                                        ),
+                                                            ) {
+                                                                NavigationItemIcon(
+                                                                    badge = it.badge,
+                                                                    icon = it.icon,
+                                                                )
+                                                            }
+                                                        },
+                                                        enabled = it.enabled,
+                                                        label = if (isExpanded) it.label else null,
+                                                        interactionSource = it.interactionSource,
+                                                    )
                                                 }
                                             }
-                                        val iconColor by animateColorAsState(
-                                            targetValue = color,
-                                            animationSpec = tween(100),
-                                        )
-                                        CompositionLocalProvider(LocalContentColor provides iconColor) {
-                                            NavigationItemIcon(
-                                                icon = it.icon,
-                                                badge = it.badge,
-                                            )
                                         }
                                     }
                                 }
                             }
-                            if (bottomBarDividerEnabled) {
-                                HorizontalDivider(
-                                    modifier =
-                                        Modifier
-                                            .align(Alignment.TopCenter)
-                                            .fillMaxWidth(),
-                                    color = FlareDividerDefaults.color,
-                                    thickness = FlareDividerDefaults.thickness,
-                                )
+                            if (showFab) {
+                                SharedTransitionLayout {
+                                    AnimatedContent(
+                                        isBottomBarExpanded,
+                                    ) { isExpanded ->
+                                        if (isExpanded) {
+                                            FloatingActionButton(
+                                                modifier =
+                                                    Modifier
+                                                        .sharedElement(
+                                                            rememberSharedContentState("compose_fab"),
+                                                            animatedVisibilityScope = this@AnimatedContent,
+                                                        ),
+                                                onClick = {
+                                                },
+                                            ) {
+                                                FAIcon(
+                                                    imageVector = FontAwesomeIcons.Solid.Pen,
+                                                    contentDescription = stringResource(id = R.string.compose_title),
+                                                )
+                                            }
+                                        } else {
+                                            SmallFloatingActionButton(
+                                                onClick = {},
+                                                modifier =
+                                                    Modifier
+                                                        .sharedElement(
+                                                            rememberSharedContentState("compose_fab"),
+                                                            animatedVisibilityScope = this@AnimatedContent,
+                                                        ),
+                                            ) {
+                                                FAIcon(
+                                                    imageVector = FontAwesomeIcons.Solid.Pen,
+                                                    contentDescription = stringResource(id = R.string.compose_title),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

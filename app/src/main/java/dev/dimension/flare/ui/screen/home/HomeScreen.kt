@@ -160,9 +160,9 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 NavigationSuiteScaffold2(
                     wideNavigationRailState = wideNavigationRailState,
                     modifier = Modifier.fillMaxSize(),
-                    bottomBarDividerEnabled = state.navigationState.bottomBarDividerEnabled,
                     bottomBarAutoHideEnabled = state.navigationState.bottomBarAutoHideEnabled,
                     layoutType = layoutType,
+                    showFab = userState.isSuccess,
                     navigationSuiteColors =
                         NavigationSuiteDefaults.colors(
                             navigationBarContainerColor = MaterialTheme.colorScheme.surface,

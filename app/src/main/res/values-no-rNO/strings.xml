@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">Behandle flammetall lagring</string>
     <string name="settings_about_title">Om</string>
     <string name="settings_about_subtitle">Lær mer om Flare</string>
+    <string name="settings_side_panel">Side Panel tilpasning</string>
+    <string name="settings_side_panel_description">Tilpass sidepanelet</string>
     <string name="settings_local_filter_title">Lokalt filter</string>
     <string name="settings_local_filter_description">Lokale filterinnstillinger for tidslinjen</string>
     <string name="settings_guest_setting_title">Vert for gjestemodus</string>
@@ -147,6 +149,7 @@
     <string name="media_save_success">Lagret i Nedlastingen</string>
     <string name="media_save_fail">Kunne ikke lagre</string>
     <string name="media_alt_text">Alt. tekst</string>
+    <string name="settings_side_panel_empty">Standard sidepanelet vil vise avhenger av kontoplattformen.</string>
     <string name="tab_settings_add">Legg til</string>
     <string name="tab_settings_drag">Dra</string>
     <string name="tab_settings_edit">Rediger</string>
@@ -256,4 +259,7 @@
     <string name="podcast_living">Podcasten levende</string>
     <string name="home_tab_antennas_title">Antenne</string>
     <string name="antennas_empty">Ingen antenner</string>
+    <string name="home_tab_mixed_timeline_title">Blandet</string>
+    <string name="tab_settings_mixed_timeline">Legg til blandet tidslinje fane</string>
+    <string name="tab_settings_mixed_timeline_desc">Blandet tidslinje vil blande alle faners tidslinjen resulterer i en fane</string>
 </resources>

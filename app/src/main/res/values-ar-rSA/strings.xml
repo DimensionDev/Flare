@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">إدارة تخزين اللعب</string>
     <string name="settings_about_title">حول</string>
     <string name="settings_about_subtitle">تعرف على المزيد حول Ffluy</string>
+    <string name="settings_side_panel">تخصيص لوحة جانبية</string>
+    <string name="settings_side_panel_description">تخصيص اللوحة الجانبية</string>
     <string name="settings_local_filter_title">الفلتر المحلي</string>
     <string name="settings_local_filter_description">إعدادات الفلتر المحلي للخيط الزمني</string>
     <string name="settings_guest_setting_title">مضيف وضع الضيف</string>
@@ -146,6 +148,7 @@
     <string name="media_save_success">حفظ في التنزيلات</string>
     <string name="media_save_fail">فشل في الحفظ</string>
     <string name="media_alt_text">نص بديل</string>
+    <string name="settings_side_panel_empty">سيتم عرض اللوحة الجانبية بشكل افتراضي اعتمادا على منصة الحساب.</string>
     <string name="tab_settings_add">إضافة</string>
     <string name="tab_settings_drag">اسحب</string>
     <string name="tab_settings_edit">تحرير</string>
@@ -255,6 +258,9 @@
     <string name="podcast_living">Podcast مباشرة</string>
     <string name="home_tab_antennas_title">هوائي</string>
     <string name="antennas_empty">لا هوائيات</string>
+    <string name="home_tab_mixed_timeline_title">مختلطة</string>
+    <string name="tab_settings_mixed_timeline">إضافة علامة تبويب الخيط الزمني المختلط</string>
+    <string name="tab_settings_mixed_timeline_desc">سيتم خلط الخط الزمني المختلط بين جميع علامات التبويب في علامة تبويب واحدة</string>
     <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
             <ul>
                 <li>إضافة دعم لهوائيات Misskey</li>

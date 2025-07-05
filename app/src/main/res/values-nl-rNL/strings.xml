@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">Beheer Flare\'s opslag</string>
     <string name="settings_about_title">Informatie</string>
     <string name="settings_about_subtitle">Meer informatie over Flare</string>
+    <string name="settings_side_panel">Zijkant paneel aanpassen</string>
+    <string name="settings_side_panel_description">Zijpaneel aanpassen</string>
     <string name="settings_local_filter_title">Lokaal filter</string>
     <string name="settings_local_filter_description">Lokale filterinstellingen voor tijdlijn</string>
     <string name="settings_guest_setting_title">Gast modus host</string>
@@ -147,6 +149,7 @@
     <string name="media_save_success">Opgeslagen in Downloads</string>
     <string name="media_save_fail">Opslaan mislukt</string>
     <string name="media_alt_text">Alternatieve tekst</string>
+    <string name="settings_side_panel_empty">Standaard wordt zijpaneel weergegeven afhankelijk van het account platform.</string>
     <string name="tab_settings_add">Toevoegen</string>
     <string name="tab_settings_drag">Sleep</string>
     <string name="tab_settings_edit">Bewerken</string>
@@ -255,6 +258,9 @@
     <string name="podcast_living">Podcast live</string>
     <string name="home_tab_antennas_title">Antenne</string>
     <string name="antennas_empty">Geen antennes</string>
+    <string name="home_tab_mixed_timeline_title">Gemengd</string>
+    <string name="tab_settings_mixed_timeline">Voeg gemengde tabblad tijdlijn toe</string>
+    <string name="tab_settings_mixed_timeline_desc">Gemengde tijdlijn mengt alle resultaten van de tabbladen in één tabblad</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
                 <li>Toegevoegde ondersteuning voor Misskey Antennas</li>

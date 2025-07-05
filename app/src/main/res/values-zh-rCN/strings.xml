@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">管理Flare的存储</string>
     <string name="settings_about_title">关于</string>
     <string name="settings_about_subtitle">了解更多关于Flare的信息</string>
+    <string name="settings_side_panel">侧面板自定义</string>
+    <string name="settings_side_panel_description">自定义侧面板</string>
     <string name="settings_local_filter_title">本地过滤器</string>
     <string name="settings_local_filter_description">时间轴的本地过滤器设置</string>
     <string name="settings_guest_setting_title">访客模式主机</string>
@@ -149,6 +151,7 @@
     <string name="media_save_success">已保存到下载文件夹</string>
     <string name="media_save_fail">保存失败</string>
     <string name="media_alt_text">备用文本</string>
+    <string name="settings_side_panel_empty">默认显示侧面板取决于账户平台。</string>
     <string name="tab_settings_add">添加</string>
     <string name="tab_settings_drag">拖动</string>
     <string name="tab_settings_edit">编辑</string>
@@ -259,6 +262,9 @@
     <string name="podcast_living">实时播报</string>
     <string name="home_tab_antennas_title">天线</string>
     <string name="antennas_empty">无天线</string>
+    <string name="home_tab_mixed_timeline_title">混合的</string>
+    <string name="tab_settings_mixed_timeline">添加混合时间线标签</string>
+    <string name="tab_settings_mixed_timeline_desc">混合时间线将混合所有标签页的时间线结果</string>
     <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
             <ul>
                 <li>支持 Misskey Antennas</li>

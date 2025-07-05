@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">Gestionează spațiul de stocare al Flare</string>
     <string name="settings_about_title">Despre</string>
     <string name="settings_about_subtitle">Află mai multe despre Flare</string>
+    <string name="settings_side_panel">Personalizare panou lateral</string>
+    <string name="settings_side_panel_description">Personalizați panoul lateral</string>
     <string name="settings_local_filter_title">Filtru local</string>
     <string name="settings_local_filter_description">Setări filtre locale pentru cronologie</string>
     <string name="settings_guest_setting_title">Gazda Modului de Oaspete</string>
@@ -147,6 +149,7 @@
     <string name="media_save_success">Salvat în Descărcări</string>
     <string name="media_save_fail">Salvarea nu a reușit</string>
     <string name="media_alt_text">Text alternativ</string>
+    <string name="settings_side_panel_empty">Panoul implicit va afișa panoul lateral depinde de platforma contului.</string>
     <string name="tab_settings_add">Adăugare</string>
     <string name="tab_settings_drag">Trage</string>
     <string name="tab_settings_edit">Editare</string>
@@ -256,6 +259,9 @@
     <string name="podcast_living">Podcast în direct</string>
     <string name="home_tab_antennas_title">Antenă</string>
     <string name="antennas_empty">Fără antene</string>
+    <string name="home_tab_mixed_timeline_title">Amestecat</string>
+    <string name="tab_settings_mixed_timeline">Adaugă cronologie mixtă</string>
+    <string name="tab_settings_mixed_timeline_desc">Amestecul cronologiei va amesteca toate tab-urile de cronologie într-o singură filă</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
                 <li>Suport adăugat pentru Misskey Antennas</li>

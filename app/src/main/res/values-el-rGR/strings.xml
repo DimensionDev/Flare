@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">Διαχείριση χώρου αποθήκευσης Flare</string>
     <string name="settings_about_title">Σχετικά</string>
     <string name="settings_about_subtitle">Μάθετε περισσότερα για το Flare</string>
+    <string name="settings_side_panel">Προσαρμογή πλαϊνού πίνακα</string>
+    <string name="settings_side_panel_description">Προσαρμόστε τον πλευρικό πίνακα</string>
     <string name="settings_local_filter_title">Τοπικό φίλτρο</string>
     <string name="settings_local_filter_description">Ρυθμίσεις τοπικού φίλτρου για το χρονολόγιο</string>
     <string name="settings_guest_setting_title">Εξυπηρετητής Λειτουργίας Επισκέπτη</string>
@@ -146,6 +148,7 @@
     <string name="media_save_success">Αποθηκεύτηκε στις Λήψεις</string>
     <string name="media_save_fail">Αποτυχία αποθήκευσης</string>
     <string name="media_alt_text">Εναλλακτικό κείμενο</string>
+    <string name="settings_side_panel_empty">Προεπιλογή θα εμφανίσει πλευρικό πίνακα εξαρτάται από την πλατφόρμα λογαριασμού.</string>
     <string name="tab_settings_add">Προσθήκη</string>
     <string name="tab_settings_drag">Σύρετε</string>
     <string name="tab_settings_edit">Επεξεργασία</string>
@@ -255,6 +258,9 @@
     <string name="podcast_living">Podcast ζωντανά</string>
     <string name="home_tab_antennas_title">Κεραία</string>
     <string name="antennas_empty">Καμία κεραία</string>
+    <string name="home_tab_mixed_timeline_title">Μεικτό</string>
+    <string name="tab_settings_mixed_timeline">Προσθήκη μικτής καρτέλας χρονολογίου</string>
+    <string name="tab_settings_mixed_timeline_desc">Μικτή χρονολογική γραμμή θα συνδυάσει όλες τις καρτέλες αποτέλεσμα χρονοδιάγραμμα σε μία καρτέλα</string>
     <string name="changelog_current"><![CDATA[            <span>Έκδοση %1$s:</span>
             <ul>
                 <li>Προστέθηκε υποστήριξη για Misskey Antennas</li>

@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">Керування сховищем Flare\'а</string>
     <string name="settings_about_title">Про програму</string>
     <string name="settings_about_subtitle">Дізнайтеся більше про Flare</string>
+    <string name="settings_side_panel">Налаштування бічної панелі</string>
+    <string name="settings_side_panel_description">Налаштування бічної панелі</string>
     <string name="settings_local_filter_title">Локальний фільтр</string>
     <string name="settings_local_filter_description">Налаштування локального фільтра для стрічки</string>
     <string name="settings_guest_setting_title">Гостьовий режим - Хост</string>
@@ -147,6 +149,7 @@
     <string name="media_save_success">Збережено на завантаження</string>
     <string name="media_save_fail">Не вдалося зберегти</string>
     <string name="media_alt_text">Alt-текст</string>
+    <string name="settings_side_panel_empty">Типово відображатиметься бічна панель, залежить від платформи облікового запису.</string>
     <string name="tab_settings_add">Додати</string>
     <string name="tab_settings_drag">Тягнути</string>
     <string name="tab_settings_edit">Редагувати</string>
@@ -255,4 +258,7 @@
     <string name="podcast_living">Подкаст в реальному часі</string>
     <string name="home_tab_antennas_title">Антена</string>
     <string name="antennas_empty">Немає антени</string>
+    <string name="home_tab_mixed_timeline_title">Змішаний</string>
+    <string name="tab_settings_mixed_timeline">Додати змішану вкладку часової шкали</string>
+    <string name="tab_settings_mixed_timeline_desc">Змішана часова шкала будуть змішувати всі вкладки в результаті однієї вкладки</string>
 </resources>

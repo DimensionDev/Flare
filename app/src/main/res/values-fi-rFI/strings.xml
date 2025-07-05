@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">Hallitse Flare-tallennustilaa</string>
     <string name="settings_about_title">Tietoja</string>
     <string name="settings_about_subtitle">Lue lisää Floresta</string>
+    <string name="settings_side_panel">Sivupaneelin räätälöinti</string>
+    <string name="settings_side_panel_description">Muokkaa sivupaneelia</string>
     <string name="settings_local_filter_title">Paikallinen suodatin</string>
     <string name="settings_local_filter_description">Paikallisen suodattimen asetukset aikajanalle</string>
     <string name="settings_guest_setting_title">Vierailevan Tilan Isäntä</string>
@@ -147,6 +149,7 @@
     <string name="media_save_success">Tallennettu latauksiin</string>
     <string name="media_save_fail">Tallennus epäonnistui</string>
     <string name="media_alt_text">Alt teksti</string>
+    <string name="settings_side_panel_empty">Oletus näyttää sivupaneeli riippuu tilin alustan.</string>
     <string name="tab_settings_add">Lisää</string>
     <string name="tab_settings_drag">Vedä</string>
     <string name="tab_settings_edit">Muokkaa</string>
@@ -256,6 +259,9 @@
     <string name="podcast_living">Elävä Podcast</string>
     <string name="home_tab_antennas_title">Antenni</string>
     <string name="antennas_empty">Ei antennia</string>
+    <string name="home_tab_mixed_timeline_title">Sekoitettu</string>
+    <string name="tab_settings_mixed_timeline">Lisää sekoitettu aikajana-välilehti</string>
+    <string name="tab_settings_mixed_timeline_desc">Sekoitettu aikajana sekoittaa kaikki välilehdet aikajana tulos yhdessä välilehdessä</string>
     <string name="changelog_current"><![CDATA[            <span>Versio %1$s:</span>
             <ul>
                 <li>Lisätty tuki Misskey Antenneille</li>

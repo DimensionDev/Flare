@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">Gérer le stockage de Fusée éclairante</string>
     <string name="settings_about_title">À propos de</string>
     <string name="settings_about_subtitle">En savoir plus sur Fusée éclairante</string>
+    <string name="settings_side_panel">Personnalisation du panneau latéral</string>
+    <string name="settings_side_panel_description">Personnaliser le panneau latéral</string>
     <string name="settings_local_filter_title">Filtre local</string>
     <string name="settings_local_filter_description">Paramètres de filtre local pour la timeline</string>
     <string name="settings_guest_setting_title">Hôte en mode invité</string>
@@ -147,6 +149,7 @@
     <string name="media_save_success">Enregistré dans les téléchargements</string>
     <string name="media_save_fail">Échec de l\'enregistrement</string>
     <string name="media_alt_text">Texte Alt</string>
+    <string name="settings_side_panel_empty">Le panneau latéral par défaut sera affiché en fonction de la plateforme du compte.</string>
     <string name="tab_settings_add">Ajouter</string>
     <string name="tab_settings_drag">Glisser</string>
     <string name="tab_settings_edit">Editer</string>
@@ -256,6 +259,9 @@
     <string name="podcast_living">Podcast en direct</string>
     <string name="home_tab_antennas_title">Antenne</string>
     <string name="antennas_empty">Aucune antenne</string>
+    <string name="home_tab_mixed_timeline_title">Mixte</string>
+    <string name="tab_settings_mixed_timeline">Ajouter un onglet de timeline mixte</string>
+    <string name="tab_settings_mixed_timeline_desc">La timeline mixte mélangera le résultat de tous les onglets dans un onglet</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
                 <li>Ajout du support pour les Antennes Misskey</li>

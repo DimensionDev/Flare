@@ -36,6 +36,8 @@
     <string name="settings_storage_subtitle">Управление хранилищем сигнала</string>
     <string name="settings_about_title">О программе</string>
     <string name="settings_about_subtitle">Узнайте больше о Сигнале</string>
+    <string name="settings_side_panel">Настройка боковой панели</string>
+    <string name="settings_side_panel_description">Настройка боковой панели</string>
     <string name="settings_local_filter_title">Локальный фильтр</string>
     <string name="settings_local_filter_description">Настройки локального фильтра для временной линии</string>
     <string name="settings_guest_setting_title">Хост гостевого режима</string>
@@ -146,6 +148,7 @@
     <string name="media_save_success">Сохранено в Загрузках</string>
     <string name="media_save_fail">Не удалось сохранить</string>
     <string name="media_alt_text">Alt текст</string>
+    <string name="settings_side_panel_empty">По умолчанию будет отображаться боковая панель в зависимости от платформы аккаунта.</string>
     <string name="tab_settings_add">Добавить</string>
     <string name="tab_settings_drag">Перетащите</string>
     <string name="tab_settings_edit">Редактирование</string>
@@ -255,6 +258,9 @@
     <string name="podcast_living">Подкаст живой</string>
     <string name="home_tab_antennas_title">Антенна</string>
     <string name="antennas_empty">Нет антенн</string>
+    <string name="home_tab_mixed_timeline_title">Смешанный</string>
+    <string name="tab_settings_mixed_timeline">Добавить вкладку смешанной ленты времени</string>
+    <string name="tab_settings_mixed_timeline_desc">Смешанная лента времени будет смешивать результат всех вкладок в одной вкладке</string>
     <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
             <ul>
                 <li>Добавлена поддержка Misskey Antennas</li>

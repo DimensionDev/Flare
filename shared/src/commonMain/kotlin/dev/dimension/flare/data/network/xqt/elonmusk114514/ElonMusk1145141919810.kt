@@ -7,10 +7,10 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.util.decodeBase64Bytes
 import io.ktor.util.encodeBase64
 import korlibs.crypto.sha256
-import kotlinx.datetime.Clock
 import kotlinx.serialization.Serializable
 import kotlin.experimental.xor
 import kotlin.random.Random
+import kotlin.time.Clock
 
 internal object ElonMusk1145141919810 {
     @Serializable

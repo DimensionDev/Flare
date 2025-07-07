@@ -13,7 +13,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.vvoHost
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 internal object VVO {
     suspend fun saveStatus(

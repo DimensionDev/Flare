@@ -1,11 +1,11 @@
 package dev.dimension.flare.ui.render
 
 import android.text.format.DateUtils
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 internal actual fun Instant.shortTime(): LocalizedShortTime {
     val compareTo = Clock.System.now()

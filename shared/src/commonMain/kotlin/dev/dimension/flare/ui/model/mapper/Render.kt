@@ -20,14 +20,15 @@ import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.toImmutableList
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 internal fun DbPagingTimelineWithStatus.render(event: StatusEvent?): UiTimeline =
-    status.status.data.content.render(
-        event,
-        references =
-            status.references.associate { it.reference.referenceType to it.status.data.content },
-    )
+    status.status.data.content
+        .render(
+            event,
+            references =
+                status.references.associate { it.reference.referenceType to it.status.data.content },
+        ).copy(dbKey = timeline._id)
 
 internal fun DbStatusWithReference.render(event: StatusEvent?): UiTimeline =
     status.data.content.render(

@@ -19,7 +19,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 internal object Misskey {
     suspend fun save(

@@ -15,7 +15,9 @@ internal sealed interface Notification {
     }
 
     data class StringNotification(
-        @StringRes val messageId: Int,
+        @param:StringRes
+        @field:StringRes
+        val messageId: Int,
         val success: Boolean,
     ) : Notification
 }

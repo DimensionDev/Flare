@@ -5,7 +5,7 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 @Entity(
     indices = [Index(value = ["statusKey", "accountType"], unique = true)],

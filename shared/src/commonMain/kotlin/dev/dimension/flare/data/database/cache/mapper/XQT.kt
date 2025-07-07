@@ -44,7 +44,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.mapper.parseXQTCustomDateTime
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 internal object XQT {
     suspend fun save(

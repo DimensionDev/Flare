@@ -7,12 +7,12 @@ import dev.dimension.flare.ui.component.date_format_full
 import dev.dimension.flare.ui.component.date_format_month_day
 import dev.dimension.flare.ui.component.date_format_year_month_day
 import dev.dimension.flare.ui.render.LocalizedShortTime
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toJavaLocalDateTime
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.stringResource
 import java.time.format.DateTimeFormatter
+import kotlin.time.Instant
 
 public val LocalizedShortTime.localizedShortTime: String
     @Composable

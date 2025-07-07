@@ -17,9 +17,10 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.mapper.fromRss
 import dev.dimension.flare.ui.model.mapper.title
 import dev.dimension.flare.ui.render.parseHtml
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.format.DateTimeComponents
+import kotlinx.datetime.parse
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @OptIn(ExperimentalPagingApi::class)
 internal class RssTimelineRemoteMediator(

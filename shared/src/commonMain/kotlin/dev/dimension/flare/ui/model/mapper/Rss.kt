@@ -7,7 +7,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.render.toUi
 import io.ktor.util.encodeBase64
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 internal fun StatusContent.Rss.RssContent.render(): UiTimeline =
     when (this) {

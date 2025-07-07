@@ -44,6 +44,7 @@ import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.datetime.toStdlibInstant
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -466,7 +467,7 @@ internal fun PostView.renderStatus(
                         ).toImmutableList(),
                 ),
             ).toImmutableList(),
-        createdAt = indexedAt.toUi(),
+        createdAt = indexedAt.toStdlibInstant().toUi(),
         sensitive = false,
         onClicked = {
             launcher.launch(
@@ -921,7 +922,10 @@ private fun render(
                 contentWarning = null,
                 poll = null,
                 quote = persistentListOf(),
-                createdAt = record.value.indexedAt.toUi(),
+                createdAt =
+                    record.value.indexedAt
+                        .toStdlibInstant()
+                        .toUi(),
                 sensitive = false,
                 onClicked = {
                     launcher.launch(

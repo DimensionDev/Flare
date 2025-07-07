@@ -17,7 +17,8 @@ import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.datetime.Clock
+import kotlinx.datetime.toDeprecatedInstant
+import kotlin.time.Clock
 
 @OptIn(ExperimentalPagingApi::class)
 internal class NotificationRemoteMediator(
@@ -49,7 +50,12 @@ internal class NotificationRemoteMediator(
                             ),
                         ).maybeResponse()
                         .also {
-                            service.updateSeen(request = UpdateSeenRequest(seenAt = Clock.System.now()))
+                            service.updateSeen(
+                                request =
+                                    UpdateSeenRequest(
+                                        seenAt = Clock.System.now().toDeprecatedInstant(),
+                                    ),
+                            )
                             onClearMarker.invoke()
                         }
                 }
@@ -82,10 +88,12 @@ internal class NotificationRemoteMediator(
                             it.record
                                 .decodeAs<Like>()
                                 .subject.uri
+
                         ListNotificationsReason.Repost ->
                             it.record
                                 .decodeAs<Repost>()
                                 .subject.uri
+
                         ListNotificationsReason.Follow -> null
                         ListNotificationsReason.Mention -> it.uri
                         ListNotificationsReason.Reply -> it.uri

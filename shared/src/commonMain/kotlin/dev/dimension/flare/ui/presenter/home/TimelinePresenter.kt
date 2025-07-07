@@ -107,7 +107,7 @@ public abstract class TimelinePresenter :
                                     }
                                 }
                             }?.dataSource
-                        data.render(dataSource)
+                        data.render(dataSource, useDbKeyInItemKey)
                     }
                 }
         }
@@ -155,6 +155,7 @@ public abstract class TimelinePresenter :
     }
 
     internal abstract val loader: Flow<BaseTimelineLoader>
+    protected open val useDbKeyInItemKey: Boolean = false
 }
 
 @Immutable

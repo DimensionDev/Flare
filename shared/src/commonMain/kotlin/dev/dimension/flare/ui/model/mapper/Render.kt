@@ -22,13 +22,22 @@ import dev.dimension.flare.ui.render.toUi
 import kotlinx.collections.immutable.toImmutableList
 import kotlin.time.Instant
 
-internal fun DbPagingTimelineWithStatus.render(event: StatusEvent?): UiTimeline =
+internal fun DbPagingTimelineWithStatus.render(
+    event: StatusEvent?,
+    useDbKey: Boolean = false,
+): UiTimeline =
     status.status.data.content
         .render(
             event,
             references =
                 status.references.associate { it.reference.referenceType to it.status.data.content },
-        ).copy(dbKey = timeline._id)
+        ).let {
+            if (useDbKey) {
+                it.copy(dbKey = timeline.accountType.toString())
+            } else {
+                it
+            }
+        }
 
 internal fun DbStatusWithReference.render(event: StatusEvent?): UiTimeline =
     status.data.content.render(

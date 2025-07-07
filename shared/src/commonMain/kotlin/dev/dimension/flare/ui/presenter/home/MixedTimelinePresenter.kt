@@ -14,6 +14,7 @@ public class MixedTimelinePresenter(
 ) : TimelinePresenter(),
     KoinComponent {
     private val database: CacheDatabase by inject()
+    override val useDbKeyInItemKey: Boolean = true
     override val loader: Flow<BaseTimelineLoader>
         get() =
             combine(subTimelinePresenter.map { it.loader }) {

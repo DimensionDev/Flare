@@ -92,7 +92,7 @@ internal interface TimelineResources {
         @Query("since_id") since_id: String? = null,
         @Query("min_id") min_id: String? = null,
         @Query("limit") limit: Int? = null,
-    ): List<Status>
+    ): Response<List<Status>>
 
     @GET("api/v1/favourites")
     suspend fun favorites(
@@ -100,5 +100,5 @@ internal interface TimelineResources {
         @Query("since_id") since_id: String? = null,
         @Query("min_id") min_id: String? = null,
         @Query("limit") limit: Int? = null,
-    ): List<Status>
+    ): Response<List<Status>>
 }

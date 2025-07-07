@@ -326,7 +326,7 @@ internal fun allTabsPresenter(filterIsTimeline: Boolean = false): AllTabsState =
                                 remember(user.key) {
                                     (
                                         TimelineTabItem.defaultPrimary(user) +
-                                            TimelineTabItem.defaultSecondary(
+                                            TimelineTabItem.secondaryFor(
                                                 user,
                                             )
                                     ).let {
@@ -360,7 +360,7 @@ internal fun allTabsPresenter(filterIsTimeline: Boolean = false): AllTabsState =
 
         object : AllTabsState {
             override val defaultTabs =
-                TimelineTabItem.default
+                TimelineTabItem.mainSidePanel
                     .let {
                         if (filterIsTimeline) {
                             it.filterIsInstance<TimelineTabItem>()

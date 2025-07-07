@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -160,6 +161,7 @@ internal fun HomeTimelineScreen(
                                     state.tabState.onSuccess { tabs ->
                                         tabs.forEachIndexed { index, tab ->
                                             LeadingIconTab(
+                                                modifier = Modifier.clip(CircleShape),
                                                 selectedContentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                                                 unselectedContentColor = LocalContentColor.current,
                                                 selected = index == pagerState.currentPage,

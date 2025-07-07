@@ -12,6 +12,7 @@ import dev.dimension.flare.ui.presenter.home.TimelinePresenter
 import dev.dimension.flare.ui.presenter.list.ListTimelinePresenter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -152,6 +153,33 @@ public sealed interface TimelineTabItem : TabItem {
                             icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
                         ),
                 ),
+                DiscoverTabItem(
+                    account = AccountType.Active,
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Discover),
+                            icon = IconType.Material(IconType.Material.MaterialIcon.Search),
+                        ),
+                ),
+            )
+        public val mainSidePanel: ImmutableList<TabItem> =
+            persistentListOf(
+                HomeTimelineTabItem(
+                    account = AccountType.Active,
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
+                            icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                        ),
+                ),
+                NotificationTabItem(
+                    account = AccountType.Active,
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Notifications),
+                            icon = IconType.Material(IconType.Material.MaterialIcon.Notification),
+                        ),
+                ),
                 RssTabItem(
                     metaData =
                         TabMetaData(
@@ -206,7 +234,29 @@ public sealed interface TimelineTabItem : TabItem {
                 PlatformType.VVo -> vvo(user.key)
             }
 
-        public fun defaultSecondary(user: UiUserV2): ImmutableList<TabItem> =
+        public fun defaultSecondary(user: UiUserV2): ImmutableList<TabItem> {
+            val result =
+                listOf(
+                    RssTabItem(
+                        account = AccountType.Guest,
+                        metaData =
+                            TabMetaData(
+                                title = TitleType.Localized(TitleType.Localized.LocalizedKey.Rss),
+                                icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+                            ),
+                    ),
+                ) +
+                    when (user.platformType) {
+                        PlatformType.Mastodon -> defaultMastodonSecondaryItems(user.key)
+                        PlatformType.Misskey -> defaultMisskeySecondaryItems(user.key)
+                        PlatformType.Bluesky -> defaultBlueskySecondaryItems(user.key)
+                        PlatformType.xQt -> defaultXqtSecondaryItems(user.key)
+                        PlatformType.VVo -> defaultVVOSecondaryItems(user.key)
+                    }
+            return result.toImmutableList()
+        }
+
+        public fun secondaryFor(user: UiUserV2): ImmutableList<TabItem> =
             when (user.platformType) {
                 PlatformType.Mastodon -> defaultMastodonSecondaryItems(user.key)
                 PlatformType.Misskey -> defaultMisskeySecondaryItems(user.key)

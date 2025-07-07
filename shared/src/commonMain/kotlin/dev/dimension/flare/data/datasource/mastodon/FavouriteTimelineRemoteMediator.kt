@@ -8,6 +8,7 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
+import dev.dimension.flare.data.network.mastodon.api.model.MastodonPaging
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
@@ -40,25 +41,26 @@ internal class FavouriteTimelineRemoteMediator(
                 }
 
                 LoadType.APPEND -> {
-                    val lastItem =
-                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
+                    val lastKey =
+                        database.pagingTimelineDao().getPagingKey(pagingKey)?.nextKey
                             ?: return Result(
                                 endOfPaginationReached = true,
                             )
                     service.favorites(
                         limit = state.config.pageSize,
-                        max_id = lastItem.timeline.statusKey.id,
+                        max_id = lastKey,
                     )
                 }
-            }
+            }.let { MastodonPaging.from(it) }
 
         return Result(
-            endOfPaginationReached = response.isEmpty(),
+            endOfPaginationReached = response.isEmpty() || response.next == null,
             data =
                 response.toDbPagingTimeline(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                 ),
+            nextKey = response.next,
         )
     }
 }

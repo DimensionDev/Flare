@@ -31,6 +31,14 @@ internal data class DbPagingTimeline(
     val _id: String = Uuid.random().toString(),
 )
 
+@Entity
+internal data class DbPagingKey(
+    @PrimaryKey
+    val pagingKey: String,
+    val nextKey: String? = null,
+    val prevKey: String? = null,
+)
+
 internal data class DbPagingTimelineWithStatus(
     @Embedded
     val timeline: DbPagingTimeline,

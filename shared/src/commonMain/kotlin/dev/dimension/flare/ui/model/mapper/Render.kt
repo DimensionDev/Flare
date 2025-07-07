@@ -33,7 +33,7 @@ internal fun DbPagingTimelineWithStatus.render(
                 status.references.associate { it.reference.referenceType to it.status.data.content },
         ).let {
             if (useDbKey) {
-                it.copy(dbKey = timeline._id)
+                it.copy(dbKey = timeline.accountType.toString())
             } else {
                 it
             }

@@ -25,7 +25,7 @@ The ultimate next generation* open-sourced AI powered decentralized social netwo
 
 ## Roadmap
 Here're some features we're planning to implement in the future.
- - [ ] Mixed timeline
+ - [x] Mixed timeline
  - [ ] AI powered features
    - [x] Translation
    - [x] Summary

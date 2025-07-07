@@ -45,7 +45,7 @@ struct TimelineViewSwiftUIV3: View {
                 }
             }
             .scrollPosition(id: $scrolledID)
-            .background(theme.secondaryBackgroundColor)
+//            .background(theme.secondaryBackgroundColor)
             .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
                 // FlareLog.debug("TimelineV3 scroll offset: \(geometry.contentOffset)")
                 geometry
@@ -59,7 +59,7 @@ struct TimelineViewSwiftUIV3: View {
                 await viewModel.setupDataSource(for: tab, using: store)
             }
         }
-        .background(theme.secondaryBackgroundColor)
+//        .background(theme.secondaryBackgroundColor)
         .onChange(of: scrollToTopTrigger) {
             let _ = FlareLog.debug("TimelineV3 ScrollToTop trigger for tab: \(tab.key)")
             guard isCurrentTab else {

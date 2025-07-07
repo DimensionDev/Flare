@@ -57,15 +57,12 @@ struct TimelineStatusViewV2: View {
     }
 
     var body: some View {
-        // 🔥 新增：Timeline级别敏感内容隐藏检查
         if shouldHideInTimeline {
             EmptyView()
         } else {
             timelineContent
         }
     }
-
-    // MARK: - 敏感内容隐藏逻辑
 
     /// Timeline级别敏感内容隐藏判断 - 对应V1版本StatusItemView.shouldHideInTimeline
     private var shouldHideInTimeline: Bool {
@@ -106,7 +103,7 @@ struct TimelineStatusViewV2: View {
 
         // 使用TimelineStatusView的结构
         VStack(alignment: .leading) {
-            Spacer().frame(height: 2)
+            Spacer().frame(height: 5)
 
             // 🔥 新增：转发头部显示 - 条件显示topMessage
             if let topMessage = item.topMessage {
@@ -191,7 +188,7 @@ struct TimelineStatusViewV2: View {
         let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
 
         // 构造MicroBlogKey - 需要从item.id和platformType构造
-        let statusKey = createMicroBlogKey(from: item)
+        let statusKey = item.createMicroBlogKey(from: item)
 
         FlareLog.debug("TimelineStatusView Navigate to status detail: \(item.id)")
         router.navigate(to: .statusDetail(
@@ -212,34 +209,6 @@ struct TimelineStatusViewV2: View {
             if let url = URL(string: card.url) {
                 openURL(url)
             }
-        }
-    }
-
-    // MARK: - 辅助方法
-
-    /// 从TimelineItem创建MicroBlogKey
-    private func createMicroBlogKey(from item: TimelineItem) -> MicroBlogKey {
-        // 从platformType推断host
-        let host = extractHostFromPlatformType(item.platformType)
-        return MicroBlogKey(id: item.id, host: host)
-    }
-
-    /// 从platformType提取host信息
-    private func extractHostFromPlatformType(_ platformType: String) -> String {
-        // 根据platformType推断默认host
-        switch platformType.lowercased() {
-        case "mastodon":
-            "mastodon.social" // 默认Mastodon实例
-        case "bluesky":
-            "bsky.app"
-        case "misskey":
-            "misskey.io"
-        case "xqt", "twitter":
-            "x.com"
-        case "vvo":
-            "weibo.com"
-        default:
-            "unknown.host"
         }
     }
 

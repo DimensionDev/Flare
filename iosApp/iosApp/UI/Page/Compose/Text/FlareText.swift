@@ -39,8 +39,8 @@ public struct FlareText: View {
             MarkdownRenderer()
         case .flareText:
             FlareTextRenderer()
-        case .textViewMarkdown:
-            TextViewMarkdownRenderer()
+//        case .textViewMarkdown:
+//            TextViewMarkdownRenderer()
         case .emojiText:
             EmojiTextRenderer()
         }
@@ -87,14 +87,14 @@ public struct FlareText: View {
             }
     }
 
-    @ViewBuilder
-    private func TextViewMarkdownRenderer() -> some View {
-        TextViewMarkdown(
-            markdownText: markdownText,
-            style: style,
-            fontScale: theme.fontSizeScale
-        )
-    }
+//    @ViewBuilder
+//    private func TextViewMarkdownRenderer() -> some View {
+//        TextViewMarkdown(
+//            markdownText: markdownText,
+//            style: style,
+//            fontScale: theme.fontSizeScale
+//        )
+//    }
 
     @ViewBuilder
     private func EmojiTextRenderer() -> some View {

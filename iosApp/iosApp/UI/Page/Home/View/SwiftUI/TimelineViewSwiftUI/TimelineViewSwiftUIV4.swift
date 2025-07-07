@@ -49,7 +49,7 @@ struct TimelineViewSwiftUIV4: View {
                                 await viewModel.handleRefresh()
                             }
                         }
-                        .listRowBackground(theme.primaryBackgroundColor)
+                        //   .listRowBackground(theme.primaryBackgroundColor)
                         .listRowInsets(EdgeInsets())
 
                     case .empty:
@@ -65,7 +65,7 @@ struct TimelineViewSwiftUIV4: View {
                         .listRowInsets(EdgeInsets())
                 }
                 // .scrollPosition($scrollPosition) 实现不了
-                .background(theme.secondaryBackgroundColor)
+                // .background(theme.secondaryBackgroundColor)
                 .listStyle(.plain)
                 .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
                     // FlareLog.debug("TimelineV4 scroll offset: \(geometry.contentOffset)")
@@ -78,7 +78,7 @@ struct TimelineViewSwiftUIV4: View {
                     await viewModel.handleRefresh()
                 }
             }
-            .background(theme.secondaryBackgroundColor)
+            // .background(theme.secondaryBackgroundColor)
             .onChange(of: scrollToTopTrigger) { _, _ in
                 let _ = FlareLog.debug("TimelineV4 ScrollToTop trigger for tab: \(tab.key)")
                 guard isCurrentTab else { return }

@@ -189,13 +189,14 @@ struct FlareMenuView: View {
             .padding(.horizontal, 20)
             .padding(.top, 20)
 
-            Spacer()
+//            Spacer()
 
-            FloatingWindowControlPanel()
+//            FloatingWindowControlPanel()
 
             settingsButton
                 .padding(.horizontal, 20)
                 .padding(.bottom, 180)
+                .padding(.top, 20)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .onAppear {

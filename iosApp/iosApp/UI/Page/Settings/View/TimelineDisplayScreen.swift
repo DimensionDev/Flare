@@ -76,6 +76,27 @@ struct TimelineDisplayScreen: View {
                     })
                 }.listRowBackground(theme.primaryBackgroundColor)
 
+                Section("Timeline Display Type") {
+                    Picker(selection: Binding(get: {
+                        appSettings.appearanceSettings.timelineDisplayType
+                    }, set: { value in
+                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.timelineDisplayType, to: value))
+                    }), content: {
+                        ForEach(TimelineDisplayType.allCases, id: \.self) { type in
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(type.displayName)
+                                    .font(.body)
+                                Text(type.description)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .tag(type)
+                        }
+                    }, label: {
+                        Text("Timeline Display Type")
+                    })
+                }.listRowBackground(theme.primaryBackgroundColor)
+
                 // 界面元素设置
                 Section("Interface Elements") {
                     // 头像形状

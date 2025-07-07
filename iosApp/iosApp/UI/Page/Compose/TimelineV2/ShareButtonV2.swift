@@ -200,7 +200,7 @@ struct ShareButtonV2: View {
                 Button(action: {
                     showTranslation = true
                 }) {
-                    Label("Apple Translate UI", systemImage: "character.bubble")
+                    Label("System Translate", systemImage: "character.bubble")
                 }
             #endif
 
@@ -226,9 +226,9 @@ struct ShareButtonV2: View {
         } label: {
             HStack {
                 Spacer()
-                Image(asset: Asset.Image.Status.Toolbar.squareAndArrowUp)
+                Image(systemName: "square.and.arrow.up")
                     .renderingMode(.template)
-                    .foregroundColor(theme.labelColor)
+                    // .foregroundColor(theme.labelColor)
                     .font(.system(size: 16))
                 Spacer()
             }
@@ -266,8 +266,6 @@ struct ShareButtonV2: View {
         }
     }
 }
-
-// MARK: - V2版本的截图包装器
 
 struct StatusCaptureWrapperV2: View {
     let content: TimelineStatusViewV2

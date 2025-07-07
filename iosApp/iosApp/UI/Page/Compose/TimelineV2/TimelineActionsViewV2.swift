@@ -98,6 +98,14 @@ struct TimelineActionsViewV2: View {
                 }
                 .frame(maxWidth: .infinity)
 
+                // 4.  翻译
+//                Button(action: {
+//
+//                }) {
+//                    Label(" ", systemImage: "character.bubble")
+//                }
+//                .frame(maxWidth: .infinity)
+
                 // 5. 分享 - 使用ShareButtonV2
                 ShareButtonV2(
                     item: item,

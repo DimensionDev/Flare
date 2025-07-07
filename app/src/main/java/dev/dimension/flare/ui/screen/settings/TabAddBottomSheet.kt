@@ -7,18 +7,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
@@ -256,26 +255,17 @@ internal fun TabAddBottomSheet(
                                                             R.string.home_tab_antennas_title
                                                     }
                                                 }.map { stringResource(id = it) }
-                                    Row(
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    ButtonGroup(
+                                        overflowIndicator = {},
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally),
                                         modifier = Modifier.fillMaxWidth(),
                                     ) {
                                         items.forEachIndexed { index, text ->
-                                            if (selectedIndex == index) {
-                                                Button(
-                                                    onClick = { selectedIndex = index },
-                                                    modifier = Modifier.padding(4.dp),
-                                                ) {
-                                                    Text(text = text)
-                                                }
-                                            } else {
-                                                OutlinedButton(
-                                                    onClick = { selectedIndex = index },
-                                                    modifier = Modifier.padding(4.dp),
-                                                ) {
-                                                    Text(text = text)
-                                                }
-                                            }
+                                            toggleableItem(
+                                                checked = selectedIndex == index,
+                                                onCheckedChange = { selectedIndex = index },
+                                                label = text,
+                                            )
                                         }
                                     }
                                 }

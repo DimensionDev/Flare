@@ -4,12 +4,12 @@ import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.http.URLBuilder
 import io.ktor.http.encodeOAuth
-import kotlinx.datetime.Clock
 import okio.Buffer
 import okio.ByteString
 import okio.ByteString.Companion.encodeUtf8
 import okio.use
 import kotlin.random.Random
+import kotlin.time.Clock
 
 private const val OAUTH_CONSUMER_KEY = "oauth_consumer_key"
 private const val OAUTH_NONCE = "oauth_nonce"

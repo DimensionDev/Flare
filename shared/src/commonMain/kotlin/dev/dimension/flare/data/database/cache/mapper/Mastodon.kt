@@ -17,7 +17,7 @@ import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
 import dev.dimension.flare.ui.model.mapper.parseMastodonContent
 import dev.dimension.flare.ui.render.toUi
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 internal object Mastodon {
     suspend fun save(

@@ -34,7 +34,6 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Instant
 import moe.tlaster.mfm.parser.MFMParser
 import moe.tlaster.mfm.parser.tree.BoldNode
 import moe.tlaster.mfm.parser.tree.CashNode
@@ -55,6 +54,7 @@ import moe.tlaster.mfm.parser.tree.SearchNode
 import moe.tlaster.mfm.parser.tree.SmallNode
 import moe.tlaster.mfm.parser.tree.StrikeNode
 import moe.tlaster.mfm.parser.tree.UrlNode
+import kotlin.time.Instant
 
 internal fun Notification.render(
     accountKey: MicroBlogKey,

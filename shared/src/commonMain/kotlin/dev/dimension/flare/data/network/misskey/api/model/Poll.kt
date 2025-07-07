@@ -1,8 +1,8 @@
 package dev.dimension.flare.data.network.misskey.api.model
 
-import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 @Serializable
 internal data class Poll(

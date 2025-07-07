@@ -7,8 +7,8 @@ import dev.dimension.flare.ui.render.toUi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 internal class Readability(
     private val scraper: NativeWebScraper,

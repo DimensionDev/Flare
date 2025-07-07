@@ -31,6 +31,7 @@ allprojects {
                     "-Xexpect-actual-classes",
                     "-Xconsistent-data-class-copy-visibility",
                     "-Xmulti-dollar-interpolation",
+                    "-opt-in=kotlin.time.ExperimentalTime",
                 )
             )
         }

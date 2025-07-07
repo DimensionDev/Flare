@@ -25,7 +25,7 @@ import dev.dimension.flare.ui.render.toUi
 import io.ktor.http.decodeURLPart
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 
 internal fun Status.render(
     accountKey: MicroBlogKey,

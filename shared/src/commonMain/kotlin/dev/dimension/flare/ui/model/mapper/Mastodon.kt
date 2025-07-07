@@ -37,7 +37,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 internal fun Notification.render(
     accountKey: MicroBlogKey,

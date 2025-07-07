@@ -28,7 +28,6 @@ struct TimelineActionsViewV2: View {
     @State private var displayBookmarkCount: Int = 0
     @State private var displayIsBookmarked: Bool = false
 
- 
     var body: some View {
         // 🔍 UI渲染日志 - 使用更明显的标识
 //        let _ = FlareLog.debug("TimelineActionsViewV2 RENDERING UI FOR ITEM: \(item.id)")
@@ -99,15 +98,14 @@ struct TimelineActionsViewV2: View {
                 }
                 .frame(maxWidth: .infinity)
 
-                
                 // 4.  翻译
 //                Button(action: {
-//                     
+//
 //                }) {
 //                    Label(" ", systemImage: "character.bubble")
 //                }
 //                .frame(maxWidth: .infinity)
-                
+
                 // 5. 分享 - 使用ShareButtonV2
                 ShareButtonV2(
                     item: item,

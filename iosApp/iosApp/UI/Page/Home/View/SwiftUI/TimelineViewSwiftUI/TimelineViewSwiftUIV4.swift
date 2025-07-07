@@ -40,7 +40,7 @@ struct TimelineViewSwiftUIV4: View {
                             presenter: viewModel.presenter,
                             onError: viewModel.handleError
                         )
-                       .listRowBackground(theme.primaryBackgroundColor)
+                        .listRowBackground(theme.primaryBackgroundColor)
                         .listRowInsets(EdgeInsets())
 
                     case let .error(error):
@@ -49,12 +49,12 @@ struct TimelineViewSwiftUIV4: View {
                                 await viewModel.handleRefresh()
                             }
                         }
-                            //   .listRowBackground(theme.primaryBackgroundColor)
+                        //   .listRowBackground(theme.primaryBackgroundColor)
                         .listRowInsets(EdgeInsets())
 
                     case .empty:
                         TimelineEmptyView()
-                                   .listRowBackground(theme.primaryBackgroundColor)
+                            .listRowBackground(theme.primaryBackgroundColor)
                             .listRowInsets(EdgeInsets())
                     }
 
@@ -65,7 +65,7 @@ struct TimelineViewSwiftUIV4: View {
                         .listRowInsets(EdgeInsets())
                 }
                 // .scrollPosition($scrollPosition) 实现不了
-                  // .background(theme.secondaryBackgroundColor)
+                // .background(theme.secondaryBackgroundColor)
                 .listStyle(.plain)
                 .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
                     // FlareLog.debug("TimelineV4 scroll offset: \(geometry.contentOffset)")

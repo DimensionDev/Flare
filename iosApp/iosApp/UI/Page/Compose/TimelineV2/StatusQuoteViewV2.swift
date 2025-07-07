@@ -9,14 +9,12 @@ import SwiftDate
 import SwiftUI
 import UIKit
 
- 
 enum SwiftAccountType {
     case specific(accountKey: String)
     case active
     case guest
 }
 
- 
 struct SwiftMicroBlogKey {
     let id: String
     let host: String
@@ -37,7 +35,7 @@ struct StatusQuoteViewV2: View {
         VStack {
             ForEach(0 ..< quotes.count, id: \.self) { index in
                 let quote = quotes[index]
-                QuotedStatusV2(item: quote, onMediaClick: onMediaClick)  
+                QuotedStatusV2(item: quote, onMediaClick: onMediaClick)
                     .foregroundColor(.gray)
 
                 if index != quotes.count - 1 {
@@ -146,12 +144,10 @@ struct QuotedStatusV2: View {
     }
 
     private func handleMediaClick(_ index: Int, _ media: Media) {
-     
         PhotoBrowserManagerV2.shared.showPhotoBrowser(
             media: media,
             images: item.images,
             initialIndex: index
         )
     }
- 
 }

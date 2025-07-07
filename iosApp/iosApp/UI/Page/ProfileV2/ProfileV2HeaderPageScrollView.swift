@@ -1,20 +1,21 @@
 
 import SwiftUI
+
 //
-//struct ProfileV2PageLabel: Identifiable {
+// struct ProfileV2PageLabel: Identifiable {
 //    var id: String = UUID().uuidString
 //    var title: String
 //    var symbolImage: String
-//}
+// }
 //
-//@resultBuilder
-//struct ProfileV2PageLabelBuilder {
+// @resultBuilder
+// struct ProfileV2PageLabelBuilder {
 //    static func buildBlock(_ components: ProfileV2PageLabel...) -> [ProfileV2PageLabel] {
 //        components.compactMap(\.self)
 //    }
-//}
+// }
 //
-//struct ProfileV2HeaderPageScrollView<Header: View, Pages: View>: View {
+// struct ProfileV2HeaderPageScrollView<Header: View, Pages: View>: View {
 //    private var displaysSymbols: Bool = false
 //    private var header: Header
 //    /// Labels(Tab Title or Tab Image)
@@ -247,11 +248,11 @@ import SwiftUI
 //            }
 //        }
 //    }
-//}
+// }
 //
 //// MARK: - ScrollGeometry Extension
 //
-//private extension ScrollGeometry {
+// private extension ScrollGeometry {
 //    init() {
 //        self.init(contentOffset: .zero, contentSize: .zero, contentInsets: .init(.zero), containerSize: .zero)
 //    }
@@ -263,4 +264,4 @@ import SwiftUI
 //    var offsetX: CGFloat {
 //        contentOffset.x + contentInsets.leading
 //    }
-//}
+// }

@@ -32,6 +32,3 @@ extension String {
         hasPrefix(prefix) ? String(dropFirst(prefix.count)) : self
     }
 }
-
- 
-

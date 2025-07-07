@@ -19,7 +19,7 @@ struct AppearanceUIScreen: View {
                         StatusItemView(
                             data: success.data,
                             detailKey: nil
-                        ) .listRowInsets(EdgeInsets())
+                        ).listRowInsets(EdgeInsets())
                     }.allowsHitTesting(false)
                 }
 

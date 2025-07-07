@@ -68,7 +68,6 @@ struct StatusHeaderViewV2: View {
     }
 }
 
- 
 struct UserComponentV2: View {
     let user: User // 使用Swift User类型
     let topEndContent: TopEndContent? // 使用Swift TopEndContent类型
@@ -126,11 +125,8 @@ struct UserComponentV2: View {
         )
         .buttonStyle(.plain)
     }
-
- 
 }
 
- 
 struct StatusVisibilityComponentV2: View {
     let visibility: VisibilityType
 

@@ -41,7 +41,6 @@ struct StatusRetweetHeaderComponentV2: View {
         .buttonStyle(.plain)
     }
 
- 
     /// 处理转发头部点击事件
     private func handleTopMessageTap() {
         // 🔥 实现转发头部点击跳转到执行操作的用户页面
@@ -59,8 +58,6 @@ struct StatusRetweetHeaderComponentV2: View {
             userKey: userKey
         ))
     }
-
- 
 
     /// 根据图标类型获取对应的图标
     @ViewBuilder

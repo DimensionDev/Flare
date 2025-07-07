@@ -76,7 +76,6 @@ struct TimelineDisplayScreen: View {
                     })
                 }.listRowBackground(theme.primaryBackgroundColor)
 
-
                 Section("Timeline Display Type") {
                     Picker(selection: Binding(get: {
                         appSettings.appearanceSettings.timelineDisplayType

@@ -1,27 +1,26 @@
 import SwiftUI
 
-
 struct FloatingDisplayTypeButton: View {
-     @Binding var isVisible: Bool
-    
-     @Environment(\.appSettings) private var appSettings
+    @Binding var isVisible: Bool
+
+    @Environment(\.appSettings) private var appSettings
     @Environment(FlareTheme.self) private var theme
-    
-     private var currentDisplayType: TimelineDisplayType {
+
+    private var currentDisplayType: TimelineDisplayType {
         appSettings.appearanceSettings.timelineDisplayType
     }
-    
-     private var nextDisplayType: TimelineDisplayType {
+
+    private var nextDisplayType: TimelineDisplayType {
         switch currentDisplayType {
         case .timeline:
-            return .mediaWaterfall
+            .mediaWaterfall
         case .mediaWaterfall:
-            return .mediaCardWaterfall
+            .mediaCardWaterfall
         case .mediaCardWaterfall:
-            return .timeline
+            .timeline
         }
     }
-    
+
     var body: some View {
         Group {
             if isVisible {
@@ -35,7 +34,7 @@ struct FloatingDisplayTypeButton: View {
             }
         }
     }
-    
+
     private var buttonContent: some View {
         Image(systemName: currentDisplayType.systemImage)
             .font(.system(size: FloatingButtonConfig.iconSize, weight: .medium))
@@ -52,20 +51,19 @@ struct FloatingDisplayTypeButton: View {
                     )
             )
     }
-    
-     private func switchDisplayType() {
+
+    private func switchDisplayType() {
         FlareLog.debug("FloatingDisplayTypeButton 切换显示模式: \(currentDisplayType.displayName) -> \(nextDisplayType.displayName)")
-        
-         let newSettings = appSettings.appearanceSettings.changing(
+
+        let newSettings = appSettings.appearanceSettings.changing(
             path: \.timelineDisplayType,
             to: nextDisplayType
         )
         appSettings.update(newValue: newSettings)
-        
-         let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+
+        let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
         impactFeedback.impactOccurred()
-        
+
         FlareLog.debug("FloatingDisplayTypeButton 显示模式已切换到: \(nextDisplayType.displayName)")
     }
 }
-

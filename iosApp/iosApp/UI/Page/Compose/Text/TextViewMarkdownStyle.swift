@@ -1,7 +1,7 @@
-//import MarkdownView
-//import UIKit
+// import MarkdownView
+// import UIKit
 //
-//public enum TextViewMarkdownStyle {
+// public enum TextViewMarkdownStyle {
 //    public static func TextViewMarkdownStyleTheme(using style: FlareTextStyle.Style, fontScale: Double) -> MarkdownTheme {
 //        let baseFontSize = style.font.pointSize
 //
@@ -52,12 +52,12 @@
 //
 //        return theme
 //    }
-//}
+// }
 //
-//extension FlareTextStyle.Style {
+// extension FlareTextStyle.Style {
 //    func isEqual(to other: FlareTextStyle.Style) -> Bool {
 //        font.isEqual(other.font) &&
 //            textColor.isEqual(other.textColor) &&
 //            linkColor.isEqual(other.linkColor)
 //    }
-//}
+// }

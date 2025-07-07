@@ -54,7 +54,3 @@ private struct TimelineLoadingViewV2: View {
         .frame(maxWidth: .infinity, minHeight: 200)
     }
 }
-
- 
-
- 

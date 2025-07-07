@@ -227,7 +227,7 @@ struct ShareButtonV2: View {
             HStack {
                 Spacer()
                 Image(systemName: "square.and.arrow.up")
-                     .renderingMode(.template)
+                    .renderingMode(.template)
                     // .foregroundColor(theme.labelColor)
                     .font(.system(size: 16))
                 Spacer()
@@ -267,7 +267,6 @@ struct ShareButtonV2: View {
     }
 }
 
- 
 struct StatusCaptureWrapperV2: View {
     let content: TimelineStatusViewV2
 

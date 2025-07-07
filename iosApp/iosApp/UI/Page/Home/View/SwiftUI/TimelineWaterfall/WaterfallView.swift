@@ -1,10 +1,8 @@
+import shared
 import SwiftUI
 import WaterfallGrid
-import shared
-
 
 struct WaterfallView: View {
-
     let tab: FLTabItem
     @ObservedObject var store: AppBarTabSettingStore
     @Binding var scrollPositionID: String?
@@ -13,15 +11,11 @@ struct WaterfallView: View {
     @Binding var showFloatingButton: Bool
     let displayType: TimelineDisplayType
 
-
     @Environment(FlareTheme.self) private var theme
     @Environment(FlareRouter.self) private var router
 
-
     @State private var viewModel = TimelineViewModel()
     @State private var scrolledID: String?
-
-
 
     var body: some View {
         switch viewModel.timelineState {
@@ -64,7 +58,6 @@ struct WaterfallView: View {
     }
 }
 
-
 struct WaterfallItemsView: View {
     let items: [TimelineItem]
     let displayType: TimelineDisplayType
@@ -81,25 +74,24 @@ struct WaterfallItemsView: View {
     @Environment(FlareTheme.self) private var theme
     @Environment(FlareRouter.self) private var router
 
-     private var waterfallItems: [WaterfallItem] {
+    private var waterfallItems: [WaterfallItem] {
         FlareLog.debug("WaterfallItemsView Converting \(items.count) timeline items to waterfall items")
 
-        let result: [WaterfallItem]
-        switch displayType {
+        let result: [WaterfallItem] = switch displayType {
         case .mediaWaterfall:
-            result = createMediaWaterfallItems(from: items)
+            createMediaWaterfallItems(from: items)
         case .mediaCardWaterfall:
-            result = createCardWaterfallItems(from: items)
+            createCardWaterfallItems(from: items)
         case .timeline:
-            result = []
+            []
         }
 
         FlareLog.debug("WaterfallItemsView Converted to \(result.count) waterfall items")
         return result
     }
 
-     private var allWaterfallMedias: [Media] {
-        return waterfallItems.map { $0.displayMedia }
+    private var allWaterfallMedias: [Media] {
+        waterfallItems.map(\.displayMedia)
     }
 
     var body: some View {
@@ -109,10 +101,10 @@ struct WaterfallItemsView: View {
                     WaterfallItemView(
                         item: item,
                         onTap: { action in
-                             let waterfallAction: ClickAction
+                            let waterfallAction: ClickAction
                             switch action {
-                            case .showMediaPreview(let media, _, _):
-                                 let waterfallIndex = allWaterfallMedias.firstIndex { $0.url == media.url } ?? 0
+                            case let .showMediaPreview(media, _, _):
+                                let waterfallIndex = allWaterfallMedias.firstIndex { $0.url == media.url } ?? 0
                                 waterfallAction = .showWaterfallMediaPreview(
                                     media: media,
                                     allWaterfallMedias: allWaterfallMedias,
@@ -147,15 +139,12 @@ struct WaterfallItemsView: View {
         .scrollPosition(id: $scrolledID)
         .background(theme.secondaryBackgroundColor)
         .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
-
             geometry
         } action: { _, newValue in
-           viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $showFloatingButton)
+            viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $showFloatingButton)
             // handleScrollOffsetChange(newValue.contentOffset.y)
         }
-        .refreshable {
-
-        }
+        .refreshable {}
         .onChange(of: scrollToTopTrigger) { _, _ in
             guard isCurrentTab else { return }
 
@@ -166,7 +155,7 @@ struct WaterfallItemsView: View {
             }
         }
     }
- 
+
     private func createMediaWaterfallItems(from items: [TimelineItem]) -> [WaterfallItem] {
         var waterfallItems: [WaterfallItem] = []
 
@@ -188,9 +177,8 @@ struct WaterfallItemsView: View {
         return waterfallItems
     }
 
-
     private func createCardWaterfallItems(from items: [TimelineItem]) -> [WaterfallItem] {
-        return items.compactMap { item in
+        items.compactMap { item in
             guard let firstMedia = item.images.first else { return nil }
 
             return WaterfallItem(
@@ -204,26 +192,23 @@ struct WaterfallItemsView: View {
     }
 
     /// 处理点击行为
-    private func handleClickAction(_ action: ClickAction, allWaterfallMedias: [Media], waterfallItems: [WaterfallItem]) {
+    private func handleClickAction(_ action: ClickAction, allWaterfallMedias _: [Media], waterfallItems _: [WaterfallItem]) {
         switch action {
-        case .showMediaPreview(let media, let allMedias, let index):
-
+        case let .showMediaPreview(media, allMedias, index):
             PhotoBrowserManagerV2.shared.showPhotoBrowser(
                 media: media,
                 images: allMedias,
                 initialIndex: index
             )
 
-        case .showWaterfallMediaPreview(let media, let allWaterfallMedias, let index):
-
+        case let .showWaterfallMediaPreview(media, allWaterfallMedias, index):
             PhotoBrowserManagerV2.shared.showPhotoBrowser(
                 media: media,
                 images: allWaterfallMedias,
                 initialIndex: index
             )
 
-        case .showTimelineDetail(let timelineItem):
-
+        case let .showTimelineDetail(timelineItem):
             let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
             let statusKey = timelineItem.createMicroBlogKey(from: timelineItem)
 
@@ -235,7 +220,6 @@ struct WaterfallItemsView: View {
         }
     }
 
- 
     private func handleLoadMore() {
         guard let presenter else { return }
 
@@ -253,7 +237,6 @@ struct WaterfallItemsView: View {
                 if nextPageIndex < currentItemCount {
                     FlareLog.debug("WaterfallItemsView Safe next page load: requesting index=\(nextPageIndex), total=\(currentItemCount)")
 
-
                     _ = pagingState.get(index: Int32(nextPageIndex))
                     FlareLog.debug("WaterfallItemsView Load more request sent")
                 } else {
@@ -265,6 +248,3 @@ struct WaterfallItemsView: View {
         }
     }
 }
-
-
- 

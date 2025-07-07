@@ -125,11 +125,8 @@ struct HomeTabViewContentV2: View {
                 }
             }
 
-
-            if router.selectedTab == .timeline {
+            if router.selectedTab == .timeline, router.navigationDepth == 0 {
                 VStack(spacing: 12) {
-                   
-
                     if !appSettings.appearanceSettings.hideScrollToTopButton {
                         FloatingScrollToTopButton(
                             isVisible: $showFloatingButton,
@@ -138,7 +135,6 @@ struct HomeTabViewContentV2: View {
                     }
 
                     FloatingDisplayTypeButton(isVisible: .constant(true))
-
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                 .padding(.trailing, FloatingButtonConfig.screenPadding)
@@ -155,4 +151,3 @@ struct HomeTabViewContentV2: View {
         }
     }
 }
-

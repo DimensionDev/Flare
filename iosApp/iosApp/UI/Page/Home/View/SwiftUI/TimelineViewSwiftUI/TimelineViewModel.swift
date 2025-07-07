@@ -119,7 +119,6 @@ class TimelineViewModel {
             showFloatingButton.wrappedValue = shouldShow
         }
     }
-    
 }
 
 struct TimelineLoadingView: View {
@@ -154,5 +153,3 @@ struct TimelineEmptyView: View {
         .padding()
     }
 }
-
-

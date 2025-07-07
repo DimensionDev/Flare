@@ -57,14 +57,13 @@ struct TimelineStatusViewV2: View {
     }
 
     var body: some View {
-         if shouldHideInTimeline {
+        if shouldHideInTimeline {
             EmptyView()
         } else {
             timelineContent
         }
     }
 
- 
     /// Timeline级别敏感内容隐藏判断 - 对应V1版本StatusItemView.shouldHideInTimeline
     private var shouldHideInTimeline: Bool {
         let sensitiveSettings = appSettings.appearanceSettings.sensitiveContentSettings
@@ -212,7 +211,6 @@ struct TimelineStatusViewV2: View {
             }
         }
     }
- 
 
     private func handleTimelineAction(_ actionType: TimelineActionType, item: TimelineItem, at index: Int) {
         FlareLog.debug("TimelineView_v2 Handling action \(actionType) for item: \(item.id) at index: \(index)")

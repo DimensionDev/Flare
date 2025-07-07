@@ -1,18 +1,19 @@
 import SwiftUI
+
 //
-//struct PageLabel {
+// struct PageLabel {
 //    var title: String
 //    var symbolImage: String
-//}
+// }
 //
-//@resultBuilder
-//struct PageLabelBuilder {
+// @resultBuilder
+// struct PageLabelBuilder {
 //    static func buildBlock(_ components: PageLabel...) -> [PageLabel] {
 //        components.compactMap(\.self)
 //    }
-//}
+// }
 //
-//struct HeaderPageScrollView<Header: View, Pages: View>: View {
+// struct HeaderPageScrollView<Header: View, Pages: View>: View {
 //    var displaysSymbols: Bool = false
 //    /// Header View
 //    var header: Header
@@ -268,9 +269,9 @@ import SwiftUI
 //            }
 //        }
 //    }
-//}
+// }
 //
-//private extension ScrollGeometry {
+// private extension ScrollGeometry {
 //    init() {
 //        self.init(contentOffset: .zero, contentSize: .zero, contentInsets: .init(.zero), containerSize: .zero)
 //    }
@@ -282,4 +283,4 @@ import SwiftUI
 //    var offsetX: CGFloat {
 //        contentOffset.x + contentInsets.leading
 //    }
-//}
+// }

@@ -23,12 +23,9 @@ struct StatusDetailScreen: View {
                     data: state.listState,
                     detailKey: statusKey
                 )
-                // .padding(.horizontal, 16)
+                .listRowBackground(theme.primaryBackgroundColor)
             }
             .listStyle(.plain)
-            // 列表背景色
-            .scrollContentBackground(.hidden)
-            .background(theme.primaryBackgroundColor)
             .refreshable {
                 try? await state.refresh()
             }
@@ -45,12 +42,7 @@ struct StatusDetailScreen: View {
                        router.navigationDepth)
             }
         }
-        // 确保同时传递router和menuState
         .environment(router)
         .environment(menuState)
-        // 使用新的导航手势修饰符
-        // .navigationBarTitleDisplayMode(.inline)
-        // .toolbarBackground(Colors.Background.swiftUIPrimary, for: .navigationBar)
-        // .toolbarBackground(.visible, for: .navigationBar)
     }
 }

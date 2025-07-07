@@ -3,7 +3,7 @@ import Kingfisher
 import SwiftUI
 
 struct WaterfallItemView: View {
-     let item: WaterfallItem
+    let item: WaterfallItem
 
     let onTap: (ClickAction) -> Void
 
@@ -20,7 +20,6 @@ struct WaterfallItemView: View {
         let imageHeight = columnWidth / item.aspectRatio
         return CGSize(width: columnWidth, height: imageHeight)
     }
-
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -43,18 +42,16 @@ struct WaterfallItemView: View {
         .onAppear {
             FlareLog.debug("WaterfallItemView onAppear: id=\(item.id), aspectRatio=\(item.aspectRatio), imageSize=\(imageSize), previewURL=\(item.previewURL?.absoluteString ?? "nil")")
 
-        if let url = item.previewURL {
-            FlareLog.debug("WaterfallItemView checking URL: \(url.absoluteString)")
-        } else {
-            FlareLog.warning("WaterfallItemView missing previewURL for item: \(item.id)")
-        }
+            if let url = item.previewURL {
+                FlareLog.debug("WaterfallItemView checking URL: \(url.absoluteString)")
+            } else {
+                FlareLog.warning("WaterfallItemView missing previewURL for item: \(item.id)")
+            }
         }
     }
 
-
     private var imageContentView: some View {
         ZStack {
-
             KFImage(item.previewURL)
                 .setProcessor(DownsamplingImageProcessor(size: CGSize(width: imageSize.width * 2, height: imageSize.height * 2)))
                 .scaleFactor(UIScreen.main.scale)
@@ -176,16 +173,13 @@ struct WaterfallItemView: View {
     @ViewBuilder
     private var backgroundView: some View {
         if item.shouldShowText {
-
             RoundedRectangle(cornerRadius: 12)
                 .fill(theme.primaryBackgroundColor)
                 .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
         } else {
-
             Color.clear
         }
     }
-
 
     private var shouldShowSensitiveMask: Bool {
         item.sourceTimelineItem.sensitive &&

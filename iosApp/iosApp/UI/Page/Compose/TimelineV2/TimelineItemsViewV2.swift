@@ -52,5 +52,3 @@ struct TimelineItemsViewV2: View {
         }
     }
 }
-
- 

@@ -17,9 +17,7 @@ struct TimelineViewSwiftUI: View {
         let displayType: TimelineDisplayType = appSettings.appearanceSettings.timelineDisplayType
 
         Group {
-
             switch (versionManager.currentVersion, displayType) {
-
             case (.v3_0, .timeline):
                 TimelineViewSwiftUIV3(
                     tab: tab,
@@ -29,6 +27,7 @@ struct TimelineViewSwiftUI: View {
                     isCurrentTab: isCurrentTab,
                     showFloatingButton: $showFloatingButton
                 )
+
             case (.v4_0, .timeline):
                 TimelineViewSwiftUIV4(
                     tab: tab,
@@ -58,6 +57,7 @@ struct TimelineViewSwiftUI: View {
                     isCurrentTab: isCurrentTab,
                     showFloatingButton: $showFloatingButton
                 )
+
             case (.v1_1, .timeline):
                 TimelineViewSwiftUIV1(
                     tab: tab,
@@ -67,6 +67,7 @@ struct TimelineViewSwiftUI: View {
                     isCurrentTab: isCurrentTab,
                     showFloatingButton: $showFloatingButton
                 )
+
             case (.v2_0, .timeline):
                 TimelineViewSwiftUIV2(
                     tab: tab,
@@ -91,6 +92,4 @@ struct TimelineViewSwiftUI: View {
             FlareLog.debug("TimelineViewSwiftUI Received version change notification")
         }
     }
-
-
 }

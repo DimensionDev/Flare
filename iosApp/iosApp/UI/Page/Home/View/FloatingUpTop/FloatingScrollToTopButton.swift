@@ -1,10 +1,7 @@
 import SwiftUI
 
-
 struct FloatingScrollToTopButton: View {
-
     @Binding var isVisible: Bool
-
 
     @Binding var scrollToTopTrigger: Bool
 

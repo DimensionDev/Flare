@@ -1,9 +1,9 @@
-//import MarkdownParser
-//import MarkdownView
-//import SwiftUI
-//import UIKit
+// import MarkdownParser
+// import MarkdownView
+// import SwiftUI
+// import UIKit
 //
-//struct TextViewMarkdown: UIViewRepresentable {
+// struct TextViewMarkdown: UIViewRepresentable {
 //    let markdownText: String
 //    let style: FlareTextStyle.Style
 //    let fontScale: CGFloat
@@ -32,9 +32,9 @@
 //    class Coordinator {
 //        var lastMarkdownText: String = ""
 //    }
-//}
+// }
 //
-//class MarkdownTextViewWrapper: UIView {
+// class MarkdownTextViewWrapper: UIView {
 //    private let markdownTextView = MarkdownTextView()
 //    private var currentMarkdownText: String = ""
 //    private var currentStyle: FlareTextStyle.Style?
@@ -191,4 +191,4 @@
 //            }
 //        }
 //    }
-//}
+// }

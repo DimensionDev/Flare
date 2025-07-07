@@ -1,6 +1,7 @@
 import SwiftUI
+
 //
-//struct ProfileV2Screen: View {
+// struct ProfileV2Screen: View {
 //    let toProfileMedia: (MicroBlogKey) -> Void
 //    let accountType: AccountType
 //    let userKey: MicroBlogKey?
@@ -41,9 +42,9 @@ import SwiftUI
 //        let tabName = index < tabNames.count ? tabNames[index] : "Unknown"
 //        print("✅ [Profile V2] \(tabName) tab refreshed (count: \(refreshCount))")
 //    }
-//}
+// }
 //
-//struct ProfileV2HeaderView: View {
+// struct ProfileV2HeaderView: View {
 //    var body: some View {
 //        VStack(spacing: 16) {
 //            Circle()
@@ -95,9 +96,9 @@ import SwiftUI
 //        )
 //        .padding(.horizontal)
 //    }
-//}
+// }
 //
-//struct ProfileV2StatView: View {
+// struct ProfileV2StatView: View {
 //    let title: String
 //    let count: String
 //
@@ -112,9 +113,9 @@ import SwiftUI
 //                .foregroundColor(.secondary)
 //        }
 //    }
-//}
+// }
 //
-//struct ProfileV2PostsTabView: View {
+// struct ProfileV2PostsTabView: View {
 //    var body: some View {
 //        ProfileV2DummyTabView(
 //            color: .red,
@@ -123,9 +124,9 @@ import SwiftUI
 //            count: 20
 //        )
 //    }
-//}
+// }
 //
-//struct ProfileV2TimelineTabView: View {
+// struct ProfileV2TimelineTabView: View {
 //    var body: some View {
 //        ProfileV2DummyTabView(
 //            color: .green,
@@ -134,9 +135,9 @@ import SwiftUI
 //            count: 15
 //        )
 //    }
-//}
+// }
 //
-//struct ProfileV2MediaTabView: View {
+// struct ProfileV2MediaTabView: View {
 //    var body: some View {
 //        ProfileV2DummyTabView(
 //            color: .orange,
@@ -145,9 +146,9 @@ import SwiftUI
 //            count: 10
 //        )
 //    }
-//}
+// }
 //
-//struct ProfileV2DummyTabView: View {
+// struct ProfileV2DummyTabView: View {
 //    let color: Color
 //    let title: String
 //    let icon: String
@@ -193,4 +194,4 @@ import SwiftUI
 //        }
 //        .padding(.horizontal)
 //    }
-//}
+// }

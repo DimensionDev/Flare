@@ -41,8 +41,7 @@ struct StatusRetweetHeaderComponentV2: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - 私有方法
-
+ 
     /// 处理转发头部点击事件
     private func handleTopMessageTap() {
         // 🔥 实现转发头部点击跳转到执行操作的用户页面
@@ -52,7 +51,7 @@ struct StatusRetweetHeaderComponentV2: View {
         }
 
         let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
-        let userKey = createMicroBlogKey(from: user)
+        let userKey = user.createMicroBlogKey(from: user)
 
         FlareLog.debug("StatusRetweetHeaderV2 Navigate to profile: \(user.key)")
         router.navigate(to: .profile(
@@ -61,28 +60,7 @@ struct StatusRetweetHeaderComponentV2: View {
         ))
     }
 
-    /// 从User创建MicroBlogKey
-    private func createMicroBlogKey(from user: User) -> MicroBlogKey {
-        // User.key已经是String格式的ID，需要推断host
-        let host = extractHostFromHandle(user.handle)
-        return MicroBlogKey(id: user.key, host: host)
-    }
-
-    /// 从用户handle提取host信息
-    private func extractHostFromHandle(_ handle: String) -> String {
-        // handle格式通常是 @username@host 或 @username
-        if handle.contains("@") {
-            let components = handle.components(separatedBy: "@")
-            if components.count >= 3 {
-                // @username@host 格式
-                return components[2]
-            } else if components.count == 2 {
-                // @username 格式，需要根据其他信息推断
-                return "mastodon.social" // 默认值
-            }
-        }
-        return "unknown.host"
-    }
+ 
 
     /// 根据图标类型获取对应的图标
     @ViewBuilder

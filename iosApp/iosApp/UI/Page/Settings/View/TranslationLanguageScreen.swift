@@ -46,6 +46,7 @@ struct TranslationLanguageScreen: View {
                     Text("Auto translate non-current language content")
                 }
             }.listRowBackground(theme.primaryBackgroundColor)
+             .disabled(true)
 
             // 语言管理设置 (iOS 18+)
             if #available(iOS 18, *) {

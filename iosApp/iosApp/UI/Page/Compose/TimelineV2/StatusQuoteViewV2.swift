@@ -9,16 +9,14 @@ import SwiftDate
 import SwiftUI
 import UIKit
 
-// MARK: - Swift原生AccountType定义
-
+ 
 enum SwiftAccountType {
     case specific(accountKey: String)
     case active
     case guest
 }
 
-// MARK: - Swift原生MicroBlogKey定义
-
+ 
 struct SwiftMicroBlogKey {
     let id: String
     let host: String
@@ -30,8 +28,8 @@ struct SwiftMicroBlogKey {
 }
 
 struct StatusQuoteViewV2: View {
-    let quotes: [TimelineItem] // 使用Swift TimelineItem类型
-    let onMediaClick: (Int, Media) -> Void // 使用Swift Media类型
+    let quotes: [TimelineItem]
+    let onMediaClick: (Int, Media) -> Void
 
     var body: some View {
         Spacer().frame(height: 10)
@@ -39,7 +37,7 @@ struct StatusQuoteViewV2: View {
         VStack {
             ForEach(0 ..< quotes.count, id: \.self) { index in
                 let quote = quotes[index]
-                QuotedStatusV2(item: quote, onMediaClick: onMediaClick) // 使用item参数
+                QuotedStatusV2(item: quote, onMediaClick: onMediaClick)  
                     .foregroundColor(.gray)
 
                 if index != quotes.count - 1 {
@@ -71,7 +69,7 @@ struct QuotedStatusV2: View {
         Button(action: {
             // 🔥 实现引用推文点击跳转到详情页面
             let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
-            let statusKey = createMicroBlogKey(from: item)
+            let statusKey = item.createMicroBlogKey(from: item)
 
             FlareLog.debug("QuotedStatus Navigate to status detail: \(item.id)")
             router.navigate(to: .statusDetail(
@@ -148,40 +146,12 @@ struct QuotedStatusV2: View {
     }
 
     private func handleMediaClick(_ index: Int, _ media: Media) {
-        // 使用Swift Media类型
-        // Show preview
+     
         PhotoBrowserManagerV2.shared.showPhotoBrowser(
             media: media,
-            images: item.images, // 使用item.images，已经是Swift Media数组
+            images: item.images,
             initialIndex: index
         )
     }
-
-    // MARK: - 辅助方法
-
-    /// 从TimelineItem创建MicroBlogKey
-    private func createMicroBlogKey(from item: TimelineItem) -> MicroBlogKey {
-        // 从platformType推断host
-        let host = extractHostFromPlatformType(item.platformType)
-        return MicroBlogKey(id: item.id, host: host)
-    }
-
-    /// 从platformType提取host信息
-    private func extractHostFromPlatformType(_ platformType: String) -> String {
-        // 根据platformType推断默认host
-        switch platformType.lowercased() {
-        case "mastodon":
-            "mastodon.social" // 默认Mastodon实例
-        case "bluesky":
-            "bsky.app"
-        case "misskey":
-            "misskey.io"
-        case "xqt", "twitter":
-            "x.com"
-        case "vvo":
-            "weibo.com"
-        default:
-            "unknown.host"
-        }
-    }
+ 
 }

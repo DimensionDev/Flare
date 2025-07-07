@@ -5,9 +5,6 @@ import MarkdownUI
 import shared
 import SwiftUI
 
-// Generated
-// @_exported import Generated
-
 enum CommonProfileHeaderConstants {
     static let headerHeight: CGFloat = 200
     static let avatarSize: CGFloat = 60

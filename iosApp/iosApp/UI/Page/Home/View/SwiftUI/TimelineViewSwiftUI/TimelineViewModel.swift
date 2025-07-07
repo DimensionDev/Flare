@@ -55,10 +55,13 @@ class TimelineViewModel {
 
         Task {
             for await state in cachedPresenter.models {
+                FlareLog.debug("Timeline Received new state from KMP: \(state.listState)")
+
                 let flareState = await Task.detached(priority: .userInitiated) { [stateConverter] in
                     return stateConverter.convert(state.listState)
                 }.value
 
+                FlareLog.debug("Timeline State converted: \(flareState)")
                 self.timelineState = flareState
                 FlareLog.debug("Timeline State updated on main thread: \(flareState)")
             }
@@ -116,6 +119,7 @@ class TimelineViewModel {
             showFloatingButton.wrappedValue = shouldShow
         }
     }
+    
 }
 
 struct TimelineLoadingView: View {
@@ -151,28 +155,4 @@ struct TimelineEmptyView: View {
     }
 }
 
-struct TimelineErrorView: View {
-    let error: FlareError
-    let onRetry: () -> Void
 
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.largeTitle)
-                .foregroundColor(.orange)
-
-            Text("Timeline Error")
-                .font(.headline)
-
-            Text(error.localizedDescription)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-
-            Button("Retry", action: onRetry)
-                .buttonStyle(.borderedProminent)
-        }
-        .frame(maxWidth: .infinity, minHeight: 200)
-        .padding()
-    }
-}

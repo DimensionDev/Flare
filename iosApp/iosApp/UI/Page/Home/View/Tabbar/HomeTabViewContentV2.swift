@@ -6,8 +6,6 @@ import os.log
 import shared
 import SwiftUI
 
-/// HomeTabViewContentV2 - 使用FlareTabBarV2的新版本主TabView容器
-/// 基于Observable架构，集成FlareTabBarV2组件
 struct HomeTabViewContentV2: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @Environment(FlareRouter.self) private var router
@@ -127,12 +125,24 @@ struct HomeTabViewContentV2: View {
                 }
             }
 
-            // 浮动滚动到顶部按钮
-            if router.selectedTab == .timeline, !appSettings.appearanceSettings.hideScrollToTopButton {
-                FloatingScrollToTopButton(
-                    isVisible: $showFloatingButton,
-                    scrollToTopTrigger: $scrollToTopTrigger
-                )
+
+            if router.selectedTab == .timeline {
+                VStack(spacing: 12) {
+                   
+
+                    if !appSettings.appearanceSettings.hideScrollToTopButton {
+                        FloatingScrollToTopButton(
+                            isVisible: $showFloatingButton,
+                            scrollToTopTrigger: $scrollToTopTrigger
+                        )
+                    }
+
+                    FloatingDisplayTypeButton(isVisible: .constant(true))
+
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+                .padding(.trailing, FloatingButtonConfig.screenPadding)
+                .padding(.bottom, FloatingButtonConfig.bottomExtraMargin)
             }
         }
         .background(theme.primaryBackgroundColor)
@@ -146,15 +156,3 @@ struct HomeTabViewContentV2: View {
     }
 }
 
-// MARK: - Preview
-
-#Preview {
-    @Previewable @State var router = FlareRouter()
-    @Previewable @State var appState = FlareAppState()
-    @Previewable @State var theme = FlareTheme.shared
-
-    HomeTabViewContentV2(accountType: AccountTypeGuest())
-        .environment(router)
-        .environment(appState)
-        .environment(theme)
-}

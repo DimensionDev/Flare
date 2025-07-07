@@ -26,7 +26,7 @@ struct TimelineContentViewV2: View {
             )
 
         case let .error(error):
-            TimelineErrorViewV2(error: error) {
+            TimelineErrorView(error: error) {
                 Task {
                     if let presenter,
                        let timelineState = presenter.models.value as? TimelineState
@@ -37,7 +37,7 @@ struct TimelineContentViewV2: View {
             }
 
         case .empty:
-            TimelineEmptyViewV2()
+            TimelineEmptyView()
         }
     }
 }
@@ -55,48 +55,6 @@ private struct TimelineLoadingViewV2: View {
     }
 }
 
-private struct TimelineEmptyViewV2: View {
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "tray")
-                .font(.largeTitle)
-                .foregroundColor(.secondary)
+ 
 
-            Text("No Timeline Items")
-                .font(.headline)
-
-            Text("There are no items to display in this timeline.")
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity, minHeight: 200)
-        .padding()
-    }
-}
-
-private struct TimelineErrorViewV2: View {
-    let error: FlareError
-    let onRetry: () -> Void
-
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "exclamationmark.triangle")
-                .font(.largeTitle)
-                .foregroundColor(.orange)
-
-            Text("Timeline Error")
-                .font(.headline)
-
-            Text(error.localizedDescription)
-                .font(.body)
-                .foregroundColor(.secondary)
-                .multilineTextAlignment(.center)
-
-            Button("Retry", action: onRetry)
-                .buttonStyle(.borderedProminent)
-        }
-        .frame(maxWidth: .infinity, minHeight: 200)
-        .padding()
-    }
-}
+ 

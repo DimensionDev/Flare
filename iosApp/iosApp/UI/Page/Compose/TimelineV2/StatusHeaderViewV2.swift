@@ -68,8 +68,7 @@ struct StatusHeaderViewV2: View {
     }
 }
 
-// MARK: - UserComponentV2 (适配Swift数据类型)
-
+ 
 struct UserComponentV2: View {
     let user: User // 使用Swift User类型
     let topEndContent: TopEndContent? // 使用Swift TopEndContent类型
@@ -81,7 +80,7 @@ struct UserComponentV2: View {
             action: {
                 // 🔥 实现用户点击跳转到用户页面
                 let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
-                let userKey = createMicroBlogKey(from: user)
+                let userKey = user.createMicroBlogKey(from: user)
 
                 FlareLog.debug("UserComponent Navigate to profile: \(user.key)")
                 router.navigate(to: .profile(
@@ -128,34 +127,10 @@ struct UserComponentV2: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: - 辅助方法
-
-    /// 从User创建MicroBlogKey
-    private func createMicroBlogKey(from user: User) -> MicroBlogKey {
-        // User.key已经是String格式的ID，需要推断host
-        let host = extractHostFromHandle(user.handle)
-        return MicroBlogKey(id: user.key, host: host)
-    }
-
-    /// 从用户handle提取host信息
-    private func extractHostFromHandle(_ handle: String) -> String {
-        // handle格式通常是 @username@host 或 @username
-        if handle.contains("@") {
-            let components = handle.components(separatedBy: "@")
-            if components.count >= 3 {
-                // @username@host 格式
-                return components[2]
-            } else if components.count == 2 {
-                // @username 格式，需要根据其他信息推断
-                return "mastodon.social" // 默认值
-            }
-        }
-        return "unknown.host"
-    }
+ 
 }
 
-// MARK: - StatusVisibilityComponentV2 (适配Swift VisibilityType)
-
+ 
 struct StatusVisibilityComponentV2: View {
     let visibility: VisibilityType
 

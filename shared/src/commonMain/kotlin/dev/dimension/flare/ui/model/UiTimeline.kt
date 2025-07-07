@@ -17,6 +17,7 @@ import kotlinx.collections.immutable.persistentListOf
 public data class UiTimeline internal constructor(
     val topMessage: TopMessage?,
     val content: ItemContent?,
+    private val dbKey: String? = null,
 ) {
     val itemKey: String
         get() =
@@ -28,6 +29,10 @@ public data class UiTimeline internal constructor(
                 if (content != null) {
                     append("withContent")
                     append(content.itemKey)
+                }
+                if (dbKey != null) {
+                    append("withDbKey")
+                    append(dbKey)
                 }
             }
     val itemType: String

@@ -8,6 +8,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RewriteQueriesToDropUnusedColumns
 import androidx.room.Transaction
+import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.database.cache.model.DbStatusWithReference
@@ -107,4 +108,13 @@ internal interface PagingTimelineDao {
     @Transaction
     @Query("SELECT * FROM DbPagingTimeline WHERE pagingKey = :pagingKey ORDER BY sortId ASC LIMIT 1")
     suspend fun getLastPagingTimeline(pagingKey: String): DbPagingTimelineWithStatus?
+
+    @Query("SELECT * FROM DbPagingKey WHERE pagingKey = :pagingKey LIMIT 1")
+    suspend fun getPagingKey(pagingKey: String): DbPagingKey?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPagingKey(pagingKey: DbPagingKey)
+
+    @Query("DELETE FROM DbPagingKey WHERE pagingKey = :pagingKey")
+    suspend fun deletePagingKey(pagingKey: String)
 }

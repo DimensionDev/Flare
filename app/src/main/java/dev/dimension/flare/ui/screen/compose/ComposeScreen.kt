@@ -217,73 +217,69 @@ internal fun ComposeScreen(
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            state.state.enableCrossPost.onSuccess { enableCrossPost ->
-                if (enableCrossPost) {
-                    Row(
-                        modifier =
-                            Modifier
-                                .horizontalScroll(rememberScrollState())
-                                .padding(horizontal = 16.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        state.state.selectedUsers.onSuccess { selectedUsers ->
-                            for (i in 0 until selectedUsers.size) {
-                                val (user, account) = selectedUsers[i]
-                                user.onSuccess {
-                                    AssistChip(
-                                        onClick = {
-                                            state.state.selectAccount(account)
+            Row(
+                modifier =
+                    Modifier
+                        .horizontalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                state.state.selectedUsers.onSuccess { selectedUsers ->
+                    for (i in 0 until selectedUsers.size) {
+                        val (user, account) = selectedUsers[i]
+                        user.onSuccess {
+                            AssistChip(
+                                onClick = {
+                                    state.state.selectAccount(account)
+                                },
+                                label = {
+                                    Text(it.handle)
+                                },
+                                leadingIcon = {
+                                    AvatarComponent(it.avatar, size = 24.dp)
+                                },
+                                shape = RoundedCornerShape(100),
+                            )
+                        }
+                    }
+                    state.state.otherAccounts.onSuccess { others ->
+                        if (others.size > 0) {
+                            AssistChip(
+                                shape = CircleShape,
+                                onClick = {
+                                    state.setShowAccountSelectMenu(true)
+                                },
+                                label = {
+                                    FAIcon(FontAwesomeIcons.Solid.Plus, contentDescription = null)
+                                    DropdownMenu(
+                                        expanded = state.showAccountSelectMenu,
+                                        onDismissRequest = {
+                                            state.setShowAccountSelectMenu(false)
                                         },
-                                        label = {
-                                            Text(it.handle)
-                                        },
-                                        leadingIcon = {
-                                            AvatarComponent(it.avatar, size = 24.dp)
-                                        },
-                                        shape = RoundedCornerShape(100),
-                                    )
-                                }
-                            }
-                            state.state.otherAccounts.onSuccess { others ->
-                                if (others.size > 0) {
-                                    AssistChip(
-                                        shape = CircleShape,
-                                        onClick = {
-                                            state.setShowAccountSelectMenu(true)
-                                        },
-                                        label = {
-                                            FAIcon(FontAwesomeIcons.Solid.Plus, contentDescription = null)
-                                            DropdownMenu(
-                                                expanded = state.showAccountSelectMenu,
-                                                onDismissRequest = {
-                                                    state.setShowAccountSelectMenu(false)
-                                                },
-                                                properties = PopupProperties(focusable = true),
-                                            ) {
-                                                for (i in 0 until others.size) {
-                                                    val (user, account) = others[i]
-                                                    user.onSuccess { data ->
-                                                        DropdownMenuItem(
-                                                            text = {
-                                                                Text(text = data.handle)
-                                                            },
-                                                            onClick = {
-                                                                state.state.selectAccount(account)
-                                                            },
-                                                            leadingIcon = {
-                                                                AvatarComponent(
-                                                                    data.avatar,
-                                                                    size = 24.dp,
-                                                                )
-                                                            },
+                                        properties = PopupProperties(focusable = true),
+                                    ) {
+                                        for (i in 0 until others.size) {
+                                            val (user, account) = others[i]
+                                            user.onSuccess { data ->
+                                                DropdownMenuItem(
+                                                    text = {
+                                                        Text(text = data.handle)
+                                                    },
+                                                    onClick = {
+                                                        state.state.selectAccount(account)
+                                                    },
+                                                    leadingIcon = {
+                                                        AvatarComponent(
+                                                            data.avatar,
+                                                            size = 24.dp,
                                                         )
-                                                    }
-                                                }
+                                                    },
+                                                )
                                             }
-                                        },
-                                    )
-                                }
-                            }
+                                        }
+                                    }
+                                },
+                            )
                         }
                     }
                 }

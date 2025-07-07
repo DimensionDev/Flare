@@ -8,6 +8,7 @@ import androidx.paging.RemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.saveToDatabase
+import dev.dimension.flare.data.database.cache.model.DbPagingKey
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.repository.DebugRepository
 import dev.dimension.flare.ui.model.UiTimeline
@@ -56,8 +57,12 @@ internal abstract class BaseTimelineRemoteMediator(
                         .pagingTimelineDao()
                         .delete(pagingKey = key)
                 }
+                database.pagingTimelineDao().deletePagingKey(pagingKey)
             }
             saveToDatabase(database, result.data)
+            database
+                .pagingTimelineDao()
+                .insertPagingKey(DbPagingKey(pagingKey = pagingKey, nextKey = result.nextKey))
         }
         return MediatorResult.Success(
             endOfPaginationReached = result.endOfPaginationReached,
@@ -72,6 +77,7 @@ internal abstract class BaseTimelineRemoteMediator(
     data class Result(
         val endOfPaginationReached: Boolean,
         val data: List<DbPagingTimelineWithStatus> = emptyList(),
+        val nextKey: String? = null,
     )
 }
 

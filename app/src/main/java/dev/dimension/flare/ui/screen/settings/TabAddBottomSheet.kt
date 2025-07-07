@@ -41,6 +41,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
+import dev.dimension.flare.common.isEmpty
 import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
@@ -209,19 +210,21 @@ internal fun TabAddBottomSheet(
                                     },
                                 )
                             }
-                            item {
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = Modifier.fillMaxWidth(),
-                                ) {
-                                    Button(
-                                        onClick = toAddRssSource,
+                            if (!allTabs.rssTabs.isEmpty) {
+                                item {
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = Modifier.fillMaxWidth(),
                                     ) {
-                                        FAIcon(
-                                            FontAwesomeIcons.Solid.Plus,
-                                            contentDescription = stringResource(R.string.add_rss_source),
-                                        )
-                                        Text(stringResource(R.string.add_rss_source))
+                                        Button(
+                                            onClick = toAddRssSource,
+                                        ) {
+                                            FAIcon(
+                                                FontAwesomeIcons.Solid.Plus,
+                                                contentDescription = stringResource(R.string.add_rss_source),
+                                            )
+                                            Text(stringResource(R.string.add_rss_source))
+                                        }
                                     }
                                 }
                             }
@@ -326,7 +329,7 @@ internal fun allTabsPresenter(filterIsTimeline: Boolean = false): AllTabsState =
                                 remember(user.key) {
                                     (
                                         TimelineTabItem.defaultPrimary(user) +
-                                            TimelineTabItem.defaultSecondary(
+                                            TimelineTabItem.secondaryFor(
                                                 user,
                                             )
                                     ).let {
@@ -360,7 +363,7 @@ internal fun allTabsPresenter(filterIsTimeline: Boolean = false): AllTabsState =
 
         object : AllTabsState {
             override val defaultTabs =
-                TimelineTabItem.default
+                TimelineTabItem.mainSidePanel
                     .let {
                         if (filterIsTimeline) {
                             it.filterIsInstance<TimelineTabItem>()

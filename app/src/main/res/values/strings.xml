@@ -328,7 +328,8 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Added support for Misskey Antennas</li>
+                <li>Added Mixed timeline support to the Home tab</li>
+                <li>Started making UI/UX adjustments, with more improvements coming soon</li>
                 <li>Bug fixes and performance improvements</li>
             </ul>
         ]]>

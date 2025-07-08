@@ -4,9 +4,7 @@ import os.log
 import shared
 import SwiftUI
 
-/// FlareTabBarV2 - 新的TabBar组件，基于Observable架构
-/// 保持Flare现有的UI样式和交互逻辑，使用iOS 17+的现代架构
-struct FlareTabBarV2: View {
+ struct FlareTabBarV2: View {
     @Environment(FlareRouter.self) private var router
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
@@ -169,23 +167,3 @@ struct FlareTabBarV2: View {
     }
 }
 
-// MARK: - Preview
-
-#Preview {
-    @Previewable @State var scrollToTopTrigger = false
-    @Previewable @State var router = FlareRouter()
-    @Previewable @State var appState = FlareAppState()
-    @Previewable @State var theme = FlareTheme.shared
-
-    VStack {
-        Spacer()
-        FlareTabBarV2(
-            accountType: AccountTypeGuest(),
-            scrollToTopTrigger: $scrollToTopTrigger
-        )
-        .environment(router)
-        .environment(appState)
-        .environment(theme)
-    }
-    .background(Color(.systemBackground))
-}

@@ -267,8 +267,9 @@
     <string name="tab_settings_mixed_timeline_desc">混合时间线将混合所有标签页的时间线结果</string>
     <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
             <ul>
-                <li>支持 Misskey Antennas</li>
-                <li>Bug 修复和性能改进</li>
+                <li>为首页标签添加混合时间线支持</li>
+                <li>开始进行UI/UX调整，更多改进即将到来</li>
+                <li>修复错误并提高性能</li>
             </ul>
         ]]></string>
 </resources>

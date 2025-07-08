@@ -2,6 +2,7 @@
 <resources>
     <string name="delete">حذف</string>
     <string name="profile_header_following_count">%1$s متابعة</string>
+    <string name="profile_header_fans_count">%1$s متابعين</string>
     <string name="profile_header_toots_count">تبويبات %1$s</string>
     <string name="profile_misskey_header_status_count">حالة %1$s</string>
     <string name="profile_header_button_follow">اتبع</string>

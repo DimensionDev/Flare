@@ -58,6 +58,7 @@
     <string name="settings_ai_config_enable_tldr">Activează rezumarea AI</string>
     <string name="settings_ai_config_tldr_description">Activează sumarizarea AI pentru postările lungi, disponibile doar în postarea care depășește 500 de caractere</string>
     <string name="status_loadmore_error_retry">Reîncercați</string>
+    <string name="login_expired">Sesiunea de autentificare a expirat</string>
     <string name="login_expired_message">Faceți clic pentru a vă reconecta</string>
     <string name="login_expired_relogin">Conectează-te din nou</string>
     <string name="service_select_welcome_title">Bun venit la Flare</string>
@@ -139,6 +140,7 @@
     <string name="settings_storage_clear_image_cache_description">%1$s MB de imagini vor fi eliminate</string>
     <string name="settings_storage_clear_database">Goliţi baza de date cache</string>
     <string name="settings_storage_clear_database_description">%1$s utilizatori, stările %2$s vor fi șterse</string>
+    <string name="settings_storage_app_log">Deschide jurnalul aplicației</string>
     <string name="settings_storage_app_log_description">Vezi jurnalul aplicațiilor</string>
     <string name="service_select_instance_input_placeholder">URL Instanță</string>
     <string name="service_select_next_button">Următoarea</string>
@@ -216,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Postări și răspunsuri</string>
     <string name="profile_tab_likes">Aprecieri</string>
     <string name="profile_tab_media">Media</string>
+    <string name="tab_settings_title">Setările tab-ului</string>
     <string name="dm_list_title">Mesaje directe</string>
     <string name="dm_list_empty">Niciun mesaj direct</string>
     <string name="dm_list_error">Încărcarea mesajelor directe a eșuat</string>
@@ -264,8 +267,9 @@
     <string name="tab_settings_mixed_timeline_desc">Amestecul cronologiei va amesteca toate tab-urile de cronologie într-o singură filă</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
-                <li>Suport adăugat pentru Misskey Antennas</li>
-                <li>Remedierea erorilor şi îmbunătăţirea performanţei</li>
+                <li>S-a adăugat suportul pentru intervalul de timp în fila de pornire</li>
+                <li>Începe efectuarea ajustărilor UI/UX, cu mai multe îmbunătățiri în curând</li>
+                <li>Remedierea erorilor și îmbunătățirea performanței</li>
             </ul>
         ]]></string>
 </resources>

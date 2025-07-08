@@ -58,6 +58,7 @@
     <string name="settings_ai_config_enable_tldr">Habilitar resumo de IA</string>
     <string name="settings_ai_config_tldr_description">Ativar o resumo de IA para publicações longas, somente disponíveis na publicação com mais de 500 caracteres</string>
     <string name="status_loadmore_error_retry">Repetir</string>
+    <string name="login_expired">Sessão de login expirada</string>
     <string name="login_expired_message">Clique para entrar novamente</string>
     <string name="login_expired_relogin">Entrar novamente</string>
     <string name="service_select_welcome_title">Bem-vindo ao Sinalizador</string>
@@ -139,6 +140,7 @@
     <string name="settings_storage_clear_image_cache_description">%1$s MB de imagens serão removidas</string>
     <string name="settings_storage_clear_database">Limpar banco de dados de cache</string>
     <string name="settings_storage_clear_database_description">%1$s usuários, o status %2$s será removido</string>
+    <string name="settings_storage_app_log">Abrir log do aplicativo</string>
     <string name="settings_storage_app_log_description">Ver registro do aplicativo</string>
     <string name="service_select_instance_input_placeholder">Instância URL</string>
     <string name="service_select_next_button">Próximo</string>
@@ -216,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Mensagens e respostas</string>
     <string name="profile_tab_likes">Gostos</string>
     <string name="profile_tab_media">Multimídia</string>
+    <string name="tab_settings_title">Configurações da aba</string>
     <string name="dm_list_title">Mensagens Diretas</string>
     <string name="dm_list_empty">Nenhuma mensagem direta</string>
     <string name="dm_list_error">Falha ao carregar mensagens diretas</string>
@@ -264,8 +267,9 @@
     <string name="tab_settings_mixed_timeline_desc">Linha do tempo mista irá misturar todas as abas que resultam em uma aba</string>
     <string name="changelog_current"><![CDATA[            <span>Versão %1$s:</span>
             <ul>
-                <li>Adicionada suporte para Misskey Antenas</li>
-                <li>correções de bugs e melhorias de desempenho</li>
+                <li>Adicionado suporte a linha do tempo misturado à aba</li>
+                <li>Iniciou os ajustes de UI/UX, com mais melhorias em breve</li>
+                <li>correções de erros e melhorias de desempenho</li>
             </ul>
         ]]></string>
 </resources>

@@ -96,6 +96,7 @@
     <string name="retweet">Prøv igjen</string>
     <string name="retweet_remove">Fjern retweet</string>
     <string name="share">Del</string>
+    <string name="user_report">Rapport %1$s</string>
     <string name="user_block">Blokker %1$s</string>
     <string name="user_unblock">Opphev blokkering %1$s</string>
     <string name="user_mute">Demp %1$s</string>

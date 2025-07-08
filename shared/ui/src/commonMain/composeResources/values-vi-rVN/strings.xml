@@ -1,2 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="settings_about_description">Mạng xã hội phi tập trung dựa trên AI mã nguồn mở thế hệ tiếp theo.</string>
+    <string name="settings_about_source_code">Mã nguồn</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Tham gia nhóm Telegram của chúng tôi</string>
+    <string name="settings_about_line_description">Tham gia nhóm Line của chúng tôi</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Hãy giúp chúng tôi dịch Flare</string>
+    <string name="settings_privacy_policy">Chính sách quyền riêng tư</string>
+</resources>

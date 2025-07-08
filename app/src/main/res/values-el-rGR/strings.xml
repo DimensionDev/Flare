@@ -58,6 +58,7 @@
     <string name="settings_ai_config_enable_tldr">Ενεργοποίηση Περίληψης Τεχνητής Νοημοσύνης</string>
     <string name="settings_ai_config_tldr_description">Ενεργοποίηση περιλήψεων τεχνητής νοημοσύνης για μεγάλες δημοσιεύσεις, μόνο διαθέσιμη σε ανάρτηση που υπερβαίνει τους 500 χαρακτήρες</string>
     <string name="status_loadmore_error_retry">Επανάληψη</string>
+    <string name="login_expired">Η συνεδρία σύνδεσης έχει λήξει</string>
     <string name="login_expired_message">Κάντε κλικ για να συνδεθείτε ξανά</string>
     <string name="login_expired_relogin">Είσοδος ξανά</string>
     <string name="service_select_welcome_title">Καλώς ήλθατε στο Flare</string>
@@ -138,6 +139,8 @@
     <string name="settings_storage_clear_image_cache">Εκκαθάριση προσωρινής μνήμης εικόνας</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB εικόνων θα αφαιρεθούν</string>
     <string name="settings_storage_clear_database">Εκκαθάριση βάσης δεδομένων προσωρινής μνήμης</string>
+    <string name="settings_storage_clear_database_description">%1$s χρήστες, %2$s καταστάσεις θα αφαιρεθούν</string>
+    <string name="settings_storage_app_log">Άνοιγμα αρχείου καταγραφής εφαρμογής</string>
     <string name="settings_storage_app_log_description">Δείτε το αρχείο καταγραφής της εφαρμογής</string>
     <string name="service_select_instance_input_placeholder">Διεύθυνση Url Παρουσίας</string>
     <string name="service_select_next_button">Επόμενο</string>
@@ -215,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Δημοσιεύσεις και απαντήσεις</string>
     <string name="profile_tab_likes">Αρέσει</string>
     <string name="profile_tab_media">Πολυμέσα</string>
+    <string name="tab_settings_title">Ρυθμίσεις καρτέλας</string>
     <string name="dm_list_title">Άμεσα Μηνύματα</string>
     <string name="dm_list_empty">Δεν υπάρχουν άμεσα μηνύματα</string>
     <string name="dm_list_error">Αποτυχία φόρτωσης άμεσων μηνυμάτων</string>
@@ -263,7 +267,8 @@
     <string name="tab_settings_mixed_timeline_desc">Μικτή χρονολογική γραμμή θα συνδυάσει όλες τις καρτέλες αποτέλεσμα χρονοδιάγραμμα σε μία καρτέλα</string>
     <string name="changelog_current"><![CDATA[            <span>Έκδοση %1$s:</span>
             <ul>
-                <li>Προστέθηκε υποστήριξη για Misskey Antennas</li>
+                <li>Προστέθηκε υποστήριξη μικτού χρονοδιαγράμματος στην καρτέλα Αρχική</li>
+                <li>Ξεκίνησε κάνοντας προσαρμογές UI/UX, με περισσότερες βελτιώσεις να έρχονται σύντομα</li>
                 <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης</li>
             </ul>
         ]]></string>

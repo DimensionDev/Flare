@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Usuń</string>
+    <string name="profile_header_following_count">%1$s Obserwujący</string>
     <string name="profile_header_fans_count">%1$s Obserwujących</string>
     <string name="profile_header_toots_count">%1$s Wpisy</string>
     <string name="profile_misskey_header_status_count">Status %1$s</string>
@@ -287,6 +288,8 @@
     <string name="poll_voted">Zagłosowano</string>
     <string name="poll_expired_at">Wygasło o %1$s</string>
     <string name="user_send_message">Wyślij wiadomość</string>
+    <string name="profile_search_user_using_account">Znajdź %1$s w %2$s używając %3$s</string>
+    <string name="profile_search_user_using_account_compat">Znajdź w %1$s</string>
     <string name="feeds_discover_feeds_created_by">Utworzone przez %1$s</string>
     <string name="notification_item_accept_follow_request">Zaakceptuj</string>
     <string name="notification_item_reject_follow_request">Odrzuć</string>

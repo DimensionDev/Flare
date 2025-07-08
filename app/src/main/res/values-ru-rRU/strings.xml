@@ -58,9 +58,11 @@
     <string name="settings_ai_config_enable_tldr">Включить ИИ сворачивание</string>
     <string name="settings_ai_config_tldr_description">Включить ИИ резюме для длинных записей, доступных только в сообщении, длиннее 500 символов</string>
     <string name="status_loadmore_error_retry">Повторить</string>
+    <string name="login_expired">Сессия входа истекла</string>
     <string name="login_expired_message">Нажмите, чтобы войти снова</string>
     <string name="login_expired_relogin">Войти снова</string>
     <string name="service_select_welcome_title">Добро пожаловать в Сигнал</string>
+    <string name="service_select_welcome_message">Flare — это клиент социальной сети для Android.\nЧтобы начать, пожалуйста, выберите сервис для подключения.</string>
     <string name="mastodon_login_verify_message">Пожалуйста, подождите, пока мы верифицируем ваши учетные данные.</string>
     <string name="status_title">Детали</string>
     <string name="misskey_visibility_public">Публичный</string>
@@ -138,6 +140,7 @@
     <string name="settings_storage_clear_image_cache_description">%1$s МБ изображений будет удалено</string>
     <string name="settings_storage_clear_database">Очистить базу данных кэша</string>
     <string name="settings_storage_clear_database_description">%1$s пользователи, статусы %2$s будут удалены</string>
+    <string name="settings_storage_app_log">Открыть журнал приложений</string>
     <string name="settings_storage_app_log_description">Просмотр журнала приложений</string>
     <string name="service_select_instance_input_placeholder">URL экземпляра</string>
     <string name="service_select_next_button">Следующий</string>
@@ -215,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Сообщения и ответы</string>
     <string name="profile_tab_likes">Лайки</string>
     <string name="profile_tab_media">Медиа</string>
+    <string name="tab_settings_title">Настройки вкладки</string>
     <string name="dm_list_title">Прямые сообщения</string>
     <string name="dm_list_empty">Нет личных сообщений</string>
     <string name="dm_list_error">Не удалось загрузить личные сообщения</string>
@@ -263,7 +267,8 @@
     <string name="tab_settings_mixed_timeline_desc">Смешанная лента времени будет смешивать результат всех вкладок в одной вкладке</string>
     <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
             <ul>
-                <li>Добавлена поддержка Misskey Antennas</li>
+                <li>Добавлена поддержка смешанной временной шкалы на вкладке "Домашняя"</li>
+                <li>Начало внесения изменений в интерфейс и опыт пользователя, ожидайте дополнительных улучшений</li>
                 <li>Исправления ошибок и улучшения производительности</li>
             </ul>
         ]]></string>

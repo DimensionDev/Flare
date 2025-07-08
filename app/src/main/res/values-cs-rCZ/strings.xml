@@ -58,6 +58,7 @@
     <string name="settings_ai_config_enable_tldr">Povolit souhrn AI</string>
     <string name="settings_ai_config_tldr_description">Povolit AI shrnutí pro dlouhé příspěvky, dostupné pouze v příspěvku, který je delší než 500 znaků</string>
     <string name="status_loadmore_error_retry">Opakovat</string>
+    <string name="login_expired">Relace přihlášení vypršela</string>
     <string name="login_expired_message">Klikněte pro přihlášení znovu</string>
     <string name="login_expired_relogin">Přihlásit se znovu</string>
     <string name="service_select_welcome_title">Vítejte na Flare</string>
@@ -139,6 +140,7 @@
     <string name="settings_storage_clear_image_cache_description">%1$s MB obrázků bude odstraněno</string>
     <string name="settings_storage_clear_database">Vymazat databázi mezipaměti</string>
     <string name="settings_storage_clear_database_description">%1$s uživatelé, %2$s stavy budou odstraněny</string>
+    <string name="settings_storage_app_log">Otevřít protokol aplikace</string>
     <string name="settings_storage_app_log_description">Zobrazit protokol aplikace</string>
     <string name="service_select_instance_input_placeholder">URL instance</string>
     <string name="service_select_next_button">Další</string>
@@ -216,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Příspěvky a odpovědi</string>
     <string name="profile_tab_likes">Líbí se mi</string>
     <string name="profile_tab_media">Média</string>
+    <string name="tab_settings_title">Nastavení karty</string>
     <string name="dm_list_title">Přímé zprávy</string>
     <string name="dm_list_empty">Žádné přímé zprávy</string>
     <string name="dm_list_error">Nepodařilo se načíst přímé zprávy</string>
@@ -264,8 +267,9 @@
     <string name="tab_settings_mixed_timeline_desc">Směsná časová osa promíchá všechny panely s výsledkem jedné záložky</string>
     <string name="changelog_current"><![CDATA[            <span>Verze %1$s:</span>
             <ul>
-                <li>Přidána podpora Misskey Antennas</li>
-                <li>Opravy chyb a vylepšení výkonu</li>
+                <li>Přidána smíšená podpora časové osy na domovskou kartu</li>
+                <li>začala vytvářet úpravy UI/UX, s dalšími vylepšeními již brzy</li>
+                <li>Opravuje chyby a zlepšuje výkon</li>
             </ul>
         ]]></string>
 </resources>

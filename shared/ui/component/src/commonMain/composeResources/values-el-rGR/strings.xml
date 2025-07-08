@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Διαγραφή</string>
+    <string name="profile_header_following_count">%1$s Ακολουθήσεις</string>
+    <string name="profile_header_fans_count">%1$s Ακολούθοι</string>
+    <string name="profile_header_toots_count">%1$s Toots</string>
+    <string name="profile_misskey_header_status_count">%1$s Καταστάσεις</string>
     <string name="profile_header_button_follow">Ακολουθήστε</string>
     <string name="profile_header_button_following">Ακολουθεί</string>
     <string name="profile_header_button_requested">Ζητήθηκε</string>

@@ -36,7 +36,9 @@ internal abstract class BaseRemoteMediator<Key : Any, Value : Any> : RemoteMedia
     }
 }
 
-internal sealed interface BaseTimelineLoader
+internal sealed interface BaseTimelineLoader {
+    data object NotSupported : BaseTimelineLoader
+}
 
 @OptIn(ExperimentalPagingApi::class)
 internal abstract class BaseTimelineRemoteMediator(

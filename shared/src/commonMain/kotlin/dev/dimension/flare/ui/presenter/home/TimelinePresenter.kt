@@ -5,6 +5,8 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadState
+import androidx.paging.LoadStates
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -36,6 +38,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -56,25 +59,46 @@ public abstract class TimelinePresenter :
 
     @OptIn(ExperimentalCoroutinesApi::class)
     protected fun createPager(scope: CoroutineScope): Flow<PagingData<UiTimeline>> =
-        loader.flatMapLatest {
-            when (it) {
-                is BaseTimelinePagingSource<*> ->
-                    networkPager(
-                        pagingSource = it,
-                        scope = scope,
-                    )
+        loader
+            .catch {
+                emit(BaseTimelineLoader.NotSupported)
+            }.flatMapLatest {
+                when (it) {
+                    is BaseTimelinePagingSource<*> ->
+                        networkPager(
+                            pagingSource = it,
+                            scope = scope,
+                        )
 
-                is BaseTimelineRemoteMediator ->
-                    cachePager(
-                        mediator = it,
-                        scope = scope,
-                    )
-            }.combine(filterFlow) { pager, filterList ->
-                pager.filter {
-                    !it.contains(filterList)
+                    is BaseTimelineRemoteMediator ->
+                        cachePager(
+                            mediator = it,
+                            scope = scope,
+                        )
+
+                    BaseTimelineLoader.NotSupported ->
+                        flowOf(
+                            PagingData.empty(
+                                sourceLoadStates =
+                                    LoadStates(
+                                        refresh = LoadState.Error(NotImplementedError()),
+                                        prepend = LoadState.Error(NotImplementedError()),
+                                        append = LoadState.Error(NotImplementedError()),
+                                    ),
+                                mediatorLoadStates =
+                                    LoadStates(
+                                        refresh = LoadState.Error(NotImplementedError()),
+                                        prepend = LoadState.Error(NotImplementedError()),
+                                        append = LoadState.Error(NotImplementedError()),
+                                    ),
+                            ),
+                        )
+                }.combine(filterFlow) { pager, filterList ->
+                    pager.filter {
+                        !it.contains(filterList)
+                    }
                 }
             }
-        }
 
     private fun cachePager(
         mediator: BaseTimelineRemoteMediator,
@@ -132,9 +156,6 @@ public abstract class TimelinePresenter :
             remember {
                 createPager(scope)
                     .cachedIn(scope)
-                    .catch {
-                        it.printStackTrace()
-                    }
             }.collectAsLazyPagingItems()
                 .toPagingState()
 

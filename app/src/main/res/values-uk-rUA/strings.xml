@@ -58,6 +58,7 @@
     <string name="settings_ai_config_enable_tldr">Увімкнути підсумок ШІ</string>
     <string name="settings_ai_config_tldr_description">Увімкнути підсумок ШІ для довгих постів, доступних тільки в повідомленнях, більше ніж 500 символів</string>
     <string name="status_loadmore_error_retry">Повторити спробу</string>
+    <string name="login_expired">Сесію входу закрито</string>
     <string name="login_expired_message">Нажміть кнопку для входу знову</string>
     <string name="login_expired_relogin">Знову увійти в систему</string>
     <string name="service_select_welcome_title">Ласкаво просимо до Flare</string>
@@ -139,6 +140,7 @@
     <string name="settings_storage_clear_image_cache_description">%1$s MB із зображень буде видалено</string>
     <string name="settings_storage_clear_database">Очистити базу даних кешу</string>
     <string name="settings_storage_clear_database_description">%1$s користувачів, статуси %2$s буде видалено</string>
+    <string name="settings_storage_app_log">Відкрити журнал додатка</string>
     <string name="settings_storage_app_log_description">Переглянути журнал програми</string>
     <string name="service_select_instance_input_placeholder">URL-адреса інстансу</string>
     <string name="service_select_next_button">Уперед</string>
@@ -216,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Повідомлення і відповіді</string>
     <string name="profile_tab_likes">Сподобалося</string>
     <string name="profile_tab_media">Медіа</string>
+    <string name="tab_settings_title">Налаштування вкладок</string>
     <string name="dm_list_title">Миттєві повідомлення</string>
     <string name="dm_list_empty">Нема особистих повідомлень</string>
     <string name="dm_list_error">Не вдалося завантажити особисті повідомлення</string>
@@ -245,6 +248,7 @@
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_title">Summary</string>
     <string name="rss_detail_tldr_error">Не вдалося узагальнити</string>
+    <string name="rss_detail_tldr_loading">Підсумовується…</string>
     <string name="emoji_picker_recent">Недавні</string>
     <string name="emoji_picker_search">Пошук</string>
     <string name="changelog_title">З поверненням!</string>
@@ -261,4 +265,11 @@
     <string name="home_tab_mixed_timeline_title">Змішаний</string>
     <string name="tab_settings_mixed_timeline">Додати змішану вкладку часової шкали</string>
     <string name="tab_settings_mixed_timeline_desc">Змішана часова шкала будуть змішувати всі вкладки в результаті однієї вкладки</string>
+    <string name="changelog_current"><![CDATA[            <span>Версія %1$s:</span>
+            <ul>
+                <li>Додана підтримка змішаного таймлайну для вкладки Головна</li>
+                <li>Розпочато внесення коректив в інтерфейс/досвід користувача, найближчим часом будуть додаткові покращення</li>
+                <li>Виправлення помилок та покращення продуктивності</li>
+            </ul>
+        ]]></string>
 </resources>

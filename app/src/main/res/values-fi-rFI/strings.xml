@@ -58,6 +58,7 @@
     <string name="settings_ai_config_enable_tldr">Ota Käyttöön tekoälyn Yhteenveto</string>
     <string name="settings_ai_config_tldr_description">Ota käyttöön tekoälyn yhteenveto pitkiä viestejä, saatavilla vain post että yli 500 merkkiä</string>
     <string name="status_loadmore_error_retry">Yritä Uudelleen</string>
+    <string name="login_expired">Kirjautumissessio on vanhentunut</string>
     <string name="login_expired_message">Klikkaa kirjautuaksesi uudelleen</string>
     <string name="login_expired_relogin">Kirjaudu uudelleen</string>
     <string name="service_select_welcome_title">Tervetuloa Flareen</string>
@@ -139,6 +140,7 @@
     <string name="settings_storage_clear_image_cache_description">%1$s MB kuvia poistetaan</string>
     <string name="settings_storage_clear_database">Tyhjennä välimuistin tietokanta</string>
     <string name="settings_storage_clear_database_description">%1$s käyttäjää, %2$s tilat poistetaan</string>
+    <string name="settings_storage_app_log">Avaa sovelluksen loki</string>
     <string name="settings_storage_app_log_description">Näytä sovellusloki</string>
     <string name="service_select_instance_input_placeholder">Ilmentymän URL</string>
     <string name="service_select_next_button">Seuraava</string>
@@ -216,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Julkaisut ja vastaukset</string>
     <string name="profile_tab_likes">Tykkäykset</string>
     <string name="profile_tab_media">Media</string>
+    <string name="tab_settings_title">Välilehden asetukset</string>
     <string name="dm_list_title">Suorat Viestit</string>
     <string name="dm_list_empty">Ei suoria viestejä</string>
     <string name="dm_list_error">Suorien viestien lataaminen epäonnistui</string>
@@ -264,8 +267,9 @@
     <string name="tab_settings_mixed_timeline_desc">Sekoitettu aikajana sekoittaa kaikki välilehdet aikajana tulos yhdessä välilehdessä</string>
     <string name="changelog_current"><![CDATA[            <span>Versio %1$s:</span>
             <ul>
-                <li>Lisätty tuki Misskey Antenneille</li>
-                <li>Virhekorjauksia ja suorituskyvyn parannuksia</li>
+                <li>Lisätty yhdistetty aikajanan tuki aloitusvälilehdelle</li>
+                <li>Aloitti UI/UX-säätämisen, kun parannuksia on tulossa pian</li>
+                <li>Virheenkorjauksia ja suorituskyvyn parannuksia</li>
             </ul>
         ]]></string>
 </resources>

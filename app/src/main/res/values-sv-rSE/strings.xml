@@ -58,6 +58,7 @@
     <string name="settings_ai_config_enable_tldr">Aktivera AI-sammanfattning</string>
     <string name="settings_ai_config_tldr_description">Aktivera AI-sammanfattning för långa inlägg, endast tillgängligt i inlägg som är längre än 500 tecken</string>
     <string name="status_loadmore_error_retry">Försök igen</string>
+    <string name="login_expired">Sessionen för inloggning har gått ut</string>
     <string name="login_expired_message">Klicka för att logga in igen</string>
     <string name="login_expired_relogin">Logga in igen</string>
     <string name="service_select_welcome_title">Välkommen till Flare</string>
@@ -139,6 +140,7 @@
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder kommer att tas bort</string>
     <string name="settings_storage_clear_database">Rensa cache-databas</string>
     <string name="settings_storage_clear_database_description">%1$s användare, %2$s status kommer att tas bort</string>
+    <string name="settings_storage_app_log">Öppna applogg</string>
     <string name="settings_storage_app_log_description">Visa apploggen</string>
     <string name="service_select_instance_input_placeholder">Instans URL</string>
     <string name="service_select_next_button">Nästa</string>
@@ -216,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Inlägg och svar</string>
     <string name="profile_tab_likes">Gillar</string>
     <string name="profile_tab_media">Media</string>
+    <string name="tab_settings_title">Flikinställningar</string>
     <string name="dm_list_title">Direkta meddelanden</string>
     <string name="dm_list_empty">Inga direktmeddelanden</string>
     <string name="dm_list_error">Det gick inte att ladda direktmeddelanden</string>
@@ -264,7 +267,8 @@
     <string name="tab_settings_mixed_timeline_desc">Blandad tidslinje kommer att blanda alla flikar tidslinje resultat i en flik</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Stöd för Misskey Antenner</li>
+                <li>Lade till blandat tidslinjestöd till fliken</li>
+                <li>började göra UI/UX justeringar, fler förbättringar kommer snart</li>
                 <li>Felrättelser och prestandaförbättringar</li>
             </ul>
         ]]></string>

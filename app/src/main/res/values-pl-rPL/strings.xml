@@ -58,6 +58,7 @@
     <string name="settings_ai_config_enable_tldr">Włącz podsumowanie AI</string>
     <string name="settings_ai_config_tldr_description">Włącz podsumowanie AI dla długich postów, dostępne tylko w postach dłuższych niż 500 znaków</string>
     <string name="status_loadmore_error_retry">Ponów próbę</string>
+    <string name="login_expired">Sesja logowania wygasła</string>
     <string name="login_expired_message">Kliknij, aby zalogować się ponownie</string>
     <string name="login_expired_relogin">Zaloguj się ponownie</string>
     <string name="service_select_welcome_title">Witaj w Flare</string>
@@ -139,6 +140,7 @@
     <string name="settings_storage_clear_image_cache_description">%1$s MB obrazów zostanie usunięte</string>
     <string name="settings_storage_clear_database">Wyczyść bazę pamięci podręcznej</string>
     <string name="settings_storage_clear_database_description">%1$s użytkowników, statusy %2$s zostaną usunięte</string>
+    <string name="settings_storage_app_log">Otwórz dziennik aplikacji</string>
     <string name="settings_storage_app_log_description">Zobacz dziennik aplikacji</string>
     <string name="service_select_instance_input_placeholder">Adres URL instancji</string>
     <string name="service_select_next_button">Następny</string>
@@ -216,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Posty i odpowiedzi</string>
     <string name="profile_tab_likes">Polubienia</string>
     <string name="profile_tab_media">Media</string>
+    <string name="tab_settings_title">Ustawienia zakładki</string>
     <string name="dm_list_title">Wiadomości bezpośrednie</string>
     <string name="dm_list_empty">Brak bezpośrednich wiadomości</string>
     <string name="dm_list_error">Nie udało się załadować bezpośrednich wiadomości</string>
@@ -264,7 +267,8 @@
     <string name="tab_settings_mixed_timeline_desc">Mieszana oś czasu połączy wszystkie karty na osi czasu w jednej karcie</string>
     <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
-                <li>Dodano wsparcie dla Misskey Antennas</li>
+                <li>Dodano obsługę mieszanej osi czasu do zakładki Home</li>
+                <li>Rozpoczęto dostosowywanie UI/UX, z dalszymi ulepszeniami już wkrótce</li>
                 <li>Poprawki błędów i ulepszenia wydajności</li>
             </ul>
         ]]></string>

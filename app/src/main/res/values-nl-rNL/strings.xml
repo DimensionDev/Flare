@@ -58,6 +58,7 @@
     <string name="settings_ai_config_enable_tldr">AI samenvatting inschakelen</string>
     <string name="settings_ai_config_tldr_description">AI samenvatting inschakelen voor lange berichten, alleen beschikbaar in post van meer dan 500 tekens</string>
     <string name="status_loadmore_error_retry">Opnieuw</string>
+    <string name="login_expired">Inlogsessie verlopen</string>
     <string name="login_expired_message">Klik om opnieuw in te loggen</string>
     <string name="login_expired_relogin">Opnieuw inloggen</string>
     <string name="service_select_welcome_title">Welkom bij Flare</string>
@@ -139,6 +140,7 @@
     <string name="settings_storage_clear_image_cache_description">%1$s MB van afbeeldingen zal worden verwijderd</string>
     <string name="settings_storage_clear_database">Cache database wissen</string>
     <string name="settings_storage_clear_database_description">%1$s gebruikers, %2$s statussen worden verwijderd</string>
+    <string name="settings_storage_app_log">Open app-logboek</string>
     <string name="settings_storage_app_log_description">Bekijk het app-logboek</string>
     <string name="service_select_instance_input_placeholder">Aanleg URL</string>
     <string name="service_select_next_button">Volgende</string>
@@ -216,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Berichten en antwoorden</string>
     <string name="profile_tab_likes">Vind-ik-leuk</string>
     <string name="profile_tab_media">Medium</string>
+    <string name="tab_settings_title">Tabbladinstellingen</string>
     <string name="dm_list_title">Directe Berichten</string>
     <string name="dm_list_empty">Geen directe berichten</string>
     <string name="dm_list_error">Laden van privéberichten mislukt</string>
@@ -245,6 +248,7 @@
     <string name="rss_detail_tldr">Summarize</string>
     <string name="rss_detail_tldr_title">Summary</string>
     <string name="rss_detail_tldr_error">Samenvatten mislukt</string>
+    <string name="rss_detail_tldr_loading">Samenvatten…</string>
     <string name="emoji_picker_recent">Recentelijk</string>
     <string name="emoji_picker_search">Zoeken</string>
     <string name="changelog_title">Welkom terug!</string>
@@ -263,8 +267,10 @@
     <string name="tab_settings_mixed_timeline_desc">Gemengde tijdlijn mengt alle resultaten van de tabbladen in één tabblad</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
-                <li>Toegevoegde ondersteuning voor Misskey Antennas</li>
-                <li>Bug fixes en prestatie verbeteringen</li>
+                <li>Toegevoegde tijdlijn ondersteuning toegevoegd aan het Home tabblad</li>
+                
+                <li>begonnen met het maken van UI/UX aanpassingen, als er binnenkort meer verbeteringen komen</li>
+                <li>Bug fixes en performance verbeteringen</li>
             </ul>
         <span>        ]]></string>
 </resources>

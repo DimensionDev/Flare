@@ -58,6 +58,7 @@
     <string name="settings_ai_config_enable_tldr">Activer le résumé de l\'IA</string>
     <string name="settings_ai_config_tldr_description">Activer le résumé de l\'IA pour les publications longues, uniquement disponible pour les publications de plus de 500 caractères</string>
     <string name="status_loadmore_error_retry">Réessayer</string>
+    <string name="login_expired">Session de connexion expirée</string>
     <string name="login_expired_message">Cliquez pour vous connecter à nouveau</string>
     <string name="login_expired_relogin">Reconnectez-vous</string>
     <string name="service_select_welcome_title">Bienvenue dans Flare</string>
@@ -139,6 +140,7 @@
     <string name="settings_storage_clear_image_cache_description">%1$s Mo d\'images seront supprimés</string>
     <string name="settings_storage_clear_database">Vider la base de données du cache</string>
     <string name="settings_storage_clear_database_description">Les utilisateurs %1$s , les statuts %2$s seront supprimés</string>
+    <string name="settings_storage_app_log">Ouvrir le journal de l\'application</string>
     <string name="settings_storage_app_log_description">Voir le journal des applications</string>
     <string name="service_select_instance_input_placeholder">URL de l\'instance</string>
     <string name="service_select_next_button">Suivant</string>
@@ -216,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Messages et réponses</string>
     <string name="profile_tab_likes">J\'aime</string>
     <string name="profile_tab_media">Médias</string>
+    <string name="tab_settings_title">Paramètres de l\'onglet</string>
     <string name="dm_list_title">Messages directs</string>
     <string name="dm_list_empty">Aucun message direct</string>
     <string name="dm_list_error">Impossible de charger les messages directs</string>
@@ -264,8 +267,9 @@
     <string name="tab_settings_mixed_timeline_desc">La timeline mixte mélangera le résultat de tous les onglets dans un onglet</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Ajout du support pour les Antennes Misskey</li>
-                <li>Corrections de bugs et améliorations des performances</li>
+                <li>Ajout du support de la timeline mixte à l'onglet Accueil</li>
+                <li>Démarré en faisant des ajustements UI/UX, avec d'autres améliorations à venir bientôt</li>
+                <li>corrections de bugs et améliorations des performances</li>
             </ul>
         ]]></string>
 </resources>

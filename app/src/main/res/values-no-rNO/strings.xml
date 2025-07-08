@@ -58,6 +58,7 @@
     <string name="settings_ai_config_enable_tldr">Aktiver AI sammendrag</string>
     <string name="settings_ai_config_tldr_description">Aktiver oppsummering av AI for lange innlegg, kun tilgjengelig i innlegg som er lengre enn 500 tegn</string>
     <string name="status_loadmore_error_retry">Prøv igjen</string>
+    <string name="login_expired">Innloggingsøkten har utløpt</string>
     <string name="login_expired_message">Trykk for å logge inn igjen</string>
     <string name="login_expired_relogin">Logg inn på nytt</string>
     <string name="service_select_welcome_title">Velkommen til oppsprett</string>
@@ -139,6 +140,7 @@
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder vil bli fjernet</string>
     <string name="settings_storage_clear_database">Slett mellomlagerdatabase</string>
     <string name="settings_storage_clear_database_description">%1$s brukere, %2$s statuser vil bli fjernet</string>
+    <string name="settings_storage_app_log">Åpne app-logg</string>
     <string name="settings_storage_app_log_description">Se app-loggen</string>
     <string name="service_select_instance_input_placeholder">Instans URL</string>
     <string name="service_select_next_button">Neste</string>
@@ -216,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Innlegg og svar</string>
     <string name="profile_tab_likes">Liker</string>
     <string name="profile_tab_media">Medier</string>
+    <string name="tab_settings_title">Faninnstillinger</string>
     <string name="dm_list_title">Direkte meldinger</string>
     <string name="dm_list_empty">Ingen direkte meldinger</string>
     <string name="dm_list_error">Kunne ikke laste direkte meldinger</string>
@@ -262,4 +265,11 @@
     <string name="home_tab_mixed_timeline_title">Blandet</string>
     <string name="tab_settings_mixed_timeline">Legg til blandet tidslinje fane</string>
     <string name="tab_settings_mixed_timeline_desc">Blandet tidslinje vil blande alle faners tidslinjen resulterer i en fane</string>
+    <string name="changelog_current"><![CDATA[            <span>Versjon %1$s:</span>
+            <ul>
+                <li>Lagt til støtte for blandet tidslinje hjemme fanen</li>
+                <li>begynte å gjøre I/UX-justeringer, med flere forbedringer kommer snart</li>
+                <li>Bug fikser og ytelsesforbedringer</li>
+            </ul>
+        ]]></string>
 </resources>

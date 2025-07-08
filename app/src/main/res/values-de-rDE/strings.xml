@@ -58,6 +58,7 @@
     <string name="settings_ai_config_enable_tldr">KI-Zusammenfassung aktivieren</string>
     <string name="settings_ai_config_tldr_description">KI-Zusammenfassung für lange Beiträge aktivieren, nur verfügbar in Beiträgen, die länger als 500 Zeichen sind</string>
     <string name="status_loadmore_error_retry">Wiederholen</string>
+    <string name="login_expired">Die Anmeldesitzung ist abgelaufen</string>
     <string name="login_expired_message">Zum erneuten Anmelden klicken</string>
     <string name="login_expired_relogin">Erneut anmelden</string>
     <string name="service_select_welcome_title">Willkommen bei Leuchtturm</string>
@@ -139,6 +140,7 @@
     <string name="settings_storage_clear_image_cache_description">%1$s MB Bilder werden entfernt</string>
     <string name="settings_storage_clear_database">Cache-Datenbank leeren</string>
     <string name="settings_storage_clear_database_description">%1$s Benutzer, %2$s Status werden entfernt</string>
+    <string name="settings_storage_app_log">App-Log öffnen</string>
     <string name="settings_storage_app_log_description">App-Log anzeigen</string>
     <string name="service_select_instance_input_placeholder">Instanz URL</string>
     <string name="service_select_next_button">Nächste</string>
@@ -216,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Beiträge und Antworten</string>
     <string name="profile_tab_likes">Gefällt</string>
     <string name="profile_tab_media">Medien</string>
+    <string name="tab_settings_title">Tab-Einstellungen</string>
     <string name="dm_list_title">Direkte Nachrichten</string>
     <string name="dm_list_empty">Keine direkten Nachrichten</string>
     <string name="dm_list_error">Fehler beim Laden der Direktnachrichten</string>
@@ -264,8 +267,9 @@
     <string name="tab_settings_mixed_timeline_desc">Gemischte Zeitleiste vermischt alle Tabs in einem Tab</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Unterstützung für Misskey Antennas</li>
+                <li>Gemischte Timeline-Unterstützung auf den Home-Tab</li>
                 
+                <li>Startete UI/UX-Anpassungen, mit weiteren Verbesserungen bald</li>
                 <li>Fehlerbehebungen und Leistungsverbesserungen</li>
             </ul>
         ]]></string>

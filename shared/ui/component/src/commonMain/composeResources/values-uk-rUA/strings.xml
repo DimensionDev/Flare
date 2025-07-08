@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="delete">Видалити</string>
+    <string name="profile_header_following_count">%1$s Підписки</string>
+    <string name="profile_header_fans_count">%1$s Підписників</string>
     <string name="profile_header_toots_count">%1$s казанок</string>
     <string name="profile_misskey_header_status_count">%1$s статус</string>
     <string name="profile_header_button_follow">Слідкувати</string>
@@ -94,6 +96,7 @@
     <string name="retweet">Ретвіт</string>
     <string name="retweet_remove">Видалити ретвіт</string>
     <string name="share">Поділитись</string>
+    <string name="user_report">Поскаржитися на %1$s</string>
     <string name="user_block">Блокувати %1$s</string>
     <string name="user_unblock">Розблокувати %1$s</string>
     <string name="user_mute">Вимкнути звук %1$s</string>

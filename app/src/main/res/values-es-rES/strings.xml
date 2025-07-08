@@ -58,6 +58,7 @@
     <string name="settings_ai_config_enable_tldr">Activar resumen de IA</string>
     <string name="settings_ai_config_tldr_description">Habilitar resumen de IA para mensajes largos, sólo disponible en post de más de 500 caracteres</string>
     <string name="status_loadmore_error_retry">Reintentar</string>
+    <string name="login_expired">La sesión de inicio ha expirado</string>
     <string name="login_expired_message">Haga clic para volver a iniciar sesión</string>
     <string name="login_expired_relogin">Iniciar sesión de nuevo</string>
     <string name="service_select_welcome_title">Bienvenido a Bengala</string>
@@ -139,6 +140,7 @@
     <string name="settings_storage_clear_image_cache_description">Se eliminarán %1$s MB de imágenes</string>
     <string name="settings_storage_clear_database">Borrar base de datos de caché</string>
     <string name="settings_storage_clear_database_description">%1$s usuarios, %2$s estados serán eliminados</string>
+    <string name="settings_storage_app_log">Abrir el registro de la aplicación</string>
     <string name="settings_storage_app_log_description">Ver el registro de aplicaciones</string>
     <string name="service_select_instance_input_placeholder">URL de instancia</string>
     <string name="service_select_next_button">Siguiente</string>
@@ -216,6 +218,7 @@
     <string name="profile_tab_timeline_with_reply">Mensajes y respuestas</string>
     <string name="profile_tab_likes">Me gusta</string>
     <string name="profile_tab_media">Medios</string>
+    <string name="tab_settings_title">Configuraciones de la pestaña</string>
     <string name="dm_list_title">Mensajes directos</string>
     <string name="dm_list_empty">No hay mensajes directos</string>
     <string name="dm_list_error">Error al cargar mensajes directos</string>
@@ -264,7 +267,8 @@
     <string name="tab_settings_mixed_timeline_desc">La línea de tiempo mezclada mezclará todas las pestañas que resulten en una pestaña</string>
     <string name="changelog_current"><![CDATA[            <span>Versión %1$s:</span>
             <ul>
-                <li>Añadido soporte para las Antenas de Misskey</li>
+                <li>Añadido soporte de cronología Mixto a la pestaña Inicio</li>
+                <li>Comenzó haciendo ajustes UI/UX, con más mejoras próximamente</li>
                 <li>correcciones de errores y mejoras de rendimiento</li>
             </ul>
         ]]></string>

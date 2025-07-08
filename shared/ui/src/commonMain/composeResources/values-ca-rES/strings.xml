@@ -1,2 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="settings_about_description">El client de xarxa social descentralitzat de nova generació obert i impulsat per IA.</string>
+    <string name="settings_about_source_code">Codi font</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Uneix-te al nostre grup de Telegram</string>
+    <string name="settings_about_line_description">Uneix-te al nostre grup de Line</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Ajuda\'ns a traduir Flare</string>
+    <string name="settings_privacy_policy">Política de privadesa</string>
+</resources>

@@ -595,7 +595,7 @@ internal class XQTDataSource(
 
     override fun discoverStatuses(): BaseTimelineLoader {
         // not supported
-        throw UnsupportedOperationException("Bluesky does not support discover statuses")
+        throw UnsupportedOperationException("XQT does not support discover statuses")
     }
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =

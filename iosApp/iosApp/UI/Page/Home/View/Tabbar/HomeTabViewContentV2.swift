@@ -108,6 +108,8 @@ struct HomeTabViewContentV2: View {
                 }
             }
             .toolbar(.hidden, for: .tabBar) // 隐藏系统TabBar
+            .ignoresSafeArea(.container, edges: .bottom)
+            .padding(.bottom, -120) // bottom bar 的 高度
 
             // 自定义TabBar - 使用FlareTabBarV2
             if !appState.isCustomTabBarHidden {
@@ -117,9 +119,9 @@ struct HomeTabViewContentV2: View {
                         scrollToTopTrigger: $scrollToTopTrigger
                     )
 
-                    // 底部安全区域
+//                     底部安全区域
                     Rectangle()
-                        .fill(theme.primaryBackgroundColor)
+                        .fill(.clear)
                         .frame(height: 0)
                         .ignoresSafeArea(.container, edges: .bottom)
                 }

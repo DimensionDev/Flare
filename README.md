@@ -25,17 +25,49 @@ The ultimate next generation* open-sourced AI powered decentralized social netwo
 
 ## Roadmap
 Here're some features we're planning to implement in the future.
- - [x] Mixed timeline
+ - [ ] Grouped Mixed timeline
+ - [ ] Showing instance's announcement
+ - [ ] Crossposting for repost
+ - [ ] Auto thread
  - [ ] AI powered features
-   - [x] Translation
-   - [x] Summary
+   - [ ] Personal trends of the day
    - [ ] Quick reply
  - [ ] Support for Meta Threads
- - [x] Anonymous mode enhancement
-   - Option to change data source
- - [ ] Auto thread
+ - [ ] Support for Discourse forum
+ - [ ] Desktop Client
+ - [ ] Web Client(?)
+
+Here're some features we've done before.
+ - [x] Mixed timeline
+ - [x] AI powered features
+   - [x] Translation
+   - [x] Summary
+ - [x] Anonymous mode enhancement, option to change data source
  - [x] Local history
  - [x] RSS feed support
+ - [x] Support for vvo platform
+ - [x] Anonymous mode, no need to login
+ - [x] Customizable tabs
+ - [x] Local filtering
+ - [x] Crossposting
+ - [x] Translation
+
+### Mastodon
+ - [x] Support for polls
+ - [x] Support global/local timelines
+ - [x] Support for lists
+ - [x] Support for bookmarks/faovrites timelines
+
+### Misskey
+ - [x] Support for polls
+ - [x] Support for lists
+ - [x] Support for antennas
+ - [x] Support for faovrites timeline
+
+### Bluesky
+ - [x] Support for lists
+ - [x] Support for feeds
+ - [x] Support DM
 
 ## Building
 ### Android

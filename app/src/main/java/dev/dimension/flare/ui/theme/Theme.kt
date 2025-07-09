@@ -17,6 +17,8 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.materialkolor.PaletteStyle
+import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
@@ -127,6 +129,8 @@ fun FlareTheme(
                     seed,
                     isDark = true,
                     isAmoled = pureColorMode,
+                    specVersion = ColorSpec.SpecVersion.SPEC_2025,
+                    style = PaletteStyle.Expressive,
                     modifyColorScheme = {
                         if (pureColorMode) {
                             it.withPureColorDarkMode()
@@ -141,6 +145,8 @@ fun FlareTheme(
                     seed,
                     isDark = false,
                     isAmoled = pureColorMode,
+                    specVersion = ColorSpec.SpecVersion.SPEC_2025,
+                    style = PaletteStyle.Expressive,
                     modifyColorScheme = {
                         if (pureColorMode) {
                             it.withPureColorLightMode()

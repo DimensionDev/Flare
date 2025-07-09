@@ -164,7 +164,7 @@ class TimelineImagePrefetcher {
             {
                 urls.append(avatarUrl)
                 avatarCount += 1
-                FlareLog.debug("TimelineImagePrefetcher   - 添加头像: \(user.name.raw) -> \(user.avatar)")
+               // FlareLog.debug("TimelineImagePrefetcher   - 添加头像: \(user.name.raw) -> \(user.avatar)")
             }
 
             // 提取媒体图片
@@ -174,7 +174,7 @@ class TimelineImagePrefetcher {
                 if let url = URL(string: cleanedImageUrl) {
                     urls.append(url)
                     mediaCount += 1
-                    FlareLog.debug("TimelineImagePrefetcher   - 添加媒体[\(mediaIndex)]: \(cleanedImageUrl)")
+                    //FlareLog.debug("TimelineImagePrefetcher   - 添加媒体[\(mediaIndex)]: \(cleanedImageUrl)")
                 }
             }
 

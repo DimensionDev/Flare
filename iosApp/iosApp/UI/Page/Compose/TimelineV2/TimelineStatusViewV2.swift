@@ -188,7 +188,7 @@ struct TimelineStatusViewV2: View {
         let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
 
         // 构造MicroBlogKey - 需要从item.id和platformType构造
-        let statusKey = item.createMicroBlogKey(from: item)
+        let statusKey = item.createMicroBlogKey()
 
         FlareLog.debug("TimelineStatusView Navigate to status detail: \(item.id)")
         router.navigate(to: .statusDetail(

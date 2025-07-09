@@ -146,7 +146,7 @@ struct TimelineActionsViewV2: View {
         displayIsRetweeted = item.isRetweeted
         displayBookmarkCount = item.bookmarkCount
         displayIsBookmarked = item.isBookmarked
-        FlareLog.debug("TimelineActionsView Synced display state from item: Like \(displayLikeCount) (liked: \(displayIsLiked)), Retweet \(displayRetweetCount) (retweeted: \(displayIsRetweeted)), Bookmark \(displayBookmarkCount) (bookmarked: \(displayIsBookmarked))")
+        //FlareLog.debug("TimelineActionsView Synced display state from item: Like \(displayLikeCount) (liked: \(displayIsLiked)), Retweet \(displayRetweetCount) (retweeted: \(displayIsRetweeted)), Bookmark \(displayBookmarkCount) (bookmarked: \(displayIsBookmarked))")
     }
 
     /// 处理点赞操作

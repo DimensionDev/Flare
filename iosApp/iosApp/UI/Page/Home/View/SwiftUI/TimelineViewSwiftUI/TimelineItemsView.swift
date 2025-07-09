@@ -7,6 +7,7 @@ struct TimelineItemsView: View {
     let isRefreshing: Bool
     let presenter: TimelinePresenter?
     let onError: (FlareError) -> Void
+    let viewModel: TimelineViewModel
 
     @State private var itemIndexMap: [String: Int] = [:]
     @State private var lastItemId: String?
@@ -33,7 +34,13 @@ struct TimelineItemsView: View {
                 }
             }
         }
-        .onChange(of: items) { _, newItems in
+        .onChange(of: items) { oldItems, newItems in
+            FlareLog.debug("[Timeline ItemsView] items数组变化: \(oldItems.count) -> \(newItems.count)")
+            if newItems.count > oldItems.count {
+                FlareLog.debug("[Timeline ItemsView] 🎉 检测到新items！新增了 \(newItems.count - oldItems.count) 个")
+                let newItemIds = newItems.suffix(newItems.count - oldItems.count).map(\.id)
+                FlareLog.debug("[Timeline ItemsView] 新增items的ID: \(newItemIds)")
+            }
             updateItemIndexMap(newItems)
             updateLastItemId(newItems)
         }
@@ -52,26 +59,10 @@ struct TimelineItemsView: View {
     }
 
     private func handleLoadMore() {
-        FlareLog.debug("Timeline Handling load more")
-
-        guard let presenter else {
-            FlareLog.warning("Timeline No presenter available for load more")
-            return
-        }
-
-        Task.detached(priority: .userInitiated) { [presenter, items] in
-            let timelineState = presenter.models.value
-            if let pagingState = timelineState.listState as? PagingStateSuccess<UiTimeline> {
-                let currentItemCount = Int(pagingState.itemCount)
-                let nextPageIndex = items.count
-
-                if nextPageIndex < currentItemCount {
-                    FlareLog.debug("Timeline Safe next page load: requesting index=\(nextPageIndex), total=\(currentItemCount)")
-                    _ = pagingState.get(index: Int32(nextPageIndex))
-                } else {
-                    FlareLog.debug("Timeline Skipped next page load: index=\(nextPageIndex) >= total=\(currentItemCount)")
-                }
-            }
+        FlareLog.debug("[Timeline LoadMore UI] UI层触发load more，委托给ViewModel")
+        // UI层只负责触发，业务逻辑委托给ViewModel
+        Task {
+            await viewModel.handleLoadMore()
         }
     }
 

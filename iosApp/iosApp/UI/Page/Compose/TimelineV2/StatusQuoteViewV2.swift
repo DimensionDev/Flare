@@ -67,7 +67,7 @@ struct QuotedStatusV2: View {
         Button(action: {
             // 🔥 实现引用推文点击跳转到详情页面
             let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
-            let statusKey = item.createMicroBlogKey(from: item)
+            let statusKey = item.createMicroBlogKey()
 
             FlareLog.debug("QuotedStatus Navigate to status detail: \(item.id)")
             router.navigate(to: .statusDetail(

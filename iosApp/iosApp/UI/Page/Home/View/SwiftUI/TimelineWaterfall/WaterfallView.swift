@@ -41,7 +41,7 @@ struct WaterfallView: View {
 
         case let .error(error):
             TimelineErrorView(error: error) {
-                Task {
+                Task { @MainActor in
                     await viewModel.handleRefresh()
                 }
             }
@@ -210,7 +210,7 @@ struct WaterfallItemsView: View {
 
         case let .showTimelineDetail(timelineItem):
             let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
-            let statusKey = timelineItem.createMicroBlogKey(from: timelineItem)
+            let statusKey = timelineItem.createMicroBlogKey()
 
             FlareLog.debug("WaterfallItemsView Navigate to timeline detail: \(timelineItem.id)")
             router.navigate(to: .statusDetail(

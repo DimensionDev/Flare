@@ -79,7 +79,7 @@ struct UserComponentV2: View {
             action: {
                 // 🔥 实现用户点击跳转到用户页面
                 let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
-                let userKey = user.createMicroBlogKey(from: user)
+                let userKey = user.createMicroBlogKey()
 
                 FlareLog.debug("UserComponent Navigate to profile: \(user.key)")
                 router.navigate(to: .profile(

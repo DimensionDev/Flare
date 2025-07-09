@@ -13,6 +13,15 @@ struct TimelineViewSwiftUIV4: View {
 
     @State private var viewModel = TimelineViewModel()
 
+    init(tab: FLTabItem, store: AppBarTabSettingStore, scrollToTopTrigger: Binding<Bool>, isCurrentTab: Bool, showFloatingButton: Binding<Bool>) {
+        self.tab = tab
+        self.store = store
+        self._scrollToTopTrigger = scrollToTopTrigger
+        self.isCurrentTab = isCurrentTab
+        self._showFloatingButton = showFloatingButton
+        FlareLog.debug("[TimelineV4] 视图初始化 for tab: \(tab.key)")
+    }
+
     // @State private var cancellables = Set<AnyCancellable>()
     @State private var refreshDebounceTimer: Timer?
 
@@ -38,7 +47,8 @@ struct TimelineViewSwiftUIV4: View {
                             hasMore: hasMore,
                             isRefreshing: isRefreshing,
                             presenter: viewModel.presenter,
-                            onError: viewModel.handleError
+                            onError: viewModel.handleError,
+                            viewModel: viewModel
                         )
                         .listRowBackground(theme.primaryBackgroundColor)
                         .listRowInsets(EdgeInsets())

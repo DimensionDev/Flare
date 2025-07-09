@@ -5,9 +5,14 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
     applyDefaultHierarchyTemplate()
-    androidTarget()
+    androidLibrary {
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        namespace = "dev.dimension.flare.shared.api"
+        minSdk = libs.versions.minSdk.get().toInt()
+    }
     jvm()
     macosX64()
     macosArm64()
@@ -27,23 +32,5 @@ kotlin {
             dependencies {
             }
         }
-    }
-}
-android {
-    compileSdk = libs.versions.compileSdk.get().toInt()
-    namespace = "dev.dimension.flare.shared.api"
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-        targetCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-    }
-    kotlin {
-        jvmToolchain(libs.versions.java.get().toInt())
-    }
-    buildFeatures {
-        buildConfig = true
     }
 }

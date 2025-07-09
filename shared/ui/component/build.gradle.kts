@@ -9,10 +9,14 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
     applyDefaultHierarchyTemplate()
-
-    androidTarget()
+    androidLibrary {
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        namespace = "dev.dimension.flare.shared.ui.component"
+        minSdk = libs.versions.minSdk.get().toInt()
+    }
     jvm()
 
     sourceSets {
@@ -33,6 +37,7 @@ kotlin {
                 implementation(libs.ksoup)
                 implementation(libs.kotlinx.immutable)
                 implementation(libs.precompose.molecule)
+                implementation(libs.kotlinx.datetime)
             }
         }
         val commonTest by getting {
@@ -46,6 +51,7 @@ kotlin {
                 implementation(libs.material3.adaptive)
                 implementation(compose.material3)
                 implementation(libs.bundles.media3)
+                implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.bundles.koin)
             }
         }
@@ -59,22 +65,6 @@ kotlin {
                 implementation(libs.androidx.collection)
             }
         }
-    }
-}
-
-android {
-    compileSdk = libs.versions.compileSdk.get().toInt()
-    namespace = "dev.dimension.flare.shared.ui.component"
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-        targetCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-    }
-    kotlin {
-        jvmToolchain(libs.versions.java.get().toInt())
     }
 }
 

@@ -1,5 +1,3 @@
-import java.util.Locale
-
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
@@ -10,10 +8,15 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
     applyDefaultHierarchyTemplate()
+    androidLibrary {
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        namespace = "dev.dimension.flare.shared.ui"
+        minSdk = libs.versions.minSdk.get().toInt()
+    }
 
-    androidTarget()
 
     listOf(
         iosX64(),
@@ -57,22 +60,6 @@ kotlin {
                 implementation(libs.compose.cupertino)
             }
         }
-    }
-}
-
-android {
-    compileSdk = libs.versions.compileSdk.get().toInt()
-    namespace = "dev.dimension.flare.shared.ui"
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-        targetCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-    }
-    kotlin {
-        jvmToolchain(libs.versions.java.get().toInt())
     }
 }
 

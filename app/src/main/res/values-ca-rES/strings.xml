@@ -267,8 +267,8 @@
     <string name="tab_settings_mixed_timeline_desc">La línia de temps mixta combinarà el resultat de totes les línies de temps en una fitxa</string>
     <string name="changelog_current"><![CDATA[            <span>Versió %1$s:</span>
             <ul>
-                <li>Suport per a línia de temps mixta afegit a la fitxa d\'Inici</li>
-                <li>S\'ha començat a fer ajustos de UI/UX, amb més millores en camí</li>
+                <li>Suport per a línia de temps mixta afegit a la fitxa d'Inici</li>
+                <li>S'ha començat a fer ajustos de UI/UX, amb més millores en camí</li>
                 <li>Correcció de errors i millores de rendiment</li>
             </ul>
         ]]></string>

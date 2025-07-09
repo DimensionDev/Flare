@@ -267,8 +267,8 @@
     <string name="tab_settings_mixed_timeline_desc">La timeline mixte mélangera le résultat de tous les onglets dans un onglet</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Ajout du support de la timeline mixte à l\'onglet Accueil</li>
-                <li>Démarré en faisant des ajustements UI/UX, avec d\'autres améliorations à venir bientôt</li>
+                <li>Ajout du support de la timeline mixte à l'onglet Accueil</li>
+                <li>Démarré en faisant des ajustements UI/UX, avec d'autres améliorations à venir bientôt</li>
                 <li>corrections de bugs et améliorations des performances</li>
             </ul>
         ]]></string>

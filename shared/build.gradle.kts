@@ -1,3 +1,4 @@
+
 import java.util.Locale
 
 plugins {
@@ -14,10 +15,15 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
     applyDefaultHierarchyTemplate()
+    androidLibrary {
+        compileSdk = libs.versions.compileSdk.get().toInt()
+        namespace = "dev.dimension.flare.shared"
+        minSdk = libs.versions.minSdk.get().toInt()
+    }
 
-    androidTarget()
 
     jvm()
 
@@ -122,25 +128,6 @@ kotlin {
 
 room {
     schemaDirectory("$projectDir/schemas")
-}
-
-android {
-    compileSdk = libs.versions.compileSdk.get().toInt()
-    namespace = "dev.dimension.flare.shared"
-
-    defaultConfig {
-        minSdk = libs.versions.minSdk.get().toInt()
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-        targetCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-    }
-    kotlin {
-        jvmToolchain(libs.versions.java.get().toInt())
-    }
-    buildFeatures {
-        buildConfig = true
-    }
 }
 
 ktlint {

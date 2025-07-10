@@ -15,6 +15,7 @@ kotlin {
         compileSdk = libs.versions.compileSdk.get().toInt()
         namespace = "dev.dimension.flare.shared.ui"
         minSdk = libs.versions.minSdk.get().toInt()
+        experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
     }
 
 

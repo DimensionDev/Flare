@@ -1,24 +1,1118 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <link rel="shortcut icon" type="image/ico" href="/src/assets/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/src/assets/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/src/assets/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/src/assets/favicon-16x16.png">
-    <link rel="manifest" href="/src/assets/site.webmanifest">
-    <link rel="mask-icon" href="/src/assets/safari-pinned-tab.svg" color="#5bbad5">
-    <meta name="msapplication-TileColor" content="#da532c">
-    <meta name="theme-color" content="#ffffff">
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flare - 下一代开源社交平台客户端</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <title>Flare</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+        :root {
+            --primary: #6366f1;
+            --secondary: #ec4899;
+            --accent: #8b5cf6;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
 
-    <script src="/src/index.tsx" type="module"></script>
-  </body>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* 动态背景 */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+
+        .gradient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.4;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .orb1 {
+            width: 600px;
+            height: 600px;
+            background: var(--primary);
+            top: -200px;
+            left: -200px;
+            animation-delay: 0s;
+        }
+
+        .orb2 {
+            width: 500px;
+            height: 500px;
+            background: var(--secondary);
+            bottom: -200px;
+            right: -200px;
+            animation-delay: 5s;
+        }
+
+        .orb3 {
+            width: 400px;
+            height: 400px;
+            background: var(--accent);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: 10s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(30px, -30px) scale(1.1);
+            }
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+        }
+
+        /* 导航栏 */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1.5rem 2rem;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                filter: brightness(1);
+            }
+            50% {
+                filter: brightness(1.2);
+            }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-links a {
+            color: var(--light);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* 语言切换器 */
+        .lang-switcher {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--glass);
+            padding: 0.5rem;
+            border-radius: 25px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .lang-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: transparent;
+            color: var(--light);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .lang-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .lang-btn:hover:not(.active) {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* 主页面 */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6rem 2rem 4rem;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-text {
+            animation: slideInLeft 1s ease-out;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--light) 0%, var(--primary) 50%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 5s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--glass);
+            color: var(--light);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .app-preview {
+            position: relative;
+            animation: slideInRight 1s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .app-preview-placeholder {
+            width: 100%;
+            max-width: 400px;
+            height: 600px;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #64748b;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-preview-placeholder::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
+        }
+
+        /* 功能区 */
+        .features {
+            padding: 6rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .features-title {
+            text-align: center;
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: 4rem;
+            background: linear-gradient(135deg, var(--light), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .features-container {
+            display: flex;
+            flex-direction: column;
+            gap: 6rem;
+        }
+
+        .feature-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .feature-row.reverse {
+            direction: rtl;
+        }
+
+        .feature-row.reverse .feature-content {
+            direction: ltr;
+        }
+
+        .feature-row.reverse .feature-image {
+            direction: ltr;
+        }
+
+        .feature-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .feature-title {
+            font-size: 2rem;
+            color: var(--light);
+        }
+
+        .feature-description {
+            color: #94a3b8;
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .feature-badge {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            width: fit-content;
+        }
+
+        .feature-image {
+            width: 100%;
+            aspect-ratio: 16/10;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #64748b;
+            backdrop-filter: blur(20px);
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .feature-image:hover {
+            border-color: var(--primary);
+            transform: scale(1.02);
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.2);
+        }
+
+        .feature-image::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+            transform: rotate(45deg);
+            animation: shimmer 4s infinite;
+        }
+
+        /* 下载区 */
+        .download {
+            padding: 6rem 2rem;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .download-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .download-title {
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--light), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .download-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 3rem;
+        }
+
+        .download-btn {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            padding: 1.5rem 2.5rem;
+            border-radius: 15px;
+            text-decoration: none;
+            color: var(--light);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            min-width: 200px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .download-btn-icon {
+            font-size: 2rem;
+        }
+
+        .download-btn-title {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .download-btn-subtitle {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+
+        /* 页脚 */
+        footer {
+            padding: 3rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer-text {
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .footer-links a {
+            color: #94a3b8;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .nav-container {
+                justify-content: space-between;
+            }
+
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .app-preview {
+                order: -1;
+            }
+
+            .cta-buttons {
+                justify-content: center;
+            }
+
+            .feature-row,
+            .feature-row.reverse {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+                direction: ltr;
+            }
+
+            .feature-row.reverse .feature-content {
+                direction: ltr;
+            }
+
+            .feature-title {
+                font-size: 1.5rem;
+            }
+
+            .feature-image {
+                aspect-ratio: 16/12;
+            }
+
+            .download-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        /* 滚动动画 */
+        .scroll-reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .scroll-reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- 动态背景 -->
+    <div class="background">
+        <div class="gradient-orb orb1"></div>
+        <div class="gradient-orb orb2"></div>
+        <div class="gradient-orb orb3"></div>
+    </div>
+
+    <!-- 导航栏 -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">Flare</div>
+            <div class="nav-links">
+                <a href="#features" data-i18n="nav.features">功能特点</a>
+                <a href="#download" data-i18n="nav.download">立即下载</a>
+                <a href="https://github.com/DimensionDev/Flare" target="_blank">GitHub</a>
+            </div>
+            <div class="lang-switcher">
+                <button class="lang-btn active" data-lang="zh">中文</button>
+                <button class="lang-btn" data-lang="en">EN</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主页面 -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1>Flare</h1>
+                <p class="subtitle" data-i18n="hero.subtitle">下一代开源的由AI驱动的社交平台客户端</p>
+                <p style="color: #94a3b8; margin-bottom: 2rem;">
+                    <span data-i18n="hero.description1">无需等待，无需注册，完全开源。</span><br>
+                    <span data-i18n="hero.description2">一个应用，畅游所有社交平台。</span>
+                </p>
+                <div class="cta-buttons">
+                    <a href="#download" class="btn btn-primary">
+                        <span data-i18n="hero.downloadBtn">立即下载</span>
+                        <span>→</span>
+                    </a>
+                    <a href="https://github.com/DimensionDev/Flare" target="_blank" class="btn btn-secondary">
+                        <span data-i18n="hero.sourceBtn">查看源码</span>
+                    </a>
+                </div>
+            </div>
+            <div class="app-preview">
+                <div class="app-preview-placeholder">
+                    <img src="cover1.png" alt="App Preview" style="object-fit: cover; width: 100%; height: 100%;">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 功能介绍 -->
+    <section class="features" id="features">
+        <h2 class="features-title scroll-reveal" data-i18n="features.title">强大功能，重新定义社交体验</h2>
+        <div class="features-container" id="features-container">
+            <!-- 功能将通过 JavaScript 动态生成 -->
+        </div>
+    </section>
+
+    <!-- 下载区域 -->
+    <section class="download" id="download">
+        <div class="download-container">
+            <h2 class="download-title" data-i18n="download.title">选择你的平台，开始使用</h2>
+            <p style="color: #94a3b8; font-size: 1.2rem;" data-i18n="download.subtitle">完全免费，开源透明，尊重隐私</p>
+            
+            <div class="download-buttons">
+                <a href="https://play.google.com/store/apps/details?id=dev.dimension.flare" target="_blank" class="download-btn">
+                    <div class="download-btn-icon">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_Play_2022_icon.svg/2320px-Google_Play_2022_icon.svg.png" alt="Google Play" style="width: 32px; height: auto;">
+                    </div>
+                    <div class="download-btn-title" data-i18n="download.googlePlay">Google Play</div>
+                    <div class="download-btn-subtitle" data-i18n="download.googlePlayDesc">Android设备</div>
+                </a>
+                
+                <a href="https://testflight.apple.com/join/iYP7QZME" target="_blank" class="download-btn">
+                    <div class="download-btn-icon">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/67/App_Store_%28iOS%29.svg" alt="TestFlight" style="width: 32px; height: auto;">
+                    </div>
+                    <div class="download-btn-title" data-i18n="download.testFlight">TestFlight</div>
+                    <div class="download-btn-subtitle" data-i18n="download.testFlightDesc">iOS测试版</div>
+                </a>
+                
+                <a href="https://github.com/DimensionDev/Flare" target="_blank" class="download-btn">
+                    <div class="download-btn-icon">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Octicons-mark-github.svg/1024px-Octicons-mark-github.svg.png" alt="Source Code" style="width: 32px; height: auto; background-color: white; padding: 0.25rem; border-radius: 16%;">
+                    </div>
+                    <div class="download-btn-title" data-i18n="download.source">源代码</div>
+                    <div class="download-btn-subtitle" data-i18n="download.sourceDesc">自行编译</div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer>
+        <div class="footer-content">
+            <p class="footer-text" data-i18n="footer.title">Flare - 开源的社交平台客户端</p>
+            <div class="footer-links">
+                <a href="https://github.com/DimensionDev/Flare" target="_blank">GitHub</a>
+                <a href="https://github.com/DimensionDev/Flare/issues" target="_blank" data-i18n="footer.issues">反馈问题</a>
+                <a href="https://github.com/DimensionDev/Flare/blob/master/LICENSE" target="_blank" data-i18n="footer.license">开源协议</a>
+            </div>
+            <p style="color: #64748b; margin-top: 2rem;" data-i18n="footer.copyright">© 2025 Flare. Made with ❤️ by DimensionDev</p>
+        </div>
+    </footer>
+
+    <script>
+        /* ========================================
+           功能维护说明：
+           要添加新功能，需要执行以下步骤：
+           
+           1. 在 features 数组中添加新对象：
+              {
+                  icon: '🎯',
+                  key: 'newFeature',
+                  badge: 'newFeature' // 或 null
+              }
+           
+           2. 在 translations 的中文和英文部分都添加翻译：
+              'features.newFeature.title': '新功能名称',
+              'features.newFeature.desc': '新功能描述',
+              'features.newFeature.badge': '即将推出', // 如果有徽章
+              'placeholder.newFeature': '[新功能截图]'
+           
+           功能会自动渲染，并保持左右交替布局
+        ======================================== */
+        
+        // 功能列表定义
+        // 添加新功能只需在此数组中添加一个新对象
+        // icon: 功能图标
+        // key: 对应翻译文件中的键名
+        // badge: 如果有徽章，对应翻译文件中的徽章键名，没有则为 null
+        const features = [
+            {
+                icon: '🌐',
+                key: 'multiPlatform',
+                badge: null,
+                image: 'feature2.png'
+            },
+            {
+                icon: '🔄',
+                key: 'mixedTimeline',
+                badge: null,
+                image: 'feature3.png'
+            },
+            // {
+            //     icon: '🤖',
+            //     key: 'aiFilter',
+            //     badge: 'aiFilter',
+            //     image: 'feature4.png'
+            // },
+            {
+                icon: '📚',
+                key: 'history',
+                badge: null,
+                image: 'feature5.png'
+            },
+            {
+                icon: '📰',
+                key: 'rss',
+                badge: null,
+                image: 'feature6.png'
+            },
+            {
+                icon: '📱',
+                key: 'tablet',
+                badge: null,
+                image: 'feature7.png'
+            },
+            {
+                icon: '💻',
+                key: 'desktop',
+                badge: 'desktop',
+                image: 'feature8.png'
+            }
+            // 在这里添加新功能...
+        ];
+
+        // i18n 翻译配置
+        const translations = {
+            zh: {
+                // 导航
+                'nav.features': '功能特点',
+                'nav.download': '立即下载',
+                
+                // 主页
+                'hero.subtitle': '下一代开源的由 AI 驱动的社交平台客户端',
+                'hero.description1': '没有 waitlist，无需注册，完全开源。',
+                'hero.description2': '一个应用，畅游所有社交平台。',
+                'hero.downloadBtn': '立即下载',
+                'hero.sourceBtn': '查看源码',
+                
+                // 功能标题
+                'features.title': '强大功能，重新定义社交体验',
+                
+                // 功能1
+                'features.multiPlatform.title': '多平台支持',
+                'features.multiPlatform.desc': '同时支持 Mastodon、Misskey、Bluesky、X 等多个平台。更多平台将在后续更新中添加，让你在一个应用中管理所有社交账号。',
+                
+                // 功能2
+                'features.mixedTimeline.title': '混合时间线',
+                'features.mixedTimeline.desc': '无需在多个账号之间切换 – 将不同平台的时间线混合为一，一次滑动即可浏览所有内容。',
+                
+                // 功能3
+                'features.aiFilter.title': 'AI智能筛选',
+                'features.aiFilter.desc': '时间线信息过载？让 AI 为你过滤冗余信息，精准抓取你感兴趣的关键内容 – 节省宝贵的阅读时间。',
+                'features.aiFilter.badge': '即将推出',
+                
+                // 功能4
+                'features.history.title': '本地历史记录',
+                'features.history.desc': '手快刷新掉了想看的内容？别担心，所有记录都保存在本地，可随时检索、离线访问。',
+                
+                // 功能5
+                'features.rss.title': 'RSS阅读器',
+                'features.rss.desc': '内置 RSS 支持，不仅是社交客户端，更是功能完整的 RSS 阅读器，订阅你喜爱的博客与新闻源。一个应用，满足所有阅读需求。',
+                
+                // 功能6
+                'features.tablet.title': '平板/大屏优化',
+                'features.tablet.desc': '专为平板和大屏设备优化的界面设计，不再是简单的手机界面放大版。充分利用屏幕空间，带来更高效的多栏布局和沉浸式阅读体验。',
+                
+                // 功能7
+                'features.desktop.title': '桌面客户端即将推出',
+                'features.desktop.desc': '"你们没有手机吗？" 没有问题！Flare 桌面客户端正在开发中，即将登陆 Windows、macOS 和 Linux 平台，让你在任何设备上都能享受完整的社交体验。',
+                'features.desktop.badge': '开发中',
+                
+                // 下载区
+                'download.title': '选择你的平台，开始使用',
+                'download.subtitle': '完全免费，开源透明，尊重隐私，没有 Waitlist，无需注册账号。你可以立即下载、安装并参与共建。',
+                'download.googlePlay': 'Google Play',
+                'download.googlePlayDesc': 'Android设备',
+                'download.testFlight': 'TestFlight',
+                'download.testFlightDesc': 'iOS测试版',
+                'download.source': '源代码',
+                'download.sourceDesc': '自行编译',
+                
+                // 页脚
+                'footer.title': 'Flare - 开源的社交平台客户端',
+                'footer.issues': '反馈问题',
+                'footer.license': '开源协议',
+                'footer.copyright': '© 2025 Flare. Made with ❤️ by DimensionDev',
+                
+                // 占位符
+                'placeholder.appPreview': '[App预览图]',
+                'placeholder.multiPlatform': '[多平台支持功能截图]',
+                'placeholder.mixedTimeline': '[混合时间线功能截图]',
+                'placeholder.aiFilter': '[AI筛选功能概念图]',
+                'placeholder.history': '[历史记录功能截图]',
+                'placeholder.rss': '[RSS阅读器功能截图]',
+                'placeholder.tablet': '[平板界面优化截图]',
+                'placeholder.desktop': '[桌面客户端预览图]',
+                'placeholder.instant': '[快速启动演示图]'
+                // 添加新功能时，也要添加对应的占位符翻译
+                // 'placeholder.newFeature': '[新功能截图]'
+            },
+            en: {
+                // Navigation
+                'nav.features': 'Features',
+                'nav.download': 'Download Now',
+
+                // Hero
+                'hero.subtitle': 'The next-generation open-source, AI-powered social-platform client',
+                'hero.description1': 'No waitlist, no registration, completely open-source.',
+                'hero.description2': 'One app to explore every social network.',
+                'hero.downloadBtn': 'Download Now',
+                'hero.sourceBtn': 'View Source',
+
+                // Features title
+                'features.title': 'Powerful features that redefine the social experience',
+
+                // Feature 1
+                'features.multiPlatform.title': 'Multi-Platform Support',
+                'features.multiPlatform.desc':
+                    'Simultaneously supports Mastodon, Misskey, Bluesky, X, and more platforms to come—manage all your social accounts in a single app.',
+
+                // Feature 2
+                'features.mixedTimeline.title': 'Mixed Timeline',
+                'features.mixedTimeline.desc':
+                    'Forget switching between accounts—merge timelines from different platforms into one and browse everything with a single scroll.',
+
+                // Feature 3
+                'features.aiFilter.title': 'AI-Smart Filtering',
+                'features.aiFilter.desc':
+                    'Timeline overload? Let AI cut through the noise and surface the posts you care about—saving you precious reading time.',
+                'features.aiFilter.badge': 'Coming Soon',
+
+                // Feature 4
+                'features.history.title': 'Local History',
+                'features.history.desc':
+                    'Accidentally refreshed away something interesting? Don’t worry—your entire browsing history is stored locally and always searchable, even offline.',
+
+                // Feature 5
+                'features.rss.title': 'RSS Reader',
+                'features.rss.desc':
+                    'Built-in RSS support. More than a social client—it’s a full-featured RSS reader, so you can follow blogs and news feeds right inside one app.',
+
+                // Feature 6
+                'features.tablet.title': 'Tablet / Large-Screen Optimized',
+                'features.tablet.desc':
+                    'A UI tailored for tablets and big screens—far beyond a simple blown-up phone layout. Make the most of screen real estate with efficient multi-column views and immersive reading.',
+
+                // Feature 7
+                'features.desktop.title': 'Desktop Client Coming Soon',
+                'features.desktop.desc':
+                    '“You guys don’t have phones?” No worries! A Flare desktop client is in development for Windows, macOS, and Linux so you’ll enjoy the full social experience on any device.',
+                'features.desktop.badge': 'In Development',
+
+                // Download section
+                'download.title': 'Choose your platform and get started',
+                'download.subtitle':
+                    'Completely free, open, and privacy-respecting. No waitlist or registration. The entire codebase and roadmap are public—you can download, install, and start contributing right away.',
+                'download.googlePlay': 'Google Play',
+                'download.googlePlayDesc': 'Android devices',
+                'download.testFlight': 'TestFlight',
+                'download.testFlightDesc': 'iOS beta',
+                'download.source': 'Source Code',
+                'download.sourceDesc': 'Build it yourself',
+
+                // Footer
+                'footer.title': 'Flare – Open-Source Social-Platform Client',
+                'footer.issues': 'Report Issues',
+                'footer.license': 'License',
+                'footer.copyright': '© 2025 Flare. Made with ❤️ by DimensionDev',
+
+                // Placeholders
+                'placeholder.appPreview': '[App Preview]',
+                'placeholder.multiPlatform': '[Multi-Platform Support Screenshot]',
+                'placeholder.mixedTimeline': '[Mixed Timeline Screenshot]',
+                'placeholder.aiFilter': '[AI Filter Concept Art]',
+                'placeholder.history': '[History Screenshot]',
+                'placeholder.rss': '[RSS Reader Screenshot]',
+                'placeholder.tablet': '[Tablet UI Screenshot]',
+                'placeholder.desktop': '[Desktop Client Preview]',
+                'placeholder.instant': '[Quick Start Demo]'
+                // When adding new features, also add the corresponding placeholder translation
+                // 'placeholder.newFeature': '[New Feature Screenshot]'
+            }
+
+        };
+
+        // 当前语言
+        let currentLang = localStorage.getItem('flare-lang') || 'zh';
+
+        // 翻译函数
+        function translate(key) {
+            return translations[currentLang][key] || key;
+        }
+
+        // 更新页面语言
+        function updateLanguage() {
+            // 更新 HTML lang 属性
+            document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+            
+            // 更新页面标题
+            document.title = currentLang === 'zh' 
+                ? 'Flare - 下一代开源社交平台客户端' 
+                : 'Flare - Next-gen Open Source Social Platform Client';
+            
+            // 更新所有带有 data-i18n 的元素
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const key = element.getAttribute('data-i18n');
+                element.textContent = translate(key);
+            });
+            
+            // 更新语言按钮状态
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-lang') === currentLang);
+            });
+        }
+
+        // 渲染功能列表
+        function renderFeatures() {
+            const container = document.getElementById('features-container');
+            container.innerHTML = '';
+            
+            features.forEach((feature, index) => {
+                const isReverse = index % 2 === 1;
+                const featureRow = document.createElement('div');
+                featureRow.className = `feature-row ${isReverse ? 'reverse' : ''} scroll-reveal`;
+                
+                const badgeHtml = feature.badge ? 
+                    `<span class="feature-badge" data-i18n="features.${feature.badge}.badge">${translate(`features.${feature.badge}.badge`)}</span>` : '';
+                
+                featureRow.innerHTML = `
+                    <div class="feature-content">
+                        <div class="feature-header">
+                            <div class="feature-icon">${feature.icon}</div>
+                            <h3 class="feature-title" data-i18n="features.${feature.key}.title">${translate(`features.${feature.key}.title`)}</h3>
+                        </div>
+                        <p class="feature-description" data-i18n="features.${feature.key}.desc">
+                            ${translate(`features.${feature.key}.desc`)}
+                        </p>
+                        ${badgeHtml}
+                    </div>
+                    <div class="feature-image">
+                        <img src="${feature.image || 'placeholder.png'}" alt="${translate(`placeholder.${feature.key}`)}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                `;
+                
+                container.appendChild(featureRow);
+            });
+            
+            // 重新初始化滚动动画观察器
+            document.querySelectorAll('.scroll-reveal').forEach(el => {
+                observer.observe(el);
+            });
+        }
+
+        // 语言切换事件
+        document.addEventListener('DOMContentLoaded', () => {
+            // 渲染功能列表
+            renderFeatures();
+            
+            // 初始化语言
+            updateLanguage();
+            
+            // 语言切换按钮点击事件
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentLang = btn.getAttribute('data-lang');
+                    localStorage.setItem('flare-lang', currentLang);
+                    updateLanguage();
+                    renderFeatures(); // 重新渲染功能列表
+                });
+            });
+        });
+
+        // 滚动显示动画
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.scroll-reveal').forEach(el => {
+            observer.observe(el);
+        });
+
+        // 导航栏滚动效果
+        let lastScroll = 0;
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            const currentScroll = window.pageYOffset;
+            
+            if (currentScroll > 100) {
+                nav.style.background = 'rgba(15, 23, 42, 0.95)';
+            } else {
+                nav.style.background = 'var(--glass)';
+            }
+            
+            lastScroll = currentScroll;
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
 </html>

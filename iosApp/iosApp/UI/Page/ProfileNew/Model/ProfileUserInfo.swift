@@ -69,7 +69,7 @@ struct ProfileUserInfo: Equatable {
         )
     }
 
-    // MARK: - Equatable
+    // - Equatable
 
     static func == (lhs: ProfileUserInfo, rhs: ProfileUserInfo) -> Bool {
         // 比较关键字段，避免复杂对象比较

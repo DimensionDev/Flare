@@ -38,7 +38,7 @@ struct FloatingWindowModifier: ViewModifier {
     }
 }
 
-// MARK: - View Extension
+// - View Extension
 
 extension View {
     /// 添加浮动性能监控窗口
@@ -165,7 +165,7 @@ struct FloatingWindowControlPanel: View {
 //        )
     }
 
-    // MARK: - Computed Properties
+    // - Computed Properties
 
     private var stateColor: Color {
         switch windowManager.state {
@@ -194,7 +194,7 @@ struct FloatingWindowControlPanel: View {
     }
 }
 
-// MARK: - Preview
+// - Preview
 
 #Preview {
     VStack(spacing: 20) {

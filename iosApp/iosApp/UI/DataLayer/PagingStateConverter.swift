@@ -12,10 +12,9 @@ class PagingStateConverter {
     /// 转换队列
     private let conversionQueue = DispatchQueue(label: "timeline.state.converter", qos: .userInitiated)
 
-    /// 核心追踪变量
-    private var nextKmpIndex: Int = 0            // 下一个需要请求的KMP index
-    private var lastKmpTotalCount: Int = 0       // 上次KMP报告的总数据量
-    private var lastStateSignature: String?     // 上次的状态签名
+    private var nextKmpIndex: Int = 0 // 下一个需要请求的KMP index
+    private var lastKmpTotalCount: Int = 0 // 上次KMP报告的总数据量
+    private var lastStateSignature: String? // 上次的状态签名
 
     /// 缓存变量
     private var convertedItems: [TimelineItem] = []
@@ -26,7 +25,7 @@ class PagingStateConverter {
 
     /// 获取下一个需要请求的KMP index
     func getNextKmpIndex() -> Int {
-        return nextKmpIndex
+        nextKmpIndex
     }
 
     deinit {
@@ -85,8 +84,6 @@ class PagingStateConverter {
             resetIncrementalState()
         }
     }
-
-    // MARK: - Private Methods
 
     /// 转换成功状态 - 使用修复的增量转换策略
     /// - Parameter successState: KMP的成功状态
@@ -166,7 +163,7 @@ class PagingStateConverter {
                 // 探测未转换数据的可用性
                 FlareLog.debug("[PagingStateConverter] === 探测未转换数据可用性 ===")
                 var availableCount = 0
-                for i in nextKmpIndex..<min(nextKmpIndex + 5, kmpTotalCount) {
+                for i in nextKmpIndex ..< min(nextKmpIndex + 5, kmpTotalCount) {
                     if successState.peek(index: Int32(i)) != nil {
                         availableCount += 1
                         FlareLog.debug("[PagingStateConverter] index \(i): 有数据")
@@ -409,7 +406,7 @@ class PagingStateConverter {
             } else if firstAvailable {
                 // 如果第一个可用但最后一个不可用，需要精确查找边界
                 FlareLog.debug("[PagingStateConverter] 批次\(batchIndex)部分可用，精确查找边界")
-                for i in batchStart..<batchEnd {
+                for i in batchStart ..< batchEnd {
                     if successState.peek(index: Int32(i)) != nil {
                         actualCount = i + 1
                         FlareLog.debug("[PagingStateConverter] 精确边界: index \(i) 可用，actualCount=\(actualCount)")
@@ -432,34 +429,6 @@ class PagingStateConverter {
 
         return actualCount
     }
-
-    /// 智能重复检测 - 允许数量增加的情况
-    /// - Parameter currentSignature: 当前状态签名
-    /// - Returns: 是否应该跳过转换
-    // private func shouldSkipConversion(_ currentSignature: String) -> Bool {
-    //     guard let lastSignature = lastStateSignature else { return false }
-
-    //     // 如果签名完全相同，跳过
-    //     if lastSignature == currentSignature {
-    //         return true
-    //     }
-
-    //     // 解析签名组件
-    //     let lastComponents = lastSignature.split(separator: "_")
-    //     let currentComponents = currentSignature.split(separator: "_")
-
-    //     if lastComponents.count >= 1, currentComponents.count >= 1 {
-    //         let lastCount = Int(lastComponents[0]) ?? 0
-    //         let currentCount = Int(currentComponents[0]) ?? 0
-
-    //         // 如果数量增加，说明有新数据，不跳过
-    //         if currentCount > lastCount {
-    //             return false
-    //         }
-    //     }
-
-    //     return false
-    // }
 
     /// 转换指定范围的items
     /// - Parameters:
@@ -505,27 +474,13 @@ class PagingStateConverter {
         FlareLog.debug("[PagingStateConverter] 范围转换完成，总共获得\(items.count)个items")
         return items
     }
-
-    /// 智能状态比较，避免不必要的UI更新
-    /// - Parameters:
-    ///   - oldState: 旧状态
-    ///   - newState: 新状态
-    /// - Returns: 是否需要更新UI
-    // private func shouldUpdateUI(from oldState: FlareTimelineState, to newState: FlareTimelineState) -> Bool {
-    //     // 使用FlareTimelineState的内置比较方法
-    //     newState.needsUIUpdate(from: oldState)
-    // }
 }
-
-// MARK: - ConversionStats
 
 /// 转换统计信息
 struct ConversionStats {
     var totalConversions: Int = 0
     var errorCount: Int = 0
 }
-
-// MARK: - PagingStateConverter Extensions
 
 extension PagingStateConverter {
     private func setupNotificationObservers() {
@@ -535,7 +490,6 @@ extension PagingStateConverter {
             name: .sensitiveContentSettingsChanged,
             object: nil
         )
-
     }
 
     @objc private func handleSensitiveContentSettingsChanged() {

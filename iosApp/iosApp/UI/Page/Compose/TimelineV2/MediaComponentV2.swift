@@ -19,7 +19,7 @@ struct MediaComponentV2: View {
             media.type == .image || media.type == .video // 使用Swift Media类型判断
         } && (sensitive || aiDetectedSensitive)
 
-        // MARK: - 媒体遮罩逻辑
+        // - 媒体遮罩逻辑
 
         // 决定是否对媒体内容应用模糊遮罩
         // 逻辑：
@@ -42,11 +42,11 @@ struct MediaComponentV2: View {
             // 使用FeedMediaViewModel.from转换方法
             let mediaViewModels = medias.map { media -> FeedMediaViewModel in
                 let viewModel = FeedMediaViewModel.from(media)
-               // let _ = FlareLog.debug("MediaComponentV2 转换媒体: \(media.url) -> \(viewModel.id)")
+                // let _ = FlareLog.debug("MediaComponentV2 转换媒体: \(media.url) -> \(viewModel.id)")
                 return viewModel
             }
 
-            //let _ = FlareLog.debug("MediaComponentV2 mediaViewModels.count: \(mediaViewModels.count)")
+            // let _ = FlareLog.debug("MediaComponentV2 mediaViewModels.count: \(mediaViewModels.count)")
 
             // build tweet medias layout
             TweetMediaGridView(
@@ -105,7 +105,7 @@ struct MediaComponentV2: View {
     }
 }
 
-// MARK: - FeedMediaViewModel扩展，添加从Swift Media转换的方法
+// - FeedMediaViewModel扩展，添加从Swift Media转换的方法
 
 extension FeedMediaViewModel {
     /// 从Swift Media类型创建FeedMediaViewModel
@@ -149,7 +149,7 @@ extension FeedMediaViewModel {
     }
 }
 
-// MARK: - FeedMediaViewModel自定义初始化器
+// - FeedMediaViewModel自定义初始化器
 
 extension FeedMediaViewModel {
     /// 自定义初始化器，用于从Swift Media创建FeedMediaViewModel

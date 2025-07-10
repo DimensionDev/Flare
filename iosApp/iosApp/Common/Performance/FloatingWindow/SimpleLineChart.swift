@@ -130,7 +130,7 @@ struct SimpleLineChart: View {
     }
 }
 
-// MARK: - Preview
+// - Preview
 
 #Preview {
     VStack(spacing: 20) {

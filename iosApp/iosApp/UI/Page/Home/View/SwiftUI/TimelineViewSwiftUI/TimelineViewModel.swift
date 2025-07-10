@@ -123,8 +123,6 @@ class TimelineViewModel {
         }
     }
 
-
-
     /// 处理加载更多的业务逻辑
     func handleLoadMore() async {
         FlareLog.debug("[Timeline ViewModel] 开始处理load more请求")
@@ -155,9 +153,9 @@ class TimelineViewModel {
                 // 添加KMP数据一致性检查
                 FlareLog.debug("[Timeline ViewModel] === KMP数据一致性检查开始 ===")
                 var actualAvailableCount = 0
-                var firstUnavailableIndex: Int? = nil
+                var firstUnavailableIndex: Int?
 
-                for i in 0..<kmpTotalCount {
+                for i in 0 ..< kmpTotalCount {
                     if pagingState.peek(index: Int32(i)) != nil {
                         actualAvailableCount += 1
                     } else {
@@ -201,7 +199,7 @@ class TimelineViewModel {
 
                         // 尝试探测下一个可用数据
                         FlareLog.debug("[Timeline ViewModel] === 探测下一个可用数据 ===")
-                        for i in (nextKmpIndex + 1)..<min(nextKmpIndex + 10, kmpTotalCount) {
+                        for i in (nextKmpIndex + 1) ..< min(nextKmpIndex + 10, kmpTotalCount) {
                             if let testResult = pagingState.peek(index: Int32(i)) {
                                 FlareLog.debug("[Timeline ViewModel] 发现可用数据在index: \(i)")
                                 break

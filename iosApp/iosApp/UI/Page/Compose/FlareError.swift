@@ -109,7 +109,7 @@ enum FlareError: Error, Equatable, LocalizedError {
         }
     }
 
-    // MARK: - 错误分类
+    // - 错误分类
 
     /// 是否为可重试错误
     var isRetryable: Bool {
@@ -153,7 +153,7 @@ enum FlareError: Error, Equatable, LocalizedError {
         }
     }
 
-    // MARK: - 从KMP错误转换
+    // - 从KMP错误转换
 
     /// 从KMP的Throwable创建FlareError
     /// - Parameter throwable: KMP的错误对象
@@ -229,7 +229,7 @@ enum FlareError: Error, Equatable, LocalizedError {
     }
 }
 
-// MARK: - ErrorSeverity
+// - ErrorSeverity
 
 /// 错误严重级别
 enum ErrorSeverity: Int, CaseIterable {
@@ -248,7 +248,7 @@ enum ErrorSeverity: Int, CaseIterable {
     }
 }
 
-// MARK: - 错误描述扩展
+// - 错误描述扩展
 
 private extension FlareError.NetworkError {
     var description: String {

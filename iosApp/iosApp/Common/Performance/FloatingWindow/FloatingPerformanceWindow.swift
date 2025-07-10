@@ -27,7 +27,7 @@ struct FloatingPerformanceWindow: View {
         .animation(.easeInOut(duration: 0.2), value: windowManager.currentOpacity)
     }
 
-    // MARK: - Drag Gesture (Vertical Only)
+    // - Drag Gesture (Vertical Only)
 
     private var dragGesture: some Gesture {
         DragGesture()
@@ -136,7 +136,7 @@ struct ExpandedPerformanceView: View {
         .padding(.horizontal, 16)
     }
 
-    // MARK: - Computed Properties
+    // - Computed Properties
 
     private var cpuColor: Color {
         PerformanceConfig.Colors.cpuColor(for: monitor.currentCPUUsage)
@@ -350,7 +350,7 @@ struct MiniFrameRateDisplay: View {
         }
     }
 
-    // MARK: - Computed Properties - 从 FrameRateDisplayView 移植
+    // - Computed Properties - 从 FrameRateDisplayView 移植
 
     private func frameRateColor(for frameRate: Double) -> Color {
         if frameRate < stutterThreshold {
@@ -457,7 +457,7 @@ struct TimelinePerformanceTestSection: View {
         .animation(.easeInOut(duration: 0.3), value: showResults)
     }
 
-    // MARK: - Test Control Methods
+    // - Test Control Methods
 
     private func startPerformanceTest() {
         FlareLog.performance("PerformanceTest Starting performance test for \(versionManager.currentVersion.rawValue)")
@@ -494,7 +494,7 @@ struct TimelinePerformanceTestSection: View {
         }
     }
 
-    // MARK: - Data Collection
+    // - Data Collection
 
     private func startDataCollection() {
         FlareLog.performance("PerformanceTest Starting data collection timer")

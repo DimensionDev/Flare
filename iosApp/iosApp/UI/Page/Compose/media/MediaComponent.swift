@@ -19,7 +19,7 @@ struct MediaComponent: View {
             media is UiMediaImage || media is UiMediaVideo
         } && (sensitive || aiDetectedSensitive)
 
-        // MARK: - 媒体遮罩逻辑
+        // - 媒体遮罩逻辑
 
         // 决定是否对媒体内容应用模糊遮罩
         // 逻辑：

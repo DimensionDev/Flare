@@ -4,7 +4,7 @@ import SwiftUI
 /// 性能监控配置类
 /// 统一管理所有性能监控相关的常量和配置
 enum PerformanceConfig {
-    // MARK: - Debug Configuration
+    // - Debug Configuration
 
     /// 是否启用调试模式（只在Debug构建中启用性能监控）
     static var isDebugModeEnabled: Bool {
@@ -20,7 +20,7 @@ enum PerformanceConfig {
     /// 是否启用详细日志输出
     static let isVerboseLoggingEnabled = true
 
-    // MARK: - Monitoring Configuration
+    // - Monitoring Configuration
 
     /// CPU和内存监控更新间隔（秒）
     /// Standardized to 0.5s for consistency with performance testing
@@ -41,7 +41,7 @@ enum PerformanceConfig {
         static let scrollFrameRates = 120 // 滚动性能分析（0.5s间隔）
     }
 
-    // MARK: - Performance Thresholds
+    // - Performance Thresholds
 
     /// 性能阈值配置
     enum Thresholds {
@@ -70,7 +70,7 @@ enum PerformanceConfig {
         }
     }
 
-    // MARK: - Floating Window Configuration
+    // - Floating Window Configuration
 
     /// 浮动窗口配置
     enum FloatingWindow {
@@ -101,7 +101,7 @@ enum PerformanceConfig {
         }
     }
 
-    // MARK: - Chart Configuration
+    // - Chart Configuration
 
     /// 图表配置
     enum Charts {
@@ -115,7 +115,7 @@ enum PerformanceConfig {
         static let miniChartHeight: CGFloat = 80
     }
 
-    // MARK: - Color Configuration
+    // - Color Configuration
 
     /// 性能状态颜色配置
     enum Colors {
@@ -178,7 +178,7 @@ enum PerformanceConfig {
         }
     }
 
-    // MARK: - Formatting Configuration
+    // - Formatting Configuration
 
     /// 数值格式化配置
     enum Formatting {
@@ -208,7 +208,7 @@ enum PerformanceConfig {
         }
     }
 
-    // MARK: - Performance Grades
+    // - Performance Grades
 
     /// 性能等级评估 - 动态适配120Hz设备
     enum PerformanceGrades {
@@ -269,7 +269,7 @@ enum PerformanceConfig {
         }
     }
 
-    // MARK: - Application Lifecycle
+    // - Application Lifecycle
 
     /// 应用生命周期配置
     enum Lifecycle {
@@ -284,38 +284,38 @@ enum PerformanceConfig {
     }
 }
 
-// MARK: - Performance Theme
+// - Performance Theme
 
 /// 性能监控主题配置
 enum PerformanceTheme {
-    // MARK: - Card Styles
+    // - Card Styles
 
     static let cardCornerRadius: CGFloat = 16
     static let cardShadowRadius: CGFloat = 8
     static let cardShadowOffset = CGSize(width: 0, height: 4)
     static let cardShadowOpacity: Double = 0.2
 
-    // MARK: - Floating Window Styles
+    // - Floating Window Styles
 
     static let floatingWindowCornerRadius: CGFloat = 16
     static let floatingWindowShadowRadius: CGFloat = 12
     static let floatingWindowShadowOffset = CGSize(width: 0, height: 6)
     static let floatingWindowShadowOpacity: Double = 0.3
 
-    // MARK: - Animation Durations
+    // - Animation Durations
 
     static let stateTransitionDuration: Double = 0.3
     static let dragFeedbackDuration: Double = 0.2
     static let snapAnimationDuration: Double = 0.5
 
-    // MARK: - Fonts
+    // - Fonts
 
     static let titleFont = Font.headline
     static let subtitleFont = Font.subheadline
     static let captionFont = Font.caption
     static let monospaceFont = Font.system(.caption, design: .monospaced)
 
-    // MARK: - Spacing
+    // - Spacing
 
     static let defaultSpacing: CGFloat = 16
     static let compactSpacing: CGFloat = 8

@@ -62,7 +62,7 @@ public enum ColorSetName: String, Sendable {
     case threadsLight = "Threads - Light"
     case threadsDark = "Threads - Dark"
 
-    // MARK: - Flutter Themes (从TweetX移植)
+    // - Flutter Themes (从TweetX移植)
 
     case freshSkyLight = "Fresh Sky - Light"
     case freshSkyDark = "Fresh Sky - Dark"
@@ -111,7 +111,7 @@ public struct ColorSetCouple: Identifiable, Sendable {
     public let dark: ColorSet
 }
 
-// MARK: - 原有主题 (Flare经典主题)
+// - 原有主题 (Flare经典主题)
 
 // 1. Theme Classic - 经典主题 【专业评分: 91/100】
 // 评分详情: 对比度24/25, 舒适度18/20, 品牌一致性15/15, 设计趋势13/15, 适应性10/10, 和谐度9/10, 功能性2/5
@@ -295,7 +295,7 @@ public struct ThemeThreadsLight: ColorSet {
     public init() {}
 }
 
-// MARK: - Flutter Themes (从TweetX移植并优化)
+// - Flutter Themes (从TweetX移植并优化)
 
 // 1. Fresh Sky - 清新天空主题 【专业评分: 94/100】
 // 评分详情: 对比度25/25, 舒适度19/20, 品牌一致性14/15, 设计趋势15/15, 适应性9/10, 和谐度10/10, 功能性2/5

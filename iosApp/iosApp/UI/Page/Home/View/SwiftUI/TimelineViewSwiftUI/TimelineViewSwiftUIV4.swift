@@ -16,9 +16,9 @@ struct TimelineViewSwiftUIV4: View {
     init(tab: FLTabItem, store: AppBarTabSettingStore, scrollToTopTrigger: Binding<Bool>, isCurrentTab: Bool, showFloatingButton: Binding<Bool>) {
         self.tab = tab
         self.store = store
-        self._scrollToTopTrigger = scrollToTopTrigger
+        _scrollToTopTrigger = scrollToTopTrigger
         self.isCurrentTab = isCurrentTab
-        self._showFloatingButton = showFloatingButton
+        _showFloatingButton = showFloatingButton
         FlareLog.debug("[TimelineV4] 视图初始化 for tab: \(tab.key)")
     }
 

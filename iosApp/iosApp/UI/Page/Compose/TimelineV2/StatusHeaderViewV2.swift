@@ -9,7 +9,7 @@ import SwiftDate
 import SwiftUI
 import UIKit
 
-// MARK: - Swift原生AccountType定义
+// - Swift原生AccountType定义
 
 // enum SwiftAccountType {
 //    case specific(accountKey: String)  // 简化版，使用String代替MicroBlogKey
@@ -17,7 +17,7 @@ import UIKit
 //    case guest
 // }
 //
-//// MARK: - Swift原生MicroBlogKey定义
+//// - Swift原生MicroBlogKey定义
 // struct SwiftMicroBlogKey {
 //    let id: String
 //    let host: String

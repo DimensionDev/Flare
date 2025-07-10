@@ -3,10 +3,10 @@ import SwiftUI
 import WaterfallGrid
 
 extension User {
- /// 从User创建MicroBlogKey
+    /// 从User创建MicroBlogKey
     func createMicroBlogKey() -> MicroBlogKey {
-        let host = extractHostFromHandle(self.handle)
-        return MicroBlogKey(id: self.key, host: host)
+        let host = extractHostFromHandle(handle)
+        return MicroBlogKey(id: key, host: host)
     }
 
     /// 从用户handle提取host信息

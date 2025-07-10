@@ -18,7 +18,7 @@ enum FloatingWindowState: String, CaseIterable {
 class FloatingWindowManager: ObservableObject {
     static let shared = FloatingWindowManager()
 
-    // MARK: - Published Properties
+    // - Published Properties
 
     @Published var state: FloatingWindowState = .hidden
     @Published var position: CGPoint = .init(x: 50, y: 100)
@@ -26,19 +26,19 @@ class FloatingWindowManager: ObservableObject {
     @Published var opacity: Double = 0.9
     @Published var selectedChart: Int = 0 // 0: CPU, 1: Memory, 2: Frame Rate
 
-    // MARK: - Private Properties
+    // - Private Properties
 
     private var screenSize: CGSize = .zero
     private let edgeMargin: CGFloat = PerformanceConfig.FloatingWindow.Layout.edgeMargin
     private let snapDistance: CGFloat = PerformanceConfig.FloatingWindow.Layout.snapDistance
 
-    // MARK: - Initialization
+    // - Initialization
 
     private init() {
         loadPersistedState()
     }
 
-    // MARK: - Public Methods
+    // - Public Methods
 
     /// 显示浮动窗口（展开状态）
     func show() {
@@ -130,7 +130,7 @@ class FloatingWindowManager: ObservableObject {
         UserDefaults.standard.set(index, forKey: PerformanceConfig.FloatingWindow.UserDefaultsKeys.selectedChart)
     }
 
-    // MARK: - Private Methods
+    // - Private Methods
 
     /// 约束位置到屏幕范围内（仅Y轴，X轴固定为0）
     private func constrainToScreen(_ point: CGPoint) -> CGPoint {
@@ -214,7 +214,7 @@ class FloatingWindowManager: ObservableObject {
     }
 }
 
-// MARK: - Computed Properties Extension
+// - Computed Properties Extension
 
 extension FloatingWindowManager {
     /// 当前窗口尺寸

@@ -13,11 +13,11 @@ struct ObservePresenter<Value, Presenter: PresenterBase<Value>, Content: View>: 
 
     public var body: some View {
         Group {
-            if let state = state {
+            if let state {
                 switch state {
-                case .success(let value):
+                case let .success(value):
                     content(value)
-                case .failure(let error):
+                case let .failure(error):
                     VStack {
                         Text("An error occurred")
                         Text(error.localizedDescription)
@@ -32,11 +32,11 @@ struct ObservePresenter<Value, Presenter: PresenterBase<Value>, Content: View>: 
         .task {
             do {
                 for try await model in presenter.models {
-                    self.state = .success(model)
+                    state = .success(model)
                 }
             } catch {
                 FlareLog.error("ObservePresenter error: \(error)")
-                self.state = .failure(error)
+                state = .failure(error)
             }
         }
     }

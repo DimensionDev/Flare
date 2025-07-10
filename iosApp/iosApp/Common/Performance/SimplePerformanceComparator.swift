@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-// MARK: - Simple Performance Comparator
+// - Simple Performance Comparator
 
 /// 简单性能对比工具，用于记录和对比不同Timeline版本的性能数据
 /// Simple performance comparator for recording and comparing performance data across Timeline versions
@@ -9,7 +9,7 @@ import SwiftUI
 class SimplePerformanceComparator {
     static let shared = SimplePerformanceComparator()
 
-    // MARK: - Performance Data Storage
+    // - Performance Data Storage
 
     /// 版本性能数据存储
     /// Version performance data storage
@@ -19,7 +19,7 @@ class SimplePerformanceComparator {
     /// Current test session
     private var currentSession: TestSession?
 
-    // MARK: - Test Session Management
+    // - Test Session Management
 
     /// 测试会话数据结构
     /// Test session data structure
@@ -85,13 +85,13 @@ class SimplePerformanceComparator {
         }
     }
 
-    // MARK: - Initialization
+    // - Initialization
 
     private init() {
         FlareLog.debug("SimplePerformanceComparator Initialized")
     }
 
-    // MARK: - Test Session Control
+    // - Test Session Control
 
     /// 开始性能测试会话
     /// Start performance test session
@@ -188,7 +188,7 @@ class SimplePerformanceComparator {
         )
     }
 
-    // MARK: - Data Retrieval
+    // - Data Retrieval
 
     /// 获取指定版本的最新测试结果
     /// Get latest test result for specified version
@@ -216,7 +216,7 @@ class SimplePerformanceComparator {
         return latestResults
     }
 
-    // MARK: - Comparison and Reporting
+    // - Comparison and Reporting
 
     /// 生成简单对比报告
     /// Generate simple comparison report

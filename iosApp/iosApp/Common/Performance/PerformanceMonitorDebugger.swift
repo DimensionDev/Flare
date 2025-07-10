@@ -15,7 +15,7 @@ class PerformanceMonitorDebugger {
 
     private init() {}
 
-    // MARK: - 系统信息检查
+    // - 系统信息检查
 
     func checkSystemCapabilities() {
         FlareLog.performance("=== Performance Monitor System Check ===")
@@ -67,7 +67,7 @@ class PerformanceMonitorDebugger {
         FlareLog.performance("Frame rate monitoring test: \(canMonitorFrameRate ? "✅ Working" : "❌ Failed")")
     }
 
-    // MARK: - 性能监控组件测试
+    // - 性能监控组件测试
 
     private func testCPUMonitoring() -> Double {
         var threadsList: thread_act_array_t?
@@ -130,7 +130,7 @@ class PerformanceMonitorDebugger {
         // 空实现，仅用于测试
     }
 
-    // MARK: - 性能监控器状态检查
+    // - 性能监控器状态检查
 
     func checkPerformanceMonitorState() {
         FlareLog.performance("=== Performance Monitor State Check ===")
@@ -146,7 +146,7 @@ class PerformanceMonitorDebugger {
         FlareLog.performance("=== State Check Complete ===")
     }
 
-    // MARK: - 强制性能监控测试
+    // - 强制性能监控测试
 
     func forcePerformanceMonitoringTest() {
         FlareLog.performance("=== Force Performance Monitoring Test ===")
@@ -180,7 +180,7 @@ class PerformanceMonitorDebugger {
         }
     }
 
-    // MARK: - 日志输出测试
+    // - 日志输出测试
 
     func testLogOutput() {
         FlareLog.performance("=== Log Output Test ===")
@@ -203,7 +203,7 @@ class PerformanceMonitorDebugger {
         FlareLog.performance("=== Log Output Test Complete ===")
     }
 
-    // MARK: - 完整诊断
+    // - 完整诊断
 
     func runFullDiagnostic() {
         FlareLog.performance("🔍 === PERFORMANCE MONITOR FULL DIAGNOSTIC ===")
@@ -217,7 +217,7 @@ class PerformanceMonitorDebugger {
     }
 }
 
-// MARK: - OSLog Extension for Debug
+// - OSLog Extension for Debug
 
 extension OSLog {
     static let debug = OSLog(subsystem: "dev.dimension.flare", category: "debug")

@@ -2,18 +2,18 @@ import Foundation
 import os.log
 import UIKit
 
-// MARK: - Timeline Performance Monitor
+// - Timeline Performance Monitor
 
 class TimelinePerformanceMonitor: ObservableObject {
     static let shared = TimelinePerformanceMonitor()
 
-    // MARK: - Performance Metrics
+    // - Performance Metrics
 
     @Published var currentCPUUsage: Double = 0
     @Published var currentMemoryUsage: UInt64 = 0
     @Published var currentFrameRate: Double = 0
 
-    // MARK: - Monitoring State
+    // - Monitoring State
 
     var isMonitoring = false
     private var monitoringTimer: Timer?
@@ -21,18 +21,18 @@ class TimelinePerformanceMonitor: ObservableObject {
     private var frameCount = 0
     private var lastFrameTime: CFTimeInterval = 0
 
-    // MARK: - Scroll Performance Tracking (Integrated)
+    // - Scroll Performance Tracking (Integrated)
 
     private var scrollFrameRates: [Double] = []
     private var scrollStutterCount = 0
 
-    // MARK: - Performance History
+    // - Performance History
 
     private var cpuHistory: [Double] = []
     private var memoryHistory: [UInt64] = []
     private var frameRateHistory: [Double] = []
 
-    // MARK: - Performance Thresholds
+    // - Performance Thresholds
 
     private let cpuThreshold: Double = PerformanceConfig.Thresholds.cpuUsage
     private let memoryThreshold: UInt64 = PerformanceConfig.Thresholds.memoryUsage
@@ -47,7 +47,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         stopMonitoring()
     }
 
-    // MARK: - Notification Observers
+    // - Notification Observers
 
     private func setupNotificationObservers() {
         NotificationCenter.default.addObserver(
@@ -113,7 +113,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         scrollStutterCount = 0
     }
 
-    // MARK: - Monitoring Control
+    // - Monitoring Control
 
     func startMonitoring() {
         return
@@ -190,7 +190,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         os_log("Stopped Timeline performance monitoring", log: .performance, type: .info)
     }
 
-    // MARK: - Metrics Update
+    // - Metrics Update
 
     private func updateCPUAndMemoryMetrics() {
         currentCPUUsage = getCurrentCPUUsage()
@@ -260,7 +260,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         }
     }
 
-    // MARK: - Scroll Performance Analysis (Integrated with Frame Rate Monitoring)
+    // - Scroll Performance Analysis (Integrated with Frame Rate Monitoring)
 
     func resetScrollPerformanceData() {
         scrollFrameRates.removeAll()
@@ -280,7 +280,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         return Double(scrollStutterCount) / Double(scrollFrameRates.count) * 100
     }
 
-    // MARK: - Data Access for Charts
+    // - Data Access for Charts
 
     var cpuHistoryData: [Double] {
         cpuHistory
@@ -312,7 +312,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         )
     }
 
-    // MARK: - Performance Analysis
+    // - Performance Analysis
 
     private func checkPerformanceThresholds() {
         if currentCPUUsage > cpuThreshold {
@@ -347,7 +347,7 @@ class TimelinePerformanceMonitor: ObservableObject {
         )
     }
 
-    // MARK: - System Metrics Helpers
+    // - System Metrics Helpers
 
     private func getCurrentCPUUsage() -> Double {
         var threadsList: thread_act_array_t?
@@ -404,7 +404,7 @@ class TimelinePerformanceMonitor: ObservableObject {
     }
 }
 
-// MARK: - Performance Report
+// - Performance Report
 
 struct PerformanceReport {
     let averageCPU: Double
@@ -456,7 +456,7 @@ struct PerformanceReport {
     }
 }
 
-// MARK: - Scroll Performance Report
+// - Scroll Performance Report
 
 struct ScrollPerformanceReport {
     let duration: TimeInterval
@@ -509,7 +509,7 @@ struct ScrollPerformanceReport {
     }
 }
 
-// MARK: - OSLog Extension
+// - OSLog Extension
 
 extension OSLog {
     static let performance = OSLog(subsystem: "dev.dimension.flare", category: "performance")

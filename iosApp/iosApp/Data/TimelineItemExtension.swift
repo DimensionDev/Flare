@@ -3,12 +3,12 @@ import SwiftUI
 import WaterfallGrid
 
 extension TimelineItem {
-    func createMicroBlogKey(from item: TimelineItem) -> MicroBlogKey {
-        let host = extractHostFromPlatformType(item.platformType)
-        return MicroBlogKey(id: item.id, host: host)
+    func createMicroBlogKey() -> MicroBlogKey {
+        let host = extractHostFromPlatformType(platformType)
+        return MicroBlogKey(id: id, host: host)
     }
 
-    func extractHostFromPlatformType(_ platformType: String) -> String {
+    private func extractHostFromPlatformType(_ platformType: String) -> String {
         switch platformType.lowercased() {
         case "mastodon":
             "mastodon.social"

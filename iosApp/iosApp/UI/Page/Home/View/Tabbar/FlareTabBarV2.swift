@@ -4,7 +4,7 @@ import os.log
 import shared
 import SwiftUI
 
- struct FlareTabBarV2: View {
+struct FlareTabBarV2: View {
     @Environment(FlareRouter.self) private var router
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
@@ -166,4 +166,3 @@ import SwiftUI
         return max(0, (UIScreen.main.bounds.width * 0.8 - 200) / CGFloat(totalTabs * 2))
     }
 }
-

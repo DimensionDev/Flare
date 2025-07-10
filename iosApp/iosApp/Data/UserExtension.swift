@@ -4,14 +4,13 @@ import WaterfallGrid
 
 extension User {
     /// 从User创建MicroBlogKey
-    func createMicroBlogKey(from user: User) -> MicroBlogKey {
-        // User.key已经是String格式的ID，需要推断host
-        let host = extractHostFromHandle(user.handle)
-        return MicroBlogKey(id: user.key, host: host)
+    func createMicroBlogKey() -> MicroBlogKey {
+        let host = extractHostFromHandle(handle)
+        return MicroBlogKey(id: key, host: host)
     }
 
     /// 从用户handle提取host信息
-    func extractHostFromHandle(_ handle: String) -> String {
+    private func extractHostFromHandle(_ handle: String) -> String {
         // handle格式通常是 @username@host 或 @username
         if handle.contains("@") {
             let components = handle.components(separatedBy: "@")

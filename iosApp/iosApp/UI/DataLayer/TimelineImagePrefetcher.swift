@@ -16,7 +16,6 @@ class TimelineImagePrefetcher {
     private init() {}
 
     func smartPrefetch(currentIndex: Int, timelineItems: [TimelineItem]) {
-        // 🔥 添加详细的入参日志
         FlareLog.debug("TimelineImagePrefetcher === smartPrefetch 开始 ===")
         FlareLog.debug("TimelineImagePrefetcher 传入参数 - currentIndex: \(currentIndex), timelineItems数量: \(timelineItems.count)")
 
@@ -125,8 +124,6 @@ class TimelineImagePrefetcher {
         FlareLog.debug("TimelineImagePrefetcher === smartPrefetch 结束 ===")
     }
 
-    // MARK: - Private Methods
-
     /// 清理预览URL，去掉?name=orig后缀
     private static func cleanPreviewUrl(_ url: String?, for type: TimelineMediaType) -> String? {
         guard let url else { return nil }
@@ -164,7 +161,7 @@ class TimelineImagePrefetcher {
             {
                 urls.append(avatarUrl)
                 avatarCount += 1
-                FlareLog.debug("TimelineImagePrefetcher   - 添加头像: \(user.name.raw) -> \(user.avatar)")
+                // FlareLog.debug("TimelineImagePrefetcher   - 添加头像: \(user.name.raw) -> \(user.avatar)")
             }
 
             // 提取媒体图片
@@ -174,7 +171,7 @@ class TimelineImagePrefetcher {
                 if let url = URL(string: cleanedImageUrl) {
                     urls.append(url)
                     mediaCount += 1
-                    FlareLog.debug("TimelineImagePrefetcher   - 添加媒体[\(mediaIndex)]: \(cleanedImageUrl)")
+                    // FlareLog.debug("TimelineImagePrefetcher   - 添加媒体[\(mediaIndex)]: \(cleanedImageUrl)")
                 }
             }
 

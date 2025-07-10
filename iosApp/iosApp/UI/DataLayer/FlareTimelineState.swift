@@ -158,18 +158,18 @@ struct PollOption: Equatable, Hashable {
 }
 
 struct TimelineItem: Identifiable, Equatable, Hashable {
-    // MARK: - 核心标识字段
+    // - 核心标识字段
 
     let id: String // 对应 UiTimelineItemContentStatus.statusKey.id
 
-    // MARK: - 内容字段 (扩展为复杂结构)
+    // - 内容字段 (扩展为复杂结构)
 
     let content: RichText // 对应 UiTimelineItemContentStatus.content (UiRichText)
     let user: User? // 对应 UiTimelineItemContentStatus.user (UiUserV2)
     let timestamp: Date // 对应 UiTimelineItemContentStatus.createdAt
     let images: [Media] // 对应 UiTimelineItemContentStatus.images ([UiMedia])
 
-    // MARK: - 新增字段 (来自StatusViewModel需求)
+    // - 新增字段 (来自StatusViewModel需求)
 
     let url: String // 对应 UiTimelineItemContentStatus.url
     let platformType: String // 对应 UiTimelineItemContentStatus.platformType.name
@@ -181,21 +181,21 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
     let topEndContent: TopEndContent? // 对应 UiTimelineItemContentStatus.topEndContent
     let poll: Poll? // 对应 UiTimelineItemContentStatus.poll
 
-    // MARK: - 转发头部信息 (新增)
+    // - 转发头部信息 (新增)
 
     let topMessage: TopMessage? // 对应 UiTimeline.topMessage
     let sensitive: Bool // 对应 UiTimelineItemContentStatus.sensitive
 
-    // MARK: - 兼容性字段 (保持向后兼容)
+    // - 兼容性字段 (保持向后兼容)
 
     let visibility: String // 从topEndContent.visibility转换而来
     let language: String? // 暂时保留，未来可能从其他地方获取
 
-    // MARK: - 操作相关字段
+    // - 操作相关字段
 
     let actions: [StatusAction] // 对应 UiTimelineItemContentStatus.actions
 
-    // MARK: - UI状态字段 (可变)
+    // - UI状态字段 (可变)
 
     var likeCount: Int
     var isLiked: Bool
@@ -403,7 +403,7 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         }
     }
 
-    // MARK: - 计算属性 (替代StatusViewModel的has*系列)
+    // - 计算属性 (替代StatusViewModel的has*系列)
 
     /// 是否有媒体内容 - 对应 StatusViewModel.hasImages
     var hasMedia: Bool {
@@ -498,7 +498,7 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
         formattedTimestamp
     }
 
-    // MARK: - 兼容性属性 (保持向后兼容)
+    // - 兼容性属性 (保持向后兼容)
 
     /// 作者名称 - 兼容性属性
     var author: String {

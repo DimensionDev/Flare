@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-// MARK: - Performance Test Configuration
+// - Performance Test Configuration
 
 /// 性能测试配置类，用于控制不同优化功能的开启/关闭
 /// Performance test configuration class for controlling different optimization features
@@ -9,7 +9,7 @@ import SwiftUI
 class PerformanceTestConfig {
     static let shared = PerformanceTestConfig()
 
-    // MARK: - Optimization Feature Toggles
+    // - Optimization Feature Toggles
 
     /// Task 1.1: 稳定 ID 系统优化
     /// Task 1.1: Stable ID system optimization
@@ -23,7 +23,7 @@ class PerformanceTestConfig {
     /// Task 1.3: Visible range detection optimization
     var enableVisibleRangeDetection: Bool = true
 
-    // MARK: - Test Scenarios
+    // - Test Scenarios
 
     /// 当前测试场景
     /// Current test scenario
@@ -51,7 +51,7 @@ class PerformanceTestConfig {
         }
     }
 
-    // MARK: - Test Configuration
+    // - Test Configuration
 
     /// 是否正在进行性能测试
     /// Whether performance testing is in progress
@@ -101,7 +101,7 @@ class PerformanceTestConfig {
         }
     }
 
-    // MARK: - Test Results
+    // - Test Results
 
     /// 测试结果存储
     /// Test results storage
@@ -131,7 +131,7 @@ class PerformanceTestConfig {
         }
     }
 
-    // MARK: - Configuration Methods
+    // - Configuration Methods
 
     /// 应用测试场景配置
     /// Apply test scenario configuration

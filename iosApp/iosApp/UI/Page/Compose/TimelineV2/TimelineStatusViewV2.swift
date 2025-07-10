@@ -10,7 +10,7 @@ import SwiftDate
 import SwiftUI
 import UIKit
 
-// MARK: - Swift原生类型定义
+// - Swift原生类型定义
 
 // enum SwiftAccountType {
 //    case specific(accountKey: String)
@@ -181,14 +181,14 @@ struct TimelineStatusViewV2: View {
         }
     }
 
-    // MARK: - 从TimelineStatusView复制的方法
+    // - 从TimelineStatusView复制的方法
 
     private func handleStatusTap() {
         // 🔥 实现推文点击跳转到详情页面
         let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
 
         // 构造MicroBlogKey - 需要从item.id和platformType构造
-        let statusKey = item.createMicroBlogKey(from: item)
+        let statusKey = item.createMicroBlogKey()
 
         FlareLog.debug("TimelineStatusView Navigate to status detail: \(item.id)")
         router.navigate(to: .statusDetail(

@@ -79,7 +79,7 @@ class TimelineViewController: UIViewController {
     }
 }
 
-// MARK: - UITableViewDataSource
+// - UITableViewDataSource
 
 extension TimelineViewController: UITableViewDataSource {
     func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
@@ -113,7 +113,7 @@ extension TimelineViewController: UITableViewDataSource {
     }
 }
 
-// MARK: - UITableViewDelegate
+// - UITableViewDelegate
 
 extension TimelineViewController: UITableViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -129,7 +129,7 @@ extension TimelineViewController: UITableViewDelegate {
     }
 }
 
-// MARK: - JXPagingViewListViewDelegate
+// - JXPagingViewListViewDelegate
 
 extension TimelineViewController: JXPagingViewListViewDelegate {
     func listView() -> UIView {

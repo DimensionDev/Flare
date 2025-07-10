@@ -9,7 +9,7 @@ import SwiftDate
 import SwiftUI
 import UIKit
 
-// MARK: - Swift原生AccountType定义
+// - Swift原生AccountType定义
 
 // enum SwiftAccountType {
 //    case specific(accountKey: String)  // 简化版，使用String代替MicroBlogKey
@@ -17,7 +17,7 @@ import UIKit
 //    case guest
 // }
 //
-//// MARK: - Swift原生MicroBlogKey定义
+//// - Swift原生MicroBlogKey定义
 // struct SwiftMicroBlogKey {
 //    let id: String
 //    let host: String
@@ -79,7 +79,7 @@ struct UserComponentV2: View {
             action: {
                 // 🔥 实现用户点击跳转到用户页面
                 let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
-                let userKey = user.createMicroBlogKey(from: user)
+                let userKey = user.createMicroBlogKey()
 
                 FlareLog.debug("UserComponent Navigate to profile: \(user.key)")
                 router.navigate(to: .profile(

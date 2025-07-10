@@ -17,7 +17,7 @@ struct TimelineViewSwiftUIV3: View {
 
     var body: some View {
         VStack {
-            ScrollView {
+            ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(spacing: 0) {
                     switch viewModel.timelineState {
                     case .loading:
@@ -29,7 +29,8 @@ struct TimelineViewSwiftUIV3: View {
                             hasMore: hasMore,
                             isRefreshing: isRefreshing,
                             presenter: viewModel.presenter,
-                            onError: viewModel.handleError
+                            onError: viewModel.handleError,
+                            viewModel: viewModel
                         )
 
                     case let .error(error):

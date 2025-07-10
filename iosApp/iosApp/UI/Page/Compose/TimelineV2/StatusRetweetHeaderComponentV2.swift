@@ -50,7 +50,7 @@ struct StatusRetweetHeaderComponentV2: View {
         }
 
         let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
-        let userKey = user.createMicroBlogKey(from: user)
+        let userKey = user.createMicroBlogKey()
 
         FlareLog.debug("StatusRetweetHeaderV2 Navigate to profile: \(user.key)")
         router.navigate(to: .profile(

@@ -28,7 +28,7 @@ public final class FlareImageConfiguration {
         cache.diskStorage.config.expiration = .days(7)
 
         cache.memoryStorage.config.expiration = .seconds(300)
-//        cache.memoryStorage.config.keepWhenEnteringBackground = true
+//       cache.memoryStorage.config.keepWhenEnteringBackground = true
 
         FlareLog.info("ImageCache Memory limit: \(memoryLimit / 1024 / 1024)MB, Disk limit: 100MB, KeepInBackground: true")
     }
@@ -116,25 +116,25 @@ public enum FlareImageOptions {
         ]
     }
 
-    public static func timelineMedia(size: CGSize, priority: Float = 0.5) -> KingfisherOptionsInfo {
-        let scale = UIScreen.main.scale
-
-        return [
-            .processor(DownsamplingImageProcessor(size: size)),
-            .scaleFactor(scale),
-
-            .downloadPriority(priority),
-            .backgroundDecode,
-            .alsoPrefetchToMemory,
-
-            .memoryCacheExpiration(.seconds(240)),
-            .diskCacheExpiration(.days(5)),
-
-            .transition(.fade(0.25)),
-            .keepCurrentImageWhileLoading,
-        ]
-    }
-
+//    public static func timelineMedia(size: CGSize, priority: Float = 0.5) -> KingfisherOptionsInfo {
+//        let scale = UIScreen.main.scale
+//
+//        return [
+//            .processor(DownsamplingImageProcessor(size: size)),
+//            .scaleFactor(scale),
+//
+//            .downloadPriority(priority),
+//            .backgroundDecode,
+//            .alsoPrefetchToMemory,
+//
+//            .memoryCacheExpiration(.seconds(240)),
+//            .diskCacheExpiration(.days(5)),
+//
+//            .transition(.fade(0.25)),
+//            .keepCurrentImageWhileLoading,
+//        ]
+//    }
+//
     public static func timelineAvatar(size: CGSize) -> KingfisherOptionsInfo {
         let scale = UIScreen.main.scale
         return [

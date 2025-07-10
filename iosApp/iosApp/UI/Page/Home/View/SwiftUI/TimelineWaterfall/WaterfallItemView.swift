@@ -53,10 +53,7 @@ struct WaterfallItemView: View {
     private var imageContentView: some View {
         ZStack {
             KFImage(item.previewURL)
-                .setProcessor(DownsamplingImageProcessor(size: CGSize(width: imageSize.width * 2, height: imageSize.height * 2)))
-                .scaleFactor(UIScreen.main.scale)
-                .memoryCacheExpiration(.seconds(120))
-                .diskCacheExpiration(.days(3))
+                .flareTimelineMedia(size: CGSize(width: imageSize.width, height: imageSize.height), priority: 0.6)
                 .placeholder {
                     imagePlaceholder
                 }
@@ -138,16 +135,16 @@ struct WaterfallItemView: View {
 
     private var userInfoView: some View {
         HStack(spacing: 6) {
-            AsyncImage(url: URL(string: item.sourceTimelineItem.user?.avatar ?? "")) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Circle()
-                    .fill(theme.secondaryBackgroundColor)
-            }
-            .frame(width: 16, height: 16)
-            .clipShape(Circle())
+            KFImage(URL(string: item.sourceTimelineItem.user?.avatar ?? ""))
+                .flareTimelineAvatar(size: CGSize(width: 16, height: 16))
+                .placeholder {
+                    Circle()
+                        .fill(theme.secondaryBackgroundColor)
+                }
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 16, height: 16)
+                .clipShape(Circle())
 
             Text(item.sourceTimelineItem.user?.name.raw ?? "")
                 .font(.caption)

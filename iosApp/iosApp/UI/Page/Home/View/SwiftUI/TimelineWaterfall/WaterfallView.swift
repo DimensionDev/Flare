@@ -136,6 +136,9 @@ struct WaterfallItemsView: View {
                 }
             }
         }
+        .onAppear {
+            router.setTimelineViewModel(viewModel)
+        }
         .scrollPosition(id: $scrolledID)
         .background(theme.secondaryBackgroundColor)
         .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in

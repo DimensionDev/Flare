@@ -25,10 +25,19 @@ class FlareRouter {
 
     var previousPageSnapshot: UIImage?
 
-    // 新增：Tab选择管理
+
+    weak var timelineViewModel: TimelineViewModel?
+
+
     var selectedTab: FlareHomeTabs = .timeline {
         didSet {
+            let oldTab = oldValue
             activeTab = selectedTab
+
+
+            handleTimelineLifecycle(from: oldTab, to: selectedTab)
+
+            FlareLog.debug("[FlareRouter] Tab changed: \(oldTab) -> \(selectedTab)")
         }
     }
 
@@ -114,10 +123,34 @@ class FlareRouter {
                log: .default, type: .debug, String(describing: tab))
     }
 
+
+    func setTimelineViewModel(_ viewModel: TimelineViewModel) {
+        timelineViewModel = viewModel
+        FlareLog.debug("[FlareRouter] Timeline ViewModel registered")
+    }
+
+
+    private func handleTimelineLifecycle(from oldTab: FlareHomeTabs, to newTab: FlareHomeTabs) {
+        FlareLog.debug("[FlareRouter] handleTimelineLifecycle called: \(oldTab) -> \(newTab)")
+
+        guard let timelineViewModel = timelineViewModel else {
+            FlareLog.debug("[FlareRouter] timelineViewModel is nil, skipping lifecycle management")
+            return
+        }
+
+
+        if newTab == .timeline && oldTab != .timeline {
+            FlareLog.debug("[FlareRouter] Switching to Timeline, data source will be refreshed by view lifecycle")
+        } else if oldTab == .timeline && newTab != .timeline {
+            FlareLog.debug("[FlareRouter] Switching away from Timeline, Task will be cancelled automatically")
+        }
+    }
+
     init(appState: FlareAppState = FlareAppState()) {
         self.appState = appState
         os_log("[FlareRouter] Initialized router: %{public}@", log: .default, type: .debug, String(describing: ObjectIdentifier(self)))
-    }
+
+     }
 
     func navigate(to destination: FlareDestination) {
         if case let .compose(accountType, status) = destination {

@@ -14,6 +14,8 @@ class TimelineViewModel {
     private var refreshDebounceTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
 
+     private var dataSourceTask: Task<Void, Never>?
+
     var items: [TimelineItem] {
         if case let .loaded(items, _, _) = timelineState {
             return items
@@ -36,6 +38,8 @@ class TimelineViewModel {
     }
 
     func setupDataSource(for tab: FLTabItem, using store: AppBarTabSettingStore) async {
+         dataSourceTask?.cancel()
+
         FlareLog.debug("Timeline Setting up data source with cache for tab: \(tab.key)")
 
         guard let cachedPresenter = store.getOrCreatePresenter(for: tab) else {
@@ -47,14 +51,20 @@ class TimelineViewModel {
 
         if presenter === cachedPresenter {
             FlareLog.debug("Timeline Using existing presenter for tab: \(tab.key)")
-            return
+        } else {
+            FlareLog.debug("Timeline Setting new cached presenter for tab: \(tab.key)")
+            presenter = cachedPresenter
         }
 
-        FlareLog.debug("Timeline Setting new cached presenter for tab: \(tab.key)")
-        presenter = cachedPresenter
 
-        Task {
+        dataSourceTask = Task {
             for await state in cachedPresenter.models {
+
+                guard !Task.isCancelled else {
+                    FlareLog.debug("[Timeline ViewModel] Task cancelled, stopping data processing")
+                    break
+                }
+
                 FlareLog.debug("[Timeline ViewModel] 收到KMP状态更新: \(type(of: state.listState))")
 
                 let flareState = await Task.detached(priority: .userInitiated) { [stateConverter] in

@@ -10,6 +10,7 @@ struct TimelineViewSwiftUIV3: View {
     let isCurrentTab: Bool
     @Binding var showFloatingButton: Bool
     @Environment(FlareTheme.self) private var theme
+    @Environment(FlareRouter.self) private var router
 
     @State private var viewModel = TimelineViewModel()
 
@@ -55,6 +56,9 @@ struct TimelineViewSwiftUIV3: View {
             }
             .refreshable {
                 await viewModel.handleRefresh()
+            }
+            .onAppear {
+                router.setTimelineViewModel(viewModel)
             }
             .task(id: tab.key) {
                 await viewModel.setupDataSource(for: tab, using: store)

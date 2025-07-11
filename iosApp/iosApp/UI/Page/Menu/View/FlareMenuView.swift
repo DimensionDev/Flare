@@ -296,6 +296,8 @@ struct FlareMenuView: View {
 
     private var settingsButton: some View {
         Button(action: {
+            FlareLog.debug("Tab switched to: menu setting")
+
             showSettings = true
         }) {
             HStack {

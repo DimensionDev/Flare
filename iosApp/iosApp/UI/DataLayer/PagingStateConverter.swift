@@ -117,8 +117,8 @@ class PagingStateConverter {
         // 🚀 新增：Load More强制转换机制 - 检查是否有新的可用数据
         if nextKmpIndex < kmpTotalCount {
             if successState.peek(index: Int32(nextKmpIndex)) != nil {
-                FlareLog.debug("[PagingStateConverter] 🎯 检测到新的可用数据，强制增量转换 (index: \(nextKmpIndex))")
-                return .incremental
+            FlareLog.debug("[PagingStateConverter] 🎯 检测到新的可用数据，强制增量转换 (index: \(nextKmpIndex))")
+            return .incremental
             }
         }
 

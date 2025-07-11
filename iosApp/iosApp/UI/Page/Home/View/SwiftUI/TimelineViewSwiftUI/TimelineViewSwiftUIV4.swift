@@ -10,6 +10,7 @@ struct TimelineViewSwiftUIV4: View {
     let isCurrentTab: Bool
     @Binding var showFloatingButton: Bool
     @Environment(FlareTheme.self) private var theme
+    @Environment(FlareRouter.self) private var router
 
     @State private var viewModel = TimelineViewModel()
 
@@ -96,6 +97,9 @@ struct TimelineViewSwiftUIV4: View {
                 withAnimation(.easeInOut(duration: 0.5)) {
                     proxy.scrollTo("timeline-top-v4", anchor: .center)
                 }
+            }
+            .onAppear {
+                router.setTimelineViewModel(viewModel)
             }
             .task(id: tab.key) {
                 await viewModel.setupDataSource(for: tab, using: store)

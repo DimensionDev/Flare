@@ -116,25 +116,7 @@ public enum FlareImageOptions {
         ]
     }
 
-//    public static func timelineMedia(size: CGSize, priority: Float = 0.5) -> KingfisherOptionsInfo {
-//        let scale = UIScreen.main.scale
-//
-//        return [
-//            .processor(DownsamplingImageProcessor(size: size)),
-//            .scaleFactor(scale),
-//
-//            .downloadPriority(priority),
-//            .backgroundDecode,
-//            .alsoPrefetchToMemory,
-//
-//            .memoryCacheExpiration(.seconds(240)),
-//            .diskCacheExpiration(.days(5)),
-//
-//            .transition(.fade(0.25)),
-//            .keepCurrentImageWhileLoading,
-//        ]
-//    }
-//
+ 
     public static func timelineAvatar(size: CGSize) -> KingfisherOptionsInfo {
         let scale = UIScreen.main.scale
         return [
@@ -172,35 +154,47 @@ public extension KFImage {
             .diskCacheExpiration(.days(30))
     }
 
-    // @MainActor
+    @MainActor
     func flareTimelineMedia(size: CGSize, priority: Float = 0.5) -> KFImage {
         let scale = UIScreen.main.scale
         let processor = DownsamplingImageProcessor(size: size)
 
-        return setProcessor(processor)
+        var image = setProcessor(processor)
             .scaleFactor(scale)
             .cancelOnDisappear(true)
             .reducePriorityOnDisappear(true)
             .downloadPriority(priority)
-            .backgroundDecode(true)
             .memoryCacheExpiration(.seconds(240))
             .diskCacheExpiration(.days(5))
             .fade(duration: 0.25)
+
+         #if !targetEnvironment(simulator)
+            image = image.backgroundDecode(true)
+        #endif
+
+        return image
     }
 
-    // @MainActor
+    @MainActor
     func flareTimelineAvatar(size: CGSize) -> KFImage {
         let scale = UIScreen.main.scale
 
         let processor = DownsamplingImageProcessor(size: size)
 
-        return setProcessor(processor)
+        var image = setProcessor(processor)
             .scaleFactor(scale)
             .cancelOnDisappear(true)
             .downloadPriority(0.7)
-            .backgroundDecode(true)
             .memoryCacheExpiration(.seconds(600))
             .diskCacheExpiration(.days(7))
             .fade(duration: 0.2)
+
+         #if !targetEnvironment(simulator)
+            image = image.backgroundDecode(true)
+        #endif
+
+        return image
     }
 }
+
+ 

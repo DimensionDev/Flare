@@ -77,6 +77,7 @@
 			membershipExceptions = (
 				Page/Home/View/UIKit/HomeTabController.swift.bak,
 				Page/Home/View/UIKit/HomeTabScreen.swift.bak,
+				Page/Settings/View/AppearanceUIScreen.swift.bak,
 			);
 			target = 7555FF7A242A565900829871 /* iosApp */;
 		};
@@ -89,6 +90,7 @@
 			membershipExceptions = (
 				Page/Home/View/UIKit/HomeTabController.swift.bak,
 				Page/Home/View/UIKit/HomeTabScreen.swift.bak,
+				Page/Settings/View/AppearanceUIScreen.swift.bak,
 			);
 		};
 /* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */

@@ -116,15 +116,12 @@ public fun VideoPlayer(
                     }
             }
         val state = rememberPresentationState(player)
-        DisposableEffect(muted, player) {
+        LaunchedEffect(muted, player) {
             player.volume = if (muted) 0f else 1f
             if (muted) {
                 player.setAudioAttributes(audioAttributes, false)
             } else {
                 player.setAudioAttributes(audioAttributes, true)
-            }
-            onDispose {
-                player.setAudioAttributes(audioAttributes, false)
             }
         }
         LaunchedEffect(autoPlay) {
@@ -139,12 +136,6 @@ public fun VideoPlayer(
                     remainingTime = player.duration - player.currentPosition
                 }
                 delay(500)
-            }
-        }
-        DisposableEffect(uri) {
-            onDispose {
-                player.setAudioAttributes(audioAttributes, false)
-                playerPool.release(uri)
             }
         }
         val isActive = rememberSurfaceBinding(uri)
@@ -184,6 +175,13 @@ public fun VideoPlayer(
             loadingPlaceholder()
         } else {
             remainingTimeContent?.invoke(this, remainingTime)
+        }
+        DisposableEffect(uri) {
+            onDispose {
+                player.volume = 0f
+                player.setAudioAttributes(audioAttributes, false)
+                playerPool.release(uri)
+            }
         }
     }
 }

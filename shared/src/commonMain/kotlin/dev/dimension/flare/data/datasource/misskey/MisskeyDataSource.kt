@@ -111,7 +111,6 @@ internal class MisskeyDataSource(
 
     fun localTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "local_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(
@@ -130,9 +129,15 @@ internal class MisskeyDataSource(
             database,
         )
 
+    fun hybridTimelineLoader() =
+        HybridTimelineRemoteMediator(
+            accountKey,
+            service,
+            database,
+        )
+
     fun publicTimeline(
         pageSize: Int = 20,
-        pagingKey: String = "public_$accountKey",
         scope: CoroutineScope,
     ): Flow<PagingData<UiTimeline>> =
         timelinePager(

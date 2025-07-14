@@ -323,6 +323,7 @@
     <string name="home_tab_mixed_timeline_title">Mixed</string>
     <string name="tab_settings_mixed_timeline">Add mixed timeline tab</string>
     <string name="tab_settings_mixed_timeline_desc">Mixed timeline will mix all tabs timeline result in one tab</string>
+    <string name="home_tab_social_timeline_title">Social</string>
 
     <string name="changelog_current">
         <![CDATA[

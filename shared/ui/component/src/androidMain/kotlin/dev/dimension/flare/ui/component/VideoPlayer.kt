@@ -146,14 +146,6 @@ public fun VideoPlayer(
                     contentScale = contentScale,
                     sourceSizeDp = state.videoSizeDp,
                 ).let {
-                    if (aspectRatio != null) {
-                        it.aspectRatio(
-                            aspectRatio,
-                        )
-                    } else {
-                        it
-                    }
-                }.let {
                     if (onClick != null) {
                         it.combinedClickable(
                             onClick = onClick,

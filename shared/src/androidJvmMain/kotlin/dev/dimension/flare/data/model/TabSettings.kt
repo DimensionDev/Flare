@@ -75,6 +75,7 @@ public sealed interface TitleType {
             Rss,
             Antenna,
             MixedTimeline,
+            Social,
         }
     }
 }
@@ -397,6 +398,14 @@ public sealed interface TimelineTabItem : TabItem {
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.List, accountKey),
+                        ),
+                ),
+                Misskey.HybridTimelineTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Social),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Featured, accountKey),
                         ),
                 ),
                 Misskey.LocalTimelineTabItem(
@@ -749,6 +758,20 @@ public object Misskey {
         override fun createPresenter(): TimelinePresenter =
             dev.dimension.flare.ui.presenter.home.misskey
                 .MissKeyPublicTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Serializable
+    public data class HybridTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "hybrid_$account"
+
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.misskey
+                .MisskeyHybridTimelinePresenter(account)
 
         override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
     }

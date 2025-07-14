@@ -114,4 +114,6 @@
     <string name="feeds_discover_feeds_created_by">Created by %1$s</string>
     <string name="feeds_unsubscribe">Unsubscribe</string>
     <string name="feeds_subscribe">Subscribe</string>
+
+    <string name="social_title">Social</string>
 </resources>

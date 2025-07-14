@@ -32,7 +32,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.PlayerSurface
-import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import androidx.media3.ui.compose.modifiers.resizeWithContentScale
 import androidx.media3.ui.compose.state.rememberPresentationState
 import kotlinx.coroutines.CoroutineScope
@@ -112,9 +111,12 @@ public fun VideoPlayer(
             remember(uri) {
                 playerPool
                     .get(uri)
+                    .apply {
+                        volume = if (muted) 0f else 1f
+                    }
             }
         val state = rememberPresentationState(player)
-        LaunchedEffect(muted) {
+        LaunchedEffect(muted, player) {
             player.volume = if (muted) 0f else 1f
             if (muted) {
                 player.setAudioAttributes(audioAttributes, false)
@@ -136,12 +138,6 @@ public fun VideoPlayer(
                 delay(500)
             }
         }
-        DisposableEffect(uri) {
-            onDispose {
-                player.setAudioAttributes(audioAttributes, false)
-                playerPool.release(uri)
-            }
-        }
         val isActive = rememberSurfaceBinding(uri)
         val playerModifier =
             Modifier
@@ -150,14 +146,6 @@ public fun VideoPlayer(
                     contentScale = contentScale,
                     sourceSizeDp = state.videoSizeDp,
                 ).let {
-                    if (aspectRatio != null) {
-                        it.aspectRatio(
-                            aspectRatio,
-                        )
-                    } else {
-                        it
-                    }
-                }.let {
                     if (onClick != null) {
                         it.combinedClickable(
                             onClick = onClick,
@@ -171,7 +159,6 @@ public fun VideoPlayer(
             PlayerSurface(
                 player = player,
                 modifier = playerModifier,
-                surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
             )
         } else {
             loadingPlaceholder.invoke(this)
@@ -180,6 +167,13 @@ public fun VideoPlayer(
             loadingPlaceholder()
         } else {
             remainingTimeContent?.invoke(this, remainingTime)
+        }
+        DisposableEffect(uri) {
+            onDispose {
+                player.volume = 0f
+                player.setAudioAttributes(audioAttributes, false)
+                playerPool.release(uri)
+            }
         }
     }
 }

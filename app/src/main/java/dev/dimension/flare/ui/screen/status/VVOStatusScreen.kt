@@ -2,8 +2,8 @@ package dev.dimension.flare.ui.screen.status
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -40,7 +40,6 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.isExpanded
-import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -93,13 +92,13 @@ internal fun VVOStatusScreen(
         },
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->
-        if (bigScreen) {
-            val width =
-                when (windowSize.width) {
-                    in 840.dp..1024.dp -> 332.dp
-                    else -> 432.dp
-                }
-            Row {
+        Row {
+            if (bigScreen) {
+                val width =
+                    when (windowSize.width) {
+                        in 840.dp..1024.dp -> 332.dp
+                        else -> 432.dp
+                    }
                 StatusContent(
                     detailStatusKey = statusKey,
                     statusState = state.status,
@@ -107,25 +106,18 @@ internal fun VVOStatusScreen(
                         Modifier
                             .verticalScroll(rememberScrollState())
                             .width(width)
-                            .padding(contentPadding + PaddingValues(horizontal = screenHorizontalPadding)),
+                            .padding(horizontal = screenHorizontalPadding)
+                            .padding(contentPadding),
                 )
-                LazyStatusVerticalStaggeredGrid(
-                    contentPadding = contentPadding,
-                ) {
-                    reactionContent(
-                        comment = state.comment,
-                        repost = state.repost,
-                        detailType = state.type,
-                        onDetailTypeChange = state::onTypeChanged,
-                    )
-                }
             }
-        } else {
             LazyStatusVerticalStaggeredGrid(
                 contentPadding = contentPadding,
+                modifier = Modifier.fillMaxSize(),
             ) {
-                item {
-                    StatusContent(statusState = state.status, detailStatusKey = statusKey)
+                if (!bigScreen) {
+                    item {
+                        StatusContent(statusState = state.status, detailStatusKey = statusKey)
+                    }
                 }
                 reactionContent(
                     comment = state.comment,
@@ -150,6 +142,7 @@ private fun StatusContent(
                 StatusItem(
                     item = status,
                     detailStatusKey = detailStatusKey,
+                    modifier = modifier,
 //                    modifier =
 //                        modifier.sharedBounds(
 //                            rememberSharedContentState(key = status.itemKey),
@@ -204,6 +197,9 @@ private fun LazyStaggeredGridScope.reactionContent(
             }
         ButtonGroup(
             overflowIndicator = {},
+            modifier =
+                Modifier
+                    .padding(horizontal = screenHorizontalPadding),
         ) {
             items.forEach { (type, title) ->
                 toggleableItem(

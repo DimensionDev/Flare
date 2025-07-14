@@ -64,7 +64,6 @@ import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.isExpanded
-import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
@@ -345,7 +344,8 @@ internal fun ProfileScreen(
                         Modifier
                             .verticalScroll(rememberScrollState())
                             .width(width)
-                            .padding(it + PaddingValues(horizontal = 16.dp)),
+                            .padding(horizontal = 16.dp)
+                            .padding(it),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Card {

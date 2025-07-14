@@ -32,7 +32,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.PlayerSurface
-import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import androidx.media3.ui.compose.modifiers.resizeWithContentScale
 import androidx.media3.ui.compose.state.rememberPresentationState
 import kotlinx.coroutines.CoroutineScope
@@ -112,14 +111,20 @@ public fun VideoPlayer(
             remember(uri) {
                 playerPool
                     .get(uri)
+                    .apply {
+                        volume = if (muted) 0f else 1f
+                    }
             }
         val state = rememberPresentationState(player)
-        LaunchedEffect(muted) {
+        DisposableEffect(muted, player) {
             player.volume = if (muted) 0f else 1f
             if (muted) {
                 player.setAudioAttributes(audioAttributes, false)
             } else {
                 player.setAudioAttributes(audioAttributes, true)
+            }
+            onDispose {
+                player.setAudioAttributes(audioAttributes, false)
             }
         }
         LaunchedEffect(autoPlay) {
@@ -171,7 +176,6 @@ public fun VideoPlayer(
             PlayerSurface(
                 player = player,
                 modifier = playerModifier,
-                surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
             )
         } else {
             loadingPlaceholder.invoke(this)

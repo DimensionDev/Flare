@@ -189,7 +189,7 @@ fluent-ui = { module = "com.konyaco:fluent", version = "0.1.0-SNAPSHOT" }
 
 window-styler = { module = "com.mayakapps.compose:window-styler", version = "0.3.3-SNAPSHOT" }
 
-commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.17.0" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.18.0" }
 
 jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version = "3.9.1" }
 

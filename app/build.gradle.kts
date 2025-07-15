@@ -146,6 +146,8 @@ dependencies {
     implementation(libs.compose.placeholder.material3)
     implementation(libs.webkit)
     implementation(libs.bundles.navigation3)
+    implementation("dev.chrisbanes.haze:haze:1.6.8")
+    implementation("dev.chrisbanes.haze:haze-materials:1.6.8")
 
     if (project.file("google-services.json").exists()) {
         implementation(platform(libs.firebase.bom))

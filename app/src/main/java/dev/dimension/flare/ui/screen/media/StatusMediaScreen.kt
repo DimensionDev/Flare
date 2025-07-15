@@ -29,12 +29,10 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -50,8 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -74,11 +70,15 @@ import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Pause
 import compose.icons.fontawesomeicons.solid.Play
 import compose.icons.fontawesomeicons.solid.Xmark
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
+import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.R
 import dev.dimension.flare.common.VideoDownloadHelper
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.Glassify
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.VideoPlayer
 import dev.dimension.flare.ui.component.VideoPlayerPool
@@ -117,6 +117,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalPermissionsApi::class,
+    ExperimentalHazeMaterialsApi::class,
 )
 @Composable
 internal fun StatusMediaScreen(
@@ -128,6 +129,7 @@ internal fun StatusMediaScreen(
     toAltText: (UiMedia) -> Unit,
     playerPool: VideoPlayerPool = koinInject(),
 ) {
+    val hazeState = rememberHazeState()
     val context = LocalContext.current
     val permissionState =
         rememberPermissionState(
@@ -183,10 +185,12 @@ internal fun StatusMediaScreen(
 
                             // handle pages around without lastPage
                             if (lastPage == pagerState.currentPage - 1 && pagerState.currentPage + 1 < pagerState.pageCount) {
-                                val nextPlayer = playerPool.peek(media[pagerState.currentPage + 1].url)
+                                val nextPlayer =
+                                    playerPool.peek(media[pagerState.currentPage + 1].url)
                                 nextPlayer?.pause()
                             } else if (lastPage == pagerState.currentPage + 1 && pagerState.currentPage - 1 >= 0) {
-                                val prevPlayer = playerPool.peek(media[pagerState.currentPage - 1].url)
+                                val prevPlayer =
+                                    playerPool.peek(media[pagerState.currentPage - 1].url)
                                 prevPlayer?.pause()
                             }
 
@@ -203,6 +207,9 @@ internal fun StatusMediaScreen(
                 }
                 Swiper(state = swiperState) {
                     HorizontalPager(
+                        modifier =
+                            Modifier
+                                .hazeSource(state = hazeState),
                         state = pagerState,
                         userScrollEnabled = !state.lockPager,
                         key = {
@@ -339,10 +346,18 @@ internal fun StatusMediaScreen(
                                 .padding(horizontal = 4.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        FilledTonalIconButton(
+                        Glassify(
                             onClick = {
                                 onDismiss.invoke()
                             },
+                            modifier = Modifier.size(40.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.secondaryContainer,
+                            hazeState = hazeState,
+//                            colors = IconButtonDefaults.filledTonalIconButtonColors(
+//                                containerColor = Color.Transparent,
+//                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+//                            )
                         ) {
                             FAIcon(
                                 FontAwesomeIcons.Solid.Xmark,
@@ -353,10 +368,14 @@ internal fun StatusMediaScreen(
                         state.medias.onSuccess { medias ->
                             val current = medias[state.currentPage]
                             if (!current.description.isNullOrEmpty()) {
-                                FilledTonalIconButton(
+                                Glassify(
                                     onClick = {
                                         toAltText.invoke(current)
                                     },
+                                    color = MaterialTheme.colorScheme.secondaryContainer,
+                                    hazeState = hazeState,
+                                    modifier = Modifier.size(40.dp),
+                                    shape = CircleShape,
                                 ) {
                                     FAIcon(
                                         FontAwesomeIcons.Solid.CircleInfo,
@@ -364,7 +383,7 @@ internal fun StatusMediaScreen(
                                     )
                                 }
                             }
-                            FilledTonalIconButton(
+                            Glassify(
                                 onClick = {
                                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                                         if (!permissionState.status.isGranted) {
@@ -376,6 +395,10 @@ internal fun StatusMediaScreen(
                                         state.save(medias[state.currentPage])
                                     }
                                 },
+                                hazeState = hazeState,
+                                color = MaterialTheme.colorScheme.secondaryContainer,
+                                modifier = Modifier.size(40.dp),
+                                shape = CircleShape,
                             ) {
                                 FAIcon(
                                     FontAwesomeIcons.Solid.Download,
@@ -397,23 +420,15 @@ internal fun StatusMediaScreen(
                             enter = slideInVertically { it },
                             exit = slideOutVertically { it },
                         ) {
-                            Surface(
-                                color = Color.Transparent,
+                            Glassify(
+                                hazeState = hazeState,
+                                color = MaterialTheme.colorScheme.surfaceContainer,
                                 contentColor = MaterialTheme.colorScheme.onBackground,
                             ) {
                                 Column(
                                     modifier =
                                         Modifier
-                                            .background(
-                                                brush =
-                                                    Brush.verticalGradient(
-                                                        colors =
-                                                            listOf(
-                                                                Color.Transparent,
-                                                                MaterialTheme.colorScheme.surfaceContainer,
-                                                            ),
-                                                    ),
-                                            ).padding(
+                                            .padding(
                                                 horizontal = screenHorizontalPadding,
                                                 vertical = 8.dp,
                                             ).windowInsetsPadding(
@@ -435,7 +450,9 @@ internal fun StatusMediaScreen(
                                                     if (pagerState.currentPage == iteration) {
                                                         MaterialTheme.colorScheme.primary
                                                     } else {
-                                                        MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                                                        MaterialTheme.colorScheme.onBackground.copy(
+                                                            alpha = 0.5f,
+                                                        )
                                                     }
                                                 Box(
                                                     modifier =
@@ -469,7 +486,10 @@ internal fun StatusMediaScreen(
                                         }
                                     }
                                     CompositionLocalProvider(
-                                        LocalComponentAppearance provides LocalComponentAppearance.current.copy(showMedia = false),
+                                        LocalComponentAppearance provides
+                                            LocalComponentAppearance.current.copy(
+                                                showMedia = false,
+                                            ),
                                     ) {
                                         QuotedStatus(
                                             data = content,

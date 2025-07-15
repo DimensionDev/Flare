@@ -4,8 +4,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -23,24 +21,25 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingToolbarDefaults.floatingToolbarVerticalNestedScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalWideNavigationRail
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.ShortNavigationBarItem
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.WideNavigationRailState
 import androidx.compose.material3.WideNavigationRailValue
@@ -75,6 +74,10 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Pen
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
+import dev.chrisbanes.haze.materials.HazeMaterials
+import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.R
 
 val LocalBottomBarHeight = androidx.compose.runtime.staticCompositionLocalOf<Dp> { 0.dp }
@@ -85,6 +88,7 @@ val LocalBottomBarShowing = androidx.compose.runtime.staticCompositionLocalOf<Bo
     ExperimentalMaterial3ExpressiveApi::class,
     ExperimentalMaterial3Api::class,
     ExperimentalSharedTransitionApi::class,
+    ExperimentalHazeMaterialsApi::class,
 )
 @ExperimentalMaterial3AdaptiveNavigationSuiteApi
 @Composable
@@ -105,6 +109,7 @@ fun NavigationSuiteScaffold2(
     footerItems: NavigationSuiteScope2.() -> Unit = {},
     content: @Composable () -> Unit = {},
 ) {
+    val hazeState = rememberHazeState()
     var isPodcastShowing by remember { mutableStateOf(false) }
     var isBottomBarExpanded by remember { mutableStateOf(true) }
     Surface(
@@ -224,8 +229,15 @@ fun NavigationSuiteScaffold2(
                             0.dp
                         },
                     LocalBottomBarShowing provides (layoutType == NavigationSuiteType.NavigationBar),
+                    LocalHazeState provides hazeState,
                 ) {
-                    content.invoke()
+                    Box(
+                        modifier =
+                            Modifier
+                                .hazeSource(state = hazeState),
+                    ) {
+                        content.invoke()
+                    }
                 }
                 Column(
                     modifier =
@@ -279,15 +291,12 @@ fun NavigationSuiteScaffold2(
                                 AnimatedContent(
                                     isBottomBarExpanded,
                                 ) { isExpanded ->
-                                    Surface(
-                                        shape =
-                                            if (isExpanded) {
-                                                RoundedCornerShape(25)
-                                            } else {
-                                                RoundedCornerShape(50)
-                                            },
+                                    Glassify(
+                                        shape = RoundedCornerShape(50),
                                         shadowElevation = 8.dp,
                                         tonalElevation = 8.dp,
+                                        hazeState = hazeState,
+                                        hazeStyle = HazeMaterials.thick(),
                                         modifier =
                                             Modifier
                                                 .sharedElement(
@@ -309,11 +318,9 @@ fun NavigationSuiteScaffold2(
                                                     ShortNavigationBarItem(
                                                         modifier =
                                                             it.modifier
-                                                                .sharedBounds(
+                                                                .sharedElement(
                                                                     rememberSharedContentState("item_$index"),
                                                                     animatedVisibilityScope = this@AnimatedContent,
-                                                                    enter = fadeIn(),
-                                                                    exit = fadeOut(),
                                                                 ),
                                                         selected = it.selected,
                                                         onClick = it.onClick,
@@ -322,7 +329,9 @@ fun NavigationSuiteScaffold2(
                                                                 modifier =
                                                                     Modifier
                                                                         .sharedElement(
-                                                                            rememberSharedContentState("item_icon_$index"),
+                                                                            rememberSharedContentState(
+                                                                                "item_icon_$index",
+                                                                            ),
                                                                             animatedVisibilityScope = this@AnimatedContent,
                                                                         ),
                                                             ) {
@@ -347,36 +356,31 @@ fun NavigationSuiteScaffold2(
                                     AnimatedContent(
                                         isBottomBarExpanded,
                                     ) { isExpanded ->
-                                        if (isExpanded) {
-                                            FloatingActionButton(
-                                                modifier =
-                                                    Modifier
-                                                        .sharedElement(
-                                                            rememberSharedContentState("compose_fab"),
-                                                            animatedVisibilityScope = this@AnimatedContent,
-                                                        ),
-                                                onClick = onFabClicked,
-                                            ) {
-                                                FAIcon(
-                                                    imageVector = FontAwesomeIcons.Solid.Pen,
-                                                    contentDescription = stringResource(id = R.string.compose_title),
-                                                )
-                                            }
-                                        } else {
-                                            SmallFloatingActionButton(
-                                                onClick = onFabClicked,
-                                                modifier =
-                                                    Modifier
-                                                        .sharedElement(
-                                                            rememberSharedContentState("compose_fab"),
-                                                            animatedVisibilityScope = this@AnimatedContent,
-                                                        ),
-                                            ) {
-                                                FAIcon(
-                                                    imageVector = FontAwesomeIcons.Solid.Pen,
-                                                    contentDescription = stringResource(id = R.string.compose_title),
-                                                )
-                                            }
+                                        Glassify(
+                                            onClick = onFabClicked,
+                                            shape = CircleShape,
+                                            shadowElevation = 8.dp,
+                                            tonalElevation = 8.dp,
+                                            color = MaterialTheme.colorScheme.primaryContainer,
+                                            hazeState = hazeState,
+                                            modifier =
+                                                Modifier
+                                                    .sharedElement(
+                                                        rememberSharedContentState("compose_fab"),
+                                                        animatedVisibilityScope = this@AnimatedContent,
+                                                    ).size(
+                                                        if (isExpanded) {
+                                                            56.dp
+                                                        } else {
+                                                            40.dp
+                                                        },
+                                                    ),
+                                        ) {
+                                            Icon(
+                                                imageVector = FontAwesomeIcons.Solid.Pen,
+                                                contentDescription = stringResource(id = R.string.compose_title),
+                                                modifier = Modifier.size(20.dp),
+                                            )
                                         }
                                     }
                                 }

@@ -54,6 +54,9 @@ kotlin {
                 implementation(libs.bundles.media3)
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.bundles.koin)
+                implementation("dev.chrisbanes.haze:haze:1.6.8")
+                implementation("dev.chrisbanes.haze:haze-materials:1.6.8")
+
             }
         }
         val jvmMain by getting {

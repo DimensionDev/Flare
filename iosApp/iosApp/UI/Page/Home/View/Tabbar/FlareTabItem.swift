@@ -32,7 +32,7 @@ struct FlareTabItem<Content: View>: View {
                 .foregroundColor(theme.labelColor)
         }
         .onAppear {
-            router.activeTab = tabType
+            router.selectedTab = tabType
             os_log("[FlareTabItem] View appeared with router: %{public}@, tab: %{public}@, depth: %{public}d",
                    log: .default, type: .debug,
                    String(describing: ObjectIdentifier(router)),

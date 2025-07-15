@@ -9,8 +9,6 @@ import UIKit
 class FlareRouter {
     public var appState: FlareAppState
 
-    // 注意：@Observable类中不能使用@Environment，需要通过其他方式获取appSettings
-
     private var cancellables = Set<AnyCancellable>()
 
     var activeDestination: FlareDestination?
@@ -26,23 +24,15 @@ class FlareRouter {
     var previousPageSnapshot: UIImage?
 
 
-    weak var timelineViewModel: TimelineViewModel?
-
-
     var selectedTab: FlareHomeTabs = .timeline {
         didSet {
             let oldTab = oldValue
-            activeTab = selectedTab
-
-
-            handleTimelineLifecycle(from: oldTab, to: selectedTab)
-
             FlareLog.debug("[FlareRouter] Tab changed: \(oldTab) -> \(selectedTab)")
         }
     }
 
     var navigationDepth: Int {
-        let depth = switch activeTab {
+        let depth = switch selectedTab {
         case .menu: menuNavigationPath.count
         case .timeline: timelineNavigationPath.count
         case .discover: discoverNavigationPath.count
@@ -53,7 +43,7 @@ class FlareRouter {
 
         os_log("[FlareRouter] Current navigationDepth for tab %{public}@: %{public}d",
                log: .default, type: .debug,
-               String(describing: activeTab),
+               String(describing: selectedTab),
                depth)
 
         return depth
@@ -65,7 +55,7 @@ class FlareRouter {
     var notificationNavigationPath = NavigationPath()
     var profileNavigationPath = NavigationPath()
 
-    var activeTab: FlareHomeTabs = .timeline
+
 
     var navigationPath: NavigationPath {
         get { currentNavigationPath }
@@ -73,7 +63,7 @@ class FlareRouter {
     }
 
     private var currentNavigationPath: NavigationPath {
-        switch activeTab {
+        switch selectedTab {
         case .menu: menuNavigationPath
         case .timeline: timelineNavigationPath
         case .discover: discoverNavigationPath
@@ -84,7 +74,7 @@ class FlareRouter {
     }
 
     private func updateCurrentNavigationPath(_ newPath: NavigationPath) {
-        switch activeTab {
+        switch selectedTab {
         case .menu: menuNavigationPath = newPath
         case .timeline: timelineNavigationPath = newPath
         case .discover: discoverNavigationPath = newPath
@@ -123,29 +113,6 @@ class FlareRouter {
                log: .default, type: .debug, String(describing: tab))
     }
 
-
-    func setTimelineViewModel(_ viewModel: TimelineViewModel) {
-        timelineViewModel = viewModel
-        FlareLog.debug("[FlareRouter] Timeline ViewModel registered")
-    }
-
-
-    private func handleTimelineLifecycle(from oldTab: FlareHomeTabs, to newTab: FlareHomeTabs) {
-        FlareLog.debug("[FlareRouter] handleTimelineLifecycle called: \(oldTab) -> \(newTab)")
-
-        guard let timelineViewModel = timelineViewModel else {
-            FlareLog.debug("[FlareRouter] timelineViewModel is nil, skipping lifecycle management")
-            return
-        }
-
-
-        if newTab == .timeline && oldTab != .timeline {
-            FlareLog.debug("[FlareRouter] Switching to Timeline, data source will be refreshed by view lifecycle")
-        } else if oldTab == .timeline && newTab != .timeline {
-            FlareLog.debug("[FlareRouter] Switching away from Timeline, Task will be cancelled automatically")
-        }
-    }
-
     init(appState: FlareAppState = FlareAppState()) {
         self.appState = appState
         os_log("[FlareRouter] Initialized router: %{public}@", log: .default, type: .debug, String(describing: ObjectIdentifier(self)))
@@ -159,12 +126,12 @@ class FlareRouter {
         }
 
         let routerId = ObjectIdentifier(self)
-        os_log("[FlareRouter] Router %{public}@ navigating to %{public}@, current depth: %{public}d, activeTab: %{public}@",
+        os_log("[FlareRouter] Router %{public}@ navigating to %{public}@, current depth: %{public}d, selectedTab: %{public}@",
                log: .default, type: .debug,
                String(describing: routerId),
                String(describing: destination),
                navigationDepth,
-               String(describing: activeTab))
+               String(describing: selectedTab))
 
         presentationType = destination.navigationType
         activeDestination = destination
@@ -213,9 +180,9 @@ class FlareRouter {
                log: .default, type: .debug,
                String(describing: routerId),
                String(describing: destination),
-               String(describing: activeTab))
+               String(describing: selectedTab))
 
-        switch activeTab {
+        switch selectedTab {
         case .menu:
             menuNavigationPath.append(destination)
         case .timeline:
@@ -233,12 +200,12 @@ class FlareRouter {
 
     private func dismissCurrentView() {
         let routerId = ObjectIdentifier(self)
-        os_log("[FlareRouter] Router %{public}@ dismissing view, current type: %{public}@, depth: %{public}d, activeTab: %{public}@",
+        os_log("[FlareRouter] Router %{public}@ dismissing view, current type: %{public}@, depth: %{public}d, selectedTab: %{public}@",
                log: .default, type: .debug,
                String(describing: routerId),
                String(describing: presentationType),
                navigationDepth,
-               String(describing: activeTab))
+               String(describing: selectedTab))
 
         switch presentationType {
         case .sheet:
@@ -249,7 +216,7 @@ class FlareRouter {
             isDialogPresented = false
             activeDestination = nil
         case .push:
-            switch activeTab {
+            switch selectedTab {
             case .menu:
                 if !menuNavigationPath.isEmpty {
                     menuNavigationPath.removeLast()

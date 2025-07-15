@@ -172,6 +172,15 @@ public abstract class TimelinePresenter :
                         onRetry()
                     }
             }
+
+            override suspend fun loadMore() {
+                listState.onSuccess {
+                    val currentCount = itemCount
+                    if (currentCount > 0) {
+                        get(currentCount - 1)
+                    }
+                }
+            }
         }
     }
 
@@ -184,4 +193,6 @@ public interface TimelineState {
     public val listState: PagingState<UiTimeline>
 
     public suspend fun refresh()
+
+    public suspend fun loadMore()
 }

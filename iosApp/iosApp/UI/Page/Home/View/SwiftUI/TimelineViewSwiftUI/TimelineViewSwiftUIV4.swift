@@ -12,6 +12,7 @@ struct TimelineViewSwiftUIV4: View {
     @Environment(FlareTheme.self) private var theme
     @Environment(FlareRouter.self) private var router
 
+
     @State private var viewModel = TimelineViewModel()
 
     init(tab: FLTabItem, store: AppBarTabSettingStore, scrollToTopTrigger: Binding<Bool>, isCurrentTab: Bool, showFloatingButton: Binding<Bool>) {
@@ -60,8 +61,7 @@ struct TimelineViewSwiftUIV4: View {
                                 await viewModel.handleRefresh()
                             }
                         }
-                        //   .listRowBackground(theme.primaryBackgroundColor)
-                        .listRowInsets(EdgeInsets())
+                         .listRowInsets(EdgeInsets())
 
                     case .empty:
                         TimelineEmptyView()
@@ -75,21 +75,16 @@ struct TimelineViewSwiftUIV4: View {
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
                 }
-                // .scrollPosition($scrollPosition) 实现不了
-                // .background(theme.secondaryBackgroundColor)
                 .listStyle(.plain)
                 .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
-                    // FlareLog.debug("TimelineV4 scroll offset: \(geometry.contentOffset)")
                     geometry
                 } action: { _, newValue in
-                    // FlareLog.debug("TimelineV4 scroll geometry changed: \(oldValue.contentOffset) -> \(newValue.contentOffset)")
                     viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $showFloatingButton)
                 }
                 .refreshable {
                     await viewModel.handleRefresh()
                 }
             }
-            // .background(theme.secondaryBackgroundColor)
             .onChange(of: scrollToTopTrigger) { _, _ in
                 let _ = FlareLog.debug("TimelineV4 ScrollToTop trigger for tab: \(tab.key)")
                 guard isCurrentTab else { return }
@@ -97,9 +92,6 @@ struct TimelineViewSwiftUIV4: View {
                 withAnimation(.easeInOut(duration: 0.5)) {
                     proxy.scrollTo("timeline-top-v4", anchor: .center)
                 }
-            }
-            .onAppear {
-                router.setTimelineViewModel(viewModel)
             }
             .task(id: tab.key) {
                 await viewModel.setupDataSource(for: tab, using: store)
@@ -113,13 +105,6 @@ struct TimelineViewSwiftUIV4: View {
                     Task { await viewModel.handleRefresh() }
                 }
             }
-            // .onDisappear {
-            //     cancellables.removeAll()
-            // }
-            // .alert("Error", isPresented: $showErrorAlert) {
-            //     Button("OK") { }
-            // } message: {
-            //     Text(currentError?.localizedDescription ?? "Unknown error")
         }
     }
 }

@@ -50,7 +50,8 @@ struct TimelineViewSwiftUIV2: View {
                         onError: { error in
                             currentError = error
                             showErrorAlert = true
-                        }
+                        },
+                        viewModel: nil
                     )
                 }
             }

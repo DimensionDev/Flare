@@ -48,6 +48,12 @@ struct HomeTabScreenSwiftUI: View {
                 showFloatingButton: $showFloatingButton
             )
         }.toolbarVisibility(.hidden, for: .navigationBar) // 隐藏，避免滑动返回 appbar 高度增加
+            .onAppear {
+                if selectedHomeAppBarTabKey.isEmpty, let firstTab = tabStore.availableAppBarTabsItems.first {
+                    selectedHomeAppBarTabKey = firstTab.key
+                    tabStore.updateSelectedTab(firstTab)
+                }
+            }
             .onChange(of: tabStore.availableAppBarTabsItems.count) { _, _ in
                 // 标签列表变化时，确保选中状态正确
                 let newItems = tabStore.availableAppBarTabsItems

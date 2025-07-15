@@ -16,6 +16,8 @@ class TimelineViewModel {
 
      private var dataSourceTask: Task<Void, Never>?
 
+     private(set) var isLoadingMore: Bool = false
+
     var items: [TimelineItem] {
         if case let .loaded(items, _, _) = timelineState {
             return items
@@ -38,7 +40,8 @@ class TimelineViewModel {
     }
 
     func setupDataSource(for tab: FLTabItem, using store: AppBarTabSettingStore) async {
-         dataSourceTask?.cancel()
+ 
+        dataSourceTask?.cancel()
 
         FlareLog.debug("Timeline Setting up data source with cache for tab: \(tab.key)")
 
@@ -60,6 +63,7 @@ class TimelineViewModel {
         dataSourceTask = Task {
             for await state in cachedPresenter.models {
 
+ 
                 guard !Task.isCancelled else {
                     FlareLog.debug("[Timeline ViewModel] Task cancelled, stopping data processing")
                     break
@@ -125,6 +129,8 @@ class TimelineViewModel {
         showErrorAlert = true
     }
 
+
+
     func handleScrollOffsetChange(_ offsetY: CGFloat, showFloatingButton: Binding<Bool>) {
         let shouldShow = offsetY > 50
 
@@ -133,101 +139,32 @@ class TimelineViewModel {
         }
     }
 
-    /// 处理加载更多的业务逻辑
+  
     func handleLoadMore() async {
-        FlareLog.debug("[Timeline ViewModel] 开始处理load more请求")
-
         guard let presenter else {
-            FlareLog.warning("[Timeline ViewModel] 错误: presenter为空，无法加载更多")
+            FlareLog.warning("[Timeline ViewModel] presenter为空，无法加载更多")
             return
         }
 
-        let currentItemsCount = items.count
-        // 获取下一个需要请求的KMP index
-        let nextKmpIndex = stateConverter.getNextKmpIndex()
+      
+        guard !isLoadingMore else {
+            FlareLog.debug("[Timeline ViewModel] 正在加载中，跳过重复调用")
+            return
+        }
 
-        FlareLog.debug("[Timeline ViewModel] 当前Swift显示数量: \(currentItemsCount), 下一个KMP index: \(nextKmpIndex)")
+        isLoadingMore = true
+        defer { isLoadingMore = false }
 
-        _ = await Task.detached(priority: .userInitiated) { [presenter] in
-            FlareLog.debug("[Timeline ViewModel] 开始异步任务，获取KMP状态")
-            let timelineState = presenter.models.value
-            FlareLog.debug("[Timeline ViewModel] 获取到TimelineState，listState类型: \(type(of: timelineState.listState))")
-
-            if let pagingState = timelineState.listState as? PagingStateSuccess<UiTimeline> {
-                let kmpTotalCount = Int(pagingState.itemCount)
-                let appendState = pagingState.appendState
-                let isRefreshing = pagingState.isRefreshing
-
-                FlareLog.debug("[Timeline ViewModel] KMP状态: totalCount=\(kmpTotalCount), nextIndex=\(nextKmpIndex), appendState=\(appendState), isRefreshing=\(isRefreshing)")
-
-                // 添加KMP数据一致性检查
-                FlareLog.debug("[Timeline ViewModel] === KMP数据一致性检查开始 ===")
-                var actualAvailableCount = 0
-                var firstUnavailableIndex: Int?
-
-                for i in 0 ..< kmpTotalCount {
-                    if pagingState.peek(index: Int32(i)) != nil {
-                        actualAvailableCount += 1
-                    } else {
-                        if firstUnavailableIndex == nil {
-                            firstUnavailableIndex = i
-                        }
-                    }
-                }
-
-                FlareLog.debug("[Timeline ViewModel] KMP数据一致性: 报告\(kmpTotalCount)个，实际可用\(actualAvailableCount)个")
-                if let firstUnavailable = firstUnavailableIndex {
-                    FlareLog.debug("[Timeline ViewModel] 第一个不可用数据位置: index \(firstUnavailable)")
-                }
-
-                // 特别检查目标index的数据可用性
-                FlareLog.debug("[Timeline ViewModel] === 目标index数据检查 ===")
-                let targetIndex = nextKmpIndex
-                let peekResult = pagingState.peek(index: Int32(targetIndex))
-                FlareLog.debug("[Timeline ViewModel] peek(index: \(targetIndex)) 结果: \(peekResult != nil ? "有数据" : "null")")
-
-                // 检查目标index前后的数据可用性
-                if targetIndex > 0 {
-                    let prevResult = pagingState.peek(index: Int32(targetIndex - 1))
-                    FlareLog.debug("[Timeline ViewModel] peek(index: \(targetIndex - 1)) 结果: \(prevResult != nil ? "有数据" : "null")")
-                }
-
-                if targetIndex + 1 < kmpTotalCount {
-                    let nextResult = pagingState.peek(index: Int32(targetIndex + 1))
-                    FlareLog.debug("[Timeline ViewModel] peek(index: \(targetIndex + 1)) 结果: \(nextResult != nil ? "有数据" : "null")")
-                }
-
-                // 检查是否需要加载更多
-                if nextKmpIndex < kmpTotalCount {
-                    FlareLog.debug("[Timeline ViewModel] 条件满足，调用pagingState.get(index: \(nextKmpIndex))")
-                    let result = pagingState.get(index: Int32(nextKmpIndex))
-                    FlareLog.debug("[Timeline ViewModel] pagingState.get()调用完成，返回值: \(result != nil ? "有数据" : "null")")
-
-                    if result == nil {
-                        FlareLog.error("[Timeline ViewModel] ❌ KMP数据获取失败！")
-                        FlareLog.error("[Timeline ViewModel] 失败详情: index=\(nextKmpIndex), totalCount=\(kmpTotalCount), actualAvailable=\(actualAvailableCount)")
-
-                        // 尝试探测下一个可用数据
-                        FlareLog.debug("[Timeline ViewModel] === 探测下一个可用数据 ===")
-                        for i in (nextKmpIndex + 1) ..< min(nextKmpIndex + 10, kmpTotalCount) {
-                            if let testResult = pagingState.peek(index: Int32(i)) {
-                                FlareLog.debug("[Timeline ViewModel] 发现可用数据在index: \(i)")
-                                break
-                            }
-                        }
-                    } else {
-                        FlareLog.debug("[Timeline ViewModel] ✅ KMP数据获取成功")
-                    }
-                } else {
-                    FlareLog.debug("[Timeline ViewModel] 已到达KMP数据末尾: nextIndex(\(nextKmpIndex)) >= totalCount(\(kmpTotalCount))")
-                }
-            } else {
-                FlareLog.warning("[Timeline ViewModel] 错误: listState不是PagingStateSuccess类型")
-            }
-        }.value
-
-        FlareLog.debug("[Timeline ViewModel] handleLoadMore方法执行完成")
+      
+        do {
+            try await presenter.models.value.loadMore()
+            FlareLog.debug("[Timeline ViewModel] LoadMore completed successfully")
+        } catch {
+            FlareLog.error("[Timeline ViewModel] LoadMore failed: \(error)")
+        }
     }
+
+
 }
 
 struct TimelineLoadingView: View {

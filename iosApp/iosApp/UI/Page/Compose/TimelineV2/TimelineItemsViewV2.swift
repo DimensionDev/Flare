@@ -11,6 +11,7 @@ struct TimelineItemsViewV2: View {
     let presenter: TimelinePresenter?
     @Binding var scrollPositionID: String?
     let onError: (FlareError) -> Void
+    let viewModel: TimelineViewModel?
 
     var body: some View {
         ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
@@ -31,24 +32,18 @@ struct TimelineItemsViewV2: View {
         if hasMore {
             TimelineLoadMoreView(isRefreshing: isRefreshing)
                 .onAppear {
-                    FlareLog.debug("TimelineItemsViewV2 Reached end of list, triggering next page load")
-                    Task {
-                        if let presenter,
-                           let timelineState = presenter.models.value as? TimelineState,
-                           let pagingState = timelineState.listState as? PagingStateSuccess<UiTimeline>
-                        {
-                            let currentItemCount = Int(pagingState.itemCount)
-                            let nextPageIndex = items.count
-
-                            if nextPageIndex < currentItemCount {
-                                FlareLog.debug("TimelineItemsViewV2 Safe next page load: requesting index=\(nextPageIndex), total=\(currentItemCount)")
-                                _ = pagingState.get(index: Int32(nextPageIndex))
-                            } else {
-                                FlareLog.debug("TimelineItemsViewV2 Skipped next page load: index=\(nextPageIndex) >= total=\(currentItemCount)")
-                            }
-                        }
+                    if hasMore, !isRefreshing, !(viewModel?.isLoadingMore ?? false) {
+                        FlareLog.debug("TimelineItemsViewV2 Load more triggered")
+                        handleLoadMore()
                     }
                 }
+        }
+    }
+
+    private func handleLoadMore() {
+        FlareLog.debug("[TimelineItemsViewV2 LoadMore] UI层触发load more，委托给ViewModel")
+         Task {
+            await viewModel?.handleLoadMore()
         }
     }
 }

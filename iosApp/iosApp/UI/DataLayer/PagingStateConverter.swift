@@ -6,26 +6,16 @@ extension Notification.Name {
 }
 
 class PagingStateConverter {
-    /// 转换统计
-    private var stats = ConversionStats()
+
 
     /// 转换队列
     private let conversionQueue = DispatchQueue(label: "timeline.state.converter", qos: .userInitiated)
-
-    private var nextKmpIndex: Int = 0 // 下一个需要请求的KMP index
-    private var lastKmpTotalCount: Int = 0 // 上次KMP报告的总数据量
-    private var lastStateSignature: String? // 上次的状态签名
 
     /// 缓存变量
     private var convertedItems: [TimelineItem] = []
 
     init() {
         setupNotificationObservers()
-    }
-
-    /// 获取下一个需要请求的KMP index
-    func getNextKmpIndex() -> Int {
-        nextKmpIndex
     }
 
     deinit {
@@ -38,7 +28,6 @@ class PagingStateConverter {
     func convert(_ pagingState: PagingState<UiTimeline>) -> FlareTimelineState {
         // 线程安全：使用串行队列同步执行
         conversionQueue.sync {
-            stats.totalConversions += 1
             FlareLog.debug("[PagingStateConverter] 开始转换PagingState，类型: \(type(of: pagingState))")
 
             let result: FlareTimelineState
@@ -52,7 +41,6 @@ class PagingStateConverter {
                 FlareLog.debug("[PagingStateConverter] 处理Error状态: \(errorState.error)")
                 let flareError = FlareError.from(errorState.error)
                 result = .error(flareError)
-                stats.errorCount += 1
 
             case is PagingStateEmpty<UiTimeline>:
                 FlareLog.debug("[PagingStateConverter] 处理Empty状态")
@@ -65,7 +53,6 @@ class PagingStateConverter {
             default:
                 FlareLog.warning("PagingStateConverter Unknown PagingState type: \(type(of: pagingState))")
                 result = .loading
-                stats.errorCount += 1
             }
 
             FlareLog.debug("[PagingStateConverter] 转换完成，结果类型: \(type(of: result))")
@@ -74,166 +61,82 @@ class PagingStateConverter {
         }
     }
 
-    var statistics: ConversionStats {
-        conversionQueue.sync { stats }
-    }
+
 
     /// 重置转换器状态（用于刷新或切换数据源）
     func reset() {
         conversionQueue.sync {
-            resetIncrementalState()
+            convertedItems.removeAll()
+            FlareLog.debug("[PagingStateConverter] 状态已重置")
         }
     }
 
-    /// 转换成功状态 - 使用修复的增量转换策略
+    /// 转换成功状态 - 简化的转换策略
     /// - Parameter successState: KMP的成功状态
     /// - Returns: 转换后的FlareTimelineState
-    private enum ConversionStrategy {
-        case incremental
-        case full
-        case skip
-    }
-
     private func convertSuccessState(_ successState: PagingStateSuccess<UiTimeline>) -> FlareTimelineState {
-        let strategy = determineConversionStrategy(successState)
-
-        switch strategy {
-        case .incremental:
-            return performIncrementalConversion(successState)
-        case .full:
-            return performFullConversion(successState)
-        case .skip:
-            // 跳过转换时，基于当前缓存生成状态
-            return generateFilteredState(successState)
-        }
-    }
-
-    private func determineConversionStrategy(_ successState: PagingStateSuccess<UiTimeline>) -> ConversionStrategy {
-        let kmpTotalCount = Int(successState.itemCount)
         let isRefreshing = successState.isRefreshing
 
-        FlareLog.debug("[PagingStateConverter] KMP状态: totalCount=\(kmpTotalCount), lastTotal=\(lastKmpTotalCount), nextKmpIndex=\(nextKmpIndex)")
-
-        // 🚀 新增：Load More强制转换机制 - 检查是否有新的可用数据
-        if nextKmpIndex < kmpTotalCount {
-            if successState.peek(index: Int32(nextKmpIndex)) != nil {
-            FlareLog.debug("[PagingStateConverter] 🎯 检测到新的可用数据，强制增量转换 (index: \(nextKmpIndex))")
-            return .incremental
-            }
-        }
-
-        // 生成基于KMP真实状态的签名（简化版本，避免appendState的复杂性）
-        let appendStateType = String(describing: type(of: successState.appendState))
-        let currentStateSignature = "\(kmpTotalCount)_\(isRefreshing)_\(appendStateType)"
-
-        FlareLog.debug("[PagingStateConverter] 状态签名: \(currentStateSignature)")
-
-        // 处理刷新场景
-        if isRefreshing {
-            FlareLog.debug("[PagingStateConverter] 检测到刷新，重置状态")
-            resetIncrementalState()
-            lastKmpTotalCount = kmpTotalCount
-            lastStateSignature = currentStateSignature
-            return .full
-        }
-
-        // 处理数据减少场景（切换账号等）
-        if kmpTotalCount < lastKmpTotalCount {
-            FlareLog.debug("[PagingStateConverter] 检测到数据减少，重置状态")
-            resetIncrementalState()
-            lastKmpTotalCount = kmpTotalCount
-            lastStateSignature = currentStateSignature
-            return .full
-        }
-
-        // 检查状态签名是否变化
-        if let lastSignature = lastStateSignature, lastSignature == currentStateSignature {
-            FlareLog.debug("[PagingStateConverter] 状态签名未变化: \(currentStateSignature)")
-            FlareLog.debug("[PagingStateConverter] === 状态签名分析 ===")
-            FlareLog.debug("[PagingStateConverter] 上次签名: \(lastSignature)")
-            FlareLog.debug("[PagingStateConverter] 当前签名: \(currentStateSignature)")
-            FlareLog.debug("[PagingStateConverter] KMP数据: totalCount=\(kmpTotalCount), nextKmpIndex=\(nextKmpIndex)")
-            FlareLog.debug("[PagingStateConverter] 缓存状态: convertedItems=\(convertedItems.count)个")
-
-            // 检查是否有未转换的KMP数据
-            if nextKmpIndex < kmpTotalCount {
-                FlareLog.warning("[PagingStateConverter] ⚠️ 检测到未转换的KMP数据: nextKmpIndex(\(nextKmpIndex)) < totalCount(\(kmpTotalCount))")
-                FlareLog.warning("[PagingStateConverter] 可能需要强制转换，但状态签名阻止了转换")
-
-                // 探测未转换数据的可用性
-                FlareLog.debug("[PagingStateConverter] === 探测未转换数据可用性 ===")
-                var availableCount = 0
-                for i in nextKmpIndex ..< min(nextKmpIndex + 5, kmpTotalCount) {
-                    if successState.peek(index: Int32(i)) != nil {
-                        availableCount += 1
-                        FlareLog.debug("[PagingStateConverter] index \(i): 有数据")
-                    } else {
-                        FlareLog.debug("[PagingStateConverter] index \(i): 无数据")
-                    }
-                }
-                FlareLog.debug("[PagingStateConverter] 未转换范围[\(nextKmpIndex), \(min(nextKmpIndex + 5, kmpTotalCount)))中有\(availableCount)个可用数据")
-            }
-
-            return .skip
-        }
-
-        // 更新状态签名
-        lastStateSignature = currentStateSignature
-
-        // 判断转换策略
-        if kmpTotalCount > lastKmpTotalCount {
-            FlareLog.debug("[PagingStateConverter] 检测到KMP数据增长: \(lastKmpTotalCount) → \(kmpTotalCount)")
-            lastKmpTotalCount = kmpTotalCount
-
-            if convertedItems.isEmpty {
-                return .full
-            } else {
-                return .incremental
-            }
+        // 简化的转换策略：刷新时全量转换，否则增量转换
+        if isRefreshing || convertedItems.isEmpty {
+            return performConversion(successState, isFullConversion: true)
         } else {
-            FlareLog.debug("[PagingStateConverter] KMP数据量未变化，跳过转换")
-            return .skip
+            return performConversion(successState, isFullConversion: false)
         }
     }
 
-    private func performIncrementalConversion(_ successState: PagingStateSuccess<UiTimeline>) -> FlareTimelineState {
+    private func performConversion(_ successState: PagingStateSuccess<UiTimeline>, isFullConversion: Bool) -> FlareTimelineState {
         let kmpTotalCount = Int(successState.itemCount)
 
-        // 确定实际可以转换的数据范围
-        let actualAvailableCount = determineActualAvailableCount(successState, maxCount: kmpTotalCount)
-        let maxConvertibleIndex = min(actualAvailableCount, kmpTotalCount)
+        // 简化数据获取：直接使用KMP报告的总数据量
+        let maxConvertibleIndex = kmpTotalCount
 
-        FlareLog.debug("[PagingStateConverter] 增量转换: 从KMP index \(nextKmpIndex) 到 \(maxConvertibleIndex)")
+        if isFullConversion {
+            FlareLog.debug("[PagingStateConverter] 全量转换: 转换 0 到 \(maxConvertibleIndex)")
 
-        // 确保有数据需要转换
-        guard maxConvertibleIndex > nextKmpIndex else {
-            FlareLog.debug("[PagingStateConverter] 无新数据需要转换")
-            return generateFilteredState(successState)
-        }
+            // 重置缓存
+            convertedItems.removeAll()
 
-        // 执行转换
-        let newItems = convertItemsInRange(
-            from: nextKmpIndex,
-            to: maxConvertibleIndex,
-            successState: successState
-        )
-
-        FlareLog.debug("[PagingStateConverter] 转换完成: 新增 \(newItems.count) 个items")
-
-        // 更新缓存和追踪变量
-        convertedItems.append(contentsOf: newItems)
-        nextKmpIndex = maxConvertibleIndex
-
-        FlareLog.debug("[PagingStateConverter] 更新追踪: nextKmpIndex=\(nextKmpIndex), 总缓存=\(convertedItems.count)")
-
-        if !newItems.isEmpty {
-            DispatchQueue.global(qos: .utility).async {
-                TimelineImagePrefetcher.shared.smartPrefetch(
-                    currentIndex: 0,
-                    timelineItems: newItems
+            // 执行全量转换
+            if maxConvertibleIndex > 0 {
+                let allItems = convertItemsInRange(
+                    from: 0,
+                    to: maxConvertibleIndex,
+                    successState: successState
                 )
+
+                convertedItems = allItems
+                FlareLog.debug("[PagingStateConverter] 全量转换完成: 转换了 \(allItems.count) 个items")
             }
+        } else {
+            // 执行增量转换：从当前缓存大小开始转换新数据
+            let startIndex = convertedItems.count
+            guard maxConvertibleIndex > startIndex else {
+                FlareLog.debug("[PagingStateConverter] 无新数据需要转换")
+                return generateFilteredState(successState)
+            }
+
+            let newItems = convertItemsInRange(
+                from: startIndex,
+                to: maxConvertibleIndex,
+                successState: successState
+            )
+
+            FlareLog.debug("[PagingStateConverter] 增量转换完成: 新增 \(newItems.count) 个items")
+
+            // 更新缓存
+            convertedItems.append(contentsOf: newItems)
         }
+
+        // 触发图片预取
+//        if !convertedItems.isEmpty {
+//            DispatchQueue.global(qos: .utility).async {
+//                TimelineImagePrefetcher.shared.smartPrefetch(
+//                    currentIndex: 0,
+//                    timelineItems: self.convertedItems
+//                )
+//            }
+//        }
 
         // 应用过滤并生成最终状态
         return generateFilteredState(successState)
@@ -243,57 +146,19 @@ class PagingStateConverter {
         // 应用敏感内容过滤
         let filteredItems = applyContentFiltering(convertedItems)
 
-        FlareLog.debug("[PagingStateConverter] 过滤结果: 原始\(convertedItems.count)个 → 过滤后\(filteredItems.count)个")
-
         // 生成最终状态（过滤不影响hasMore判断，基于KMP原始数据）
-        let hasMore = checkHasMoreData(successState)
+        let appendState = successState.appendState
+        let appendStateDescription = String(describing: appendState)
+        let hasMore = !(appendStateDescription.contains("NotLoading") && appendStateDescription.contains("endOfPaginationReached=true"))
         let isRefreshing = successState.isRefreshing
 
+        FlareLog.debug("[PagingStateConverter] hasMore判断: AppendState(\(hasMore))")
+
         if filteredItems.isEmpty {
-            FlareLog.debug("[PagingStateConverter] 过滤后为空，返回empty状态")
             return .empty
         }
 
         return .loaded(items: filteredItems, hasMore: hasMore, isRefreshing: isRefreshing)
-    }
-
-    private func performFullConversion(_ successState: PagingStateSuccess<UiTimeline>) -> FlareTimelineState {
-        let kmpTotalCount = Int(successState.itemCount)
-        let actualAvailableCount = determineActualAvailableCount(successState, maxCount: kmpTotalCount)
-        let maxConvertibleIndex = min(actualAvailableCount, kmpTotalCount)
-
-        FlareLog.debug("[PagingStateConverter] 全量转换: 转换 0 到 \(maxConvertibleIndex)")
-
-        // 重置缓存
-        convertedItems.removeAll()
-
-        // 执行转换
-        if maxConvertibleIndex > 0 {
-            let allItems = convertItemsInRange(
-                from: 0,
-                to: maxConvertibleIndex,
-                successState: successState
-            )
-
-            convertedItems = allItems
-            nextKmpIndex = maxConvertibleIndex
-
-            FlareLog.debug("[PagingStateConverter] 全量转换完成: 转换了 \(allItems.count) 个items")
-        } else {
-            nextKmpIndex = 0
-        }
-
-        if !convertedItems.isEmpty {
-            DispatchQueue.global(qos: .utility).async {
-                TimelineImagePrefetcher.shared.smartPrefetch(
-                    currentIndex: 0,
-                    timelineItems: self.convertedItems
-                )
-            }
-        }
-
-        // 应用过滤并生成最终状态
-        return generateFilteredState(successState)
     }
 
     private func applyContentFiltering(_ items: [TimelineItem]) -> [TimelineItem] {
@@ -338,98 +203,6 @@ class PagingStateConverter {
         AppSettings()
     }
 
-    private func checkHasMoreData(_ successState: PagingStateSuccess<UiTimeline>) -> Bool {
-        let kmpTotalCount = Int(successState.itemCount)
-        let appendState = successState.appendState
-        let appendStateDescription = String(describing: appendState)
-
-        // 基于KMP原始数据判断是否还有更多数据
-        let hasMoreFromKmp = nextKmpIndex < kmpTotalCount
-
-        // 基于appendState判断是否还有更多数据
-        let hasMoreFromAppendState = !(appendStateDescription.contains("NotLoading") && appendStateDescription.contains("endOfPaginationReached=true"))
-
-        let hasMore = hasMoreFromKmp || hasMoreFromAppendState
-
-        FlareLog.debug("[PagingStateConverter] hasMore判断: KMP(\(hasMoreFromKmp)), AppendState(\(hasMoreFromAppendState)), 最终(\(hasMore))")
-
-        return hasMore
-    }
-
-    /// 重置增量转换状态
-    private func resetIncrementalState() {
-        nextKmpIndex = 0
-        lastKmpTotalCount = 0
-        convertedItems.removeAll()
-        lastStateSignature = nil
-
-        FlareLog.debug("[PagingStateConverter] 状态已重置")
-    }
-
-    /// 确定实际可转换的数量
-    /// - Parameters:
-    ///   - successState: KMP的成功状态
-    ///   - maxCount: KMP报告的最大数量
-    /// - Returns: 实际可转换的数量
-    private func determineActualAvailableCount(_ successState: PagingStateSuccess<UiTimeline>, maxCount: Int) -> Int {
-        FlareLog.debug("[PagingStateConverter] === determineActualAvailableCount 开始 ===")
-        FlareLog.debug("[PagingStateConverter] 输入参数: maxCount=\(maxCount), nextKmpIndex=\(nextKmpIndex)")
-
-        // 使用批量转换策略，避免一次性转换过多数据
-        let batchSize = 20
-        let maxBatchesToCheck = 5 // 最多检查5个批次
-
-        var actualCount = nextKmpIndex
-        FlareLog.debug("[PagingStateConverter] 初始actualCount: \(actualCount)")
-
-        // 从当前已转换位置开始，按批次探测可用数据
-        for batchIndex in 0 ..< maxBatchesToCheck {
-            let batchStart = nextKmpIndex + (batchIndex * batchSize)
-            let batchEnd = min(batchStart + batchSize, maxCount)
-
-            FlareLog.debug("[PagingStateConverter] 检查批次\(batchIndex): [\(batchStart), \(batchEnd))")
-
-            if batchStart >= maxCount {
-                FlareLog.debug("[PagingStateConverter] 批次起始位置超出范围，停止检查")
-                break
-            }
-
-            // 检查这个批次的第一个和最后一个item
-            let firstAvailable = successState.peek(index: Int32(batchStart)) != nil
-            let lastAvailable = successState.peek(index: Int32(batchEnd - 1)) != nil
-
-            FlareLog.debug("[PagingStateConverter] 批次\(batchIndex)检查结果: first(\(batchStart))=\(firstAvailable), last(\(batchEnd - 1))=\(lastAvailable)")
-
-            if firstAvailable, lastAvailable {
-                actualCount = batchEnd
-                FlareLog.debug("[PagingStateConverter] 批次\(batchIndex)完全可用，更新actualCount: \(actualCount)")
-            } else if firstAvailable {
-                // 如果第一个可用但最后一个不可用，需要精确查找边界
-                FlareLog.debug("[PagingStateConverter] 批次\(batchIndex)部分可用，精确查找边界")
-                for i in batchStart ..< batchEnd {
-                    if successState.peek(index: Int32(i)) != nil {
-                        actualCount = i + 1
-                        FlareLog.debug("[PagingStateConverter] 精确边界: index \(i) 可用，actualCount=\(actualCount)")
-                    } else {
-                        FlareLog.debug("[PagingStateConverter] 精确边界: index \(i) 不可用，停止")
-                        break
-                    }
-                }
-                break
-            } else {
-                // 如果第一个都不可用，停止检查
-                FlareLog.debug("[PagingStateConverter] 批次\(batchIndex)第一个数据不可用，停止检查")
-                break
-            }
-        }
-
-        FlareLog.debug("[PagingStateConverter] === determineActualAvailableCount 结果 ===")
-        FlareLog.debug("[PagingStateConverter] 最终actualCount: \(actualCount)")
-        FlareLog.debug("[PagingStateConverter] 相比nextKmpIndex(\(nextKmpIndex))增加了: \(actualCount - nextKmpIndex)个")
-
-        return actualCount
-    }
-
     /// 转换指定范围的items
     /// - Parameters:
     ///   - from: 起始index（包含）
@@ -446,7 +219,7 @@ class PagingStateConverter {
         FlareLog.debug("[PagingStateConverter] 开始转换范围: [\(startIndex), \(endIndex))")
 
         for index in startIndex ..< endIndex {
-            FlareLog.debug("[PagingStateConverter] 尝试获取index=\(index)的数据")
+            //FlareLog.debug("[PagingStateConverter] 尝试获取index=\(index)的数据")
 
             let uiTimeline: UiTimeline?
 
@@ -454,10 +227,14 @@ class PagingStateConverter {
             if let peekedItem = successState.peek(index: Int32(index)) {
                 FlareLog.debug("[PagingStateConverter] peek成功获取index=\(index)的数据")
                 uiTimeline = peekedItem
-            } else {
-                FlareLog.debug("[PagingStateConverter] peek失败，尝试get获取index=\(index)的数据")
+            }
+            else {
+                continue
+               // break
+//                FlareLog.debug("[PagingStateConverter] peek失败，尝试get获取index=\(index)的数据")
                 // 如果peek失败，使用get（可能触发加载）
-                uiTimeline = successState.get(index: Int32(index))
+//                uiTimeline = successState.get(index: Int32(index))
+                 
             }
 
             if let timeline = uiTimeline {
@@ -476,11 +253,7 @@ class PagingStateConverter {
     }
 }
 
-/// 转换统计信息
-struct ConversionStats {
-    var totalConversions: Int = 0
-    var errorCount: Int = 0
-}
+
 
 extension PagingStateConverter {
     private func setupNotificationObservers() {

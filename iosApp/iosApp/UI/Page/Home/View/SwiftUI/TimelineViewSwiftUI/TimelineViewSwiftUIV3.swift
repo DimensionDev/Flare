@@ -12,6 +12,7 @@ struct TimelineViewSwiftUIV3: View {
     @Environment(FlareTheme.self) private var theme
     @Environment(FlareRouter.self) private var router
 
+
     @State private var viewModel = TimelineViewModel()
 
     @State private var scrolledID: String?
@@ -56,9 +57,6 @@ struct TimelineViewSwiftUIV3: View {
             }
             .refreshable {
                 await viewModel.handleRefresh()
-            }
-            .onAppear {
-                router.setTimelineViewModel(viewModel)
             }
             .task(id: tab.key) {
                 await viewModel.setupDataSource(for: tab, using: store)

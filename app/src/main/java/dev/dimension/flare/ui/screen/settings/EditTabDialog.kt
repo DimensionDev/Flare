@@ -27,11 +27,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.resId
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.model.UiRssSource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
@@ -196,6 +198,13 @@ private fun presenter(
                     ) +
                         IconType.Material.MaterialIcon.entries.map {
                             IconType.Material(it)
+                        } +
+                        if (tabItem is RssTimelineTabItem) {
+                            listOfNotNull(
+                                IconType.Url(UiRssSource.favIconUrl(tabItem.feedUrl)),
+                            )
+                        } else {
+                            emptyList()
                         }
                 }.let {
                     it.toPersistentList()
@@ -219,12 +228,14 @@ private fun presenter(
                             IconType.Mixed(value.icon, account.accountKey)
                         is IconType.Mixed ->
                             IconType.Mixed(value.icon, account.accountKey)
+                        is IconType.Url -> value
                     }
                 } else {
                     when (value) {
                         is IconType.Avatar -> value
                         is IconType.Material -> value
                         is IconType.Mixed -> IconType.Material(value.icon)
+                        is IconType.Url -> value
                     }
                 }
         }

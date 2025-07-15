@@ -77,6 +77,7 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.collectAsUiState
@@ -467,7 +468,7 @@ fun TabIcon(
             )
         }
 
-        is IconType.Mixed -> {
+        is Mixed -> {
             if (iconOnly) {
                 FAIcon(
                     imageVector = icon.icon.toIcon(),
@@ -513,11 +514,17 @@ fun TabIcon(
                             Modifier
                                 .size(12.dp)
                                 .align(Alignment.BottomEnd)
-                                .background(MaterialTheme.colorScheme.background, shape = CircleShape)
-                                .padding(2.dp),
+                                .background(
+                                    MaterialTheme.colorScheme.background,
+                                    shape = CircleShape,
+                                ).padding(2.dp),
                     )
                 }
             }
+        }
+
+        is IconType.Url -> {
+            NetworkImage(icon.url, contentDescription = null, modifier = modifier.size(24.dp))
         }
     }
 }

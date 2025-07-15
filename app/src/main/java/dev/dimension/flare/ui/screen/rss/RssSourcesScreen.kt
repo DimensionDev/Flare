@@ -1,8 +1,10 @@
 package dev.dimension.flare.ui.screen.rss
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,17 +30,28 @@ import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.File
 import compose.icons.fontawesomeicons.solid.Pen
 import compose.icons.fontawesomeicons.solid.Plus
+import compose.icons.fontawesomeicons.solid.Thumbtack
+import compose.icons.fontawesomeicons.solid.ThumbtackSlash
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
+import dev.dimension.flare.data.model.RssTimelineTabItem
+import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.model.UiRssSource
+import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.rss.RssSourcesPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,7 +93,11 @@ internal fun RssSourcesScreen(
                         modifier =
                             Modifier
                                 .fillParentMaxSize(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+                        verticalArrangement =
+                            Arrangement.spacedBy(
+                                8.dp,
+                                Alignment.CenterVertically,
+                            ),
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         FAIcon(
@@ -117,54 +134,92 @@ internal fun RssSourcesScreen(
                         )
                     },
                     trailingContent = {
-                        var showDropdown by remember {
-                            mutableStateOf(false)
-                        }
-                        IconButton(onClick = { showDropdown = true }) {
-                            FAIcon(
-                                imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
-                                contentDescription = stringResource(id = R.string.more),
-                            )
-                            DropdownMenu(
-                                expanded = showDropdown,
-                                onDismissRequest = { showDropdown = false },
-                            ) {
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = stringResource(id = R.string.edit_rss_source),
-                                        )
-                                    },
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            state.currentTabs.onSuccess { currentTabs ->
+                                val isPinned =
+                                    remember(
+                                        it,
+                                        currentTabs,
+                                    ) {
+                                        currentTabs.contains(it.url)
+                                    }
+                                IconButton(
                                     onClick = {
-                                        onEdit.invoke(it.id)
-                                        showDropdown = false
+                                        if (isPinned) {
+                                            state.unpinSource(it)
+                                        } else {
+                                            state.pinSource(it)
+                                        }
                                     },
-                                    leadingIcon = {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.Pen,
-                                            contentDescription = stringResource(id = R.string.edit_rss_source),
-                                        )
-                                    },
+                                ) {
+                                    AnimatedContent(isPinned) {
+                                        if (it) {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.ThumbtackSlash,
+                                                contentDescription = stringResource(id = R.string.tab_settings_add),
+                                            )
+                                        } else {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Thumbtack,
+                                                contentDescription = stringResource(id = R.string.tab_settings_remove),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            var showDropdown by remember {
+                                mutableStateOf(false)
+                            }
+                            IconButton(onClick = { showDropdown = true }) {
+                                FAIcon(
+                                    imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
+                                    contentDescription = stringResource(id = R.string.more),
                                 )
-                                DropdownMenuItem(
-                                    text = {
-                                        Text(
-                                            text = stringResource(id = R.string.delete_rss_source),
-                                            color = MaterialTheme.colorScheme.error,
-                                        )
-                                    },
-                                    onClick = {
-                                        state.delete(it.id)
-                                        showDropdown = false
-                                    },
-                                    leadingIcon = {
-                                        FAIcon(
-                                            imageVector = FontAwesomeIcons.Solid.Trash,
-                                            contentDescription = stringResource(id = R.string.delete_rss_source),
-                                            tint = MaterialTheme.colorScheme.error,
-                                        )
-                                    },
-                                )
+                                DropdownMenu(
+                                    expanded = showDropdown,
+                                    onDismissRequest = { showDropdown = false },
+                                ) {
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = stringResource(id = R.string.edit_rss_source),
+                                            )
+                                        },
+                                        onClick = {
+                                            onEdit.invoke(it.id)
+                                            showDropdown = false
+                                        },
+                                        leadingIcon = {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Pen,
+                                                contentDescription = stringResource(id = R.string.edit_rss_source),
+                                            )
+                                        },
+                                    )
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = stringResource(id = R.string.delete_rss_source),
+                                                color = MaterialTheme.colorScheme.error,
+                                            )
+                                        },
+                                        onClick = {
+                                            state.delete(it.id)
+                                            showDropdown = false
+                                        },
+                                        leadingIcon = {
+                                            FAIcon(
+                                                imageVector = FontAwesomeIcons.Solid.Trash,
+                                                contentDescription = stringResource(id = R.string.delete_rss_source),
+                                                tint = MaterialTheme.colorScheme.error,
+                                            )
+                                        },
+                                    )
+                                }
                             }
                         }
                     },
@@ -175,10 +230,42 @@ internal fun RssSourcesScreen(
 }
 
 @Composable
-private fun presenter() =
-    run {
-        val state = remember { RssSourcesPresenter() }.invoke()
+private fun presenter(
+    settingsRepository: SettingsRepository = koinInject(),
+    appScope: CoroutineScope = koinInject(),
+) = run {
+    val state = remember { RssSourcesPresenter() }.invoke()
+    val tabSettings by settingsRepository.tabSettings.collectAsUiState()
+    val currentTabs =
+        tabSettings.map {
+            it.mainTabs
+                .filterIsInstance<RssTimelineTabItem>()
+                .map { it.feedUrl }
+                .toImmutableList()
+        }
+    object : RssSourcesPresenter.State by state {
+        val currentTabs = currentTabs
 
-        object : RssSourcesPresenter.State by state {
+        fun pinSource(source: UiRssSource) {
+            appScope.launch {
+                settingsRepository.updateTabSettings {
+                    copy(
+                        mainTabs =
+                            mainTabs + RssTimelineTabItem(source),
+                    )
+                }
+            }
+        }
+
+        fun unpinSource(source: UiRssSource) {
+            appScope.launch {
+                settingsRepository.updateTabSettings {
+                    copy(
+                        mainTabs =
+                            mainTabs.filterNot { it is RssTimelineTabItem && it.feedUrl == source.url },
+                    )
+                }
+            }
         }
     }
+}

@@ -40,6 +40,7 @@
                 android:resource="@xml/shortcuts" />
         </activity>
         <activity
+            android:label="@string/compose_title"
             android:theme="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
             android:exported="true"
             android:name=".ui.screen.compose.ShortcutComposeActivity">
@@ -59,6 +60,26 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
+
+
+        <activity
+            android:label="@string/add_rss_source"
+            android:theme="@android:style/Theme.DeviceDefault.Dialog.NoActionBar"
+            android:exported="true"
+            android:name=".ui.screen.rss.AddRssSourceActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
+            <intent-filter>
+                <data android:scheme="rsshub" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".common.PlaybackService"
             android:foregroundServiceType="mediaPlayback"

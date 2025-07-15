@@ -21,7 +21,7 @@ public class RssSourcesPresenter :
     KoinComponent {
     private val appDatabase by inject<AppDatabase>()
 
-    public interface State : CheckRssSourcePresenter.State {
+    public interface State {
         public val sources: PagingState<UiRssSource>
 
         public fun add(
@@ -42,8 +42,7 @@ public class RssSourcesPresenter :
                 }
             }
         }.collectPagingState()
-        val checkRssSourcePresenterState = remember { CheckRssSourcePresenter() }.body()
-        return object : State, CheckRssSourcePresenter.State by checkRssSourcePresenterState {
+        return object : State {
             override val sources: PagingState<UiRssSource> = sources
 
             override fun add(

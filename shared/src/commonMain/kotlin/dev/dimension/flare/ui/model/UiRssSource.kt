@@ -3,7 +3,7 @@ package dev.dimension.flare.ui.model
 import dev.dimension.flare.ui.render.UiDateTime
 import io.ktor.http.Url
 
-public data class UiRssSource(
+public data class UiRssSource internal constructor(
     val id: Int,
     val url: String,
     val title: String?,
@@ -13,7 +13,13 @@ public data class UiRssSource(
         Url(url).host
     }
     val favIcon: String by lazy {
-        val url = Url(url)
-        "https://${url.host}/favicon.ico"
+        favIconUrl(url)
+    }
+
+    public companion object {
+        public fun favIconUrl(url: String): String {
+            val parsedUrl = Url(url)
+            return "https://${parsedUrl.host}/favicon.ico"
+        }
     }
 }

@@ -11,6 +11,9 @@ internal interface RssSourceDao {
     @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
     suspend fun insert(data: DbRssSources)
 
+    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    suspend fun insertAll(data: List<DbRssSources>)
+
     @Query("SELECT * FROM DbRssSources")
     fun getAll(): Flow<List<DbRssSources>>
 

@@ -88,6 +88,11 @@ public sealed interface IconType {
     ) : IconType
 
     @Serializable
+    public data class Url(
+        val url: String,
+    ) : IconType
+
+    @Serializable
     public data class Material(
         val icon: MaterialIcon,
     ) : IconType {
@@ -893,7 +898,19 @@ public data class RssTimelineTabItem(
         metaData =
             TabMetaData(
                 title = TitleType.Text(data.title ?: data.url),
-                icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+                icon = IconType.Url(data.favIcon),
+            ),
+    )
+
+    public constructor(
+        feedUrl: String,
+        title: String,
+    ) : this(
+        feedUrl,
+        metaData =
+            TabMetaData(
+                title = TitleType.Text(title),
+                icon = IconType.Url(UiRssSource.favIconUrl(feedUrl)),
             ),
     )
 }

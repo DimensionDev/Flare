@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">混合</string>
     <string name="tab_settings_mixed_timeline">添加混合时间线标签</string>
     <string name="tab_settings_mixed_timeline_desc">混合时间线将混合所有标签页的时间线结果</string>
+    <string name="home_tab_social_timeline_title">社交活动</string>
     <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
             <ul>
                 <li>为首页标签添加混合时间线支持</li>

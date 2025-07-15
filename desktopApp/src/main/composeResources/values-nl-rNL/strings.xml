@@ -100,4 +100,5 @@
     <string name="feeds_discover_feeds_created_by">Aangemaakt door %1$s</string>
     <string name="feeds_unsubscribe">Afmelden</string>
     <string name="feeds_subscribe">Abonneren</string>
+    <string name="social_title">Sociaal</string>
 </resources>

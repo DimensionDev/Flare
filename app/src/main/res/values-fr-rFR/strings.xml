@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">Mixte</string>
     <string name="tab_settings_mixed_timeline">Ajouter un onglet de timeline mixte</string>
     <string name="tab_settings_mixed_timeline_desc">La timeline mixte mélangera le résultat de tous les onglets dans un onglet</string>
+    <string name="home_tab_social_timeline_title">Réseaux sociaux</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
                 <li>Ajout du support de la timeline mixte à l\'onglet Accueil</li>

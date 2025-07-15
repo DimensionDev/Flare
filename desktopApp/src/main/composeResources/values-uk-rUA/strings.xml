@@ -100,4 +100,5 @@
     <string name="feeds_discover_feeds_created_by">Створено %1$s</string>
     <string name="feeds_unsubscribe">Відмовитися від підписки</string>
     <string name="feeds_subscribe">Підписатися</string>
+    <string name="social_title">Соціальні мережі</string>
 </resources>

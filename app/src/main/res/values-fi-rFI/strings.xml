@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">Sekoitettu</string>
     <string name="tab_settings_mixed_timeline">Lisää sekoitettu aikajana-välilehti</string>
     <string name="tab_settings_mixed_timeline_desc">Sekoitettu aikajana sekoittaa kaikki välilehdet aikajana tulos yhdessä välilehdessä</string>
+    <string name="home_tab_social_timeline_title">Sosiaalinen</string>
     <string name="changelog_current"><![CDATA[            <span>Versio %1$s:</span>
             <ul>
                 <li>Lisätty yhdistetty aikajanan tuki aloitusvälilehdelle</li>

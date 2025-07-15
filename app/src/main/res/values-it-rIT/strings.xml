@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">Misto</string>
     <string name="tab_settings_mixed_timeline">Aggiungi scheda timeline mista</string>
     <string name="tab_settings_mixed_timeline_desc">La timeline mista mescolerà il risultato di tutte le schede della timeline in una scheda</string>
+    <string name="home_tab_social_timeline_title">Social</string>
     <string name="changelog_current"><![CDATA[            <span>Versione %1$s:</span>
             <ul>
                 <li>Aggiunto il supporto della timeline mista alla scheda Home</li>

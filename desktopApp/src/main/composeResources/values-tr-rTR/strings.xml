@@ -100,4 +100,5 @@
     <string name="feeds_discover_feeds_created_by">%1$s tarafından oluşturuldu</string>
     <string name="feeds_unsubscribe">Abone olmayı kes</string>
     <string name="feeds_subscribe">Abone ol</string>
+    <string name="social_title">Sosyal</string>
 </resources>

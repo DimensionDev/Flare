@@ -100,4 +100,5 @@
     <string name="feeds_discover_feeds_created_by">%1$s가 만든</string>
     <string name="feeds_unsubscribe">구독 해지</string>
     <string name="feeds_subscribe">구독하기</string>
+    <string name="social_title">소셜</string>
 </resources>

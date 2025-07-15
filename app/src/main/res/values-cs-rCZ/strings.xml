@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">Smíšená</string>
     <string name="tab_settings_mixed_timeline">Přidat smíšenou časovou osu</string>
     <string name="tab_settings_mixed_timeline_desc">Směsná časová osa promíchá všechny panely s výsledkem jedné záložky</string>
+    <string name="home_tab_social_timeline_title">Sociální</string>
     <string name="changelog_current"><![CDATA[            <span>Verze %1$s:</span>
             <ul>
                 <li>Přidána smíšená podpora časové osy na domovskou kartu</li>

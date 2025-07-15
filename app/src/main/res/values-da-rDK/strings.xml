@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">Blandet</string>
     <string name="tab_settings_mixed_timeline">Tilføj blandet tidslinje fane</string>
     <string name="tab_settings_mixed_timeline_desc">Blandet tidslinje vil blande alle faner tidslinje resultat i en fane</string>
+    <string name="home_tab_social_timeline_title">Social</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
                 <li>Tilføjet Blandet tidslinje støtte til fanen Home</li>

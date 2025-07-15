@@ -100,4 +100,5 @@
     <string name="feeds_discover_feeds_created_by">Opprettet av %1$s</string>
     <string name="feeds_unsubscribe">Avmeld</string>
     <string name="feeds_subscribe">Abonner</string>
+    <string name="social_title">Sosial</string>
 </resources>

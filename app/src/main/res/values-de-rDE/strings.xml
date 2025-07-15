@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">Gemischt</string>
     <string name="tab_settings_mixed_timeline">Tab für gemischte Zeitleiste hinzufügen</string>
     <string name="tab_settings_mixed_timeline_desc">Gemischte Zeitleiste vermischt alle Tabs in einem Tab</string>
+    <string name="home_tab_social_timeline_title">Soziale</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
                 <li>Gemischte Timeline-Unterstützung auf den Home-Tab</li>

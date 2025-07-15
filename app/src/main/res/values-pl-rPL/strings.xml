@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">Mieszane</string>
     <string name="tab_settings_mixed_timeline">Dodaj mieszaną kartę osi czasu</string>
     <string name="tab_settings_mixed_timeline_desc">Mieszana oś czasu połączy wszystkie karty na osi czasu w jednej karcie</string>
+    <string name="home_tab_social_timeline_title">Społeczność</string>
     <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
                 <li>Dodano obsługę mieszanej osi czasu do zakładki Home</li>

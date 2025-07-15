@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">綜合</string>
     <string name="tab_settings_mixed_timeline">添加綜合時間線標籤</string>
     <string name="tab_settings_mixed_timeline_desc">綜合時間線將所有標籤的時間線結果混合成一個標籤</string>
+    <string name="home_tab_social_timeline_title">社會</string>
     <string name="changelog_current"><![CDATA[            <span>版本 %1$s：</span>
             <ul>
                 <li>新增混合時間線功能到首頁</li>

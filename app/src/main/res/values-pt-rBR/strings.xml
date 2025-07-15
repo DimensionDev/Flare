@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">Misto</string>
     <string name="tab_settings_mixed_timeline">Adicionar guia de timeline mista</string>
     <string name="tab_settings_mixed_timeline_desc">Linha do tempo mista irá misturar todas as abas que resultam em uma aba</string>
+    <string name="home_tab_social_timeline_title">Sócio</string>
     <string name="changelog_current"><![CDATA[            <span>Versão %1$s:</span>
             <ul>
                 <li>Adicionado suporte a linha do tempo misturado à aba</li>

@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">مختلطة</string>
     <string name="tab_settings_mixed_timeline">إضافة علامة تبويب الخيط الزمني المختلط</string>
     <string name="tab_settings_mixed_timeline_desc">سيتم خلط الخط الزمني المختلط بين جميع علامات التبويب في علامة تبويب واحدة</string>
+    <string name="home_tab_social_timeline_title">إجتماعي</string>
     <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
             <ul>
                 <li>تمت إضافة دعم الخط الزمني المختلط إلى علامة التبويب الرئيسية</li>

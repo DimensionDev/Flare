@@ -100,4 +100,5 @@
     <string name="feeds_discover_feeds_created_by">Készítette: %1$s</string>
     <string name="feeds_unsubscribe">Leiratkozás</string>
     <string name="feeds_subscribe">Feliratkozás</string>
+    <string name="social_title">Szociális</string>
 </resources>

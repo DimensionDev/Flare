@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">Amestecat</string>
     <string name="tab_settings_mixed_timeline">Adaugă cronologie mixtă</string>
     <string name="tab_settings_mixed_timeline_desc">Amestecul cronologiei va amesteca toate tab-urile de cronologie într-o singură filă</string>
+    <string name="home_tab_social_timeline_title">Sociale</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
                 <li>S-a adăugat suportul pentru intervalul de timp în fila de pornire</li>

@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">Змішаний</string>
     <string name="tab_settings_mixed_timeline">Додати змішану вкладку часової шкали</string>
     <string name="tab_settings_mixed_timeline_desc">Змішана часова шкала будуть змішувати всі вкладки в результаті однієї вкладки</string>
+    <string name="home_tab_social_timeline_title">Соціальні мережі</string>
     <string name="changelog_current"><![CDATA[            <span>Версія %1$s:</span>
             <ul>
                 <li>Додана підтримка змішаного таймлайну для вкладки Головна</li>

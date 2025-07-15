@@ -100,4 +100,5 @@
     <string name="feeds_discover_feeds_created_by">由 %1$s 創建</string>
     <string name="feeds_unsubscribe">取消訂閱</string>
     <string name="feeds_subscribe">訂閱</string>
+    <string name="social_title">社會</string>
 </resources>

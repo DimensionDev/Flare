@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">혼합</string>
     <string name="tab_settings_mixed_timeline">혼합된 타임라인 탭 추가</string>
     <string name="tab_settings_mixed_timeline_desc">혼합된 타임라인은 모든 탭의 타임라인 결과를 하나의 탭으로 혼합합니다</string>
+    <string name="home_tab_social_timeline_title">소셜</string>
     <string name="changelog_current"><![CDATA[            <span>버전 %1$s:</span>
             <ul>
                 <li>홈 탭에 혼합된 타임라인 지원 추가</li>

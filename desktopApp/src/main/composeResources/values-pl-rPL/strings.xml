@@ -100,4 +100,5 @@
     <string name="feeds_discover_feeds_created_by">Utworzone przez %1$s</string>
     <string name="feeds_unsubscribe">Anuluj subskrypcję</string>
     <string name="feeds_subscribe">Subskrybuj</string>
+    <string name="social_title">Społeczność</string>
 </resources>

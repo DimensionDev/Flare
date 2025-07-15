@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">Смешанный</string>
     <string name="tab_settings_mixed_timeline">Добавить вкладку смешанной ленты времени</string>
     <string name="tab_settings_mixed_timeline_desc">Смешанная лента времени будет смешивать результат всех вкладок в одной вкладке</string>
+    <string name="home_tab_social_timeline_title">Соцсети</string>
     <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
             <ul>
                 <li>Добавлена поддержка смешанной временной шкалы на вкладке "Домашняя"</li>

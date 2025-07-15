@@ -100,4 +100,5 @@
     <string name="feeds_discover_feeds_created_by">Vytvořil %1$s</string>
     <string name="feeds_unsubscribe">Odhlásit odběr</string>
     <string name="feeds_subscribe">Odebírat</string>
+    <string name="social_title">Sociální</string>
 </resources>

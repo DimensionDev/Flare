@@ -265,6 +265,7 @@
     <string name="home_tab_mixed_timeline_title">Gemengd</string>
     <string name="tab_settings_mixed_timeline">Voeg gemengde tabblad tijdlijn toe</string>
     <string name="tab_settings_mixed_timeline_desc">Gemengde tijdlijn mengt alle resultaten van de tabbladen in één tabblad</string>
+    <string name="home_tab_social_timeline_title">Sociaal</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
                 <li>Toegevoegde tijdlijn ondersteuning toegevoegd aan het Home tabblad</li>

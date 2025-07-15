@@ -265,5 +265,6 @@
     <string name="home_tab_mixed_timeline_title">Keverve</string>
     <string name="tab_settings_mixed_timeline">Keverve idővonal fül hozzáadása</string>
     <string name="tab_settings_mixed_timeline_desc">A kevert idővonal minden tab idővonalát egy tabba keveri</string>
+    <string name="home_tab_social_timeline_title">Szociális</string>
     <string name="changelog_current"><![CDATA[\n            <span>Verzió %1$s:</span>\n            <ul>\n                <li>Hozzáadva kevert idővonal támogatást a Főoldalra</li>\n                <li>Elkezdtük a UI/UX javítását, további fejlesztések várhatók</li>\n                <li>Hibajavítások és teljesítményoptimalizálások</li>\n            </ul>\n        ]]></string>
 </resources>

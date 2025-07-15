@@ -100,4 +100,5 @@
     <string name="feeds_discover_feeds_created_by">تم إنشاؤها بواسطة %1$s</string>
     <string name="feeds_unsubscribe">إلغاء الاشتراك</string>
     <string name="feeds_subscribe">اشترك</string>
+    <string name="social_title">إجتماعي</string>
 </resources>

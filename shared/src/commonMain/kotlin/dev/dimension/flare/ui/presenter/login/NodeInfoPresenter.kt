@@ -10,13 +10,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.datasource.microblog.RecommendInstancePagingSource
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.network.nodeinfo.NodeInfoService
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiInstance
@@ -44,7 +44,7 @@ public class NodeInfoPresenter : PresenterBase<NodeInfoState>() {
             remember {
                 combine(
                     Pager(
-                        config = PagingConfig(pageSize = 20),
+                        config = pagingConfig,
                     ) {
                         RecommendInstancePagingSource()
                     }.flow.cachedIn(scope),

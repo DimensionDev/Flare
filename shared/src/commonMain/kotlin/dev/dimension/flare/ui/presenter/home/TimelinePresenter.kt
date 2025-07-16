@@ -15,7 +15,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
 import androidx.paging.map
 import dev.dimension.flare.common.BaseTimelineLoader
-import dev.dimension.flare.common.BaseTimelinePagingSource
+import dev.dimension.flare.common.BaseTimelinePagingSourceFactory
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onEmpty
@@ -64,7 +64,7 @@ public abstract class TimelinePresenter :
                 emit(BaseTimelineLoader.NotSupported)
             }.flatMapLatest {
                 when (it) {
-                    is BaseTimelinePagingSource<*> ->
+                    is BaseTimelinePagingSourceFactory<*> ->
                         networkPager(
                             pagingSource = it,
                             scope = scope,
@@ -138,14 +138,14 @@ public abstract class TimelinePresenter :
     }
 
     private fun networkPager(
-        pagingSource: BaseTimelinePagingSource<*>,
+        pagingSource: BaseTimelinePagingSourceFactory<*>,
         scope: CoroutineScope,
         pageSize: Int = 20,
     ): Flow<PagingData<UiTimeline>> =
         Pager(
             config = PagingConfig(pageSize = pageSize),
             pagingSourceFactory = {
-                pagingSource
+                pagingSource.create()
             },
         ).flow.cachedIn(scope)
 

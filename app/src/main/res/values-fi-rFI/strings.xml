@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">URL-osoite</string>
     <string name="rss_title">RSS</string>
     <string name="empty_rss_sources">Ei RSS-lähteitä</string>
+    <string name="rss_sources_rss_hub_host_label">RssHub Isäntä</string>
+    <string name="rss_sources_rss_hub_host_hint">Sinun täytyy asettaa RssHub isäntä, jos haluat käyttää RssHub, tai valitse julkinen RssHub palvelin</string>
+    <string name="rss_sources_discovered_rss_sources">Löydetty RSS-lähteet</string>
+    <string name="rss_sources_pinned_in_tabs">Kiinnitä kotiin välilehdet</string>
     <string name="rss_detail_open_in_browser">Avaa selaimessa</string>
     <string name="rss_detail_share">Jaa</string>
     <string name="rss_detail_tldr">Summarize</string>

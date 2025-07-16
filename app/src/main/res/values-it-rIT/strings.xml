@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">Nessuna sorgente rss</string>
+    <string name="rss_sources_rss_hub_host_label">Host RssHub</string>
+    <string name="rss_sources_rss_hub_host_hint">È necessario impostare l\'host RssHub se si desidera utilizzare RssHub, o selezionare il server RsssHub pubblico</string>
+    <string name="rss_sources_discovered_rss_sources">Scoperte Sorgenti Rss</string>
+    <string name="rss_sources_pinned_in_tabs">Aggiungi alle schede home</string>
     <string name="rss_detail_open_in_browser">Apri nel browser</string>
     <string name="rss_detail_share">Condividi</string>
     <string name="rss_detail_tldr">Summarize</string>

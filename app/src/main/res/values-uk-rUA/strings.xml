@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">URL-адреса</string>
     <string name="rss_title">RSS</string>
     <string name="empty_rss_sources">Відсутні вихідні коди для запитів</string>
+    <string name="rss_sources_rss_hub_host_label">Хост RsHub</string>
+    <string name="rss_sources_rss_hub_host_hint">Ви повинні встановити RssHub якщо ви хочете використовувати RsHub, або вибрати публічний сервер RsHub</string>
+    <string name="rss_sources_discovered_rss_sources">Виявлені Rss джерела</string>
+    <string name="rss_sources_pinned_in_tabs">Закріпити на домашніх вкладках</string>
     <string name="rss_detail_open_in_browser">Відкрити у браузері</string>
     <string name="rss_detail_share">Поділитись</string>
     <string name="rss_detail_tldr">Summarize</string>

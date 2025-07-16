@@ -4,6 +4,9 @@ import androidx.compose.ui.graphics.Shape
 
 internal expect object PlatformShapes {
     @get:Composable
+    val extraSmall: Shape
+
+    @get:Composable
     val small: Shape
 
     @get:Composable
@@ -11,4 +14,10 @@ internal expect object PlatformShapes {
 
     @get:Composable
     val large: Shape
+
+    @get:Composable
+    val topCardShape: Shape
+
+    @get:Composable
+    val bottomCardShape: Shape
 }

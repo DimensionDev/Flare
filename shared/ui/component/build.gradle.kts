@@ -50,7 +50,7 @@ kotlin {
             dependencies {
                 implementation(libs.compose.placeholder.material3)
                 implementation(libs.material3.adaptive)
-                implementation(compose.material3)
+                implementation(libs.material3)
                 implementation(libs.bundles.media3)
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.bundles.koin)

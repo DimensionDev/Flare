@@ -36,7 +36,13 @@ public fun LazyStatusVerticalStaggeredGrid(
         if (bigScreen) {
             contentPadding + PaddingValues(horizontal = screenHorizontalPadding)
         } else {
-            contentPadding
+            contentPadding + PaddingValues(horizontal = screenHorizontalPadding)
+        }
+    val actualVerticalSpacing =
+        if (bigScreen) {
+            verticalItemSpacing
+        } else {
+            4.dp
         }
     LazyVerticalStaggeredGrid(
         modifier = modifier,
@@ -44,7 +50,7 @@ public fun LazyStatusVerticalStaggeredGrid(
         state = state,
         contentPadding = padding,
         reverseLayout = reverseLayout,
-        verticalItemSpacing = verticalItemSpacing,
+        verticalItemSpacing = actualVerticalSpacing,
         horizontalArrangement = horizontalArrangement,
         flingBehavior = flingBehavior,
         userScrollEnabled = userScrollEnabled,

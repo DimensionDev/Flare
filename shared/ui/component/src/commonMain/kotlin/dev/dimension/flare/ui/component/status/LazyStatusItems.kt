@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.component.status
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -70,16 +71,18 @@ public fun LazyStaggeredGridScope.status(
                     itemContentType {
                         it.itemType
                     },
-            ) {
-                val item = get(it)
+            ) { index ->
+                val item = get(index)
                 AdaptiveCard(
-                    modifier = Modifier.animateItem(),
+                    modifier =
+                        Modifier
+                            .animateItem(),
+                    index = index,
+                    totalCount = itemCount,
                     content = {
-                        val bigScreen = isBigScreen()
-                        Column {
-                            StatusItem(
-                                item,
-                                detailStatusKey = detailStatusKey,
+                        StatusItem(
+                            item,
+                            detailStatusKey = detailStatusKey,
 //                        modifier =
 //                        Modifier
 //                            .let {
@@ -100,12 +103,7 @@ public fun LazyStaggeredGridScope.status(
 //                                }
 //                            }
 //                            .background(MaterialTheme.colorScheme.background),
-                            )
-
-                            if (it != itemCount - 1 && !bigScreen) {
-                                HorizontalDivider()
-                            }
-                        }
+                        )
                     },
                 )
             }
@@ -126,6 +124,8 @@ public fun LazyStaggeredGridScope.status(
                             content = {
                                 OnLoading()
                             },
+                            index = it,
+                            totalCount = 10,
                             modifier = Modifier.animateItem(),
                         )
                     }
@@ -165,6 +165,8 @@ public fun LazyStaggeredGridScope.status(
             items(10) {
                 AdaptiveCard(
                     modifier = Modifier.animateItem(),
+                    index = it,
+                    totalCount = 10,
                     content = {
                         OnLoading()
                     },
@@ -202,6 +204,8 @@ public fun LazyStaggeredGridScope.status(
 @Composable
 public fun AdaptiveCard(
     modifier: Modifier = Modifier,
+    index: Int = 0,
+    totalCount: Int = 0,
     content: @Composable () -> Unit,
 ) {
     val bigScreen = isBigScreen()
@@ -221,7 +225,17 @@ public fun AdaptiveCard(
         }
     } else {
         Box(
-            modifier = modifier,
+            modifier =
+                modifier
+                    .let {
+                        if (index == 0 && totalCount > 1) {
+                            it.clip(PlatformTheme.shapes.topCardShape)
+                        } else if (index == totalCount - 1) {
+                            it.clip(PlatformTheme.shapes.bottomCardShape)
+                        } else {
+                            it.clip(PlatformTheme.shapes.extraSmall)
+                        }
+                    }.background(PlatformTheme.colorScheme.card),
         ) {
             content.invoke()
         }
@@ -241,10 +255,6 @@ private fun OnLoading(modifier: Modifier = Modifier) {
                         vertical = 8.dp,
                     ),
         )
-        val bigScreen = isBigScreen()
-        if (!bigScreen) {
-            HorizontalDivider()
-        }
     }
 }
 

@@ -5,6 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Shape
 
 internal actual object PlatformShapes {
+    actual val extraSmall: Shape
+        @Composable
+        get() = MaterialTheme.shapes.extraSmall
     actual val small: Shape
         @Composable
         get() = MaterialTheme.shapes.small
@@ -14,4 +17,18 @@ internal actual object PlatformShapes {
     actual val large: Shape
         @Composable
         get() = MaterialTheme.shapes.large
+    actual val topCardShape: Shape
+        @Composable
+        get() =
+            MaterialTheme.shapes.extraSmall.copy(
+                topStart = MaterialTheme.shapes.medium.topStart,
+                topEnd = MaterialTheme.shapes.medium.topEnd,
+            )
+    actual val bottomCardShape: Shape
+        @Composable
+        get() =
+            MaterialTheme.shapes.extraSmall.copy(
+                bottomStart = MaterialTheme.shapes.medium.bottomStart,
+                bottomEnd = MaterialTheme.shapes.medium.bottomEnd,
+            )
 }

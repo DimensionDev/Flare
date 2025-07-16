@@ -29,7 +29,7 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
-import dev.dimension.flare.ui.common.items
+import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
@@ -153,14 +153,16 @@ internal fun LocalCacheSearchScreen(onBack: () -> Unit) {
                         },
                     )
                 SearchType.User ->
-                    items(
+                    itemsIndexed(
                         if (text.isEmpty()) {
                             state.userHistory
                         } else {
                             state.searchUser
                         },
-                    ) { user ->
+                    ) { index, itemsCount, user ->
                         AdaptiveCard(
+                            index = index,
+                            totalCount = itemsCount,
                             content = {
                                 AccountItem(
                                     userState = UiState.Success(user),

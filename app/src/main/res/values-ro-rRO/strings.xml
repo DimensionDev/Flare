@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">Url-ul</string>
     <string name="rss_title">RSS</string>
     <string name="empty_rss_sources">Fără surse rss</string>
+    <string name="rss_sources_rss_hub_host_label">Gazda RsHub</string>
+    <string name="rss_sources_rss_hub_host_hint">Trebuie să setezi gazda RsHub dacă vrei să folosești RssHub, sau să selectezi serverul RsHub public</string>
+    <string name="rss_sources_discovered_rss_sources">Surse RSS descoperite</string>
+    <string name="rss_sources_pinned_in_tabs">Fixează în filele principale</string>
     <string name="rss_detail_open_in_browser">Deschide în browser</string>
     <string name="rss_detail_share">Distribuie</string>
     <string name="rss_detail_tldr">Summarize</string>

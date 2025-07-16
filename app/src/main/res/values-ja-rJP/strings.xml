@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">RSS</string>
     <string name="empty_rss_sources">RSSソースがありません</string>
+    <string name="rss_sources_rss_hub_host_label">RssHub ホスト</string>
+    <string name="rss_sources_rss_hub_host_hint">RssHubを使用する場合は、RssHubホストを設定するか、RssHubサーバーを選択する必要があります。</string>
+    <string name="rss_sources_discovered_rss_sources">検出された RSS ソース</string>
+    <string name="rss_sources_pinned_in_tabs">ホームタブに固定</string>
     <string name="rss_detail_open_in_browser">ブラウザで開く</string>
     <string name="rss_detail_share">共有</string>
     <string name="rss_detail_tldr">Summarize</string>

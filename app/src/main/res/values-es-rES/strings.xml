@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">Bruto</string>
     <string name="empty_rss_sources">Sin fuentes rast</string>
+    <string name="rss_sources_rss_hub_host_label">Host RssHub</string>
+    <string name="rss_sources_rss_hub_host_hint">Necesitas establecer el host RssHub si quieres usar RssHub, o seleccionar el servidor RssHub público</string>
+    <string name="rss_sources_discovered_rss_sources">Fuentes brutas descubiertas</string>
+    <string name="rss_sources_pinned_in_tabs">Fijar a pestañas de inicio</string>
     <string name="rss_detail_open_in_browser">Abrir en el navegador</string>
     <string name="rss_detail_share">Compartir</string>
     <string name="rss_detail_tldr">Summarize</string>

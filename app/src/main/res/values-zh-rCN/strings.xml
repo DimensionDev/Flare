@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">网址</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">无 rss 源</string>
+    <string name="rss_sources_rss_hub_host_label">RssHub 主机</string>
+    <string name="rss_sources_rss_hub_host_hint">如果你想要使用 RssHub ，你需要设置RssHub 主机或选择公共RssHub 服务器</string>
+    <string name="rss_sources_discovered_rss_sources">发现的 Rss 源</string>
+    <string name="rss_sources_pinned_in_tabs">固定到主标签页</string>
     <string name="rss_detail_open_in_browser">在浏览器中打开</string>
     <string name="rss_detail_share">分享</string>
     <string name="rss_detail_tldr">总结摘要</string>

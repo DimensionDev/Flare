@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">الرابط</string>
     <string name="rss_title">راس</string>
     <string name="empty_rss_sources">لا توجد مصادر Rss</string>
+    <string name="rss_sources_rss_hub_host_label">مضيف RssHub</string>
+    <string name="rss_sources_rss_hub_host_hint">تحتاج إلى تعيين مضيف RssHub إذا كنت ترغب في استخدام RssHub، أو تحديد خادم RssHub العام</string>
+    <string name="rss_sources_discovered_rss_sources">مصادر Rss المكتشفة</string>
+    <string name="rss_sources_pinned_in_tabs">تثبيت إلى علامات التبويب الرئيسية</string>
     <string name="rss_detail_open_in_browser">فتح في المتصفح</string>
     <string name="rss_detail_share">مشاركة</string>
     <string name="rss_detail_tldr">Summarize</string>

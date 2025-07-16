@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">RSS</string>
     <string name="empty_rss_sources">Ingen rss kilder</string>
+    <string name="rss_sources_rss_hub_host_label">RssHUB-vert</string>
+    <string name="rss_sources_rss_hub_host_hint">Du må angi RssHUB-vert hvis du vil bruke RsssHub, eller velge den offentlige RssHUB-serveren</string>
+    <string name="rss_sources_discovered_rss_sources">Oppdaget Rss kilder</string>
+    <string name="rss_sources_pinned_in_tabs">Fest til hovedsidemerkene</string>
     <string name="rss_detail_open_in_browser">Åpne i nettleser</string>
     <string name="rss_detail_share">Del</string>
     <string name="rss_detail_tldr">Summarize</string>

@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">RSS</string>
     <string name="empty_rss_sources">Δεν υπάρχουν πηγές rss</string>
+    <string name="rss_sources_rss_hub_host_label">Διακομιστής RssHub</string>
+    <string name="rss_sources_rss_hub_host_hint">Θα πρέπει να ορίσετε το διακομιστή RssHub αν θέλετε να χρησιμοποιήσετε RssHub, ή επιλέξτε το δημόσιο διακομιστή RssHub</string>
+    <string name="rss_sources_discovered_rss_sources">Ανακαλύφθηκε Πηγές Rss</string>
+    <string name="rss_sources_pinned_in_tabs">Καρφίτσωμα στις καρτέλες του σπιτιού</string>
     <string name="rss_detail_open_in_browser">Άνοιγμα σε πρόγραμμα περιήγησης</string>
     <string name="rss_detail_share">Κοινοποίηση</string>
     <string name="rss_detail_tldr">Summarize</string>

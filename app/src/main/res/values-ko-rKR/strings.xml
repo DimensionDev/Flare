@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">RSS</string>
     <string name="empty_rss_sources">RSS 소스가 없습니다</string>
+    <string name="rss_sources_rss_hub_host_label">RssHub 호스트</string>
+    <string name="rss_sources_rss_hub_host_hint">RssHub를 사용하려면 RssHub 호스트를 설정하거나 공개 RssHub 서버를 선택해야 합니다.</string>
+    <string name="rss_sources_discovered_rss_sources">검색된 RSS 소스</string>
+    <string name="rss_sources_pinned_in_tabs">홈 탭에 고정</string>
     <string name="rss_detail_open_in_browser">브라우저에서 열기</string>
     <string name="rss_detail_share">공유</string>
     <string name="rss_detail_tldr">요약하기</string>

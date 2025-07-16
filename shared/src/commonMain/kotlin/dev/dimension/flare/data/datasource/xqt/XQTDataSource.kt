@@ -3,7 +3,6 @@ package dev.dimension.flare.data.datasource.xqt
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingState
 import androidx.paging.cachedIn
@@ -40,6 +39,7 @@ import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.datasource.microblog.createSendingDirectMessage
 import dev.dimension.flare.data.datasource.microblog.memoryPager
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.datasource.microblog.relationKeyWithUserKey
 import dev.dimension.flare.data.datasource.microblog.timelinePager
 import dev.dimension.flare.data.network.xqt.XQTService
@@ -192,7 +192,7 @@ internal class XQTDataSource(
     ): Flow<PagingData<UiTimeline>> {
         if (type == NotificationFilter.All) {
             return Pager(
-                config = PagingConfig(pageSize = pageSize),
+                config = pagingConfig,
             ) {
                 NotificationPagingSource(
                     locale = "en",
@@ -574,7 +574,7 @@ internal class XQTDataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             SearchUserPagingSource(
                 service = service,
@@ -585,7 +585,7 @@ internal class XQTDataSource(
 
     override fun discoverUsers(pageSize: Int): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             TrendsUserPagingSource(
                 service,
@@ -600,7 +600,7 @@ internal class XQTDataSource(
 
     override fun discoverHashtags(pageSize: Int): Flow<PagingData<UiHashtag>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             TrendHashtagPagingSource(
                 service,
@@ -1067,7 +1067,7 @@ internal class XQTDataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             FollowingPagingSource(
                 service = service,
@@ -1082,7 +1082,7 @@ internal class XQTDataSource(
         pageSize: Int,
     ): Flow<PagingData<UiUserV2>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
         ) {
             FansPagingSource(
                 service = service,
@@ -1486,7 +1486,7 @@ internal class XQTDataSource(
 
     override fun directMessageList(scope: CoroutineScope): Flow<PagingData<UiDMRoom>> =
         Pager(
-            config = PagingConfig(pageSize = 20),
+            config = pagingConfig,
             remoteMediator =
                 DMListRemoteMediator(
                     service = service,
@@ -1510,7 +1510,7 @@ internal class XQTDataSource(
         scope: CoroutineScope,
     ): Flow<PagingData<UiDMItem>> =
         Pager(
-            config = PagingConfig(pageSize = 20),
+            config = pagingConfig,
             remoteMediator =
                 DMConversationRemoteMediator(
                     service = service,

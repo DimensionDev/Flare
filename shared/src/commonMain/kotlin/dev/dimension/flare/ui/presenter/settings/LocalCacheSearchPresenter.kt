@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
 import androidx.paging.map
@@ -14,6 +13,7 @@ import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
@@ -54,7 +54,7 @@ public class LocalCacheSearchPresenter :
                     UiState.Error(Throwable("Query is empty"))
                 } else {
                     Pager(
-                        config = PagingConfig(pageSize = 20),
+                        config = pagingConfig,
                     ) {
                         database.pagingTimelineDao().searchHistoryPagingSource(query = "%$query%")
                     }.flow.let {
@@ -66,7 +66,7 @@ public class LocalCacheSearchPresenter :
             remember(allAccounts) {
                 allAccounts.map { accounts ->
                     Pager(
-                        config = PagingConfig(pageSize = 20),
+                        config = pagingConfig,
                     ) {
                         database
                             .pagingTimelineDao()
@@ -114,7 +114,7 @@ public class LocalCacheSearchPresenter :
         val userHistory =
             remember {
                 Pager(
-                    config = PagingConfig(pageSize = 20),
+                    config = pagingConfig,
                 ) {
                     database.userDao().getUserHistory()
                 }.flow.map {
@@ -135,7 +135,7 @@ public class LocalCacheSearchPresenter :
                 } else {
                     allAccounts.map { accounts ->
                         Pager(
-                            config = PagingConfig(pageSize = 20),
+                            config = pagingConfig,
                         ) {
                             database.userDao().searchUser(query)
                         }.flow.map {

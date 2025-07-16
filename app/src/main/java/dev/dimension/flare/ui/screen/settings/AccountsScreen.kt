@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,7 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,8 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -44,9 +47,10 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.isError
@@ -57,6 +61,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsState
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
@@ -68,12 +73,13 @@ internal fun AccountsScreen(
     onBack: () -> Unit,
     toLogin: () -> Unit,
 ) {
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter {
         accountsPresenter()
     }
     FlareScaffold(
         topBar = {
-            FlareTopAppBar(
+            FlareLargeFlexibleTopAppBar(
                 title = {
                     Text(text = stringResource(id = R.string.settings_accounts_title))
                 },
@@ -89,11 +95,19 @@ internal fun AccountsScreen(
                         FAIcon(FontAwesomeIcons.Solid.Plus, contentDescription = null)
                     }
                 },
+                scrollBehavior = topAppBarScrollBehavior,
             )
         },
+        modifier =
+            Modifier
+                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) {
         LazyColumn(
             contentPadding = it,
+            modifier =
+                Modifier
+                    .padding(horizontal = screenHorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             when (val accountState = state.accounts) {
                 // TODO: show error
@@ -116,27 +130,35 @@ internal fun AccountsScreen(
                             }
                         }
                         SwipeToDismissBox(
+                            modifier =
+                                Modifier
+                                    .listCard(
+                                        index = index,
+                                        totalCount = accountState.data.size,
+                                    ),
                             state = swipeState,
                             backgroundContent = {
-                                Box(
-                                    modifier =
-                                        Modifier
-                                            .fillMaxSize()
-                                            .background(color = MaterialTheme.colorScheme.error)
-                                            .padding(16.dp),
-                                    contentAlignment = Alignment.CenterEnd,
-                                ) {
-                                    Text(
-                                        text = stringResource(id = R.string.settings_accounts_remove),
-                                        color = MaterialTheme.colorScheme.onError,
-                                    )
+                                if (swipeState.dismissDirection != SwipeToDismissBoxValue.Settled) {
+                                    Box(
+                                        modifier =
+                                            Modifier
+                                                .fillMaxSize()
+                                                .background(color = MaterialTheme.colorScheme.error)
+                                                .padding(16.dp),
+                                        contentAlignment = Alignment.CenterEnd,
+                                    ) {
+                                        Text(
+                                            text = stringResource(id = R.string.settings_accounts_remove),
+                                            color = MaterialTheme.colorScheme.onError,
+                                        )
+                                    }
                                 }
                             },
                             enableDismissFromStartToEnd = false,
                             enableDismissFromEndToStart = data.isSuccess || data.isError,
                         ) {
                             AccountItem(
-                                modifier = Modifier.background(color = MaterialTheme.colorScheme.background),
+                                modifier = Modifier,
                                 userState = data,
                                 onClick = {
                                     state.setActiveAccount(it)
@@ -174,7 +196,9 @@ fun <T : UiUserV2> AccountItem(
     supportingContent: @Composable (UiUserV2) -> Unit = {
         Text(text = it.handle, maxLines = 1)
     },
-    colors: ListItemColors = ListItemDefaults.colors(containerColor = Color.Transparent),
+    tonalElevation: Dp = ListItemDefaults.Elevation,
+    shadowElevation: Dp = ListItemDefaults.Elevation,
+    colors: ListItemColors = ListItemDefaults.colors(),
 ) {
     userState
         .onSuccess { data ->
@@ -197,6 +221,8 @@ fun <T : UiUserV2> AccountItem(
                     supportingContent.invoke(data)
                 },
                 colors = colors,
+                shadowElevation = shadowElevation,
+                tonalElevation = tonalElevation,
             )
         }.onLoading {
             ListItem(
@@ -214,6 +240,8 @@ fun <T : UiUserV2> AccountItem(
                     Text(text = "Loading...", modifier = Modifier.placeholder(true))
                 },
                 colors = colors,
+                shadowElevation = shadowElevation,
+                tonalElevation = tonalElevation,
             )
         }.onError { throwable ->
             ListItem(
@@ -250,6 +278,8 @@ fun <T : UiUserV2> AccountItem(
                         null
                     },
                 colors = colors,
+                shadowElevation = shadowElevation,
+                tonalElevation = tonalElevation,
             )
         }
 }

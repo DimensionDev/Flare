@@ -137,7 +137,11 @@ fun NavigationSuiteScaffold2(
             ModalWideNavigationRail(
                 hideOnCollapse = layoutType == NavigationSuiteType.NavigationBar,
                 state = wideNavigationRailState,
-                colors = navigationSuiteColors.wideNavigationRailColors,
+                colors =
+                    navigationSuiteColors.wideNavigationRailColors
+                        .copy(
+                            containerColor = Color.Transparent,
+                        ),
             ) {
                 val actualLayoutType =
                     if (layoutType == NavigationSuiteType.NavigationBar) {

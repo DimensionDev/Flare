@@ -31,23 +31,14 @@ struct WaterfallItemView: View {
         }
         .background(backgroundView)
         .contentShape(Rectangle())
-        .onTapGesture {
-            // 默认点击行为：如果有文字内容则显示详情，否则显示媒体预览
+        .onTapGesture { 
             if item.shouldShowText {
                 onTap(item.contentClickAction)
             } else {
                 onTap(item.imageClickAction)
             }
         }
-        .onAppear {
-            FlareLog.debug("WaterfallItemView onAppear: id=\(item.id), aspectRatio=\(item.aspectRatio), imageSize=\(imageSize), previewURL=\(item.previewURL?.absoluteString ?? "nil")")
-
-            if let url = item.previewURL {
-                FlareLog.debug("WaterfallItemView checking URL: \(url.absoluteString)")
-            } else {
-                FlareLog.warning("WaterfallItemView missing previewURL for item: \(item.id)")
-            }
-        }
+         
     }
 
     private var imageContentView: some View {

@@ -219,7 +219,7 @@ class PagingStateConverter {
         FlareLog.debug("[PagingStateConverter] 开始转换范围: [\(startIndex), \(endIndex))")
 
         for index in startIndex ..< endIndex {
-            //FlareLog.debug("[PagingStateConverter] 尝试获取index=\(index)的数据")
+            FlareLog.debug("[PagingStateConverter] 尝试获取index=\(index)的数据")
 
             let uiTimeline: UiTimeline?
 

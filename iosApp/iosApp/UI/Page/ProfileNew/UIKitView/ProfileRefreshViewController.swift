@@ -12,7 +12,7 @@ import UIKit
 extension JXPagingListContainerView: JXSegmentedViewListContainer {}
 
 class ProfileNewRefreshViewController: UIViewController {
-    // - Properties
+   
     private var theme: FlareTheme?
     private var userInfo: ProfileUserInfo?
     private var state: ProfileNewState?
@@ -29,7 +29,7 @@ class ProfileNewRefreshViewController: UIViewController {
     private var listViewControllers: [Int: JXPagingViewListViewDelegate] = [:]
     private var themeObserver: NSObjectProtocol?
 
-    // UI Components
+     
     var pagingView: JXPagingView!
     var userHeaderView: ProfileNewHeaderView!
     var segmentedView: JXSegmentedView!
@@ -38,37 +38,31 @@ class ProfileNewRefreshViewController: UIViewController {
     private var titles: [String] = []
     private var refreshControl: ProfileStretchRefreshControl?
 
-    // Navigation Components
+     
     private var navigationBar: UINavigationBar = {
         let nav = UINavigationBar()
-        //  nav.backgroundColor = .systemBackground
-        return nav
+         return nav
     }()
-
-    private var segmentedBackButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(systemName: "chevron.left"), for: .normal)
-        button.isHidden = true
-        button.isUserInteractionEnabled = true
-
-        // 设置图标在按钮中的内边距，这样图标保持原来大小，但按钮区域更大
-        button.contentEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-
-        return button
-    }()
+ 
 
     private var lastContentOffset: CGFloat = 0
     private let navigationBarHeight: CGFloat = 44
     private var isNavigationBarHidden = false
 
-    // 配置方法
+    
+    private static let BANNER_HEIGHT: CGFloat = 200
+    private var isAppBarTitleVisible = false
+
+  
+    private var _cachedSafeAreaTop: CGFloat?
+
+   
     func configure(
         userInfo: ProfileUserInfo?,
         state: ProfileNewState,
         selectedTab: Binding<Int>,
         isShowAppBar: Binding<Bool?>,
-        isShowsegmentedBackButton: Binding<Bool>,
-        horizontalSizeClass: UserInterfaceSizeClass?,
+         horizontalSizeClass: UserInterfaceSizeClass?,
         appSettings: AppSettings,
         toProfileMedia: @escaping (MicroBlogKey) -> Void,
         accountType: AccountType,
@@ -81,8 +75,7 @@ class ProfileNewRefreshViewController: UIViewController {
         self.state = state
         self.selectedTab = selectedTab
         self.isShowAppBar = isShowAppBar
-        self.isShowsegmentedBackButton = isShowsegmentedBackButton
-        self.horizontalSizeClass = horizontalSizeClass
+         self.horizontalSizeClass = horizontalSizeClass
         self.appSettings = appSettings
         self.toProfileMedia = toProfileMedia
         self.accountType = accountType
@@ -90,35 +83,35 @@ class ProfileNewRefreshViewController: UIViewController {
         self.tabStore = tabStore
         self.mediaPresenterWrapper = mediaPresenterWrapper
         self.theme = theme
-
-        // 设置主题监听
+ 
         setupThemeObserver()
-
-        // 根据是否是自己的 profile 来控制导航栏显示
+ 
         let isOwnProfile = userKey == nil
 
-        // 根据 isShowAppBar 的状态来控制导航栏显示
-        if let showAppBar = isShowAppBar.wrappedValue {
-            navigationController?.setNavigationBarHidden(!showAppBar, animated: false)
-            updateNavigationButtons(isOwnProfile: isOwnProfile, showAppBar: showAppBar)
+         
+        if isOwnProfile {
+            // 自己的Profile：根据原有逻辑控制AppBar
+            if let showAppBar = isShowAppBar.wrappedValue {
+                navigationController?.setNavigationBarHidden(!showAppBar, animated: false)
+            } else {
+                // 初始状态，显示导航栏
+                navigationController?.setNavigationBarHidden(false, animated: false)
+                isShowAppBar.wrappedValue = true
+            }
         } else {
-            // 初始状态，显示导航栏
+            // 其他用户Profile：AppBar永远显示
             navigationController?.setNavigationBarHidden(false, animated: false)
-            updateNavigationButtons(isOwnProfile: isOwnProfile, showAppBar: true)
-            // 设置初始状态
+
             isShowAppBar.wrappedValue = true
         }
+
+        // 🔑 设置导航按钮
+        setupNavigationButtons(isOwnProfile: isOwnProfile)
 
         // 更新UI
         updateUI()
 
-        // 根据 isShowAppBar 状态更新 isShowsegmentedBackButton
-        if let showAppBar = isShowAppBar.wrappedValue {
-            isShowsegmentedBackButton.wrappedValue = !showAppBar
-        } else {
-            isShowsegmentedBackButton.wrappedValue = false
-        }
-
+        
         // 配置头部视图
         if let userInfo {
             userHeaderView?.configure(with: userInfo, state: state, theme: theme)
@@ -128,6 +121,13 @@ class ProfileNewRefreshViewController: UIViewController {
                 os_log("[📔][ProfileRefreshViewController]点击关注按钮: userKey=%{public}@", log: .default, type: .debug, userInfo.profile.key.description)
                 state.follow(userKey: userInfo.profile.key, data: relation)
             }
+        }
+
+        
+        if !isOwnProfile {
+            isAppBarTitleVisible = false
+            navigationController?.navigationBar.topItem?.title = nil
+            navigationController?.navigationBar.alpha = 1.0
         }
     }
 
@@ -160,18 +160,38 @@ class ProfileNewRefreshViewController: UIViewController {
         }
     }
 
+     private var cachedSafeAreaTop: CGFloat {
+        if let cached = _cachedSafeAreaTop {
+            return cached
+        }
+        let window = UIApplication.shared.windows.first { $0.isKeyWindow }
+        let safeAreaTop = window?.safeAreaInsets.top ?? 0
+        _cachedSafeAreaTop = safeAreaTop
+        return safeAreaTop
+    }
+
+     private func clearSafeAreaCache() {
+        _cachedSafeAreaTop = nil
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
+
+        // Clear safe area cache when device orientation changes
+        coordinator.animate(alongsideTransition: nil) { _ in
+            self.clearSafeAreaCache()
+        }
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // view.backgroundColor = .systemBackground
-
+ 
         // 设置导航栏
         setupNavigationBar()
 
         // 初始时显示系统导航栏，隐藏自定义导航栏和返回按钮
         navigationController?.setNavigationBarHidden(false, animated: false)
         navigationBar.alpha = 0
-        segmentedBackButton.isHidden = true
         isNavigationBarHidden = false
 
         // 允许系统返回手势
@@ -251,22 +271,27 @@ class ProfileNewRefreshViewController: UIViewController {
     @objc private func handlePanGesture(_: UIPanGestureRecognizer) {
         let offset = pagingView.mainTableView.contentOffset.y
         refreshControl?.scrollViewDidScroll(withOffset: offset)
-        updateNavigationBarVisibility(with: offset)
+      
+        let isOwnProfile = userKey == nil
+        if !isOwnProfile {
+            updateNavigationBarVisibility(with: offset)
+        }
+         
     }
 
     private func refreshContent() {
-        // 模拟刷新过程
+        
         let workItem = DispatchWorkItem {
             self.isHeaderRefreshed = true
             self.refreshControl?.endRefreshing()
             self.pagingView.reloadData()
 
-            // 触发当前列表的刷新
+            
             if let currentList = self.pagingView.validListDict[self.segmentedView.selectedIndex] as? ProfileNewListViewController {
                 currentList.headerRefresh()
             }
             Task {
-                // 获取当前选中的列表视图
+               
                 if let currentList = self.pagingView.validListDict[self.segmentedView.selectedIndex] {
                     if let timelineVC = currentList as? TimelineViewController,
                        let timelineState = timelineVC.presenter?.models.value as? TimelineState
@@ -309,10 +334,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 添加到视图
         view.addSubview(navigationBar)
-
-        // 设置返回按钮事件
-        segmentedBackButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
-
+ 
         // 初始时隐藏 moreButton
         moreButton.isEnabled = false
         navigationItem.rightBarButtonItem = nil
@@ -385,7 +407,10 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 添加举报选项
         if case let .success(user) = onEnum(of: state.userState) {
-            ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Report Success", comment: "")).show()
+            alertController.addAction(UIAlertAction(title: NSLocalizedString("report", comment: ""), style: .destructive) { [weak self] _ in
+                // 直接显示举报成功Toast
+                ToastView(icon: UIImage(systemName: "checkmark.circle"), message: NSLocalizedString("Report Success", comment: "")).show()
+            })
         }
 
         // 添加取消选项
@@ -395,58 +420,64 @@ class ProfileNewRefreshViewController: UIViewController {
         present(alertController, animated: true)
     }
 
-    private func updateNavigationBarVisibility(with offset: CGFloat) {
-        let threshold: CGFloat = 100 // 触发导航栏隐藏的阈值
+     private func updateNavigationBarVisibility(with offset: CGFloat) {
+        
+         if offset > Self.BANNER_HEIGHT && !isAppBarTitleVisible {
+           
+            isAppBarTitleVisible = true
+            UIView.animate(withDuration: 0.25) {
+                self.navigationController?.navigationBar.alpha = 0.9
+            }
+            updateAppBarTitle(showUserName: true)
+        } else if offset <= Self.BANNER_HEIGHT && isAppBarTitleVisible {
+             isAppBarTitleVisible = false
+            UIView.animate(withDuration: 0.25) {
+                self.navigationController?.navigationBar.alpha = 1.0
+            }
+            updateAppBarTitle(showUserName: false)
+        }
+ 
+        lastContentOffset = offset
+    }
+
+  
+    private func updateAppBarTitle(showUserName: Bool) {
         let isOwnProfile = userKey == nil
 
-        // 如果是自己的 profile，不处理导航栏隐藏
-        if isOwnProfile {
-            return
+        // Only process title for other user profiles
+        guard !isOwnProfile else { return }
+
+        if showUserName {
+            // Show user name title
+            if let userInfo = userInfo {
+                let displayName = userInfo.profile.name.raw.isEmpty ? userInfo.profile.handle : userInfo.profile.name.raw
+                navigationController?.navigationBar.topItem?.title = displayName
+            }
+        } else {
+            // Hide title
+            navigationController?.navigationBar.topItem?.title = nil
         }
 
-        // 判断滚动方向和位置
-        if offset > lastContentOffset && offset > threshold {
-            // 向上滚动且超过阈值，隐藏导航栏，显示返回按钮
-            if !isNavigationBarHidden {
-                UIView.animate(withDuration: 0.3) {
-                    self.isShowAppBar?.wrappedValue = false
-                    self.isShowsegmentedBackButton?.wrappedValue = true
-                    self.updateNavigationButtons(isOwnProfile: isOwnProfile, showAppBar: false)
-                }
-                isNavigationBarHidden = true
-            }
-        } else if offset < lastContentOffset || offset < threshold {
-            // 向下滚动或回到顶部，显示导航栏，隐藏返回按钮
-            if isNavigationBarHidden {
-                UIView.animate(withDuration: 0.3) {
-                    self.isShowAppBar?.wrappedValue = true
-                    self.isShowsegmentedBackButton?.wrappedValue = false
-                    self.updateNavigationButtons(isOwnProfile: isOwnProfile, showAppBar: true)
-                }
-                isNavigationBarHidden = false
-            }
-        }
-
-        lastContentOffset = offset
+    
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         let isOwnProfile = userKey == nil
-        // 如果是自己的 profile，显示系统导航栏
-        if isOwnProfile {
+
+        //  AppBar永远显示
+        if isOwnProfile { 
             navigationController?.setNavigationBarHidden(false, animated: animated)
-        } else {
-            // 如果是其他用户的 profile，初始时隐藏系统导航栏
-            navigationController?.setNavigationBarHidden(true, animated: animated)
+        } else { 
+            navigationController?.setNavigationBarHidden(false, animated: animated)
+            navigationController?.navigationBar.alpha = 1.0 
         }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
 
-        // 离开页面时重置状态，不然 详情页会导致没appbar
-        //
+        // 离开页面时重置状态，不然 详情页会导致没appbar 
         isShowAppBar?.wrappedValue = true
         isShowsegmentedBackButton?.wrappedValue = false
 
@@ -456,8 +487,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
     deinit {
         cleanupListViewControllers()
-
-        // 移除主题观察者
+ 
         if let themeObserver {
             NotificationCenter.default.removeObserver(themeObserver)
         }
@@ -466,28 +496,17 @@ class ProfileNewRefreshViewController: UIViewController {
     private func cleanupListViewControllers() {
         listViewControllers.removeAll()
     }
-
-    private func updateNavigationButtons(isOwnProfile: Bool, showAppBar: Bool) {
-        // 如果是自己的 profile，不显示任何返回按钮
+ 
+    private func setupNavigationButtons(isOwnProfile: Bool) {
         if isOwnProfile {
+            // 自己的Profile：清除所有导航按钮
             navigationController?.navigationBar.topItem?.leftBarButtonItem = nil
             navigationController?.navigationBar.topItem?.rightBarButtonItem = nil
-            segmentedBackButton.isHidden = true
-            return
-        }
-
-        // 其他用户的 profile
-        if showAppBar {
-            // 显示系统导航栏时，使用系统默认的返回按钮
-            navigationController?.navigationBar.topItem?.leftBarButtonItem = nil // 不设置自定义返回按钮，使用系统默认的
+        } else {
+            // 其他用户Profile：只设置更多按钮，使用系统默认返回按钮
+            navigationController?.navigationBar.topItem?.leftBarButtonItem = nil // 使用系统默认返回按钮
             let moreButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), style: .plain, target: self, action: #selector(handleMoreMenuTap))
             navigationController?.navigationBar.topItem?.rightBarButtonItem = moreButton
-            segmentedBackButton.isHidden = true
-        } else {
-            // 隐藏系统导航栏时
-            navigationController?.navigationBar.topItem?.leftBarButtonItem = nil
-            navigationController?.navigationBar.topItem?.rightBarButtonItem = nil
-            segmentedBackButton.isHidden = false
         }
     }
 
@@ -505,27 +524,24 @@ class ProfileNewRefreshViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
 
-    // 新增方法: 设置主题观察者
+   
     private func setupThemeObserver() {
-        // 移除旧的观察者（如果存在）
+       
         if let existingObserver = themeObserver {
             NotificationCenter.default.removeObserver(existingObserver)
         }
 
-        // 添加新的观察者
+  
         themeObserver = NotificationCenter.default.addObserver(
             forName: NSNotification.Name("FlareThemeDidChange"),
             object: nil,
             queue: .main
         ) { [weak self] _ in
             self?.applyCurrentTheme()
-        }
-
-        // 立即应用当前主题
+        } 
         applyCurrentTheme()
     }
-
-    // 新增方法: 应用当前主题到所有子视图
+ 
     private func applyCurrentTheme() {
         guard let theme else { return }
 
@@ -552,13 +568,11 @@ class ProfileNewRefreshViewController: UIViewController {
             } else if let mediaVC = listVC as? ProfileMediaViewController {
                 mediaVC.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
             }
-        }
-
-        // 如果需要应用到其他UI元素，也可以在这里添加
+        } 
     }
 }
 
-// - UIGestureRecognizerDelegate
+ 
 
 extension ProfileNewRefreshViewController: UIGestureRecognizerDelegate {
     func gestureRecognizer(_: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith _: UIGestureRecognizer) -> Bool {
@@ -566,7 +580,7 @@ extension ProfileNewRefreshViewController: UIGestureRecognizerDelegate {
     }
 }
 
-// - JXPagingViewDelegate
+ 
 
 extension ProfileNewRefreshViewController: JXPagingViewDelegate {
     func tableHeaderViewHeight(in _: JXPagingView) -> Int {
@@ -582,44 +596,54 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
     }
 
     func heightForPinSectionHeader(in _: JXPagingView) -> Int {
-        // 获取安全区域高度
-        let window = UIApplication.shared.windows.first { $0.isKeyWindow }
-        let safeAreaTop = window?.safeAreaInsets.top ?? 0
+     
+        let safeAreaTop = cachedSafeAreaTop
 
-        // 返回 tab bar 高度 + 安全区域高度
-        return Int(50 + safeAreaTop)
+        // 布局常量
+        let navigationBarHeight: CGFloat = 44 // AppBar标准高度
+        let tabBarHeight: CGFloat = 50 // TabBar高度
+
+        let isOwnProfile = userKey == nil
+
+        if isOwnProfile {
+            // Own profile: SafeArea + TabBar
+            return Int(safeAreaTop + tabBarHeight)
+        } else {
+            // Other user profile: SafeArea + AppBar + TabBar
+            return Int(safeAreaTop + navigationBarHeight + tabBarHeight)
+        }
     }
 
     func viewForPinSectionHeader(in _: JXPagingView) -> UIView {
-        // 创建一个容器视图，包含安全区域的空白和 segmentedView
         let containerView = UIView()
-        //  containerView.backgroundColor = .systemBackground
+        containerView.backgroundColor = .systemBackground
         containerView.isUserInteractionEnabled = true
 
-        // 获取安全区域高度
-        let window = UIApplication.shared.windows.first { $0.isKeyWindow }
-        let safeAreaTop = window?.safeAreaInsets.top ?? 0
+        // Use cached safe area for performance optimization
+        let safeAreaTop = cachedSafeAreaTop
 
-        // 调整 segmentedView 的位置，放在安全区域下方
-        segmentedView.frame = CGRect(x: 0, y: safeAreaTop, width: view.bounds.width, height: 50)
+        let navigationBarHeight: CGFloat = 44
+        let tabBarHeight: CGFloat = 50
+
+        let isOwnProfile = userKey == nil
+
+        let tabBarY: CGFloat
+        if isOwnProfile {
+            tabBarY = safeAreaTop
+        } else {
+            tabBarY = safeAreaTop + navigationBarHeight - 18
+        }
+
+        // 调整 segmentedView 的位置
+        segmentedView.frame = CGRect(x: 0, y: tabBarY, width: view.bounds.width, height: tabBarHeight)
 
         // 创建一个按钮容器，确保它在 segmentedView 之上
-        let buttonContainer = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 50 + safeAreaTop)) // 增加容器宽度
+        let buttonContainer = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 50 + safeAreaTop))
         buttonContainer.isUserInteractionEnabled = true
-        // buttonContainer.backgroundColor = .clear
-
-        // 设置返回按钮的位置和大小 - 增加点击区域
-        segmentedBackButton.frame = CGRect(x: 8, y: safeAreaTop + 5, width: 44, height: 44) // 增加按钮区域
-        segmentedBackButton.removeTarget(nil, action: nil, for: .allEvents)
-        segmentedBackButton.addTarget(self, action: #selector(handleBackButtonTap), for: .touchUpInside)
-
-        // 按照正确的层级添加视图
-        buttonContainer.addSubview(segmentedBackButton)
+        buttonContainer.backgroundColor = .clear
+ 
         containerView.addSubview(segmentedView)
-        containerView.addSubview(buttonContainer)
-
-        os_log("[📔][ProfileRefreshViewController]设置返回按钮: frame=%{public}@", log: .default, type: .debug, NSCoder.string(for: segmentedBackButton.frame))
-        if let theme {
+         if let theme {
             containerView.backgroundColor = UIColor(theme.primaryBackgroundColor)
         }
         return containerView
@@ -661,7 +685,7 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
             return mediaVC
         } else {
             let timelineVC = TimelineViewController()
-//            timelineVC.shouldShowLoadMore = true
+ 
             if let presenter = tabStore.currentPresenter {
                 os_log("[📔][ProfileNewRefreshViewController] updatePresenter start", log: .default, type: .debug)
 
@@ -686,10 +710,7 @@ extension ProfileNewRefreshViewController: JXSegmentedViewDelegate {
         // 更新选中状态
         selectedTab?.wrappedValue = index
 
-        // 发送通知更新 appbar index
-        // tood: 这个等select Index 解决后要删掉，冗杂的
-        NotificationCenter.default.post(name: NSNotification.Name("AppBarIndexDidChange"), object: index)
-
+         
         // 更新当前选中的标签页的presenter
         if let tabStore, index < tabStore.availableTabs.count {
             let selectedTab = tabStore.availableTabs[index]
@@ -723,5 +744,48 @@ extension ProfileNewRefreshViewController: JXSegmentedViewDelegate {
         if let currentList = pagingView.validListDict[index] as? ProfileNewListViewController {
             currentList.tableView.mj_header?.beginRefreshing()
         }
+    }
+}
+
+ 
+extension ProfileNewRefreshViewController {
+   
+    func needsProfileUpdate(
+        userInfo: ProfileUserInfo?,
+        selectedTab: Int,
+        accountType: AccountType,
+        userKey: MicroBlogKey?
+    ) -> Bool {
+ 
+        // 1. 检查用户信息是否变化
+        let userChanged = self.userInfo?.profile.key.description != userInfo?.profile.key.description
+
+        // 2. 检查选中Tab是否变化
+        let tabChanged = self.selectedTab?.wrappedValue != selectedTab
+
+        // 3. 检查账户类型是否变化（更精确的比较）
+        let currentAccountKey = (self.accountType as? AccountTypeSpecific)?.accountKey.description ?? String(describing: self.accountType)
+        let newAccountKey = (accountType as? AccountTypeSpecific)?.accountKey.description ?? String(describing: accountType)
+        let accountChanged = currentAccountKey != newAccountKey
+
+        // 4. 检查用户Key是否变化
+        let userKeyChanged = self.userKey?.description != userKey?.description
+
+        // 5. 首次配置检查（如果当前userInfo为nil，说明是首次配置）
+        let isFirstConfiguration = self.userInfo == nil && userInfo != nil
+
+        let needsUpdate = userChanged || tabChanged || accountChanged || userKeyChanged || isFirstConfiguration
+
+        if needsUpdate {
+            os_log("[ProfileNewRefreshViewController] Update needed: user=%{public}@, tab=%{public}@, account=%{public}@, userKey=%{public}@, first=%{public}@",
+                   log: .default, type: .debug,
+                   userChanged ? "changed" : "same",
+                   tabChanged ? "changed" : "same",
+                   accountChanged ? "changed" : "same",
+                   userKeyChanged ? "changed" : "same",
+                   isFirstConfiguration ? "true" : "false")
+        }
+
+        return needsUpdate
     }
 }

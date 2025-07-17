@@ -96,7 +96,7 @@ struct FlareTabBarV2: View {
                         router.selectedTab == tab
                             ? theme.tintColor : Color(.secondaryLabel)
                     )
-                    .frame(width: 24, height: 24)
+                    .frame(width: 28, height: 28)
                     .background(
                         ZStack {
                             if router.selectedTab == tab {
@@ -107,13 +107,13 @@ struct FlareTabBarV2: View {
                                         id: "selectedTabIndicator",
                                         in: tabBarNamespace
                                     )
-                                    .animation(.easeOut(duration: 0.15), value: router.selectedTab) // 更快的动画
+                                    .animation(.easeOut(duration: 0.1), value: router.selectedTab) // 更快的动画
                             }
                         }
                     )
             }
         }
-        .frame(height: 55) // TabBar项目高度
+        .frame(height: 65) // TabBar项目高度
         .frame(maxWidth: .infinity)
         .buttonStyle(PlainButtonStyle())
     }
@@ -123,22 +123,22 @@ struct FlareTabBarV2: View {
         switch tab {
         case .menu:
             Text(AwesomeIcon.bars.rawValue)
-                .font(.awesome(style: .solid, size: 20))
+                .font(.awesome(style: .solid, size: 24))
         case .timeline:
             Text(AwesomeIcon.home.rawValue)
-                .font(.awesome(style: .solid, size: 20))
+                .font(.awesome(style: .solid, size: 24))
         case .notification:
             Text(AwesomeIcon.bell.rawValue)
-                .font(.awesome(style: .solid, size: 20))
+                .font(.awesome(style: .solid, size: 24))
         case .discover:
             Text(AwesomeIcon.search.rawValue)
-                .font(.awesome(style: .solid, size: 20))
+                .font(.awesome(style: .solid, size: 24))
         case .profile:
             Text(AwesomeIcon.user.rawValue)
-                .font(.awesome(style: .solid, size: 20))
+                .font(.awesome(style: .solid, size: 24))
         case .compose:
             Text(AwesomeIcon.plus.rawValue)
-                .font(.awesome(style: .solid, size: 20))
+                .font(.awesome(style: .solid, size: 24))
         }
     }
 

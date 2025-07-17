@@ -16,7 +16,7 @@ struct WaterfallItemsView: View {
     @Binding var showFloatingButton: Bool
     let viewModel: TimelineViewModel
 
-    @State private var hasTriggeredLoadMore = false
+//    @State private var hasTriggeredLoadMore = false
     @State private var scrollThreshold: CGFloat = 100
     @State private var hasInitialLoadCompleted = false
 
@@ -81,7 +81,7 @@ struct WaterfallItemsView: View {
             }
         }
         .onAppear {
-            hasTriggeredLoadMore = false
+//            hasTriggeredLoadMore = false
             hasInitialLoadCompleted = false
             FlareLog.debug("Waterfall view appeared, reset trigger flags")
 
@@ -114,11 +114,11 @@ struct WaterfallItemsView: View {
                 hasMore,
                 !isRefreshing,
                 !viewModel.isLoadingMore,
-                !hasTriggeredLoadMore,
+//                hasTriggeredLoadMore,
                 hasInitialLoadCompleted
             {  
                 FlareLog.debug("Waterfall Near bottom, triggering load more (distance: \(distanceFromBottom))")
-                hasTriggeredLoadMore = true
+//                hasTriggeredLoadMore = true
                 Task {
                     await viewModel.handleLoadMore()
                 }

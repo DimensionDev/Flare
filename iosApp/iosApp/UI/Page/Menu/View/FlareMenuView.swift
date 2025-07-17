@@ -12,9 +12,7 @@ struct FlareMenuView: View {
     @State private var showFeeds = false
     @State private var showSettings = false
     @State private var showPerformanceTest = false
-//    let accountType: AccountType
-//    let user: UiUserV2?
-
+ 
     @State private var currentUser: UiUserV2? = nil
 
     @State private var accountType: AccountType = AccountTypeGuest()
@@ -22,12 +20,8 @@ struct FlareMenuView: View {
     @Environment(FlareRouter.self) private var router
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
-    @StateObject private var monitor = TimelinePerformanceMonitor.shared
-
-//    init(accountType: AccountType, user: UiUserV2? = nil) {
-//        self.accountType = accountType
-//        self.user = user
-//    }
+ 
+ 
 
     var body: some View {
         VStack(spacing: 0) {

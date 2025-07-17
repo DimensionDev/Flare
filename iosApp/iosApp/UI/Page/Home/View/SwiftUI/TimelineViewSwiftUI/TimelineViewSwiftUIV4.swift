@@ -15,6 +15,9 @@ struct TimelineViewSwiftUIV4: View {
 
     @State private var viewModel = TimelineViewModel()
 
+   
+    @State private var isInitialized: Bool = false
+
     init(tab: FLTabItem, store: AppBarTabSettingStore, scrollToTopTrigger: Binding<Bool>, isCurrentTab: Bool, showFloatingButton: Binding<Bool>) {
         self.tab = tab
         self.store = store
@@ -24,7 +27,7 @@ struct TimelineViewSwiftUIV4: View {
         FlareLog.debug("[TimelineV4] 视图初始化 for tab: \(tab.key)")
     }
 
-    // @State private var cancellables = Set<AnyCancellable>()
+
     @State private var refreshDebounceTimer: Timer?
 
     var body: some View {
@@ -94,7 +97,14 @@ struct TimelineViewSwiftUIV4: View {
                 }
             }
             .task(id: tab.key) {
-                await viewModel.setupDataSource(for: tab, using: store)
+              
+                if !isInitialized {
+                    isInitialized = true
+                    FlareLog.debug("[TimelineV4] First time initialization for tab: \(tab.key)")
+                    await viewModel.setupDataSource(for: tab, using: store)
+                } else {
+                    FlareLog.debug("[TimelineV4] Tab reappeared, skipping setupDataSource for tab: \(tab.key)")
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: .timelineItemUpdated)) { _ in
                 FlareLog.debug("TimelineV4 Received item update for tab: \(tab.key)")

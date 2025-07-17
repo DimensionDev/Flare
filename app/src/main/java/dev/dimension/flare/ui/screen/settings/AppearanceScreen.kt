@@ -52,6 +52,7 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AppearancePresenter
 import dev.dimension.flare.ui.presenter.settings.AppearanceState
+import dev.dimension.flare.ui.theme.ListCardShapes
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.launch
@@ -94,7 +95,7 @@ internal fun AppearanceScreen(
             Column(
                 modifier =
                     Modifier
-                        .clip(MaterialTheme.shapes.medium),
+                        .clip(ListCardShapes.container()),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 BoxWithConstraints {
@@ -106,7 +107,7 @@ internal fun AppearanceScreen(
                                     if (maxWidth < 400.dp) {
                                         showMenu = true
                                     }
-                                }.clip(MaterialTheme.shapes.extraSmall),
+                                }.clip(ListCardShapes.item()),
                         headlineContent = {
                             Text(text = stringResource(id = R.string.settings_appearance_theme))
                         },
@@ -216,7 +217,7 @@ internal fun AppearanceScreen(
                                 state.updateSettings {
                                     copy(pureColorMode = !pureColorMode)
                                 }
-                            }.clip(MaterialTheme.shapes.extraSmall),
+                            }.clip(ListCardShapes.item()),
                 )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     ListItem(
@@ -242,7 +243,7 @@ internal fun AppearanceScreen(
                                     state.updateSettings {
                                         copy(dynamicTheme = !dynamicTheme)
                                     }
-                                }.clip(MaterialTheme.shapes.extraSmall),
+                                }.clip(ListCardShapes.item()),
                     )
                 }
                 AnimatedVisibility(visible = !appearanceSettings.dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
@@ -267,7 +268,7 @@ internal fun AppearanceScreen(
                             Modifier
                                 .clickable {
                                     toColorPicker.invoke()
-                                }.clip(MaterialTheme.shapes.extraSmall),
+                                }.clip(ListCardShapes.item()),
                     )
                 }
             }
@@ -275,7 +276,7 @@ internal fun AppearanceScreen(
             Column(
                 modifier =
                     Modifier
-                        .clip(MaterialTheme.shapes.medium),
+                        .clip(ListCardShapes.container()),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 state.sampleStatus.onSuccess {
@@ -284,7 +285,7 @@ internal fun AppearanceScreen(
                         modifier =
                             Modifier
                                 .background(MaterialTheme.colorScheme.surface)
-                                .clip(MaterialTheme.shapes.extraSmall),
+                                .clip(ListCardShapes.item()),
                     )
                 }
                 BoxWithConstraints {
@@ -296,7 +297,7 @@ internal fun AppearanceScreen(
                                     if (maxWidth < 400.dp) {
                                         showMenu = true
                                     }
-                                }.clip(MaterialTheme.shapes.extraSmall),
+                                }.clip(ListCardShapes.item()),
                         headlineContent = {
                             Text(text = stringResource(id = R.string.settings_appearance_avatar_shape))
                         },
@@ -391,7 +392,7 @@ internal fun AppearanceScreen(
                                 state.updateSettings {
                                     copy(showActions = !showActions)
                                 }
-                            }.clip(MaterialTheme.shapes.extraSmall),
+                            }.clip(ListCardShapes.item()),
                 )
                 AnimatedVisibility(appearanceSettings.showActions) {
                     ListItem(
@@ -417,7 +418,7 @@ internal fun AppearanceScreen(
                                     state.updateSettings {
                                         copy(showNumbers = !showNumbers)
                                     }
-                                }.clip(MaterialTheme.shapes.extraSmall),
+                                }.clip(ListCardShapes.item()),
                     )
                 }
                 ListItem(
@@ -443,7 +444,7 @@ internal fun AppearanceScreen(
                                 state.updateSettings {
                                     copy(showLinkPreview = !showLinkPreview)
                                 }
-                            }.clip(MaterialTheme.shapes.extraSmall),
+                            }.clip(ListCardShapes.item()),
                 )
                 AnimatedVisibility(visible = appearanceSettings.showLinkPreview) {
                     ListItem(
@@ -469,7 +470,7 @@ internal fun AppearanceScreen(
                                     state.updateSettings {
                                         copy(compatLinkPreview = !compatLinkPreview)
                                     }
-                                }.clip(MaterialTheme.shapes.extraSmall),
+                                }.clip(ListCardShapes.item()),
                     )
                 }
                 ListItem(
@@ -495,7 +496,7 @@ internal fun AppearanceScreen(
                                 state.updateSettings {
                                     copy(showMedia = !showMedia)
                                 }
-                            }.clip(MaterialTheme.shapes.extraSmall),
+                            }.clip(ListCardShapes.item()),
                 )
                 AnimatedVisibility(appearanceSettings.showMedia) {
                     ListItem(
@@ -521,7 +522,7 @@ internal fun AppearanceScreen(
                                     state.updateSettings {
                                         copy(showSensitiveContent = !showSensitiveContent)
                                     }
-                                }.clip(MaterialTheme.shapes.extraSmall),
+                                }.clip(ListCardShapes.item()),
                     )
                 }
                 AnimatedVisibility(appearanceSettings.showMedia) {
@@ -548,7 +549,7 @@ internal fun AppearanceScreen(
                                     state.updateSettings {
                                         copy(expandMediaSize = !expandMediaSize)
                                     }
-                                }.clip(MaterialTheme.shapes.extraSmall),
+                                }.clip(ListCardShapes.item()),
                     )
                 }
                 AnimatedVisibility(appearanceSettings.showMedia) {
@@ -561,7 +562,7 @@ internal fun AppearanceScreen(
                                         if (maxWidth < 400.dp) {
                                             showMenu = true
                                         }
-                                    }.clip(MaterialTheme.shapes.extraSmall),
+                                    }.clip(ListCardShapes.item()),
                             headlineContent = {
                                 Text(text = stringResource(id = R.string.settings_appearance_video_autoplay))
                             },

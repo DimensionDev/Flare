@@ -9,7 +9,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -37,6 +36,7 @@ import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
+import dev.dimension.flare.ui.theme.ListCardShapes
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -71,7 +71,7 @@ internal fun StorageScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(it)
                     .padding(horizontal = screenHorizontalPadding)
-                    .clip(MaterialTheme.shapes.medium),
+                    .clip(ListCardShapes.container()),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             ListItem(
@@ -92,7 +92,7 @@ internal fun StorageScreen(
                         .clickable {
                             state.clearImageCache()
                         }.clip(
-                            MaterialTheme.shapes.extraSmall,
+                            ListCardShapes.item(),
                         ),
                 leadingContent = {
                     FAIcon(
@@ -120,7 +120,7 @@ internal fun StorageScreen(
                         .clickable {
                             state.clearCacheDatabase()
                         }.clip(
-                            MaterialTheme.shapes.extraSmall,
+                            ListCardShapes.item(),
                         ),
                 leadingContent = {
                     FAIcon(
@@ -144,7 +144,7 @@ internal fun StorageScreen(
                         .clickable {
                             toAppLog.invoke()
                         }.clip(
-                            MaterialTheme.shapes.extraSmall,
+                            ListCardShapes.item(),
                         ),
                 leadingContent = {
                     FAIcon(

@@ -92,7 +92,6 @@ internal fun TabAddBottomSheet(
                         } else {
                             onAddTab(tabItem)
                         }
-                        onDismissRequest()
                     },
             )
         }

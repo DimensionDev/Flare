@@ -21,8 +21,8 @@ public fun Modifier.listCard(
                 shape = PlatformTheme.shapes.bottomCardShape,
             )
         } else {
-            clip(shape = PlatformTheme.shapes.extraSmall)
+            clip(shape = PlatformTheme.shapes.listCardItemShape)
         }
     } else {
-        clip(shape = PlatformTheme.shapes.medium)
+        clip(shape = PlatformTheme.shapes.listCardContainerShape)
     }

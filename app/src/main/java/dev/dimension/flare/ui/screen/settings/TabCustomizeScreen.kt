@@ -336,10 +336,10 @@ internal fun LazyItemScope.TabCustomItem(
     val haptics = LocalHapticFeedback.current
     val swipeState =
         rememberSwipeToDismissBoxState()
-
     LaunchedEffect(swipeState.settledValue) {
         if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {
             delay(AnimationConstants.DefaultDurationMillis.toLong())
+            swipeState.reset()
             deleteTab(item)
         }
     }

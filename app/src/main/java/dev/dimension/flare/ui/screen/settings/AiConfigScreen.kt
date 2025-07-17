@@ -51,6 +51,7 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.FlareServerProviderPresenter
+import dev.dimension.flare.ui.theme.ListCardShapes
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -88,7 +89,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     .verticalScroll(rememberScrollState())
                     .padding(it)
                     .padding(horizontal = screenHorizontalPadding)
-                    .clip(MaterialTheme.shapes.medium),
+                    .clip(ListCardShapes.container()),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             ListItem(
@@ -97,7 +98,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                         .clickable {
                             state.setShowServerDialog(true)
                         }.clip(
-                            MaterialTheme.shapes.extraSmall,
+                            ListCardShapes.item(),
                         ),
                 overlineContent = {
                     Text(
@@ -146,7 +147,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                                 copy(translation = !state.aiConfig.translation)
                             }
                         }.clip(
-                            MaterialTheme.shapes.extraSmall,
+                            ListCardShapes.item(),
                         ),
             )
             ListItem(
@@ -177,7 +178,7 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                                 copy(tldr = !state.aiConfig.tldr)
                             }
                         }.clip(
-                            MaterialTheme.shapes.extraSmall,
+                            ListCardShapes.item(),
                         ),
             )
         }

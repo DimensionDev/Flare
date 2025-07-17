@@ -1,5 +1,6 @@
 package dev.dimension.flare.ui.screen.settings
 
+import androidx.compose.animation.core.AnimationConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,9 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -65,6 +64,7 @@ import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
@@ -136,14 +136,10 @@ internal fun AccountsScreen(
                         val swipeState =
                             rememberSwipeToDismissBoxState()
 
-                        val haptics = LocalHapticFeedback.current
-                        LaunchedEffect(swipeState.progress) {
-                            if (swipeState.progress > 0.5f) {
-                                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                            }
-                        }
                         LaunchedEffect(swipeState.settledValue) {
                             if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {
+                                delay(AnimationConstants.DefaultDurationMillis.toLong())
+                                swipeState.reset()
                                 state.logout(account.accountKey)
                             }
                         }

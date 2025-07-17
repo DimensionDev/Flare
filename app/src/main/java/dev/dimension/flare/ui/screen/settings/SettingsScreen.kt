@@ -11,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -45,6 +44,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.theme.ListCardShapes
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -129,7 +129,7 @@ internal fun SettingsScreen(
                         },
                         modifier =
                             Modifier
-                                .clip(shape = MaterialTheme.shapes.medium),
+                                .clip(shape = ListCardShapes.container()),
                     )
                 }.onError {
                     ListItem(
@@ -140,7 +140,7 @@ internal fun SettingsScreen(
                             Modifier
                                 .clickable {
                                     toAccounts.invoke()
-                                }.clip(shape = MaterialTheme.shapes.medium),
+                                }.clip(shape = ListCardShapes.container()),
                         leadingContent = {
                             FAIcon(
                                 imageVector = FontAwesomeIcons.Solid.CircleUser,
@@ -179,7 +179,7 @@ internal fun SettingsScreen(
             Column(
                 modifier =
                     Modifier
-                        .clip(MaterialTheme.shapes.medium),
+                        .clip(ListCardShapes.container()),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 ListItem(
@@ -199,7 +199,7 @@ internal fun SettingsScreen(
                         Modifier
                             .clickable {
                                 toAppearance.invoke()
-                            }.clip(shape = MaterialTheme.shapes.extraSmall),
+                            }.clip(shape = ListCardShapes.item()),
                 )
                 state.user.onSuccess {
                     ListItem(
@@ -219,7 +219,7 @@ internal fun SettingsScreen(
                             Modifier
                                 .clickable {
                                     toTabCustomization.invoke()
-                                }.clip(shape = MaterialTheme.shapes.extraSmall),
+                                }.clip(shape = ListCardShapes.item()),
                     )
                 }
             }
@@ -228,7 +228,7 @@ internal fun SettingsScreen(
                 Column(
                     modifier =
                         Modifier
-                            .clip(MaterialTheme.shapes.medium),
+                            .clip(ListCardShapes.container()),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     ListItem(
@@ -248,7 +248,7 @@ internal fun SettingsScreen(
                             Modifier
                                 .clickable {
                                     toLocalFilter.invoke()
-                                }.clip(shape = MaterialTheme.shapes.extraSmall),
+                                }.clip(shape = ListCardShapes.item()),
                     )
                     ListItem(
                         headlineContent = {
@@ -258,7 +258,7 @@ internal fun SettingsScreen(
                             Modifier
                                 .clickable {
                                     toLocalHistory.invoke()
-                                }.clip(shape = MaterialTheme.shapes.extraSmall),
+                                }.clip(shape = ListCardShapes.item()),
                         leadingContent = {
                             FAIcon(
                                 imageVector = FontAwesomeIcons.Solid.ClockRotateLeft,
@@ -286,7 +286,7 @@ internal fun SettingsScreen(
                             Modifier
                                 .clickable {
                                     toStorage.invoke()
-                                }.clip(shape = MaterialTheme.shapes.extraSmall),
+                                }.clip(shape = ListCardShapes.item()),
                     )
                 }
 //            ListItem(
@@ -311,7 +311,7 @@ internal fun SettingsScreen(
             Column(
                 modifier =
                     Modifier
-                        .clip(MaterialTheme.shapes.medium),
+                        .clip(ListCardShapes.container()),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 ListItem(
@@ -331,13 +331,13 @@ internal fun SettingsScreen(
                         Modifier
                             .clickable {
                                 toAiConfig.invoke()
-                            }.clip(shape = MaterialTheme.shapes.extraSmall),
+                            }.clip(shape = ListCardShapes.item()),
                 )
             }
             Column(
                 modifier =
                     Modifier
-                        .clip(MaterialTheme.shapes.medium),
+                        .clip(ListCardShapes.container()),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 ListItem(
@@ -357,7 +357,7 @@ internal fun SettingsScreen(
                         Modifier
                             .clickable {
                                 toAbout.invoke()
-                            }.clip(shape = MaterialTheme.shapes.extraSmall),
+                            }.clip(shape = ListCardShapes.item()),
                 )
             }
         }

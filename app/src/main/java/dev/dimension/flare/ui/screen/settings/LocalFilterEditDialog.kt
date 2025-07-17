@@ -40,6 +40,7 @@ import dev.dimension.flare.ui.model.UiKeywordFilter
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.LocalFilterPresenter
+import dev.dimension.flare.ui.theme.ListCardShapes
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -99,7 +100,7 @@ internal fun LocalFilterEditDialog(
             Column(
                 modifier =
                     Modifier
-                        .clip(MaterialTheme.shapes.medium),
+                        .clip(ListCardShapes.container()),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 ListItem(
@@ -117,7 +118,7 @@ internal fun LocalFilterEditDialog(
                     },
                     modifier =
                         Modifier
-                            .clip(MaterialTheme.shapes.extraSmall),
+                            .clip(ListCardShapes.item()),
                 )
                 ListItem(
                     headlineContent = {
@@ -133,7 +134,7 @@ internal fun LocalFilterEditDialog(
                         Modifier
                             .clickable {
                                 state.setForTimeline(!state.forTimeline)
-                            }.clip(MaterialTheme.shapes.extraSmall),
+                            }.clip(ListCardShapes.item()),
                 )
                 ListItem(
                     headlineContent = {
@@ -149,7 +150,7 @@ internal fun LocalFilterEditDialog(
                         Modifier
                             .clickable {
                                 state.setForNotification(!state.forNotification)
-                            }.clip(MaterialTheme.shapes.extraSmall),
+                            }.clip(ListCardShapes.item()),
                 )
                 ListItem(
                     headlineContent = {
@@ -165,7 +166,7 @@ internal fun LocalFilterEditDialog(
                         Modifier
                             .clickable {
                                 state.setForSearch(!state.forSearch)
-                            }.clip(MaterialTheme.shapes.extraSmall),
+                            }.clip(ListCardShapes.item()),
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -189,7 +190,7 @@ internal fun LocalFilterEditDialog(
                             .clickable {
                                 state.delete()
                                 onBack()
-                            }.clip(MaterialTheme.shapes.medium),
+                            }.clip(ListCardShapes.container()),
                 )
             }
         }

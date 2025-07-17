@@ -44,7 +44,6 @@ import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
@@ -231,7 +230,7 @@ private fun presenter(
             mutableStateListOf<TimelineTabItem>()
         }
     val currentTabs =
-        accountState.user.flatMap { user ->
+        remember(tabSettings) {
             tabSettings.map {
                 it.mainTabs
                     .toImmutableList()

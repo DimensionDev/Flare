@@ -272,9 +272,11 @@
     <string name="home_tab_social_timeline_title">Socialt</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Lade till blandat tidslinjestöd till fliken</li>
-                <li>började göra UI/UX justeringar, fler förbättringar kommer snart</li>
-                <li>Felrättelser och prestandaförbättringar</li>
+                <li>Tillagt stöd för Misskey\'s Social tidslinje</li>
+                <li>Tillagt RSSHub stöd</li>
+                <li>Tillagt stöd för att upptäcka möjliga RSS-flöden från webbplatser</li>
+                <li>Fler UI/UX-förbättringar — vi är fortfarande på väg mot kontinuerlig förfining</li>
+                <li>Felrättningar och prestandaförbättringar</li>
             </ul>
         ]]></string>
 </resources>

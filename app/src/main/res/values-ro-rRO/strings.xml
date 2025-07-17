@@ -272,9 +272,11 @@
     <string name="home_tab_social_timeline_title">Sociale</string>
     <string name="changelog_current"><![CDATA[            <span>Versiunea %1$s:</span>
             <ul>
-                <li>S-a adăugat suportul pentru intervalul de timp în fila de pornire</li>
-                <li>Începe efectuarea ajustărilor UI/UX, cu mai multe îmbunătățiri în curând</li>
-                <li>Remedierea erorilor și îmbunătățirea performanței</li>
+                <li>Adăugat suport pentru cronologia socială a lui Misskey</li>
+                <li>Adăugat suport RSSHub</li>
+                <li>S-a adăugat suport pentru detectarea posibilelor fluxuri RSS de pe site-uri web</li>
+                <li>Mai multe îmbunătățiri UI/UX - suntem încă pe calea perfecționării continue</li>
+                <li>Corecții de erori și îmbunătățiri ale performanței</li>
             </ul>
         ]]></string>
 </resources>

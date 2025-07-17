@@ -265,11 +265,4 @@
     <string name="home_tab_mixed_timeline_title">Gemengde</string>
     <string name="tab_settings_mixed_timeline">Voeg gemengde tydlyn tab by</string>
     <string name="tab_settings_mixed_timeline_desc">Gemengde tydlyn sal al die tab tydlyn resultate in \'n tab meng</string>
-    <string name="changelog_current"><![CDATA[            <span>Weergawe %1$s:</span>
-            <ul>
-                <li>Toegevoeg gemengde tydlyn ondersteuning aan die Tuis tab</li>
-                <li>Begin om UI/UX aanpassings te maak, met meer verbeterings wat binnekort kom</li>
-                <li>Foutoplossings en prestasie verbeterings</li>
-            </ul>
-        ]]></string>
 </resources>

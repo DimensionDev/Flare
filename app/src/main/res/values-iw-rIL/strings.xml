@@ -265,11 +265,4 @@
     <string name="home_tab_mixed_timeline_title">מעורב</string>
     <string name="tab_settings_mixed_timeline">הוסף טאב טיימליין מעורב</string>
     <string name="tab_settings_mixed_timeline_desc">טיימליין מעורב יערבב את התוצאות של כל הטאבים בטאב אחד</string>
-    <string name="changelog_current"><![CDATA[            <span>גרסה %1$s:</span>
-            <ul>
-                <li> added Mixed timeline support to the Home tab </li>
-                <li>Started making UI/UX adjustments, with more improvements coming soon</li>
-                <li>תיקוני באגים ושיפורי ביצועים</li>
-            </ul>
-        ]]></string>
 </resources>

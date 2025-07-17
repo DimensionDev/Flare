@@ -272,10 +272,11 @@
     <string name="home_tab_social_timeline_title">Sociaal</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
-                <li>Toegevoegde tijdlijn ondersteuning toegevoegd aan het Home tabblad</li>
-                
-                <li>begonnen met het maken van UI/UX aanpassingen, als er binnenkort meer verbeteringen komen</li>
-                <li>Bug fixes en performance verbeteringen</li>
+                <li>Ondersteuning toegevoegd voor de sociale tijdlijn van Misskey\</li>
+                <li>RSSHub ondersteuning toegevoegd</li>
+                <li>Ondersteuning toegevoegd voor het detecteren van mogelijke RSS feeds van websites</li>
+                <li>Meer UI/UX verbeteringen - we zijn nog steeds op het pad van voortdurende verfijning</li>
+                <li>Bug fixes en prestatieverbeteringen</li>
             </ul>
-        <span>        ]]></string>
+        ]]></string>
 </resources>

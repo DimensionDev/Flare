@@ -272,9 +272,12 @@
     <string name="home_tab_social_timeline_title">Réseaux sociaux</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Ajout du support de la timeline mixte à l\'onglet Accueil</li>
-                <li>Démarré en faisant des ajustements UI/UX, avec d\'autres améliorations à venir bientôt</li>
-                <li>corrections de bugs et améliorations des performances</li>
+                <li>Ajout de la prise en charge de la timeline sociale</li>
+                <li>Ajout du support RSSHub</li>
+                <li>Ajout du support pour la détection d'éventuels flux RSS provenant des sites</li>
+                
+                <li>Améliorations UI/UX supplémentaires — nous sommes toujours sur le chemin du raffinement continu</li>
+                <li>Corrections de bugs et améliorations de performances</li>
             </ul>
         ]]></string>
 </resources>

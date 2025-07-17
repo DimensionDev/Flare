@@ -272,8 +272,10 @@
     <string name="home_tab_social_timeline_title">Sosyal</string>
     <string name="changelog_current"><![CDATA[            <span>Sürüm %1$s:</span>
             <ul>
-                <li>Ana sekmeye Karışık zaman çizelge desteği eklendi</li>
-                <li>UI/UX ayarlamaları yapmaya başlandı, daha fazla iyileştirme yakında gelecek</li>
+                <li>Misskey\'in Sosyal zaman çizelgesi için destek eklendi</li>
+                <li>RSSHub desteği eklendi</li>
+                <li>Web sitelerinden olası RSS beslemelerini tespit etmek için destek eklendi</li>
+                <li>Daha fazla UI/UX iyileştirmesi - hala sürekli iyileştirme yolundayız</li>
                 <li>Hata düzeltmeleri ve performans iyileştirmeleri</li>
             </ul>
         ]]></string>

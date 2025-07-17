@@ -270,11 +270,13 @@
     <string name="tab_settings_mixed_timeline">混合タイムラインタブを追加</string>
     <string name="tab_settings_mixed_timeline_desc">混合されたタイムラインは、すべてのタブタイムラインの結果を1つのタブにミックスします</string>
     <string name="home_tab_social_timeline_title">ソーシャル</string>
-    <string name="changelog_current"><![CDATA[            <span>バージョン %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>バージョン %1$s：</span>
             <ul>
-                <li>ホームタブに混合タイムラインのサポートを追加</li>
-                <li>UI/UXの調整を開始、さらなる改善が間もなく行われます</li>
-                <li>バグ修正とパフォーマンスの改善</li>
+                <li>Misskeyのソーシャルタイムラインに対応しました。</li>
+                <li>RSSHubのサポートを追加</li>
+                <li>ウェブサイトからの可能なRSSフィードを検出するためのサポートを追加しました。</li>
+                <li>より多くのUI/UX改善 - 継続的な改良の道を進んでいる。</li>
+                <li>バグ修正とパフォーマンス改善</li>
             </ul>
         ]]></string>
 </resources>

@@ -265,11 +265,4 @@
     <string name="home_tab_mixed_timeline_title">Мешано</string>
     <string name="tab_settings_mixed_timeline">Додајте таб раста</string>
     <string name="tab_settings_mixed_timeline_desc">Мешана временска линија ће комбиновати све резултате таба у један таб</string>
-    <string name="changelog_current"><![CDATA[            <span>Верзија %1$s:</span>
-            <ul>
-                <li>Додата подршка за мешану временску линију на главну таблу</li>
-                <li>Почео рад на UI/UX прилагођавању, са више унапређења ускоро</li>
-                <li>Исправке грешака и унапређење перформанси</li>
-            </ul>
-        ]]></string>
 </resources>

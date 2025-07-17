@@ -272,9 +272,12 @@
     <string name="home_tab_social_timeline_title">Soziale</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Gemischte Timeline-Unterstützung auf den Home-Tab</li>
+                <li>Unterstützung für Misskey\'s Social Timeline</li>
                 
-                <li>Startete UI/UX-Anpassungen, mit weiteren Verbesserungen bald</li>
+                <li>RSSHub-Unterstützung</li>
+                
+                <li>Unterstützung für die Erkennung möglicher RSS-Feeds von Webseiten</li>
+                <li>Weitere UI/UX-Verbesserungen — wir befinden uns immer noch auf dem Pfad der kontinuierlichen Verfeinerung</li>
                 <li>Fehlerbehebungen und Leistungsverbesserungen</li>
             </ul>
         ]]></string>

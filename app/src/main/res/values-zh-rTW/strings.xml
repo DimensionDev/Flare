@@ -272,9 +272,11 @@
     <string name="home_tab_social_timeline_title">社會</string>
     <string name="changelog_current"><![CDATA[            <span>版本 %1$s：</span>
             <ul>
-                <li>新增混合時間線功能到首頁</li>
-                <li>開始進行UI/UX調整，更多改進將即將到來</li>
-                <li>修復錯誤和性能改進</li>
+                <li>新增對 Misskey\'s Social Timeline 的支援</li>
+                <li>新增 RSSHub 支援</li>
+                <li>新增偵測網站 RSS feed 的支援</li>
+                <li>更多 UI/UX 的改進 - 我們仍在不斷改進的路上</li>
+                <li>錯誤修正與效能提升</li>
             </ul>
         ]]></string>
 </resources>

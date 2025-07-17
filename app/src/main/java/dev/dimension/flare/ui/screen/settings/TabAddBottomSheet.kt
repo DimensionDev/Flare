@@ -11,6 +11,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -50,6 +52,7 @@ import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.TabRowIndicator
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flatMap
@@ -105,7 +108,12 @@ internal fun TabAddBottomSheet(
                 SecondaryScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     containerColor = Color.Transparent,
-                    contentColor = MaterialTheme.colorScheme.onBackground,
+                    indicator = {
+                        TabRowIndicator(
+                            selectedIndex = pagerState.currentPage,
+                        )
+                    },
+                    divider = {},
                 ) {
                     Tab(
                         selected = pagerState.currentPage == 0,
@@ -117,6 +125,7 @@ internal fun TabAddBottomSheet(
                         text = {
                             Text(text = stringResource(id = R.string.tab_settings_default))
                         },
+                        modifier = Modifier.clip(CircleShape),
                     )
                     Tab(
                         selected = pagerState.currentPage == 1,
@@ -128,9 +137,11 @@ internal fun TabAddBottomSheet(
                         text = {
                             Text(text = stringResource(id = R.string.rss_title))
                         },
+                        modifier = Modifier.clip(CircleShape),
                     )
                     tabs.forEachIndexed { index, tabState ->
                         LeadingIconTab(
+                            modifier = Modifier.clip(CircleShape),
                             selected = pagerState.currentPage == index + 2,
                             onClick = {
                                 scope.launch {

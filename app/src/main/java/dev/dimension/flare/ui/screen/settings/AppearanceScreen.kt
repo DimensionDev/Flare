@@ -14,7 +14,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonGroup
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -43,6 +42,7 @@ import dev.dimension.flare.data.model.Theme
 import dev.dimension.flare.data.model.VideoAutoplay
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.status.StatusItem
@@ -151,7 +151,7 @@ internal fun AppearanceScreen(
                                             Text(text = stringResource(id = R.string.settings_appearance_theme_dark))
                                     }
                                 }
-                                DropdownMenu(
+                                FlareDropdownMenu(
                                     expanded = showMenu,
                                     onDismissRequest = { showMenu = false },
                                 ) {
@@ -337,7 +337,7 @@ internal fun AppearanceScreen(
                                             Text(text = stringResource(id = R.string.settings_appearance_avatar_shape_square))
                                     }
                                 }
-                                DropdownMenu(
+                                FlareDropdownMenu(
                                     expanded = showMenu,
                                     onDismissRequest = { showMenu = false },
                                 ) {
@@ -597,7 +597,7 @@ internal fun AppearanceScreen(
                                     }) {
                                         Text(text = stringResource(id = appearanceSettings.videoAutoplay.id))
                                     }
-                                    DropdownMenu(
+                                    FlareDropdownMenu(
                                         expanded = showMenu,
                                         onDismissRequest = { showMenu = false },
                                     ) {

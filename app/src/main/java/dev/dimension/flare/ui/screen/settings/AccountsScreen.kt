@@ -29,7 +29,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -114,7 +116,17 @@ internal fun AccountsScreen(
                 is UiState.Error -> Unit
                 is UiState.Loading -> {
                     items(3) {
-                        AccountItem(userState = UiState.Loading(), onClick = {}, toLogin = {})
+                        AccountItem(
+                            userState = UiState.Loading(),
+                            onClick = {},
+                            toLogin = {},
+                            modifier =
+                                Modifier
+                                    .listCard(
+                                        index = it,
+                                        totalCount = 3,
+                                    ),
+                        )
                     }
                 }
 
@@ -124,6 +136,12 @@ internal fun AccountsScreen(
                         val swipeState =
                             rememberSwipeToDismissBoxState()
 
+                        val haptics = LocalHapticFeedback.current
+                        LaunchedEffect(swipeState.progress) {
+                            if (swipeState.progress > 0.5f) {
+                                haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+                            }
+                        }
                         LaunchedEffect(swipeState.settledValue) {
                             if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {
                                 state.logout(account.accountKey)

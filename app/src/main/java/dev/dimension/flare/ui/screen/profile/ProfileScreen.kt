@@ -26,17 +26,16 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
@@ -63,7 +62,6 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.common.isExpanded
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
@@ -72,6 +70,9 @@ import dev.dimension.flare.ui.component.ProfileHeaderLoading
 import dev.dimension.flare.ui.component.ProfileMenu
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.TabRowIndicator
+import dev.dimension.flare.ui.component.platform.isBigScreen
+import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.MediaItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
@@ -230,13 +231,17 @@ internal fun ProfileScreen(
         profilePresenter(userKey = userKey, accountType = accountType)
     }
     val nestedScrollState = rememberNestedScrollViewState()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val windowInfo = currentWindowAdaptiveInfo()
     val windowSize =
         with(LocalDensity.current) {
             currentWindowSize().toSize().toDpSize()
         }
-    val bigScreen = windowInfo.windowSizeClass.isExpanded()
+    val bigScreen = isBigScreen()
+    val scrollBehavior =
+        if (bigScreen) {
+            TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+        } else {
+            TopAppBarDefaults.pinnedScrollBehavior()
+        }
     val scope = rememberCoroutineScope()
     FlareScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -348,7 +353,7 @@ internal fun ProfileScreen(
                             .padding(it),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    Card {
+                    AdaptiveCard {
                         ProfileHeader(
                             state = state.state,
                             menu = {
@@ -388,42 +393,43 @@ internal fun ProfileScreen(
                     val content = @Composable {
                         state.state.tabs.onSuccess { tabs ->
                             val pagerState = rememberPagerState { tabs.size }
-                            Column {
-                                Box {
-                                    if (tabs.size > 1) {
-                                        SecondaryScrollableTabRow(
-                                            selectedTabIndex = pagerState.currentPage,
-                                            modifier = Modifier.fillMaxWidth(),
-                                            edgePadding = screenHorizontalPadding,
-                                            divider = {},
-                                        ) {
-                                            tabs
-                                                .toImmutableList()
-                                                .forEachIndexed { index, profileTab ->
-                                                    Tab(
-                                                        selected = pagerState.currentPage == index,
-                                                        onClick = {
-                                                            scope.launch {
-                                                                pagerState.animateScrollToPage(index)
-                                                            }
-                                                        },
-                                                    ) {
-                                                        Text(
-                                                            profileTab.title,
-                                                            modifier =
-                                                                Modifier
-                                                                    .padding(8.dp),
-                                                        )
-                                                    }
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                if (tabs.size > 1) {
+                                    SecondaryScrollableTabRow(
+                                        containerColor = Color.Transparent,
+                                        selectedTabIndex = pagerState.currentPage,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        edgePadding = screenHorizontalPadding,
+                                        divider = {},
+                                        indicator = {
+                                            TabRowIndicator(
+                                                selectedIndex = minOf(pagerState.currentPage, tabs.size - 1),
+                                            )
+                                        },
+                                    ) {
+                                        tabs
+                                            .toImmutableList()
+                                            .forEachIndexed { index, profileTab ->
+                                                Tab(
+                                                    modifier = Modifier.clip(CircleShape),
+                                                    selected = pagerState.currentPage == index,
+                                                    onClick = {
+                                                        scope.launch {
+                                                            pagerState.animateScrollToPage(index)
+                                                        }
+                                                    },
+                                                ) {
+                                                    Text(
+                                                        profileTab.title,
+                                                        modifier =
+                                                            Modifier
+                                                                .padding(8.dp),
+                                                    )
                                                 }
-                                        }
+                                            }
                                     }
-                                    HorizontalDivider(
-                                        modifier =
-                                            Modifier
-                                                .align(Alignment.BottomCenter)
-                                                .fillMaxWidth(),
-                                    )
                                 }
                                 HorizontalPager(
                                     state = pagerState,

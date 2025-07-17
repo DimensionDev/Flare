@@ -45,7 +45,8 @@ internal fun EntryProviderBuilder<NavKey>.misskeyEntryBuilder(
             accountType = args.accountType,
             toTimeline = {
                 navigate(Route.Misskey.AntennaTimeline(args.accountType, it.id, it.title))
-            }
+            },
+            onBack = onBack
         )
     }
 

@@ -4,13 +4,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -46,10 +43,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
@@ -72,6 +69,7 @@ import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.Glassify
 import dev.dimension.flare.ui.component.LocalBottomBarShowing
 import dev.dimension.flare.ui.component.RefreshContainer
+import dev.dimension.flare.ui.component.TabRowIndicator
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -141,6 +139,7 @@ internal fun HomeTimelineScreen(
                         state.tabState.onSuccess { tabs ->
                             if (tabs.size > 1) {
                                 SecondaryScrollableTabRow(
+                                    containerColor = Color.Transparent,
                                     modifier =
                                         Modifier
                                             .fillMaxWidth(),
@@ -148,15 +147,8 @@ internal fun HomeTimelineScreen(
                                     edgePadding = 0.dp,
                                     divider = {},
                                     indicator = {
-                                        Box(
-                                            Modifier
-                                                .tabIndicatorOffset(minOf(pagerState.currentPage, tabs.lastIndex))
-                                                .fillMaxWidth()
-                                                .fillMaxHeight()
-                                                .background(
-                                                    color = MaterialTheme.colorScheme.secondaryContainer,
-                                                    shape = CircleShape,
-                                                ).zIndex(-1f),
+                                        TabRowIndicator(
+                                            selectedIndex = minOf(pagerState.currentPage, tabs.lastIndex),
                                         )
                                     },
                                 ) {

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -40,9 +39,11 @@ import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareDropdownMenu
+import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.uiListItemComponent
 import dev.dimension.flare.ui.model.UiList
@@ -54,6 +55,7 @@ import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.AllListPresenter
 import dev.dimension.flare.ui.presenter.list.AllListState
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -90,15 +92,16 @@ internal fun ListScreen(
     createList: () -> Unit,
     editList: (UiList) -> Unit,
     deleteList: (UiList) -> Unit,
+    onBack: () -> Unit,
 ) {
     val state by producePresenter {
         presenter(accountType)
     }
-    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     FlareScaffold(
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         topBar = {
-            FlareTopAppBar(
+            FlareLargeFlexibleTopAppBar(
                 title = {
                     Text(text = stringResource(id = R.string.home_tab_list_title))
                 },
@@ -115,6 +118,9 @@ internal fun ListScreen(
                         )
                     }
                 },
+                navigationIcon = {
+                    BackButton(onBack)
+                },
             )
         },
     ) { contentPadding ->
@@ -128,6 +134,10 @@ internal fun ListScreen(
             content = {
                 LazyColumn(
                     contentPadding = contentPadding,
+                    modifier =
+                        Modifier
+                            .padding(horizontal = screenHorizontalPadding),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     uiListItemComponent(
                         state.items,
@@ -174,7 +184,7 @@ internal fun ListScreen(
                                         imageVector = FontAwesomeIcons.Solid.EllipsisVertical,
                                         contentDescription = stringResource(id = R.string.more),
                                     )
-                                    DropdownMenu(
+                                    FlareDropdownMenu(
                                         expanded = showDropdown,
                                         onDismissRequest = { showDropdown = false },
                                     ) {

@@ -1,14 +1,11 @@
 package dev.dimension.flare.ui.component.platform
 
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import dev.chrisbanes.haze.materials.ExperimentalHazeMaterialsApi
+import dev.dimension.flare.ui.component.FlareDropdownMenu
 
-@OptIn(ExperimentalHazeMaterialsApi::class)
 @Composable
 internal actual fun PlatformDropdownMenu(
     expanded: Boolean,
@@ -16,12 +13,11 @@ internal actual fun PlatformDropdownMenu(
     modifier: Modifier,
     content: @Composable PlatformDropdownMenuScope.() -> Unit,
 ) {
-    DropdownMenu(
+    FlareDropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
         modifier = modifier,
         content = content,
-        shape = MaterialTheme.shapes.medium,
     )
 }
 

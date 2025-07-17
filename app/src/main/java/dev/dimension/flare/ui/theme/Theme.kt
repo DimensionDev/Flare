@@ -39,15 +39,15 @@ private object MoreColors {
 
 private fun ColorScheme.withPureColorLightMode(): ColorScheme =
     copy(
-        background = Color.White,
-        surface = Color.White,
+        background = MoreColors.Gray100,
+        surface = MoreColors.Gray100,
         onBackground = Color.Black,
         onSurface = Color.Black,
-        surfaceContainer = MoreColors.Gray100,
-        surfaceContainerLow = MoreColors.Gray100,
-        surfaceContainerHigh = MoreColors.Gray100,
-        surfaceContainerLowest = MoreColors.Gray100,
-        surfaceContainerHighest = MoreColors.Gray100,
+        surfaceContainer = Color.White,
+        surfaceContainerLow = Color.White,
+        surfaceContainerHigh = Color.White,
+        surfaceContainerLowest = Color.White,
+        surfaceContainerHighest = Color.White,
         onSurfaceVariant = MoreColors.Gray800,
     )
 
@@ -136,7 +136,11 @@ fun FlareTheme(
                             it.withPureColorDarkMode()
                         }
                     } else {
-                        it
+                        it.copy(
+                            background = it.surfaceContainerLow,
+//                            surface = it.surfaceContainerLow,
+                            surfaceContainerLow = it.surface,
+                        )
                     }
                 },
             )

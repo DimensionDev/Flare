@@ -416,12 +416,12 @@ internal fun LazyItemScope.TabCustomItem(
                                         Modifier.draggableHandle(
                                             onDragStarted = {
                                                 haptics.performHapticFeedback(
-                                                    HapticFeedbackType.LongPress,
+                                                    HapticFeedbackType.Confirm,
                                                 )
                                             },
                                             onDragStopped = {
                                                 haptics.performHapticFeedback(
-                                                    HapticFeedbackType.LongPress,
+                                                    HapticFeedbackType.Confirm,
                                                 )
                                             },
                                         ),

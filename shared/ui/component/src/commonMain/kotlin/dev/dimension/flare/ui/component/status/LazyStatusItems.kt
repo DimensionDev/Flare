@@ -1,6 +1,5 @@
 package dev.dimension.flare.ui.component.status
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,13 +37,10 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.HorizontalDivider
 import dev.dimension.flare.ui.component.Res
 import dev.dimension.flare.ui.component.login_expired
 import dev.dimension.flare.ui.component.login_expired_message
-import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformText
-import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.component.status_empty
 import dev.dimension.flare.ui.component.status_loadmore_end
@@ -140,7 +136,6 @@ public fun LazyStaggeredGridScope.status(
                                     .fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            HorizontalDivider()
                             Spacer(modifier = Modifier.height(8.dp))
                             PlatformText(
                                 text = stringResource(Res.string.status_loadmore_end),
@@ -200,47 +195,6 @@ public fun LazyStaggeredGridScope.status(
             }
         }
     }
-
-@Composable
-public fun AdaptiveCard(
-    modifier: Modifier = Modifier,
-    index: Int = 0,
-    totalCount: Int = 0,
-    content: @Composable () -> Unit,
-) {
-    val bigScreen = isBigScreen()
-    if (bigScreen) {
-        PlatformCard(
-            modifier =
-                modifier
-                    .padding(
-                        horizontal = 2.dp,
-                        vertical = 6.dp,
-                    ),
-            elevated = true,
-//            elevation = CardDefaults.elevatedCardElevation(),
-//            colors = CardDefaults.elevatedCardColors(),
-        ) {
-            content.invoke()
-        }
-    } else {
-        Box(
-            modifier =
-                modifier
-                    .let {
-                        if (index == 0 && totalCount > 1) {
-                            it.clip(PlatformTheme.shapes.topCardShape)
-                        } else if (index == totalCount - 1) {
-                            it.clip(PlatformTheme.shapes.bottomCardShape)
-                        } else {
-                            it.clip(PlatformTheme.shapes.extraSmall)
-                        }
-                    }.background(PlatformTheme.colorScheme.card),
-        ) {
-            content.invoke()
-        }
-    }
-}
 
 @Composable
 private fun OnLoading(modifier: Modifier = Modifier) {

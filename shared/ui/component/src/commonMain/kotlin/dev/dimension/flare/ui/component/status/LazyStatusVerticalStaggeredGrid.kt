@@ -42,7 +42,7 @@ public fun LazyStatusVerticalStaggeredGrid(
         if (bigScreen) {
             verticalItemSpacing
         } else {
-            4.dp
+            2.dp
         }
     LazyVerticalStaggeredGrid(
         modifier = modifier,

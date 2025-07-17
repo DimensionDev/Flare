@@ -188,14 +188,17 @@ private fun presenter(
         val availableIcons: ImmutableList<IconType> =
             kotlin
                 .run {
-                    listOfNotNull(
-                        when (val account = tabItem.account) {
-                            is AccountType.Specific ->
-                                IconType.Avatar(account.accountKey)
+                    when (val account = tabItem.account) {
+                        is AccountType.Specific ->
+                            listOf(
+                                IconType.Avatar(account.accountKey),
+                                IconType.Url(
+                                    UiRssSource.favIconUrl(account.accountKey.host),
+                                ),
+                            )
 
-                            else -> null
-                        },
-                    ) +
+                        else -> emptyList()
+                    } +
                         IconType.Material.MaterialIcon.entries.map {
                             IconType.Material(it)
                         } +

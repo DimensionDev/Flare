@@ -19,6 +19,7 @@ internal actual object PlatformShapes {
     actual val large: Shape
         @Composable
         get() = MaterialTheme.shapes.large
+
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     actual val topCardShape: Shape
         @Composable
@@ -27,6 +28,7 @@ internal actual object PlatformShapes {
                 topStart = listCardContainerShape.topStart,
                 topEnd = listCardContainerShape.topEnd,
             )
+
     @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     actual val bottomCardShape: Shape
         @Composable

@@ -12,10 +12,8 @@ struct TimelineViewSwiftUIV4: View {
     @Environment(FlareTheme.self) private var theme
     @Environment(FlareRouter.self) private var router
 
-
     @State private var viewModel = TimelineViewModel()
 
-   
     @State private var isInitialized: Bool = false
 
     init(tab: FLTabItem, store: AppBarTabSettingStore, scrollToTopTrigger: Binding<Bool>, isCurrentTab: Bool, showFloatingButton: Binding<Bool>) {
@@ -26,7 +24,6 @@ struct TimelineViewSwiftUIV4: View {
         _showFloatingButton = showFloatingButton
         FlareLog.debug("[TimelineV4] 视图初始化 for tab: \(tab.key)")
     }
-
 
     @State private var refreshDebounceTimer: Timer?
 
@@ -64,7 +61,7 @@ struct TimelineViewSwiftUIV4: View {
                                 await viewModel.handleRefresh()
                             }
                         }
-                         .listRowInsets(EdgeInsets())
+                        .listRowInsets(EdgeInsets())
 
                     case .empty:
                         TimelineEmptyView()
@@ -97,7 +94,6 @@ struct TimelineViewSwiftUIV4: View {
                 }
             }
             .task(id: tab.key) {
-              
                 if !isInitialized {
                     isInitialized = true
                     FlareLog.debug("[TimelineV4] First time initialization for tab: \(tab.key)")

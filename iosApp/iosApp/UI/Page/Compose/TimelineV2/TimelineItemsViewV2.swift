@@ -42,7 +42,7 @@ struct TimelineItemsViewV2: View {
 
     private func handleLoadMore() {
         FlareLog.debug("[TimelineItemsViewV2 LoadMore] UI层触发load more，委托给ViewModel")
-         Task {
+        Task {
             await viewModel?.handleLoadMore()
         }
     }

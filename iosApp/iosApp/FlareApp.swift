@@ -30,8 +30,6 @@ struct FlareApp: SwiftUI.App {
 
         // DownloadManager初始化
         _ = DownloadManager.shared
-
- 
     }
 
     var body: some Scene {
@@ -59,7 +57,7 @@ struct FlareApp: SwiftUI.App {
                         }
                         .withFlareTheme()
                         .environment(router)
- 
+
                 #endif
 
                 // --- Global Floating Player Overlay ---

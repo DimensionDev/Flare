@@ -12,7 +12,6 @@ struct TimelineViewSwiftUIV3: View {
     @Environment(FlareTheme.self) private var theme
     @Environment(FlareRouter.self) private var router
 
-
     @State private var viewModel = TimelineViewModel()
 
     @State private var scrolledID: String?

@@ -12,7 +12,7 @@ struct FlareTabItem<Content: View>: View {
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
 
-     @State private var didAppear: Bool = false
+    @State private var didAppear: Bool = false
     @State private var isInitialized: Bool = false
 
     init(tabType: FlareHomeTabs, @ViewBuilder content: @escaping () -> Content) {
@@ -35,7 +35,6 @@ struct FlareTabItem<Content: View>: View {
                 .foregroundColor(theme.labelColor)
         }
         .onAppear {
-
             if !didAppear {
                 didAppear = true
                 isInitialized = true
@@ -44,14 +43,12 @@ struct FlareTabItem<Content: View>: View {
                        log: .default, type: .debug,
                        String(describing: tabType))
 
-
                 performInitialSetup()
             } else {
                 os_log("[FlareTabItem] Tab reappeared, skipping initialization for tab: %{public}@",
                        log: .default, type: .debug,
                        String(describing: tabType))
             }
-
 
             router.selectedTab = tabType
 
@@ -72,37 +69,34 @@ struct FlareTabItem<Content: View>: View {
         .environment(router)
     }
 
-     private func performInitialSetup() {
-
+    private func performInitialSetup() {
         switch tabType {
         case .timeline:
-
             os_log("[FlareTabItem] Initializing Timeline tab",
                    log: .default, type: .debug)
-            
 
         case .menu:
-             os_log("[FlareTabItem] Initializing Menu tab",
+            os_log("[FlareTabItem] Initializing Menu tab",
                    log: .default, type: .debug)
 
         case .notification:
-             os_log("[FlareTabItem] Initializing Notification tab",
+            os_log("[FlareTabItem] Initializing Notification tab",
                    log: .default, type: .debug)
 
         case .discover:
-             os_log("[FlareTabItem] Initializing Discover tab",
+            os_log("[FlareTabItem] Initializing Discover tab",
                    log: .default, type: .debug)
 
         case .profile:
-             os_log("[FlareTabItem] Initializing Profile tab",
+            os_log("[FlareTabItem] Initializing Profile tab",
                    log: .default, type: .debug)
-            case .compose:
-                os_log("[FlareTabItem] Initializing Profile tab",
-                       log: .default, type: .debug)
 
+        case .compose:
+            os_log("[FlareTabItem] Initializing Profile tab",
+                   log: .default, type: .debug)
         }
 
-         os_log("[FlareTabItem] Initial setup completed for tab: %{public}@",
+        os_log("[FlareTabItem] Initial setup completed for tab: %{public}@",
                log: .default, type: .debug,
                String(describing: tabType))
     }

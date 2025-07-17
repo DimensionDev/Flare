@@ -14,9 +14,9 @@ class TimelineViewModel {
     private var refreshDebounceTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
 
-     private var dataSourceTask: Task<Void, Never>?
+    private var dataSourceTask: Task<Void, Never>?
 
-     private(set) var isLoadingMore: Bool = false
+    private(set) var isLoadingMore: Bool = false
 
     var items: [TimelineItem] {
         if case let .loaded(items, _, _) = timelineState {
@@ -40,7 +40,6 @@ class TimelineViewModel {
     }
 
     func setupDataSource(for tab: FLTabItem, using store: AppBarTabSettingStore) async {
- 
         dataSourceTask?.cancel()
 
         FlareLog.debug("Timeline Setting up data source with cache for tab: \(tab.key)")
@@ -59,11 +58,8 @@ class TimelineViewModel {
             presenter = cachedPresenter
         }
 
-
         dataSourceTask = Task {
             for await state in cachedPresenter.models {
-
- 
                 guard !Task.isCancelled else {
                     FlareLog.debug("[Timeline ViewModel] Task cancelled, stopping data processing")
                     break
@@ -129,8 +125,6 @@ class TimelineViewModel {
         showErrorAlert = true
     }
 
-
-
     func handleScrollOffsetChange(_ offsetY: CGFloat, showFloatingButton: Binding<Bool>) {
         let shouldShow = offsetY > 50
 
@@ -139,14 +133,12 @@ class TimelineViewModel {
         }
     }
 
-  
     func handleLoadMore() async {
         guard let presenter else {
             FlareLog.warning("[Timeline ViewModel] presenter为空，无法加载更多")
             return
         }
 
-      
         guard !isLoadingMore else {
             FlareLog.debug("[Timeline ViewModel] 正在加载中，跳过重复调用")
             return
@@ -155,7 +147,6 @@ class TimelineViewModel {
         isLoadingMore = true
         defer { isLoadingMore = false }
 
-      
         do {
             try await presenter.models.value.loadMore()
             FlareLog.debug("[Timeline ViewModel] LoadMore completed successfully")
@@ -163,8 +154,6 @@ class TimelineViewModel {
             FlareLog.error("[Timeline ViewModel] LoadMore failed: \(error)")
         }
     }
-
-
 }
 
 struct TimelineLoadingView: View {

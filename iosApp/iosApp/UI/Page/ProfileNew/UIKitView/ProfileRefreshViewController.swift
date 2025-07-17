@@ -12,7 +12,6 @@ import UIKit
 extension JXPagingListContainerView: JXSegmentedViewListContainer {}
 
 class ProfileNewRefreshViewController: UIViewController {
-   
     private var theme: FlareTheme?
     private var userInfo: ProfileUserInfo?
     private var state: ProfileNewState?
@@ -29,7 +28,6 @@ class ProfileNewRefreshViewController: UIViewController {
     private var listViewControllers: [Int: JXPagingViewListViewDelegate] = [:]
     private var themeObserver: NSObjectProtocol?
 
-     
     var pagingView: JXPagingView!
     var userHeaderView: ProfileNewHeaderView!
     var segmentedView: JXSegmentedView!
@@ -38,31 +36,26 @@ class ProfileNewRefreshViewController: UIViewController {
     private var titles: [String] = []
     private var refreshControl: ProfileStretchRefreshControl?
 
-     
     private var navigationBar: UINavigationBar = {
         let nav = UINavigationBar()
-         return nav
+        return nav
     }()
- 
 
     private var lastContentOffset: CGFloat = 0
     private let navigationBarHeight: CGFloat = 44
     private var isNavigationBarHidden = false
 
-    
     private static let BANNER_HEIGHT: CGFloat = 200
     private var isAppBarTitleVisible = false
 
-  
     private var _cachedSafeAreaTop: CGFloat?
 
-   
     func configure(
         userInfo: ProfileUserInfo?,
         state: ProfileNewState,
         selectedTab: Binding<Int>,
         isShowAppBar: Binding<Bool?>,
-         horizontalSizeClass: UserInterfaceSizeClass?,
+        horizontalSizeClass: UserInterfaceSizeClass?,
         appSettings: AppSettings,
         toProfileMedia: @escaping (MicroBlogKey) -> Void,
         accountType: AccountType,
@@ -75,7 +68,7 @@ class ProfileNewRefreshViewController: UIViewController {
         self.state = state
         self.selectedTab = selectedTab
         self.isShowAppBar = isShowAppBar
-         self.horizontalSizeClass = horizontalSizeClass
+        self.horizontalSizeClass = horizontalSizeClass
         self.appSettings = appSettings
         self.toProfileMedia = toProfileMedia
         self.accountType = accountType
@@ -83,12 +76,11 @@ class ProfileNewRefreshViewController: UIViewController {
         self.tabStore = tabStore
         self.mediaPresenterWrapper = mediaPresenterWrapper
         self.theme = theme
- 
+
         setupThemeObserver()
- 
+
         let isOwnProfile = userKey == nil
 
-         
         if isOwnProfile {
             // 自己的Profile：根据原有逻辑控制AppBar
             if let showAppBar = isShowAppBar.wrappedValue {
@@ -111,7 +103,6 @@ class ProfileNewRefreshViewController: UIViewController {
         // 更新UI
         updateUI()
 
-        
         // 配置头部视图
         if let userInfo {
             userHeaderView?.configure(with: userInfo, state: state, theme: theme)
@@ -123,7 +114,6 @@ class ProfileNewRefreshViewController: UIViewController {
             }
         }
 
-        
         if !isOwnProfile {
             isAppBarTitleVisible = false
             navigationController?.navigationBar.topItem?.title = nil
@@ -160,7 +150,7 @@ class ProfileNewRefreshViewController: UIViewController {
         }
     }
 
-     private var cachedSafeAreaTop: CGFloat {
+    private var cachedSafeAreaTop: CGFloat {
         if let cached = _cachedSafeAreaTop {
             return cached
         }
@@ -170,7 +160,7 @@ class ProfileNewRefreshViewController: UIViewController {
         return safeAreaTop
     }
 
-     private func clearSafeAreaCache() {
+    private func clearSafeAreaCache() {
         _cachedSafeAreaTop = nil
     }
 
@@ -185,7 +175,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
- 
+
         // 设置导航栏
         setupNavigationBar()
 
@@ -271,27 +261,23 @@ class ProfileNewRefreshViewController: UIViewController {
     @objc private func handlePanGesture(_: UIPanGestureRecognizer) {
         let offset = pagingView.mainTableView.contentOffset.y
         refreshControl?.scrollViewDidScroll(withOffset: offset)
-      
+
         let isOwnProfile = userKey == nil
         if !isOwnProfile {
             updateNavigationBarVisibility(with: offset)
         }
-         
     }
 
     private func refreshContent() {
-        
         let workItem = DispatchWorkItem {
             self.isHeaderRefreshed = true
             self.refreshControl?.endRefreshing()
             self.pagingView.reloadData()
 
-            
             if let currentList = self.pagingView.validListDict[self.segmentedView.selectedIndex] as? ProfileNewListViewController {
                 currentList.headerRefresh()
             }
             Task {
-               
                 if let currentList = self.pagingView.validListDict[self.segmentedView.selectedIndex] {
                     if let timelineVC = currentList as? TimelineViewController,
                        let timelineState = timelineVC.presenter?.models.value as? TimelineState
@@ -334,7 +320,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 添加到视图
         view.addSubview(navigationBar)
- 
+
         // 初始时隐藏 moreButton
         moreButton.isEnabled = false
         navigationItem.rightBarButtonItem = nil
@@ -420,27 +406,24 @@ class ProfileNewRefreshViewController: UIViewController {
         present(alertController, animated: true)
     }
 
-     private func updateNavigationBarVisibility(with offset: CGFloat) {
-        
-         if offset > Self.BANNER_HEIGHT && !isAppBarTitleVisible {
-           
+    private func updateNavigationBarVisibility(with offset: CGFloat) {
+        if offset > Self.BANNER_HEIGHT, !isAppBarTitleVisible {
             isAppBarTitleVisible = true
             UIView.animate(withDuration: 0.25) {
                 self.navigationController?.navigationBar.alpha = 0.9
             }
             updateAppBarTitle(showUserName: true)
-        } else if offset <= Self.BANNER_HEIGHT && isAppBarTitleVisible {
-             isAppBarTitleVisible = false
+        } else if offset <= Self.BANNER_HEIGHT, isAppBarTitleVisible {
+            isAppBarTitleVisible = false
             UIView.animate(withDuration: 0.25) {
                 self.navigationController?.navigationBar.alpha = 1.0
             }
             updateAppBarTitle(showUserName: false)
         }
- 
+
         lastContentOffset = offset
     }
 
-  
     private func updateAppBarTitle(showUserName: Bool) {
         let isOwnProfile = userKey == nil
 
@@ -449,7 +432,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         if showUserName {
             // Show user name title
-            if let userInfo = userInfo {
+            if let userInfo {
                 let displayName = userInfo.profile.name.raw.isEmpty ? userInfo.profile.handle : userInfo.profile.name.raw
                 navigationController?.navigationBar.topItem?.title = displayName
             }
@@ -457,8 +440,6 @@ class ProfileNewRefreshViewController: UIViewController {
             // Hide title
             navigationController?.navigationBar.topItem?.title = nil
         }
-
-    
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -466,18 +447,18 @@ class ProfileNewRefreshViewController: UIViewController {
         let isOwnProfile = userKey == nil
 
         //  AppBar永远显示
-        if isOwnProfile { 
+        if isOwnProfile {
             navigationController?.setNavigationBarHidden(false, animated: animated)
-        } else { 
+        } else {
             navigationController?.setNavigationBarHidden(false, animated: animated)
-            navigationController?.navigationBar.alpha = 1.0 
+            navigationController?.navigationBar.alpha = 1.0
         }
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
 
-        // 离开页面时重置状态，不然 详情页会导致没appbar 
+        // 离开页面时重置状态，不然 详情页会导致没appbar
         isShowAppBar?.wrappedValue = true
         isShowsegmentedBackButton?.wrappedValue = false
 
@@ -487,7 +468,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
     deinit {
         cleanupListViewControllers()
- 
+
         if let themeObserver {
             NotificationCenter.default.removeObserver(themeObserver)
         }
@@ -496,7 +477,7 @@ class ProfileNewRefreshViewController: UIViewController {
     private func cleanupListViewControllers() {
         listViewControllers.removeAll()
     }
- 
+
     private func setupNavigationButtons(isOwnProfile: Bool) {
         if isOwnProfile {
             // 自己的Profile：清除所有导航按钮
@@ -524,24 +505,21 @@ class ProfileNewRefreshViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
 
-   
     private func setupThemeObserver() {
-       
         if let existingObserver = themeObserver {
             NotificationCenter.default.removeObserver(existingObserver)
         }
 
-  
         themeObserver = NotificationCenter.default.addObserver(
             forName: NSNotification.Name("FlareThemeDidChange"),
             object: nil,
             queue: .main
         ) { [weak self] _ in
             self?.applyCurrentTheme()
-        } 
+        }
         applyCurrentTheme()
     }
- 
+
     private func applyCurrentTheme() {
         guard let theme else { return }
 
@@ -568,19 +546,15 @@ class ProfileNewRefreshViewController: UIViewController {
             } else if let mediaVC = listVC as? ProfileMediaViewController {
                 mediaVC.view.backgroundColor = UIColor(theme.primaryBackgroundColor)
             }
-        } 
+        }
     }
 }
-
- 
 
 extension ProfileNewRefreshViewController: UIGestureRecognizerDelegate {
     func gestureRecognizer(_: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith _: UIGestureRecognizer) -> Bool {
         true
     }
 }
-
- 
 
 extension ProfileNewRefreshViewController: JXPagingViewDelegate {
     func tableHeaderViewHeight(in _: JXPagingView) -> Int {
@@ -596,7 +570,6 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
     }
 
     func heightForPinSectionHeader(in _: JXPagingView) -> Int {
-     
         let safeAreaTop = cachedSafeAreaTop
 
         // 布局常量
@@ -627,11 +600,10 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
 
         let isOwnProfile = userKey == nil
 
-        let tabBarY: CGFloat
-        if isOwnProfile {
-            tabBarY = safeAreaTop
+        let tabBarY: CGFloat = if isOwnProfile {
+            safeAreaTop
         } else {
-            tabBarY = safeAreaTop + navigationBarHeight - 18
+            safeAreaTop + navigationBarHeight - 18
         }
 
         // 调整 segmentedView 的位置
@@ -641,9 +613,9 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
         let buttonContainer = UIView(frame: CGRect(x: 0, y: 0, width: 80, height: 50 + safeAreaTop))
         buttonContainer.isUserInteractionEnabled = true
         buttonContainer.backgroundColor = .clear
- 
+
         containerView.addSubview(segmentedView)
-         if let theme {
+        if let theme {
             containerView.backgroundColor = UIColor(theme.primaryBackgroundColor)
         }
         return containerView
@@ -685,7 +657,7 @@ extension ProfileNewRefreshViewController: JXPagingViewDelegate {
             return mediaVC
         } else {
             let timelineVC = TimelineViewController()
- 
+
             if let presenter = tabStore.currentPresenter {
                 os_log("[📔][ProfileNewRefreshViewController] updatePresenter start", log: .default, type: .debug)
 
@@ -710,7 +682,6 @@ extension ProfileNewRefreshViewController: JXSegmentedViewDelegate {
         // 更新选中状态
         selectedTab?.wrappedValue = index
 
-         
         // 更新当前选中的标签页的presenter
         if let tabStore, index < tabStore.availableTabs.count {
             let selectedTab = tabStore.availableTabs[index]
@@ -747,16 +718,13 @@ extension ProfileNewRefreshViewController: JXSegmentedViewDelegate {
     }
 }
 
- 
 extension ProfileNewRefreshViewController {
-   
     func needsProfileUpdate(
         userInfo: ProfileUserInfo?,
         selectedTab: Int,
         accountType: AccountType,
         userKey: MicroBlogKey?
     ) -> Bool {
- 
         // 1. 检查用户信息是否变化
         let userChanged = self.userInfo?.profile.key.description != userInfo?.profile.key.description
 

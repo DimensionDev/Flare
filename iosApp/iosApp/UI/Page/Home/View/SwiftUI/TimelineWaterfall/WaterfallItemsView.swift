@@ -73,7 +73,7 @@ struct WaterfallItemsView: View {
                     animation: .easeInOut(duration: 0.3)
                 )
                 .scrollOptions(direction: .vertical)
-                .padding(.horizontal, 8) 
+                .padding(.horizontal, 8)
                 if hasMore {
                     TimelineLoadMoreView(isRefreshing: isRefreshing)
                         .padding(.top, 16)
@@ -100,7 +100,7 @@ struct WaterfallItemsView: View {
         .background(theme.secondaryBackgroundColor)
         .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
             geometry
-        } action: { oldValue, newValue in
+        } action: { _, newValue in
             viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $showFloatingButton)
 
             let currentOffset = newValue.contentOffset.y
@@ -111,12 +111,12 @@ struct WaterfallItemsView: View {
             let distanceFromBottom = contentHeight - (currentOffset + scrollViewHeight)
 
             if distanceFromBottom <= scrollThreshold,
-                hasMore,
-                !isRefreshing,
-                !viewModel.isLoadingMore,
+               hasMore,
+               !isRefreshing,
+               !viewModel.isLoadingMore,
 //                hasTriggeredLoadMore,
-                hasInitialLoadCompleted
-            {  
+               hasInitialLoadCompleted
+            {
                 FlareLog.debug("Waterfall Near bottom, triggering load more (distance: \(distanceFromBottom))")
 //                hasTriggeredLoadMore = true
                 Task {
@@ -191,7 +191,6 @@ struct WaterfallItemsView: View {
         }
     }
 
-  
     private func handleClickAction(_ action: ClickAction, allWaterfallMedias _: [Media], waterfallItems _: [WaterfallItem]) {
         switch action {
         case let .showMediaPreview(media, allMedias, index):

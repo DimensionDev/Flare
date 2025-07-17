@@ -7,12 +7,12 @@ import shared
 import SwiftUI
 
 struct ProfileTabScreenUikit: View {
-     let toProfileMedia: (MicroBlogKey) -> Void
+    let toProfileMedia: (MicroBlogKey) -> Void
     let accountType: AccountType
     let userKey: MicroBlogKey?
     let showBackButton: Bool
 
-     @StateObject private var presenterWrapper: ProfilePresenterWrapper
+    @StateObject private var presenterWrapper: ProfilePresenterWrapper
     @StateObject private var mediaPresenterWrapper: ProfileMediaPresenterWrapper
     @StateObject private var tabStore: ProfileTabSettingStore
     @State private var selectedTab: Int = 0
@@ -34,7 +34,6 @@ struct ProfileTabScreenUikit: View {
         self.userKey = userKey
         self.showBackButton = showBackButton
 
-         
         let service = ProfilePresenterService.shared
 
         _presenterWrapper = StateObject(
@@ -50,7 +49,7 @@ struct ProfileTabScreenUikit: View {
             String(describing: accountType), userKey?.description ?? "nil"
         )
 
-         os_log("[📔][ProfilePresenterService] %{public}@", log: .default, type: .debug, service.getCacheInfo())
+        os_log("[📔][ProfilePresenterService] %{public}@", log: .default, type: .debug, service.getCacheInfo())
     }
 
     var body: some View {
@@ -87,7 +86,7 @@ struct ProfileTabScreenUikit: View {
                     theme: theme
                 )
                 .ignoresSafeArea(edges: .top)
- 
+
             } else {
                 ProfileNewRefreshViewControllerWrapper(
                     userInfo: userInfo,
@@ -111,7 +110,7 @@ struct ProfileTabScreenUikit: View {
                     theme: theme
                 )
                 .ignoresSafeArea(edges: .top)
-             }
+            }
         }
     }
 }
@@ -133,12 +132,12 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
 
     func makeUIViewController(context _: Context) -> ProfileNewRefreshViewController {
         let controller = ProfileNewRefreshViewController()
-         controller.configure(
+        controller.configure(
             userInfo: userInfo,
             state: state,
             selectedTab: $selectedTab,
             isShowAppBar: $isShowAppBar,
-             horizontalSizeClass: horizontalSizeClass,
+            horizontalSizeClass: horizontalSizeClass,
             appSettings: appSettings,
             toProfileMedia: toProfileMedia,
             accountType: accountType,
@@ -153,13 +152,13 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
     func updateUIViewController(
         _ uiViewController: ProfileNewRefreshViewController, context _: Context
     ) {
-         if shouldUpdate(uiViewController) {
+        if shouldUpdate(uiViewController) {
             uiViewController.configure(
                 userInfo: userInfo,
                 state: state,
                 selectedTab: $selectedTab,
                 isShowAppBar: $isShowAppBar,
-                 horizontalSizeClass: horizontalSizeClass,
+                horizontalSizeClass: horizontalSizeClass,
                 appSettings: appSettings,
                 toProfileMedia: toProfileMedia,
                 accountType: accountType,
@@ -171,8 +170,8 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
         }
     }
 
-     private func shouldUpdate(_ controller: ProfileNewRefreshViewController) -> Bool {
-        return controller.needsProfileUpdate(
+    private func shouldUpdate(_ controller: ProfileNewRefreshViewController) -> Bool {
+        controller.needsProfileUpdate(
             userInfo: userInfo,
             selectedTab: selectedTab,
             accountType: accountType,

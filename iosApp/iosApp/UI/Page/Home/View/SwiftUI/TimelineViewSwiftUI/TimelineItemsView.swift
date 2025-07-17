@@ -23,9 +23,9 @@ struct TimelineItemsView: View {
             )
             .padding(.vertical, 4)
 //            .onScrollVisibilityChange(threshold: 0.3) { isVisible in
-////                if isVisible {
-////                    FlareLog.debug("Timeline item \(item.id) became visible")
-////                }
+            ////                if isVisible {
+            ////                    FlareLog.debug("Timeline item \(item.id) became visible")
+            ////                }
 //            }
             .onAppear {
                 if item.id == lastItemId, hasMore, !isRefreshing, !viewModel.isLoadingMore {

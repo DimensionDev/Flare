@@ -6,8 +6,6 @@ extension Notification.Name {
 }
 
 class PagingStateConverter {
-
-
     /// 转换队列
     private let conversionQueue = DispatchQueue(label: "timeline.state.converter", qos: .userInitiated)
 
@@ -60,8 +58,6 @@ class PagingStateConverter {
             return result
         }
     }
-
-
 
     /// 重置转换器状态（用于刷新或切换数据源）
     func reset() {
@@ -227,14 +223,12 @@ class PagingStateConverter {
             if let peekedItem = successState.peek(index: Int32(index)) {
                 FlareLog.debug("[PagingStateConverter] peek成功获取index=\(index)的数据")
                 uiTimeline = peekedItem
-            }
-            else {
+            } else {
                 continue
-               // break
+                // break
 //                FlareLog.debug("[PagingStateConverter] peek失败，尝试get获取index=\(index)的数据")
                 // 如果peek失败，使用get（可能触发加载）
 //                uiTimeline = successState.get(index: Int32(index))
-                 
             }
 
             if let timeline = uiTimeline {
@@ -252,8 +246,6 @@ class PagingStateConverter {
         return items
     }
 }
-
-
 
 extension PagingStateConverter {
     private func setupNotificationObservers() {

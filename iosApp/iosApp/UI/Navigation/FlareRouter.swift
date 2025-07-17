@@ -23,7 +23,6 @@ class FlareRouter {
 
     var previousPageSnapshot: UIImage?
 
-
     var selectedTab: FlareHomeTabs = .timeline {
         didSet {
             let oldTab = oldValue
@@ -54,8 +53,6 @@ class FlareRouter {
     var discoverNavigationPath = NavigationPath()
     var notificationNavigationPath = NavigationPath()
     var profileNavigationPath = NavigationPath()
-
-
 
     var navigationPath: NavigationPath {
         get { currentNavigationPath }
@@ -116,8 +113,7 @@ class FlareRouter {
     init(appState: FlareAppState = FlareAppState()) {
         self.appState = appState
         os_log("[FlareRouter] Initialized router: %{public}@", log: .default, type: .debug, String(describing: ObjectIdentifier(self)))
-
-     }
+    }
 
     func navigate(to destination: FlareDestination) {
         if case let .compose(accountType, status) = destination {

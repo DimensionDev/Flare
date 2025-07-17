@@ -116,7 +116,6 @@ public enum FlareImageOptions {
         ]
     }
 
- 
     public static func timelineAvatar(size: CGSize) -> KingfisherOptionsInfo {
         let scale = UIScreen.main.scale
         return [
@@ -168,7 +167,7 @@ public extension KFImage {
             .diskCacheExpiration(.days(5))
             .fade(duration: 0.25)
 
-         #if !targetEnvironment(simulator)
+        #if !targetEnvironment(simulator)
             image = image.backgroundDecode(true)
         #endif
 
@@ -189,12 +188,10 @@ public extension KFImage {
             .diskCacheExpiration(.days(7))
             .fade(duration: 0.2)
 
-         #if !targetEnvironment(simulator)
+        #if !targetEnvironment(simulator)
             image = image.backgroundDecode(true)
         #endif
 
         return image
     }
 }
-
- 

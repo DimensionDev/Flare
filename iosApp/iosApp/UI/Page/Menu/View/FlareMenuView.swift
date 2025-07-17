@@ -12,7 +12,7 @@ struct FlareMenuView: View {
     @State private var showFeeds = false
     @State private var showSettings = false
     @State private var showPerformanceTest = false
- 
+
     @State private var currentUser: UiUserV2? = nil
 
     @State private var accountType: AccountType = AccountTypeGuest()
@@ -20,8 +20,6 @@ struct FlareMenuView: View {
     @Environment(FlareRouter.self) private var router
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
- 
- 
 
     var body: some View {
         VStack(spacing: 0) {

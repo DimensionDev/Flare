@@ -60,5 +60,3 @@ struct WaterfallView: View {
         }
     }
 }
-
-

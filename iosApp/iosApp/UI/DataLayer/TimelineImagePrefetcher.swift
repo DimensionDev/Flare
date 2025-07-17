@@ -202,7 +202,6 @@ class TimelineImagePrefetcher {
             }
         }
 
-
         let uniqueUrls = Array(urls)
         let duplicateCount = urls.count - uniqueUrls.count
 

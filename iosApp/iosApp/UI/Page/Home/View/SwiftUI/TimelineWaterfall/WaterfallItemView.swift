@@ -31,14 +31,13 @@ struct WaterfallItemView: View {
         }
         .background(backgroundView)
         .contentShape(Rectangle())
-        .onTapGesture { 
+        .onTapGesture {
             if item.shouldShowText {
                 onTap(item.contentClickAction)
             } else {
                 onTap(item.imageClickAction)
             }
         }
-         
     }
 
     private var imageContentView: some View {

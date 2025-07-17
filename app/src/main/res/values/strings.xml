@@ -333,8 +333,10 @@
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Added Mixed timeline support to the Home tab</li>
-                <li>Started making UI/UX adjustments, with more improvements coming soon</li>
+                <li>Added support for Misskey\'s Social timeline</li>
+                <li>Added RSSHub support</li>
+                <li>Added support for detecting possible RSS feeds from websites</li>
+                <li>More UI/UX improvements — we\'re still on the path of continuous refinement</li>
                 <li>Bug fixes and performance improvements</li>
             </ul>
         ]]>

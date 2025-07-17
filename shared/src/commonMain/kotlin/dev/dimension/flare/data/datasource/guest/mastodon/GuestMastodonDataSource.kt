@@ -4,6 +4,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import dev.dimension.flare.common.BaseTimelinePagingSourceFactory
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
 import dev.dimension.flare.common.MemCacheable
@@ -44,7 +45,10 @@ internal class GuestMastodonDataSource(
     }
     private val database: CacheDatabase by inject()
 
-    override fun homeTimeline() = GuestTimelinePagingSource(host = host, service = service)
+    override fun homeTimeline() =
+        BaseTimelinePagingSourceFactory {
+            GuestTimelinePagingSource(host = host, service = service)
+        }
 
     override fun userByAcct(acct: String): CacheData<UiUserV2> {
         val (name, host) = MicroBlogKey.valueOf(acct)
@@ -100,20 +104,24 @@ internal class GuestMastodonDataSource(
     override fun userTimeline(
         userKey: MicroBlogKey,
         mediaOnly: Boolean,
-    ) = GuestUserTimelinePagingSource(
-        host = host,
-        userId = userKey.id,
-        onlyMedia = mediaOnly,
-        service = service,
-    )
-
-    override fun context(statusKey: MicroBlogKey) =
-        GuestStatusDetailPagingSource(
+    ) = BaseTimelinePagingSourceFactory {
+        GuestUserTimelinePagingSource(
             host = host,
-            statusKey = statusKey,
-            statusOnly = false,
+            userId = userKey.id,
+            onlyMedia = mediaOnly,
             service = service,
         )
+    }
+
+    override fun context(statusKey: MicroBlogKey) =
+        BaseTimelinePagingSourceFactory {
+            GuestStatusDetailPagingSource(
+                host = host,
+                statusKey = statusKey,
+                statusOnly = false,
+                service = service,
+            )
+        }
 
     override fun status(statusKey: MicroBlogKey): CacheData<UiTimeline> {
         val pagingKey = "status_only_$statusKey"
@@ -128,7 +136,10 @@ internal class GuestMastodonDataSource(
         )
     }
 
-    override fun searchStatus(query: String) = GuestSearchStatusPagingSource(host = host, query = query, service = service)
+    override fun searchStatus(query: String) =
+        BaseTimelinePagingSourceFactory {
+            GuestSearchStatusPagingSource(host = host, query = query, service = service)
+        }
 
     override fun searchUser(
         query: String,
@@ -202,22 +213,26 @@ internal class GuestMastodonDataSource(
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.Status,
                 loader =
-                    GuestUserTimelinePagingSource(
-                        host = host,
-                        userId = userKey.id,
-                        service = service,
-                        withPinned = true,
-                    ),
+                    BaseTimelinePagingSourceFactory {
+                        GuestUserTimelinePagingSource(
+                            host = host,
+                            userId = userKey.id,
+                            service = service,
+                            withPinned = true,
+                        )
+                    },
             ),
             ProfileTab.Timeline(
                 type = ProfileTab.Timeline.Type.StatusWithReplies,
                 loader =
-                    GuestUserTimelinePagingSource(
-                        host = host,
-                        userId = userKey.id,
-                        withReply = true,
-                        service = service,
-                    ),
+                    BaseTimelinePagingSourceFactory {
+                        GuestUserTimelinePagingSource(
+                            host = host,
+                            userId = userKey.id,
+                            withReply = true,
+                            service = service,
+                        )
+                    },
             ),
             ProfileTab.Media,
         )

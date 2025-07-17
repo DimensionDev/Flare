@@ -1,7 +1,7 @@
 package dev.dimension.flare.data.datasource.guest.mastodon
 
 import androidx.paging.PagingState
-import dev.dimension.flare.common.BaseTimelinePagingSource
+import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.data.network.mastodon.GuestMastodonService
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiTimeline
@@ -12,7 +12,7 @@ internal class GuestStatusDetailPagingSource(
     private val host: String,
     private val statusKey: MicroBlogKey,
     private val statusOnly: Boolean,
-) : BaseTimelinePagingSource<Int>() {
+) : BasePagingSource<Int, UiTimeline>() {
     override fun getRefreshKey(state: PagingState<Int, UiTimeline>): Int? = null
 
     override suspend fun doLoad(params: LoadParams<Int>): LoadResult<Int, UiTimeline> {

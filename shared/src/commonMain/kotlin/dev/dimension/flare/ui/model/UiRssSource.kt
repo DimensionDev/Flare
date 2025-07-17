@@ -18,7 +18,12 @@ public data class UiRssSource internal constructor(
 
     public companion object {
         public fun favIconUrl(url: String): String {
-            val parsedUrl = Url(url)
+            val parsedUrl =
+                if (url.startsWith("http")) {
+                    Url(url)
+                } else {
+                    Url("https://$url")
+                }
             return "https://${parsedUrl.host}/favicon.ico"
         }
     }

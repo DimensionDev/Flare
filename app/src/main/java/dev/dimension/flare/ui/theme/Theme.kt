@@ -39,15 +39,15 @@ private object MoreColors {
 
 private fun ColorScheme.withPureColorLightMode(): ColorScheme =
     copy(
-        background = Color.White,
-        surface = Color.White,
+        background = MoreColors.Gray100,
+        surface = MoreColors.Gray100,
         onBackground = Color.Black,
         onSurface = Color.Black,
-        surfaceContainer = MoreColors.Gray100,
-        surfaceContainerLow = MoreColors.Gray100,
-        surfaceContainerHigh = MoreColors.Gray100,
-        surfaceContainerLowest = MoreColors.Gray100,
-        surfaceContainerHighest = MoreColors.Gray100,
+        surfaceContainer = Color.White,
+        surfaceContainerLow = Color.White,
+        surfaceContainerHigh = Color.White,
+        surfaceContainerLowest = Color.White,
+        surfaceContainerHighest = Color.White,
         onSurfaceVariant = MoreColors.Gray800,
     )
 
@@ -87,74 +87,63 @@ fun FlareTheme(
     dynamicColor: Boolean = LocalAppearanceSettings.current.dynamicTheme,
     content: @Composable () -> Unit,
 ) {
+    val context = LocalContext.current
     val seed = Color(LocalAppearanceSettings.current.colorSeed)
     val pureColorMode = LocalAppearanceSettings.current.pureColorMode
     val bigScreen = isBigScreen()
     val colorScheme =
-        when {
-            dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                val context = LocalContext.current
-                remember(
-                    darkTheme,
-                    pureColorMode,
-                ) {
-                    if (darkTheme) {
-                        dynamicDarkColorScheme(context)
-                            .let {
-                                if (pureColorMode) {
-                                    it.withPureColorDarkMode()
-                                } else {
-                                    it
-                                }
-                            }
+        if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            remember(
+                darkTheme,
+                pureColorMode,
+            ) {
+                if (darkTheme) {
+                    dynamicDarkColorScheme(context)
+                } else {
+                    dynamicLightColorScheme(context)
+                }.let {
+                    if (pureColorMode) {
+                        if (bigScreen && !darkTheme) {
+                            it.withPureColorLightModeInBigScreen()
+                        } else if (!darkTheme) {
+                            it.withPureColorLightMode()
+                        } else {
+                            it.withPureColorDarkMode()
+                        }
                     } else {
-                        dynamicLightColorScheme(context)
-                            .let {
-                                if (pureColorMode) {
-                                    if (bigScreen) {
-                                        it.withPureColorLightModeInBigScreen()
-                                    } else {
-                                        it.withPureColorLightMode()
-                                    }
-                                } else {
-                                    it
-                                }
-                            }
+                        it.copy(
+                            background = it.surfaceContainerLow,
+//                            surface = it.surfaceContainerLow,
+                            surfaceContainerLow = it.surface,
+                        )
                     }
                 }
             }
-
-            darkTheme ->
-                rememberDynamicColorScheme(
-                    seed,
-                    isDark = true,
-                    isAmoled = pureColorMode,
-                    specVersion = ColorSpec.SpecVersion.SPEC_2025,
-                    style = PaletteStyle.Expressive,
-                    modifyColorScheme = {
-                        if (pureColorMode) {
-                            it.withPureColorDarkMode()
-                        } else {
-                            it
-                        }
-                    },
-                )
-
-            else ->
-                rememberDynamicColorScheme(
-                    seed,
-                    isDark = false,
-                    isAmoled = pureColorMode,
-                    specVersion = ColorSpec.SpecVersion.SPEC_2025,
-                    style = PaletteStyle.Expressive,
-                    modifyColorScheme = {
-                        if (pureColorMode) {
+        } else {
+            rememberDynamicColorScheme(
+                seedColor = seed,
+                isAmoled = pureColorMode,
+                specVersion = ColorSpec.SpecVersion.SPEC_2025,
+                style = PaletteStyle.Expressive,
+                isDark = darkTheme,
+                modifyColorScheme = {
+                    if (pureColorMode) {
+                        if (bigScreen && !darkTheme) {
+                            it.withPureColorLightModeInBigScreen()
+                        } else if (!darkTheme) {
                             it.withPureColorLightMode()
                         } else {
-                            it
+                            it.withPureColorDarkMode()
                         }
-                    },
-                )
+                    } else {
+                        it.copy(
+                            background = it.surfaceContainerLow,
+//                            surface = it.surfaceContainerLow,
+                            surfaceContainerLow = it.surface,
+                        )
+                    }
+                },
+            )
         }
     val view = LocalView.current
     if (!view.isInEditMode && view.context is Activity) {

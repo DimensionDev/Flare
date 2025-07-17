@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -33,6 +32,7 @@ import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.resId
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.model.UiRssSource
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -110,7 +110,7 @@ internal fun EditTabDialog(
                                 title = tabItem.metaData.title,
                             )
                         }
-                        DropdownMenu(
+                        FlareDropdownMenu(
                             expanded = state.showIconPicker,
                             onDismissRequest = {
                                 state.setShowIconPicker(false)
@@ -188,14 +188,17 @@ private fun presenter(
         val availableIcons: ImmutableList<IconType> =
             kotlin
                 .run {
-                    listOfNotNull(
-                        when (val account = tabItem.account) {
-                            is AccountType.Specific ->
-                                IconType.Avatar(account.accountKey)
+                    when (val account = tabItem.account) {
+                        is AccountType.Specific ->
+                            listOf(
+                                IconType.Avatar(account.accountKey),
+                                IconType.Url(
+                                    UiRssSource.favIconUrl(account.accountKey.host),
+                                ),
+                            )
 
-                            else -> null
-                        },
-                    ) +
+                        else -> emptyList()
+                    } +
                         IconType.Material.MaterialIcon.entries.map {
                             IconType.Material(it)
                         } +

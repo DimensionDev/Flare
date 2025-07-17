@@ -31,7 +31,6 @@ import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -86,6 +85,7 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.status.QuotedStatus
@@ -251,7 +251,7 @@ internal fun ComposeScreen(
                                 },
                                 label = {
                                     FAIcon(FontAwesomeIcons.Solid.Plus, contentDescription = null)
-                                    DropdownMenu(
+                                    FlareDropdownMenu(
                                         expanded = state.showAccountSelectMenu,
                                         onDismissRequest = {
                                             state.setShowAccountSelectMenu(false)
@@ -493,7 +493,7 @@ internal fun ComposeScreen(
                                         stringResource(id = pollState.expiredAt.textId),
                                     ),
                             )
-                            DropdownMenu(
+                            FlareDropdownMenu(
                                 expanded = pollState.showExpirationMenu,
                                 onDismissRequest = {
                                     pollState.setShowExpirationMenu(false)
@@ -581,7 +581,7 @@ internal fun ComposeScreen(
                         },
                     ) {
                         StatusVisibilityComponent(visibility = visibilityState.visibility)
-                        DropdownMenu(
+                        FlareDropdownMenu(
                             expanded = visibilityState.showVisibilityMenu,
                             onDismissRequest = {
                                 visibilityState.hideVisibilityMenu()

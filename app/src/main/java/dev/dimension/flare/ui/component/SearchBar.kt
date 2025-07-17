@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -17,7 +16,6 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -46,6 +44,7 @@ import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.UserPlaceholder
 import dev.dimension.flare.ui.component.status.status
@@ -59,7 +58,6 @@ import dev.dimension.flare.ui.presenter.home.SearchHistoryState
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.theme.screenHorizontalPadding
 
 @Composable
 internal fun SearchBar(
@@ -197,6 +195,11 @@ internal fun LazyStaggeredGridScope.searchContent(
                     headlineContent = {
                         Text(text = stringResource(R.string.search_users))
                     },
+                    colors =
+                        ListItemDefaults
+                            .colors(
+                                containerColor = Color.Transparent,
+                            ),
                 )
             }
             item(
@@ -204,11 +207,10 @@ internal fun LazyStaggeredGridScope.searchContent(
             ) {
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                 ) {
                     items(itemCount) {
                         val item = get(it)
-                        Card(
+                        AdaptiveCard(
                             modifier =
                                 Modifier
                                     .width(256.dp),
@@ -238,10 +240,15 @@ internal fun LazyStaggeredGridScope.searchContent(
                     headlineContent = {
                         Text(text = stringResource(R.string.search_users))
                     },
+                    colors =
+                        ListItemDefaults
+                            .colors(
+                                containerColor = Color.Transparent,
+                            ),
                 )
             }
             items(10) {
-                Card(
+                AdaptiveCard(
                     modifier =
                         Modifier
                             .width(256.dp),
@@ -261,6 +268,11 @@ internal fun LazyStaggeredGridScope.searchContent(
                 headlineContent = {
                     Text(text = stringResource(R.string.search_status))
                 },
+                colors =
+                    ListItemDefaults
+                        .colors(
+                            containerColor = Color.Transparent,
+                        ),
             )
         }
         status(searchStatus)

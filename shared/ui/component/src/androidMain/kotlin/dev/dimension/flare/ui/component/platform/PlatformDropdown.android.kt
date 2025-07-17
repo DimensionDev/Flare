@@ -1,10 +1,10 @@
 package dev.dimension.flare.ui.component.platform
 
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import dev.dimension.flare.ui.component.FlareDropdownMenu
 
 @Composable
 internal actual fun PlatformDropdownMenu(
@@ -13,7 +13,7 @@ internal actual fun PlatformDropdownMenu(
     modifier: Modifier,
     content: @Composable PlatformDropdownMenuScope.() -> Unit,
 ) {
-    DropdownMenu(
+    FlareDropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
         modifier = modifier,

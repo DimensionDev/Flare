@@ -1,7 +1,9 @@
 package dev.dimension.flare.ui.screen.misskey
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -13,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Thumbtack
@@ -25,9 +28,10 @@ import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.uiListItemComponent
 import dev.dimension.flare.ui.model.UiList
@@ -38,6 +42,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.AntennasListPresenter
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -49,20 +54,24 @@ import org.koin.compose.koinInject
 internal fun AntennasListScreen(
     accountType: AccountType,
     toTimeline: (UiList) -> Unit,
+    onBack: () -> Unit,
 ) {
     val state by producePresenter("antennas_list_$accountType") {
         presenter(accountType)
     }
 
-    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     FlareScaffold(
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         topBar = {
-            FlareTopAppBar(
+            FlareLargeFlexibleTopAppBar(
                 title = {
                     Text(text = stringResource(id = R.string.home_tab_antennas_title))
                 },
                 scrollBehavior = topAppBarScrollBehavior,
+                navigationIcon = {
+                    BackButton(onBack = onBack)
+                },
             )
         },
     ) { contentPadding ->
@@ -76,6 +85,10 @@ internal fun AntennasListScreen(
             content = {
                 LazyColumn(
                     contentPadding = contentPadding,
+                    modifier =
+                        Modifier
+                            .padding(horizontal = screenHorizontalPadding),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     uiListItemComponent(
                         state.data,

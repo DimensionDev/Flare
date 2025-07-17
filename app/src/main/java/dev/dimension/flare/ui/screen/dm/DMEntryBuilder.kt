@@ -27,6 +27,7 @@ internal fun EntryProviderBuilder<NavKey>.dmEntryBuilder(
             onItemClicked = { roomKey ->
                 navigate(Route.DM.Conversation(args.accountType, roomKey))
             },
+            onBack = onBack,
         )
     }
     

@@ -37,13 +37,10 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.FAIcon
-import dev.dimension.flare.ui.component.HorizontalDivider
 import dev.dimension.flare.ui.component.Res
 import dev.dimension.flare.ui.component.login_expired
 import dev.dimension.flare.ui.component.login_expired_message
-import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformText
-import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.component.status_empty
 import dev.dimension.flare.ui.component.status_loadmore_end
@@ -70,16 +67,18 @@ public fun LazyStaggeredGridScope.status(
                     itemContentType {
                         it.itemType
                     },
-            ) {
-                val item = get(it)
+            ) { index ->
+                val item = get(index)
                 AdaptiveCard(
-                    modifier = Modifier.animateItem(),
+                    modifier =
+                        Modifier
+                            .animateItem(),
+                    index = index,
+                    totalCount = itemCount,
                     content = {
-                        val bigScreen = isBigScreen()
-                        Column {
-                            StatusItem(
-                                item,
-                                detailStatusKey = detailStatusKey,
+                        StatusItem(
+                            item,
+                            detailStatusKey = detailStatusKey,
 //                        modifier =
 //                        Modifier
 //                            .let {
@@ -100,12 +99,7 @@ public fun LazyStaggeredGridScope.status(
 //                                }
 //                            }
 //                            .background(MaterialTheme.colorScheme.background),
-                            )
-
-                            if (it != itemCount - 1 && !bigScreen) {
-                                HorizontalDivider()
-                            }
-                        }
+                        )
                     },
                 )
             }
@@ -126,6 +120,8 @@ public fun LazyStaggeredGridScope.status(
                             content = {
                                 OnLoading()
                             },
+                            index = it,
+                            totalCount = 10,
                             modifier = Modifier.animateItem(),
                         )
                     }
@@ -140,7 +136,6 @@ public fun LazyStaggeredGridScope.status(
                                     .fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
-                            HorizontalDivider()
                             Spacer(modifier = Modifier.height(8.dp))
                             PlatformText(
                                 text = stringResource(Res.string.status_loadmore_end),
@@ -165,6 +160,8 @@ public fun LazyStaggeredGridScope.status(
             items(10) {
                 AdaptiveCard(
                     modifier = Modifier.animateItem(),
+                    index = it,
+                    totalCount = 10,
                     content = {
                         OnLoading()
                     },
@@ -200,35 +197,6 @@ public fun LazyStaggeredGridScope.status(
     }
 
 @Composable
-public fun AdaptiveCard(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
-    val bigScreen = isBigScreen()
-    if (bigScreen) {
-        PlatformCard(
-            modifier =
-                modifier
-                    .padding(
-                        horizontal = 2.dp,
-                        vertical = 6.dp,
-                    ),
-            elevated = true,
-//            elevation = CardDefaults.elevatedCardElevation(),
-//            colors = CardDefaults.elevatedCardColors(),
-        ) {
-            content.invoke()
-        }
-    } else {
-        Box(
-            modifier = modifier,
-        ) {
-            content.invoke()
-        }
-    }
-}
-
-@Composable
 private fun OnLoading(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
@@ -241,10 +209,6 @@ private fun OnLoading(modifier: Modifier = Modifier) {
                         vertical = 8.dp,
                     ),
         )
-        val bigScreen = isBigScreen()
-        if (!bigScreen) {
-            HorizontalDivider()
-        }
     }
 }
 

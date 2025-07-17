@@ -2,6 +2,7 @@
 clikt = "5.0.3"
 collection = "1.5.0"
 compileSdk = "36"
+haze = "1.6.8"
 lifecycleViewmodelCompose = "2.9.1"
 minSdk = "21"
 java = "21"
@@ -58,6 +59,8 @@ androidx-collection = { module = "androidx.collection:collection", version.ref =
 bluesky = { module = "sh.christian.ozone:bluesky", version.ref = "bluesky" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
+haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }

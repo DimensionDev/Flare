@@ -49,6 +49,7 @@ internal fun EntryProviderBuilder<NavKey>.settingsSelectEntryBuilder(
             toAiConfig = {
                 navigate(Route.Settings.AiConfig)
             },
+            onBack = onBack,
         )
     }
 

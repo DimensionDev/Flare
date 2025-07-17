@@ -5,10 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
@@ -24,10 +22,10 @@ import compose.icons.fontawesomeicons.solid.CircleExclamation
 import compose.icons.fontawesomeicons.solid.List
 import compose.icons.fontawesomeicons.solid.Rss
 import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.ui.common.items
+import dev.dimension.flare.ui.common.itemsIndexed
+import dev.dimension.flare.ui.component.platform.PlatformListItem
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.placeholder
-import dev.dimension.flare.ui.component.status.ListComponent
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.theme.MediumAlpha
 import dev.dimension.flare.ui.theme.PlatformTheme
@@ -39,7 +37,7 @@ public fun LazyListScope.uiListItemComponent(
     onClicked: ((UiList) -> Unit)? = null,
     trailingContent: @Composable RowScope.(UiList) -> Unit = {},
 ) {
-    items(
+    itemsIndexed(
         items,
         emptyContent = {
             Box(
@@ -63,17 +61,15 @@ public fun LazyListScope.uiListItemComponent(
                 }
             }
         },
-        loadingContent = {
-            Column(
+        loadingContent = { index, itemCount ->
+            ItemPlaceHolder(
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                ItemPlaceHolder()
-                HorizontalDivider()
-            }
+                        .listCard(
+                            index = index,
+                            totalCount = itemCount,
+                        ),
+            )
         },
         errorContent = {
             Column(
@@ -92,8 +88,18 @@ public fun LazyListScope.uiListItemComponent(
                 )
             }
         },
-    ) { item ->
-        UiListItem(onClicked, item, trailingContent)
+    ) { index, itemCount, item ->
+        UiListItem(
+            onClicked = onClicked,
+            item = item,
+            trailingContent = trailingContent,
+            modifier =
+                Modifier
+                    .listCard(
+                        index = index,
+                        totalCount = itemCount,
+                    ),
+        )
     }
 }
 
@@ -107,6 +113,7 @@ public fun UiListItem(
     Column(
         modifier =
             modifier
+                .background(PlatformTheme.colorScheme.card)
                 .let {
                     if (onClicked == null) {
                         it
@@ -118,8 +125,7 @@ public fun UiListItem(
                     }
                 },
     ) {
-        Spacer(modifier = Modifier.height(8.dp))
-        ListComponent(
+        PlatformListItem(
             headlineContent = {
                 PlatformText(text = item.title)
             },
@@ -164,24 +170,28 @@ public fun UiListItem(
                 }
             },
             trailingContent = {
-                trailingContent.invoke(this, item)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    trailingContent.invoke(this, item)
+                }
             },
-            modifier = Modifier.padding(horizontal = screenHorizontalPadding),
         )
         item.description?.takeIf { it.isNotEmpty() }?.let {
             PlatformText(
                 text = it,
-                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+                modifier =
+                    Modifier
+                        .padding(bottom = 8.dp)
+                        .padding(horizontal = screenHorizontalPadding),
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        HorizontalDivider()
     }
 }
 
 @Composable
 public fun ItemPlaceHolder(modifier: Modifier = Modifier) {
-    ListComponent(
+    PlatformListItem(
         modifier = modifier,
         headlineContent = {
             PlatformText(

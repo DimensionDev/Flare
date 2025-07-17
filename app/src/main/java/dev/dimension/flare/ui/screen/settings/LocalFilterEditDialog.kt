@@ -96,30 +96,24 @@ internal fun LocalFilterEditDialog(
                 Modifier
                     .padding(contentPadding)
                     .padding(horizontal = screenHorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            OutlinedTextField(
+                state = state.input,
+                placeholder = {
+                    Text(text = stringResource(id = R.string.local_filter_keyword_hint))
+                },
+                label = {
+                    Text(text = stringResource(id = R.string.local_filter_keyword))
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
             Column(
                 modifier =
                     Modifier
                         .clip(ListCardShapes.container()),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                ListItem(
-                    headlineContent = {
-                        OutlinedTextField(
-                            state = state.input,
-                            placeholder = {
-                                Text(text = stringResource(id = R.string.local_filter_keyword_hint))
-                            },
-                            label = {
-                                Text(text = stringResource(id = R.string.local_filter_keyword))
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                    },
-                    modifier =
-                        Modifier
-                            .clip(ListCardShapes.item()),
-                )
                 ListItem(
                     headlineContent = {
                         Text(text = stringResource(id = R.string.local_filter_for_timeline))

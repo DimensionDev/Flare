@@ -65,6 +65,7 @@ internal fun InAppNotificationComponent(
                     showText = true
                     delay(3.seconds)
                     showNotification = false
+                    showText = false
                 }
                 AnimatedVisibility(
                     showNotification,

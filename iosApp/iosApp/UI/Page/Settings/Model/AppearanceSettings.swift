@@ -65,7 +65,7 @@ struct AppearanceSettings: Codable, Changeable {
     var swipeGestures: Bool = false
     var enableFullSwipePop: Bool = true
     var hideScrollToTopButton: Bool = false
-    var autoTranslate: Bool = false
+    // var autoTranslate: Bool = false
     var mastodon: Mastodon = .init()
     var misskey: Misskey = .init()
     var bluesky: Bluesky = .init()

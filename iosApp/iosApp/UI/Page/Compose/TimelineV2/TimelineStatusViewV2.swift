@@ -37,7 +37,9 @@ struct TimelineStatusViewV2: View {
 
     // 添加TimelineStatusView需要的状态和环境变量
     let isDetail: Bool = false
-    let enableTranslation: Bool = true
+    @State private var showAppleTranslation: Bool = false // Apple翻译sheet状态
+    @State private var showGoogleTranslation: Bool = false // 是否显示Google翻译内容
+    @State private var isTranslating: Bool = false // 防重复点击状态
     @State private var showMedia: Bool = false
     @State private var showShareMenu: Bool = false
 
@@ -123,7 +125,7 @@ struct TimelineStatusViewV2: View {
             StatusContentViewV2(
                 item: item,
                 isDetailView: isDetail,
-                enableTranslation: enableTranslation,
+                enableTranslation: showGoogleTranslation,
                 appSettings: appSettings,
                 theme: theme,
                 openURL: openURL,
@@ -179,6 +181,15 @@ struct TimelineStatusViewV2: View {
                 }
             }
         }
+        .onDisappear {
+            resetTranslationStates()
+        }
+        .onChange(of: item.id) { oldValue, newValue in
+            resetTranslationStates()
+        }
+        #if canImport(_Translation_SwiftUI)
+        .addTranslateView(isPresented: $showAppleTranslation, text: item.content.raw)
+        #endif
     }
 
     // - 从TimelineStatusView复制的方法
@@ -214,6 +225,37 @@ struct TimelineStatusViewV2: View {
 
     private func handleTimelineAction(_ actionType: TimelineActionType, item: TimelineItem, at index: Int) {
         FlareLog.debug("TimelineView_v2 Handling action \(actionType) for item: \(item.id) at index: \(index)")
+
+
+        if actionType == .translate {
+            guard !isTranslating else {
+                FlareLog.debug("TimelineView_v2 Translation already in progress, ignoring")
+                return
+            }
+
+
+            guard !item.content.raw.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+                FlareLog.warning("TimelineView_v2 Empty text for translation")
+                return
+            }
+
+            isTranslating = true
+            let provider = appSettings.otherSettings.translationProvider
+
+            if provider == .systemOffline {
+                FlareLog.debug("TimelineView_v2 Apple translation sheet triggered for item: \(item.id)")
+                showAppleTranslation = true
+            } else {
+                FlareLog.debug("TimelineView_v2 Google translate action triggered for item: \(item.id)")
+                showGoogleTranslation = true
+            }
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isTranslating = false
+            }
+            return
+        }
+
         FlareLog.debug("TimelineView_v2 Received updated item state:")
         FlareLog.debug("   - ID: \(item.id)")
         FlareLog.debug("   - Like count: \(item.likeCount)")
@@ -227,5 +269,12 @@ struct TimelineStatusViewV2: View {
             FlareLog.debug("TimelineView_v2 Updating local state for index: \(index)")
             FlareLog.debug("TimelineView_v2 Local state update logged for index: \(index)")
         }
+    }
+
+
+    private func resetTranslationStates() {
+        showAppleTranslation = false
+        showGoogleTranslation = false
+        isTranslating = false
     }
 }

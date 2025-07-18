@@ -56,9 +56,9 @@ struct QuotedStatus: View {
                     }
                     .font(.system(size: 16))
 
-                if appSettings.appearanceSettings.autoTranslate {
-                    TranslatableText(originalText: data.content.raw)
-                }
+                // if appSettings.appearanceSettings.autoTranslate {
+                    // TranslatableText(originalText: data.content.raw)
+                // }
 
                 Spacer()
                     .frame(height: 8)

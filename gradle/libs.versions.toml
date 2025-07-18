@@ -12,7 +12,7 @@ core-ktx = "1.16.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.2.1"
 espresso-core = "3.6.1"
-lifecycle-runtime-ktx = "2.9.1"
+lifecycle-runtime-ktx = "2.9.2"
 activity-compose = "1.10.1"
 compose-bom = "2025.06.01"
 ksp = "2.2.0-2.0.2"
@@ -81,7 +81,7 @@ ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.4.0-alpha17" }
+material3 = { group = "androidx.compose.material3", name = "material3", version = "1.4.0-alpha18" }
 material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
 material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive" }

@@ -40,7 +40,7 @@ private object MoreColors {
 private fun ColorScheme.withPureColorLightMode(): ColorScheme =
     copy(
         background = MoreColors.Gray100,
-        surface = MoreColors.Gray100,
+        surface = Color.White,
         onBackground = Color.Black,
         onSurface = Color.Black,
         surfaceContainer = Color.White,
@@ -54,7 +54,7 @@ private fun ColorScheme.withPureColorLightMode(): ColorScheme =
 private fun ColorScheme.withPureColorLightModeInBigScreen(): ColorScheme =
     copy(
         background = MoreColors.Gray50,
-        surface = MoreColors.Gray50,
+        surface = Color.White,
         onBackground = Color.Black,
         onSurface = Color.Black,
         surfaceContainer = Color.White,
@@ -67,15 +67,15 @@ private fun ColorScheme.withPureColorLightModeInBigScreen(): ColorScheme =
 
 private fun ColorScheme.withPureColorDarkMode(): ColorScheme =
     copy(
-        background = Color.Black,
+        background = MoreColors.Gray900,
         surface = Color.Black,
         onBackground = Color.White,
         onSurface = Color.White,
-        surfaceContainer = MoreColors.Gray900,
-        surfaceContainerLow = MoreColors.Gray900,
-        surfaceContainerHigh = MoreColors.Gray900,
-        surfaceContainerLowest = MoreColors.Gray900,
-        surfaceContainerHighest = MoreColors.Gray900,
+        surfaceContainer = Color.Black,
+        surfaceContainerLow = Color.Black,
+        surfaceContainerHigh = Color.Black,
+        surfaceContainerLowest = Color.Black,
+        surfaceContainerHighest = Color.Black,
         onSurfaceVariant = MoreColors.Gray400,
     )
 
@@ -101,22 +101,6 @@ fun FlareTheme(
                     dynamicDarkColorScheme(context)
                 } else {
                     dynamicLightColorScheme(context)
-                }.let {
-                    if (pureColorMode) {
-                        if (bigScreen && !darkTheme) {
-                            it.withPureColorLightModeInBigScreen()
-                        } else if (!darkTheme) {
-                            it.withPureColorLightMode()
-                        } else {
-                            it.withPureColorDarkMode()
-                        }
-                    } else {
-                        it.copy(
-                            background = it.surfaceContainerLow,
-//                            surface = it.surfaceContainerLow,
-                            surfaceContainerLow = it.surface,
-                        )
-                    }
                 }
             }
         } else {
@@ -126,24 +110,32 @@ fun FlareTheme(
                 specVersion = ColorSpec.SpecVersion.SPEC_2025,
                 style = PaletteStyle.Expressive,
                 isDark = darkTheme,
-                modifyColorScheme = {
-                    if (pureColorMode) {
-                        if (bigScreen && !darkTheme) {
-                            it.withPureColorLightModeInBigScreen()
-                        } else if (!darkTheme) {
-                            it.withPureColorLightMode()
-                        } else {
-                            it.withPureColorDarkMode()
-                        }
+            )
+        }.let {
+            remember(it) {
+                if (pureColorMode) {
+                    if (bigScreen && !darkTheme) {
+                        it.withPureColorLightModeInBigScreen()
+                    } else if (!darkTheme) {
+                        it.withPureColorLightMode()
+                    } else {
+                        it.withPureColorDarkMode()
+                    }
+                } else {
+                    if (darkTheme) {
+                        it.copy(
+                            background = it.surfaceContainer,
+                            surface = it.surfaceContainerHighest,
+//                        surfaceContainerLow = it.surfaceContainerHighest,
+                        )
                     } else {
                         it.copy(
                             background = it.surfaceContainerLow,
-//                            surface = it.surfaceContainerLow,
-                            surfaceContainerLow = it.surface,
+//                        surfaceContainerLow = it.surface,
                         )
                     }
-                },
-            )
+                }
+            }
         }
     val view = LocalView.current
     if (!view.isInEditMode && view.context is Activity) {

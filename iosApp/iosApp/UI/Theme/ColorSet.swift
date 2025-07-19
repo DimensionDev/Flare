@@ -1,18 +1,9 @@
 import SwiftUI
 
-// copy from Ice Cube
 public let availableColorsSets: [ColorSetCouple] =
     [
-        // 原有主题
         .init(light: ThemeLight(), dark: ThemeDark()),
-        .init(light: ThemeNeonLight(), dark: ThemeNeonDark()),
-        .init(light: ThemeDesertLight(), dark: ThemeDesertDark()),
-        .init(light: ThemeNemesisLight(), dark: ThemeNemesisDark()),
-        .init(light: ThemeMediumLight(), dark: ThemeMediumDark()),
-        .init(light: ThemeConstellationLight(), dark: ThemeConstellationDark()),
-        .init(light: ThemeThreadsLight(), dark: ThemeThreadsDark()),
 
-        // Flutter主题 (从TweetX移植)
         .init(light: ThemeFreshSkyLight(), dark: ThemeFreshSkyDark()),
         .init(light: ThemeDarkOceanLight(), dark: ThemeDarkOceanDark()),
         .init(light: ThemeMysticNightLight(), dark: ThemeMysticNightDark()),
@@ -49,20 +40,6 @@ public enum ColorScheme: String, Sendable {
 public enum ColorSetName: String, Sendable {
     case themeDark = "Dark"
     case themeLight = "Light"
-    case themeNeonDark = "Neon - Dark"
-    case themeNeonLight = "Neon - Light"
-    case themeDesertDark = "Desert - Dark"
-    case themeDesertLight = "Desert - Light"
-    case themeNemesisDark = "Nemesis - Dark"
-    case themeNemesisLight = "Nemesis - Light"
-    case themeMediumLight = "Medium - Light"
-    case themeMediumDark = "Medium - Dark"
-    case themeConstellationLight = "Constellation - Light"
-    case themeConstellationDark = "Constellation - Dark"
-    case threadsLight = "Threads - Light"
-    case threadsDark = "Threads - Dark"
-
-    // - Flutter Themes (从TweetX移植)
 
     case freshSkyLight = "Fresh Sky - Light"
     case freshSkyDark = "Fresh Sky - Dark"
@@ -111,12 +88,6 @@ public struct ColorSetCouple: Identifiable, Sendable {
     public let dark: ColorSet
 }
 
-// - 原有主题 (Flare经典主题)
-
-// 1. Theme Classic - 经典主题 【专业评分: 91/100】
-// 评分详情: 对比度24/25, 舒适度18/20, 品牌一致性15/15, 设计趋势13/15, 适应性10/10, 和谐度9/10, 功能性2/5
-// 优势: Flare品牌色，紫色主调经典，高对比度，品牌识别度强
-// 适用: Flare用户、品牌展示、经典风格爱好者
 public struct ThemeDark: ColorSet {
     public var name: ColorSetName = .themeDark
     public var scheme: ColorScheme = .dark
@@ -139,168 +110,6 @@ public struct ThemeLight: ColorSet {
     public init() {}
 }
 
-// 2. Neon - 霓虹主题 【专业评分: 87/100】
-// 评分详情: 对比度23/25, 舒适度16/20, 品牌一致性14/15, 设计趋势14/15, 适应性9/10, 和谐度8/10, 功能性3/5
-// 优势: 霓虹紫色，科技感强，夜间使用友好，个性化突出
-// 适用: 科技爱好者、夜间使用、个性化需求
-public struct ThemeNeonDark: ColorSet {
-    public var name: ColorSetName = .themeNeonDark
-    public var scheme: ColorScheme = .dark
-    public var tintColor: Color = .init(red: 213 / 255, green: 46 / 255, blue: 245 / 255)
-    public var primaryBackgroundColor: Color = .black
-    public var secondaryBackgroundColor: Color = .init(red: 19 / 255, green: 0 / 255, blue: 32 / 255)
-    public var labelColor: Color = .white
-
-    public init() {}
-}
-
-public struct ThemeNeonLight: ColorSet {
-    public var name: ColorSetName = .themeNeonLight
-    public var scheme: ColorScheme = .light
-    public var tintColor: Color = .init(red: 213 / 255, green: 46 / 255, blue: 245 / 255) // 图标
-    public var primaryBackgroundColor: Color = .white // 主背景色
-    public var secondaryBackgroundColor: Color = .init(hex: 0xF0F1F2) //  次背景色
-    public var labelColor: Color = .black // 文字
-
-    public init() {}
-}
-
-// 3. Desert - 沙漠主题 【专业评分: 83/100】
-// 评分详情: 对比度21/25, 舒适度17/20, 品牌一致性12/15, 设计趋势13/15, 适应性8/10, 和谐度9/10, 功能性3/5
-// 优势: 温暖橙色调，自然感强，舒适护眼，独特的沙漠风情
-// 适用: 自然风格、温暖氛围、长时间阅读
-public struct ThemeDesertDark: ColorSet {
-    public var name: ColorSetName = .themeDesertDark
-    public var scheme: ColorScheme = .dark
-    public var tintColor: Color = .init(hex: 0xDF915E)
-    public var primaryBackgroundColor: Color = .init(hex: 0x433744)
-    public var secondaryBackgroundColor: Color = .init(hex: 0x654868)
-    public var labelColor: Color = .white
-
-    public init() {}
-}
-
-public struct ThemeDesertLight: ColorSet {
-    public var name: ColorSetName = .themeDesertLight
-    public var scheme: ColorScheme = .light
-    public var tintColor: Color = .init(hex: 0xDF915E)
-    public var primaryBackgroundColor: Color = .init(hex: 0xFCF2EB)
-    public var secondaryBackgroundColor: Color = .init(hex: 0xEEEDE7)
-    public var labelColor: Color = .black
-
-    public init() {}
-}
-
-// 4. Nemesis - 复仇者主题 【专业评分: 89/100】
-// 评分详情: 对比度24/25, 舒适度18/20, 品牌一致性13/15, 设计趋势14/15, 适应性9/10, 和谐度8/10, 功能性3/5
-// 优势: 科技蓝色，现代感强，高对比度，专业商务风格
-// 适用: 商务专业、科技感需求、现代风格爱好者
-public struct ThemeNemesisDark: ColorSet {
-    public var name: ColorSetName = .themeNemesisDark
-    public var scheme: ColorScheme = .dark
-    public var tintColor: Color = .init(hex: 0x17A2F2)
-    public var primaryBackgroundColor: Color = .init(hex: 0x000000)
-    public var secondaryBackgroundColor: Color = .init(hex: 0x151E2B)
-    public var labelColor: Color = .white
-
-    public init() {}
-}
-
-public struct ThemeNemesisLight: ColorSet {
-    public var name: ColorSetName = .themeNemesisLight
-    public var scheme: ColorScheme = .light
-    public var tintColor: Color = .init(hex: 0x17A2F2)
-    public var primaryBackgroundColor: Color = .init(hex: 0xFFFFFF)
-    public var secondaryBackgroundColor: Color = .init(hex: 0xE8ECEF)
-    public var labelColor: Color = .black
-
-    public init() {}
-}
-
-// 5. Medium - 媒体主题 【专业评分: 86/100】
-// 评分详情: 对比度23/25, 舒适度17/20, 品牌一致性12/15, 设计趋势14/15, 适应性9/10, 和谐度8/10, 功能性3/5
-// 优势: Medium风格绿色，阅读友好，简洁专业，内容创作者喜爱
-// 适用: 内容创作、阅读写作、专业博客、知识工作者
-public struct ThemeMediumDark: ColorSet {
-    public var name: ColorSetName = .themeMediumDark
-    public var scheme: ColorScheme = .dark
-    public var tintColor: Color = .init(hex: 0x1A8917)
-    public var primaryBackgroundColor: Color = .init(hex: 0x121212)
-    public var secondaryBackgroundColor: Color = .init(hex: 0x191919)
-    public var labelColor: Color = .white
-
-    public init() {}
-}
-
-public struct ThemeMediumLight: ColorSet {
-    public var name: ColorSetName = .themeMediumLight
-    public var scheme: ColorScheme = .light
-    public var tintColor: Color = .init(hex: 0x1A8917)
-    public var primaryBackgroundColor: Color = .init(hex: 0xFFFFFF)
-    public var secondaryBackgroundColor: Color = .init(hex: 0xFAFAFA)
-    public var labelColor: Color = .black
-
-    public init() {}
-}
-
-// 6. Constellation - 星座主题 【专业评分: 81/100】
-// 评分详情: 对比度20/25, 舒适度16/20, 品牌一致性11/15, 设计趋势13/15, 适应性8/10, 和谐度10/10, 功能性3/5
-// 优势: 星空配色，浪漫神秘，色彩和谐度高，独特的天文主题
-// 适用: 个性化需求、浪漫风格、天文爱好者、夜间使用
-public struct ThemeConstellationDark: ColorSet {
-    public var name: ColorSetName = .themeConstellationDark
-    public var scheme: ColorScheme = .dark
-    public var tintColor: Color = .init(hex: 0xFFD966)
-    public var primaryBackgroundColor: Color = .init(hex: 0x09192C)
-    public var secondaryBackgroundColor: Color = .init(hex: 0x304C7A)
-    public var labelColor: Color = .init(hex: 0xE2E4E2)
-
-    public init() {}
-}
-
-public struct ThemeConstellationLight: ColorSet {
-    public var name: ColorSetName = .themeConstellationLight
-    public var scheme: ColorScheme = .light
-    public var tintColor: Color = .init(hex: 0xC82238)
-    public var primaryBackgroundColor: Color = .init(hex: 0xF4F5F7)
-    public var secondaryBackgroundColor: Color = .init(hex: 0xACC7E5)
-    public var labelColor: Color = .black
-
-    public init() {}
-}
-
-// 7. Threads - 线程主题 【专业评分: 88/100】
-// 评分详情: 对比度23/25, 舒适度18/20, 品牌一致性13/15, 设计趋势14/15, 适应性9/10, 和谐度8/10, 功能性3/5
-// 优势: Meta Threads风格，现代蓝色，社交媒体友好，简洁专业
-// 适用: 社交媒体、现代风格、年轻用户、商务社交
-public struct ThemeThreadsDark: ColorSet {
-    public var name: ColorSetName = .threadsDark
-    public var scheme: ColorScheme = .dark
-    public var tintColor: Color = .init(hex: 0x0095F6)
-    public var primaryBackgroundColor: Color = .init(hex: 0x101010)
-    public var secondaryBackgroundColor: Color = .init(hex: 0x181818)
-    public var labelColor: Color = .init(hex: 0xE2E4E2)
-
-    public init() {}
-}
-
-public struct ThemeThreadsLight: ColorSet {
-    public var name: ColorSetName = .threadsLight
-    public var scheme: ColorScheme = .light
-    public var tintColor: Color = .init(hex: 0x0095F6)
-    public var primaryBackgroundColor: Color = .init(hex: 0xFFFFFF)
-    public var secondaryBackgroundColor: Color = .init(hex: 0xFFFFFF)
-    public var labelColor: Color = .black
-
-    public init() {}
-}
-
-// - Flutter Themes (从TweetX移植并优化)
-
-// 1. Fresh Sky - 清新天空主题 【专业评分: 94/100】
-// 评分详情: 对比度25/25, 舒适度19/20, 品牌一致性14/15, 设计趋势15/15, 适应性9/10, 和谐度10/10, 功能性2/5
-// 优势: 经典蓝白配色，商务场景首选，高对比度，符合现代设计趋势
-// 适用: 商务专业、日常使用、长时间阅读
 public struct ThemeFreshSkyLight: ColorSet {
     public var name: ColorSetName = .freshSkyLight
     public var scheme: ColorScheme = .light
@@ -323,10 +132,6 @@ public struct ThemeFreshSkyDark: ColorSet {
     public init() {}
 }
 
-// 2. Dark Ocean - 深海主题 【专业评分: 96/100】
-// 评分详情: 对比度25/25, 舒适度20/20, 品牌一致性13/15, 设计趋势15/15, 适应性10/10, 和谐度10/10, 功能性3/5
-// 优势: Nord设计系统，程序员最爱，极高对比度，色彩科学严谨
-// 适用: 开发者、设计师、专业用户、夜间使用
 public struct ThemeDarkOceanLight: ColorSet {
     public var name: ColorSetName = .darkOceanLight
     public var scheme: ColorScheme = .light
@@ -349,10 +154,6 @@ public struct ThemeDarkOceanDark: ColorSet {
     public init() {}
 }
 
-// 3. Mystic Night - 神秘夜晚 【专业评分: 92/100】
-// 评分详情: 对比度24/25, 舒适度18/20, 品牌一致性15/15, 设计趋势14/15, 适应性9/10, 和谐度9/10, 功能性3/5
-// 优势: Dracula风格，创意感强，开发者社区验证，紫色主调与品牌契合
-// 适用: 创意工作者、程序员、夜间模式爱好者
 public struct ThemeMysticNightLight: ColorSet {
     public var name: ColorSetName = .mysticNightLight
     public var scheme: ColorScheme = .light
@@ -375,11 +176,6 @@ public struct ThemeMysticNightDark: ColorSet {
     public init() {}
 }
 
-// 4. Sunset Glow - 日落余晖主题 【专业评分: 72/100】
-// 评分详情: 对比度18/25, 舒适度14/20, 品牌一致性10/15, 设计趋势12/15, 适应性7/10, 和谐度8/10, 功能性3/5
-// 优势: 温暖色调，情感化设计，适合休闲场景
-// 劣势: 橙红配色对比度不足，长时间使用易疲劳
-// 适用: 休闲浏览、短时间使用、个性化需求
 public struct ThemeSunsetGlowLight: ColorSet {
     public var name: ColorSetName = .sunsetGlowLight
     public var scheme: ColorScheme = .light
@@ -402,11 +198,6 @@ public struct ThemeSunsetGlowDark: ColorSet {
     public init() {}
 }
 
-// 5. Enchanted Forest - 魔法森林主题 【专业评分: 76/100】
-// 评分详情: 对比度20/25, 舒适度16/20, 品牌一致性11/15, 设计趋势12/15, 适应性8/10, 和谐度7/10, 功能性2/5
-// 优势: 自然绿色调，护眼效果，环保理念
-// 劣势: 绿色饱和度偏高，专业场景适用性有限
-// 适用: 自然爱好者、护眼需求、休闲使用
 public struct ThemeEnchantedForestLight: ColorSet {
     public var name: ColorSetName = .enchantedForestLight
     public var scheme: ColorScheme = .light
@@ -429,10 +220,6 @@ public struct ThemeEnchantedForestDark: ColorSet {
     public init() {}
 }
 
-// 6. Autumn Whisper - 秋日私语主题 【专业评分: 80/100】
-// 评分详情: 对比度21/25, 舒适度16/20, 品牌一致性12/15, 设计趋势13/15, 适应性8/10, 和谐度8/10, 功能性2/5
-// 优势: 温暖秋色，情感化设计，舒适感强，符合季节性主题趋势
-// 适用: 秋季使用、温暖氛围、情感化场景
 public struct ThemeAutumnWhisperLight: ColorSet {
     public var name: ColorSetName = .autumnWhisperLight
     public var scheme: ColorScheme = .light
@@ -455,10 +242,6 @@ public struct ThemeAutumnWhisperDark: ColorSet {
     public init() {}
 }
 
-// 7. Arctic Frost - 极地霜雪主题 【专业评分: 90/100】
-// 评分详情: 对比度24/25, 舒适度19/20, 品牌一致性13/15, 设计趋势15/15, 适应性9/10, 和谐度8/10, 功能性2/5
-// 优势: 清新冷色调，视觉舒适，高对比度，符合极简设计趋势
-// 适用: 长时间阅读、清新风格爱好者、夏季使用
 public struct ThemeArcticFrostLight: ColorSet {
     public var name: ColorSetName = .arcticFrostLight
     public var scheme: ColorScheme = .light
@@ -481,11 +264,6 @@ public struct ThemeArcticFrostDark: ColorSet {
     public init() {}
 }
 
-// 8. Cherry Blossom - 樱花主题 【专业评分: 65/100】
-// 评分详情: 对比度16/25, 舒适度12/20, 品牌一致性8/15, 设计趋势10/15, 适应性6/10, 和谐度8/10, 功能性5/5
-// 优势: 浪漫粉色，情感化设计，春季主题
-// 劣势: 粉色饱和度过高，专业场景不适用，长时间使用易疲劳
-// 适用: 个性化需求、短时间使用、特定用户群体
 public struct ThemeCherryBlossomLight: ColorSet {
     public var name: ColorSetName = .cherryBlossomLight
     public var scheme: ColorScheme = .light
@@ -508,10 +286,6 @@ public struct ThemeCherryBlossomDark: ColorSet {
     public init() {}
 }
 
-// 9. Pristine Elegance - 纯净优雅主题 【专业评分: 88/100】
-// 评分详情: 对比度23/25, 舒适度18/20, 品牌一致性14/15, 设计趋势15/15, 适应性9/10, 和谐度7/10, 功能性2/5
-// 优势: 极简风格，符合Apple设计语言，高雅简洁，专业感强
-// 适用: 商务专业、极简主义者、Apple生态用户
 public struct ThemePristineEleganceLight: ColorSet {
     public var name: ColorSetName = .pristineEleganceLight
     public var scheme: ColorScheme = .light
@@ -534,10 +308,6 @@ public struct ThemePristineEleganceDark: ColorSet {
     public init() {}
 }
 
-// 10. Nocturnal Depths - 夜幕深渊主题 【专业评分: 78/100】
-// 评分详情: 对比度20/25, 舒适度16/20, 品牌一致性12/15, 设计趋势13/15, 适应性8/10, 和谐度7/10, 功能性2/5
-// 优势: 中性色调，适合专业场景，低调内敛，不易疲劳
-// 适用: 专业工作、长时间使用、中性风格偏好者
 public struct ThemeNocturnalDepthsLight: ColorSet {
     public var name: ColorSetName = .nocturnalDepthsLight
     public var scheme: ColorScheme = .light
@@ -560,10 +330,6 @@ public struct ThemeNocturnalDepthsDark: ColorSet {
     public init() {}
 }
 
-// 11. Obsidian Grace - 黑曜石优雅主题 【专业评分: 86/100】
-// 评分详情: 对比度23/25, 舒适度17/20, 品牌一致性13/15, 设计趋势14/15, 适应性9/10, 和谐度8/10, 功能性2/5
-// 优势: 经典黑白配色，永不过时，极高对比度，专业感强
-// 适用: 商务专业、经典风格爱好者、高对比度需求
 public struct ThemeObsidianGraceLight: ColorSet {
     public var name: ColorSetName = .obsidianGraceLight
     public var scheme: ColorScheme = .light
@@ -586,10 +352,6 @@ public struct ThemeObsidianGraceDark: ColorSet {
     public init() {}
 }
 
-// 12. Jade Lagoon - 翡翠泻湖主题 【专业评分: 84/100】
-// 评分详情: 对比度22/25, 舒适度18/20, 品牌一致性12/15, 设计趋势13/15, 适应性8/10, 和谐度9/10, 功能性2/5
-// 优势: 自然绿色调，护眼效果好，清新舒适，色彩和谐
-// 适用: 护眼需求、自然风格、长时间阅读
 public struct ThemeJadeLagoonLight: ColorSet {
     public var name: ColorSetName = .jadeLagoonLight
     public var scheme: ColorScheme = .light
@@ -612,10 +374,6 @@ public struct ThemeJadeLagoonDark: ColorSet {
     public init() {}
 }
 
-// 13. Timber Essence - 木质精华主题 【专业评分: 82/100】
-// 评分详情: 对比度21/25, 舒适度17/20, 品牌一致性12/15, 设计趋势13/15, 适应性8/10, 和谐度9/10, 功能性2/5
-// 优势: 温暖木质色调，舒适感强，自然质感，适合长时间使用
-// 适用: 温暖氛围、自然风格、舒适阅读
 public struct ThemeTimberEssenceLight: ColorSet {
     public var name: ColorSetName = .timberEssenceLight
     public var scheme: ColorScheme = .light
@@ -638,11 +396,6 @@ public struct ThemeTimberEssenceDark: ColorSet {
     public init() {}
 }
 
-// 14. Rustic Canvas - 质朴画布主题 【专业评分: 74/100】
-// 评分详情: 对比度19/25, 舒适度15/20, 品牌一致性11/15, 设计趋势11/15, 适应性7/10, 和谐度8/10, 功能性3/5
-// 优势: 质朴自然，温暖色调，复古感
-// 劣势: 棕色调在数字界面中显得过时，专业感不足
-// 适用: 复古风格、温暖氛围、个性化需求
 public struct ThemeRusticCanvasLight: ColorSet {
     public var name: ColorSetName = .rusticCanvasLight
     public var scheme: ColorScheme = .light
@@ -665,11 +418,6 @@ public struct ThemeRusticCanvasDark: ColorSet {
     public init() {}
 }
 
-// 15. Plum Blossom - 梅花主题 【专业评分: 70/100】
-// 评分详情: 对比度18/25, 舒适度14/20, 品牌一致性13/15, 设计趋势10/15, 适应性6/10, 和谐度7/10, 功能性2/5
-// 优势: 紫红色调与品牌色契合，传统文化元素
-// 劣势: 颜色饱和度高，长时间使用易疲劳，专业场景适用性有限
-// 适用: 个性化需求、文化主题、短时间使用
 public struct ThemePlumBlossomLight: ColorSet {
     public var name: ColorSetName = .plumBlossomLight
     public var scheme: ColorScheme = .light
@@ -692,10 +440,6 @@ public struct ThemePlumBlossomDark: ColorSet {
     public init() {}
 }
 
-// 16. Natural Linen - 天然亚麻主题 【专业评分: 79/100】
-// 评分详情: 对比度20/25, 舒适度16/20, 品牌一致性12/15, 设计趋势12/15, 适应性8/10, 和谐度9/10, 功能性2/5
-// 优势: 天然质感，温暖舒适，护眼效果，自然风格
-// 适用: 自然风格、舒适阅读、温暖氛围
 public struct ThemeNaturalLinenLight: ColorSet {
     public var name: ColorSetName = .naturalLinenLight
     public var scheme: ColorScheme = .light
@@ -718,10 +462,6 @@ public struct ThemeNaturalLinenDark: ColorSet {
     public init() {}
 }
 
-// 17. Pristine Snow - 纯净雪花主题 【专业评分: 85/100】
-// 评分详情: 对比度22/25, 舒适度17/20, 品牌一致性14/15, 设计趋势14/15, 适应性9/10, 和谐度7/10, 功能性2/5
-// 优势: 纯净简洁，高对比度，极简风格，专业感强
-// 适用: 极简主义、专业工作、高对比度需求
 public struct ThemePristineSnowLight: ColorSet {
     public var name: ColorSetName = .pristineSnowLight
     public var scheme: ColorScheme = .light
@@ -744,11 +484,6 @@ public struct ThemePristineSnowDark: ColorSet {
     public init() {}
 }
 
-// 18. Emerald Depths - 翡翠深渊主题 【专业评分: 68/100】
-// 评分详情: 对比度17/25, 舒适度13/20, 品牌一致性11/15, 设计趋势11/15, 适应性6/10, 和谐度7/10, 功能性3/5
-// 优势: 深绿色调，自然感强
-// 劣势: Dark版本使用纯绿色过于刺眼，长时间使用不适，专业场景适用性差
-// 适用: 个性化需求、短时间使用、特定用户群体
 public struct ThemeEmeraldDepthsLight: ColorSet {
     public var name: ColorSetName = .emeraldDepthsLight
     public var scheme: ColorScheme = .light

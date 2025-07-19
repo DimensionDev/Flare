@@ -365,23 +365,9 @@ public final class FlareTheme {
 
     public static var allColorSet: [ColorSet] {
         [
-            // 原有主题
             ThemeDark(),
             ThemeLight(),
-            ThemeNeonDark(),
-            ThemeNeonLight(),
-            ThemeDesertDark(),
-            ThemeDesertLight(),
-            ThemeNemesisDark(),
-            ThemeNemesisLight(),
-            ThemeMediumLight(),
-            ThemeMediumDark(),
-            ThemeConstellationLight(),
-            ThemeConstellationDark(),
-            ThemeThreadsLight(),
-            ThemeThreadsDark(),
 
-            // Flutter主题 (从TweetX移植)
             ThemeFreshSkyLight(),
             ThemeFreshSkyDark(),
             ThemeDarkOceanLight(),

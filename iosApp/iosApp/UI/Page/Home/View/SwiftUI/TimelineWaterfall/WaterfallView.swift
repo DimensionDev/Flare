@@ -5,11 +5,9 @@ import WaterfallGrid
 struct WaterfallView: View {
     let tab: FLTabItem
     @ObservedObject var store: AppBarTabSettingStore
-    @Binding var scrollPositionID: String?
-    @Binding var scrollToTopTrigger: Bool
     let isCurrentTab: Bool
-    @Binding var showFloatingButton: Bool
     let displayType: TimelineDisplayType
+    @EnvironmentObject private var timelineState: TimelineExtState
 
     @Environment(FlareTheme.self) private var theme
     @Environment(FlareRouter.self) private var router
@@ -34,9 +32,7 @@ struct WaterfallView: View {
                 presenter: viewModel.presenter,
                 onError: viewModel.handleError,
                 scrolledID: $scrolledID,
-                scrollToTopTrigger: $scrollToTopTrigger,
                 isCurrentTab: isCurrentTab,
-                showFloatingButton: $showFloatingButton,
                 viewModel: viewModel
             ).task(id: tab.key) {
                 await viewModel.setupDataSource(for: tab, using: store)

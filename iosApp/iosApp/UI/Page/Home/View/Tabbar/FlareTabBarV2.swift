@@ -9,14 +9,13 @@ struct FlareTabBarV2: View {
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
     @Environment(\.appSettings) private var appSettings
+    @EnvironmentObject private var timelineState: TimelineExtState
 
     let accountType: AccountType
-    @Binding var scrollToTopTrigger: Bool
     @Namespace private var tabBarNamespace
 
-    init(accountType: AccountType, scrollToTopTrigger: Binding<Bool>) {
+    init(accountType: AccountType) {
         self.accountType = accountType
-        _scrollToTopTrigger = scrollToTopTrigger
 
         os_log("[FlareTabBarV2] Initialized for account type: %{public}@",
                log: .default, type: .debug,
@@ -80,9 +79,9 @@ struct FlareTabBarV2: View {
 
                 if tab == .timeline {
                     // Timeline特殊处理：触发滚动到顶部
-                    let oldValue = scrollToTopTrigger
-                    scrollToTopTrigger.toggle()
-                    FlareLog.debug("[FlareTabBarV2] Timeline scroll trigger toggled: \(oldValue) -> \(scrollToTopTrigger)")
+                    let oldValue = timelineState.scrollToTopTrigger
+                    timelineState.scrollToTopTrigger.toggle()
+                    FlareLog.debug("[FlareTabBarV2] Timeline scroll trigger toggled: \(oldValue) -> \(timelineState.scrollToTopTrigger)")
                 }
             } else {
                 // 切换到新Tab - 移除动画以提升响应速度

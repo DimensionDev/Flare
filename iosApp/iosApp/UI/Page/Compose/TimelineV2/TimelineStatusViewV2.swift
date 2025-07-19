@@ -184,7 +184,7 @@ struct TimelineStatusViewV2: View {
         .onDisappear {
             resetTranslationStates()
         }
-        .onChange(of: item.id) { oldValue, newValue in
+        .onChange(of: item.id) { _, _ in
             resetTranslationStates()
         }
         #if canImport(_Translation_SwiftUI)
@@ -226,13 +226,11 @@ struct TimelineStatusViewV2: View {
     private func handleTimelineAction(_ actionType: TimelineActionType, item: TimelineItem, at index: Int) {
         FlareLog.debug("TimelineView_v2 Handling action \(actionType) for item: \(item.id) at index: \(index)")
 
-
         if actionType == .translate {
             guard !isTranslating else {
                 FlareLog.debug("TimelineView_v2 Translation already in progress, ignoring")
                 return
             }
-
 
             guard !item.content.raw.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 FlareLog.warning("TimelineView_v2 Empty text for translation")
@@ -270,7 +268,6 @@ struct TimelineStatusViewV2: View {
             FlareLog.debug("TimelineView_v2 Local state update logged for index: \(index)")
         }
     }
-
 
     private func resetTranslationStates() {
         showAppleTranslation = false

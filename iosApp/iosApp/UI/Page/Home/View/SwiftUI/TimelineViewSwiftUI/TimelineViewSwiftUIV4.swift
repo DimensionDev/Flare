@@ -5,23 +5,19 @@ import SwiftUI
 struct TimelineViewSwiftUIV4: View {
     let tab: FLTabItem
     @ObservedObject var store: AppBarTabSettingStore
-    // @Binding var scrollPositionID: String?
-    @Binding var scrollToTopTrigger: Bool
     let isCurrentTab: Bool
-    @Binding var showFloatingButton: Bool
     @Environment(FlareTheme.self) private var theme
     @Environment(FlareRouter.self) private var router
+    @EnvironmentObject private var timelineState: TimelineExtState
 
     @State private var viewModel = TimelineViewModel()
 
     @State private var isInitialized: Bool = false
 
-    init(tab: FLTabItem, store: AppBarTabSettingStore, scrollToTopTrigger: Binding<Bool>, isCurrentTab: Bool, showFloatingButton: Binding<Bool>) {
+    init(tab: FLTabItem, store: AppBarTabSettingStore, isCurrentTab: Bool) {
         self.tab = tab
         self.store = store
-        _scrollToTopTrigger = scrollToTopTrigger
         self.isCurrentTab = isCurrentTab
-        _showFloatingButton = showFloatingButton
         FlareLog.debug("[TimelineV4] 视图初始化 for tab: \(tab.key)")
     }
 
@@ -79,13 +75,13 @@ struct TimelineViewSwiftUIV4: View {
                 .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
                     geometry
                 } action: { _, newValue in
-                    viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $showFloatingButton)
+                    viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $timelineState.showFloatingButton)
                 }
                 .refreshable {
                     await viewModel.handleRefresh()
                 }
             }
-            .onChange(of: scrollToTopTrigger) { _, _ in
+            .onChange(of: timelineState.scrollToTopTrigger) { _, _ in
                 let _ = FlareLog.debug("TimelineV4 ScrollToTop trigger for tab: \(tab.key)")
                 guard isCurrentTab else { return }
 

@@ -211,7 +211,6 @@ struct TimelineActionsViewV2: View {
             return
         }
 
-       
         let newRetweetCount = displayIsRetweeted ? displayRetweetCount - 1 : displayRetweetCount + 1
         let newIsRetweeted = !displayIsRetweeted
 
@@ -301,7 +300,6 @@ struct TimelineActionsViewV2: View {
 
     /// 执行KMP操作
     private func performKMPAction(actionType: TimelineActionType) {
- 
         func findAndExecuteAction(in actions: [StatusAction], actionType: TimelineActionType) -> Bool {
             for (index, action) in actions.enumerated() {
                 FlareLog.debug("TimelineActionsView Processing action at index \(index): \(type(of: action))")
@@ -311,7 +309,8 @@ struct TimelineActionsViewV2: View {
 
                 // 检查 .item 类型
                 if case let .item(actionItem) = enumResult,
-                   let clickable = actionItem as? StatusActionItemClickable {
+                   let clickable = actionItem as? StatusActionItemClickable
+                {
                     FlareLog.debug("TimelineActionsView Found .item with actionItem: \(type(of: actionItem))")
 
                     // 根据类型匹配
@@ -346,7 +345,6 @@ struct TimelineActionsViewV2: View {
                 }
                 // 检查 .group 类型
                 else if case let .group(group) = enumResult {
-                   
                     // 递归搜索group中的actions
                     if findAndExecuteAction(in: group.actions, actionType: actionType) {
                         return true

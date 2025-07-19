@@ -115,7 +115,7 @@ class ProfileNewRefreshViewController: UIViewController {
         }
 
         if !isOwnProfile {
-             navigationController?.navigationBar.alpha = 1.0
+            navigationController?.navigationBar.alpha = 1.0
         }
     }
 
@@ -342,7 +342,6 @@ class ProfileNewRefreshViewController: UIViewController {
 
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
 
-         
         // if case let .success(actions) = onEnum(of: state.actions),
         //    actions.data.size > 0
         // {
@@ -423,7 +422,6 @@ class ProfileNewRefreshViewController: UIViewController {
         //     }
         // }
 
-        
         if case let .success(user) = onEnum(of: state.userState) {
             alertController.addAction(UIAlertAction(title: NSLocalizedString("report", comment: ""), style: .destructive) { [weak self] _ in
                 Task {
@@ -441,7 +439,6 @@ class ProfileNewRefreshViewController: UIViewController {
             })
         }
 
-         
         alertController.addAction(UIAlertAction(title: NSLocalizedString("cancel", comment: ""), style: .cancel))
 
         present(alertController, animated: true)

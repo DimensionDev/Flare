@@ -32,30 +32,29 @@ struct TranslationLanguageScreen: View {
                 }
             }.listRowBackground(theme.primaryBackgroundColor)
 
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Test Translation")
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Test Translation")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
 
-                    Text("Hello World!")
-                        .font(.body)
+                Text("Hello World!")
+                    .font(.body)
 
-                    
-                    TranslatableText(originalText: "Hello World!")
-                        .id(appSettings.otherSettings.translationProvider) // 切换引擎时刷新
+                TranslatableText(originalText: "Hello World!")
+                    .id(appSettings.otherSettings.translationProvider) // 切换引擎时刷新
+            }
+            .padding(.vertical, 8)
+
+            if appSettings.otherSettings.translationProvider == .systemOffline {
+                Button(action: {
+                    showSystemTranslationTest = true
+                }) {
+                    HStack {
+                        Label("Test System Translation", systemImage: "character.bubble.fill")
+                    }
                 }
-                .padding(.vertical, 8)
-
-                 if appSettings.otherSettings.translationProvider == .systemOffline {
-                    Button(action: {
-                        showSystemTranslationTest = true
-                    }) {
-                        HStack {
-                            Label("Test System Translation", systemImage: "character.bubble.fill")
-                         }
-                    }    
-                 }
-         }
+            }
+        }
         .scrollContentBackground(.hidden)
         .background(theme.secondaryBackgroundColor)
         .navigationTitle("Translation & Language")

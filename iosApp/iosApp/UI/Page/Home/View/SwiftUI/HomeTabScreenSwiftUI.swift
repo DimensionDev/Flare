@@ -3,17 +3,16 @@ import SwiftUI
 
 struct HomeTabScreenSwiftUI: View {
     let accountType: AccountType
-    @Binding var scrollToTopTrigger: Bool
-    @Binding var showFloatingButton: Bool
 
     var onSwitchToMenuTab: (() -> Void)?
 
     @StateObject private var tabStore = AppBarTabSettingStore.shared
+    @EnvironmentObject private var timelineState: TimelineExtState
     @State private var selectedHomeAppBarTabKey: String = ""
     @State private var showAppbarSettings = false
     @State private var showLogin = false
-    @State private var tabScrollTriggers: [String: Bool] = [:]
-    @Environment(FlareTheme.self) private var theme
+    // @State private var tabScrollTriggers: [String: Bool] = [:]
+    // @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         VStack(spacing: 0) {
@@ -31,11 +30,11 @@ struct HomeTabScreenSwiftUI: View {
                 onScrollToTop: { tabKey in
                     FlareLog.debug("HomeTabScreenSwiftUI Triggering scroll to top for tab: \(tabKey)")
                     // 切换指定标签的滚动触发器
-                    tabScrollTriggers[tabKey] = !(tabScrollTriggers[tabKey] ?? false)
+                    // tabScrollTriggers[tabKey] = !(tabScrollTriggers[tabKey] ?? false)
 
-                    // 同时触发旧的 scrollToTopTrigger 以支持浮动按钮
+                    // 同时触发 TimelineExtState 的 scrollToTopTrigger 以支持浮动按钮
                     if tabKey == selectedHomeAppBarTabKey {
-                        scrollToTopTrigger.toggle()
+                        timelineState.scrollToTopTrigger.toggle()
                     }
                 }
             )
@@ -44,8 +43,7 @@ struct HomeTabScreenSwiftUI: View {
             TabContentViewSwiftUI(
                 tabStore: tabStore,
                 selectedTab: $selectedHomeAppBarTabKey,
-                tabScrollTriggers: $tabScrollTriggers,
-                showFloatingButton: $showFloatingButton
+                // tabScrollTriggers: $tabScrollTriggers
             )
         }.toolbarVisibility(.hidden, for: .navigationBar) // 隐藏，避免滑动返回 appbar 高度增加
             .onAppear {
@@ -67,11 +65,11 @@ struct HomeTabScreenSwiftUI: View {
                     }
                 }
             }
-            .onChange(of: scrollToTopTrigger) { _, _ in
-                // 当浮动按钮触发 scrollToTopTrigger 时，同步到当前标签的 tabScrollTriggers
-                FlareLog.debug("HomeTabScreenSwiftUI FloatingButton triggered scroll to top for current tab: \(selectedHomeAppBarTabKey)")
-                tabScrollTriggers[selectedHomeAppBarTabKey] = !(tabScrollTriggers[selectedHomeAppBarTabKey] ?? false)
-            }
+            // .onChange(of: timelineState.scrollToTopTrigger) { _, _ in
+            //     // 当浮动按钮触发 scrollToTopTrigger 时，同步到当前标签的 tabScrollTriggers
+            //     FlareLog.debug("HomeTabScreenSwiftUI FloatingButton triggered scroll to top for current tab: \(selectedHomeAppBarTabKey)")
+            //     // tabScrollTriggers[selectedHomeAppBarTabKey] = !(tabScrollTriggers[selectedHomeAppBarTabKey] ?? false)
+            // }
             .onChange(of: selectedHomeAppBarTabKey) { _, newValue in
                 if let tab = tabStore.availableAppBarTabsItems.first(where: { $0.key == newValue }) {
                     tabStore.updateSelectedTab(tab)

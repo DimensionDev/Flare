@@ -12,10 +12,9 @@ struct HomeTabViewContentV2: View {
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
     @Environment(\.appSettings) private var appSettings
+    @EnvironmentObject private var timelineState: TimelineExtState
 
     let accountType: AccountType
-    @State private var scrollToTopTrigger = false
-    @State private var showFloatingButton = false
 
     private var visibleTabs: [FlareHomeTabs] {
         var tabs: [FlareHomeTabs] = [.menu, .timeline]
@@ -42,12 +41,10 @@ struct HomeTabViewContentV2: View {
         )
 
         return ZStack(alignment: .bottom) {
-            // 主TabView内容 - 恢复TabView架构以保持状态
             TabView(selection: Binding(
                 get: { router.selectedTab },
                 set: { router.selectedTab = $0 }
             )) {
-                // Menu Tab
                 Tab(value: FlareHomeTabs.menu) {
                     FlareTabItem(tabType: .menu) {
                         FlareMenuView()
@@ -56,13 +53,10 @@ struct HomeTabViewContentV2: View {
                 }
                 .customizationID("tabview_menu")
 
-                // Timeline Tab
                 Tab(value: FlareHomeTabs.timeline) {
                     FlareTabItem(tabType: .timeline) {
                         HomeTabScreenSwiftUI(
                             accountType: accountType,
-                            scrollToTopTrigger: $scrollToTopTrigger,
-                            showFloatingButton: $showFloatingButton,
                             onSwitchToMenuTab: {
                                 router.selectedTab = .menu
                             }
@@ -115,11 +109,10 @@ struct HomeTabViewContentV2: View {
             if !appState.isCustomTabBarHidden {
                 VStack(spacing: 0) {
                     FlareTabBarV2(
-                        accountType: accountType,
-                        scrollToTopTrigger: $scrollToTopTrigger
+                        accountType: accountType
                     )
 
-//                     底部安全区域
+                    // 底部安全区域
                     Rectangle()
                         .fill(.clear)
                         .frame(height: 0)
@@ -130,10 +123,7 @@ struct HomeTabViewContentV2: View {
             if router.selectedTab == .timeline, router.navigationDepth == 0 {
                 VStack(spacing: 12) {
                     if !appSettings.appearanceSettings.hideScrollToTopButton {
-                        FloatingScrollToTopButton(
-                            isVisible: $showFloatingButton,
-                            scrollToTopTrigger: $scrollToTopTrigger
-                        )
+                        FloatingScrollToTopButton()
                     }
 
                     FloatingDisplayTypeButton(isVisible: .constant(true))

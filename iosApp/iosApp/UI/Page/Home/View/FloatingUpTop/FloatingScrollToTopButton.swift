@@ -1,22 +1,19 @@
 import SwiftUI
 
 struct FloatingScrollToTopButton: View {
-    @Binding var isVisible: Bool
-
-    @Binding var scrollToTopTrigger: Bool
-
+    @EnvironmentObject private var timelineState: TimelineExtState
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         Group {
-            if isVisible {
+            if timelineState.showFloatingButton {
                 Button(action: scrollToTopAction) {
                     buttonContent
                 }
                 .transition(.scale.combined(with: .opacity))
                 .animation(.spring(response: FloatingButtonConfig.springResponse,
                                    dampingFraction: FloatingButtonConfig.springDamping),
-                           value: isVisible)
+                           value: timelineState.showFloatingButton)
             }
         }
     }
@@ -39,6 +36,6 @@ struct FloatingScrollToTopButton: View {
     }
 
     private func scrollToTopAction() {
-        scrollToTopTrigger.toggle()
+        timelineState.scrollToTopTrigger.toggle()
     }
 }

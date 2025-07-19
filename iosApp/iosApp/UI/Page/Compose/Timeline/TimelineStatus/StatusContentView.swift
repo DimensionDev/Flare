@@ -257,8 +257,8 @@ struct StatusMainContentView: View {
             .lineSpacing(CGFloat(theme.lineSpacing))
             .foregroundColor(theme.labelColor)
 
-//appSettings.appearanceSettings.autoTranslate,
-            if  viewModel.shouldShowTranslation {
+            // appSettings.appearanceSettings.autoTranslate,
+            if viewModel.shouldShowTranslation {
                 TranslatableText(originalText: content.raw)
             }
         } else {

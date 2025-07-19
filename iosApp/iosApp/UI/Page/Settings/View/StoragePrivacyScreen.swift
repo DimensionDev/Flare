@@ -140,16 +140,14 @@ struct StoragePrivacyScreen: View {
                 }.listRowBackground(theme.primaryBackgroundColor)
 
                 // Privacy Settings Section
-                Section("Privacy Settings") {
-                    // 这里可以添加未来的隐私设置
-                    // 目前隐私相关的设置（如敏感内容分析）已经移到了其他页面
-                    Text("Privacy settings will be added here in future updates")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }.listRowBackground(theme.primaryBackgroundColor)
+//                Section("Privacy Settings") {
+//                    Text("https://github.com/DimensionDev/Flare")
+//                        .font(.caption)
+//                        .foregroundColor(.secondary)
+//                }.listRowBackground(theme.primaryBackgroundColor)
             }
             .background(theme.secondaryBackgroundColor)
-            .navigationTitle("Storage & Privacy")
+            .navigationTitle("Storage")
             .navigationBarTitleDisplayMode(.inline)
             .onAppear {
                 calculateImageCacheSize()

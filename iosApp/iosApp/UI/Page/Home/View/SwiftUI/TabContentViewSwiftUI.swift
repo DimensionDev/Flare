@@ -5,12 +5,11 @@ import SwiftUIIntrospect
 struct TabContentViewSwiftUI: View {
     @ObservedObject var tabStore: AppBarTabSettingStore
     @Binding var selectedTab: String
-    @Binding var tabScrollTriggers: [String: Bool]
-    @Binding var showFloatingButton: Bool
+    // @Binding var tabScrollTriggers: [String: Bool]
 
-    @State private var scrollPositions: [String: String] = [:]
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareRouter.self) private var router
+    // @EnvironmentObject private var timelineState: TimelineExtState
 
     var body: some View {
         ZStack {
@@ -19,22 +18,7 @@ struct TabContentViewSwiftUI: View {
                     TimelineViewSwiftUI(
                         tab: tab,
                         store: tabStore,
-                        scrollPositionID: Binding(
-                            get: { scrollPositions[tab.key] },
-                            set: { newValue in
-                                if let newValue {
-                                    scrollPositions[tab.key] = newValue
-                                }
-                            }
-                        ),
-                        scrollToTopTrigger: Binding(
-                            get: { tabScrollTriggers[tab.key] ?? false },
-                            set: { newValue in
-                                tabScrollTriggers[tab.key] = newValue
-                            }
-                        ),
-                        isCurrentTab: selectedTab == tab.key,
-                        showFloatingButton: $showFloatingButton
+                        isCurrentTab: selectedTab == tab.key
                     )
                     .tag(tab.key)
                 }

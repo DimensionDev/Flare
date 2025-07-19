@@ -11,10 +11,9 @@ struct WaterfallItemsView: View {
     let presenter: TimelinePresenter?
     let onError: (FlareError) -> Void
     @Binding var scrolledID: String?
-    @Binding var scrollToTopTrigger: Bool
     let isCurrentTab: Bool
-    @Binding var showFloatingButton: Bool
     let viewModel: TimelineViewModel
+    @EnvironmentObject private var timelineState: TimelineExtState
 
 //    @State private var hasTriggeredLoadMore = false
     @State private var scrollThreshold: CGFloat = 100
@@ -101,7 +100,7 @@ struct WaterfallItemsView: View {
         .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
             geometry
         } action: { _, newValue in
-            viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $showFloatingButton)
+            viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $timelineState.showFloatingButton)
 
             let currentOffset = newValue.contentOffset.y
 
@@ -125,7 +124,7 @@ struct WaterfallItemsView: View {
             }
         }
         .refreshable {}
-        .onChange(of: scrollToTopTrigger) { _, _ in
+        .onChange(of: timelineState.scrollToTopTrigger) { _, _ in
             guard isCurrentTab else { return }
 
             if let firstItem = waterfallItems.first {

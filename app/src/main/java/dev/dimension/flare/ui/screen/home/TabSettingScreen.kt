@@ -160,7 +160,7 @@ internal fun TabSettingScreen(
                 }
             }
             item {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(6.dp))
             }
             itemsIndexed(state.currentTabs, key = { _, item -> item.key }) { index, item ->
                 TabCustomItem(

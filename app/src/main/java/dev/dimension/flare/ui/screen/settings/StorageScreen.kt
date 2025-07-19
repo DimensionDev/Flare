@@ -30,9 +30,10 @@ import compose.icons.fontawesomeicons.solid.Envelope
 import compose.icons.fontawesomeicons.solid.Images
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.BackButton
-import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.ThemeIconData
+import dev.dimension.flare.ui.component.ThemedIcon
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
@@ -95,9 +96,10 @@ internal fun StorageScreen(
                             ListCardShapes.item(),
                         ),
                 leadingContent = {
-                    FAIcon(
+                    ThemedIcon(
                         FontAwesomeIcons.Solid.Images,
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.settings_storage_clear_image_cache),
+                        color = ThemeIconData.Color.ForestGreen,
                     )
                 },
             )
@@ -123,9 +125,10 @@ internal fun StorageScreen(
                             ListCardShapes.item(),
                         ),
                 leadingContent = {
-                    FAIcon(
+                    ThemedIcon(
                         FontAwesomeIcons.Solid.Database,
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.settings_storage_clear_database),
+                        color = ThemeIconData.Color.ImperialMagenta,
                     )
                 },
             )
@@ -147,9 +150,10 @@ internal fun StorageScreen(
                             ListCardShapes.item(),
                         ),
                 leadingContent = {
-                    FAIcon(
+                    ThemedIcon(
                         FontAwesomeIcons.Solid.Envelope,
-                        contentDescription = null,
+                        contentDescription = stringResource(id = R.string.settings_storage_app_log),
+                        color = ThemeIconData.Color.DeepTeal,
                     )
                 },
             )

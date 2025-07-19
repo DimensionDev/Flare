@@ -38,6 +38,7 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.common.itemsIndexed
+import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareDropdownMenu
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
@@ -63,6 +64,7 @@ internal fun RssSourcesScreen(
     onAdd: () -> Unit,
     onEdit: (Int) -> Unit,
     onClicked: (UiRssSource) -> Unit,
+    onBack: () -> Unit,
 ) {
     val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter { presenter() }
@@ -83,6 +85,9 @@ internal fun RssSourcesScreen(
                             contentDescription = stringResource(R.string.add_rss_source),
                         )
                     }
+                },
+                navigationIcon = {
+                    BackButton(onBack = onBack)
                 },
                 scrollBehavior = topAppBarScrollBehavior,
             )

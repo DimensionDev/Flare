@@ -67,11 +67,7 @@ internal fun EntryProviderBuilder<NavKey>.listEntryBuilder(
                     ),
                 )
             },
-            toCompose = {
-                navigate(Route.Compose.New(args.accountType))
-            },
-            toQuickMenu = { /* No-op for lists */ },
-            toLogin = { /* No-op for lists */ },
+            onBack = onBack,
         )
     }
 

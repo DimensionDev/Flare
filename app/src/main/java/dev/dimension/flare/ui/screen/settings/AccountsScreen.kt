@@ -212,6 +212,7 @@ fun <T : UiUserV2> AccountItem(
     },
     tonalElevation: Dp = ListItemDefaults.Elevation,
     shadowElevation: Dp = ListItemDefaults.Elevation,
+    avatarSize: Dp = AvatarComponentDefaults.size,
     colors: ListItemColors = ListItemDefaults.colors(),
 ) {
     userState
@@ -226,7 +227,7 @@ fun <T : UiUserV2> AccountItem(
                             onClick.invoke(data.key)
                         },
                 leadingContent = {
-                    AvatarComponent(data = data.avatar)
+                    AvatarComponent(data = data.avatar, size = avatarSize)
                 },
                 trailingContent = {
                     trailingContent.invoke(data)
@@ -248,6 +249,7 @@ fun <T : UiUserV2> AccountItem(
                     AvatarComponent(
                         data = null,
                         modifier = Modifier.placeholder(true, shape = CircleShape),
+                        size = avatarSize,
                     )
                 },
                 supportingContent = {
@@ -271,7 +273,7 @@ fun <T : UiUserV2> AccountItem(
                     FAIcon(
                         FontAwesomeIcons.Solid.FileCircleExclamation,
                         contentDescription = stringResource(id = R.string.account_item_error_title),
-                        modifier = Modifier.size(AvatarComponentDefaults.size),
+                        modifier = Modifier.size(avatarSize),
                     )
                 },
                 supportingContent = {

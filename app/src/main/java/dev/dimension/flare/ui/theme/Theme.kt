@@ -125,13 +125,11 @@ fun FlareTheme(
                     if (darkTheme) {
                         it.copy(
                             background = it.surfaceContainer,
-                            surface = it.surfaceContainerHighest,
-//                        surfaceContainerLow = it.surfaceContainerHighest,
+                            surface = it.surfaceBright,
                         )
                     } else {
                         it.copy(
-                            background = it.surfaceContainerLow,
-//                        surfaceContainerLow = it.surface,
+                            background = it.surfaceContainer,
                         )
                     }
                 }
@@ -162,7 +160,6 @@ fun FlareTheme(
     }
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
-        typography = Typography,
         content = {
             content.invoke()
         },

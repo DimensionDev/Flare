@@ -39,15 +39,10 @@ internal fun EntryProviderBuilder<NavKey>.homeEntryBuilder(
     entry<Route.Timeline> { args ->
         TimelineScreen(
             tabItem = args.tabItem,
-            toCompose = {
-                navigate(Route.Compose.New(accountType = args.accountType))
-            },
-            toQuickMenu = {
-                openDrawer.invoke()
-            },
             toLogin = {
                 navigate(Route.ServiceSelect.Selection)
             },
+            onBack = onBack,
         )
     }
     entry<Route.Discover> { args ->

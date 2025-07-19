@@ -34,11 +34,14 @@ import compose.icons.fontawesomeicons.solid.Globe
 import compose.icons.fontawesomeicons.solid.Palette
 import compose.icons.fontawesomeicons.solid.Robot
 import compose.icons.fontawesomeicons.solid.TableList
+import dev.dimension.flare.BuildConfig
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.component.ThemeIconData
+import dev.dimension.flare.ui.component.ThemedIcon
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
@@ -81,6 +84,7 @@ internal fun SettingsScreen(
     toAppearance: () -> Unit,
     toStorage: () -> Unit,
     toAbout: () -> Unit,
+    toColorSpace: () -> Unit,
     toTabCustomization: () -> Unit,
     toLocalFilter: () -> Unit,
     toGuestSettings: () -> Unit,
@@ -118,6 +122,7 @@ internal fun SettingsScreen(
                 .onSuccess {
                     AccountItem(
                         userState = state.user,
+                        avatarSize = 40.dp,
                         onClick = {
                             toAccounts.invoke()
                         },
@@ -142,9 +147,10 @@ internal fun SettingsScreen(
                                     toAccounts.invoke()
                                 }.clip(shape = ListCardShapes.container()),
                         leadingContent = {
-                            FAIcon(
+                            ThemedIcon(
                                 imageVector = FontAwesomeIcons.Solid.CircleUser,
                                 contentDescription = null,
+                                color = ThemeIconData.Color.ImperialMagenta,
                             )
                         },
                         supportingContent = {
@@ -165,9 +171,10 @@ internal fun SettingsScreen(
                                     toGuestSettings.invoke()
                                 },
                         leadingContent = {
-                            FAIcon(
+                            ThemedIcon(
                                 imageVector = FontAwesomeIcons.Solid.Globe,
-                                contentDescription = null,
+                                contentDescription = stringResource(id = R.string.settings_guest_setting_title),
+                                color = ThemeIconData.Color.SapphireBlue,
                             )
                         },
                         supportingContent = {
@@ -187,9 +194,10 @@ internal fun SettingsScreen(
                         Text(text = stringResource(id = R.string.settings_appearance_title))
                     },
                     leadingContent = {
-                        FAIcon(
+                        ThemedIcon(
                             imageVector = FontAwesomeIcons.Solid.Palette,
-                            contentDescription = null,
+                            contentDescription = stringResource(id = R.string.settings_appearance_title),
+                            color = ThemeIconData.Color.RoyalPurple,
                         )
                     },
                     supportingContent = {
@@ -207,9 +215,10 @@ internal fun SettingsScreen(
                             Text(text = stringResource(id = R.string.settings_side_panel))
                         },
                         leadingContent = {
-                            FAIcon(
+                            ThemedIcon(
                                 imageVector = FontAwesomeIcons.Solid.TableList,
-                                contentDescription = null,
+                                contentDescription = stringResource(id = R.string.settings_side_panel),
+                                color = ThemeIconData.Color.DeepTeal,
                             )
                         },
                         supportingContent = {
@@ -236,9 +245,10 @@ internal fun SettingsScreen(
                             Text(text = stringResource(id = R.string.settings_local_filter_title))
                         },
                         leadingContent = {
-                            FAIcon(
+                            ThemedIcon(
                                 imageVector = FontAwesomeIcons.Solid.Filter,
-                                contentDescription = null,
+                                contentDescription = stringResource(id = R.string.settings_local_filter_title),
+                                color = ThemeIconData.Color.BurntUmber,
                             )
                         },
                         supportingContent = {
@@ -260,9 +270,10 @@ internal fun SettingsScreen(
                                     toLocalHistory.invoke()
                                 }.clip(shape = ListCardShapes.item()),
                         leadingContent = {
-                            FAIcon(
+                            ThemedIcon(
                                 imageVector = FontAwesomeIcons.Solid.ClockRotateLeft,
-                                contentDescription = null,
+                                contentDescription = stringResource(id = R.string.settings_local_history_title),
+                                color = ThemeIconData.Color.BurntUmber,
                             )
                         },
                         supportingContent = {
@@ -274,9 +285,10 @@ internal fun SettingsScreen(
                             Text(text = stringResource(id = R.string.settings_storage_title))
                         },
                         leadingContent = {
-                            FAIcon(
+                            ThemedIcon(
                                 imageVector = FontAwesomeIcons.Solid.Database,
-                                contentDescription = null,
+                                contentDescription = stringResource(id = R.string.settings_storage_title),
+                                color = ThemeIconData.Color.DarkAmber,
                             )
                         },
                         supportingContent = {
@@ -294,7 +306,7 @@ internal fun SettingsScreen(
 //                    Text(text = stringResource(id = R.string.settings_notifications_title))
 //                },
 //                leadingContent = {
-//                    FAIcon(
+//                    ThemedIcon(
 //                        imageVector = Icons.Default.Notifications,
 //                        contentDescription = null,
 //                    )
@@ -319,9 +331,10 @@ internal fun SettingsScreen(
                         Text(text = stringResource(id = R.string.settings_ai_config_title))
                     },
                     leadingContent = {
-                        FAIcon(
+                        ThemedIcon(
                             imageVector = FontAwesomeIcons.Solid.Robot,
                             contentDescription = stringResource(id = R.string.settings_ai_config_title),
+                            color = ThemeIconData.Color.ForestGreen,
                         )
                     },
                     supportingContent = {
@@ -340,14 +353,34 @@ internal fun SettingsScreen(
                         .clip(ListCardShapes.container()),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
+                if (BuildConfig.DEBUG) {
+                    ListItem(
+                        headlineContent = {
+                            Text(text = "Color Space")
+                        },
+                        leadingContent = {
+                            ThemedIcon(
+                                imageVector = FontAwesomeIcons.Solid.CircleInfo,
+                                contentDescription = null,
+                                color = ThemeIconData.Color.CharcoalGrey,
+                            )
+                        },
+                        modifier =
+                            Modifier
+                                .clickable {
+                                    toColorSpace.invoke()
+                                }.clip(shape = ListCardShapes.item()),
+                    )
+                }
                 ListItem(
                     headlineContent = {
                         Text(text = stringResource(id = R.string.settings_about_title))
                     },
                     leadingContent = {
-                        FAIcon(
+                        ThemedIcon(
                             imageVector = FontAwesomeIcons.Solid.CircleInfo,
-                            contentDescription = null,
+                            contentDescription = stringResource(id = R.string.settings_about_title),
+                            color = ThemeIconData.Color.CharcoalGrey,
                         )
                     },
                     supportingContent = {

@@ -59,6 +59,7 @@ internal fun EntryProviderBuilder<NavKey>.rssEntryBuilder(
                     )
                 )
             },
+            onBack = onBack,
         )
     }
     entry<Route.Rss.Timeline>(
@@ -81,8 +82,7 @@ internal fun EntryProviderBuilder<NavKey>.rssEntryBuilder(
                     )
                 )
             },
-            toCompose = {},
-            toQuickMenu = {},
+            onBack = onBack,
         )
     }
     entry<Route.Rss.Detail>(

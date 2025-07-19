@@ -22,13 +22,13 @@ struct TimelineItemsView: View {
                 onError: onError
             )
             .padding(.vertical, 4)
-            .onScrollVisibilityChange(threshold: 0.3) { isVisible in
-                if isVisible {
-                    FlareLog.debug("Timeline item \(item.id) became visible")
-                }
-            }
+//            .onScrollVisibilityChange(threshold: 0.3) { isVisible in
+            ////                if isVisible {
+            ////                    FlareLog.debug("Timeline item \(item.id) became visible")
+            ////                }
+//            }
             .onAppear {
-                if item.id == lastItemId, hasMore {
+                if item.id == lastItemId, hasMore, !isRefreshing, !viewModel.isLoadingMore {
                     FlareLog.debug("Timeline Last item appeared, triggering load more")
                     handleLoadMore()
                 }
@@ -49,13 +49,16 @@ struct TimelineItemsView: View {
             updateLastItemId(items)
         }
 
-        if hasMore {
-            TimelineLoadMoreView(isRefreshing: isRefreshing)
-                .onAppear {
-                    FlareLog.debug("Timeline Load more triggered")
-                    handleLoadMore()
-                }
-        }
+//        if hasMore {
+//            TimelineLoadMoreView(isRefreshing: isRefreshing)
+//                .onAppear {
+//                    // 🔥 只在非刷新状态下触发，避免重复
+//                    if hasMore, !isRefreshing, !viewModel.isLoadingMore {
+//                        FlareLog.debug("Timeline Load more triggered")
+//                        handleLoadMore()
+//                    }
+//                }
+//        }
     }
 
     private func handleLoadMore() {

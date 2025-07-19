@@ -4,21 +4,17 @@ import shared
 import SwiftUI
 
 class ProfileTabSettingStore: ObservableObject, TabStateProvider {
-    // - Published Properties
     @Published var availableTabs: [FLTabItem] = [] // 当前显示的所有标签
     @Published var selectedTabKey: String? // 当前选中的标签
     @Published var currentUser: UiUserV2?
     @Published var currentPresenter: TimelinePresenter?
     @Published var currentMediaPresenter: ProfileMediaPresenter?
 
-    // - Private Properties
-//    private var timelineStore: TimelineStore
     private var isInitializing = false
-//    private var presenter = ActiveAccountPresenter()
-    private var presenterCache: [String: TimelinePresenter] = [:] // 添加缓存
+
+    private var presenterCache: [String: TimelinePresenter] = [:]
     private var mediaPresenterCache: [String: ProfileMediaPresenter] = [:] // 媒体presenter缓存
 
-    // TabStateProvider 协议实现
     var onTabChange: ((Int) -> Void)?
 
     var tabCount: Int {
@@ -30,9 +26,7 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
         return availableTabs.firstIndex { $0.key == selectedTabKey } ?? 0
     }
 
-    // - Initialization
-    init(userKey: MicroBlogKey?) { // timelineStore: TimelineStore,
-//        self.timelineStore = timelineStore
+    init(userKey: MicroBlogKey?) {
         observeUser(userKey: userKey)
     }
 
@@ -49,14 +43,6 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
             initializeWithUser(createSampleUser(), userKey: userKey)
             return
         }
-
-        // 如果没有，则等待用户更新通知
-//        NotificationCenter.default.addObserver(
-//            self,
-//            selector: #selector(handleUserUpdate),
-//            name: .userDidUpdate,
-//            object: nil
-//        )
     }
 
     @objc private func handleUserUpdate(_ notification: Notification) {

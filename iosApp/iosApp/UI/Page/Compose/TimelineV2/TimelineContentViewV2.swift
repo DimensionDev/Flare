@@ -9,6 +9,7 @@ struct TimelineContentViewV2: View {
     let presenter: TimelinePresenter?
     @Binding var scrollPositionID: String?
     let onError: (FlareError) -> Void
+    let viewModel: TimelineViewModel?
 
     var body: some View {
         switch state {
@@ -22,7 +23,8 @@ struct TimelineContentViewV2: View {
                 isRefreshing: isRefreshing,
                 presenter: presenter,
                 scrollPositionID: $scrollPositionID,
-                onError: onError
+                onError: onError,
+                viewModel: viewModel
             )
 
         case let .error(error):

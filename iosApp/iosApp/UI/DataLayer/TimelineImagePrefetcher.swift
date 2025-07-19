@@ -140,7 +140,7 @@ class TimelineImagePrefetcher {
     }
 
     private static func extractImageUrls(from timelineItems: [TimelineItem], limit _: Int) -> [URL] {
-        var urls: [URL] = []
+        var urls = Set<URL>()
         var avatarCount = 0
         var mediaCount = 0
         var quoteAvatarCount = 0
@@ -159,7 +159,7 @@ class TimelineImagePrefetcher {
             if let user = item.user,
                let avatarUrl = URL(string: user.avatar)
             {
-                urls.append(avatarUrl)
+                urls.insert(avatarUrl)
                 avatarCount += 1
                 // FlareLog.debug("TimelineImagePrefetcher   - 添加头像: \(user.name.raw) -> \(user.avatar)")
             }
@@ -169,7 +169,7 @@ class TimelineImagePrefetcher {
                 let rawImageUrl = media.previewUrl ?? media.url
                 let cleanedImageUrl = cleanPreviewUrl(rawImageUrl, for: .image) ?? rawImageUrl
                 if let url = URL(string: cleanedImageUrl) {
-                    urls.append(url)
+                    urls.insert(url)
                     mediaCount += 1
                     // FlareLog.debug("TimelineImagePrefetcher   - 添加媒体[\(mediaIndex)]: \(cleanedImageUrl)")
                 }
@@ -184,7 +184,7 @@ class TimelineImagePrefetcher {
                 if let quoteUser = quoteItem.user,
                    let quoteAvatarUrl = URL(string: quoteUser.avatar)
                 {
-                    urls.append(quoteAvatarUrl)
+                    urls.insert(quoteAvatarUrl)
                     quoteAvatarCount += 1
                     FlareLog.debug("TimelineImagePrefetcher     - 添加引用头像: \(quoteUser.name.raw) -> \(quoteUser.avatar)")
                 }
@@ -194,7 +194,7 @@ class TimelineImagePrefetcher {
                     let rawImageUrl = media.previewUrl ?? media.url
                     let cleanedImageUrl = cleanPreviewUrl(rawImageUrl, for: .image) ?? rawImageUrl
                     if let url = URL(string: cleanedImageUrl) {
-                        urls.append(url)
+                        urls.insert(url)
                         quoteMediaCount += 1
                         FlareLog.debug("TimelineImagePrefetcher     - 添加引用媒体[\(quoteMediaIndex)]: \(cleanedImageUrl)")
                     }
@@ -202,8 +202,7 @@ class TimelineImagePrefetcher {
             }
         }
 
-        // 🔥 去重并统计
-        let uniqueUrls = Array(Set(urls))
+        let uniqueUrls = Array(urls)
         let duplicateCount = urls.count - uniqueUrls.count
 
         FlareLog.debug("TimelineImagePrefetcher === extractImageUrls 统计 ===")

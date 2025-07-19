@@ -111,9 +111,9 @@ struct QuotedStatusV2: View {
                     }
                     .font(.system(size: 16))
 
-                if appSettings.appearanceSettings.autoTranslate {
-                    TranslatableText(originalText: item.content.raw)
-                }
+                // if appSettings.appearanceSettings.autoTranslate {
+                //     TranslatableText(originalText: item.content.raw)
+                // }
 
                 Spacer()
                     .frame(height: 8)

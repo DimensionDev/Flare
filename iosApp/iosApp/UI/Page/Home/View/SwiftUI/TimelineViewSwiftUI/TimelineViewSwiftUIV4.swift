@@ -5,24 +5,22 @@ import SwiftUI
 struct TimelineViewSwiftUIV4: View {
     let tab: FLTabItem
     @ObservedObject var store: AppBarTabSettingStore
-    // @Binding var scrollPositionID: String?
-    @Binding var scrollToTopTrigger: Bool
     let isCurrentTab: Bool
-    @Binding var showFloatingButton: Bool
     @Environment(FlareTheme.self) private var theme
+    @Environment(FlareRouter.self) private var router
+    @EnvironmentObject private var timelineState: TimelineExtState
 
     @State private var viewModel = TimelineViewModel()
 
-    init(tab: FLTabItem, store: AppBarTabSettingStore, scrollToTopTrigger: Binding<Bool>, isCurrentTab: Bool, showFloatingButton: Binding<Bool>) {
+    @State private var isInitialized: Bool = false
+
+    init(tab: FLTabItem, store: AppBarTabSettingStore, isCurrentTab: Bool) {
         self.tab = tab
         self.store = store
-        _scrollToTopTrigger = scrollToTopTrigger
         self.isCurrentTab = isCurrentTab
-        _showFloatingButton = showFloatingButton
         FlareLog.debug("[TimelineV4] 视图初始化 for tab: \(tab.key)")
     }
 
-    // @State private var cancellables = Set<AnyCancellable>()
     @State private var refreshDebounceTimer: Timer?
 
     var body: some View {
@@ -59,7 +57,6 @@ struct TimelineViewSwiftUIV4: View {
                                 await viewModel.handleRefresh()
                             }
                         }
-                        //   .listRowBackground(theme.primaryBackgroundColor)
                         .listRowInsets(EdgeInsets())
 
                     case .empty:
@@ -74,22 +71,17 @@ struct TimelineViewSwiftUIV4: View {
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
                 }
-                // .scrollPosition($scrollPosition) 实现不了
-                // .background(theme.secondaryBackgroundColor)
                 .listStyle(.plain)
                 .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
-                    // FlareLog.debug("TimelineV4 scroll offset: \(geometry.contentOffset)")
                     geometry
                 } action: { _, newValue in
-                    // FlareLog.debug("TimelineV4 scroll geometry changed: \(oldValue.contentOffset) -> \(newValue.contentOffset)")
-                    viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $showFloatingButton)
+                    viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $timelineState.showFloatingButton)
                 }
                 .refreshable {
                     await viewModel.handleRefresh()
                 }
             }
-            // .background(theme.secondaryBackgroundColor)
-            .onChange(of: scrollToTopTrigger) { _, _ in
+            .onChange(of: timelineState.scrollToTopTrigger) { _, _ in
                 let _ = FlareLog.debug("TimelineV4 ScrollToTop trigger for tab: \(tab.key)")
                 guard isCurrentTab else { return }
 
@@ -98,7 +90,13 @@ struct TimelineViewSwiftUIV4: View {
                 }
             }
             .task(id: tab.key) {
-                await viewModel.setupDataSource(for: tab, using: store)
+                if !isInitialized {
+                    isInitialized = true
+                    FlareLog.debug("[TimelineV4] First time initialization for tab: \(tab.key)")
+                    await viewModel.setupDataSource(for: tab, using: store)
+                } else {
+                    FlareLog.debug("[TimelineV4] Tab reappeared, skipping setupDataSource for tab: \(tab.key)")
+                }
             }
             .onReceive(NotificationCenter.default.publisher(for: .timelineItemUpdated)) { _ in
                 FlareLog.debug("TimelineV4 Received item update for tab: \(tab.key)")
@@ -109,13 +107,6 @@ struct TimelineViewSwiftUIV4: View {
                     Task { await viewModel.handleRefresh() }
                 }
             }
-            // .onDisappear {
-            //     cancellables.removeAll()
-            // }
-            // .alert("Error", isPresented: $showErrorAlert) {
-            //     Button("OK") { }
-            // } message: {
-            //     Text(currentError?.localizedDescription ?? "Unknown error")
         }
     }
 }

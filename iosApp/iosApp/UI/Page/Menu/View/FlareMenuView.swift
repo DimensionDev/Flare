@@ -12,8 +12,6 @@ struct FlareMenuView: View {
     @State private var showFeeds = false
     @State private var showSettings = false
     @State private var showPerformanceTest = false
-//    let accountType: AccountType
-//    let user: UiUserV2?
 
     @State private var currentUser: UiUserV2? = nil
 
@@ -22,12 +20,6 @@ struct FlareMenuView: View {
     @Environment(FlareRouter.self) private var router
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
-    @StateObject private var monitor = TimelinePerformanceMonitor.shared
-
-//    init(accountType: AccountType, user: UiUserV2? = nil) {
-//        self.accountType = accountType
-//        self.user = user
-//    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -296,6 +288,8 @@ struct FlareMenuView: View {
 
     private var settingsButton: some View {
         Button(action: {
+            FlareLog.debug("Tab switched to: menu setting")
+
             showSettings = true
         }) {
             HStack {

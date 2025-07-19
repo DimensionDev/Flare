@@ -32,20 +32,10 @@ struct WaterfallItemView: View {
         .background(backgroundView)
         .contentShape(Rectangle())
         .onTapGesture {
-            // 默认点击行为：如果有文字内容则显示详情，否则显示媒体预览
             if item.shouldShowText {
                 onTap(item.contentClickAction)
             } else {
                 onTap(item.imageClickAction)
-            }
-        }
-        .onAppear {
-            FlareLog.debug("WaterfallItemView onAppear: id=\(item.id), aspectRatio=\(item.aspectRatio), imageSize=\(imageSize), previewURL=\(item.previewURL?.absoluteString ?? "nil")")
-
-            if let url = item.previewURL {
-                FlareLog.debug("WaterfallItemView checking URL: \(url.absoluteString)")
-            } else {
-                FlareLog.warning("WaterfallItemView missing previewURL for item: \(item.id)")
             }
         }
     }
@@ -53,10 +43,7 @@ struct WaterfallItemView: View {
     private var imageContentView: some View {
         ZStack {
             KFImage(item.previewURL)
-                .setProcessor(DownsamplingImageProcessor(size: CGSize(width: imageSize.width * 2, height: imageSize.height * 2)))
-                .scaleFactor(UIScreen.main.scale)
-                .memoryCacheExpiration(.seconds(120))
-                .diskCacheExpiration(.days(3))
+                .flareTimelineMedia(size: CGSize(width: imageSize.width, height: imageSize.height), priority: 0.6)
                 .placeholder {
                     imagePlaceholder
                 }
@@ -138,16 +125,16 @@ struct WaterfallItemView: View {
 
     private var userInfoView: some View {
         HStack(spacing: 6) {
-            AsyncImage(url: URL(string: item.sourceTimelineItem.user?.avatar ?? "")) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            } placeholder: {
-                Circle()
-                    .fill(theme.secondaryBackgroundColor)
-            }
-            .frame(width: 16, height: 16)
-            .clipShape(Circle())
+            KFImage(URL(string: item.sourceTimelineItem.user?.avatar ?? ""))
+                .flareTimelineAvatar(size: CGSize(width: 16, height: 16))
+                .placeholder {
+                    Circle()
+                        .fill(theme.secondaryBackgroundColor)
+                }
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(width: 16, height: 16)
+                .clipShape(Circle())
 
             Text(item.sourceTimelineItem.user?.name.raw ?? "")
                 .font(.caption)

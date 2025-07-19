@@ -54,14 +54,14 @@ struct SettingsUIScreen: View {
                             .tag(SettingsDestination.browserSettings)
 
                             // AI Settings
-                            Label {
-                                Text(SettingsDestination.aiSettings.title)
-                                    .foregroundColor(theme.labelColor)
-                            } icon: {
-                                Image(systemName: SettingsDestination.aiSettings.icon)
-                                    .foregroundColor(theme.tintColor)
-                            }
-                            .tag(SettingsDestination.aiSettings)
+//                            Label {
+//                                Text(SettingsDestination.aiSettings.title)
+//                                    .foregroundColor(theme.labelColor)
+//                            } icon: {
+//                                Image(systemName: SettingsDestination.aiSettings.icon)
+//                                    .foregroundColor(theme.tintColor)
+//                            }
+//                            .tag(SettingsDestination.aiSettings)
 
                             // Storage & Privacy
                             Label {
@@ -108,8 +108,8 @@ struct SettingsUIScreen: View {
                             TranslationLanguageScreen()
                         case .browserSettings:
                             BrowserSettingsScreen()
-                        case .aiSettings:
-                            AISettingsScreen()
+//                        case .aiSettings:
+//                            AISettingsScreen()
                         case .storagePrivacy:
                             StoragePrivacyScreen()
                         case .about:
@@ -136,8 +136,8 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
     case mediaContent = "media_content"
     case translationLanguage = "translation_language"
     case browserSettings = "browser_settings"
-    case aiSettings = "ai_settings"
-    case storagePrivacy = "storage_privacy"
+//    case aiSettings = "ai_settings"
+    case storagePrivacy = "storage"
     case about
     case support
 
@@ -149,8 +149,8 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
         case .mediaContent: "Media & Content"
         case .translationLanguage: "Translation & Language"
         case .browserSettings: "Browser Settings"
-        case .aiSettings: "AI Settings"
-        case .storagePrivacy: "Storage & Privacy"
+//        case .aiSettings: "AI Settings"
+        case .storagePrivacy: "Storage"
         case .about: "About"
         case .support: "Feature Requests"
         }
@@ -162,7 +162,7 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
         case .mediaContent: "photo.on.rectangle"
         case .translationLanguage: "character.bubble"
         case .browserSettings: "network"
-        case .aiSettings: "brain"
+//        case .aiSettings: "brain"
         case .storagePrivacy: "lock.shield"
         case .about: "info.circle"
         case .support: "list.bullet.rectangle.portrait"
@@ -172,7 +172,7 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
     var priority: Int {
         switch self {
         case .timelineDisplay, .mediaContent: 3
-        case .translationLanguage, .browserSettings, .aiSettings: 2
+        case .translationLanguage, .browserSettings: 2 // ,.aiSettings:
         case .storagePrivacy, .about, .support: 1
         }
     }

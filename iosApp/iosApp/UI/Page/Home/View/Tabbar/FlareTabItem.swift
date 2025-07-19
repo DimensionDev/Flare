@@ -15,10 +15,6 @@ struct FlareTabItem<Content: View>: View {
     init(tabType: FlareHomeTabs, @ViewBuilder content: @escaping () -> Content) {
         self.tabType = tabType
         self.content = content
-
-        os_log("[FlareTabItem] Initialized with tab: %{public}@",
-               log: .default, type: .debug,
-               String(describing: tabType))
     }
 
     var body: some View {
@@ -32,12 +28,7 @@ struct FlareTabItem<Content: View>: View {
                 .foregroundColor(theme.labelColor)
         }
         .onAppear {
-            router.activeTab = tabType
-            os_log("[FlareTabItem] View appeared with router: %{public}@, tab: %{public}@, depth: %{public}d",
-                   log: .default, type: .debug,
-                   String(describing: ObjectIdentifier(router)),
-                   String(describing: tabType),
-                   router.navigationDepth)
+            router.selectedTab = tabType
         }
         .environment(\.openURL, OpenURLAction { url in
             if router.handleDeepLink(url) {

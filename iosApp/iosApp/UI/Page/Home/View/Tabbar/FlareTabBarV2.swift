@@ -9,14 +9,13 @@ struct FlareTabBarV2: View {
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
     @Environment(\.appSettings) private var appSettings
+    @EnvironmentObject private var timelineState: TimelineExtState
 
     let accountType: AccountType
-    @Binding var scrollToTopTrigger: Bool
     @Namespace private var tabBarNamespace
 
-    init(accountType: AccountType, scrollToTopTrigger: Binding<Bool>) {
+    init(accountType: AccountType) {
         self.accountType = accountType
-        _scrollToTopTrigger = scrollToTopTrigger
 
         os_log("[FlareTabBarV2] Initialized for account type: %{public}@",
                log: .default, type: .debug,
@@ -80,9 +79,9 @@ struct FlareTabBarV2: View {
 
                 if tab == .timeline {
                     // Timeline特殊处理：触发滚动到顶部
-                    let oldValue = scrollToTopTrigger
-                    scrollToTopTrigger.toggle()
-                    FlareLog.debug("[FlareTabBarV2] Timeline scroll trigger toggled: \(oldValue) -> \(scrollToTopTrigger)")
+                    let oldValue = timelineState.scrollToTopTrigger
+                    timelineState.scrollToTopTrigger.toggle()
+                    FlareLog.debug("[FlareTabBarV2] Timeline scroll trigger toggled: \(oldValue) -> \(timelineState.scrollToTopTrigger)")
                 }
             } else {
                 // 切换到新Tab - 移除动画以提升响应速度
@@ -96,7 +95,7 @@ struct FlareTabBarV2: View {
                         router.selectedTab == tab
                             ? theme.tintColor : Color(.secondaryLabel)
                     )
-                    .frame(width: 24, height: 24)
+                    .frame(width: 28, height: 28)
                     .background(
                         ZStack {
                             if router.selectedTab == tab {
@@ -107,13 +106,13 @@ struct FlareTabBarV2: View {
                                         id: "selectedTabIndicator",
                                         in: tabBarNamespace
                                     )
-                                    .animation(.easeOut(duration: 0.15), value: router.selectedTab) // 更快的动画
+                                    .animation(.easeOut(duration: 0.1), value: router.selectedTab) // 更快的动画
                             }
                         }
                     )
             }
         }
-        .frame(height: 55) // TabBar项目高度
+        .frame(height: 65) // TabBar项目高度
         .frame(maxWidth: .infinity)
         .buttonStyle(PlainButtonStyle())
     }
@@ -123,22 +122,22 @@ struct FlareTabBarV2: View {
         switch tab {
         case .menu:
             Text(AwesomeIcon.bars.rawValue)
-                .font(.awesome(style: .solid, size: 20))
+                .font(.awesome(style: .solid, size: 24))
         case .timeline:
             Text(AwesomeIcon.home.rawValue)
-                .font(.awesome(style: .solid, size: 20))
+                .font(.awesome(style: .solid, size: 24))
         case .notification:
             Text(AwesomeIcon.bell.rawValue)
-                .font(.awesome(style: .solid, size: 20))
+                .font(.awesome(style: .solid, size: 24))
         case .discover:
             Text(AwesomeIcon.search.rawValue)
-                .font(.awesome(style: .solid, size: 20))
+                .font(.awesome(style: .solid, size: 24))
         case .profile:
             Text(AwesomeIcon.user.rawValue)
-                .font(.awesome(style: .solid, size: 20))
+                .font(.awesome(style: .solid, size: 24))
         case .compose:
             Text(AwesomeIcon.plus.rawValue)
-                .font(.awesome(style: .solid, size: 20))
+                .font(.awesome(style: .solid, size: 24))
         }
     }
 

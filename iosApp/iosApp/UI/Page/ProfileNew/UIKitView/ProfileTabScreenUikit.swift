@@ -7,13 +7,11 @@ import shared
 import SwiftUI
 
 struct ProfileTabScreenUikit: View {
-    // MicroBlogKey host+id
     let toProfileMedia: (MicroBlogKey) -> Void
     let accountType: AccountType
     let userKey: MicroBlogKey?
     let showBackButton: Bool
 
-    // 包含 user relationState， isme，listState - userTimeline，mediaState，canSendMessage
     @StateObject private var presenterWrapper: ProfilePresenterWrapper
     @StateObject private var mediaPresenterWrapper: ProfileMediaPresenterWrapper
     @StateObject private var tabStore: ProfileTabSettingStore
@@ -36,20 +34,22 @@ struct ProfileTabScreenUikit: View {
         self.userKey = userKey
         self.showBackButton = showBackButton
 
-        //        let timelineStore = TimelineStore(accountType: accountType)
-        _presenterWrapper = StateObject(
-            wrappedValue: ProfilePresenterWrapper(accountType: accountType, userKey: userKey))
-        _mediaPresenterWrapper = StateObject(
-            wrappedValue: ProfileMediaPresenterWrapper(accountType: accountType, userKey: userKey))
+        let service = ProfilePresenterService.shared
 
-        // 初始化 tabStore
-        let tabStore = ProfileTabSettingStore(userKey: userKey)
-        _tabStore = StateObject(wrappedValue: tabStore)
+        _presenterWrapper = StateObject(
+            wrappedValue: service.getOrCreatePresenter(accountType: accountType, userKey: userKey))
+        _mediaPresenterWrapper = StateObject(
+            wrappedValue: service.getOrCreateMediaPresenter(accountType: accountType, userKey: userKey))
+        _tabStore = StateObject(
+            wrappedValue: service.getOrCreateTabStore(userKey: userKey))
 
         os_log(
-            "[📔][ProfileNewScreen - init]初始化: accountType=%{public}@, userKey=%{public}@", log: .default,
-            type: .debug, String(describing: accountType), userKey?.description ?? "nil"
+            "[📔][ProfileNewScreen - optimized]优化初始化完成: accountType=%{public}@, userKey=%{public}@",
+            log: .default, type: .debug,
+            String(describing: accountType), userKey?.description ?? "nil"
         )
+
+        os_log("[📔][ProfilePresenterService] %{public}@", log: .default, type: .debug, service.getCacheInfo())
     }
 
     var body: some View {
@@ -86,7 +86,6 @@ struct ProfileTabScreenUikit: View {
                     theme: theme
                 )
                 .ignoresSafeArea(edges: .top)
-//                .flareNavigationGesture(router: router)
 
             } else {
                 ProfileNewRefreshViewControllerWrapper(
@@ -111,7 +110,6 @@ struct ProfileTabScreenUikit: View {
                     theme: theme
                 )
                 .ignoresSafeArea(edges: .top)
-//                .flareNavigationGesture(router: router)
             }
         }
     }
@@ -134,13 +132,11 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
 
     func makeUIViewController(context _: Context) -> ProfileNewRefreshViewController {
         let controller = ProfileNewRefreshViewController()
-        // 传递所有必要的数据给 ProfileNewRefreshViewController
         controller.configure(
             userInfo: userInfo,
             state: state,
             selectedTab: $selectedTab,
             isShowAppBar: $isShowAppBar,
-            isShowsegmentedBackButton: $isShowsegmentedBackButton,
             horizontalSizeClass: horizontalSizeClass,
             appSettings: appSettings,
             toProfileMedia: toProfileMedia,
@@ -156,21 +152,30 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
     func updateUIViewController(
         _ uiViewController: ProfileNewRefreshViewController, context _: Context
     ) {
-        // 更新 ViewController 的数据
-        uiViewController.configure(
+        if shouldUpdate(uiViewController) {
+            uiViewController.configure(
+                userInfo: userInfo,
+                state: state,
+                selectedTab: $selectedTab,
+                isShowAppBar: $isShowAppBar,
+                horizontalSizeClass: horizontalSizeClass,
+                appSettings: appSettings,
+                toProfileMedia: toProfileMedia,
+                accountType: accountType,
+                userKey: userKey,
+                tabStore: tabStore,
+                mediaPresenterWrapper: mediaPresenterWrapper,
+                theme: theme
+            )
+        }
+    }
+
+    private func shouldUpdate(_ controller: ProfileNewRefreshViewController) -> Bool {
+        controller.needsProfileUpdate(
             userInfo: userInfo,
-            state: state,
-            selectedTab: $selectedTab,
-            isShowAppBar: $isShowAppBar,
-            isShowsegmentedBackButton: $isShowsegmentedBackButton,
-            horizontalSizeClass: horizontalSizeClass,
-            appSettings: appSettings,
-            toProfileMedia: toProfileMedia,
+            selectedTab: selectedTab,
             accountType: accountType,
-            userKey: userKey,
-            tabStore: tabStore,
-            mediaPresenterWrapper: mediaPresenterWrapper,
-            theme: theme
+            userKey: userKey
         )
     }
 }

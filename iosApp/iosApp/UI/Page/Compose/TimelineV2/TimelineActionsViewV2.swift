@@ -64,10 +64,10 @@ struct TimelineActionsViewV2: View {
                     handleRetweetAction()
                 }
                 .frame(maxWidth: .infinity)
-                .confirmationDialog("转发选项", isPresented: $showRetweetMenu) {
-                    Button("转发") { performRetweetAction(isQuote: false) }
-                    Button("引用转发") { performRetweetAction(isQuote: true) }
-                    Button("取消", role: .cancel) {}
+                .confirmationDialog("Retweet Options", isPresented: $showRetweetMenu) {
+                    Button("Retweet") { performRetweetAction(isQuote: false) }
+                    Button("Quote Tweet") { performRetweetAction(isQuote: true) }
+                    Button("Cancel", role: .cancel) {}
                 }
 
                 // 3. 点赞
@@ -98,15 +98,18 @@ struct TimelineActionsViewV2: View {
                 }
                 .frame(maxWidth: .infinity)
 
-                // 4.  翻译
-//                Button(action: {
-//
-//                }) {
-//                    Label(" ", systemImage: "character.bubble")
-//                }
-//                .frame(maxWidth: .infinity)
+                // 5. 翻译
+                ActionButtonV2(
+                    iconImage: Image(systemName: "character.bubble"),
+                    count: 0,
+                    isActive: false,
+                    activeColor: .blue
+                ) {
+                    handleTranslateAction()
+                }
+                .frame(maxWidth: .infinity)
 
-                // 5. 分享 - 使用ShareButtonV2
+                // 6. 分享 - 使用ShareButtonV2
                 ShareButtonV2(
                     item: item,
                     view: TimelineStatusViewV2(
@@ -201,13 +204,18 @@ struct TimelineActionsViewV2: View {
     private func performRetweetAction(isQuote: Bool) {
         FlareLog.debug("TimelineActionsView RETWEET BUTTON CLICKED! Item: \(item.id), isQuote: \(isQuote)")
 
-        // 🎯 乐观更新：立即更新显示状态
+        if isQuote {
+            // 引用转发：调用KMP层的Quote操作
+            FlareLog.debug("TimelineActionsView Performing quote tweet via KMP")
+            performKMPAction(actionType: .quote)
+            return
+        }
+
         let newRetweetCount = displayIsRetweeted ? displayRetweetCount - 1 : displayRetweetCount + 1
         let newIsRetweeted = !displayIsRetweeted
 
         FlareLog.debug("TimelineActionsView Optimistic update - Retweet: \(displayRetweetCount) → \(newRetweetCount), Retweeted: \(displayIsRetweeted) → \(newIsRetweeted)")
 
-        // 🔥 立即更新@State变量，触发UI重新渲染
         displayRetweetCount = newRetweetCount
         displayIsRetweeted = newIsRetweeted
 
@@ -228,7 +236,7 @@ struct TimelineActionsViewV2: View {
         onAction(.repost, updatedItem)
         FlareLog.debug("TimelineActionsView onAction call completed")
 
-        // 🔥 强制UI刷新
+        //   UI刷新
         refreshTrigger += 1
         FlareLog.debug("TimelineActionsView Triggered UI refresh: \(refreshTrigger)")
 
@@ -282,45 +290,71 @@ struct TimelineActionsViewV2: View {
         performKMPAction(actionType: .bookmark)
     }
 
+    /// 处理翻译操作
+    private func handleTranslateAction() {
+        FlareLog.debug("TimelineActionsView TRANSLATE BUTTON CLICKED! Item: \(item.id)")
+
+        onAction(.translate, item)
+        FlareLog.debug("TimelineActionsView Translation action triggered")
+    }
+
     /// 执行KMP操作
     private func performKMPAction(actionType: TimelineActionType) {
-        FlareLog.debug("TimelineActionsView Starting KMP action: \(actionType) for item: \(item.id)")
-        FlareLog.debug("TimelineActionsView Current state - likeCount: \(item.likeCount), isLiked: \(item.isLiked)")
+        func findAndExecuteAction(in actions: [StatusAction], actionType: TimelineActionType) -> Bool {
+            for (index, action) in actions.enumerated() {
+                FlareLog.debug("TimelineActionsView Processing action at index \(index): \(type(of: action))")
 
-        // 找到对应的StatusAction并调用KMP
-        for (index, action) in item.actions.enumerated() {
-            if case let .item(actionItem) = onEnum(of: action),
-               let clickable = actionItem as? StatusActionItemClickable
-            {
-                // 根据类型匹配
-                let shouldExecute = switch actionType {
-                case .like: actionItem is StatusActionItemLike
-                case .repost: actionItem is StatusActionItemRetweet
-                case .reply: actionItem is StatusActionItemReply
-                case .bookmark: actionItem is StatusActionItemBookmark
-                default: false
+                let enumResult = onEnum(of: action)
+                FlareLog.debug("TimelineActionsView onEnum result: \(type(of: enumResult))")
+
+                // 检查 .item 类型
+                if case let .item(actionItem) = enumResult,
+                   let clickable = actionItem as? StatusActionItemClickable
+                {
+                    FlareLog.debug("TimelineActionsView Found .item with actionItem: \(type(of: actionItem))")
+
+                    // 根据类型匹配
+                    let shouldExecute = switch actionType {
+                    case .like: actionItem is StatusActionItemLike
+                    case .repost: actionItem is StatusActionItemRetweet
+                    case .reply: actionItem is StatusActionItemReply
+                    case .bookmark: actionItem is StatusActionItemBookmark
+                    case .quote: actionItem is StatusActionItemQuote
+                    default: false
+                    }
+
+                    if shouldExecute {
+                        FlareLog.debug("TimelineActionsView Found matching action at index \(index): \(type(of: actionItem))")
+
+                        // 记录当前StatusAction的状态
+                        if let likeAction = actionItem as? StatusActionItemLike {
+                            FlareLog.debug("TimelineActionsView Like action state - count: \(likeAction.count), liked: \(likeAction.liked)")
+                        }
+
+                        let openURLAction = OpenURLAction { url in
+                            FlareLog.debug("url:  : \(url)")
+                            openURL(url)
+                            return .handled
+                        }
+
+                        FlareLog.debug("TimelineActionsView Calling KMP onClicked() for \(type(of: actionItem))")
+                        clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURLAction)))
+                        FlareLog.debug("TimelineActionsView KMP onClicked() call completed")
+                        return true
+                    }
                 }
-
-                if shouldExecute {
-                    FlareLog.debug("TimelineActionsView Found matching action at index \(index): \(type(of: actionItem))")
-
-                    // 记录当前StatusAction的状态
-                    if let likeAction = actionItem as? StatusActionItemLike {
-                        FlareLog.debug("TimelineActionsView Like action state - count: \(likeAction.count), liked: \(likeAction.liked)")
+                // 检查 .group 类型
+                else if case let .group(group) = enumResult {
+                    // 递归搜索group中的actions
+                    if findAndExecuteAction(in: group.actions, actionType: actionType) {
+                        return true
                     }
-
-                    let openURLAction = OpenURLAction { url in
-                        openURL(url)
-                        return .handled
-                    }
-
-                    FlareLog.debug("TimelineActionsView Calling KMP onClicked() for \(type(of: actionItem))")
-                    clickable.onClicked(.init(launcher: AppleUriLauncher(openURL: openURLAction)))
-                    FlareLog.debug("TimelineActionsView KMP onClicked() call completed")
-                    break
                 }
             }
+            return false
         }
+
+        let _ = findAndExecuteAction(in: item.actions, actionType: actionType)
     }
 }
 
@@ -355,5 +389,7 @@ enum TimelineActionType {
     case repost
     case reply
     case bookmark
+    case quote
     case share
+    case translate
 }

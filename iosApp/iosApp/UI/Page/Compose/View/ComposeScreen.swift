@@ -134,6 +134,9 @@ struct ComposeScreen: View {
                                     }
                                 } label: {
                                     Awesome.Classic.Solid.plus.image
+                                        .padding(8)
+                                        .background(theme.tintColor)
+                                        .cornerRadius(8)
                                 }.disabled(viewModel.pollViewModel.choices.count >= 4)
                             }
                             #if os(iOS)
@@ -151,6 +154,9 @@ struct ComposeScreen: View {
                                         }
                                     } label: {
                                         Awesome.Classic.Solid.deleteLeft.image
+                                            .padding(8)
+                                            .background(theme.tintColor)
+                                            .cornerRadius(8)
                                     }
                                     .disabled(viewModel.pollViewModel.choices.count <= 2)
                                 }
@@ -203,6 +209,9 @@ struct ComposeScreen: View {
                             }), matching: .any(of: [.images, .videos, .livePhotos])) {
                                 Awesome.Classic.Solid.image.image
                                     .frame(width: iconSize, height: iconSize)
+                                    .padding(8)
+                                    .background(theme.tintColor)
+                                    .cornerRadius(8)
                             }
                         }
                         if viewModel.mediaViewModel.selectedItems.count == 0,
@@ -216,6 +225,9 @@ struct ComposeScreen: View {
                             }, label: {
                                 Awesome.Classic.Solid.squarePollHorizontal.image
                                     .frame(width: iconSize, height: iconSize)
+                                    .padding(8)
+                                    .background(theme.tintColor)
+                                    .cornerRadius(8)
                             })
                         }
                         if case let .success(visibilityState) = onEnum(of: viewModel.model.visibilityState) {
@@ -230,6 +242,9 @@ struct ComposeScreen: View {
                             } label: {
                                 StatusVisibilityComponent(visibility: visibilityState.data.visibility)
                                     .frame(width: iconSize, height: iconSize)
+                                    .padding(8)
+                                    .background(theme.tintColor)
+                                    .cornerRadius(8)
                             }
                         }
                         if case let .success(data) = onEnum(of: viewModel.model.composeConfig),
@@ -247,6 +262,9 @@ struct ComposeScreen: View {
                             }, label: {
                                 Awesome.Classic.Solid.circleExclamation.image
                                     .frame(width: iconSize, height: iconSize)
+                                    .padding(8)
+                                    .background(theme.tintColor)
+                                    .cornerRadius(8)
                             })
                         }
                         if case .success = onEnum(of: viewModel.model.emojiState) {
@@ -255,6 +273,9 @@ struct ComposeScreen: View {
                             }, label: {
                                 Awesome.Classic.Solid.faceSmile.image
                                     .frame(width: iconSize, height: iconSize)
+                                    .padding(8)
+                                    .background(theme.tintColor)
+                                    .cornerRadius(8)
                             })
                             .popover(isPresented: $viewModel.showEmoji) {
                                 if case let .success(emojis) = onEnum(of: viewModel.model.emojiState) {
@@ -291,7 +312,6 @@ struct ComposeScreen: View {
                     }
                     .padding([.bottom, .horizontal])
                 })
-                .buttonStyle(.bordered)
             }
         }
         .activateViewModel(viewModel: viewModel)
@@ -303,6 +323,9 @@ struct ComposeScreen: View {
                     onBack()
                 }, label: {
                     Awesome.Classic.Solid.paperPlane.image
+                        .padding(8)
+                        .background(theme.tintColor)
+                        .cornerRadius(8)
                 })
             }
             ToolbarItem(placement: .cancellationAction) {
@@ -310,6 +333,9 @@ struct ComposeScreen: View {
                     onBack()
                 }, label: {
                     Awesome.Classic.Solid.xmark.image
+                        .padding(8)
+                        .background(theme.tintColor)
+                        .cornerRadius(8)
                 })
             }
             ToolbarItem(placement: .principal) {

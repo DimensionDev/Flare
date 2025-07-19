@@ -9,10 +9,9 @@ import SwiftUI
 import UIKit
 
 struct StatusContentViewV2: View {
-    // 修改参数：使用TimelineItem替代StatusViewModel，去掉shared引用
     let item: TimelineItem
     let isDetailView: Bool
-    let enableTranslation: Bool
+    let enableTranslation: Bool // 是否显示Google翻译内容
     let appSettings: AppSettings
     let theme: FlareTheme
     let openURL: OpenURLAction
@@ -36,7 +35,7 @@ struct StatusContentViewV2: View {
             // Main content
             StatusMainContentViewV2(
                 item: item,
-                enableTranslation: enableTranslation,
+                enableTranslation: enableTranslation, //  是否显示Google翻译内容
                 appSettings: appSettings,
                 theme: theme,
                 openURL: openURL
@@ -251,7 +250,7 @@ struct StatusContentWarningViewV2: View {
 
 struct StatusMainContentViewV2: View {
     let item: TimelineItem // 使用TimelineItem替代StatusViewModel
-    let enableTranslation: Bool // 从StatusViewModel中提取
+    let enableTranslation: Bool // 重新定义：是否显示Google翻译内容
     let appSettings: AppSettings
     let theme: FlareTheme
     let openURL: OpenURLAction
@@ -278,8 +277,9 @@ struct StatusMainContentViewV2: View {
             .lineSpacing(CGFloat(theme.lineSpacing))
             .foregroundColor(theme.labelColor)
 
-            if appSettings.appearanceSettings.autoTranslate, enableTranslation {
-                TranslatableText(originalText: content.raw)
+            // 简化翻译显示条件：只有Google翻译且手动触发时才显示
+            if enableTranslation {
+                TranslatableText(originalText: content.raw, forceTranslate: true)
             }
         } else {
             Text("")

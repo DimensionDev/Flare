@@ -14,6 +14,7 @@ struct HomeTabViewContent: View {
 
     @State private var appState = FlareAppState()
     @Environment(FlareRouter.self) private var router
+    @EnvironmentObject private var timelineState: TimelineExtState
 
     @Namespace private var tabBarNamespace
 
@@ -53,11 +54,9 @@ struct HomeTabViewContent: View {
                     FlareTabItem(tabType: .timeline) {
                         HomeTabScreenSwiftUI(
                             accountType: accountType,
-                            scrollToTopTrigger: $scrollToTopTrigger,
-                            showFloatingButton: $showFloatingButton,
                             onSwitchToMenuTab: {
                                 withAnimation {
-                                    selectedTab = .menu
+                                    selectedTab = .timeline
                                 }
                             }
                         )
@@ -107,10 +106,7 @@ struct HomeTabViewContent: View {
             }
 
             if selectedTab == .timeline, !appSettings.appearanceSettings.hideScrollToTopButton {
-                FloatingScrollToTopButton(
-                    isVisible: $showFloatingButton,
-                    scrollToTopTrigger: $scrollToTopTrigger
-                )
+                FloatingScrollToTopButton()
             }
         }
 

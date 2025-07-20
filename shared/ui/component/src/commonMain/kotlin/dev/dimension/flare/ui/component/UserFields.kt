@@ -1,36 +1,29 @@
 package dev.dimension.flare.ui.component
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import dev.dimension.flare.ui.component.platform.PlatformCard
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.theme.PlatformTheme
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableMap
-import kotlin.collections.component1
-import kotlin.collections.component2
 
 @Composable
-internal fun UserFields(
+internal fun ColumnScope.UserFields(
     fields: ImmutableMap<String, UiRichText>,
-    modifier: Modifier = Modifier,
 ) {
-    PlatformCard(
-        modifier = modifier,
-    ) {
-        fields.onEachIndexed { index, (key, value) ->
-            UserField(
-                key = key,
-                value = value,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-            )
-            if (index != fields.size - 1) {
-                HorizontalDivider()
-            }
-        }
+    fields.onEachIndexed { index, (key, value) ->
+        UserField(
+            key = key,
+            value = value,
+        )
     }
 }
 

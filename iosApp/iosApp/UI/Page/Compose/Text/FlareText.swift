@@ -37,10 +37,6 @@ public struct FlareText: View {
         switch appSettings.appearanceSettings.renderEngine {
         case .markdown:
             MarkdownRenderer()
-        case .flareText:
-            FlareTextRenderer()
-//        case .textViewMarkdown:
-//            TextViewMarkdownRenderer()
         case .emojiText:
             EmojiTextRenderer()
         }

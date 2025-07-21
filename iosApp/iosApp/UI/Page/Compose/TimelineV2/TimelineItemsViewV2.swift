@@ -18,9 +18,9 @@ struct TimelineItemsViewV2: View {
             TimelineStatusViewV2(
                 item: item,
                 index: index,
-                presenter: presenter,
-                scrollPositionID: $scrollPositionID,
-                onError: onError
+//                presenter: presenter,
+//                scrollPositionID: $scrollPositionID,
+//                onError: onError
             )
 
             if index < items.count - 1 {

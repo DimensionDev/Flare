@@ -103,7 +103,7 @@ struct WaterfallItemView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "eye.slash")
                         .font(.title2)
-                    Text("敏感内容")
+                    Text("Sensitive")
                         .font(.caption)
                 }
                 .foregroundColor(.secondary)

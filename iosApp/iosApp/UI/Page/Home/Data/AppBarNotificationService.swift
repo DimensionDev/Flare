@@ -5,8 +5,7 @@ import SwiftUI
 
 // 通知管理服务
 class AppBarNotificationService {
-    private let logger = Logger(subsystem: "com.flare.app", category: "AppBarNotificationService")
-
+ 
     // 发送标签更新通知
     func postTabsDidUpdateNotification(updatedTabKey: String? = nil, newTitle: String? = nil) {
         var userInfo: [String: Any]?

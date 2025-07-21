@@ -32,7 +32,8 @@ struct FlareRootView: View {
                                        String(describing: ObjectIdentifier(router)))
 
                         HomeTabViewContentV2(accountType: accountType)
-                            .environment(theme).applyTheme(theme)
+                            .environment(theme)
+                            .applyTheme(theme)
                             .environment(appState)
                             .environment(router)
                             .environmentObject(timelineState)
@@ -41,7 +42,8 @@ struct FlareRootView: View {
                                     FlareDestinationView(
                                         destination: destination,
                                         router: router
-                                    ).environment(theme).applyTheme(theme)
+                                    ).environment(theme)
+                                    .applyTheme(theme)
                                         .environment(appState)
                                 }
                             }
@@ -51,7 +53,8 @@ struct FlareRootView: View {
                                         .modifier(SwipeToDismissModifier(onDismiss: {
                                             router.dismissFullScreenCover()
                                         }))
-                                        .environment(theme).applyTheme(theme)
+                                        .environment(theme)
+                                        .applyTheme(theme)
                                         .environment(\.appSettings, appSettings)
                                         .environment(appState)
                                 }
@@ -72,7 +75,8 @@ struct FlareRootView: View {
                                             accountType: composeAccountType,
                                             status: convertToSharedComposeStatus(composeManager.composeStatus)
                                         )
-                                        .environment(theme).applyTheme(theme)
+                                        .environment(theme)
+                                        .applyTheme(theme)
                                         .environment(router)
                                         .environment(appState)
                                         .environment(\.appSettings, appSettings)

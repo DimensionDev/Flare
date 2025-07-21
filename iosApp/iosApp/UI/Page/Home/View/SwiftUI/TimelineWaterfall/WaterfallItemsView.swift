@@ -1,4 +1,3 @@
-
 import shared
 import SwiftUI
 import WaterfallGrid
@@ -14,13 +13,12 @@ struct WaterfallItemsView: View {
     let isCurrentTab: Bool
     let viewModel: TimelineViewModel
     @EnvironmentObject private var timelineState: TimelineExtState
+    @Environment(FlareRouter.self) private var router
 
-//    @State private var hasTriggeredLoadMore = false
     @State private var scrollThreshold: CGFloat = 100
     @State private var hasInitialLoadCompleted = false
 
     @Environment(FlareTheme.self) private var theme
-    @Environment(FlareRouter.self) private var router
 
     private var waterfallItems: [WaterfallItem] {
         FlareLog.debug("WaterfallItemsView Converting \(items.count) timeline items to waterfall items")
@@ -80,7 +78,6 @@ struct WaterfallItemsView: View {
             }
         }
         .onAppear {
-//            hasTriggeredLoadMore = false
             hasInitialLoadCompleted = false
             FlareLog.debug("Waterfall view appeared, reset trigger flags")
 
@@ -113,11 +110,9 @@ struct WaterfallItemsView: View {
                hasMore,
                !isRefreshing,
                !viewModel.isLoadingMore,
-//                hasTriggeredLoadMore,
                hasInitialLoadCompleted
             {
                 FlareLog.debug("Waterfall Near bottom, triggering load more (distance: \(distanceFromBottom))")
-//                hasTriggeredLoadMore = true
                 Task {
                     await viewModel.handleLoadMore()
                 }
@@ -210,7 +205,6 @@ struct WaterfallItemsView: View {
             let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
             let statusKey = timelineItem.createMicroBlogKey()
 
-            FlareLog.debug("WaterfallItemsView Navigate to timeline detail: \(timelineItem.id)")
             router.navigate(to: .statusDetail(
                 accountType: accountType,
                 statusKey: statusKey

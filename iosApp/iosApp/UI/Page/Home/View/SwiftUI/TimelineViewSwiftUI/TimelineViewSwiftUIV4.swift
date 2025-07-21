@@ -7,7 +7,6 @@ struct TimelineViewSwiftUIV4: View {
     @ObservedObject var store: AppBarTabSettingStore
     let isCurrentTab: Bool
     @Environment(FlareTheme.self) private var theme
-    @Environment(FlareRouter.self) private var router
     @EnvironmentObject private var timelineState: TimelineExtState
 
     @State private var viewModel = TimelineViewModel()
@@ -44,8 +43,6 @@ struct TimelineViewSwiftUIV4: View {
                             items: items,
                             hasMore: hasMore,
                             isRefreshing: isRefreshing,
-                            presenter: viewModel.presenter,
-                            onError: viewModel.handleError,
                             viewModel: viewModel
                         )
                         .listRowBackground(theme.primaryBackgroundColor)
@@ -82,7 +79,6 @@ struct TimelineViewSwiftUIV4: View {
                 }
             }
             .onChange(of: timelineState.scrollToTopTrigger) { _, _ in
-                let _ = FlareLog.debug("TimelineV4 ScrollToTop trigger for tab: \(tab.key)")
                 guard isCurrentTab else { return }
 
                 withAnimation(.easeInOut(duration: 0.5)) {

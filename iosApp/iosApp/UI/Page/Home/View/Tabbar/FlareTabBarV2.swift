@@ -57,9 +57,8 @@ struct FlareTabBarV2: View {
             }
             .padding(.vertical, 8)
             .padding(.horizontal, 12)
-            .fixedSize(horizontal: true, vertical: false) // 强制内层HStack根据内容收缩宽度
+            .fixedSize(horizontal: true, vertical: false)
             .background(
-                // 圆角矩形 + 毛玻璃背景
                 .ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20)
             )
 
@@ -70,23 +69,13 @@ struct FlareTabBarV2: View {
     @ViewBuilder
     private func tabBarItem(for tab: FlareHomeTabs) -> some View {
         Button {
-            FlareLog.debug("[FlareTabBarV2] Tab button tapped: \(tab), selectedTab: \(router.selectedTab)")
-
             if router.selectedTab == tab {
-                FlareLog.debug("[FlareTabBarV2] Same tab tapped again: \(tab)")
-                // 双击同一个Tab的逻辑
                 router.popToRoot(for: tab)
-
                 if tab == .timeline {
-                    // Timeline特殊处理：触发滚动到顶部
-                    let oldValue = timelineState.scrollToTopTrigger
                     timelineState.scrollToTopTrigger.toggle()
-                    FlareLog.debug("[FlareTabBarV2] Timeline scroll trigger toggled: \(oldValue) -> \(timelineState.scrollToTopTrigger)")
                 }
             } else {
-                // 切换到新Tab - 移除动画以提升响应速度
                 router.selectedTab = tab
-                FlareLog.debug("[FlareTabBarV2] Tab switched to: \(tab)")
             }
         } label: {
             VStack(spacing: 2) {
@@ -112,7 +101,7 @@ struct FlareTabBarV2: View {
                     )
             }
         }
-        .frame(height: 65) // TabBar项目高度
+        .frame(height: 65)
         .frame(maxWidth: .infinity)
         .buttonStyle(PlainButtonStyle())
     }
@@ -144,7 +133,6 @@ struct FlareTabBarV2: View {
     @ViewBuilder
     private func composeButton() -> some View {
         Button {
-            FlareLog.debug("[FlareTabBarV2] Compose button tapped")
             ComposeManager.shared.showNewCompose(accountType: accountType)
         } label: {
             Asset.Tab.compose.swiftUIImage
@@ -161,7 +149,7 @@ struct FlareTabBarV2: View {
     }
 
     private func calculateHorizontalPadding() -> CGFloat {
-        let totalTabs = !(accountType is AccountTypeGuest) ? 6 : 3 // 包含compose按钮
+        let totalTabs = !(accountType is AccountTypeGuest) ? 6 : 3
         return max(0, (UIScreen.main.bounds.width * 0.8 - 200) / CGFloat(totalTabs * 2))
     }
 }

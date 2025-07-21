@@ -7,8 +7,7 @@ import shared
 import SwiftUI
 
 struct HomeTabViewContentV2: View {
-    @Environment(\.horizontalSizeClass) var horizontalSizeClass
-    @Environment(FlareRouter.self) private var router
+     @Environment(FlareRouter.self) private var router
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
     @Environment(\.appSettings) private var appSettings
@@ -101,18 +100,16 @@ struct HomeTabViewContentV2: View {
                     .customizationID("tabview_profile")
                 }
             }
-            .toolbar(.hidden, for: .tabBar) // 隐藏系统TabBar
+            .toolbar(.hidden, for: .tabBar)
             .ignoresSafeArea(.container, edges: .bottom)
-            .padding(.bottom, -120) // bottom bar 的 高度
+            .padding(.bottom, -120)
 
-            // 自定义TabBar - 使用FlareTabBarV2
             if !appState.isCustomTabBarHidden {
                 VStack(spacing: 0) {
                     FlareTabBarV2(
                         accountType: accountType
                     )
 
-                    // 底部安全区域
                     Rectangle()
                         .fill(.clear)
                         .frame(height: 0)
@@ -136,7 +133,6 @@ struct HomeTabViewContentV2: View {
         .background(theme.primaryBackgroundColor)
         .foregroundColor(theme.labelColor)
         .onAppear {
-            // 确保router的selectedTab与当前状态同步
             if router.selectedTab != .timeline {
                 router.selectedTab = .timeline
             }

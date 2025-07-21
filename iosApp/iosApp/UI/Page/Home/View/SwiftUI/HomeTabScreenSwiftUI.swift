@@ -11,8 +11,7 @@ struct HomeTabScreenSwiftUI: View {
     @State private var selectedHomeAppBarTabKey: String = ""
     @State private var showAppbarSettings = false
     @State private var showLogin = false
-    // @State private var tabScrollTriggers: [String: Bool] = [:]
-    // @Environment(FlareTheme.self) private var theme
+    @Environment(\.appSettings) private var appSettings
 
     var body: some View {
         VStack(spacing: 0) {
@@ -28,11 +27,6 @@ struct HomeTabScreenSwiftUI: View {
                     showAppbarSettings = true
                 },
                 onScrollToTop: { tabKey in
-                    FlareLog.debug("HomeTabScreenSwiftUI Triggering scroll to top for tab: \(tabKey)")
-                    // 切换指定标签的滚动触发器
-                    // tabScrollTriggers[tabKey] = !(tabScrollTriggers[tabKey] ?? false)
-
-                    // 同时触发 TimelineExtState 的 scrollToTopTrigger 以支持浮动按钮
                     if tabKey == selectedHomeAppBarTabKey {
                         timelineState.scrollToTopTrigger.toggle()
                     }
@@ -43,9 +37,8 @@ struct HomeTabScreenSwiftUI: View {
             TabContentViewSwiftUI(
                 tabStore: tabStore,
                 selectedTab: $selectedHomeAppBarTabKey,
-                // tabScrollTriggers: $tabScrollTriggers
             )
-        }.toolbarVisibility(.hidden, for: .navigationBar) // 隐藏，避免滑动返回 appbar 高度增加
+        }.toolbarVisibility(.hidden, for: .navigationBar)
             .onAppear {
                 if selectedHomeAppBarTabKey.isEmpty, let firstTab = tabStore.availableAppBarTabsItems.first {
                     selectedHomeAppBarTabKey = firstTab.key
@@ -53,11 +46,9 @@ struct HomeTabScreenSwiftUI: View {
                 }
             }
             .onChange(of: tabStore.availableAppBarTabsItems.count) { _, _ in
-                // 标签列表变化时，确保选中状态正确
                 let newItems = tabStore.availableAppBarTabsItems
                 let currentTabExists = newItems.contains { $0.key == selectedHomeAppBarTabKey }
 
-                // 如果当前选中的标签不存在，或者没有选中任何标签，则选择第一个
                 if (!selectedHomeAppBarTabKey.isEmpty && !currentTabExists) || selectedHomeAppBarTabKey.isEmpty {
                     if let firstTab = newItems.first {
                         selectedHomeAppBarTabKey = firstTab.key
@@ -65,11 +56,6 @@ struct HomeTabScreenSwiftUI: View {
                     }
                 }
             }
-            // .onChange(of: timelineState.scrollToTopTrigger) { _, _ in
-            //     // 当浮动按钮触发 scrollToTopTrigger 时，同步到当前标签的 tabScrollTriggers
-            //     FlareLog.debug("HomeTabScreenSwiftUI FloatingButton triggered scroll to top for current tab: \(selectedHomeAppBarTabKey)")
-            //     // tabScrollTriggers[selectedHomeAppBarTabKey] = !(tabScrollTriggers[selectedHomeAppBarTabKey] ?? false)
-            // }
             .onChange(of: selectedHomeAppBarTabKey) { _, newValue in
                 if let tab = tabStore.availableAppBarTabsItems.first(where: { $0.key == newValue }) {
                     tabStore.updateSelectedTab(tab)

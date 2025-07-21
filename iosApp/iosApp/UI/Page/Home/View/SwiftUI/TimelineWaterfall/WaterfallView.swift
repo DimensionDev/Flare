@@ -7,10 +7,8 @@ struct WaterfallView: View {
     @ObservedObject var store: AppBarTabSettingStore
     let isCurrentTab: Bool
     let displayType: TimelineDisplayType
-    @EnvironmentObject private var timelineState: TimelineExtState
 
     @Environment(FlareTheme.self) private var theme
-    @Environment(FlareRouter.self) private var router
 
     @State private var viewModel = TimelineViewModel()
     @State private var scrolledID: String?

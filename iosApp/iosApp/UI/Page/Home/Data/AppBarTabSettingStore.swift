@@ -9,11 +9,8 @@ extension Notification.Name {
     static let listTitleDidUpdate = Notification.Name("listTitleDidUpdate")
 }
 
-// 日志记录器
-private let logger = Logger(subsystem: "com.flare.app", category: "AppBarTabSettingStore")
-
 class AppBarTabSettingStore: ObservableObject, TabStateProvider {
-    // 单例实现
+    
     static let shared = AppBarTabSettingStore(accountType: AccountTypeGuest())
 
     @Published var primaryHomeItems: [FLTabItem] = [] // 主要标签（不可更改状态）Appbar 第一个Home 标签
@@ -70,14 +67,17 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 
         // 如果用户ID相同，不重复初始化
         if userId == lastInitializedUserId, userId != nil {
-            logger.debug("用户ID未变化，跳过初始化: \(String(describing: userId))")
+            FlareLog.debug("用户ID未变化，跳过初始化: \(String(describing: userId))")
             return
         }
 
         // 记录新的用户ID
         lastInitializedUserId = userId
 
-        logger.debug("初始化AppBarTabSettingStore: account=\(account != nil ? "有账号" : "无账号"), user=\(user != nil ? String(describing: user?.name) : "无用户")")
+        FlareLog
+            .debug(
+                "初始化AppBarTabSettingStore: account=\(account != nil ? "有账号" : "无账号"), user=\(user != nil ? String(describing: user?.name) : "无用户")"
+            )
 
         // 清理现有状态
         clearAllState()
@@ -132,7 +132,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 
     // 清除所有状态
     func clearAllState() {
-        logger.debug("清除所有AppBar状态...")
+        FlareLog.debug("清除所有AppBar状态...")
 
         storageLock.lock()
         defer { storageLock.unlock() }
@@ -149,7 +149,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
         appBarItems = [] // 清空统一配置
 
         objectWillChange.send()
-        logger.debug("状态清除完成")
+        FlareLog.debug("状态清除完成")
     }
 
     // 更新账户类型
@@ -202,7 +202,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
             // 检查是否为Feed类型
             let isBlueskyFeed = notification.userInfo?["itemType"] as? String == "feed"
 
-            logger.debug("收到\(isBlueskyFeed ? "Feed" : "List")Pin状态变更通知: ID=\(listId), 标题=\(listTitle), isPinned=\(isPinned)")
+            FlareLog.debug("收到\(isBlueskyFeed ? "Feed" : "List")Pin状态变更通知: ID=\(listId), 标题=\(listTitle), isPinned=\(isPinned)")
 
             // 记录列表标题，这对于任何情况都需要
             DispatchQueue.main.async {
@@ -210,7 +210,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 
                 if let iconUrl = notification.userInfo?["listIconUrl"] as? String {
                     self.listIconUrls[listId] = iconUrl
-                    logger.debug("设置图标URL: \(listId) -> \(iconUrl)")
+                    FlareLog.debug("设置图标URL: \(listId) -> \(iconUrl)")
                 }
 
                 // 根据类型生成不同前缀的tabId
@@ -221,7 +221,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
                     if !self.availableAppBarTabsItems.contains(where: { $0.key == tabId }) {
                         // 直接调用toggleTab确保完整的标签添加流程被执行
                         self.toggleTab(tabId)
-                        logger.debug("通过toggleTab添加\(isBlueskyFeed ? "Feed" : "List")标签: \(tabId)")
+                        FlareLog.debug("通过toggleTab添加\(isBlueskyFeed ? "Feed" : "List")标签: \(tabId)")
                     } else {
                         // 标签已存在，仅更新pinnedListIds
                         if !self.pinnedListIds.contains(listId) {
@@ -231,7 +231,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
                             self.updateConfigFromUiState()
                             self.saveAppBarConfig()
 
-                            logger.debug("标签已存在，仅更新pinnedListIds: \(listId)")
+                            FlareLog.debug("标签已存在，仅更新pinnedListIds: \(listId)")
                         }
                     }
                 } else {
@@ -239,7 +239,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
                     if self.availableAppBarTabsItems.contains(where: { $0.key == tabId }) {
                         // 直接调用toggleTab确保完整的标签移除流程被执行
                         self.toggleTab(tabId)
-                        logger.debug("通过toggleTab移除\(isBlueskyFeed ? "Feed" : "List")标签: \(tabId)")
+                        FlareLog.debug("通过toggleTab移除\(isBlueskyFeed ? "Feed" : "List")标签: \(tabId)")
                     } else {
                         // 标签已经不存在，仅更新pinnedListIds
                         self.pinnedListIds.removeAll { $0 == listId }
@@ -248,7 +248,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
                         self.updateConfigFromUiState()
                         self.saveAppBarConfig()
 
-                        logger.debug("标签已不存在，仅更新pinnedListIds: \(listId)")
+                        FlareLog.debug("标签已不存在，仅更新pinnedListIds: \(listId)")
                     }
                 }
             }
@@ -270,7 +270,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
     }
 
     private func initializeWithUser(_ user: UiUserV2) {
-        logger.debug("初始化用户: \(user.name)")
+        FlareLog.debug("初始化用户: \(user.name)")
 
         currentUser = user
 
@@ -285,7 +285,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
         if appBarItems.isEmpty {
             appBarItems = configService.createDefaultAppBarConfig(for: user)
             saveAppBarConfig()
-            logger.debug("创建默认AppBar配置")
+            FlareLog.debug("创建默认AppBar配置")
         }
 
         // 从配置更新UI状态
@@ -368,7 +368,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 
                     if let iconUrl = item.metadata["iconUrl"] {
                         listIconUrls[itemId] = iconUrl
-                        logger.debug("加载图标URL: \(itemId) -> \(iconUrl)")
+                        FlareLog.debug("加载图标URL: \(itemId) -> \(iconUrl)")
                     }
 
                     // 添加到固定ID列表
@@ -411,7 +411,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
                 appBarItems[configIndex] = newItem
 
                 // 记录但不立即保存，避免频繁IO
-                logger.debug("更新首页时间戳确保排序")
+                FlareLog.debug("更新首页时间戳确保排序")
             }
         }
     }
@@ -454,7 +454,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
                         let id = String(components)
                         if let iconUrl = listIconUrls[id], !iconUrl.isEmpty {
                             newMetadata["iconUrl"] = iconUrl
-                            logger.debug("保留现有图标URL: \(id) -> \(iconUrl)")
+                            FlareLog.debug("保留现有图标URL: \(id) -> \(iconUrl)")
                         }
                     }
                 }
@@ -493,7 +493,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
                         let id = String(components)
                         if let iconUrl = listIconUrls[id], !iconUrl.isEmpty {
                             metadata["iconUrl"] = iconUrl
-                            logger.debug("添加新图标URL: \(id) -> \(iconUrl)")
+                            FlareLog.debug("添加新图标URL: \(id) -> \(iconUrl)")
                         }
                     }
                 }
@@ -569,7 +569,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 
         // 恢复选中状态
         selectedAppBarTabKey = selectedKey
-        logger.debug("移动标签完成：\(movedTab.key) 移动到位置 \(destination)")
+        FlareLog.debug("移动标签完成：\(movedTab.key) 移动到位置 \(destination)")
     }
 
     // 专门用于移动列表标签的方法
@@ -607,7 +607,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
             // 检查是否为Feed类型
             let isBlueskyFeed = notification.userInfo?["itemType"] as? String == "feed"
 
-            logger.debug("收到\(isBlueskyFeed ? "Feed" : "列表")标题更新通知: ID=\(listId), 新标题=\(newTitle)")
+            FlareLog.debug("收到\(isBlueskyFeed ? "Feed" : "列表")标题更新通知: ID=\(listId), 新标题=\(newTitle)")
 
             DispatchQueue.main.async {
                 // 更新标题映射
@@ -681,7 +681,7 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
     func toggleTab(_ id: String) {
         guard let user = currentUser else { return }
 
-        logger.debug("切换标签状态: \(id)")
+        FlareLog.debug("切换标签状态: \(id)")
 
         let wasSelected = selectedAppBarTabKey == id
         let isBlueskyFeed = id.starts(with: "feed_")
@@ -849,6 +849,6 @@ class AppBarTabSettingStore: ObservableObject, TabStateProvider {
 
         // 添加发送TabsDidUpdate通知，确保HomeTabController更新UI
         notificationService.postTabsDidUpdateNotification()
-        logger.debug("发送TabsDidUpdate通知，标签状态已更改: \(id)")
+        FlareLog.debug("发送TabsDidUpdate通知，标签状态已更改: \(id)")
     }
 }

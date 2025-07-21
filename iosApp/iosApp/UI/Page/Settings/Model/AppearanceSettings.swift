@@ -54,7 +54,7 @@ struct AppearanceSettings: Codable, Changeable {
     var theme: Theme = .auto
     var avatarShape: AvatarShape = .circle
     var renderEngine: RenderEngine = .markdown
-    var timelineDisplayType: TimelineDisplayType = .timeline // 新增Timeline显示类型设置
+    var timelineDisplayType: TimelineDisplayType = .timeline
     var showActions: Bool = true
     var showNumbers: Bool = true
     var showLinkPreview: Bool = true
@@ -64,7 +64,6 @@ struct AppearanceSettings: Codable, Changeable {
     var swipeGestures: Bool = false
     var enableFullSwipePop: Bool = true
     var hideScrollToTopButton: Bool = false
-    // var autoTranslate: Bool = false
     var mastodon: Mastodon = .init()
     var misskey: Misskey = .init()
     var bluesky: Bluesky = .init()
@@ -108,18 +107,12 @@ struct AppearanceSettings: Codable, Changeable {
 
 enum RenderEngine: Codable, CaseIterable {
     case markdown
-    case flareText
-//    case textViewMarkdown
     case emojiText
 
     var title: String {
         switch self {
         case .markdown:
             "Markdown"
-        case .flareText:
-            "FlareText"
-//        case .textViewMarkdown:
-//            "TextViewMarkdown"
         case .emojiText:
             "EmojiText"
         }

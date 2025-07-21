@@ -41,8 +41,6 @@ enum TimelineDisplayType: String, CaseIterable, Identifiable, Codable {
     func saveUserPreference(for tabKey: String) {
         let key = "timeline_display_type_\(tabKey)"
         UserDefaults.standard.set(rawValue, forKey: key)
-
-        FlareLog.debug("TimelineDisplayType Saved preference: \(displayName) for tab: \(tabKey)")
     }
 }
 
@@ -55,8 +53,8 @@ enum ClickAction {
 struct WaterfallItem: Identifiable, Hashable {
     let id: String
     let sourceTimelineItem: TimelineItem
-    let displayMedia: Media // 要显示的媒体（Card模式用第一个，Media模式用当前这个）
-    let mediaIndex: Int // 在原推文中的媒体索引
+    let displayMedia: Media
+    let mediaIndex: Int
     let displayType: TimelineDisplayType
 
     var aspectRatio: CGFloat {

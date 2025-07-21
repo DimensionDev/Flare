@@ -47,9 +47,9 @@ struct TimelineDisplayScreen: View {
                             actions: []
                         ),
                         index: 0,
-                        presenter: nil,
-                        scrollPositionID: .constant(nil),
-                        onError: { _ in }
+//                        presenter: nil,
+//                        scrollPositionID: .constant(nil),
+//                        onError: { _ in }
                     ).padding(.vertical, 0)
                 }
 

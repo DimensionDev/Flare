@@ -10,7 +10,7 @@ struct TranslatableText: View {
     @StateObject private var viewModel = TranslationViewModel()
     private let languageDetector = LanguageDetector()
     @Environment(\.appSettings) private var appSettings
-    @Environment(\.isInCaptureMode) private var isInCaptureMode // 截图不翻译
+    @Environment(\.isInCaptureMode) private var isInCaptureMode
 
     init(originalText: String) {
         self.originalText = originalText
@@ -30,7 +30,7 @@ struct TranslatableText: View {
         return forceTranslate &&
             getTranslatedText() == nil &&
             !isTranslating() &&
-            languageDetector.shouldTranslate(text: originalText, targetLanguage: Locale.current.language.languageCode?.identifier ?? "en") // 检查是否需要翻译
+            languageDetector.shouldTranslate(text: originalText, targetLanguage: Locale.current.language.languageCode?.identifier ?? "en")
     }
 
     private func getTranslatedText() -> String? {

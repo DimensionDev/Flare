@@ -156,20 +156,21 @@ internal fun CommonProfileHeader(
                 }
             }
             Column(
-                modifier = Modifier
-                    .let {
-                        if (isBigScreen()) {
-                            it
-                        } else {
-                            it
-                                .padding(horizontal = screenHorizontalPadding)
-                                .padding(bottom = 8.dp)
-                                .listCard()
-                                .background(PlatformTheme.colorScheme.card)
-                                .padding(horizontal = screenHorizontalPadding, vertical = 8.dp)
-                                .fillMaxWidth()
-                        }
-                    },
+                modifier =
+                    Modifier
+                        .let {
+                            if (isBigScreen()) {
+                                it
+                            } else {
+                                it
+                                    .padding(horizontal = screenHorizontalPadding)
+                                    .padding(bottom = 8.dp)
+                                    .listCard()
+                                    .background(PlatformTheme.colorScheme.card)
+                                    .padding(horizontal = screenHorizontalPadding, vertical = 8.dp)
+                                    .fillMaxWidth()
+                            }
+                        },
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Column {

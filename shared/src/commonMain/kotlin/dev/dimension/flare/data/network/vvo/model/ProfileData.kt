@@ -60,6 +60,8 @@ internal data class CardlistInfo(
 
 @Serializable
 internal data class Card(
+    @SerialName("card_style")
+    val cardStyle: Long? = null,
     @SerialName("card_type")
     val cardType: Long? = null,
     @SerialName("profile_type_id")

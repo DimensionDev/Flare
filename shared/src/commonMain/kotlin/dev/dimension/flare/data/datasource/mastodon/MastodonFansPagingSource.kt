@@ -1,11 +1,8 @@
 package dev.dimension.flare.data.datasource.mastodon
 
-import androidx.paging.PagingSource.LoadParams
-import androidx.paging.PagingSource.LoadResult
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.data.network.mastodon.api.AccountResources
-import dev.dimension.flare.data.network.mastodon.api.model.MastodonPaging
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.mapper.render
@@ -27,7 +24,7 @@ internal class MastodonFansPagingSource(
                     id = userKey.id,
                     limit = limit,
                     max_id = maxId,
-                ).let { MastodonPaging.from(it) }
+                )
         return LoadResult.Page(
             data =
                 response.map {

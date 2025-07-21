@@ -1,11 +1,11 @@
 package dev.dimension.flare.data.network.mastodon.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.MastodonList
+import dev.dimension.flare.data.network.mastodon.api.model.MastodonPaging
 
 internal interface AccountResources {
     @GET("api/v1/accounts/{id}/followers")
@@ -14,7 +14,7 @@ internal interface AccountResources {
         @Query("max_id") max_id: String? = null,
         @Query("since_id") since_id: String? = null,
         @Query("limit") limit: Int? = null,
-    ): Response<List<Account>>
+    ): MastodonPaging<Account>
 
     @GET("api/v1/accounts/{id}/following")
     suspend fun following(
@@ -22,10 +22,10 @@ internal interface AccountResources {
         @Query("max_id") max_id: String? = null,
         @Query("since_id") since_id: String? = null,
         @Query("limit") limit: Int? = null,
-    ): Response<List<Account>>
+    ): MastodonPaging<Account>
 
     @GET("api/v1/accounts/{id}/lists")
     suspend fun accountLists(
         @Path(value = "id") id: String,
-    ): Response<List<MastodonList>>
+    ): MastodonPaging<MastodonList>
 }

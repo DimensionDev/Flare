@@ -130,7 +130,7 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
                 )
             }
             item {
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
             itemsIndexed(state.messages) { index, it ->
                 ListItem(

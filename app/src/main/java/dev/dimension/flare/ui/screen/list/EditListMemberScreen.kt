@@ -115,7 +115,7 @@ internal fun EditListMemberScreen(
                     )
                 }
                 item {
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
                 state.users
                     .onSuccess {

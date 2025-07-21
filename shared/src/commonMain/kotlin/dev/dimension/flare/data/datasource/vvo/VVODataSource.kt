@@ -174,7 +174,10 @@ internal class VVODataSource(
             fetchSource = {
                 val config = service.config()
                 if (config.data?.login != true) {
-                    throw LoginExpiredException
+                    throw LoginExpiredException(
+                        accountKey = accountKey,
+                        platformType = PlatformType.VVo,
+                    )
                 }
                 val st = config.data.st
                 requireNotNull(st) { "st is null" }
@@ -199,7 +202,10 @@ internal class VVODataSource(
         ) {
             val config = service.config()
             if (config.data?.login != true) {
-                throw LoginExpiredException
+                throw LoginExpiredException(
+                    accountKey = accountKey,
+                    platformType = PlatformType.VVo,
+                )
             }
             val st = config.data.st
             requireNotNull(st) { "st is null" }
@@ -322,7 +328,10 @@ internal class VVODataSource(
         val maxProgress = data.medias.size + 1
         val config = service.config()
         if (config.data?.login != true) {
-            throw LoginExpiredException
+            throw LoginExpiredException(
+                accountKey = accountKey,
+                platformType = PlatformType.VVo,
+            )
         }
         val st = config.data.st
         requireNotNull(st) { "st is null" }
@@ -367,7 +376,10 @@ internal class VVODataSource(
     override suspend fun deleteStatus(statusKey: MicroBlogKey) {
         val config = service.config()
         if (config.data?.login != true) {
-            throw LoginExpiredException
+            throw LoginExpiredException(
+                accountKey = accountKey,
+                platformType = PlatformType.VVo,
+            )
         }
         val st = config.data.st
         requireNotNull(st) { "st is null" }
@@ -416,7 +428,8 @@ internal class VVODataSource(
             config = PagingConfig(pageSize = pageSize),
         ) {
             TrendHashtagPagingSource(
-                service,
+                accountKey = accountKey,
+                service = service,
             )
         }.flow
 
@@ -451,7 +464,10 @@ internal class VVODataSource(
         tryRun {
             val config = service.config()
             if (config.data?.login != true) {
-                throw LoginExpiredException
+                throw LoginExpiredException(
+                    accountKey = accountKey,
+                    platformType = PlatformType.VVo,
+                )
             }
             val st = config.data.st
             requireNotNull(st) { "st is null" }
@@ -482,7 +498,10 @@ internal class VVODataSource(
         tryRun {
             val config = service.config()
             if (config.data?.login != true) {
-                throw LoginExpiredException
+                throw LoginExpiredException(
+                    accountKey = accountKey,
+                    platformType = PlatformType.VVo,
+                )
             }
             val st = config.data.st
             requireNotNull(st) { "st is null" }
@@ -570,7 +589,10 @@ internal class VVODataSource(
         ) {
             val config = service.config()
             if (config.data?.login != true) {
-                throw LoginExpiredException
+                throw LoginExpiredException(
+                    accountKey = accountKey,
+                    platformType = PlatformType.VVo,
+                )
             }
             val st = config.data.st
             requireNotNull(st) { "st is null" }
@@ -606,7 +628,10 @@ internal class VVODataSource(
             tryRun {
                 val config = service.config()
                 if (config.data?.login != true) {
-                    throw LoginExpiredException
+                    throw LoginExpiredException(
+                        accountKey = accountKey,
+                        platformType = PlatformType.VVo,
+                    )
                 }
                 val st = config.data.st
                 requireNotNull(st) { "st is null" }
@@ -668,7 +693,10 @@ internal class VVODataSource(
             tryRun {
                 val config = service.config()
                 if (config.data?.login != true) {
-                    throw LoginExpiredException
+                    throw LoginExpiredException(
+                        accountKey = accountKey,
+                        platformType = PlatformType.VVo,
+                    )
                 }
                 val st = config.data.st
                 requireNotNull(st) { "st is null" }
@@ -716,7 +744,10 @@ internal class VVODataSource(
             fetchSource = {
                 val config = service.config()
                 if (config.data?.login != true) {
-                    throw LoginExpiredException
+                    throw LoginExpiredException(
+                        accountKey = accountKey,
+                        platformType = PlatformType.VVo,
+                    )
                 }
                 val st = config.data.st
                 requireNotNull(st) { "st is null" }

@@ -6,6 +6,7 @@ import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.mapper.render
 
@@ -19,7 +20,10 @@ internal class CommentPagingSource(
         val config = service.config()
         if (config.data?.login != true) {
             return LoadResult.Error(
-                LoginExpiredException,
+                LoginExpiredException(
+                    accountKey = accountKey,
+                    platformType = PlatformType.VVo,
+                ),
             )
         }
         if (params.key == null) {

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,7 +35,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.FileCircleExclamation
+import compose.icons.fontawesomeicons.solid.FaceSadTear
 import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.TabSettings
@@ -51,6 +50,8 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.ThemeIconData
+import dev.dimension.flare.ui.component.ThemedIcon
 import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
@@ -263,22 +264,23 @@ fun <T : UiUserV2> AccountItem(
             ListItem(
                 headlineContent = {
                     if (throwable is LoginExpiredException) {
-                        Text(text = stringResource(id = R.string.login_expired))
+                        Text(text = stringResource(id = R.string.login_expired, throwable.accountKey.toString()))
                     } else {
                         Text(text = stringResource(id = R.string.account_item_error_title))
                     }
                 },
                 modifier = modifier,
                 leadingContent = {
-                    FAIcon(
-                        FontAwesomeIcons.Solid.FileCircleExclamation,
+                    ThemedIcon(
+                        FontAwesomeIcons.Solid.FaceSadTear,
                         contentDescription = stringResource(id = R.string.account_item_error_title),
-                        modifier = Modifier.size(avatarSize),
+                        color = ThemeIconData.Color.ImperialMagenta,
+                        size = avatarSize,
                     )
                 },
                 supportingContent = {
                     if (throwable is LoginExpiredException) {
-                        Text(text = stringResource(id = R.string.login_expired_message))
+                        Text(text = throwable.accountKey.toString())
                     } else {
                         Text(text = stringResource(id = R.string.account_item_error_message))
                     }

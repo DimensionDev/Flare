@@ -12,6 +12,7 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 
 @OptIn(ExperimentalPagingApi::class)
 internal class HomeTimelineRemoteMediator(
@@ -34,9 +35,15 @@ internal class HomeTimelineRemoteMediator(
         if (config.data?.login != true) {
             inAppNotification.onError(
                 Message.LoginExpired,
-                LoginExpiredException,
+                LoginExpiredException(
+                    accountKey = accountKey,
+                    platformType = PlatformType.VVo,
+                ),
             )
-            throw LoginExpiredException
+            throw LoginExpiredException(
+                accountKey = accountKey,
+                platformType = PlatformType.VVo,
+            )
         }
 
         val response =

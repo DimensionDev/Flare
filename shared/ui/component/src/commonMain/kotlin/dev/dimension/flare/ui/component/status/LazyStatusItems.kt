@@ -220,7 +220,7 @@ private fun OnError(
 ) {
     when (error) {
         is LoginExpiredException -> {
-            LoginExpiredError(modifier)
+            LoginExpiredError(error, modifier)
         }
 
         else -> {
@@ -247,7 +247,10 @@ private fun OnError(
 }
 
 @Composable
-private fun LoginExpiredError(modifier: Modifier = Modifier) {
+private fun LoginExpiredError(
+    exception: LoginExpiredException,
+    modifier: Modifier = Modifier,
+) {
     val uriHandler = LocalUriHandler.current
     Column(
         modifier =
@@ -268,6 +271,9 @@ private fun LoginExpiredError(modifier: Modifier = Modifier) {
         )
         PlatformText(
             text = stringResource(resource = Res.string.login_expired_message),
+        )
+        PlatformText(
+            text = exception.accountKey.toString(),
         )
     }
 }

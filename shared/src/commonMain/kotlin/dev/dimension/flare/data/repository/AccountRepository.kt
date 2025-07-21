@@ -95,7 +95,10 @@ internal class AccountRepository(
 
 public data object NoActiveAccountException : Exception("No active account.")
 
-public data object LoginExpiredException : Exception("Login expired.")
+public data class LoginExpiredException(
+    val accountKey: MicroBlogKey,
+    val platformType: PlatformType,
+) : Exception("Login expired.")
 
 @Composable
 internal fun activeAccountPresenter(repository: AccountRepository): State<UiState<UiAccount>> =

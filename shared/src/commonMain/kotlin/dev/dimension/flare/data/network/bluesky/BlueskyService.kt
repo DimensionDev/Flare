@@ -6,6 +6,7 @@ import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import io.ktor.client.HttpClient
 import io.ktor.client.call.HttpClientCall
 import io.ktor.client.call.body
@@ -48,6 +49,7 @@ internal data class BlueskyService(
                 refresh = refreshToken
                 tokenRefreshed = onTokenRefreshed
                 this.baseUrl = baseUrl
+                this.accountKey = accountKey
             }
             install(AtprotoProxyPlugin)
 
@@ -86,6 +88,7 @@ private class AtprotoProxyPlugin {
 internal class XrpcAuthPlugin(
     private val json: Json,
     private val baseUrl: String,
+    private val accountKey: MicroBlogKey? = null,
     private val accessToken: String? = null,
     private val refreshToken: String? = null,
     private val onTokenRefreshed: ((accessToken: String, refreshToken: String) -> Unit)? = null,
@@ -96,6 +99,7 @@ internal class XrpcAuthPlugin(
         var refresh: String? = null,
         var tokenRefreshed: ((accessToken: String, refreshToken: String) -> Unit)? = null,
         var baseUrl: String? = null,
+        var accountKey: MicroBlogKey? = null,
     )
 
     companion object : HttpClientPlugin<Config, XrpcAuthPlugin> {
@@ -109,6 +113,7 @@ internal class XrpcAuthPlugin(
                 refreshToken = config.refresh,
                 onTokenRefreshed = config.tokenRefreshed,
                 baseUrl = config.baseUrl!!,
+                accountKey = config.accountKey,
             )
         }
 
@@ -162,7 +167,10 @@ internal class XrpcAuthPlugin(
                                 plugin.json.decodeFromString(refreshResponse.bodyAsText())
                             }
                         if (refreshBody.getOrNull()?.error == "ExpiredToken") {
-                            throw LoginExpiredException
+                            throw LoginExpiredException(
+                                accountKey = plugin.accountKey ?: throw IllegalStateException("No account key provided"),
+                                platformType = PlatformType.Bluesky,
+                            )
                         }
                     }
                 }

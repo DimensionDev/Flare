@@ -38,6 +38,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.adaptive.currentWindowSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,8 +64,10 @@ import dev.dimension.flare.data.datasource.microblog.ProfileTab
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.ProfileHeader
 import dev.dimension.flare.ui.component.ProfileHeaderLoading
 import dev.dimension.flare.ui.component.ProfileMenu
@@ -298,6 +301,7 @@ internal fun ProfileScreen(
                                     Modifier.graphicsLayer {
                                         alpha = titleAlpha
                                     },
+                                maxLines = 1,
                             )
                         }
                     },
@@ -529,63 +533,70 @@ private fun ProfileMediaTab(
     onItemClicked: (statusKey: MicroBlogKey, index: Int, preview: String?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LazyVerticalStaggeredGrid(
-        modifier = modifier,
-        columns = StaggeredGridCells.Adaptive(120.dp),
-        verticalItemSpacing = 8.dp,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        contentPadding = PaddingValues(vertical = 8.dp, horizontal = screenHorizontalPadding),
+    CompositionLocalProvider(
+        LocalComponentAppearance provides
+            LocalComponentAppearance.current.copy(
+                videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
+            ),
     ) {
-        mediaState
-            .onSuccess {
-                items(itemCount) { index ->
-                    val item = get(index)
-                    if (item != null) {
-                        val media = item.media
-                        MediaItem(
-                            media = media,
-                            showCountdown = false,
-                            modifier =
-                                Modifier
-                                    .clip(MaterialTheme.shapes.medium)
-                                    .clipToBounds()
-                                    .clickable {
-                                        val content = item.status.content
-                                        if (content is UiTimeline.ItemContent.Status) {
-                                            onItemClicked(
-                                                content.statusKey,
-                                                item.index,
-                                                when (media) {
-                                                    is UiMedia.Image -> media.previewUrl
-                                                    is UiMedia.Video -> media.thumbnailUrl
-                                                    is UiMedia.Gif -> media.previewUrl
-                                                    else -> null
-                                                },
-                                            )
-                                        }
-                                    },
-                        )
-                    } else {
-                        Card {
-                            Box(
+        LazyVerticalStaggeredGrid(
+            modifier = modifier,
+            columns = StaggeredGridCells.Adaptive(120.dp),
+            verticalItemSpacing = 8.dp,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(vertical = 8.dp, horizontal = screenHorizontalPadding),
+        ) {
+            mediaState
+                .onSuccess {
+                    items(itemCount) { index ->
+                        val item = get(index)
+                        if (item != null) {
+                            val media = item.media
+                            MediaItem(
+                                media = media,
+                                showCountdown = false,
                                 modifier =
                                     Modifier
-                                        .size(120.dp)
-                                        .placeholder(true),
+                                        .clip(MaterialTheme.shapes.medium)
+                                        .clipToBounds()
+                                        .clickable {
+                                            val content = item.status.content
+                                            if (content is UiTimeline.ItemContent.Status) {
+                                                onItemClicked(
+                                                    content.statusKey,
+                                                    item.index,
+                                                    when (media) {
+                                                        is UiMedia.Image -> media.previewUrl
+                                                        is UiMedia.Video -> media.thumbnailUrl
+                                                        is UiMedia.Gif -> media.previewUrl
+                                                        else -> null
+                                                    },
+                                                )
+                                            }
+                                        },
                             )
+                        } else {
+                            Card {
+                                Box(
+                                    modifier =
+                                        Modifier
+                                            .size(120.dp)
+                                            .placeholder(true),
+                                )
+                            }
                         }
                     }
+                }.onLoading {
+                    items(10) {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .size(120.dp)
+                                    .placeholder(true),
+                        )
+                    }
                 }
-            }.onLoading {
-                items(10) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .size(120.dp)
-                                .placeholder(true),
-                    )
-                }
-            }
+        }
     }
 }
 

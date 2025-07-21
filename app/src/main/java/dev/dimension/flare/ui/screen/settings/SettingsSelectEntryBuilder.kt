@@ -49,6 +49,9 @@ internal fun EntryProviderBuilder<NavKey>.settingsSelectEntryBuilder(
             toAiConfig = {
                 navigate(Route.Settings.AiConfig)
             },
+            toColorSpace = {
+                navigate(Route.Settings.ColorSpace)
+            },
             onBack = onBack,
         )
     }
@@ -184,6 +187,16 @@ internal fun EntryProviderBuilder<NavKey>.settingsSelectEntryBuilder(
     ) { args ->
         LocalFilterEditDialog(
             keyword = args.keyword,
+            onBack = onBack
+        )
+    }
+
+    entry<Route.Settings.ColorSpace>(
+        metadata = ListDetailSceneStrategy.extraPane(
+            sceneKey = "Settings"
+        )
+    ) { args ->
+        ColorSpaceScreen(
             onBack = onBack
         )
     }

@@ -1,6 +1,8 @@
 package dev.dimension.flare.ui.screen.profile
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
@@ -12,16 +14,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.common.items
+import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.RefreshContainer
+import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.presenter.invoke
@@ -29,6 +33,7 @@ import dev.dimension.flare.ui.presenter.profile.FansPresenter
 import dev.dimension.flare.ui.presenter.profile.FollowingPresenter
 import dev.dimension.flare.ui.presenter.profile.UserListPresenter
 import dev.dimension.flare.ui.screen.settings.AccountItem
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -114,11 +119,11 @@ internal fun UserListScreen(
     refresh: () -> Unit,
     onUserClick: (MicroBlogKey) -> Unit,
 ) {
-    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     FlareScaffold(
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         topBar = {
-            FlareTopAppBar(
+            FlareLargeFlexibleTopAppBar(
                 title = title,
                 scrollBehavior = topAppBarScrollBehavior,
                 navigationIcon = {
@@ -137,18 +142,34 @@ internal fun UserListScreen(
             content = {
                 LazyColumn(
                     contentPadding = contentPadding,
+                    modifier =
+                        Modifier
+                            .padding(horizontal = screenHorizontalPadding),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    items(
+                    itemsIndexed(
                         data,
-                        loadingContent = {
+                        loadingContent = { index, itemCount ->
                             AccountItem(
+                                modifier =
+                                    Modifier
+                                        .listCard(
+                                            index = index,
+                                            totalCount = itemCount,
+                                        ),
                                 userState = UiState.Loading(),
                                 onClick = { onUserClick(it) },
                                 toLogin = {},
                             )
                         },
-                    ) {
+                    ) { index, itemCount, it ->
                         AccountItem(
+                            modifier =
+                                Modifier
+                                    .listCard(
+                                        index = index,
+                                        totalCount = itemCount,
+                                    ),
                             userState = UiState.Success(it),
                             onClick = { onUserClick(it) },
                             toLogin = {},

@@ -122,6 +122,9 @@ internal sealed interface Route : NavKey {
         data class LocalFilterEdit(
             val keyword: String?,
         ) : Settings
+
+        @Serializable
+        data object ColorSpace : Settings
     }
 
     @Serializable

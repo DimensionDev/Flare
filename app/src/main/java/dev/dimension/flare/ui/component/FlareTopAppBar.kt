@@ -26,6 +26,7 @@ fun FlareTopAppBar(
         TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.background,
             scrolledContainerColor = MaterialTheme.colorScheme.background,
+            actionIconContentColor = MaterialTheme.colorScheme.primary,
         ),
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
@@ -62,6 +63,7 @@ fun FlareLargeFlexibleTopAppBar(
         TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.background,
             scrolledContainerColor = MaterialTheme.colorScheme.background,
+            actionIconContentColor = MaterialTheme.colorScheme.primary,
         ),
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {

@@ -66,11 +66,7 @@ internal fun EntryProviderBuilder<NavKey>.misskeyEntryBuilder(
                     ),
                 )
             },
-            toCompose = {
-                navigate(Route.Compose.New(args.accountType))
-            },
-            toQuickMenu = { /* No-op */ },
-            toLogin = { /* No-op */ },
+            onBack = onBack,
         )
     }
 }

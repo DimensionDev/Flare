@@ -30,8 +30,10 @@ internal class FollowingPagingSource(
                 .getContainerIndex(containerId = containerId, page = nextPage)
                 .data
                 ?.cards
-                ?.lastOrNull()
-                ?.cardGroup
+                ?.filter { it.cardType == 11L && it.cardStyle == null }
+                ?.mapNotNull {
+                    it.cardGroup
+                }?.flatMap { it }
                 ?.mapNotNull { it.user }
                 ?.map {
                     it.render(accountKey = accountKey)

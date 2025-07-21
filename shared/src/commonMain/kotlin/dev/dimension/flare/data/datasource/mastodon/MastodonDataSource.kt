@@ -995,10 +995,9 @@ internal open class MastodonDataSource(
                         val result =
                             service
                                 .listMembers(listId, limit = pageSize, max_id = key)
-                                .body()
-                                ?.map {
+                                .map {
                                     it.toDbUser(accountKey.host).render(accountKey)
-                                } ?: emptyList()
+                                }
 
                         if (loadType == LoadType.REFRESH) {
                             MemoryPagingSource.update(
@@ -1091,13 +1090,11 @@ internal open class MastodonDataSource(
         ) {
             service
                 .accountLists(userKey.id)
-                .body()
-                ?.mapNotNull {
+                .mapNotNull {
                     it.id?.let { _ ->
                         it.render()
                     }
-                }.orEmpty()
-                .toImmutableList()
+                }.toImmutableList()
         }
 
     override val supportedMetaData: ImmutableList<ListMetaDataType>

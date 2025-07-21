@@ -12,6 +12,7 @@ import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.mastodon.api.model.Account
 import dev.dimension.flare.data.network.mastodon.api.model.MastodonList
+import dev.dimension.flare.data.network.mastodon.api.model.MastodonPaging
 import dev.dimension.flare.data.network.mastodon.api.model.PostAccounts
 import dev.dimension.flare.data.network.mastodon.api.model.PostList
 
@@ -48,7 +49,7 @@ internal interface ListsResources {
         @Query("max_id") max_id: String? = null,
         @Query("since_id") since_id: String? = null,
         @Query("limit") limit: Int = 20,
-    ): Response<List<Account>>
+    ): MastodonPaging<Account>
 
     @POST("api/v1/lists/{id}/accounts")
     suspend fun addMember(

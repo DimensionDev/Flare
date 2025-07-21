@@ -10,6 +10,7 @@ import dev.dimension.flare.common.BuildConfig
 import dev.dimension.flare.common.JSON
 import dev.dimension.flare.data.network.authorization.Authorization
 import dev.dimension.flare.data.network.authorization.AuthorizationPlugin
+import dev.dimension.flare.data.network.mastodon.api.model.MastodonPagingConverterFactory
 import dev.dimension.flare.data.repository.DebugRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -39,6 +40,7 @@ internal fun ktorfit(
         FlowConverterFactory(),
         CallConverterFactory(),
         ResponseConverterFactory(),
+        MastodonPagingConverterFactory(),
     )
 }
 

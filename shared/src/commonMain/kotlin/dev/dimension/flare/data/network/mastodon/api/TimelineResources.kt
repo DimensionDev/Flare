@@ -1,10 +1,10 @@
 package dev.dimension.flare.data.network.mastodon.api
 
-import de.jensklingenberg.ktorfit.Response
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 import dev.dimension.flare.data.network.mastodon.api.model.Context
+import dev.dimension.flare.data.network.mastodon.api.model.MastodonPaging
 import dev.dimension.flare.data.network.mastodon.api.model.Notification
 import dev.dimension.flare.data.network.mastodon.api.model.NotificationTypes
 import dev.dimension.flare.data.network.mastodon.api.model.Status
@@ -49,7 +49,7 @@ internal interface TimelineResources {
         @Query("min_id") min_id: String? = null,
         @Query("exclude_replies") exclude_replies: Boolean? = null,
         @Query("limit") limit: Int? = null,
-    ): Response<List<Status>>
+    ): MastodonPaging<Status>
 
     @GET("api/v1/notifications")
     suspend fun notification(
@@ -92,7 +92,7 @@ internal interface TimelineResources {
         @Query("since_id") since_id: String? = null,
         @Query("min_id") min_id: String? = null,
         @Query("limit") limit: Int? = null,
-    ): Response<List<Status>>
+    ): MastodonPaging<Status>
 
     @GET("api/v1/favourites")
     suspend fun favorites(
@@ -100,5 +100,5 @@ internal interface TimelineResources {
         @Query("since_id") since_id: String? = null,
         @Query("min_id") min_id: String? = null,
         @Query("limit") limit: Int? = null,
-    ): Response<List<Status>>
+    ): MastodonPaging<Status>
 }

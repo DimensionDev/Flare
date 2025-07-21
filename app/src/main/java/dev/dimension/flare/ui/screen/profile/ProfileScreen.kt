@@ -301,6 +301,7 @@ internal fun ProfileScreen(
                                     Modifier.graphicsLayer {
                                         alpha = titleAlpha
                                     },
+                                maxLines = 1,
                             )
                         }
                     },

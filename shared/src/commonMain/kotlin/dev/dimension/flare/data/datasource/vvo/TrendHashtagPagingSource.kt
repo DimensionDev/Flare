@@ -4,9 +4,12 @@ import androidx.paging.PagingState
 import dev.dimension.flare.common.BasePagingSource
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.ui.model.UiHashtag
 
 internal class TrendHashtagPagingSource(
+    private val accountKey: MicroBlogKey,
     private val service: VVOService,
 ) : BasePagingSource<Int, UiHashtag>() {
     private val containerId = "106003type=25&filter_type=realtimehot"
@@ -17,7 +20,10 @@ internal class TrendHashtagPagingSource(
         val config = service.config()
         if (config.data?.login != true) {
             return LoadResult.Error(
-                LoginExpiredException,
+                LoginExpiredException(
+                    accountKey = accountKey,
+                    platformType = PlatformType.VVo,
+                ),
             )
         }
         service

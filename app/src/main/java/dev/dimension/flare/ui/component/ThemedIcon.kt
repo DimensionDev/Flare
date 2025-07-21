@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.theme.isLight
 import kotlinx.collections.immutable.persistentMapOf
@@ -154,6 +155,7 @@ internal fun ThemedIcon(
     contentDescription: String?,
     color: ThemeIconData.Color,
     modifier: Modifier = Modifier,
+    size: Dp = 40.dp,
 ) {
     val isLight = MaterialTheme.colorScheme.isLight()
     val theme =
@@ -170,7 +172,7 @@ internal fun ThemedIcon(
         modifier =
             modifier
                 .background(theme.backgroundColor, shape = CircleShape)
-                .size(40.dp),
+                .size(size),
         contentAlignment = Alignment.Center,
     ) {
         FAIcon(

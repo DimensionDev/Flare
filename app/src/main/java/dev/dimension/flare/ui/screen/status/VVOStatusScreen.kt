@@ -44,6 +44,7 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.component.status.status
@@ -99,16 +100,19 @@ internal fun VVOStatusScreen(
                         in 840.dp..1024.dp -> 332.dp
                         else -> 432.dp
                     }
-                StatusContent(
-                    detailStatusKey = statusKey,
-                    statusState = state.status,
+                AdaptiveCard(
                     modifier =
                         Modifier
                             .verticalScroll(rememberScrollState())
                             .width(width)
                             .padding(horizontal = screenHorizontalPadding)
                             .padding(contentPadding),
-                )
+                ) {
+                    StatusContent(
+                        detailStatusKey = statusKey,
+                        statusState = state.status,
+                    )
+                }
             }
             LazyStatusVerticalStaggeredGrid(
                 contentPadding = contentPadding,
@@ -116,7 +120,9 @@ internal fun VVOStatusScreen(
             ) {
                 if (!bigScreen) {
                     item {
-                        StatusContent(statusState = state.status, detailStatusKey = statusKey)
+                        AdaptiveCard {
+                            StatusContent(statusState = state.status, detailStatusKey = statusKey)
+                        }
                     }
                 }
                 reactionContent(

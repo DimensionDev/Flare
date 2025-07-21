@@ -126,10 +126,12 @@ fun FlareTheme(
                         it.copy(
                             background = it.surfaceContainer,
                             surface = it.surfaceBright,
+                            surfaceContainer = it.surfaceContainerHighest,
                         )
                     } else {
                         it.copy(
                             background = it.surfaceContainer,
+                            surfaceContainer = it.surfaceContainerHighest,
                         )
                     }
                 }

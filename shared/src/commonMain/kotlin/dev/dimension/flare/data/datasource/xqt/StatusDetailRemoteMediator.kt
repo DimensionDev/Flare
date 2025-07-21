@@ -14,16 +14,11 @@ import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
-import dev.dimension.flare.data.database.cache.model.StatusContent
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.xqt.XQTService
-import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
-import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.mapper.render
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
@@ -51,7 +46,6 @@ internal class StatusDetailRemoteMediator(
             append(accountKey.toString())
         }
     private var cursor: String? = null
-    private var actualId: String? = null
 
     override suspend fun timeline(
         loadType: LoadType,
@@ -108,73 +102,13 @@ internal class StatusDetailRemoteMediator(
                 endOfPaginationReached = true,
             )
         } else {
-            val id =
-                actualId ?: run {
-                    val result =
-                        database
-                            .statusDao()
-                            .get(statusKey, AccountType.Specific(accountKey))
-                            .firstOrNull()
-                            ?.content
-                            ?.let { it as? StatusContent.XQT }
-                            ?.data
-                            ?.render(accountKey, event = event)
-                            ?.let {
-                                (it.content as? UiTimeline.ItemContent.Status)?.statusKey?.id
-                            } ?: run {
-                            val response =
-                                service
-                                    .getTweetDetail(
-                                        variables =
-                                            TweetDetailRequest(
-                                                focalTweetID = statusKey.id,
-                                                cursor = null,
-                                            ).encodeJson(),
-                                    ).body()
-                                    ?.data
-                                    ?.threadedConversationWithInjectionsV2
-                                    ?.instructions
-                                    .orEmpty()
-                            val tweet = response.tweets()
-                            tweet
-                                .firstOrNull {
-                                    it.id == statusKey.id
-                                }?.tweets
-                                ?.tweetResults
-                                ?.result
-                                ?.let { it as? Tweet }
-                                ?.legacy
-                                ?.retweetedStatusResult
-                                ?.result
-                                ?.let { it as? Tweet }
-                                ?.legacy
-                                ?.idStr
-                        } ?: statusKey.id
-
-                    actualId = result
-                    result
-                }
-            val currentItem =
-                if (cursor == null) {
-                    service
-                        .getTweetResultByRestId(
-                            variables =
-                                TweetDetailWithRestIdRequest(
-                                    tweetID = statusKey.id,
-                                ).encodeJson(),
-                        ).body()
-                        ?.data
-                        ?.tweetResult
-                } else {
-                    null
-                }
-            val actualResponse =
+            val response =
                 service
                     .getTweetDetail(
                         variables =
                             TweetDetailRequest(
-                                focalTweetID = id,
-                                cursor = null,
+                                focalTweetID = statusKey.id,
+                                cursor = cursor,
                             ).encodeJson(),
                     ).body()
                     ?.data
@@ -183,45 +117,20 @@ internal class StatusDetailRemoteMediator(
                     .orEmpty()
 
             val actualTweet =
-                actualResponse
+                response
                     .tweets()
-                    .map {
-                        if (id != statusKey.id) {
-                            val itId =
-                                it.tweets
-                                    .tweetResults
-                                    .result
-                                    ?.let { it as? Tweet }
-                                    ?.legacy
-                                    ?.idStr
-                            if (itId == id) {
-                                it.copy(
-                                    tweets =
-                                        it.tweets.copy(
-                                            tweetResults = currentItem ?: it.tweets.tweetResults,
-                                        ),
-                                    id = statusKey.id,
-                                )
-                            } else {
-                                it
-                            }
-                        } else {
-                            it
-                        }
-                    }.filter {
+                    .filter {
                         when (val result = it.tweets.tweetResults.result) {
-                            is Tweet -> result.legacy?.conversationIdStr == statusKey.id
                             is TweetTombstone -> false
-                            is TweetWithVisibilityResults ->
-                                result.tweet.legacy?.conversationIdStr == statusKey.id
                             null -> false
+                            else -> true
                         }
                     }
 
-            cursor = actualResponse.cursor()
+            cursor = response.cursor()
 
             return Result(
-                endOfPaginationReached = actualResponse.isBottomEnd() || actualTweet.size == 1 || cursor == null,
+                endOfPaginationReached = response.isBottomEnd() || actualTweet.size == 1 || cursor == null,
                 data = actualTweet.map { it.toDbPagingTimeline(accountKey, pagingKey) },
             )
         }

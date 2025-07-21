@@ -8,8 +8,9 @@ import de.jensklingenberg.ktorfit.converter.TypeData
 import dev.dimension.flare.common.decodeJson
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.util.reflect.serializer
+import io.ktor.utils.io.InternalAPI
 import kotlinx.serialization.builtins.ListSerializer
-import kotlinx.serialization.serializer
 
 internal class MastodonPaging<T>(
     data: List<T>,
@@ -31,6 +32,7 @@ internal class MastodonPaging<T>(
 }
 
 internal class MastodonPagingConverterFactory : Converter.Factory {
+    @OptIn( InternalAPI::class)
     override fun suspendResponseConverter(
         typeData: TypeData,
         ktorfit: Ktorfit,
@@ -50,11 +52,9 @@ internal class MastodonPagingConverterFactory : Converter.Factory {
                             val body =
                                 result.response.bodyAsText().decodeJson(
                                     ListSerializer(
-                                        serializer(
-                                            typeData.typeArgs
-                                                .first()
-                                                .typeInfo.kotlinType!!,
-                                        ),
+                                        typeData.typeArgs
+                                            .first()
+                                            .typeInfo.serializer(),
                                     ),
                                 )
                             MastodonPaging(

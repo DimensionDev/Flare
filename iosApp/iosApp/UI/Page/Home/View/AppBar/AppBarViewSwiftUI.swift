@@ -29,7 +29,7 @@ struct AppBarViewSwiftUI: View {
             .padding(.leading, 8)
 
             // 标签栏
-            TabItemsViewSwiftUI(
+            AppBarTabItemsViewSwiftUI(
                 selection: $selectedHomeAppBarTab,
                 items: tabs,
                 onScrollToTop: onScrollToTop
@@ -43,13 +43,9 @@ struct AppBarViewSwiftUI: View {
                 }
                 .frame(width: 44)
                 .padding(.trailing, 8)
-            } else {
-                // Spacer()
-                //     .frame(width: 44)
-                //     .padding(.trailing, 8)
-            }
+            } 
         }
         .frame(height: 44)
-//        .background(Color(.systemBackground).opacity(0.95))
+
     }
 }

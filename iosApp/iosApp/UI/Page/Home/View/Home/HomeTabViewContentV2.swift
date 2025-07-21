@@ -54,7 +54,7 @@ struct HomeTabViewContentV2: View {
 
                 Tab(value: FlareHomeTabs.timeline) {
                     FlareTabItem(tabType: .timeline) {
-                        HomeTabScreenSwiftUI(
+                        HomeScreenSwiftUI(
                             accountType: accountType,
                             onSwitchToMenuTab: {
                                 router.selectedTab = .menu

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 73;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -71,30 +71,8 @@
 		B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MoleculeViewModelBase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		6423385A2DF07E900022CB96 /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Page/Home/View/UIKit/HomeTabController.swift.bak,
-				Page/Home/View/UIKit/HomeTabScreen.swift.bak,
-			);
-			target = 7555FF7A242A565900829871 /* iosApp */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		6423385B2DF07E900022CB96 /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = 7555FF77242A565900829871 /* Sources */;
-			membershipExceptions = (
-				Page/Home/View/UIKit/HomeTabController.swift.bak,
-				Page/Home/View/UIKit/HomeTabScreen.swift.bak,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		647078602D76F0A100551073 /* UI */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (6423385A2DF07E900022CB96 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, 6423385B2DF07E900022CB96 /* PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = UI; sourceTree = "<group>"; };
+		647078602D76F0A100551073 /* UI */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = UI; sourceTree = "<group>"; };
 		647078DE2D76F0A400551073 /* Extension */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Extension; sourceTree = "<group>"; };
 		647078E32D76F0A600551073 /* Common */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Common; sourceTree = "<group>"; };
 		647078EC2D76F0B900551073 /* Data */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Data; sourceTree = "<group>"; };
@@ -318,6 +296,7 @@
 				};
 			};
 			buildConfigurationList = 7555FF76242A565900829871 /* Build configuration list for PBXProject "iosApp" */;
+			compatibilityVersion = "Xcode 9.3";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -356,7 +335,6 @@
 				640236042DF6B62200C0D558 /* XCRemoteSwiftPackageReference "swiftui-introspect" */,
 				6447DE902E192773005E08AE /* XCRemoteSwiftPackageReference "WaterfallGrid" */,
 			);
-			preferredProjectObjectVersion = 50;
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";

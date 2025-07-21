@@ -1,7 +1,7 @@
 import shared
 import SwiftUI
 
-struct HomeTabScreenSwiftUI: View {
+struct HomeScreenSwiftUI: View {
     let accountType: AccountType
 
     var onSwitchToMenuTab: (() -> Void)?
@@ -34,7 +34,7 @@ struct HomeTabScreenSwiftUI: View {
             )
             .frame(height: 44)
 
-            TabContentViewSwiftUI(
+            HomeTabViewContentViewSwiftUI(
                 tabStore: tabStore,
                 selectedTab: $selectedHomeAppBarTabKey,
             )

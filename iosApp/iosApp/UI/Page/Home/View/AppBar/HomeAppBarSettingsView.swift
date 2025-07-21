@@ -110,7 +110,7 @@ struct HomeAppBarSettingsView: View {
                     // 主要标签
                     if let primaryTab = store.primaryHomeItems.first {
                         Section(header: Text("main tab")) {
-                            TabItemRow(tab: primaryTab, store: store, isPrimary: true)
+                            AppBarSettingRow(tab: primaryTab, store: store, isPrimary: true)
                         }.listRowBackground(theme.primaryBackgroundColor)
                     }
 
@@ -125,7 +125,7 @@ struct HomeAppBarSettingsView: View {
                     if !secondaryTabs.isEmpty {
                         Section(header: Text("used tabs")) {
                             ForEach(secondaryTabs, id: \.key) { tab in
-                                TabItemRow(tab: tab, store: store, isPrimary: false, defaultToggleValue: true)
+                                AppBarSettingRow(tab: tab, store: store, isPrimary: false, defaultToggleValue: true)
                             }
                             .onMove { source, destination in
                                 store.moveTab(from: source, to: destination)
@@ -140,7 +140,7 @@ struct HomeAppBarSettingsView: View {
                     if !unusedTabs.isEmpty {
                         Section(header: Text("unused tabs")) {
                             ForEach(unusedTabs, id: \.key) { tab in
-                                TabItemRow(tab: tab, store: store, isPrimary: false, defaultToggleValue: false)
+                                AppBarSettingRow(tab: tab, store: store, isPrimary: false, defaultToggleValue: false)
                             }
                         }.listRowBackground(theme.primaryBackgroundColor)
                     }
@@ -276,7 +276,7 @@ struct HomeAppBarSettingsView: View {
             editingListTitle = ""
         }) {
             if let list = editingList {
-                EditAppBarSettingListTitleView(
+                AppBarSettingEditListTitleView(
                     title: $editedTitle,
                     listId: list.id,
                     iconUrl: list.avatar,
@@ -291,7 +291,7 @@ struct HomeAppBarSettingsView: View {
                 )
             } else if let listId = editingListId, !editingListTitle.isEmpty {
                 // 使用 ID 和标题直接编辑
-                EditAppBarSettingListTitleView(
+                AppBarSettingEditListTitleView(
                     title: $editedTitle,
                     listId: listId,
                     iconUrl: store.listIconUrls[listId],

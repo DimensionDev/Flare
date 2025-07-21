@@ -2,7 +2,7 @@ import MarkdownUI
 import shared
 import SwiftUI
 
-struct TabItemsViewSwiftUI: View {
+struct AppBarTabItemsViewSwiftUI: View {
     @Binding var selection: String
     let items: [FLTabItem]
     let onScrollToTop: (String) -> Void

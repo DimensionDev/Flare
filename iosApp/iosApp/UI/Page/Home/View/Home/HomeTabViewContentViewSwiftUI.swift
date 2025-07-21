@@ -2,7 +2,7 @@ import shared
 import SwiftUI
 import SwiftUIIntrospect
 
-struct TabContentViewSwiftUI: View {
+struct HomeTabViewContentViewSwiftUI: View {
     @ObservedObject var tabStore: AppBarTabSettingStore
     @Binding var selectedTab: String
     @Environment(\.appSettings) private var appSettings

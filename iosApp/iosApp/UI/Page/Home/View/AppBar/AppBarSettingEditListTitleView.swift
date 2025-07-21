@@ -3,7 +3,7 @@ import os
 import shared
 import SwiftUI
 
-struct EditAppBarSettingListTitleView: View {
+struct AppBarSettingEditListTitleView: View {
     @Binding var title: String
     let listId: String
     let iconUrl: String?

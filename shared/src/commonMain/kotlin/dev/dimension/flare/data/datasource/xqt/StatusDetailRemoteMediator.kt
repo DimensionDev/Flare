@@ -16,7 +16,9 @@ import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.xqt.XQTService
+import dev.dimension.flare.data.network.xqt.model.Tweet
 import dev.dimension.flare.data.network.xqt.model.TweetTombstone
+import dev.dimension.flare.data.network.xqt.model.TweetWithVisibilityResults
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.coroutines.flow.firstOrNull
@@ -46,6 +48,7 @@ internal class StatusDetailRemoteMediator(
             append(accountKey.toString())
         }
     private var cursor: String? = null
+    private var conversationId: String? = null
 
     override suspend fun timeline(
         loadType: LoadType,
@@ -116,6 +119,29 @@ internal class StatusDetailRemoteMediator(
                     ?.instructions
                     .orEmpty()
 
+            val tweet =
+                service
+                    .getTweetResultByRestId(
+                        variables =
+                            TweetDetailWithRestIdRequest(
+                                tweetID = statusKey.id,
+                                withCommunity = true,
+                                includePromotedContent = true,
+                                withVoice = true,
+                            ).encodeJson(),
+                    ).body()
+                    ?.data
+                    ?.tweetResult
+                    ?.result
+
+            conversationId =
+                when (tweet) {
+                    is Tweet -> tweet.legacy?.conversationIdStr
+                    is TweetTombstone -> null
+                    is TweetWithVisibilityResults -> tweet.tweet.legacy?.conversationIdStr
+                    null -> null
+                }
+
             val actualTweet =
                 response
                     .tweets()
@@ -123,7 +149,8 @@ internal class StatusDetailRemoteMediator(
                         when (val result = it.tweets.tweetResults.result) {
                             is TweetTombstone -> false
                             null -> false
-                            else -> true
+                            is Tweet -> result.legacy?.conversationIdStr == conversationId
+                            is TweetWithVisibilityResults -> result.tweet.legacy?.conversationIdStr == conversationId
                         }
                     }
 

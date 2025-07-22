@@ -86,6 +86,8 @@ class PagingStateConverter {
         // 简化数据获取：直接使用KMP报告的总数据量
         let maxConvertibleIndex = kmpTotalCount
 
+        var newItems: [TimelineItem] = []
+
         if isFullConversion {
             FlareLog.debug("[PagingStateConverter] 全量转换: 转换 0 到 \(maxConvertibleIndex)")
 
@@ -101,7 +103,12 @@ class PagingStateConverter {
                 )
 
                 convertedItems = allItems
-                FlareLog.debug("[PagingStateConverter] 全量转换完成: 转换了 \(allItems.count) 个items")
+
+                if !allItems.isEmpty {
+                    let prefetchCount = min(20, allItems.count)
+                    newItems = Array(allItems.prefix(prefetchCount))
+                    FlareLog.debug("[PagingStateConverter] 全量转换完成: 转换了 \(allItems.count) 个items，预取前 \(newItems.count) 个")
+                }
             }
         } else {
             // 执行增量转换：从当前缓存大小开始转换新数据
@@ -121,27 +128,26 @@ class PagingStateConverter {
                 return generateFilteredState(successState)
             }
 
-            let newItems = convertItemsInRange(
+            let incrementalItems = convertItemsInRange(
                 from: startIndex,
                 to: maxConvertibleIndex,
                 successState: successState
             )
 
-            FlareLog.debug("[PagingStateConverter] 增量转换完成: 新增 \(newItems.count) 个items")
+            FlareLog.debug("[PagingStateConverter] 增量转换完成: 新增 \(incrementalItems.count) 个items")
 
             // 更新缓存
-            convertedItems.append(contentsOf: newItems)
+            convertedItems.append(contentsOf: incrementalItems)
+
+            newItems = incrementalItems
         }
 
-        // 触发图片预取
-//        if !convertedItems.isEmpty {
-//            DispatchQueue.global(qos: .utility).async {
-//                TimelineImagePrefetcher.shared.smartPrefetch(
-//                    currentIndex: 0,
-//                    timelineItems: self.convertedItems
-//                )
-//            }
-//        }
+        if !newItems.isEmpty {
+            DispatchQueue.global(qos: .utility).async {
+                FlareLog.debug("[PagingStateConverter] 触发图片预取，新数据数量: \(newItems.count)")
+                TimelineImagePrefetcher.shared.smartPrefetchDiskImages(timelineItems: newItems)
+            }
+        }
 
         // 应用过滤并生成最终状态
         return generateFilteredState(successState)

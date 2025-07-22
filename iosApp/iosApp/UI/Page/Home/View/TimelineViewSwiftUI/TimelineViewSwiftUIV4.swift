@@ -34,9 +34,16 @@ struct TimelineViewSwiftUIV4: View {
 
                     switch viewModel.timelineState {
                     case .loading:
-                        TimelineLoadingView()
+                        ForEach(0 ..< 5, id: \.self) { index in
+                            TimelineStatusViewV2(
+                                item: createSampleTimelineItem(),
+                                index: index
+                            )
+                            .redacted(reason: .placeholder)
                             .listRowBackground(theme.primaryBackgroundColor)
                             .listRowInsets(EdgeInsets())
+                            .listRowSeparator(.hidden)
+                        }
 
                     case let .loaded(items, hasMore, isRefreshing):
                         TimelineItemsView(

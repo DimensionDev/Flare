@@ -3,7 +3,6 @@ import os
 import shared
 import SwiftUI
 
-
 struct AppBarSettingRow: View {
     let tab: FLTabItem
     let store: AppBarTabSettingStore
@@ -15,7 +14,6 @@ struct AppBarSettingRow: View {
 
     @Environment(FlareTheme.self) private var theme
 
-  
     init(tab: FLTabItem, store: AppBarTabSettingStore, isPrimary: Bool, defaultToggleValue: Bool = true) {
         self.tab = tab
         self.store = store
@@ -57,32 +55,32 @@ struct AppBarSettingRow: View {
 
             if !isPrimary {
                 Toggle(
-"",
- isOn: Binding(
-                    get: {
-                        let isEnabled = store.availableAppBarTabsItems.contains(
-                            where: { $0.key == tab.key
-                            })
-                        FlareLog
-                            .debug(
-                                "Toggle GET: tab=\(tab.key), isEnabled=\(isEnabled), defaultValue=\(defaultToggleValue)"
-                            )
-                        return isEnabled ? true : defaultToggleValue
-                    },
-                    set: { _ in
-                        if !isProcessing {
-                            isProcessing = true
-                            FlareLog.debug("Toggle SET: tab=\(tab.key), 开始切换状态")
-                            store.toggleTab(tab.key)
-                            // 设置短暂延迟避免频繁操作
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                isProcessing = false
-                                FlareLog.debug("Toggle SET: tab=\(tab.key), 切换完成")
+                    "",
+                    isOn: Binding(
+                        get: {
+                            let isEnabled = store.availableAppBarTabsItems.contains(
+                                where: { $0.key == tab.key
+                                })
+                            FlareLog
+                                .debug(
+                                    "Toggle GET: tab=\(tab.key), isEnabled=\(isEnabled), defaultValue=\(defaultToggleValue)"
+                                )
+                            return isEnabled ? true : defaultToggleValue
+                        },
+                        set: { _ in
+                            if !isProcessing {
+                                isProcessing = true
+                                FlareLog.debug("Toggle SET: tab=\(tab.key), 开始切换状态")
+                                store.toggleTab(tab.key)
+                                // 设置短暂延迟避免频繁操作
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    isProcessing = false
+                                    FlareLog.debug("Toggle SET: tab=\(tab.key), 切换完成")
+                                }
                             }
                         }
-                    }
+                    )
                 )
-)
                 .disabled(isProcessing)
             }
         }
@@ -96,13 +94,12 @@ struct ListTabItemRowRow: View {
     let store: AppBarTabSettingStore
     let onRequestEdit: (String, String) -> Void
     let isBlueskyFeed: Bool
-    let defaultToggleValue: Bool 
+    let defaultToggleValue: Bool
 
     @Environment(FlareTheme.self) private var theme
     @State private var isProcessing = false
     @State private var currentTitle: String
 
- 
     init(listId: String, title: String, store: AppBarTabSettingStore, onRequestEdit: @escaping (String, String) -> Void, isBlueskyFeed: Bool = false, defaultToggleValue: Bool = true) {
         self.listId = listId
         self.title = title

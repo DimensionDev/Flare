@@ -43,9 +43,8 @@ struct AppBarViewSwiftUI: View {
                 }
                 .frame(width: 44)
                 .padding(.trailing, 8)
-            } 
+            }
         }
         .frame(height: 44)
-
     }
 }

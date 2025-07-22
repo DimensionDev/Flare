@@ -10,7 +10,6 @@ extension Notification.Name {
 }
 
 class AppBarTabSettingStore: ObservableObject, TabStateProvider {
-    
     static let shared = AppBarTabSettingStore(accountType: AccountTypeGuest())
 
     @Published var primaryHomeItems: [FLTabItem] = [] // 主要标签（不可更改状态）Appbar 第一个Home 标签

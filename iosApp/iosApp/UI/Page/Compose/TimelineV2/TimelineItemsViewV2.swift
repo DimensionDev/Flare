@@ -17,7 +17,7 @@ struct TimelineItemsViewV2: View {
         ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
             TimelineStatusViewV2(
                 item: item,
-                index: index,
+                index: index
 //                presenter: presenter,
 //                scrollPositionID: $scrollPositionID,
 //                onError: onError

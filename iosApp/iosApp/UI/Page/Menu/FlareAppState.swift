@@ -6,7 +6,5 @@ class FlareAppState {
     // hidden  home custom tabbar
     var isCustomTabBarHidden: Bool = false
 
-
-    init() {  }
- 
+    init() {}
 }

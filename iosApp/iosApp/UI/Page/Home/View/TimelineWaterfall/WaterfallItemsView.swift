@@ -15,7 +15,7 @@ struct WaterfallItemsView: View {
     @EnvironmentObject private var timelineState: TimelineExtState
     @Environment(FlareRouter.self) private var router
 
-    @State private var scrollThreshold: CGFloat = 100
+    @State private var scrollThreshold: CGFloat = 500
     @State private var hasInitialLoadCompleted = false
 
     @Environment(FlareTheme.self) private var theme

@@ -5,7 +5,6 @@ import SwiftUI
 
 // 通知管理服务
 class AppBarNotificationService {
- 
     // 发送标签更新通知
     func postTabsDidUpdateNotification(updatedTabKey: String? = nil, newTitle: String? = nil) {
         var userInfo: [String: Any]?

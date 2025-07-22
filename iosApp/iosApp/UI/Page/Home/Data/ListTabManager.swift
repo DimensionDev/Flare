@@ -4,7 +4,6 @@ import shared
 import SwiftUI
 
 class ListTabManager {
- 
     func moveListTab(
         from source: IndexSet,
         to destination: Int,

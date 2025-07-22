@@ -43,7 +43,7 @@ struct FlareRootView: View {
                                         destination: destination,
                                         router: router
                                     ).environment(theme)
-                                    .applyTheme(theme)
+                                        .applyTheme(theme)
                                         .environment(appState)
                                 }
                             }

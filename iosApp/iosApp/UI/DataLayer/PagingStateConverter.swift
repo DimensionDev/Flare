@@ -9,7 +9,6 @@ class PagingStateConverter {
     /// 转换队列
     private let conversionQueue = DispatchQueue(label: "timeline.state.converter", qos: .userInitiated)
 
-    /// 缓存变量
     private var convertedItems: [TimelineItem] = []
 
     init() {
@@ -108,7 +107,17 @@ class PagingStateConverter {
             // 执行增量转换：从当前缓存大小开始转换新数据
             let startIndex = convertedItems.count
             guard maxConvertibleIndex > startIndex else {
-                FlareLog.debug("[PagingStateConverter] 无新数据需要转换")
+                if maxConvertibleIndex > 0, let firstNewItem = successState.peek(index: 0) {
+                    let firstNewItemId = firstNewItem.itemKey
+                    let firstOldItemId = convertedItems.first?.id
+
+                    if firstNewItemId != firstOldItemId {
+                        FlareLog.debug("[PagingStateConverter] 检测到数据内容变化，执行全量转换")
+                        return performConversion(successState, isFullConversion: true)
+                    }
+                }
+
+                FlareLog.debug("[PagingStateConverter] 无新数据需要转换，当前缓存: \(startIndex), KMP总数: \(maxConvertibleIndex)")
                 return generateFilteredState(successState)
             }
 

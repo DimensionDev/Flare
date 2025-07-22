@@ -169,6 +169,39 @@ struct TimelineLoadingView: View {
     }
 }
 
+func createSampleTimelineItem() -> TimelineItem {
+    let sampleUser = User(
+        key: "sample@mastodon.social",
+        name: RichText(raw: "Sample User Name"),
+        handle: "@sampleuser",
+        avatar: "https://example.com/avatar.jpg",
+        banner: "https://example.com/banner.jpg",
+        description: RichText(raw: "Sample user description")
+    )
+
+    return TimelineItem(
+        id: "sample-timeline-item-\(UUID().uuidString)",
+        content: RichText(raw: "This is a sample timeline content for skeleton loading. It shows how the timeline item will look when loaded."),
+        user: sampleUser,
+        timestamp: Date(),
+        images: [],
+        url: "https://example.com/status",
+        platformType: "Mastodon",
+        aboveTextContent: nil,
+        contentWarning: nil,
+        card: nil,
+        quote: [],
+        bottomContent: nil,
+        topEndContent: nil,
+        poll: nil,
+        topMessage: nil,
+        sensitive: false,
+        visibility: "public",
+        language: "en",
+        actions: []
+    )
+}
+
 struct TimelineEmptyView: View {
     var body: some View {
         VStack(spacing: 16) {

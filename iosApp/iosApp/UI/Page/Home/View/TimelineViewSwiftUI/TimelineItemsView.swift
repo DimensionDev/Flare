@@ -11,17 +11,36 @@ struct TimelineItemsView: View {
     @State private var lastItemId: String?
     @Environment(\.appSettings) private var appSettings
 
+    private let loadMoreThreshold = 3
+
     var body: some View {
-        ForEach(items) { item in
-            TimelineStatusViewV2(
-                item: item,
-                index: itemIndexMap[item.id] ?? 0,
-            )
-            .padding(.vertical, 4)
-            .onAppear {
-                if item.id == lastItemId, hasMore, !isRefreshing, !viewModel.isLoadingMore {
-                    FlareLog.debug("Timeline Last item appeared, triggering load more")
-                    handleLoadMore()
+        Group {
+            ForEach(items) { item in
+                TimelineStatusViewV2(
+                    item: item,
+                    index: itemIndexMap[item.id] ?? 0,
+                )
+                .padding(.vertical, 4)
+                .onAppear {
+                    if let currentIndex = itemIndexMap[item.id] {
+                        let remainingItems = items.count - currentIndex - 1
+
+                        if remainingItems <= loadMoreThreshold, hasMore, !isRefreshing, !viewModel.isLoadingMore {
+                            FlareLog.debug("Timeline 提前触发load more，当前索引: \(currentIndex), 剩余items: \(remainingItems)")
+                            handleLoadMore()
+                        }
+                    }
+                }
+            }
+
+            if viewModel.isLoadingMore {
+                ForEach(0 ..< 2, id: \.self) { index in
+                    TimelineStatusViewV2(
+                        item: createSampleTimelineItem(),
+                        index: items.count + index
+                    )
+                    .redacted(reason: .placeholder)
+                    .padding(.vertical, 4)
                 }
             }
         }

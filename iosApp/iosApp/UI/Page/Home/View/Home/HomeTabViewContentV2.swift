@@ -7,7 +7,7 @@ import shared
 import SwiftUI
 
 struct HomeTabViewContentV2: View {
-     @Environment(FlareRouter.self) private var router
+    @Environment(FlareRouter.self) private var router
     @Environment(FlareAppState.self) private var appState
     @Environment(FlareTheme.self) private var theme
     @Environment(\.appSettings) private var appSettings

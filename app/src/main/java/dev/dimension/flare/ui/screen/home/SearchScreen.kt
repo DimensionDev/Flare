@@ -30,7 +30,7 @@ internal fun SearchScreen(
     onAccountClick: () -> Unit,
     onUserClick: (MicroBlogKey) -> Unit,
 ) {
-    val state by producePresenter("search_$accountType") { presenter(accountType, initialQuery) }
+    val state by producePresenter("search_${accountType}_$initialQuery") { presenter(accountType, initialQuery) }
     val lazyListState = rememberLazyStaggeredGridState()
     RegisterTabCallback(
         lazyListState = lazyListState,
@@ -86,7 +86,7 @@ private fun presenter(
 ) = run {
     val searchBarState = searchBarPresenter(accountType, initialQuery)
     val searchState =
-        remember {
+        remember(initialQuery, accountType) {
             SearchPresenter(accountType = accountType, initialQuery)
         }.invoke()
 

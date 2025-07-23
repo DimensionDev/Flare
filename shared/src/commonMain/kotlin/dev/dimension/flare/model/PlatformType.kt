@@ -33,12 +33,18 @@ public val PlatformType.logoUrl: String
                     "0a286d8ee91af2e78ff2ee8e5065c3.webp"
         }
 
-public val xqtHost: String =
+public val xqtOldHost: String =
     buildString {
         append("dHc=".decodeBase64String())
         append("aXR0".decodeBase64String())
         append("ZXI=".decodeBase64String())
         append("LmNvbQ==".decodeBase64String())
+    }
+
+public val xqtHost: String =
+    buildString {
+        append("x")
+        append(".com")
     }
 
 public val vvo: String =

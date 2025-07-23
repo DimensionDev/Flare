@@ -77,7 +77,6 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
-import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiDMItem
 import dev.dimension.flare.ui.model.UiDMRoom
@@ -240,7 +239,7 @@ internal class XQTDataSource(
                                 is User -> it
                                 is UserUnavailable -> null
                             }
-                        }?.toDbUser() ?: throw Exception("User not found")
+                        }?.toDbUser(accountKey) ?: throw Exception("User not found")
                 database.userDao().insert(user)
             },
             cacheSource = {
@@ -269,7 +268,7 @@ internal class XQTDataSource(
                                 is User -> it
                                 is UserUnavailable -> null
                             }
-                        }?.toDbUser() ?: throw Exception("User not found")
+                        }?.toDbUser(accountKey) ?: throw Exception("User not found")
                 database.userDao().insert(user)
             },
             cacheSource = {
@@ -299,7 +298,7 @@ internal class XQTDataSource(
                             is UserUnavailable -> null
                         }
                     } ?: throw Exception("User not found")
-            val user = userResponse.toDbUser()
+            val user = userResponse.toDbUser(accountKey)
 
             service
                 .profileSpotlights(user.handle)
@@ -404,7 +403,7 @@ internal class XQTDataSource(
                 }?.user
                 ?.handle
                 ?.removePrefix("@")
-                ?.removeSuffix("@$xqtHost")
+                ?.removeSuffix("@${accountKey.host}")
         val maxProgress = data.medias.size + 1
         val mediaIds =
             data.medias.mapIndexed { index, item ->
@@ -454,7 +453,7 @@ internal class XQTDataSource(
                             semanticAnnotationIds = emptyList(),
                             attachmentUrl =
                                 quoteId?.let {
-                                    "https://$xqtHost/$quoteUserName/status/$it"
+                                    "https://${accountKey.host}/$quoteUserName/status/$it"
                                 },
                         ),
                 ),
@@ -1400,7 +1399,7 @@ internal class XQTDataSource(
                             is User -> it
                             is UserUnavailable -> null
                         }
-                    }?.toDbUser()
+                    }?.toDbUser(accountKey)
                     ?.render(accountKey = accountKey) ?: throw Exception("User not found")
             MemoryPagingSource.updateWith(
                 key = listMemberKey(listId),

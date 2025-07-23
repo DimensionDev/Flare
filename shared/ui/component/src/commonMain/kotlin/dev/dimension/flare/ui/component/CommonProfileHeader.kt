@@ -167,10 +167,9 @@ internal fun CommonProfileHeader(
                                     .padding(bottom = 8.dp)
                                     .listCard()
                                     .background(PlatformTheme.colorScheme.card)
-                                    .padding(horizontal = screenHorizontalPadding, vertical = 8.dp)
                                     .fillMaxWidth()
                             }
-                        },
+                        }.padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Column {

@@ -45,11 +45,10 @@ struct TimelineViewSwiftUIV4: View {
                             .listRowSeparator(.hidden)
                         }
 
-                    case let .loaded(items, hasMore, isRefreshing):
+                    case let .loaded(items, hasMore):
                         TimelineItemsView(
                             items: items,
                             hasMore: hasMore,
-                            isRefreshing: isRefreshing,
                             viewModel: viewModel
                         )
                         .listRowBackground(theme.primaryBackgroundColor)
@@ -82,7 +81,10 @@ struct TimelineViewSwiftUIV4: View {
                     viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $timelineState.showFloatingButton)
                 }
                 .refreshable {
+                    // 🔥 添加日志：下拉刷新触发
+                    FlareLog.debug("[TimelineV4] 下拉刷新触发")
                     await viewModel.handleRefresh()
+                    FlareLog.debug("[TimelineV4] 下拉刷新完成")
                 }
             }
             .onChange(of: timelineState.scrollToTopTrigger) { _, _ in

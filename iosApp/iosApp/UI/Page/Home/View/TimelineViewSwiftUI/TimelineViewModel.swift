@@ -19,25 +19,23 @@ class TimelineViewModel {
     private(set) var isLoadingMore: Bool = false
 
     var items: [TimelineItem] {
-        if case let .loaded(items, _, _) = timelineState {
+        if case let .loaded(items, _) = timelineState {
             return items
         }
         return []
     }
 
     var hasMore: Bool {
-        if case let .loaded(_, hasMore, _) = timelineState {
+        if case let .loaded(_, hasMore) = timelineState {
             return hasMore
         }
         return false
     }
 
-    var isRefreshing: Bool {
-        if case let .loaded(_, _, isRefreshing) = timelineState {
-            return isRefreshing
-        }
-        return false
-    }
+    // 🔥 移除：isRefreshing属性不再需要
+    // var isRefreshing: Bool {
+    //     return false
+    // }
 
     func setupDataSource(for tab: FLTabItem, using store: AppBarTabSettingStore) async {
         dataSourceTask?.cancel()
@@ -65,16 +63,27 @@ class TimelineViewModel {
                     break
                 }
 
+                // 🔥 添加日志：状态更新详情
+                FlareLog.debug("[Timeline ViewModel] 收到KMP状态更新 - 类型: \(type(of: state.listState))")
+                if let successState = state.listState as? PagingStateSuccess<UiTimeline> {
+                    FlareLog.debug("[Timeline ViewModel] KMP状态详情 - isRefreshing: \(successState.isRefreshing), itemCount: \(successState.itemCount)")
+                }
                 FlareLog.debug("[Timeline ViewModel] 收到KMP状态更新: \(type(of: state.listState))")
 
                 let flareState = await Task.detached(priority: .userInitiated) { [stateConverter] in
                     return stateConverter.convert(state.listState)
                 }.value
 
+                // 🔥 添加日志：转换结果
+                FlareLog.debug("[Timeline ViewModel] 状态转换完成 - 转换前类型: \(type(of: state.listState)), 转换后类型: \(type(of: flareState))")
                 FlareLog.debug("[Timeline ViewModel] 状态转换完成: \(type(of: flareState))")
 
                 await MainActor.run {
+                    let oldItemsCount = self.items.count
                     self.timelineState = flareState
+                    let newItemsCount = self.items.count
+                    // 🔥 添加日志：UI状态更新
+                    FlareLog.debug("[Timeline ViewModel] UI状态已更新 - items数量变化: \(oldItemsCount) -> \(newItemsCount), hasMore: \(self.hasMore)")
                     FlareLog.debug("[Timeline ViewModel] UI状态已更新: items数量=\(self.items.count), hasMore=\(self.hasMore)")
                 }
             }
@@ -82,9 +91,16 @@ class TimelineViewModel {
     }
 
     func handleRefresh() async {
+        // 🔥 添加日志：refresh操作开始
+        FlareLog.debug("[Timeline ViewModel] handleRefresh开始 - isLoadingMore: \(isLoadingMore)")
         FlareLog.debug("Timeline Handling refresh")
 
+        // 🔥 新增：刷新前重置状态转换器
+        stateConverter.reset()
+        FlareLog.debug("[Timeline ViewModel] 刷新前已重置状态转换器")
+
         guard let presenter else {
+            FlareLog.warning("[Timeline ViewModel] handleRefresh失败 - presenter为空")
             FlareLog.warning("Timeline No presenter available for refresh")
             return
         }
@@ -97,9 +113,11 @@ class TimelineViewModel {
             }.value
 
             if refreshResult {
+                FlareLog.debug("[Timeline ViewModel] handleRefresh完成")
                 FlareLog.debug("Timeline Refresh completed")
             }
         } catch {
+            FlareLog.error("[Timeline ViewModel] handleRefresh失败: \(error)")
             FlareLog.error("Timeline Refresh failed: \(error)")
             let flareError = await Task.detached(priority: .utility) {
                 FlareError.from(error)
@@ -134,23 +152,35 @@ class TimelineViewModel {
     }
 
     func handleLoadMore() async {
+        // 🔥 添加日志：loadMore操作状态检查
+        FlareLog.debug("[Timeline ViewModel] handleLoadMore开始 - isLoadingMore: \(isLoadingMore), presenter存在: \(presenter != nil)")
+
         guard let presenter else {
+            FlareLog.warning("[Timeline ViewModel] handleLoadMore失败 - presenter为空")
             FlareLog.warning("[Timeline ViewModel] presenter为空，无法加载更多")
             return
         }
 
         guard !isLoadingMore else {
+            FlareLog.debug("[Timeline ViewModel] handleLoadMore跳过 - 正在加载中")
             FlareLog.debug("[Timeline ViewModel] 正在加载中，跳过重复调用")
             return
         }
 
         isLoadingMore = true
-        defer { isLoadingMore = false }
+        // 🔥 添加日志：loadMore状态变更
+        FlareLog.debug("[Timeline ViewModel] handleLoadMore状态更新 - isLoadingMore设为true")
+        defer {
+            isLoadingMore = false
+            FlareLog.debug("[Timeline ViewModel] handleLoadMore状态恢复 - isLoadingMore设为false")
+        }
 
         do {
             try await presenter.models.value.loadMore()
+            FlareLog.debug("[Timeline ViewModel] handleLoadMore完成")
             FlareLog.debug("[Timeline ViewModel] LoadMore completed successfully")
         } catch {
+            FlareLog.error("[Timeline ViewModel] handleLoadMore失败: \(error)")
             FlareLog.error("[Timeline ViewModel] LoadMore failed: \(error)")
         }
     }

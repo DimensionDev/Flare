@@ -7,7 +7,6 @@ import SwiftUI
 struct TimelineItemsViewV2: View {
     let items: [TimelineItem]
     let hasMore: Bool
-    let isRefreshing: Bool
     let presenter: TimelinePresenter?
     @Binding var scrollPositionID: String?
     let onError: (FlareError) -> Void
@@ -30,9 +29,9 @@ struct TimelineItemsViewV2: View {
         }
 
         if hasMore {
-            TimelineLoadMoreView(isRefreshing: isRefreshing)
+            TimelineLoadMoreView(isRefreshing: false)
                 .onAppear {
-                    if hasMore, !isRefreshing, !(viewModel?.isLoadingMore ?? false) {
+                    if hasMore, !(viewModel?.isLoadingMore ?? false) {
                         FlareLog.debug("TimelineItemsViewV2 Load more triggered")
                         handleLoadMore()
                     }

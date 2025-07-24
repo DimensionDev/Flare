@@ -21,12 +21,11 @@ struct WaterfallView: View {
                     await viewModel.setupDataSource(for: tab, using: store)
                 }
 
-        case let .loaded(items, hasMore, isRefreshing):
+        case let .loaded(items, hasMore):
             WaterfallItemsView(
                 items: items,
                 displayType: displayType,
                 hasMore: hasMore,
-                isRefreshing: isRefreshing,
                 presenter: viewModel.presenter,
                 onError: viewModel.handleError,
                 scrolledID: $scrolledID,

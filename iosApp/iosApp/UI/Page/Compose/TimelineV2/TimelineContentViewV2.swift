@@ -16,11 +16,10 @@ struct TimelineContentViewV2: View {
         case .loading:
             TimelineLoadingViewV2()
 
-        case let .loaded(items, hasMore, isRefreshing):
+        case let .loaded(items, hasMore):
             TimelineItemsViewV2(
                 items: items,
                 hasMore: hasMore,
-                isRefreshing: isRefreshing,
                 presenter: presenter,
                 scrollPositionID: $scrollPositionID,
                 onError: onError,

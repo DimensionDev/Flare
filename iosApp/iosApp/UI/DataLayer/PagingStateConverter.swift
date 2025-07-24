@@ -10,6 +10,8 @@ class PagingStateConverter {
     private let conversionQueue = DispatchQueue(label: "timeline.state.converter", qos: .userInitiated)
 
     private var convertedItems: [TimelineItem] = []
+    
+    private var topSignature: String = ""
 
     init() {
         setupNotificationObservers()
@@ -62,20 +64,25 @@ class PagingStateConverter {
     func reset() {
         conversionQueue.sync {
             convertedItems.removeAll()
-            FlareLog.debug("[PagingStateConverter] 状态已重置")
+            // 保留topSignature用于后续比较，不重置
+            FlareLog.debug("[PagingStateConverter] 状态已重置，保留topSignature: \(topSignature)")
         }
     }
 
-    /// 转换成功状态 - 简化的转换策略
+    /// 转换成功状态 - 极简转换策略
     /// - Parameter successState: KMP的成功状态
     /// - Returns: 转换后的FlareTimelineState
     private func convertSuccessState(_ successState: PagingStateSuccess<UiTimeline>) -> FlareTimelineState {
-        let isRefreshing = successState.isRefreshing
+        //  极简转换策略：只基于convertedItems状态判断
+        FlareLog.debug("[PagingStateConverter] 转换策略判断 - convertedItems.count: \(convertedItems.count), KMP itemCount: \(successState.itemCount)")
 
-        // 简化的转换策略：刷新时全量转换，否则增量转换
-        if isRefreshing || convertedItems.isEmpty {
+        if convertedItems.isEmpty {
+            // 首次加载或刷新后 → 全量转换
+            FlareLog.debug("[PagingStateConverter] 选择全量转换策略 - convertedItems为空")
             return performConversion(successState, isFullConversion: true)
         } else {
+            // 已有数据 → 增量转换
+            FlareLog.debug("[PagingStateConverter] 选择增量转换策略 - convertedItems非空")
             return performConversion(successState, isFullConversion: false)
         }
     }
@@ -89,6 +96,31 @@ class PagingStateConverter {
         var newItems: [TimelineItem] = []
 
         if isFullConversion {
+            // 新增：topSignature检查逻辑
+            let newSignature = calculateTopSignature(successState, count: 10)
+            
+            if newSignature == topSignature {
+                // 新增：检测到缓存数据，使用临时数据显示
+                FlareLog.debug("[PagingStateConverter] 检测到缓存数据，保持显示")
+                
+                let tempItems = convertItemsInRange(
+                    from: 0,
+                    to: maxConvertibleIndex,
+                    successState: successState
+                )
+                
+                return generateFilteredState(successState, items: tempItems)
+            }else {
+                FlareLog.debug("[PagingStateConverter] 检测到新数据，执行全量转换")
+                FlareLog.debug("[PagingStateConverter] 旧signature: \(topSignature)")
+                FlareLog.debug("[PagingStateConverter] 新signature: \(newSignature)")
+            }
+            
+            // 新增：检测到新数据，执行全量转换
+            FlareLog.debug("[PagingStateConverter] 检测到新数据，执行全量转换")
+            
+            // 添加日志：全量转换开始
+            FlareLog.debug("[PagingStateConverter] 开始全量转换 - 清空缓存，当前缓存数量: \(convertedItems.count)")
             FlareLog.debug("[PagingStateConverter] 全量转换: 转换 0 到 \(maxConvertibleIndex)")
 
             // 重置缓存
@@ -105,41 +137,81 @@ class PagingStateConverter {
                 convertedItems = allItems
 
                 if !allItems.isEmpty {
-                    let prefetchCount = min(20, allItems.count)
-                    newItems = Array(allItems.prefix(prefetchCount))
-                    FlareLog.debug("[PagingStateConverter] 全量转换完成: 转换了 \(allItems.count) 个items，预取前 \(newItems.count) 个")
+                    // 修复：返回所有items，不要截断
+                    newItems = allItems
+                    FlareLog.debug("[PagingStateConverter] 全量转换完成 - 返回所有items: \(allItems.count)")
                 }
             }
+            
+            // 新增：更新topSignature
+            topSignature = newSignature
         } else {
             // 执行增量转换：从当前缓存大小开始转换新数据
             let startIndex = convertedItems.count
-            guard maxConvertibleIndex > startIndex else {
-                if maxConvertibleIndex > 0, let firstNewItem = successState.peek(index: 0) {
-                    let firstNewItemId = firstNewItem.itemKey
-                    let firstOldItemId = convertedItems.first?.id
+            var incrementalItems: [TimelineItem] = []
 
-                    if firstNewItemId != firstOldItemId {
-                        FlareLog.debug("[PagingStateConverter] 检测到数据内容变化，执行全量转换")
-                        return performConversion(successState, isFullConversion: true)
-                    }
+            if maxConvertibleIndex > startIndex {
+                // 正常增量转换：有新数据需要加载
+                FlareLog.debug("[PagingStateConverter] 正常增量转换 - startIndex: \(startIndex), maxIndex: \(maxConvertibleIndex)")
+
+                incrementalItems = convertItemsInRange(
+                    from: startIndex,
+                    to: maxConvertibleIndex,
+                    successState: successState
+                )
+
+                FlareLog.debug("[PagingStateConverter] 正常增量转换完成: 新增 \(incrementalItems.count) 个items")
+
+            } else {
+                // 异常情况：数据倒退，需要去重处理
+                FlareLog.debug("[PagingStateConverter] 数据倒退情况 - 当前缓存: \(startIndex), KMP总数: \(maxConvertibleIndex)")
+
+                // 获取KMP返回的所有数据
+                let kmpItems = convertItemsInRange(
+                    from: 0,
+                    to: maxConvertibleIndex,
+                    successState: successState
+                )
+
+                FlareLog.debug("[PagingStateConverter] 获取KMP数据完成: \(kmpItems.count) 个items")
+
+                // 去重处理：只保留不在现有数组中的数据
+                let existingKeys = Set(convertedItems.map { $0.id })
+                incrementalItems = kmpItems.filter { !existingKeys.contains($0.id) }
+
+                FlareLog.debug("[PagingStateConverter] 去重处理完成 - 原始: \(kmpItems.count), 去重后: \(incrementalItems.count)")
+
+                // 额外日志：记录被过滤的重复数据
+                let duplicateCount = kmpItems.count - incrementalItems.count
+                if duplicateCount > 0 {
+                    FlareLog.debug("[PagingStateConverter] 过滤了 \(duplicateCount) 个重复数据")
                 }
 
-                FlareLog.debug("[PagingStateConverter] 无新数据需要转换，当前缓存: \(startIndex), KMP总数: \(maxConvertibleIndex)")
-                return generateFilteredState(successState)
+                // 记录新增数据的详细信息（仅前3个）
+                for (index, item) in incrementalItems.prefix(3).enumerated() {
+                    FlareLog.debug("[PagingStateConverter] 新增数据[\(index)]: \(item.id)")
+                }
             }
 
-            let incrementalItems = convertItemsInRange(
-                from: startIndex,
-                to: maxConvertibleIndex,
-                successState: successState
-            )
+            // 统一处理：将增量数据追加到现有数组
+            if !incrementalItems.isEmpty {
+                FlareLog.debug("[PagingStateConverter] 开始追加增量数据 - 追加前总数: \(convertedItems.count)")
 
-            FlareLog.debug("[PagingStateConverter] 增量转换完成: 新增 \(incrementalItems.count) 个items")
+                convertedItems.append(contentsOf: incrementalItems)
+                newItems = incrementalItems
 
-            // 更新缓存
-            convertedItems.append(contentsOf: incrementalItems)
+                FlareLog.debug("[PagingStateConverter] 增量转换完成 - 新增: \(incrementalItems.count), 缓存总数: \(convertedItems.count)")
+            } else {
+                // 没有新数据的情况
+                if maxConvertibleIndex <= startIndex {
+                    FlareLog.debug("[PagingStateConverter] 数据倒退但无新数据，当前缓存: \(startIndex), KMP总数: \(maxConvertibleIndex)")
+                } else {
+                    FlareLog.debug("[PagingStateConverter] 正常情况但无新数据，可能存在转换问题")
+                }
 
-            newItems = incrementalItems
+                // 确保newItems为空数组
+                newItems = []
+            }
         }
 
         if !newItems.isEmpty {
@@ -153,23 +225,47 @@ class PagingStateConverter {
         return generateFilteredState(successState)
     }
 
-    private func generateFilteredState(_ successState: PagingStateSuccess<UiTimeline>) -> FlareTimelineState {
+    // 修改：统一的generateFilteredState方法，增加可选items参数
+    private func generateFilteredState(_ successState: PagingStateSuccess<UiTimeline>, items: [TimelineItem]? = nil) -> FlareTimelineState {
+        // 添加日志：最终状态生成
+        let sourceItems = items ?? convertedItems
+        FlareLog.debug("[PagingStateConverter] generateFilteredState开始 - 源items: \(sourceItems.count)")
+
         // 应用敏感内容过滤
-        let filteredItems = applyContentFiltering(convertedItems)
+        let filteredItems = applyContentFiltering(sourceItems)
+        FlareLog.debug("[PagingStateConverter] 内容过滤完成 - 过滤前: \(sourceItems.count), 过滤后: \(filteredItems.count)")
 
         // 生成最终状态（过滤不影响hasMore判断，基于KMP原始数据）
         let appendState = successState.appendState
         let appendStateDescription = String(describing: appendState)
         let hasMore = !(appendStateDescription.contains("NotLoading") && appendStateDescription.contains("endOfPaginationReached=true"))
-        let isRefreshing = successState.isRefreshing
 
+        //  添加日志：hasMore判断详情
+        FlareLog.debug("[PagingStateConverter] hasMore判断详情 - appendState: \(appendStateDescription)")
         FlareLog.debug("[PagingStateConverter] hasMore判断: AppendState(\(hasMore))")
+        FlareLog.debug("[PagingStateConverter] 最终状态 - hasMore: \(hasMore)")
 
         if filteredItems.isEmpty {
+            FlareLog.debug("[PagingStateConverter] 返回空状态")
             return .empty
         }
 
-        return .loaded(items: filteredItems, hasMore: hasMore, isRefreshing: isRefreshing)
+        FlareLog.debug("[PagingStateConverter] 返回loaded状态 - items: \(filteredItems.count), hasMore: \(hasMore)")
+        return .loaded(items: filteredItems, hasMore: hasMore)
+    }
+
+    // 新增：计算topSignature方法
+    private func calculateTopSignature(_ successState: PagingStateSuccess<UiTimeline>, count: Int) -> String {
+        var ids: [String] = []
+        let maxCount = min(count, Int(successState.itemCount))
+        
+        for i in 0..<maxCount {
+            if let item = successState.peek(index: Int32(i)) {
+                ids.append(item.itemKey)
+            }
+        }
+        
+        return ids.joined(separator: "|")
     }
 
     private func applyContentFiltering(_ items: [TimelineItem]) -> [TimelineItem] {

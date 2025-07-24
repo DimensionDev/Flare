@@ -111,7 +111,7 @@ struct SettingsUIScreen: View {
 //                        case .aiSettings:
 //                            AISettingsScreen()
                         case .storagePrivacy:
-                            StoragePrivacyScreen()
+                            StoragePrivacyScreen().id(selectedDetail)
                         case .about:
                             AboutScreen()
                         case .support:

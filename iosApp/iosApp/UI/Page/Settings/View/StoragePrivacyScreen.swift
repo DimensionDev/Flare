@@ -64,7 +64,7 @@ struct StoragePrivacyScreen: View {
     }
 
     var body: some View {
-        ObservePresenter(presenter: presenter) { state in
+        ObserveOldPresenter(presenter: presenter) { state in
             List {
                 // Storage Management Section
                 Section("Storage Management") {

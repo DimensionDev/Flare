@@ -6,7 +6,6 @@ struct WaterfallItemsView: View {
     let items: [TimelineItem]
     let displayType: TimelineDisplayType
     let hasMore: Bool
-    let isRefreshing: Bool
     let presenter: TimelinePresenter?
     let onError: (FlareError) -> Void
     @Binding var scrolledID: String?
@@ -72,7 +71,7 @@ struct WaterfallItemsView: View {
                 .scrollOptions(direction: .vertical)
                 .padding(.horizontal, 8)
                 if hasMore {
-                    TimelineLoadMoreView(isRefreshing: isRefreshing)
+                    TimelineLoadMoreView(isRefreshing: false)
                         .padding(.top, 16)
                 }
             }
@@ -108,7 +107,6 @@ struct WaterfallItemsView: View {
 
             if distanceFromBottom <= scrollThreshold,
                hasMore,
-               !isRefreshing,
                !viewModel.isLoadingMore,
                hasInitialLoadCompleted
             {

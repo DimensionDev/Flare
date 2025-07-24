@@ -5,6 +5,9 @@ struct SettingsUIScreen: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State private var selectedDetail: SettingsDestination?
     @State private var presenter = ActiveAccountPresenter()
+    @State private var storagePresenter = StoragePresenter()  
+    @State private var appearancePresenter: AppearancePresenter = AppearancePresenter()
+
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
@@ -101,7 +104,7 @@ struct SettingsUIScreen: View {
                     if let detail = selectedDetail {
                         switch detail {
                         case .timelineDisplay:
-                            TimelineDisplayScreen()
+                            TimelineDisplayScreen(presenter: appearancePresenter)
                         case .mediaContent:
                             MediaContentScreen()
                         case .translationLanguage:
@@ -111,7 +114,7 @@ struct SettingsUIScreen: View {
 //                        case .aiSettings:
 //                            AISettingsScreen()
                         case .storagePrivacy:
-                            StoragePrivacyScreen().id(selectedDetail)
+                            StoragePrivacyScreen(presenter: storagePresenter).id(selectedDetail)
                         case .about:
                             AboutScreen()
                         case .support:
@@ -124,7 +127,7 @@ struct SettingsUIScreen: View {
                             .padding()
                     }
                 }
-            }
+            } 
         }
         .scrollContentBackground(.hidden)
         .listRowBackground(theme.secondaryBackgroundColor)

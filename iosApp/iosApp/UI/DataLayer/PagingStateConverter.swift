@@ -259,9 +259,11 @@ class PagingStateConverter {
         var ids: [String] = []
         let maxCount = min(count, Int(successState.itemCount))
 
-        for i in 0 ..< maxCount {
-            if let item = successState.peek(index: Int32(i)) {
+        for i in 0 ..< maxCount { 
+            if let item = safePeek(successState, index: Int32(i)) {
                 ids.append(item.itemKey)
+            } else {
+                FlareLog.warning("PagingStateConverter: safePeek returned nil at index \(i) in calculateTopSignature")
             }
         }
 
@@ -330,11 +332,12 @@ class PagingStateConverter {
 
             let uiTimeline: UiTimeline?
 
-            // 首先尝试peek（不触发加载）
-            if let peekedItem = successState.peek(index: Int32(index)) {
-                FlareLog.debug("[PagingStateConverter] peek成功获取index=\(index)的数据")
+            
+            if let peekedItem = safePeek(successState, index: Int32(index)) {
+                
                 uiTimeline = peekedItem
             } else {
+                FlareLog.warning("PagingStateConverter: safePeek returned nil at index \(index) in convertItemsInRange")
                 continue
                 // break
 //                FlareLog.debug("[PagingStateConverter] peek失败，尝试get获取index=\(index)的数据")
@@ -355,6 +358,24 @@ class PagingStateConverter {
 
         FlareLog.debug("[PagingStateConverter] 范围转换完成，总共获得\(items.count)个items")
         return items
+    }
+
+ 
+    private func safePeek(_ successState: PagingStateSuccess<UiTimeline>, index: Int32) -> UiTimeline? {
+       
+        guard index >= 0 && index < successState.itemCount else {
+            FlareLog.warning("PagingStateConverter: Index \(index) out of bounds (itemCount: \(successState.itemCount))")
+            return nil
+        }
+
+       
+        let result = successState.peek(index: index)
+
+        if result == nil {
+            FlareLog.debug("PagingStateConverter: peek returned nil at index \(index)")
+        }
+
+        return result
     }
 }
 

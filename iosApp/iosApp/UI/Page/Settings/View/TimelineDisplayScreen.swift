@@ -5,55 +5,60 @@ import UIKit
 struct TimelineDisplayScreen: View {
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareTheme.self) private var theme
-    @State private var presenter = AppearancePresenter()
+    // @State private var presenter = AppearancePresenter()
     @State private var localValues = DisplaySettingsLocalValues()
     @State private var isFontSelectorPresented = false
 
     @State private var isThemeAutoSectionExpanded = true
     @State private var isFontSectionExpanded = true
+   let presenter: AppearancePresenter 
+
+    init(presenter: AppearancePresenter) {
+        self.presenter = presenter
+     }
 
     var body: some View {
-        // ObservePresenter(presenter: presenter) { state in
+         ObserveOldPresenter(presenter: presenter) { state in
         List {
-            // if case let .success(success) = onEnum(of: state.sampleStatus) {
+             if case let .success(success) = onEnum(of: state.sampleStatus) {
             VStack {
-                // StatusItemView(
-                //        data: success.data,
-                //        detailKey: nil
-                //    )
-                if let user = UserManager.shared.getCurrentUser().0?.toSwift() {
-                    TimelineStatusViewV2(
-                        item: TimelineItem(
-                            id: "sample",
-                            content: RichText(
-                                raw: "Sample content for \(user.name.raw)  on twitter.com [#flare](flare://Search/%23flare)"
-                            ),
-                            user: user,
-                            timestamp: Date(),
-                            images: [],
-                            url: "",
-                            platformType: "xqt",
-                            aboveTextContent: nil,
-                            contentWarning: nil,
-                            card: nil,
-                            quote: [],
-                            bottomContent: nil,
-                            topEndContent: nil,
-                            poll: nil,
-                            topMessage: nil,
-                            sensitive: false,
-                            visibility: "public",
-                            language: nil,
-                            actions: []
-                        ),
-                        index: 0
-                    ).padding(.vertical, 0)
-                }
+                StatusItemView(
+                       data: success.data,
+                       detailKey: nil
+                   )
+                // if let user = UserManager.shared.getCurrentUser().0?.toSwift() {
+                //     TimelineStatusViewV2(
+                //         item: TimelineItem(
+                //             id: "sample",
+                //             content: RichText(
+                //                 raw: "Sample content for \(user.name.raw)  on twitter.com [#flare](flare://Search/%23flare)"
+                //             ),
+                //             user: user,
+                //             timestamp: Date(),
+                //             images: [],
+                //             url: "",
+                //             platformType: "xqt",
+                //             aboveTextContent: nil,
+                //             contentWarning: nil,
+                //             card: nil,
+                //             quote: [],
+                //             bottomContent: nil,
+                //             topEndContent: nil,
+                //             poll: nil,
+                //             topMessage: nil,
+                //             sensitive: false,
+                //             visibility: "public",
+                //             language: nil,
+                //             actions: []
+                //         ),
+                //         index: 0
+                //     ).padding(.vertical, 0)
+                // }
 
             }.allowsHitTesting(false)
                 .listRowBackground(theme.primaryBackgroundColor)
                 .listStyle(.plain)
-            // }
+             }
 
             // Theme部分
             Section {
@@ -199,7 +204,7 @@ struct TimelineDisplayScreen: View {
         #endif
     }
 
-    // }
+      }
 
     private var themeSelectorButton: some View {
         Picker(selection: .init(get: {

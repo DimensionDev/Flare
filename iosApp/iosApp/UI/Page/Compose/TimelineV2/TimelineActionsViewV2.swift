@@ -94,7 +94,7 @@ struct TimelineActionsViewV2: View {
                 ) {
                     handleTranslateAction()
                 }
-                .frame(maxWidth: .infinity)
+                // .frame(maxWidth: .infinity)
 
                 ShareButtonV2(
                     item: item,
@@ -105,7 +105,7 @@ struct TimelineActionsViewV2: View {
                 )
             }
             .padding(.vertical, 8)
-            .padding(.horizontal, 16)
+            // .padding(.horizontal, 16)
         }
         .id("\(item.id)-\(displayLikeCount)-\(displayIsLiked)-\(displayRetweetCount)-\(displayIsRetweeted)-\(displayBookmarkCount)-\(displayIsBookmarked)-\(refreshTrigger)")
         .onAppear {

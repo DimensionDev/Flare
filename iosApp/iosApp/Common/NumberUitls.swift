@@ -7,9 +7,9 @@ func formatCount(_ count: Int64) -> String {
         return "\(count)"
     }
     if count < 1_000_000 {
-        let k = Double(count) / 1000.0
-        return String(format: "%.1fK", k).replacingOccurrences(of: ".0", with: "")
+        let k = Int(count / 1000)
+        return "\(k)K"
     }
-    let m = Double(count) / 1_000_000.0
-    return String(format: "%.1fM", m).replacingOccurrences(of: ".0", with: "")
+    let m = Int(count / 1_000_000)
+    return "\(m)M"
 }

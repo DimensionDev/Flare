@@ -33,7 +33,6 @@ internal class SearchStatusPagingSource(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): Result {
-        println("initialQuery: $query")
         val response =
             when (loadType) {
                 LoadType.REFRESH -> {

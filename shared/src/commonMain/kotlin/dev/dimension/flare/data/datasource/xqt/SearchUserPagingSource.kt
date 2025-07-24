@@ -40,9 +40,6 @@ internal class SearchUserPagingSource(
                 .orEmpty()
         val cursor = response.cursor()
         val users = response.users()
-        println(
-            "SearchUserPagingSource: response=${response.size} query=$query, cursor=$cursor, users=${users.size}, isBottomEnd=${response.isBottomEnd()}",
-        )
         return LoadResult.Page(
             data = users.map { it.render(accountKey = accountKey) },
             prevKey = null,

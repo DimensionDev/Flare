@@ -1183,8 +1183,6 @@ internal class XQTDataSource(
                             )
                         }
 
-                        println("result: $result")
-
                         return MediatorResult.Success(
                             endOfPaginationReached = result.isEmpty(),
                         )

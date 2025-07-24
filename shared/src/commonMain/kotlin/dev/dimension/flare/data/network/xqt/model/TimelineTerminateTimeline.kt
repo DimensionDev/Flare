@@ -48,6 +48,6 @@ internal data class TimelineTerminateTimeline(
         bottom("Bottom"),
 
         @SerialName(value = "TopAndBottom")
-        topAndBottom("TopAndBottom");
+        topAndBottom("TopAndBottom"),
     }
 }

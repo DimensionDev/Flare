@@ -655,7 +655,7 @@ enum FlareTimelineState: Equatable {
 
     func stoppingRefresh() -> FlareTimelineState {
         // 🔥 简化：移除isRefreshing后，此方法不再需要修改状态
-        return self
+        self
     }
 }
 

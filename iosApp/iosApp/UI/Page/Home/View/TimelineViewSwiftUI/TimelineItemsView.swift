@@ -17,7 +17,7 @@ struct TimelineItemsView: View {
             ForEach(items) { item in
                 TimelineStatusViewV2(
                     item: item,
-                    index: itemIndexMap[item.id] ?? 0,
+                    index: itemIndexMap[item.id] ?? 0
                 )
                 .padding(.vertical, 4)
                 .onAppear {
@@ -62,7 +62,7 @@ struct TimelineItemsView: View {
                 FlareLog.debug("[Timeline ItemsView] 新增items的ID: \(newItemIds)")
 
                 // 🔥 添加日志：检查新增items的位置
-                if !oldItems.isEmpty && !newItems.isEmpty {
+                if !oldItems.isEmpty, !newItems.isEmpty {
                     let oldFirstId = oldItems.first?.id
                     let newFirstId = newItems.first?.id
                     FlareLog.debug("  - 第一个item变化: \(oldFirstId ?? "nil") -> \(newFirstId ?? "nil")")

@@ -10,7 +10,7 @@ class PagingStateConverter {
     private let conversionQueue = DispatchQueue(label: "timeline.state.converter", qos: .userInitiated)
 
     private var convertedItems: [TimelineItem] = []
-    
+
     private var topSignature: String = ""
 
     init() {
@@ -98,27 +98,27 @@ class PagingStateConverter {
         if isFullConversion {
             // 新增：topSignature检查逻辑
             let newSignature = calculateTopSignature(successState, count: 10)
-            
+
             if newSignature == topSignature {
                 // 新增：检测到缓存数据，使用临时数据显示
                 FlareLog.debug("[PagingStateConverter] 检测到缓存数据，保持显示")
-                
+
                 let tempItems = convertItemsInRange(
                     from: 0,
                     to: maxConvertibleIndex,
                     successState: successState
                 )
-                
+
                 return generateFilteredState(successState, items: tempItems)
-            }else {
+            } else {
                 FlareLog.debug("[PagingStateConverter] 检测到新数据，执行全量转换")
                 FlareLog.debug("[PagingStateConverter] 旧signature: \(topSignature)")
                 FlareLog.debug("[PagingStateConverter] 新signature: \(newSignature)")
             }
-            
+
             // 新增：检测到新数据，执行全量转换
             FlareLog.debug("[PagingStateConverter] 检测到新数据，执行全量转换")
-            
+
             // 添加日志：全量转换开始
             FlareLog.debug("[PagingStateConverter] 开始全量转换 - 清空缓存，当前缓存数量: \(convertedItems.count)")
             FlareLog.debug("[PagingStateConverter] 全量转换: 转换 0 到 \(maxConvertibleIndex)")
@@ -142,7 +142,7 @@ class PagingStateConverter {
                     FlareLog.debug("[PagingStateConverter] 全量转换完成 - 返回所有items: \(allItems.count)")
                 }
             }
-            
+
             // 新增：更新topSignature
             topSignature = newSignature
         } else {
@@ -176,7 +176,7 @@ class PagingStateConverter {
                 FlareLog.debug("[PagingStateConverter] 获取KMP数据完成: \(kmpItems.count) 个items")
 
                 // 去重处理：只保留不在现有数组中的数据
-                let existingKeys = Set(convertedItems.map { $0.id })
+                let existingKeys = Set(convertedItems.map(\.id))
                 incrementalItems = kmpItems.filter { !existingKeys.contains($0.id) }
 
                 FlareLog.debug("[PagingStateConverter] 去重处理完成 - 原始: \(kmpItems.count), 去重后: \(incrementalItems.count)")
@@ -258,13 +258,13 @@ class PagingStateConverter {
     private func calculateTopSignature(_ successState: PagingStateSuccess<UiTimeline>, count: Int) -> String {
         var ids: [String] = []
         let maxCount = min(count, Int(successState.itemCount))
-        
-        for i in 0..<maxCount {
+
+        for i in 0 ..< maxCount {
             if let item = successState.peek(index: Int32(i)) {
                 ids.append(item.itemKey)
             }
         }
-        
+
         return ids.joined(separator: "|")
     }
 

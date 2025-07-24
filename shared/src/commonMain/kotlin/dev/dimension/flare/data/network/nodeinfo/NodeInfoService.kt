@@ -14,6 +14,7 @@ import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.model.vvoHostLong
 import dev.dimension.flare.model.vvoHostShort
 import dev.dimension.flare.model.xqtHost
+import dev.dimension.flare.model.xqtOldHost
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.http.URLBuilder
@@ -104,7 +105,7 @@ internal data object NodeInfoService {
 
     suspend fun detectPlatformType(host: String): PlatformType =
         coroutineScope {
-            val xqt = listOf(xqtHost, "xqt.social", "x.com")
+            val xqt = listOf(xqtOldHost, "xqt.social", xqtHost)
             if (xqt.any { it.equals(host, ignoreCase = true) }) {
                 return@coroutineScope PlatformType.xQt
             }

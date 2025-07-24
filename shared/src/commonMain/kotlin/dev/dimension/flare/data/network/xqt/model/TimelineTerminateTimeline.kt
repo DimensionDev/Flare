@@ -28,7 +28,7 @@ import kotlinx.serialization.Serializable
 @SerialName("TimelineTerminateTimeline")
 internal data class TimelineTerminateTimeline(
     @SerialName(value = "direction")
-    val direction: TimelineTerminateTimeline.Direction,
+    val direction: TimelineTerminateTimeline.Direction? = null,
 //    @Contextual @SerialName(value = "type")
 //    val type: InstructionType,
 ) : InstructionUnion {
@@ -46,5 +46,8 @@ internal data class TimelineTerminateTimeline(
 
         @SerialName(value = "Bottom")
         bottom("Bottom"),
+
+        @SerialName(value = "TopAndBottom")
+        topAndBottom("TopAndBottom"),
     }
 }

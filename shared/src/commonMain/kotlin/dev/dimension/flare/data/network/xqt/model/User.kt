@@ -61,4 +61,32 @@ internal data class User(
 //    val hasGraduatedAccess: kotlin.Boolean? = null,
 //    @SerialName(value = "has_nft_avatar")
 //    val hasNftAvatar: kotlin.Boolean? = false,
-) : UserUnion
+    @SerialName(value = "avatar")
+    val avatar: Avatar? = null,
+    @SerialName(value = "core")
+    val core: Core? = null,
+    @SerialName(value = "dm_permissions")
+    val dmPermissions: DmPermissions? = null,
+) : UserUnion {
+    @Serializable
+    data class Avatar(
+        @SerialName(value = "image_url")
+        val imageUrl: kotlin.String? = null,
+    )
+
+    @Serializable
+    data class Core(
+        @SerialName(value = "created_at")
+        val createdAt: kotlin.String? = null,
+        @SerialName(value = "name")
+        val name: kotlin.String? = null,
+        @SerialName(value = "screen_name")
+        val screenName: kotlin.String? = null,
+    )
+
+    @Serializable
+    data class DmPermissions(
+        @SerialName(value = "can_dm")
+        val canDm: kotlin.Boolean = false,
+    )
+}

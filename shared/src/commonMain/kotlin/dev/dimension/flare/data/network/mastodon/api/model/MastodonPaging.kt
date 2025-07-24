@@ -32,7 +32,7 @@ internal class MastodonPaging<T>(
 }
 
 internal class MastodonPagingConverterFactory : Converter.Factory {
-    @OptIn( InternalAPI::class)
+    @OptIn(InternalAPI::class)
     override fun suspendResponseConverter(
         typeData: TypeData,
         ktorfit: Ktorfit,
@@ -54,7 +54,8 @@ internal class MastodonPagingConverterFactory : Converter.Factory {
                                     ListSerializer(
                                         typeData.typeArgs
                                             .first()
-                                            .typeInfo.serializer(),
+                                            .typeInfo
+                                            .serializer(),
                                     ),
                                 )
                             MastodonPaging(

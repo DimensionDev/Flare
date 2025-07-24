@@ -42,8 +42,9 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
-import dev.dimension.flare.model.xqtHost
+import dev.dimension.flare.ui.model.mapper.name
 import dev.dimension.flare.ui.model.mapper.parseXQTCustomDateTime
+import dev.dimension.flare.ui.model.mapper.screenName
 import kotlin.time.Clock
 
 internal object XQT {
@@ -139,7 +140,7 @@ internal object XQT {
                 ?.values
                 .orEmpty()
                 .toList()
-                .toDbUser(),
+                .toDbUser(accountKey),
         )
         database.messageDao().insertMessages(messages)
         database.messageDao().insertReferences(references)
@@ -147,7 +148,7 @@ internal object XQT {
     }
 }
 
-private fun List<InboxUser>.toDbUser(): List<DbUser> {
+private fun List<InboxUser>.toDbUser(accountKey: MicroBlogKey): List<DbUser> {
     return mapNotNull {
         if (it.name == null || it.screenName == null || it.idStr == null) {
             return@mapNotNull null
@@ -178,7 +179,7 @@ private fun List<InboxUser>.toDbUser(): List<DbUser> {
                 },
             isBlueVerified = it.isBlueVerified == true,
             restId = it.idStr,
-        ).toDbUser()
+        ).toDbUser(accountKey)
     }
 }
 
@@ -261,7 +262,7 @@ private fun toDbStatusWithUser(
             ?.result
             ?.let {
                 it as? User
-            }?.toDbUser() ?: throw IllegalStateException("Tweet.user should not be null")
+            }?.toDbUser(accountKey) ?: throw IllegalStateException("Tweet.user should not be null")
     return DbStatusWithUser(
         data =
             DbStatus(
@@ -274,13 +275,15 @@ private fun toDbStatusWithUser(
                 userKey = user.userKey,
                 accountType = AccountType.Specific(accountKey),
                 text = tweet.legacy?.fullText,
-                createdAt = tweet.legacy?.createdAt?.let { parseXQTCustomDateTime(it) } ?: Clock.System.now(),
+                createdAt =
+                    tweet.legacy?.createdAt?.let { parseXQTCustomDateTime(it) }
+                        ?: Clock.System.now(),
             ),
         user = user,
     )
 }
 
-private fun TimelineTweet.toDbUser(): DbUser {
+private fun TimelineTweet.toDbUser(accountKey: MicroBlogKey): DbUser {
     val tweet =
         when (tweetResults.result) {
             is Tweet -> tweetResults.result
@@ -295,20 +298,20 @@ private fun TimelineTweet.toDbUser(): DbUser {
                 it as? User
             }
             ?: throw IllegalStateException("Tweet.user should not be null")
-    return user.toDbUser()
+    return user.toDbUser(accountKey = accountKey)
 }
 
-internal fun User.toDbUser() =
+internal fun User.toDbUser(accountKey: MicroBlogKey) =
     DbUser(
         userKey =
             MicroBlogKey(
                 id = restId,
-                host = xqtHost,
+                host = accountKey.host,
             ),
         platformType = PlatformType.xQt,
-        name = legacy.name,
-        handle = legacy.screenName,
-        host = xqtHost,
+        name = name,
+        handle = screenName,
+        host = accountKey.host,
         content = UserContent.XQT(this),
     )
 
@@ -413,7 +416,7 @@ internal fun List<InstructionUnion>.cursor() =
 internal fun List<InstructionUnion>.isBottomEnd() =
     filterIsInstance<TimelineTerminateTimeline>()
         .firstOrNull {
-            it.direction == TimelineTerminateTimeline.Direction.bottom
+            it.direction == TimelineTerminateTimeline.Direction.bottom || it.direction == TimelineTerminateTimeline.Direction.topAndBottom
         } != null
 
 internal fun TopLevel.tweets(): List<XQTTimeline> =

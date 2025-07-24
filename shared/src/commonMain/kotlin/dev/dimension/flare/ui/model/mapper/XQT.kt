@@ -31,7 +31,6 @@ import dev.dimension.flare.data.network.xqt.model.legacy.TopLevel
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.ReferenceType
-import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiDMItem
@@ -608,7 +607,7 @@ internal fun Tweet.renderStatus(
         },
         url =
             buildString {
-                append("https://$xqtHost/")
+                append("https://${accountKey.host}/")
                 append(user?.handleWithoutAt)
                 append("/status/")
                 append(legacy?.idStr ?: restId)
@@ -620,17 +619,17 @@ internal fun User.render(accountKey: MicroBlogKey): UiProfile {
     val userKey =
         MicroBlogKey(
             id = restId,
-            host = xqtHost,
+            host = accountKey.host,
         )
     return UiProfile(
         key = userKey,
-        avatar = legacy.profileImageUrlHttps.replaceWithOriginImageUrl(),
+        avatar = avatarUrl,
         name =
             Element("span")
                 .apply {
-                    addChildren(TextNode(legacy.name))
+                    addChildren(TextNode(name))
                 }.toUi(),
-        handle = "@${legacy.screenName}@$xqtHost",
+        handle = "@$screenName@${accountKey.host}",
         banner = legacy.profileBannerUrl,
         description =
             legacy.description?.takeIf { it.isNotEmpty() }?.let {
@@ -879,7 +878,7 @@ private fun MessageContent.XQT.Message.render(
                 customHeaders =
                     persistentMapOf(
                         "Cookie" to credential.chocolate,
-                        "Referer" to "https://$xqtHost/",
+                        "Referer" to "https://${accountKey.host}/",
                     ),
             ),
         )
@@ -910,7 +909,7 @@ private fun MessageContent.XQT.Message.render(
                 customHeaders =
                     persistentMapOf(
                         "Cookie" to credential.chocolate,
-                        "Referer" to "https://$xqtHost/",
+                        "Referer" to "https://${accountKey.host}/",
                     ),
             ),
         )
@@ -940,7 +939,7 @@ private fun MessageContent.XQT.Message.render(
                         customHeaders =
                             persistentMapOf(
                                 "Cookie" to credential.chocolate,
-                                "Referer" to "https://$xqtHost/",
+                                "Referer" to "https://${accountKey.host}/",
                             ),
                     ),
                 )
@@ -961,7 +960,7 @@ private fun MessageContent.XQT.Message.render(
                         customHeaders =
                             persistentMapOf(
                                 "Cookie" to credential.chocolate,
-                                "Referer" to "https://$xqtHost/",
+                                "Referer" to "https://${accountKey.host}/",
                             ),
                     ),
                 )
@@ -1066,7 +1065,7 @@ private fun Admin.render(accountKey: MicroBlogKey): UiUserV2 {
                 .apply {
                     addChildren(TextNode(displayName.orEmpty()))
                 }.toUi(),
-        handle = "@$twitterScreenName@$xqtHost",
+        handle = "@$twitterScreenName@${accountKey.host}",
         platformType = PlatformType.xQt,
         onClicked = {
             launcher.launch(AppDeepLink.Profile(accountKey, key))
@@ -1078,3 +1077,15 @@ private fun Admin.render(accountKey: MicroBlogKey): UiUserV2 {
         bottomContent = null,
     )
 }
+
+internal val User.name: String
+    get() = legacy.name ?: core?.name ?: "Unknown"
+
+internal val User.screenName: String
+    get() = legacy.screenName ?: core?.screenName ?: "Unknown"
+
+internal val User.avatarUrl: String
+    get() =
+        legacy.profileImageUrlHttps?.replaceWithOriginImageUrl()
+            ?: avatar?.imageUrl?.replaceWithOriginImageUrl()
+            ?: "https://abs.twimg.com/sticky/default_profile_images/default_profile_normal.png"

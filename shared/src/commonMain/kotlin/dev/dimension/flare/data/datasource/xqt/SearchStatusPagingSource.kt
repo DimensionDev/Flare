@@ -7,12 +7,12 @@ import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.cursor
+import dev.dimension.flare.data.database.cache.mapper.isBottomEnd
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.xqtHost
 import io.ktor.http.encodeURLQueryComponent
 import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
@@ -44,7 +44,7 @@ internal class SearchStatusPagingSource(
                                     rawQuery = query,
                                     count = state.config.pageSize.toLong(),
                                 ).encodeJson(),
-                            referer = "https://$xqtHost/search?q=${query.encodeURLQueryComponent()}",
+                            referer = "https://${accountKey.host}/search?q=${query.encodeURLQueryComponent()}",
                         )
                 }
 
@@ -62,7 +62,7 @@ internal class SearchStatusPagingSource(
                                 count = state.config.pageSize.toLong(),
                                 cursor = cursor,
                             ).encodeJson(),
-                        referer = "https://$xqtHost/search?q=${query.encodeURLQueryComponent()}",
+                        referer = "https://${accountKey.host}/search?q=${query.encodeURLQueryComponent()}",
                     )
                 }
             }.body()?.data?.searchByRawQuery?.searchTimeline?.timeline?.instructions.orEmpty()
@@ -72,7 +72,7 @@ internal class SearchStatusPagingSource(
         val data = tweets.map { it.toDbPagingTimeline(accountKey, pagingKey) }
 
         return Result(
-            endOfPaginationReached = tweets.isEmpty(),
+            endOfPaginationReached = response.isBottomEnd(),
             data = data,
         )
     }

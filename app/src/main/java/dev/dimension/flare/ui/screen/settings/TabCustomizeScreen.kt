@@ -297,7 +297,6 @@ internal fun ListTabItem(
     modifier: Modifier = Modifier,
 ) {
     ListItem(
-//        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         headlineContent = {
             TabTitle(data.metaData.title)
         },

@@ -4,7 +4,7 @@ collection = "1.5.0"
 compileSdk = "36"
 haze = "1.6.9"
 lifecycleViewmodelCompose = "2.9.1"
-minSdk = "21"
+minSdk = "23"
 java = "21"
 agp = "8.11.1"
 kotlin = "2.2.0"
@@ -175,8 +175,8 @@ kermit = { group = "co.touchlab", name = "kermit", version = "2.0.6" }
 kotlin-codepoints-deluxe = { group = "de.cketti.unicode", name = "kotlin-codepoints-deluxe", version = "0.11.0" }
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
-firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
-firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
+firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics" }
 
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.1.2" }

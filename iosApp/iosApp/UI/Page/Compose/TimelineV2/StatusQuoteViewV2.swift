@@ -60,16 +60,14 @@ struct QuotedStatusV2: View {
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
-    let item: TimelineItem // 使用Swift TimelineItem类型
-    let onMediaClick: (Int, Media) -> Void // 使用Swift Media类型
+    let item: TimelineItem
+    let onMediaClick: (Int, Media) -> Void
 
     var body: some View {
         Button(action: {
-            // 🔥 实现引用推文点击跳转到详情页面
             let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
             let statusKey = item.createMicroBlogKey()
 
-            FlareLog.debug("QuotedStatus Navigate to status detail: \(item.id)")
             router.navigate(to: .statusDetail(
                 accountType: accountType,
                 statusKey: statusKey
@@ -90,14 +88,13 @@ struct QuotedStatusV2: View {
                             .font(.subheadline)
                             .foregroundColor(.gray)
                         Spacer()
-                        dateFormatter(item.timestamp) // 使用TimelineItem的timestamp
+                        dateFormatter(item.timestamp)
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
                     .padding(.horizontal, 9)
                 }
 
-                // 原文和翻译
                 FlareText(item.content.raw, item.content.markdown, style: FlareTextStyle.Style(
                     font: Font.scaledBodyFont,
                     textColor: UIColor(theme.labelColor),
@@ -111,18 +108,17 @@ struct QuotedStatusV2: View {
                     }
                     .font(.system(size: 16))
 
-                if appSettings.appearanceSettings.autoTranslate {
-                    TranslatableText(originalText: item.content.raw)
-                }
+                // if appSettings.appearanceSettings.autoTranslate {
+                //     TranslatableText(originalText: item.content.raw)
+                // }
 
                 Spacer()
                     .frame(height: 8)
                 if !item.images.isEmpty {
                     if appSettings.appearanceSettings.showMedia || showMedia {
-                        // 使用V2版本的MediaComponent
                         MediaComponentV2(
                             hideSensitive: item.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
-                            medias: [], // 暂时为空，需要将item.images转换为UiMedia数组
+                            medias: [],
                             onMediaClick: handleMediaClick,
                             sensitive: item.sensitive
                         )

@@ -10,7 +10,7 @@ enum PreferredBrowser: String, CaseIterable, Codable {
 class OtherSettings: Codable {
     var preferredBrowser: PreferredBrowser = .inAppSafari
     var inAppBrowserReaderView: Bool = true
-    var translationProvider: TranslationProvider = .google
+    var translationProvider: TranslationProvider = .systemOffline
     var sensitiveContentAnalysisEnabled: Bool = false
 
     init() {}

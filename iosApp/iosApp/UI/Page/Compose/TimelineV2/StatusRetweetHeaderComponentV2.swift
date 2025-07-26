@@ -16,13 +16,11 @@ struct StatusRetweetHeaderComponentV2: View {
             handleTopMessageTap()
         }) {
             HStack(alignment: .center) {
-                // 图标显示
                 getIcon(for: topMessage.icon)
                     .foregroundColor(theme.labelColor)
                     .font(.system(size: 14))
                     .frame(maxWidth: 14, maxHeight: 14, alignment: .center)
 
-                // 文本显示：用户名 + 操作描述
                 Markdown {
                     nameMarkdown + (nameMarkdown.isEmpty ? "" : " ") + text
                 }
@@ -41,18 +39,14 @@ struct StatusRetweetHeaderComponentV2: View {
         .buttonStyle(.plain)
     }
 
-    /// 处理转发头部点击事件
     private func handleTopMessageTap() {
-        // 🔥 实现转发头部点击跳转到执行操作的用户页面
         guard let user = topMessage.user else {
-            FlareLog.warning("StatusRetweetHeaderV2 No user in topMessage")
             return
         }
 
         let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
         let userKey = user.createMicroBlogKey()
 
-        FlareLog.debug("StatusRetweetHeaderV2 Navigate to profile: \(user.key)")
         router.navigate(to: .profile(
             accountType: accountType,
             userKey: userKey

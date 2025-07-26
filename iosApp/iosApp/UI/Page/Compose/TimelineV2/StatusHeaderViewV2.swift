@@ -9,28 +9,8 @@ import SwiftDate
 import SwiftUI
 import UIKit
 
-// - Swift原生AccountType定义
-
-// enum SwiftAccountType {
-//    case specific(accountKey: String)  // 简化版，使用String代替MicroBlogKey
-//    case active
-//    case guest
-// }
-//
-//// - Swift原生MicroBlogKey定义
-// struct SwiftMicroBlogKey {
-//    let id: String
-//    let host: String
-//
-//    init(id: String, host: String) {
-//        self.id = id
-//        self.host = host
-//    }
-// }
-
 struct StatusHeaderViewV2: View {
-    // 修改参数：使用TimelineItem替代StatusViewModel
-    let item: TimelineItem
+    let timelineItem: TimelineItem
     let isDetailView: Bool
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
@@ -38,11 +18,10 @@ struct StatusHeaderViewV2: View {
     var body: some View {
         HStack(alignment: .top) {
             HStack(alignment: .center, spacing: 1) {
-                // 使用TimelineItem的user数据
-                if item.hasUser, let user = item.user {
+                if timelineItem.hasUser, let user = timelineItem.user {
                     UserComponentV2(
                         user: user,
-                        topEndContent: item.topEndContent
+                        topEndContent: timelineItem.topEndContent
                     )
                     .id("UserComponent_\(user.key)")
                     .environment(router)
@@ -50,9 +29,8 @@ struct StatusHeaderViewV2: View {
 
                 Spacer()
 
-                // 使用TimelineItem的isDetailView和格式化时间
                 if !isDetailView {
-                    Text(item.getFormattedDate())
+                    Text(timelineItem.getFormattedDate())
                         .foregroundColor(.gray)
                         .font(.caption)
                         .frame(minWidth: 80, alignment: .trailing)
@@ -62,26 +40,22 @@ struct StatusHeaderViewV2: View {
         }
         .allowsHitTesting(true)
         .contentShape(Rectangle())
-        .onTapGesture {
-            // 空的手势处理
-        }
+        .onTapGesture {}
     }
 }
 
 struct UserComponentV2: View {
-    let user: User // 使用Swift User类型
-    let topEndContent: TopEndContent? // 使用Swift TopEndContent类型
+    let user: User
+    let topEndContent: TopEndContent?
 
     @Environment(FlareRouter.self) private var router
 
     var body: some View {
         Button(
             action: {
-                // 🔥 实现用户点击跳转到用户页面
                 let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
                 let userKey = user.createMicroBlogKey()
 
-                FlareLog.debug("UserComponent Navigate to profile: \(user.key)")
                 router.navigate(to: .profile(
                     accountType: accountType,
                     userKey: userKey
@@ -91,7 +65,6 @@ struct UserComponentV2: View {
                 HStack {
                     UserAvatar(data: user.avatar, size: 44)
                     VStack(alignment: .leading, spacing: 2) {
-                        // 显示用户名 - 使用Swift RichText
                         if user.name.markdown.isEmpty {
                             Text(" ")
                                 .lineLimit(1)
@@ -108,7 +81,6 @@ struct UserComponentV2: View {
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
 
-                            // 显示可见性图标 - 使用Swift TopEndContent
                             if let topEndContent {
                                 switch topEndContent {
                                 case let .visibility(visibilityType):

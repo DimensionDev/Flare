@@ -30,9 +30,6 @@ struct FlareApp: SwiftUI.App {
 
         // DownloadManager初始化
         _ = DownloadManager.shared
-
-        // 🚀 120fps优化配置
-//        FrameRateOptimizer.configureForApp()
     }
 
     var body: some Scene {
@@ -60,7 +57,6 @@ struct FlareApp: SwiftUI.App {
                         }
                         .withFlareTheme()
                         .environment(router)
-                        .floatingPerformanceWindow()
 
                 #endif
 

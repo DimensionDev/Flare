@@ -10,14 +10,13 @@ struct TimelineViewSwiftUIV4: View {
     @EnvironmentObject private var timelineState: TimelineExtState
 
     @State private var viewModel = TimelineViewModel()
-
     @State private var isInitialized: Bool = false
 
     init(tab: FLTabItem, store: AppBarTabSettingStore, isCurrentTab: Bool) {
         self.tab = tab
         self.store = store
         self.isCurrentTab = isCurrentTab
-        FlareLog.debug("[TimelineV4] 视图初始化 for tab: \(tab.key)")
+        FlareLog.debug("🔍 [TimelineV4] 视图初始化 for tab: '\(tab.key)', received isCurrentTab: \(isCurrentTab)")
     }
 
     @State private var refreshDebounceTimer: Timer?
@@ -95,21 +94,55 @@ struct TimelineViewSwiftUIV4: View {
                 }
             }
             .task(id: tab.key) {
+                let timestamp = Date().timeIntervalSince1970
+                FlareLog.debug("📱 [TimelineV4] .task(id: \(tab.key)) triggered - isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
+
                 if !isInitialized {
                     isInitialized = true
-                    FlareLog.debug("[TimelineV4] First time initialization for tab: \(tab.key)")
+                    FlareLog.debug("🚀 [TimelineV4] First time initialization for tab: \(tab.key)")
                     await viewModel.setupDataSource(for: tab, using: store)
+                    FlareLog.debug("✅ [TimelineV4] setupDataSource completed for tab: \(tab.key)")
                 } else {
-                    FlareLog.debug("[TimelineV4] Tab reappeared, skipping setupDataSource for tab: \(tab.key)")
+                    FlareLog.debug("⏭️ [TimelineV4] Tab reappeared, skipping setupDataSource for tab: \(tab.key)")
                 }
             }
+            .onAppear {
+                let timestamp = Date().timeIntervalSince1970
+                FlareLog.debug("👁️ [TimelineV4] onAppear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
+
+                // 移除isCurrentTab检查，总是尝试resume
+                viewModel.resume()
+            }
+            .onDisappear {
+                let timestamp = Date().timeIntervalSince1970
+                FlareLog.debug("👋 [TimelineV4] onDisappear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
+
+                // 页面消失时，无论什么tab都暂停
+                viewModel.pause()
+            }
             .onReceive(NotificationCenter.default.publisher(for: .timelineItemUpdated)) { _ in
-                FlareLog.debug("TimelineV4 Received item update for tab: \(tab.key)")
+                let timestamp = Date().timeIntervalSince1970
+                FlareLog.debug("📬 [TimelineV4] Received timelineItemUpdated notification - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
 
                 refreshDebounceTimer?.invalidate()
+                FlareLog.debug("⏰ [TimelineV4] Setting refresh debounce timer - tab: \(tab.key), isCurrentTab: \(isCurrentTab)")
+
                 refreshDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-                    guard isCurrentTab else { return }
-                    Task { await viewModel.handleRefresh() }
+                    let timerTimestamp = Date().timeIntervalSince1970
+                    FlareLog.debug("⏱️ [TimelineV4] Debounce timer fired - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timerTimestamp)")
+
+                    guard isCurrentTab else {
+                        FlareLog.debug("⏸️ [TimelineV4] Skipping refresh - not current tab: \(tab.key)")
+                        return
+                    }
+
+                    FlareLog.debug("🔄 [TimelineV4] Starting handleRefresh - tab: \(tab.key)")
+                    Task {
+                        await viewModel.handleRefresh()
+                        await MainActor.run {
+                            FlareLog.debug("✅ [TimelineV4] handleRefresh completed - tab: \(tab.key), timestamp: \(Date().timeIntervalSince1970)")
+                        }
+                    }
                 }
             }
         }

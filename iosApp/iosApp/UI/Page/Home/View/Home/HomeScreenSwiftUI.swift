@@ -40,7 +40,9 @@ struct HomeScreenSwiftUI: View {
             )
         }.toolbarVisibility(.hidden, for: .navigationBar)
             .onAppear {
+                FlareLog.debug("🏠 [HomeScreen] onAppear - selectedHomeAppBarTabKey: '\(selectedHomeAppBarTabKey)'")
                 if selectedHomeAppBarTabKey.isEmpty, let firstTab = tabStore.availableAppBarTabsItems.first {
+                    FlareLog.debug("🏠 [HomeScreen] Setting initial tab: '\(firstTab.key)'")
                     selectedHomeAppBarTabKey = firstTab.key
                     tabStore.updateSelectedTab(firstTab)
                 }
@@ -56,9 +58,13 @@ struct HomeScreenSwiftUI: View {
                     }
                 }
             }
-            .onChange(of: selectedHomeAppBarTabKey) { _, newValue in
+            .onChange(of: selectedHomeAppBarTabKey) { oldValue, newValue in
+                FlareLog.debug("🔄 [HomeScreen] selectedHomeAppBarTabKey changed: '\(oldValue)' → '\(newValue)'")
                 if let tab = tabStore.availableAppBarTabsItems.first(where: { $0.key == newValue }) {
+                    FlareLog.debug("🔄 [HomeScreen] Updating tabStore with tab: '\(tab.key)'")
                     tabStore.updateSelectedTab(tab)
+                } else {
+                    FlareLog.warning("⚠️ [HomeScreen] No tab found for key: '\(newValue)'")
                 }
             }
             .sheet(isPresented: $showAppbarSettings) {

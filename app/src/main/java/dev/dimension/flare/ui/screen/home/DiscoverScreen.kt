@@ -1,22 +1,20 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
-import androidx.compose.material3.Card
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
@@ -25,23 +23,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
+import dev.dimension.flare.common.isLoading
 import dev.dimension.flare.common.isRefreshing
+import dev.dimension.flare.common.isSuccess
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.isCompat
 import dev.dimension.flare.ui.common.isNormal
+import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.SearchBar
 import dev.dimension.flare.ui.component.SearchBarState
 import dev.dimension.flare.ui.component.searchBarPresenter
 import dev.dimension.flare.ui.component.searchContent
+import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.UserPlaceholder
@@ -50,7 +53,6 @@ import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
@@ -111,75 +113,31 @@ internal fun DiscoverScreen(
                             toUser = onUserClick,
                         )
                     } else {
-                        state.users
-                            .onSuccess {
-                                item(
-                                    span = StaggeredGridItemSpan.FullLine,
+                        if (state.users.isLoading || state.users.isSuccess()) {
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
+                                ListItem(
+                                    headlineContent = {
+                                        Text(text = stringResource(R.string.discover_users))
+                                    },
+                                    colors =
+                                        ListItemDefaults
+                                            .colors(
+                                                containerColor = Color.Transparent,
+                                            ),
+                                )
+                            }
+                            item(
+                                span = StaggeredGridItemSpan.FullLine,
+                            ) {
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 ) {
-                                    ListItem(
-                                        headlineContent = {
-                                            Text(text = stringResource(R.string.discover_users))
-                                        },
-                                    )
-                                }
-                                item(
-                                    span = StaggeredGridItemSpan.FullLine,
-                                ) {
-                                    LazyHorizontalGrid(
-                                        modifier = Modifier.height(128.dp),
-                                        rows = GridCells.Fixed(2),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
-                                    ) {
-                                        items(
-                                            itemCount,
-//                                                    key = users.itemKey { it.key },
-                                        ) {
-                                            val user = get(it)
-                                            Card(
-                                                modifier =
-                                                    Modifier
-                                                        .width(256.dp),
-                                            ) {
-                                                if (user != null) {
-                                                    CommonStatusHeaderComponent(
-                                                        data = user,
-                                                        onUserClick = onUserClick,
-                                                        modifier = Modifier.padding(8.dp),
-                                                    )
-                                                } else {
-                                                    UserPlaceholder(
-                                                        modifier = Modifier.padding(8.dp),
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }.onLoading {
-                                item(
-                                    span = StaggeredGridItemSpan.FullLine,
-                                ) {
-                                    ListItem(
-                                        headlineContent = {
-                                            Text(text = stringResource(R.string.discover_users))
-                                        },
-                                    )
-                                }
-
-                                item(
-                                    span = StaggeredGridItemSpan.FullLine,
-                                ) {
-                                    LazyHorizontalGrid(
-                                        modifier = Modifier.height(128.dp),
-                                        rows = GridCells.Fixed(2),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
-                                    ) {
-                                        items(10) {
-                                            Card(
+                                    items(
+                                        state.users,
+                                        loadingContent = {
+                                            AdaptiveCard(
                                                 modifier =
                                                     Modifier
                                                         .width(256.dp),
@@ -188,10 +146,26 @@ internal fun DiscoverScreen(
                                                     modifier = Modifier.padding(8.dp),
                                                 )
                                             }
+                                        },
+                                    ) { item ->
+                                        AdaptiveCard(
+                                            modifier =
+                                                Modifier
+                                                    .width(256.dp),
+                                        ) {
+                                            CommonStatusHeaderComponent(
+                                                modifier = Modifier.padding(8.dp),
+                                                data = item,
+                                                onUserClick = {
+                                                    onUserClick(item.key)
+                                                },
+                                            )
                                         }
                                     }
                                 }
                             }
+                        }
+
                         state.hashtags.onSuccess {
                             item(
                                 span = StaggeredGridItemSpan.FullLine,
@@ -200,6 +174,11 @@ internal fun DiscoverScreen(
                                     headlineContent = {
                                         Text(text = stringResource(R.string.discover_hashtags))
                                     },
+                                    colors =
+                                        ListItemDefaults
+                                            .colors(
+                                                containerColor = Color.Transparent,
+                                            ),
                                 )
                             }
                             item(
@@ -218,22 +197,23 @@ internal fun DiscoverScreen(
                                 FlowRow(
                                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                                     verticalArrangement = Arrangement.spacedBy(4.dp),
-                                    modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                                     maxItemsInEachRow = maxItemsInEachRow,
                                 ) {
                                     repeat(
                                         itemCount,
                                     ) {
                                         val hashtag = get(it)
-                                        Card(
-                                            modifier = Modifier.weight(1f),
-                                            onClick = {
-                                                hashtag?.searchContent?.let { it1 ->
-                                                    state.commitSearch(
-                                                        it1,
-                                                    )
-                                                }
-                                            },
+                                        AdaptiveCard(
+                                            modifier =
+                                                Modifier
+                                                    .weight(1f)
+                                                    .clickable {
+                                                        hashtag?.searchContent?.let { it1 ->
+                                                            state.commitSearch(
+                                                                it1,
+                                                            )
+                                                        }
+                                                    },
                                         ) {
                                             Box(
                                                 modifier =
@@ -272,6 +252,11 @@ internal fun DiscoverScreen(
                                         headlineContent = {
                                             Text(text = stringResource(R.string.discover_status))
                                         },
+                                        colors =
+                                            ListItemDefaults
+                                                .colors(
+                                                    containerColor = Color.Transparent,
+                                                ),
                                     )
                                 }
                                 status(state.status)
@@ -283,6 +268,11 @@ internal fun DiscoverScreen(
                                         headlineContent = {
                                             Text(text = stringResource(R.string.discover_status))
                                         },
+                                        colors =
+                                            ListItemDefaults
+                                                .colors(
+                                                    containerColor = Color.Transparent,
+                                                ),
                                     )
                                 }
                                 status(state.status)

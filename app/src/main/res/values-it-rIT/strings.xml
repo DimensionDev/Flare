@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">Nessuna sorgente rss</string>
+    <string name="rss_sources_rss_hub_host_label">Host RssHub</string>
+    <string name="rss_sources_rss_hub_host_hint">È necessario impostare l\'host RssHub se si desidera utilizzare RssHub, o selezionare il server RsssHub pubblico</string>
+    <string name="rss_sources_discovered_rss_sources">Scoperte Sorgenti Rss</string>
+    <string name="rss_sources_pinned_in_tabs">Aggiungi alle schede home</string>
     <string name="rss_detail_open_in_browser">Apri nel browser</string>
     <string name="rss_detail_share">Condividi</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -265,10 +269,13 @@
     <string name="home_tab_mixed_timeline_title">Misto</string>
     <string name="tab_settings_mixed_timeline">Aggiungi scheda timeline mista</string>
     <string name="tab_settings_mixed_timeline_desc">La timeline mista mescolerà il risultato di tutte le schede della timeline in una scheda</string>
+    <string name="home_tab_social_timeline_title">Social</string>
     <string name="changelog_current"><![CDATA[            <span>Versione %1$s:</span>
             <ul>
-                <li>Aggiunto il supporto della timeline mista alla scheda Home</li>
-                <li>Iniziato a effettuare le modifiche UI/UX, con ulteriori miglioramenti in arrivo</li>
+                <li>Aggiunto il supporto per la timeline Social</li>
+                <li>Aggiunto il supporto RSSHub</li>
+                <li>Aggiunto il supporto per il rilevamento di eventuali feed RSS dai siti web</li>
+                <li>Più miglioramenti UI/UX — siamo ancora sul percorso del perfezionamento continuo</li>
                 <li>Correzioni di bug e miglioramenti delle prestazioni</li>
             </ul>
         ]]></string>

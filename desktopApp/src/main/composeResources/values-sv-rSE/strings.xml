@@ -100,4 +100,5 @@
     <string name="feeds_discover_feeds_created_by">Skapad av %1$s</string>
     <string name="feeds_unsubscribe">Avprenumerera</string>
     <string name="feeds_subscribe">Prenumerera</string>
+    <string name="social_title">Socialt</string>
 </resources>

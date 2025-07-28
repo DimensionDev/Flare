@@ -37,9 +37,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.text.intl.Locale
@@ -623,6 +625,7 @@ internal fun StatusActions(
     onShare: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val haptics = LocalHapticFeedback.current
     val launcher = LocalUriHandler.current
     Row(
         modifier =
@@ -714,6 +717,7 @@ internal fun StatusActions(
                         withTextMinWidth = index != items.lastIndex,
                         onClicked = {
                             if (action is StatusAction.Item.Clickable) {
+                                haptics.performHapticFeedback(HapticFeedbackType.ContextClick)
                                 action.onClicked.invoke(
                                     ClickContext(
                                         launcher = {

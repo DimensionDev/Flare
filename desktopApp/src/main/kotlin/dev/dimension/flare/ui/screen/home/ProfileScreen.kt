@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +40,8 @@ import dev.dimension.flare.profile_tab_media
 import dev.dimension.flare.profile_tab_timeline
 import dev.dimension.flare.profile_tab_timeline_with_reply
 import dev.dimension.flare.ui.common.items
+import dev.dimension.flare.ui.component.ComponentAppearance
+import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.ProfileHeader
 import dev.dimension.flare.ui.component.ProfileMenu
 import dev.dimension.flare.ui.component.platform.isBigScreen
@@ -198,19 +201,25 @@ internal fun ProfileScreen(
                                     }
                                 },
                             ) { item ->
-                                val media = item.media
-                                MediaItem(
-                                    media = media,
-                                    showCountdown = false,
-                                    modifier =
-                                        Modifier
-                                            .clip(FluentTheme.shapes.control)
-                                            .padding(
-                                                vertical = 4.dp,
-                                            ).clipToBounds()
-                                            .clickable {
-                                                val content = item.status.content
-                                                if (content is UiTimeline.ItemContent.Status) {
+                                CompositionLocalProvider(
+                                    LocalComponentAppearance provides
+                                        LocalComponentAppearance.current.copy(
+                                            videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
+                                        ),
+                                ) {
+                                    val media = item.media
+                                    MediaItem(
+                                        media = media,
+                                        showCountdown = false,
+                                        modifier =
+                                            Modifier
+                                                .clip(FluentTheme.shapes.control)
+                                                .padding(
+                                                    vertical = 4.dp,
+                                                ).clipToBounds()
+                                                .clickable {
+                                                    val content = item.status.content
+                                                    if (content is UiTimeline.ItemContent.Status) {
 //                                                onItemClicked(
 //                                                    content.statusKey,
 //                                                    item.index,
@@ -221,9 +230,10 @@ internal fun ProfileScreen(
 //                                                        else -> null
 //                                                    },
 //                                                )
-                                                }
-                                            },
-                                )
+                                                    }
+                                                },
+                                    )
+                                }
                             }
                         }
                         is ProfileState.Tab.Timeline -> {

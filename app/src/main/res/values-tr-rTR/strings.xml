@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">Hiç rss kaynağı yok</string>
+    <string name="rss_sources_rss_hub_host_label">RssHub Ana Bilgisayar</string>
+    <string name="rss_sources_rss_hub_host_hint">RssHub kullanmak istiyorsanız RssHub ana bilgisayarını ayarlamanız veya genel RssHub sunucusunu seçmeniz gerekir</string>
+    <string name="rss_sources_discovered_rss_sources">Keşfedilen Rss Kaynakları</string>
+    <string name="rss_sources_pinned_in_tabs">Ana sekmelere sabitleyin</string>
     <string name="rss_detail_open_in_browser">Tarayıcıda aç</string>
     <string name="rss_detail_share">Paylaş</string>
     <string name="rss_detail_tldr">Özetle</string>
@@ -265,10 +269,13 @@
     <string name="home_tab_mixed_timeline_title">Karışık</string>
     <string name="tab_settings_mixed_timeline">Karışık zaman çizelgesi sekmesi ekle</string>
     <string name="tab_settings_mixed_timeline_desc">Karışık zaman çizelgesi, tüm sekme zaman çizelgesi sonuçlarını tek bir sekmede karıştırır</string>
+    <string name="home_tab_social_timeline_title">Sosyal</string>
     <string name="changelog_current"><![CDATA[            <span>Sürüm %1$s:</span>
             <ul>
-                <li>Ana sekmeye Karışık zaman çizelge desteği eklendi</li>
-                <li>UI/UX ayarlamaları yapmaya başlandı, daha fazla iyileştirme yakında gelecek</li>
+                <li>Misskey\'in Sosyal zaman çizelgesi için destek eklendi</li>
+                <li>RSSHub desteği eklendi</li>
+                <li>Web sitelerinden olası RSS beslemelerini tespit etmek için destek eklendi</li>
+                <li>Daha fazla UI/UX iyileştirmesi - hala sürekli iyileştirme yolundayız</li>
                 <li>Hata düzeltmeleri ve performans iyileştirmeleri</li>
             </ul>
         ]]></string>

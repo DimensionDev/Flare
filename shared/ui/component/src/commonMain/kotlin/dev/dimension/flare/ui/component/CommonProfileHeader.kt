@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.platform.PlatformText
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.render.UiRichText
 import dev.dimension.flare.ui.theme.PlatformTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -38,7 +40,7 @@ internal fun CommonProfileHeader(
     onBannerClick: (() -> Unit)? = null,
     headerTrailing: @Composable RowScope.() -> Unit = {},
     handleTrailing: @Composable RowScope.() -> Unit = {},
-    content: @Composable () -> Unit = {},
+    content: @Composable ColumnScope.() -> Unit = {},
 ) {
     val statusBarHeight =
         with(LocalDensity.current) {
@@ -156,37 +158,48 @@ internal fun CommonProfileHeader(
             Column(
                 modifier =
                     Modifier
-                        .padding(horizontal = screenHorizontalPadding),
+                        .let {
+                            if (isBigScreen()) {
+                                it
+                            } else {
+                                it
+                                    .padding(horizontal = screenHorizontalPadding)
+                                    .padding(bottom = 8.dp)
+                                    .listCard()
+                                    .background(PlatformTheme.colorScheme.card)
+                                    .fillMaxWidth()
+                            }
+                        }.padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                RichText(
-                    text = displayName,
-                    textStyle = PlatformTheme.typography.title,
+                Column {
+                    RichText(
+                        text = displayName,
+                        textStyle = PlatformTheme.typography.title,
 //                        modifier =
 //                            Modifier
 //                                .sharedElement(
 //                                    rememberSharedContentState(key = "profile-display-name-$userKey"),
 //                                    animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                ),
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    PlatformText(
-                        text = handle,
-                        style = PlatformTheme.typography.caption,
+                    )
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        PlatformText(
+                            text = handle,
+                            style = PlatformTheme.typography.caption,
 //                            modifier =
 //                                Modifier
 //                                    .sharedElement(
 //                                        rememberSharedContentState(key = "profile-handle-$userKey"),
 //                                        animatedVisibilityScope = this@AnimatedVisibilityScope,
 //                                    ),
-                    )
-                    handleTrailing.invoke(this)
+                        )
+                        handleTrailing.invoke(this)
+                    }
                 }
-            }
-            // content
-            Box {
                 content()
             }
         }

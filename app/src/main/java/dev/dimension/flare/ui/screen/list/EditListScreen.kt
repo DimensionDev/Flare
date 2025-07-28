@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -26,6 +25,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -58,9 +59,11 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareDropdownMenu
+import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
@@ -84,6 +87,7 @@ internal fun EditListScreen(
     onBack: () -> Unit,
     toEditUser: () -> Unit,
 ) {
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val context = LocalContext.current
     val state by producePresenter {
         presenter(context, accountType, listId, onBack)
@@ -97,7 +101,8 @@ internal fun EditListScreen(
         )
     FlareScaffold(
         topBar = {
-            FlareTopAppBar(
+            FlareLargeFlexibleTopAppBar(
+                scrollBehavior = topAppBarScrollBehavior,
                 title = {
                     Text(text = stringResource(id = R.string.list_edit))
                 },
@@ -117,16 +122,23 @@ internal fun EditListScreen(
                 },
             )
         },
+        modifier =
+            Modifier
+                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) { contentPadding ->
         LazyColumn(
             contentPadding = contentPadding,
+            modifier =
+                Modifier
+                    .padding(horizontal = screenHorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             item {
                 Column(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
+                            .padding(vertical = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Row(
@@ -233,6 +245,12 @@ internal fun EditListScreen(
                             )
                         }
                     },
+                    modifier =
+                        Modifier
+                            .listCard(
+                                index = 0,
+                                totalCount = 2,
+                            ),
                 )
             }
             state.memberInfo
@@ -244,6 +262,12 @@ internal fun EditListScreen(
                                 UiState.Success(item)
                             } ?: UiState.Loading()
                         AccountItem(
+                            modifier =
+                                Modifier
+                                    .listCard(
+                                        index = index + 1,
+                                        totalCount = itemCount + 1,
+                                    ),
                             userState = userState,
                             onClick = {},
                             toLogin = { },
@@ -259,7 +283,7 @@ internal fun EditListScreen(
                                         contentDescription = stringResource(id = R.string.more),
                                     )
                                 }
-                                DropdownMenu(
+                                FlareDropdownMenu(
                                     expanded = showMenu,
                                     onDismissRequest = {
                                         showMenu = false
@@ -292,15 +316,45 @@ internal fun EditListScreen(
                     }
                 }.onLoading {
                     items(10) {
-                        AccountItem(userState = UiState.Loading(), onClick = {}, toLogin = { })
+                        AccountItem(
+                            userState = UiState.Loading(),
+                            onClick = {},
+                            toLogin = { },
+                            modifier =
+                                Modifier
+                                    .listCard(
+                                        index = it + 1,
+                                        totalCount = 11,
+                                    ),
+                        )
                     }
                 }.onEmpty {
                     item {
-                        Text(text = stringResource(id = R.string.list_edit_no_members))
+                        ListItem(
+                            headlineContent = {
+                                Text(text = stringResource(id = R.string.list_edit_no_members))
+                            },
+                            modifier =
+                                Modifier
+                                    .listCard(
+                                        index = 1,
+                                        totalCount = 2,
+                                    ),
+                        )
                     }
                 }.onError {
                     item {
-                        Text(text = stringResource(id = R.string.list_edit_members_error))
+                        ListItem(
+                            headlineContent = {
+                                Text(text = stringResource(id = R.string.list_edit_members_error))
+                            },
+                            modifier =
+                                Modifier
+                                    .listCard(
+                                        index = 1,
+                                        totalCount = 2,
+                                    ),
+                        )
                     }
                 }
         }

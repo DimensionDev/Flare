@@ -83,9 +83,9 @@ internal abstract class BaseTimelineRemoteMediator(
     )
 }
 
-internal abstract class BaseTimelinePagingSource<T : Any> :
-    BasePagingSource<T, UiTimeline>(),
-    BaseTimelineLoader
+internal fun interface BaseTimelinePagingSourceFactory<T : Any> : BaseTimelineLoader {
+    abstract fun create(): BasePagingSource<T, UiTimeline>
+}
 
 internal abstract class BasePagingSource<Key : Any, Value : Any> : PagingSource<Key, Value>() {
     override suspend fun load(params: LoadParams<Key>): LoadResult<Key, Value> =

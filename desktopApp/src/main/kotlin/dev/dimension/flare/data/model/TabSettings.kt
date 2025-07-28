@@ -35,6 +35,7 @@ import dev.dimension.flare.mastodon_tab_local_title
 import dev.dimension.flare.mastodon_tab_public_title
 import dev.dimension.flare.rss_title
 import dev.dimension.flare.settings_title
+import dev.dimension.flare.social_title
 import dev.dimension.flare.ui.icons.Misskey
 import org.jetbrains.compose.resources.StringResource
 
@@ -55,6 +56,7 @@ internal val TitleType.Localized.res: StringResource
             TitleType.Localized.LocalizedKey.Feeds -> Res.string.home_tab_feeds_title
             TitleType.Localized.LocalizedKey.DirectMessage -> Res.string.dm_list_title
             TitleType.Localized.LocalizedKey.Rss -> Res.string.rss_title
+            TitleType.Localized.LocalizedKey.Social -> Res.string.social_title
         }
 
 internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =

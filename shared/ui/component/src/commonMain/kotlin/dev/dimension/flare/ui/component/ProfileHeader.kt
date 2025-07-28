@@ -220,55 +220,47 @@ private fun ProfileHeaderSuccess(
             }
         },
         content = {
-            Column(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = screenHorizontalPadding),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                user.description?.let {
-                    RichText(
-                        text = it,
-                    )
-                }
-                when (val content = user.bottomContent) {
-                    is UiProfile.BottomContent.Fields ->
-                        UserFields(
-                            fields = content.fields,
-                        )
-
-                    is UiProfile.BottomContent.Iconify -> {
-                        content.items.forEach { (key, value) ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            ) {
-                                val icon =
-                                    when (key) {
-                                        UiProfile.BottomContent.Iconify.Icon.Location -> FontAwesomeIcons.Solid.LocationDot
-                                        UiProfile.BottomContent.Iconify.Icon.Url -> FontAwesomeIcons.Solid.Globe
-                                        UiProfile.BottomContent.Iconify.Icon.Verify -> FontAwesomeIcons.Solid.CircleCheck
-                                    }
-                                FAIcon(icon, contentDescription = null)
-                                RichText(text = value)
-                            }
-                        }
-                    }
-
-                    null -> Unit
-                }
-                MatricesDisplay(
-                    data = user.matrices,
-                    expanded = expandMatrices,
-                    onClicked = {
-                        when (it) {
-                            1 -> onFollowListClick.invoke(user.key)
-                            2 -> onFansListClick.invoke(user.key)
-                        }
-                    },
+            user.description?.let {
+                RichText(
+                    text = it,
                 )
             }
+            when (val content = user.bottomContent) {
+                is UiProfile.BottomContent.Fields ->
+                    UserFields(
+                        fields = content.fields,
+                    )
+
+                is UiProfile.BottomContent.Iconify -> {
+                    content.items.forEach { (key, value) ->
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            val icon =
+                                when (key) {
+                                    UiProfile.BottomContent.Iconify.Icon.Location -> FontAwesomeIcons.Solid.LocationDot
+                                    UiProfile.BottomContent.Iconify.Icon.Url -> FontAwesomeIcons.Solid.Globe
+                                    UiProfile.BottomContent.Iconify.Icon.Verify -> FontAwesomeIcons.Solid.CircleCheck
+                                }
+                            FAIcon(icon, contentDescription = null)
+                            RichText(text = value)
+                        }
+                    }
+                }
+
+                null -> Unit
+            }
+            MatricesDisplay(
+                data = user.matrices,
+                expanded = expandMatrices,
+                onClicked = {
+                    when (it) {
+                        1 -> onFollowListClick.invoke(user.key)
+                        2 -> onFansListClick.invoke(user.key)
+                    }
+                },
+            )
         },
     )
 }

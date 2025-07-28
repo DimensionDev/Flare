@@ -47,6 +47,7 @@ internal fun EntryProviderBuilder<NavKey>.listEntryBuilder(
             deleteList = { item ->
                 navigate(Route.Lists.Delete(args.accountType, item.id, item.title))
             },
+            onBack = onBack,
         )
     }
 
@@ -66,11 +67,7 @@ internal fun EntryProviderBuilder<NavKey>.listEntryBuilder(
                     ),
                 )
             },
-            toCompose = {
-                navigate(Route.Compose.New(args.accountType))
-            },
-            toQuickMenu = { /* No-op for lists */ },
-            toLogin = { /* No-op for lists */ },
+            onBack = onBack,
         )
     }
 

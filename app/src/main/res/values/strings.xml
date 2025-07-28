@@ -296,6 +296,10 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">No rss sources</string>
+    <string name="rss_sources_rss_hub_host_label">RssHub Host</string>
+    <string name="rss_sources_rss_hub_host_hint">You need to set the RssHub host if you want to use RssHub, or select the public RssHub server</string>
+    <string name="rss_sources_discovered_rss_sources">Discovered Rss Sources</string>
+    <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
 
     <string name="rss_detail_open_in_browser">Open in browser</string>
     <string name="rss_detail_share">Share</string>
@@ -323,13 +327,16 @@
     <string name="home_tab_mixed_timeline_title">Mixed</string>
     <string name="tab_settings_mixed_timeline">Add mixed timeline tab</string>
     <string name="tab_settings_mixed_timeline_desc">Mixed timeline will mix all tabs timeline result in one tab</string>
+    <string name="home_tab_social_timeline_title">Social</string>
 
     <string name="changelog_current">
         <![CDATA[
             <span>Version %1$s:</span>
             <ul>
-                <li>Added Mixed timeline support to the Home tab</li>
-                <li>Started making UI/UX adjustments, with more improvements coming soon</li>
+                <li>Added support for Misskey\'s Social timeline</li>
+                <li>Added RSSHub support</li>
+                <li>Added support for detecting possible RSS feeds from websites</li>
+                <li>More UI/UX improvements — we\'re still on the path of continuous refinement</li>
                 <li>Bug fixes and performance improvements</li>
             </ul>
         ]]>

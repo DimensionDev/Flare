@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.presenter.home
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,17 +50,22 @@ public class SearchPresenter(
                 }.toPagingState()
 
         val status =
-            remember(query) {
+            remember {
                 SearchStatusTimelinePresenter(
                     accountType = accountType,
                     initialQuery = query,
                 )
-            }.body().listState
+            }
+        val stateState = status.body().listState
+        LaunchedEffect(query) {
+            status.setQuery(query)
+        }
+
         val isSearching = query.isNotEmpty()
 
         return object : SearchState {
             override val users = user
-            override val status = status
+            override val status = stateState
             override val searching = isSearching
 
             override fun search(new: String) {

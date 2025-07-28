@@ -265,11 +265,4 @@
     <string name="home_tab_mixed_timeline_title">Hỗn hợp</string>
     <string name="tab_settings_mixed_timeline">Thêm tab dòng thời gian hỗn hợp</string>
     <string name="tab_settings_mixed_timeline_desc">Dòng thời gian hỗn hợp sẽ kết hợp tất cả kết quả dòng thời gian của các tab thành một tab</string>
-    <string name="changelog_current"><![CDATA[            <span>Phiên bản %1$s:</span>
-            <ul>
-                <li>Thêm hỗ trợ dòng thời gian hỗn hợp cho tab Trang chủ</li>
-                <li>Bắt đầu thực hiện điều chỉnh UI/UX, với nhiều cải tiến hơn nữa sẽ đến sớm</li>
-                <li>Sửa lỗi và cải tiến hiệu suất</li>
-            </ul>
-        ]]></string>
 </resources>

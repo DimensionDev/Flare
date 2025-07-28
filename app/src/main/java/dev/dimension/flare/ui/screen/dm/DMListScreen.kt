@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -38,16 +38,17 @@ import compose.icons.fontawesomeicons.solid.Message
 import dev.dimension.flare.R
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.common.items
+import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.AvatarComponentDefaults
+import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.ItemPlaceHolder
 import dev.dimension.flare.ui.component.RefreshContainer
 import dev.dimension.flare.ui.component.RichText
-import dev.dimension.flare.ui.component.status.ListComponent
+import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.localizedShortTime
 import dev.dimension.flare.ui.presenter.dm.DMListPresenter
 import dev.dimension.flare.ui.presenter.dm.DMListState
@@ -84,20 +85,24 @@ internal fun DMConversationDetailPlaceholder(modifier: Modifier = Modifier) {
 @Composable
 internal fun DMListScreen(
     accountType: AccountType,
+    onBack: () -> Unit,
     onItemClicked: (MicroBlogKey) -> Unit,
 ) {
     val state by producePresenter("dm_list_$accountType") {
         presenter(accountType)
     }
-    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     FlareScaffold(
         modifier = Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
         topBar = {
-            FlareTopAppBar(
+            FlareLargeFlexibleTopAppBar(
                 title = {
                     Text(text = stringResource(id = R.string.dm_list_title))
                 },
                 scrollBehavior = topAppBarScrollBehavior,
+                navigationIcon = {
+                    BackButton(onBack)
+                },
             )
         },
     ) { contentPadding ->
@@ -111,8 +116,12 @@ internal fun DMListScreen(
             content = {
                 LazyColumn(
                     contentPadding = contentPadding,
+                    modifier =
+                        Modifier
+                            .padding(horizontal = screenHorizontalPadding),
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    items(
+                    itemsIndexed(
                         state.items,
                         emptyContent = {
                             Box(
@@ -136,20 +145,15 @@ internal fun DMListScreen(
                                 }
                             }
                         },
-                        loadingContent = {
-                            Column(
+                        loadingContent = { index, itemCount ->
+                            ItemPlaceHolder(
                                 modifier =
                                     Modifier
-                                        .fillMaxSize()
-                                        .padding(
-                                            horizontal = screenHorizontalPadding,
-                                            vertical = 8.dp,
+                                        .listCard(
+                                            index = index,
+                                            totalCount = itemCount,
                                         ),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                ItemPlaceHolder()
-                                HorizontalDivider()
-                            }
+                            )
                         },
                         errorContent = {
                             Box(
@@ -177,139 +181,132 @@ internal fun DMListScreen(
                                 }
                             }
                         },
-                        itemContent = { item ->
-                            Column(
-                                modifier =
-                                    Modifier
-                                        .clickable {
-                                            onItemClicked.invoke(item.key)
-                                        },
-                            ) {
-                                ListComponent(
-                                    headlineContent = {
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                            verticalAlignment = Alignment.CenterVertically,
-                                        ) {
-                                            if (item.hasUser) {
-                                                Row(
-                                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                                    verticalAlignment = Alignment.CenterVertically,
-                                                    modifier = Modifier.weight(1f),
-                                                ) {
-                                                    item.users.forEach { user ->
-                                                        RichText(
-                                                            text = user.name,
+                        itemContent = { index, itemCount, item ->
+                            ListItem(
+                                headlineContent = {
+                                    Row(
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        if (item.hasUser) {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                modifier = Modifier.weight(1f),
+                                            ) {
+                                                item.users.forEach { user ->
+                                                    RichText(
+                                                        text = user.name,
+                                                        maxLines = 1,
+                                                        overflow = TextOverflow.Ellipsis,
+                                                    )
+                                                    if (item.users.size == 1) {
+                                                        Text(
+                                                            text = user.handle,
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            modifier =
+                                                                Modifier
+                                                                    .alpha(MediumAlpha),
                                                             maxLines = 1,
                                                             overflow = TextOverflow.Ellipsis,
                                                         )
-                                                        if (item.users.size == 1) {
-                                                            Text(
-                                                                text = user.handle,
-                                                                style = MaterialTheme.typography.bodySmall,
-                                                                modifier =
-                                                                    Modifier
-                                                                        .alpha(MediumAlpha),
-                                                                maxLines = 1,
-                                                                overflow = TextOverflow.Ellipsis,
-                                                            )
-                                                        }
                                                     }
                                                 }
-                                            }
-                                            val lastMessage = item.lastMessage
-                                            if (lastMessage != null) {
-                                                Text(
-                                                    text = lastMessage.timestamp.shortTime.localizedShortTime,
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    modifier =
-                                                        Modifier
-                                                            .alpha(MediumAlpha),
-                                                    maxLines = 1,
-                                                    overflow = TextOverflow.Ellipsis,
-                                                )
                                             }
                                         }
-                                    },
-                                    leadingContent = {
-                                        if (!item.hasUser) {
-                                            FAIcon(
-                                                FontAwesomeIcons.Solid.CircleUser,
-                                                contentDescription = null,
+                                        val lastMessage = item.lastMessage
+                                        if (lastMessage != null) {
+                                            Text(
+                                                text = lastMessage.timestamp.shortTime.localizedShortTime,
+                                                style = MaterialTheme.typography.bodySmall,
                                                 modifier =
                                                     Modifier
-                                                        .size(AvatarComponentDefaults.size),
-                                                tint = MaterialTheme.colorScheme.primary,
+                                                        .alpha(MediumAlpha),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis,
                                             )
-                                        } else {
-                                            Box(
-                                                modifier =
-                                                    Modifier
-                                                        .size(AvatarComponentDefaults.size),
+                                        }
+                                    }
+                                },
+                                leadingContent = {
+                                    if (!item.hasUser) {
+                                        FAIcon(
+                                            FontAwesomeIcons.Solid.CircleUser,
+                                            contentDescription = null,
+                                            modifier =
+                                                Modifier
+                                                    .size(AvatarComponentDefaults.size),
+                                            tint = MaterialTheme.colorScheme.primary,
+                                        )
+                                    } else {
+                                        Box(
+                                            modifier =
+                                                Modifier
+                                                    .size(AvatarComponentDefaults.size),
+                                        ) {
+                                            repeat(
+                                                min(item.users.size, 2),
                                             ) {
-                                                repeat(
-                                                    min(item.users.size, 2),
-                                                ) {
-                                                    val avatar = item.users[it].avatar
-                                                    if (item.users.size == 1) {
-                                                        AvatarComponent(avatar)
-                                                    } else {
-                                                        Box(
-                                                            modifier =
-                                                                Modifier
-                                                                    .offset(
-                                                                        x = (it * 12).dp,
-                                                                        y = (it * 12).dp,
-                                                                    ),
-                                                        ) {
-                                                            AvatarComponent(
-                                                                avatar,
-                                                                size = AvatarComponentDefaults.compatSize,
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                                if (item.users.size > 1) {
-                                                    Text(
-                                                        item.users.size.toString(),
+                                                val avatar = item.users[it].avatar
+                                                if (item.users.size == 1) {
+                                                    AvatarComponent(avatar)
+                                                } else {
+                                                    Box(
                                                         modifier =
                                                             Modifier
-                                                                .align(Alignment.BottomEnd)
-                                                                .background(
-                                                                    MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
-                                                                    shape = MaterialTheme.shapes.small,
-                                                                ).padding(horizontal = 4.dp),
-                                                    )
+                                                                .offset(
+                                                                    x = (it * 12).dp,
+                                                                    y = (it * 12).dp,
+                                                                ),
+                                                    ) {
+                                                        AvatarComponent(
+                                                            avatar,
+                                                            size = AvatarComponentDefaults.compatSize,
+                                                        )
+                                                    }
                                                 }
                                             }
-                                        }
-                                    },
-                                    supportingContent = {
-                                        Text(
-                                            text = item.lastMessageText,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis,
-                                        )
-                                    },
-                                    trailingContent = {
-                                        if (item.unreadCount > 0) {
-                                            Badge {
+                                            if (item.users.size > 1) {
                                                 Text(
-                                                    text = item.unreadCount.toString(),
+                                                    item.users.size.toString(),
+                                                    modifier =
+                                                        Modifier
+                                                            .align(Alignment.BottomEnd)
+                                                            .background(
+                                                                MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
+                                                                shape = MaterialTheme.shapes.small,
+                                                            ).padding(horizontal = 4.dp),
                                                 )
                                             }
                                         }
-                                    },
-                                    modifier =
-                                        Modifier
-                                            .padding(
-                                                horizontal = screenHorizontalPadding,
-                                                vertical = 8.dp,
-                                            ),
-                                )
-                                HorizontalDivider()
-                            }
+                                    }
+                                },
+                                supportingContent = {
+                                    Text(
+                                        text = item.lastMessageText,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                },
+                                trailingContent = {
+                                    if (item.unreadCount > 0) {
+                                        Badge {
+                                            Text(
+                                                text = item.unreadCount.toString(),
+                                            )
+                                        }
+                                    }
+                                },
+                                modifier =
+                                    Modifier
+                                        .listCard(
+                                            index = index,
+                                            totalCount = itemCount,
+                                        ).clickable {
+                                            onItemClicked.invoke(item.key)
+                                        },
+                            )
                         },
                     )
                 }

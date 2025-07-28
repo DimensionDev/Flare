@@ -4,13 +4,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonGroup
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -46,13 +51,16 @@ import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.ui.common.items
+import dev.dimension.flare.ui.common.itemsIndexed
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.component.TabRowIndicator
+import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.rss.RssSourcesPresenter
@@ -60,6 +68,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.PinnableTimelineTabPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.theme.MediumAlpha
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
@@ -78,23 +87,26 @@ internal fun TabAddBottomSheet(
         onDismissRequest = onDismissRequest,
     ) {
         @Composable
-        fun TabItem(tabItem: TabItem) {
+        fun TabItem(
+            tabItem: TabItem,
+            modifier: Modifier = Modifier,
+        ) {
             ListTabItem(
                 data = tabItem,
                 isAdded = tabs.any { tab -> tabItem.key == tab.key },
                 modifier =
-                    Modifier.clickable {
+                    modifier.clickable {
                         if (tabs.any { tab -> tabItem.key == tab.key }) {
                             onDeleteTab(tabItem.key)
                         } else {
                             onAddTab(tabItem)
                         }
-                        onDismissRequest()
                     },
             )
         }
         Column(
             modifier = Modifier.fillMaxHeight(),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             allTabs.accountTabs.onSuccess { tabs ->
                 val pagerState =
@@ -105,7 +117,12 @@ internal fun TabAddBottomSheet(
                 SecondaryScrollableTabRow(
                     selectedTabIndex = pagerState.currentPage,
                     containerColor = Color.Transparent,
-                    contentColor = MaterialTheme.colorScheme.onBackground,
+                    indicator = {
+                        TabRowIndicator(
+                            selectedIndex = pagerState.currentPage,
+                        )
+                    },
+                    divider = {},
                 ) {
                     Tab(
                         selected = pagerState.currentPage == 0,
@@ -117,6 +134,7 @@ internal fun TabAddBottomSheet(
                         text = {
                             Text(text = stringResource(id = R.string.tab_settings_default))
                         },
+                        modifier = Modifier.clip(CircleShape),
                     )
                     Tab(
                         selected = pagerState.currentPage == 1,
@@ -128,9 +146,11 @@ internal fun TabAddBottomSheet(
                         text = {
                             Text(text = stringResource(id = R.string.rss_title))
                         },
+                        modifier = Modifier.clip(CircleShape),
                     )
                     tabs.forEachIndexed { index, tabState ->
                         LeadingIconTab(
+                            modifier = Modifier.clip(CircleShape),
                             selected = pagerState.currentPage == index + 2,
                             onClick = {
                                 scope.launch {
@@ -177,14 +197,28 @@ internal fun TabAddBottomSheet(
                     verticalAlignment = Alignment.Top,
                 ) {
                     if (it == 0) {
-                        LazyColumn {
-                            items(allTabs.defaultTabs) {
-                                TabItem(it)
+                        LazyColumn(
+                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                        ) {
+                            itemsIndexed(allTabs.defaultTabs) { index, it ->
+                                TabItem(
+                                    it,
+                                    modifier =
+                                        Modifier
+                                            .listCard(
+                                                index = index,
+                                                totalCount = allTabs.defaultTabs.size,
+                                            ),
+                                )
                             }
                         }
                     } else if (it == 1) {
-                        LazyColumn {
-                            items(
+                        LazyColumn(
+                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                        ) {
+                            itemsIndexed(
                                 allTabs.rssTabs,
                                 emptyContent = {
                                     Box(
@@ -202,14 +236,23 @@ internal fun TabAddBottomSheet(
                                         }
                                     }
                                 },
-                            ) {
+                            ) { index, itemCount, it ->
                                 TabItem(
                                     remember(it) {
                                         RssTimelineTabItem(it)
                                     },
+                                    modifier =
+                                        Modifier
+                                            .listCard(
+                                                index = index,
+                                                totalCount = itemCount,
+                                            ),
                                 )
                             }
                             if (!allTabs.rssTabs.isEmpty) {
+                                item {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                }
                                 item {
                                     Box(
                                         contentAlignment = Alignment.Center,
@@ -271,19 +314,41 @@ internal fun TabAddBottomSheet(
                                 }
                                 when (selectedIndex) {
                                     0 -> {
-                                        LazyColumn {
-                                            items(tab.tabs) {
-                                                TabItem(it)
+                                        LazyColumn(
+                                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                                        ) {
+                                            itemsIndexed(tab.tabs) { index, it ->
+                                                TabItem(
+                                                    it,
+                                                    modifier =
+                                                        Modifier
+                                                            .listCard(
+                                                                index = index,
+                                                                totalCount = tab.tabs.size,
+                                                            ),
+                                                )
                                             }
                                         }
                                     }
 
                                     else -> {
-                                        LazyColumn {
+                                        LazyColumn(
+                                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
+                                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                                        ) {
                                             val data = tab.extraTabs.elementAtOrNull(selectedIndex - 1)?.data
                                             if (data != null) {
-                                                items(data) { item ->
-                                                    TabItem(remember(item) { item.toTabItem(accountKey = tab.profile.key) })
+                                                itemsIndexed(data) { index, totalCount, item ->
+                                                    TabItem(
+                                                        remember(item) { item.toTabItem(accountKey = tab.profile.key) },
+                                                        modifier =
+                                                            Modifier
+                                                                .listCard(
+                                                                    index = index,
+                                                                    totalCount = totalCount,
+                                                                ),
+                                                    )
                                                 }
                                             }
                                         }
@@ -313,7 +378,9 @@ internal fun allTabsPresenter(filterIsTimeline: Boolean = false): AllTabsState =
             accountState.accounts.map {
                 it
                     .toImmutableList()
-                    .map { (_, userState) ->
+                    .filter {
+                        it.second.isSuccess
+                    }.map { (_, userState) ->
                         userState.flatMap { user ->
                             val tabs =
                                 remember(user.key) {

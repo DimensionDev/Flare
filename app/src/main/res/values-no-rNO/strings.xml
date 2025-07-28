@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">RSS</string>
     <string name="empty_rss_sources">Ingen rss kilder</string>
+    <string name="rss_sources_rss_hub_host_label">RssHUB-vert</string>
+    <string name="rss_sources_rss_hub_host_hint">Du må angi RssHUB-vert hvis du vil bruke RsssHub, eller velge den offentlige RssHUB-serveren</string>
+    <string name="rss_sources_discovered_rss_sources">Oppdaget Rss kilder</string>
+    <string name="rss_sources_pinned_in_tabs">Fest til hovedsidemerkene</string>
     <string name="rss_detail_open_in_browser">Åpne i nettleser</string>
     <string name="rss_detail_share">Del</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -265,10 +269,13 @@
     <string name="home_tab_mixed_timeline_title">Blandet</string>
     <string name="tab_settings_mixed_timeline">Legg til blandet tidslinje fane</string>
     <string name="tab_settings_mixed_timeline_desc">Blandet tidslinje vil blande alle faners tidslinjen resulterer i en fane</string>
+    <string name="home_tab_social_timeline_title">Sosial</string>
     <string name="changelog_current"><![CDATA[            <span>Versjon %1$s:</span>
             <ul>
-                <li>Lagt til støtte for blandet tidslinje hjemme fanen</li>
-                <li>begynte å gjøre I/UX-justeringer, med flere forbedringer kommer snart</li>
+                <li>La til støtte for Misskey\'s sosiale tid på</li>
+                <li>Lagt til RSSHub støtte</li>
+                <li>Lagt til støtte for å oppdage mulige RSS-strømmer på nettsidene</li>
+                <li>Flere UI/UX forbedringer — vi jobber fortsatt på veien for kontinuerlig raffinering</li>
                 <li>Bug fikser og ytelsesforbedringer</li>
             </ul>
         ]]></string>

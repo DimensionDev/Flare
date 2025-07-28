@@ -72,7 +72,7 @@ internal data class UserLegacy(
     @SerialName(value = "can_media_tag")
     val canMediaTag: kotlin.Boolean = false,
     @SerialName(value = "created_at")
-    val createdAt: kotlin.String,
+    val createdAt: kotlin.String? = null,
     @SerialName(value = "default_profile")
     val defaultProfile: kotlin.Boolean = false,
     @SerialName(value = "default_profile_image")
@@ -102,7 +102,7 @@ internal data class UserLegacy(
     @SerialName(value = "muting")
     val muting: kotlin.Boolean = false,
     @SerialName(value = "name")
-    val name: kotlin.String,
+    val name: kotlin.String? = null,
     @SerialName(value = "normal_followers_count")
     val normalFollowersCount: kotlin.Int = 0,
     @SerialName(value = "pinned_tweet_ids_str")
@@ -110,17 +110,17 @@ internal data class UserLegacy(
     @SerialName(value = "possibly_sensitive")
     val possiblySensitive: kotlin.Boolean = false,
     @SerialName(value = "profile_image_url_https")
-    val profileImageUrlHttps: String,
+    val profileImageUrlHttps: String? = null,
     @SerialName(value = "profile_interstitial_type")
     val profileInterstitialType: kotlin.String? = null,
     @SerialName(value = "screen_name")
-    val screenName: kotlin.String,
+    val screenName: kotlin.String? = null,
     @SerialName(value = "statuses_count")
     val statusesCount: kotlin.Int = 0,
     @SerialName(value = "translator_type")
-    val translatorType: kotlin.String,
+    val translatorType: kotlin.String? = null,
     @SerialName(value = "verified")
-    val verified: kotlin.Boolean,
+    val verified: kotlin.Boolean = false,
     @SerialName(value = "want_retweets")
     val wantRetweets: kotlin.Boolean = false,
     @SerialName(value = "follow_request_sent")

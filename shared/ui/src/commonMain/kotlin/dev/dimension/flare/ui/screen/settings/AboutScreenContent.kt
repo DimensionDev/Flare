@@ -2,7 +2,10 @@ package dev.dimension.flare.ui.screen.settings
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -14,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -49,6 +53,7 @@ public fun AboutScreenContent(
     Column(
         modifier =
             Modifier
+                .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
                 .then(modifier),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -75,110 +80,133 @@ public fun AboutScreenContent(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        ListItem(
-            headlineContent = {
-                Text(text = stringResource(resource = Res.string.settings_about_source_code))
-            },
-            supportingContent = {
-                Text(
-                    text = "https://github.com/DimensionDev/Flare",
-                )
-            },
+        Spacer(Modifier.height(16.dp))
+        Column(
             modifier =
-                Modifier.clickable {
-                    uriHandler.openUri("https://github.com/DimensionDev/Flare")
+                Modifier
+                    .clip(MaterialTheme.shapes.medium),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(resource = Res.string.settings_about_source_code))
                 },
-            leadingContent = {
-                Icon(
-                    imageVector = FontAwesomeIcons.Brands.Github,
-                    contentDescription = "GitHub",
-                    modifier = Modifier.size(24.dp),
-                )
-            },
-        )
-        ListItem(
-            headlineContent = {
-                Text(text = stringResource(resource = Res.string.settings_about_telegram))
-            },
-            supportingContent = {
-                Text(
-                    text = stringResource(resource = Res.string.settings_about_telegram_description),
-                )
-            },
-            modifier =
-                Modifier.clickable {
-                    uriHandler.openUri("https://t.me/+0UtcP6_qcDoyOWE1")
+                supportingContent = {
+                    Text(
+                        text = "https://github.com/DimensionDev/Flare",
+                    )
                 },
-            leadingContent = {
-                Icon(
-                    imageVector = FontAwesomeIcons.Brands.Telegram,
-                    contentDescription = stringResource(resource = Res.string.settings_about_telegram),
-                    modifier = Modifier.size(24.dp),
-                )
-            },
-        )
-        ListItem(
-            headlineContent = {
-                Text(text = stringResource(resource = Res.string.settings_about_line))
-            },
-            supportingContent = {
-                Text(
-                    text = stringResource(resource = Res.string.settings_about_line_description),
-                )
-            },
-            modifier =
-                Modifier.clickable {
-                    uriHandler.openUri("https://line.me/ti/g/hf95HyGJ9k")
+                modifier =
+                    Modifier
+                        .clickable {
+                            uriHandler.openUri("https://github.com/DimensionDev/Flare")
+                        }.clip(
+                            MaterialTheme.shapes.extraSmall,
+                        ),
+                leadingContent = {
+                    Icon(
+                        imageVector = FontAwesomeIcons.Brands.Github,
+                        contentDescription = "GitHub",
+                        modifier = Modifier.size(24.dp),
+                    )
                 },
-            leadingContent = {
-                Icon(
-                    imageVector = FontAwesomeIcons.Brands.Line,
-                    contentDescription = stringResource(resource = Res.string.settings_about_telegram),
-                    modifier = Modifier.size(24.dp),
-                )
-            },
-        )
-        ListItem(
-            headlineContent = {
-                Text(text = stringResource(resource = Res.string.settings_about_localization))
-            },
-            supportingContent = {
-                Text(
-                    text = stringResource(resource = Res.string.settings_about_localization_description),
-                )
-            },
-            modifier =
-                Modifier.clickable {
-                    uriHandler.openUri("https://crowdin.com/project/flareapp")
+            )
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(resource = Res.string.settings_about_telegram))
                 },
-            leadingContent = {
-                Icon(
-                    imageVector = FontAwesomeIcons.Solid.Language,
-                    contentDescription = stringResource(resource = Res.string.settings_about_localization),
-                    modifier = Modifier.size(24.dp),
-                )
-            },
-        )
-        ListItem(
-            headlineContent = {
-                Text(text = stringResource(resource = Res.string.settings_privacy_policy))
-            },
-            supportingContent = {
-                Text(
-                    text = "https://legal.mask.io/maskbook",
-                )
-            },
-            modifier =
-                Modifier.clickable {
-                    uriHandler.openUri("https://legal.mask.io/maskbook/")
+                supportingContent = {
+                    Text(
+                        text = stringResource(resource = Res.string.settings_about_telegram_description),
+                    )
                 },
-            leadingContent = {
-                Icon(
-                    imageVector = FontAwesomeIcons.Solid.Lock,
-                    contentDescription = stringResource(resource = Res.string.settings_privacy_policy),
-                    modifier = Modifier.size(24.dp),
-                )
-            },
-        )
+                modifier =
+                    Modifier
+                        .clickable {
+                            uriHandler.openUri("https://t.me/+0UtcP6_qcDoyOWE1")
+                        }.clip(
+                            MaterialTheme.shapes.extraSmall,
+                        ),
+                leadingContent = {
+                    Icon(
+                        imageVector = FontAwesomeIcons.Brands.Telegram,
+                        contentDescription = stringResource(resource = Res.string.settings_about_telegram),
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+            )
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(resource = Res.string.settings_about_line))
+                },
+                supportingContent = {
+                    Text(
+                        text = stringResource(resource = Res.string.settings_about_line_description),
+                    )
+                },
+                modifier =
+                    Modifier
+                        .clickable {
+                            uriHandler.openUri("https://line.me/ti/g/hf95HyGJ9k")
+                        }.clip(
+                            MaterialTheme.shapes.extraSmall,
+                        ),
+                leadingContent = {
+                    Icon(
+                        imageVector = FontAwesomeIcons.Brands.Line,
+                        contentDescription = stringResource(resource = Res.string.settings_about_telegram),
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+            )
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(resource = Res.string.settings_about_localization))
+                },
+                supportingContent = {
+                    Text(
+                        text = stringResource(resource = Res.string.settings_about_localization_description),
+                    )
+                },
+                modifier =
+                    Modifier
+                        .clickable {
+                            uriHandler.openUri("https://crowdin.com/project/flareapp")
+                        }.clip(
+                            MaterialTheme.shapes.extraSmall,
+                        ),
+                leadingContent = {
+                    Icon(
+                        imageVector = FontAwesomeIcons.Solid.Language,
+                        contentDescription = stringResource(resource = Res.string.settings_about_localization),
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+            )
+            ListItem(
+                headlineContent = {
+                    Text(text = stringResource(resource = Res.string.settings_privacy_policy))
+                },
+                supportingContent = {
+                    Text(
+                        text = "https://legal.mask.io/maskbook",
+                    )
+                },
+                modifier =
+                    Modifier
+                        .clickable {
+                            uriHandler.openUri("https://legal.mask.io/maskbook/")
+                        }.clip(
+                            MaterialTheme.shapes.extraSmall,
+                        ),
+                leadingContent = {
+                    Icon(
+                        imageVector = FontAwesomeIcons.Solid.Lock,
+                        contentDescription = stringResource(resource = Res.string.settings_privacy_policy),
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+            )
+        }
     }
 }

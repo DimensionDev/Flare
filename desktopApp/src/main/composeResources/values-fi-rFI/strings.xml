@@ -100,4 +100,5 @@
     <string name="feeds_discover_feeds_created_by">Luotu %1$s</string>
     <string name="feeds_unsubscribe">Peruuta Tilaus</string>
     <string name="feeds_subscribe">Tilaa</string>
+    <string name="social_title">Sosiaalinen</string>
 </resources>

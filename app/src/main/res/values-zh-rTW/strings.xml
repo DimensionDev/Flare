@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">網址</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">沒有Rss來源</string>
+    <string name="rss_sources_rss_hub_host_label">RssHub 主機</string>
+    <string name="rss_sources_rss_hub_host_hint">如果要使用 RssHub，您需要設定 RssHub 主機，或選擇公共 RssHub 伺服器</string>
+    <string name="rss_sources_discovered_rss_sources">發現的 Rss 來源</string>
+    <string name="rss_sources_pinned_in_tabs">釘選到首頁標籤</string>
     <string name="rss_detail_open_in_browser">在瀏覽器中打開</string>
     <string name="rss_detail_share">分享</string>
     <string name="rss_detail_tldr">總結</string>
@@ -265,11 +269,14 @@
     <string name="home_tab_mixed_timeline_title">綜合</string>
     <string name="tab_settings_mixed_timeline">添加綜合時間線標籤</string>
     <string name="tab_settings_mixed_timeline_desc">綜合時間線將所有標籤的時間線結果混合成一個標籤</string>
+    <string name="home_tab_social_timeline_title">社會</string>
     <string name="changelog_current"><![CDATA[            <span>版本 %1$s：</span>
             <ul>
-                <li>新增混合時間線功能到首頁</li>
-                <li>開始進行UI/UX調整，更多改進將即將到來</li>
-                <li>修復錯誤和性能改進</li>
+                <li>新增對 Misskey\'s Social Timeline 的支援</li>
+                <li>新增 RSSHub 支援</li>
+                <li>新增偵測網站 RSS feed 的支援</li>
+                <li>更多 UI/UX 的改進 - 我們仍在不斷改進的路上</li>
+                <li>錯誤修正與效能提升</li>
             </ul>
         ]]></string>
 </resources>

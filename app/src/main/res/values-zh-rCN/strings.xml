@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">网址</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">无 rss 源</string>
+    <string name="rss_sources_rss_hub_host_label">RssHub 主机</string>
+    <string name="rss_sources_rss_hub_host_hint">如果你想要使用 RssHub ，你需要设置RssHub 主机或选择公共RssHub 服务器</string>
+    <string name="rss_sources_discovered_rss_sources">发现的 Rss 源</string>
+    <string name="rss_sources_pinned_in_tabs">固定到主标签页</string>
     <string name="rss_detail_open_in_browser">在浏览器中打开</string>
     <string name="rss_detail_share">分享</string>
     <string name="rss_detail_tldr">总结摘要</string>
@@ -265,11 +269,14 @@
     <string name="home_tab_mixed_timeline_title">混合</string>
     <string name="tab_settings_mixed_timeline">添加混合时间线标签</string>
     <string name="tab_settings_mixed_timeline_desc">混合时间线将混合所有标签页的时间线结果</string>
-    <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
+    <string name="home_tab_social_timeline_title">社交活动</string>
+    <string name="changelog_current"><![CDATA[            <span> %1$s版本:</span>
             <ul>
-                <li>为首页标签添加混合时间线支持</li>
-                <li>开始进行UI/UX调整，更多改进即将到来</li>
-                <li>修复错误并提高性能</li>
+                <li>添加支持Misskey的社交时间线</li>
+                <li>添加RSSHub支持</li>
+                <li>添加支持从网站中检测可能的RSS源</li>
+                <li>更多的UI/UX改进，我们仍在继续改进的路上</li>
+                <li>Bug 修复和性能改进</li>
             </ul>
         ]]></string>
 </resources>

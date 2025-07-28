@@ -8,14 +8,13 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadState
 import androidx.paging.LoadStates
 import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.filter
 import androidx.paging.map
 import dev.dimension.flare.common.BaseTimelineLoader
-import dev.dimension.flare.common.BaseTimelinePagingSource
+import dev.dimension.flare.common.BaseTimelinePagingSourceFactory
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.onEmpty
@@ -24,6 +23,7 @@ import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.common.toPagingState
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.datasource.microblog.contains
+import dev.dimension.flare.data.datasource.microblog.pagingConfig
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.LocalFilterRepository
 import dev.dimension.flare.model.AccountType
@@ -64,7 +64,7 @@ public abstract class TimelinePresenter :
                 emit(BaseTimelineLoader.NotSupported)
             }.flatMapLatest {
                 when (it) {
-                    is BaseTimelinePagingSource<*> ->
+                    is BaseTimelinePagingSourceFactory<*> ->
                         networkPager(
                             pagingSource = it,
                             scope = scope,
@@ -107,7 +107,7 @@ public abstract class TimelinePresenter :
     ): Flow<PagingData<UiTimeline>> {
         val pagerFlow =
             Pager(
-                config = PagingConfig(pageSize = pageSize),
+                config = pagingConfig,
                 remoteMediator = mediator,
                 pagingSourceFactory = {
                     database.pagingTimelineDao().getPagingSource(
@@ -138,14 +138,14 @@ public abstract class TimelinePresenter :
     }
 
     private fun networkPager(
-        pagingSource: BaseTimelinePagingSource<*>,
+        pagingSource: BaseTimelinePagingSourceFactory<*>,
         scope: CoroutineScope,
         pageSize: Int = 20,
     ): Flow<PagingData<UiTimeline>> =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
             pagingSourceFactory = {
-                pagingSource
+                pagingSource.create()
             },
         ).flow.cachedIn(scope)
 

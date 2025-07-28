@@ -30,6 +30,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
+internal expect val pagingConfig: PagingConfig
+
 @OptIn(ExperimentalPagingApi::class)
 internal fun timelinePager(
     pageSize: Int,
@@ -41,7 +43,7 @@ internal fun timelinePager(
 ): Flow<PagingData<UiTimeline>> {
     val pagerFlow =
         Pager(
-            config = PagingConfig(pageSize = pageSize),
+            config = pagingConfig,
             remoteMediator = mediator,
             pagingSourceFactory = {
                 database.pagingTimelineDao().getPagingSource(
@@ -189,7 +191,7 @@ internal fun <T : Any> memoryPager(
     mediator: BaseRemoteMediator<Int, T>,
 ): Flow<PagingData<T>> =
     Pager(
-        config = PagingConfig(pageSize = pageSize),
+        config = pagingConfig,
         remoteMediator = mediator,
         pagingSourceFactory = {
             MemoryPagingSource(

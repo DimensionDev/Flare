@@ -24,7 +24,8 @@ internal fun EntryProviderBuilder<NavKey>.blueskyEntryBuilder(
             accountType = args.accountType,
             toFeed = { uiList ->
                 navigate(Route.Bluesky.FeedDetail(args.accountType, uiList.id))
-            }
+            },
+            onBack = onBack,
         )
     }
 

@@ -2,14 +2,19 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -21,8 +26,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
@@ -33,10 +40,10 @@ import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.collectAsUiState
-import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
@@ -45,6 +52,7 @@ import dev.dimension.flare.ui.screen.settings.EditTabDialog
 import dev.dimension.flare.ui.screen.settings.TabAddBottomSheet
 import dev.dimension.flare.ui.screen.settings.TabCustomItem
 import dev.dimension.flare.ui.screen.settings.allTabsPresenter
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.map
@@ -60,6 +68,7 @@ internal fun TabSettingScreen(
     onBack: () -> Unit,
     toAddRssSource: () -> Unit,
 ) {
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val haptics = LocalHapticFeedback.current
     val state by producePresenter {
         presenter(accountType = accountType)
@@ -85,7 +94,7 @@ internal fun TabSettingScreen(
     }
     FlareScaffold(
         topBar = {
-            FlareTopAppBar(
+            FlareLargeFlexibleTopAppBar(
                 title = {
                     Text(text = stringResource(R.string.tab_settings_title))
                 },
@@ -104,8 +113,12 @@ internal fun TabSettingScreen(
                         )
                     }
                 },
+                scrollBehavior = topAppBarScrollBehavior,
             )
         },
+        modifier =
+            Modifier
+                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) {
         val lazyListState = rememberLazyListState()
         val reorderableLazyColumnState =
@@ -116,6 +129,10 @@ internal fun TabSettingScreen(
         LazyColumn(
             state = lazyListState,
             contentPadding = it,
+            modifier =
+                Modifier
+                    .padding(horizontal = screenHorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             state.enableMixedTimeline.onSuccess { enabled ->
                 item("header") {
@@ -135,13 +152,17 @@ internal fun TabSettingScreen(
                             Text(stringResource(R.string.tab_settings_mixed_timeline_desc))
                         },
                         modifier =
-                            Modifier.clickable {
-                                state.setEnableMixedTimeline(!enabled)
-                            },
+                            Modifier
+                                .clickable {
+                                    state.setEnableMixedTimeline(!enabled)
+                                }.listCard(),
                     )
                 }
             }
-            items(state.currentTabs, key = { it.key }) { item ->
+            item {
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+            itemsIndexed(state.currentTabs, key = { _, item -> item.key }) { index, item ->
                 TabCustomItem(
                     item = item,
                     deleteTab = {
@@ -156,6 +177,12 @@ internal fun TabSettingScreen(
                     },
                     reorderableLazyColumnState = reorderableLazyColumnState,
                     canSwipeToDelete = state.canSwipeToDelete,
+                    modifier =
+                        Modifier
+                            .listCard(
+                                index = index,
+                                totalCount = state.currentTabs.size,
+                            ),
                 )
             }
         }
@@ -203,7 +230,7 @@ private fun presenter(
             mutableStateListOf<TimelineTabItem>()
         }
     val currentTabs =
-        accountState.user.flatMap { user ->
+        remember(tabSettings) {
             tabSettings.map {
                 it.mainTabs
                     .toImmutableList()

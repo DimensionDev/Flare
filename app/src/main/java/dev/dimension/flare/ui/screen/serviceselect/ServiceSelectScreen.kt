@@ -19,7 +19,6 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedSecureTextField
@@ -57,7 +56,6 @@ import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.component.NetworkImage
-import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.model.UiInstance
@@ -344,12 +342,11 @@ internal fun ServiceSelectScreen(
             item(
                 span = StaggeredGridItemSpan.FullLine,
             ) {
-                Column {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    if (!isBigScreen()) {
-                        HorizontalDivider()
-                    }
-                }
+                Spacer(
+                    modifier =
+                        Modifier
+                            .height(16.dp),
+                )
             }
 
             state.instances
@@ -358,31 +355,25 @@ internal fun ServiceSelectScreen(
                         count = itemCount,
                     ) {
                         val instance = get(it)
-                        Column {
-                            ServiceSelectItem(
-                                instance = instance,
-                                onClick = {
-                                    if (instance != null) {
-                                        state.selectInstance(instance)
-                                    }
-                                },
-                            )
-                            if (!isBigScreen()) {
-                                HorizontalDivider()
-                            }
-                        }
+                        ServiceSelectItem(
+                            instance = instance,
+                            index = it,
+                            totalCount = itemCount,
+                            onClick = {
+                                if (instance != null) {
+                                    state.selectInstance(instance)
+                                }
+                            },
+                        )
                     }
                 }.onLoading {
                     items(10) {
-                        Column {
-                            ServiceSelectItem(
-                                instance = null,
-                                onClick = {},
-                            )
-                            if (!isBigScreen()) {
-                                HorizontalDivider()
-                            }
-                        }
+                        ServiceSelectItem(
+                            index = it,
+                            totalCount = 10,
+                            instance = null,
+                            onClick = {},
+                        )
                     }
                 }.onEmpty {
                     items(1) {
@@ -400,9 +391,13 @@ internal fun ServiceSelectScreen(
 private fun ServiceSelectItem(
     instance: UiInstance?,
     onClick: () -> Unit,
+    index: Int,
+    totalCount: Int,
     modifier: Modifier = Modifier,
 ) {
     AdaptiveCard(
+        index = index,
+        totalCount = totalCount,
         modifier = modifier,
     ) {
         Column(

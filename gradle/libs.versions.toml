@@ -2,27 +2,28 @@
 clikt = "5.0.3"
 collection = "1.5.0"
 compileSdk = "36"
+haze = "1.6.9"
 lifecycleViewmodelCompose = "2.9.1"
-minSdk = "21"
+minSdk = "23"
 java = "21"
-agp = "8.11.0"
+agp = "8.11.1"
 kotlin = "2.2.0"
 core-ktx = "1.16.0"
 junit = "4.13.2"
 androidx-test-ext-junit = "1.2.1"
 espresso-core = "3.6.1"
-lifecycle-runtime-ktx = "2.9.1"
+lifecycle-runtime-ktx = "2.9.2"
 activity-compose = "1.10.1"
-compose-bom = "2025.06.01"
+compose-bom = "2025.07.00"
 ksp = "2.2.0-2.0.2"
 openaiClient = "4.0.1"
 paging = "3.3.6"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-collections-immutable = "0.4.0"
 kotlinx-serialization = "1.9.0"
-coil3 = "3.2.0"
+coil3 = "3.3.0"
 ktorfit = "2.6.1"
-ktor = "3.2.1"
+ktor = "3.2.2"
 reorderable = "2.5.1"
 stately = "2.1.0"
 twitter-parser = "0.5.5"
@@ -42,9 +43,9 @@ koin = "4.1.0"
 composeIcons = "1.3.0"
 media3 = "1.7.1"
 desugar_jdk_libs = "2.1.5"
-firebase-bom = "33.16.0"
+firebase-bom = "34.0.0"
 google-services = "4.4.3"
-firebase-crashlytics = "3.0.4"
+firebase-crashlytics = "3.0.5"
 materialKolor = "3.0.0"
 room = "2.7.2"
 sqlite = "2.5.2"
@@ -58,6 +59,8 @@ androidx-collection = { module = "androidx.collection:collection", version.ref =
 bluesky = { module = "sh.christian.ozone:bluesky", version.ref = "bluesky" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
+haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidx-test-ext-junit" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
@@ -78,7 +81,7 @@ ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
-material3 = { group = "androidx.compose.material3", name = "material3", version = "1.4.0-alpha17" }
+material3 = { group = "androidx.compose.material3", name = "material3", version = "1.4.0-alpha18" }
 material3WindowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
 material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
 material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive" }
@@ -169,11 +172,11 @@ compose-placeholder-foundation = { group = "io.github.fornewid", name = "placeho
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
 kermit = { group = "co.touchlab", name = "kermit", version = "2.0.6" }
-kotlin-codepoints-deluxe = { group = "de.cketti.unicode", name = "kotlin-codepoints-deluxe", version = "0.10.0" }
+kotlin-codepoints-deluxe = { group = "de.cketti.unicode", name = "kotlin-codepoints-deluxe", version = "0.11.0" }
 
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
-firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
-firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
+firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics" }
 
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.1.2" }
@@ -189,11 +192,11 @@ fluent-ui = { module = "com.konyaco:fluent", version = "0.1.0-SNAPSHOT" }
 
 window-styler = { module = "com.mayakapps.compose:window-styler", version = "0.3.3-SNAPSHOT" }
 
-commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.17.0" }
+commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.18.0" }
 
 jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version = "3.9.1" }
 
-jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.9.0-beta03" }
+jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.9.0-beta04" }
 krypto = { module = "com.soywiz:korlibs-crypto", version = "6.0.1" }
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }

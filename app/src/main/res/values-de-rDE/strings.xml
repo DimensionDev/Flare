@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">RS</string>
     <string name="empty_rss_sources">Keine rss Quellen</string>
+    <string name="rss_sources_rss_hub_host_label">RssHub Host</string>
+    <string name="rss_sources_rss_hub_host_hint">Sie müssen den RssHub Host setzen, wenn Sie RssHub verwenden möchten, oder den öffentlichen RssHub Server auswählen</string>
+    <string name="rss_sources_discovered_rss_sources">Entdeckte Rss Quellen</string>
+    <string name="rss_sources_pinned_in_tabs">An Home-Tabs anheften</string>
     <string name="rss_detail_open_in_browser">Im Browser öffnen</string>
     <string name="rss_detail_share">Teilen</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -265,11 +269,15 @@
     <string name="home_tab_mixed_timeline_title">Gemischt</string>
     <string name="tab_settings_mixed_timeline">Tab für gemischte Zeitleiste hinzufügen</string>
     <string name="tab_settings_mixed_timeline_desc">Gemischte Zeitleiste vermischt alle Tabs in einem Tab</string>
+    <string name="home_tab_social_timeline_title">Soziale</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Gemischte Timeline-Unterstützung auf den Home-Tab</li>
+                <li>Unterstützung für Misskey\'s Social Timeline</li>
                 
-                <li>Startete UI/UX-Anpassungen, mit weiteren Verbesserungen bald</li>
+                <li>RSSHub-Unterstützung</li>
+                
+                <li>Unterstützung für die Erkennung möglicher RSS-Feeds von Webseiten</li>
+                <li>Weitere UI/UX-Verbesserungen — wir befinden uns immer noch auf dem Pfad der kontinuierlichen Verfeinerung</li>
                 <li>Fehlerbehebungen und Leistungsverbesserungen</li>
             </ul>
         ]]></string>

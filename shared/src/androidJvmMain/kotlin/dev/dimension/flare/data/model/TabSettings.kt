@@ -75,6 +75,7 @@ public sealed interface TitleType {
             Rss,
             Antenna,
             MixedTimeline,
+            Social,
         }
     }
 }
@@ -84,6 +85,11 @@ public sealed interface IconType {
     @Serializable
     public data class Avatar(
         val userKey: MicroBlogKey,
+    ) : IconType
+
+    @Serializable
+    public data class Url(
+        val url: String,
     ) : IconType
 
     @Serializable
@@ -397,6 +403,14 @@ public sealed interface TimelineTabItem : TabItem {
                         TabMetaData(
                             title = TitleType.Localized(TitleType.Localized.LocalizedKey.List),
                             icon = IconType.Mixed(IconType.Material.MaterialIcon.List, accountKey),
+                        ),
+                ),
+                Misskey.HybridTimelineTabItem(
+                    account = AccountType.Specific(accountKey),
+                    metaData =
+                        TabMetaData(
+                            title = TitleType.Localized(TitleType.Localized.LocalizedKey.Social),
+                            icon = IconType.Mixed(IconType.Material.MaterialIcon.Featured, accountKey),
                         ),
                 ),
                 Misskey.LocalTimelineTabItem(
@@ -754,6 +768,20 @@ public object Misskey {
     }
 
     @Serializable
+    public data class HybridTimelineTabItem(
+        override val account: AccountType,
+        override val metaData: TabMetaData,
+    ) : TimelineTabItem {
+        override val key: String = "hybrid_$account"
+
+        override fun createPresenter(): TimelinePresenter =
+            dev.dimension.flare.ui.presenter.home.misskey
+                .MisskeyHybridTimelinePresenter(account)
+
+        override fun update(metaData: TabMetaData): TabItem = copy(metaData = metaData)
+    }
+
+    @Serializable
     public data class FavouriteTimelineTabItem(
         override val account: AccountType,
         override val metaData: TabMetaData,
@@ -870,7 +898,19 @@ public data class RssTimelineTabItem(
         metaData =
             TabMetaData(
                 title = TitleType.Text(data.title ?: data.url),
-                icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+                icon = IconType.Url(data.favIcon),
+            ),
+    )
+
+    public constructor(
+        feedUrl: String,
+        title: String,
+    ) : this(
+        feedUrl,
+        metaData =
+            TabMetaData(
+                title = TitleType.Text(title),
+                icon = IconType.Url(UiRssSource.favIconUrl(feedUrl)),
             ),
     )
 }

@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">Url</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">Aucune source rss</string>
+    <string name="rss_sources_rss_hub_host_label">Hôte RssHub</string>
+    <string name="rss_sources_rss_hub_host_hint">Vous devez définir l\'hôte RssHub si vous voulez utiliser RssHub, ou sélectionner le serveur RssHub public</string>
+    <string name="rss_sources_discovered_rss_sources">Sources RSS découvertes</string>
+    <string name="rss_sources_pinned_in_tabs">Épingler aux onglets d\'accueil</string>
     <string name="rss_detail_open_in_browser">Ouvrir dans le navigateur</string>
     <string name="rss_detail_share">Partager</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -265,11 +269,15 @@
     <string name="home_tab_mixed_timeline_title">Mixte</string>
     <string name="tab_settings_mixed_timeline">Ajouter un onglet de timeline mixte</string>
     <string name="tab_settings_mixed_timeline_desc">La timeline mixte mélangera le résultat de tous les onglets dans un onglet</string>
+    <string name="home_tab_social_timeline_title">Réseaux sociaux</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Ajout du support de la timeline mixte à l\'onglet Accueil</li>
-                <li>Démarré en faisant des ajustements UI/UX, avec d\'autres améliorations à venir bientôt</li>
-                <li>corrections de bugs et améliorations des performances</li>
+                <li>Ajout de la prise en charge de la timeline sociale</li>
+                <li>Ajout du support RSSHub</li>
+                <li>Ajout du support pour la détection d\'éventuels flux RSS provenant des sites</li>
+                
+                <li>Améliorations UI/UX supplémentaires — nous sommes toujours sur le chemin du raffinement continu</li>
+                <li>Corrections de bugs et améliorations de performances</li>
             </ul>
         ]]></string>
 </resources>

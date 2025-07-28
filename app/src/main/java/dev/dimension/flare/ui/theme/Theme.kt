@@ -39,22 +39,22 @@ private object MoreColors {
 
 private fun ColorScheme.withPureColorLightMode(): ColorScheme =
     copy(
-        background = Color.White,
+        background = MoreColors.Gray100,
         surface = Color.White,
         onBackground = Color.Black,
         onSurface = Color.Black,
-        surfaceContainer = MoreColors.Gray100,
-        surfaceContainerLow = MoreColors.Gray100,
-        surfaceContainerHigh = MoreColors.Gray100,
-        surfaceContainerLowest = MoreColors.Gray100,
-        surfaceContainerHighest = MoreColors.Gray100,
+        surfaceContainer = Color.White,
+        surfaceContainerLow = Color.White,
+        surfaceContainerHigh = Color.White,
+        surfaceContainerLowest = Color.White,
+        surfaceContainerHighest = Color.White,
         onSurfaceVariant = MoreColors.Gray800,
     )
 
 private fun ColorScheme.withPureColorLightModeInBigScreen(): ColorScheme =
     copy(
         background = MoreColors.Gray50,
-        surface = MoreColors.Gray50,
+        surface = Color.White,
         onBackground = Color.Black,
         onSurface = Color.Black,
         surfaceContainer = Color.White,
@@ -67,15 +67,15 @@ private fun ColorScheme.withPureColorLightModeInBigScreen(): ColorScheme =
 
 private fun ColorScheme.withPureColorDarkMode(): ColorScheme =
     copy(
-        background = Color.Black,
+        background = MoreColors.Gray900,
         surface = Color.Black,
         onBackground = Color.White,
         onSurface = Color.White,
-        surfaceContainer = MoreColors.Gray900,
-        surfaceContainerLow = MoreColors.Gray900,
-        surfaceContainerHigh = MoreColors.Gray900,
-        surfaceContainerLowest = MoreColors.Gray900,
-        surfaceContainerHighest = MoreColors.Gray900,
+        surfaceContainer = Color.Black,
+        surfaceContainerLow = Color.Black,
+        surfaceContainerHigh = Color.Black,
+        surfaceContainerLowest = Color.Black,
+        surfaceContainerHighest = Color.Black,
         onSurfaceVariant = MoreColors.Gray400,
     )
 
@@ -87,74 +87,55 @@ fun FlareTheme(
     dynamicColor: Boolean = LocalAppearanceSettings.current.dynamicTheme,
     content: @Composable () -> Unit,
 ) {
+    val context = LocalContext.current
     val seed = Color(LocalAppearanceSettings.current.colorSeed)
     val pureColorMode = LocalAppearanceSettings.current.pureColorMode
     val bigScreen = isBigScreen()
     val colorScheme =
-        when {
-            dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-                val context = LocalContext.current
-                remember(
-                    darkTheme,
-                    pureColorMode,
-                ) {
-                    if (darkTheme) {
-                        dynamicDarkColorScheme(context)
-                            .let {
-                                if (pureColorMode) {
-                                    it.withPureColorDarkMode()
-                                } else {
-                                    it
-                                }
-                            }
+        if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            remember(
+                darkTheme,
+                pureColorMode,
+            ) {
+                if (darkTheme) {
+                    dynamicDarkColorScheme(context)
+                } else {
+                    dynamicLightColorScheme(context)
+                }
+            }
+        } else {
+            rememberDynamicColorScheme(
+                seedColor = seed,
+                isAmoled = pureColorMode,
+                specVersion = ColorSpec.SpecVersion.SPEC_2025,
+                style = PaletteStyle.Expressive,
+                isDark = darkTheme,
+            )
+        }.let {
+            remember(it) {
+                if (pureColorMode) {
+                    if (bigScreen && !darkTheme) {
+                        it.withPureColorLightModeInBigScreen()
+                    } else if (!darkTheme) {
+                        it.withPureColorLightMode()
                     } else {
-                        dynamicLightColorScheme(context)
-                            .let {
-                                if (pureColorMode) {
-                                    if (bigScreen) {
-                                        it.withPureColorLightModeInBigScreen()
-                                    } else {
-                                        it.withPureColorLightMode()
-                                    }
-                                } else {
-                                    it
-                                }
-                            }
+                        it.withPureColorDarkMode()
+                    }
+                } else {
+                    if (darkTheme) {
+                        it.copy(
+                            background = it.surfaceContainer,
+                            surface = it.surfaceBright,
+                            surfaceContainer = it.surfaceContainerHighest,
+                        )
+                    } else {
+                        it.copy(
+                            background = it.surfaceContainer,
+                            surfaceContainer = it.surfaceContainerHighest,
+                        )
                     }
                 }
             }
-
-            darkTheme ->
-                rememberDynamicColorScheme(
-                    seed,
-                    isDark = true,
-                    isAmoled = pureColorMode,
-                    specVersion = ColorSpec.SpecVersion.SPEC_2025,
-                    style = PaletteStyle.Expressive,
-                    modifyColorScheme = {
-                        if (pureColorMode) {
-                            it.withPureColorDarkMode()
-                        } else {
-                            it
-                        }
-                    },
-                )
-
-            else ->
-                rememberDynamicColorScheme(
-                    seed,
-                    isDark = false,
-                    isAmoled = pureColorMode,
-                    specVersion = ColorSpec.SpecVersion.SPEC_2025,
-                    style = PaletteStyle.Expressive,
-                    modifyColorScheme = {
-                        if (pureColorMode) {
-                            it.withPureColorLightMode()
-                        } else {
-                            it
-                        }
-                    },
-                )
         }
     val view = LocalView.current
     if (!view.isInEditMode && view.context is Activity) {
@@ -181,7 +162,6 @@ fun FlareTheme(
     }
     MaterialExpressiveTheme(
         colorScheme = colorScheme,
-        typography = Typography,
         content = {
             content.invoke()
         },

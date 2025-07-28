@@ -162,7 +162,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                     modifier = Modifier.fillMaxSize(),
                     bottomBarAutoHideEnabled = state.navigationState.bottomBarAutoHideEnabled,
                     layoutType = layoutType,
-                    showFab = userState.isSuccess,
+                    showFab = userState.isSuccess && accountType !is AccountType.Guest,
                     onFabClicked = {
                         navigate(Route.Compose.New(accountType))
                     },

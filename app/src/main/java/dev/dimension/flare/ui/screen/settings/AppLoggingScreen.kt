@@ -2,9 +2,12 @@ package dev.dimension.flare.ui.screen.settings
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -13,12 +16,15 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -29,11 +35,14 @@ import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.DevModePresenter
 import dev.dimension.flare.ui.screen.media.saveByteArrayToDownloads
+import dev.dimension.flare.ui.theme.ListCardShapes
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.time.Clock
 
@@ -43,9 +52,10 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
     val state by producePresenter { presenter() }
     val context = LocalContext.current
     var selectedMessage by remember { mutableStateOf<String?>(null) }
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     FlareScaffold(
         topBar = {
-            FlareTopAppBar(
+            FlareLargeFlexibleTopAppBar(
                 title = {
                     Text(text = stringResource(id = R.string.settings_app_logging_title))
                 },
@@ -85,11 +95,19 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
                         )
                     }
                 },
+                scrollBehavior = topAppBarScrollBehavior,
             )
         },
+        modifier =
+            Modifier
+                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) {
         LazyColumn(
             contentPadding = it,
+            modifier =
+                Modifier
+                    .padding(horizontal = screenHorizontalPadding),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             item {
                 ListItem(
@@ -104,17 +122,26 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
                             },
                         )
                     },
+                    modifier =
+                        Modifier
+                            .clickable {
+                                state.setEnabled(!state.enabled)
+                            }.clip(ListCardShapes.container()),
                 )
             }
-            items(state.messages) {
+            item {
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+            itemsIndexed(state.messages) { index, it ->
                 ListItem(
                     headlineContent = {
                         Text(it, maxLines = 3)
                     },
                     modifier =
-                        Modifier.clickable {
-                            selectedMessage = it
-                        },
+                        Modifier
+                            .clickable {
+                                selectedMessage = it
+                            }.listCard(index = index, totalCount = state.messages.size),
                 )
             }
         }

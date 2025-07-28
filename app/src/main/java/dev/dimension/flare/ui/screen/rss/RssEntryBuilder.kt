@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
@@ -15,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.EntryProviderBuilder
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entry
-import androidx.navigation3.ui.DialogSceneStrategy
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.SquareRss
@@ -23,12 +23,14 @@ import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.ui.component.BottomSheetSceneStrategy
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
+import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 
-@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3Api::class)
 internal fun EntryProviderBuilder<NavKey>.rssEntryBuilder(
     navigate: (Route) -> Unit,
     onBack: () -> Unit
@@ -57,6 +59,7 @@ internal fun EntryProviderBuilder<NavKey>.rssEntryBuilder(
                     )
                 )
             },
+            onBack = onBack,
         )
     }
     entry<Route.Rss.Timeline>(
@@ -73,12 +76,13 @@ internal fun EntryProviderBuilder<NavKey>.rssEntryBuilder(
                     feedUrl = args.url,
                     metaData = TabMetaData(
                         title = TitleType.Text(args.title ?: args.url),
-                        icon = IconType.Material(IconType.Material.MaterialIcon.Rss)
+                        icon = IconType.Url(
+                            url = UiRssSource.favIconUrl(args.url),
+                        )
                     )
                 )
             },
-            toCompose = {},
-            toQuickMenu = {},
+            onBack = onBack,
         )
     }
     entry<Route.Rss.Detail>(
@@ -92,17 +96,17 @@ internal fun EntryProviderBuilder<NavKey>.rssEntryBuilder(
         )
     }
     entry<Route.Rss.Create>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = BottomSheetSceneStrategy.bottomSheet()
     ) {
-        RssSourceEditDialog(
+        RssSourceEditSheet(
             onDismissRequest = onBack,
             id = null,
         )
     }
     entry<Route.Rss.Edit>(
-        metadata = DialogSceneStrategy.dialog()
+        metadata = BottomSheetSceneStrategy.bottomSheet()
     ) { args ->
-        RssSourceEditDialog(
+        RssSourceEditSheet(
             onDismissRequest = onBack,
             id = args.id,
         )

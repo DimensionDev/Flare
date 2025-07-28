@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">Adres URL</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">Brak źródeł rss</string>
+    <string name="rss_sources_rss_hub_host_label">Host RssHub</string>
+    <string name="rss_sources_rss_hub_host_hint">Musisz ustawić host RssHub jeśli chcesz używać RssHub, lub wybrać publiczny serwer RssHub</string>
+    <string name="rss_sources_discovered_rss_sources">Odkryte źródła RSS</string>
+    <string name="rss_sources_pinned_in_tabs">Przypnij do zakładek domowych</string>
     <string name="rss_detail_open_in_browser">Otwórz w przeglądarce</string>
     <string name="rss_detail_share">Udostępnij</string>
     <string name="rss_detail_tldr">Summarize</string>
@@ -265,10 +269,13 @@
     <string name="home_tab_mixed_timeline_title">Mieszane</string>
     <string name="tab_settings_mixed_timeline">Dodaj mieszaną kartę osi czasu</string>
     <string name="tab_settings_mixed_timeline_desc">Mieszana oś czasu połączy wszystkie karty na osi czasu w jednej karcie</string>
+    <string name="home_tab_social_timeline_title">Społeczność</string>
     <string name="changelog_current"><![CDATA[            <span>Wersja %1$s:</span>
             <ul>
-                <li>Dodano obsługę mieszanej osi czasu do zakładki Home</li>
-                <li>Rozpoczęto dostosowywanie UI/UX, z dalszymi ulepszeniami już wkrótce</li>
+                <li>Dodano wsparcie dla społecznej osi czasu Misskeya</li>
+                <li>Dodano wsparcie RSSHub</li>
+                <li>Dodano wsparcie dla wykrywania ewentualnych kanałów RSS z witryn</li>
+                <li>Więcej ulepszeń UI/UX — nadal jesteśmy na ścieżce ciągłego doskonalenia</li>
                 <li>Poprawki błędów i ulepszenia wydajności</li>
             </ul>
         ]]></string>

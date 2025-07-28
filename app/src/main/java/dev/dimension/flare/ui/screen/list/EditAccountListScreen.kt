@@ -1,5 +1,7 @@
 package dev.dimension.flare.ui.screen.list
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -10,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
@@ -26,6 +29,7 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.EditAccountListPresenter
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -56,6 +60,10 @@ internal fun EditAccountListScreen(
         content = { contentPadding ->
             LazyColumn(
                 contentPadding = contentPadding,
+                modifier =
+                    Modifier
+                        .padding(horizontal = screenHorizontalPadding),
+                verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 uiListItemComponent(
                     state.lists,

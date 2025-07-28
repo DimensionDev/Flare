@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 
@@ -96,7 +95,10 @@ internal class AccountRepository(
 
 public data object NoActiveAccountException : Exception("No active account.")
 
-public data object LoginExpiredException : Exception("Login expired.")
+public data class LoginExpiredException(
+    val accountKey: MicroBlogKey,
+    val platformType: PlatformType,
+) : Exception("Login expired.")
 
 @Composable
 internal fun activeAccountPresenter(repository: AccountRepository): State<UiState<UiAccount>> =
@@ -156,8 +158,8 @@ internal fun accountServiceFlow(
 ): Flow<MicroblogDataSource> =
     when (accountType) {
         AccountType.Active -> {
-            repository.activeAccount.mapNotNull {
-                it?.dataSource
+            repository.activeAccount.map {
+                it?.dataSource ?: throw NoActiveAccountException
             }
         }
         AccountType.Guest -> {
@@ -176,8 +178,8 @@ internal fun accountServiceFlow(
         is AccountType.Specific -> {
             repository
                 .getFlow(accountType.accountKey)
-                .mapNotNull {
-                    it?.dataSource
+                .map {
+                    it?.dataSource ?: throw NoActiveAccountException
                 }
         }
     }

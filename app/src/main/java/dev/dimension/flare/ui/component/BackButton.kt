@@ -1,6 +1,9 @@
 package dev.dimension.flare.ui.component
 
-import androidx.compose.material3.IconButton
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,7 +22,16 @@ fun BackButton(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    IconButton(onClick = onBack, modifier = modifier) {
+    FilledTonalIconButton(
+        onClick = onBack,
+        modifier =
+            modifier
+                .padding(horizontal = 16.dp),
+        colors =
+            IconButtonDefaults.filledTonalIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+            ),
+    ) {
         FAIcon(
             imageVector = arrow,
             contentDescription = stringResource(id = R.string.navigate_back),

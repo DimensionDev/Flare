@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.settings
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,6 +19,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -28,6 +30,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -39,14 +43,16 @@ import dev.dimension.flare.data.model.AppSettings
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.FlareTopAppBar
 import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.FlareServerProviderPresenter
+import dev.dimension.flare.ui.theme.ListCardShapes
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
@@ -59,31 +65,41 @@ import org.koin.compose.koinInject
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun AiConfigScreen(onBack: () -> Unit) {
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val state by producePresenter { presenter() }
     FlareScaffold(
         topBar = {
-            FlareTopAppBar(
+            FlareLargeFlexibleTopAppBar(
                 title = {
                     Text(text = stringResource(id = R.string.settings_ai_config_title))
                 },
                 navigationIcon = {
                     BackButton(onBack = onBack)
                 },
+                scrollBehavior = topAppBarScrollBehavior,
             )
         },
+        modifier =
+            Modifier
+                .nestedScroll(topAppBarScrollBehavior.nestedScrollConnection),
     ) {
         Column(
             modifier =
                 Modifier
                     .verticalScroll(rememberScrollState())
-                    .padding(it),
+                    .padding(it)
+                    .padding(horizontal = screenHorizontalPadding)
+                    .clip(ListCardShapes.container()),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             ListItem(
                 modifier =
                     Modifier
                         .clickable {
                             state.setShowServerDialog(true)
-                        },
+                        }.clip(
+                            ListCardShapes.item(),
+                        ),
                 overlineContent = {
                     Text(
                         text = stringResource(id = R.string.settings_ai_config_server),
@@ -125,11 +141,14 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     )
                 },
                 modifier =
-                    Modifier.clickable {
-                        state.update {
-                            copy(translation = !state.aiConfig.translation)
-                        }
-                    },
+                    Modifier
+                        .clickable {
+                            state.update {
+                                copy(translation = !state.aiConfig.translation)
+                            }
+                        }.clip(
+                            ListCardShapes.item(),
+                        ),
             )
             ListItem(
                 headlineContent = {
@@ -153,11 +172,14 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     )
                 },
                 modifier =
-                    Modifier.clickable {
-                        state.update {
-                            copy(tldr = !state.aiConfig.tldr)
-                        }
-                    },
+                    Modifier
+                        .clickable {
+                            state.update {
+                                copy(tldr = !state.aiConfig.tldr)
+                            }
+                        }.clip(
+                            ListCardShapes.item(),
+                        ),
             )
         }
     }

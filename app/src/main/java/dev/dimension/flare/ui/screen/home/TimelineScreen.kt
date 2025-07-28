@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -12,15 +11,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
-import dev.dimension.flare.ui.component.FlareTopAppBar
-import dev.dimension.flare.ui.component.LocalBottomBarShowing
 import dev.dimension.flare.ui.model.onError
-import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
@@ -31,9 +27,8 @@ import moe.tlaster.precompose.molecule.producePresenter
 @Composable
 internal fun TimelineScreen(
     tabItem: TimelineTabItem,
-    toCompose: () -> Unit,
-    toQuickMenu: () -> Unit,
     toLogin: (() -> Unit)? = null,
+    onBack: () -> Unit,
 ) {
     val state by producePresenter(key = "timeline_${tabItem.key}") {
         timelinePresenter(tabItem)
@@ -44,24 +39,16 @@ internal fun TimelineScreen(
             state.refreshSync()
         },
     )
-    val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+    val topAppBarScrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     FlareScaffold(
         topBar = {
-            FlareTopAppBar(
+            FlareLargeFlexibleTopAppBar(
                 title = {
                     TabTitle(title = tabItem.metaData.title)
                 },
                 scrollBehavior = topAppBarScrollBehavior,
                 navigationIcon = {
-                    if (LocalBottomBarShowing.current) {
-                        state.user.onSuccess {
-                            IconButton(
-                                onClick = toQuickMenu,
-                            ) {
-                                AvatarComponent(it.avatar, size = 24.dp)
-                            }
-                        }
-                    }
+                    BackButton(onBack)
                 },
                 actions = {
                     if (toLogin != null) {

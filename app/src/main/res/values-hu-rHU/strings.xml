@@ -243,6 +243,10 @@
     <string name="rss_sources_url_label">URL</string>
     <string name="rss_title">Rss</string>
     <string name="empty_rss_sources">Nincsenek rss források</string>
+    <string name="rss_sources_rss_hub_host_label">RssHub Host</string>
+    <string name="rss_sources_rss_hub_host_hint">Be kell állítania az RssHub hosztot, ha az RssHubot szeretné használni, vagy ki kell választania a nyilvános RssHub szervert.</string>
+    <string name="rss_sources_discovered_rss_sources">Felfedezett Rss források</string>
+    <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
     <string name="rss_detail_open_in_browser">Megnyitás a böngészőben</string>
     <string name="rss_detail_share">Megosztás</string>
     <string name="rss_detail_tldr">Összefoglalás</string>
@@ -265,5 +269,14 @@
     <string name="home_tab_mixed_timeline_title">Keverve</string>
     <string name="tab_settings_mixed_timeline">Keverve idővonal fül hozzáadása</string>
     <string name="tab_settings_mixed_timeline_desc">A kevert idővonal minden tab idővonalát egy tabba keveri</string>
-    <string name="changelog_current"><![CDATA[\n            <span>Verzió %1$s:</span>\n            <ul>\n                <li>Hozzáadva kevert idővonal támogatást a Főoldalra</li>\n                <li>Elkezdtük a UI/UX javítását, további fejlesztések várhatók</li>\n                <li>Hibajavítások és teljesítményoptimalizálások</li>\n            </ul>\n        ]]></string>
+    <string name="home_tab_social_timeline_title">Szociális</string>
+    <string name="changelog_current"><![CDATA[            <span>Verzió %1$s:</span>
+            <ul>
+                <li>Hozzáadva a Misskey\'s Social timeline támogatása</li>
+                <li>RSSHub támogatás hozzáadva</li>
+                <li>Támogatás hozzáadva a weboldalak lehetséges RSS feedjeinek felismeréséhez</li>
+                <li>További UI/UX fejlesztések - még mindig a folyamatos finomítás útját járjuk.</li>
+                <li>Hibajavítások és teljesítményjavítások</li>
+            </ul>
+        ]]></string>
 </resources>

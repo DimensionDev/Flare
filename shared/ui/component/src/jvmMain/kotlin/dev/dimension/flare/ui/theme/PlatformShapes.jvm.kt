@@ -5,6 +5,9 @@ import androidx.compose.ui.graphics.Shape
 import com.konyaco.fluent.FluentTheme
 
 internal actual object PlatformShapes {
+    actual val extraSmall: Shape
+        @Composable
+        get() = FluentTheme.shapes.intersectionEdge
     actual val small: Shape
         @Composable
         get() = FluentTheme.shapes.intersectionEdge

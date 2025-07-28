@@ -45,7 +45,8 @@ internal fun EntryProviderBuilder<NavKey>.misskeyEntryBuilder(
             accountType = args.accountType,
             toTimeline = {
                 navigate(Route.Misskey.AntennaTimeline(args.accountType, it.id, it.title))
-            }
+            },
+            onBack = onBack
         )
     }
 
@@ -65,11 +66,7 @@ internal fun EntryProviderBuilder<NavKey>.misskeyEntryBuilder(
                     ),
                 )
             },
-            toCompose = {
-                navigate(Route.Compose.New(args.accountType))
-            },
-            toQuickMenu = { /* No-op */ },
-            toLogin = { /* No-op */ },
+            onBack = onBack,
         )
     }
 }

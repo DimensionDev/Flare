@@ -112,7 +112,7 @@ public enum FlareImageOptions {
             .processor(DownsamplingImageProcessor(size: size)),
             .scaleFactor(UIScreen.main.scale),
             .memoryCacheExpiration(.seconds(180)),
-            .diskCacheExpiration(.days(3)),
+            .diskCacheExpiration(.days(3))
         ]
     }
 
@@ -126,7 +126,7 @@ public enum FlareImageOptions {
             .alsoPrefetchToMemory,
             .memoryCacheExpiration(.seconds(600)),
             .diskCacheExpiration(.days(7)),
-            .transition(.fade(0.2)),
+            .transition(.fade(0.2))
         ]
     }
 }

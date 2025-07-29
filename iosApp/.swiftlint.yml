@@ -10,6 +10,9 @@ disabled_rules:
   - function_parameter_count
   - type_body_length
 
+opt_in_rules:
+  - trailing_comma
+
 # 排除第三方库的检查
 excluded:
   - Pods

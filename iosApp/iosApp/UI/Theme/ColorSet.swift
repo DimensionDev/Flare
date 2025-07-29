@@ -21,7 +21,7 @@ public let availableColorsSets: [ColorSetCouple] =
         .init(light: ThemePlumBlossomLight(), dark: ThemePlumBlossomDark()),
         .init(light: ThemeNaturalLinenLight(), dark: ThemeNaturalLinenDark()),
         .init(light: ThemePristineSnowLight(), dark: ThemePristineSnowDark()),
-        .init(light: ThemeEmeraldDepthsLight(), dark: ThemeEmeraldDepthsDark()),
+        .init(light: ThemeEmeraldDepthsLight(), dark: ThemeEmeraldDepthsDark())
     ]
 
 public protocol ColorSet: Sendable {

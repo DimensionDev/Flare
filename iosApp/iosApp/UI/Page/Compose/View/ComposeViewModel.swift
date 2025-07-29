@@ -158,7 +158,7 @@ class PollViewModel {
         ComposePollExpired.hours12,
         ComposePollExpired.days1,
         ComposePollExpired.days3,
-        ComposePollExpired.days7,
+        ComposePollExpired.days7
     ]
     func add() {
         if choices.count < 4 {

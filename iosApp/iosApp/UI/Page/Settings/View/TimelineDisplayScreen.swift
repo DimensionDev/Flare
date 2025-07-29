@@ -11,200 +11,199 @@ struct TimelineDisplayScreen: View {
 
     @State private var isThemeAutoSectionExpanded = true
     @State private var isFontSectionExpanded = true
-   let presenter: AppearancePresenter 
+    let presenter: AppearancePresenter
 
     init(presenter: AppearancePresenter) {
         self.presenter = presenter
-     }
-
-    var body: some View {
-         ObserveOldPresenter(presenter: presenter) { state in
-        List {
-             if case let .success(success) = onEnum(of: state.sampleStatus) {
-            VStack {
-                StatusItemView(
-                       data: success.data,
-                       detailKey: nil
-                   )
-                // if let user = UserManager.shared.getCurrentUser().0?.toSwift() {
-                //     TimelineStatusViewV2(
-                //         item: TimelineItem(
-                //             id: "sample",
-                //             content: RichText(
-                //                 raw: "Sample content for \(user.name.raw)  on twitter.com [#flare](flare://Search/%23flare)"
-                //             ),
-                //             user: user,
-                //             timestamp: Date(),
-                //             images: [],
-                //             url: "",
-                //             platformType: "xqt",
-                //             aboveTextContent: nil,
-                //             contentWarning: nil,
-                //             card: nil,
-                //             quote: [],
-                //             bottomContent: nil,
-                //             topEndContent: nil,
-                //             poll: nil,
-                //             topMessage: nil,
-                //             sensitive: false,
-                //             visibility: "public",
-                //             language: nil,
-                //             actions: []
-                //         ),
-                //         index: 0
-                //     ).padding(.vertical, 0)
-                // }
-
-            }.allowsHitTesting(false)
-                .listRowBackground(theme.primaryBackgroundColor)
-                .listStyle(.plain)
-             }
-
-            // Theme部分
-            Section {
-                themeAutoSection
-            }.listRowBackground(theme.primaryBackgroundColor)
-
-            // Font部分
-            Section {
-                fontSection
-            }.listRowBackground(theme.primaryBackgroundColor)
-
-            // 渲染引擎选择部分
-            Section("Text Render Engine") {
-                Picker(selection: Binding(get: {
-                    appSettings.appearanceSettings.renderEngine
-                }, set: { value in
-                    appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.renderEngine, to: value))
-                }), content: {
-                    ForEach(RenderEngine.allCases, id: \.self) { engine in
-                        Text(engine.title).tag(engine)
-                    }
-                }, label: {
-                    Text("Text Render Engine")
-                })
-            }.listRowBackground(theme.primaryBackgroundColor)
-
-            Section("Timeline Display Type") {
-                Picker(selection: Binding(get: {
-                    appSettings.appearanceSettings.timelineDisplayType
-                }, set: { value in
-                    appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.timelineDisplayType, to: value))
-                }), content: {
-                    ForEach(TimelineDisplayType.allCases, id: \.self) { type in
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(type.displayName)
-                                .font(.body)
-                            Text(type.description)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .tag(type)
-                    }
-                }, label: {
-                    Text("Timeline Display Type")
-                })
-            }.listRowBackground(theme.primaryBackgroundColor)
-
-            // 界面元素设置
-            Section("Interface Elements") {
-                // 头像形状
-                Picker(selection: Binding(get: {
-                    appSettings.appearanceSettings.avatarShape
-                }, set: { value in
-                    appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.avatarShape, to: value))
-                }), content: {
-                    Text("settings_appearance_avatar_shape_round")
-                        .tag(AvatarShape.circle)
-                    Text("settings_appearance_avatar_shape_square")
-                        .tag(AvatarShape.square)
-                }, label: {
-                    Text("settings_appearance_avatar_shape")
-                    Text("settings_appearance_avatar_shape_description")
-                })
-
-                // 显示操作按钮
-                Toggle(isOn: Binding(get: {
-                    appSettings.appearanceSettings.showActions
-                }, set: { value in
-                    appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showActions, to: value))
-                })) {
-                    Text("settings_appearance_show_actions")
-                    Text("settings_appearance_show_actions_description")
-                }
-
-                // 显示数字统计 (依赖于显示操作按钮)
-                if appSettings.appearanceSettings.showActions {
-                    Toggle(isOn: Binding(get: {
-                        appSettings.appearanceSettings.showNumbers
-                    }, set: { value in
-                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showNumbers, to: value))
-                    })) {
-                        Text("settings_appearance_show_numbers")
-                        Text("settings_appearance_show_numbers_description")
-                    }
-                }
-
-                // 隐藏返回顶部按钮
-                Toggle(isOn: Binding(get: {
-                    appSettings.appearanceSettings.hideScrollToTopButton
-                }, set: { value in
-                    appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.hideScrollToTopButton, to: value))
-                })) {
-                    Text("Hide Scroll to Top Button")
-                    Text("Hide the floating scroll to top button")
-                }
-            }.listRowBackground(theme.primaryBackgroundColor)
-
-            // 交互行为设置
-            Section("Interaction Behavior") {
-                // 全屏滑动返回
-                Toggle(isOn: Binding(get: {
-                    appSettings.appearanceSettings.enableFullSwipePop
-                }, set: { value in
-                    appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.enableFullSwipePop, to: value))
-                })) {
-                    Text("Full Swipe Back")
-                    Text("Allow swiping back from anywhere on the screen")
-                }
-            }.listRowBackground(theme.primaryBackgroundColor)
-                .buttonStyle(.plain)
-        }
-        .scrollContentBackground(.hidden)
-        .background(theme.secondaryBackgroundColor)
-        .navigationTitle("Timeline & Display")
-        .navigationBarTitleDisplayMode(.inline)
-        .task(id: localValues.tintColor) {
-            do { try await Task.sleep(for: .microseconds(500)) } catch {}
-            theme.tintColor = localValues.tintColor
-        }
-        .task(id: localValues.primaryBackgroundColor) {
-            do { try await Task.sleep(for: .microseconds(500)) } catch {}
-            theme.primaryBackgroundColor = localValues.primaryBackgroundColor
-        }
-        .task(id: localValues.secondaryBackgroundColor) {
-            do { try await Task.sleep(for: .microseconds(500)) } catch {}
-            theme.secondaryBackgroundColor = localValues.secondaryBackgroundColor
-        }
-        .task(id: localValues.labelColor) {
-            do { try await Task.sleep(for: .microseconds(500)) } catch {}
-            theme.labelColor = localValues.labelColor
-        }
-        .task(id: localValues.lineSpacing) {
-            do { try await Task.sleep(for: .microseconds(500)) } catch {}
-            theme.lineSpacing = localValues.lineSpacing
-        }
-        .task(id: localValues.fontSizeScale) {
-            do { try await Task.sleep(for: .microseconds(500)) } catch {}
-            theme.fontSizeScale = localValues.fontSizeScale
-        }
-        #if os(macOS)
-        .toggleStyle(.switch)
-        .pickerStyle(.segmented)
-        #endif
     }
 
-      }
+    var body: some View {
+        ObserveOldPresenter(presenter: presenter) { state in
+            List {
+                if case let .success(success) = onEnum(of: state.sampleStatus) {
+                    VStack {
+                        StatusItemView(
+                            data: success.data,
+                            detailKey: nil
+                        )
+                        // if let user = UserManager.shared.getCurrentUser().0?.toSwift() {
+                        //     TimelineStatusViewV2(
+                        //         item: TimelineItem(
+                        //             id: "sample",
+                        //             content: RichText(
+                        //                 raw: "Sample content for \(user.name.raw)  on twitter.com [#flare](flare://Search/%23flare)"
+                        //             ),
+                        //             user: user,
+                        //             timestamp: Date(),
+                        //             images: [],
+                        //             url: "",
+                        //             platformType: "xqt",
+                        //             aboveTextContent: nil,
+                        //             contentWarning: nil,
+                        //             card: nil,
+                        //             quote: [],
+                        //             bottomContent: nil,
+                        //             topEndContent: nil,
+                        //             poll: nil,
+                        //             topMessage: nil,
+                        //             sensitive: false,
+                        //             visibility: "public",
+                        //             language: nil,
+                        //             actions: []
+                        //         ),
+                        //         index: 0
+                        //     ).padding(.vertical, 0)
+                        // }
+
+                    }.allowsHitTesting(false)
+                        .listRowBackground(theme.primaryBackgroundColor)
+                        .listStyle(.plain)
+                }
+
+                // Theme部分
+                Section {
+                    themeAutoSection
+                }.listRowBackground(theme.primaryBackgroundColor)
+
+                // Font部分
+                Section {
+                    fontSection
+                }.listRowBackground(theme.primaryBackgroundColor)
+
+                // 渲染引擎选择部分
+                Section("Text Render Engine") {
+                    Picker(selection: Binding(get: {
+                        appSettings.appearanceSettings.renderEngine
+                    }, set: { value in
+                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.renderEngine, to: value))
+                    }), content: {
+                        ForEach(RenderEngine.allCases, id: \.self) { engine in
+                            Text(engine.title).tag(engine)
+                        }
+                    }, label: {
+                        Text("Text Render Engine")
+                    })
+                }.listRowBackground(theme.primaryBackgroundColor)
+
+                Section("Timeline Display Type") {
+                    Picker(selection: Binding(get: {
+                        appSettings.appearanceSettings.timelineDisplayType
+                    }, set: { value in
+                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.timelineDisplayType, to: value))
+                    }), content: {
+                        ForEach(TimelineDisplayType.allCases, id: \.self) { type in
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(type.displayName)
+                                    .font(.body)
+                                Text(type.description)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .tag(type)
+                        }
+                    }, label: {
+                        Text("Timeline Display Type")
+                    })
+                }.listRowBackground(theme.primaryBackgroundColor)
+
+                // 界面元素设置
+                Section("Interface Elements") {
+                    // 头像形状
+                    Picker(selection: Binding(get: {
+                        appSettings.appearanceSettings.avatarShape
+                    }, set: { value in
+                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.avatarShape, to: value))
+                    }), content: {
+                        Text("settings_appearance_avatar_shape_round")
+                            .tag(AvatarShape.circle)
+                        Text("settings_appearance_avatar_shape_square")
+                            .tag(AvatarShape.square)
+                    }, label: {
+                        Text("settings_appearance_avatar_shape")
+                        Text("settings_appearance_avatar_shape_description")
+                    })
+
+                    // 显示操作按钮
+                    Toggle(isOn: Binding(get: {
+                        appSettings.appearanceSettings.showActions
+                    }, set: { value in
+                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showActions, to: value))
+                    })) {
+                        Text("settings_appearance_show_actions")
+                        Text("settings_appearance_show_actions_description")
+                    }
+
+                    // 显示数字统计 (依赖于显示操作按钮)
+                    if appSettings.appearanceSettings.showActions {
+                        Toggle(isOn: Binding(get: {
+                            appSettings.appearanceSettings.showNumbers
+                        }, set: { value in
+                            appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showNumbers, to: value))
+                        })) {
+                            Text("settings_appearance_show_numbers")
+                            Text("settings_appearance_show_numbers_description")
+                        }
+                    }
+
+                    // 隐藏返回顶部按钮
+                    Toggle(isOn: Binding(get: {
+                        appSettings.appearanceSettings.hideScrollToTopButton
+                    }, set: { value in
+                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.hideScrollToTopButton, to: value))
+                    })) {
+                        Text("Hide Scroll to Top Button")
+                        Text("Hide the floating scroll to top button")
+                    }
+                }.listRowBackground(theme.primaryBackgroundColor)
+
+                // 交互行为设置
+                Section("Interaction Behavior") {
+                    // 全屏滑动返回
+                    Toggle(isOn: Binding(get: {
+                        appSettings.appearanceSettings.enableFullSwipePop
+                    }, set: { value in
+                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.enableFullSwipePop, to: value))
+                    })) {
+                        Text("Full Swipe Back")
+                        Text("Allow swiping back from anywhere on the screen")
+                    }
+                }.listRowBackground(theme.primaryBackgroundColor)
+                    .buttonStyle(.plain)
+            }
+            .scrollContentBackground(.hidden)
+            .background(theme.secondaryBackgroundColor)
+            .navigationTitle("Timeline & Display")
+            .navigationBarTitleDisplayMode(.inline)
+            .task(id: localValues.tintColor) {
+                do { try await Task.sleep(for: .microseconds(500)) } catch {}
+                theme.tintColor = localValues.tintColor
+            }
+            .task(id: localValues.primaryBackgroundColor) {
+                do { try await Task.sleep(for: .microseconds(500)) } catch {}
+                theme.primaryBackgroundColor = localValues.primaryBackgroundColor
+            }
+            .task(id: localValues.secondaryBackgroundColor) {
+                do { try await Task.sleep(for: .microseconds(500)) } catch {}
+                theme.secondaryBackgroundColor = localValues.secondaryBackgroundColor
+            }
+            .task(id: localValues.labelColor) {
+                do { try await Task.sleep(for: .microseconds(500)) } catch {}
+                theme.labelColor = localValues.labelColor
+            }
+            .task(id: localValues.lineSpacing) {
+                do { try await Task.sleep(for: .microseconds(500)) } catch {}
+                theme.lineSpacing = localValues.lineSpacing
+            }
+            .task(id: localValues.fontSizeScale) {
+                do { try await Task.sleep(for: .microseconds(500)) } catch {}
+                theme.fontSizeScale = localValues.fontSizeScale
+            }
+            #if os(macOS)
+            .toggleStyle(.switch)
+            .pickerStyle(.segmented)
+            #endif
+        }
+    }
 
     private var themeSelectorButton: some View {
         Picker(selection: .init(get: {

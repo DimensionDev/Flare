@@ -70,8 +70,8 @@ struct WaterfallView: View {
             FlareLog.debug("👁️ [WaterfallView] onAppear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
 
 //            if isCurrentTab {
-                FlareLog.debug("✅ [WaterfallView] Current tab, calling resume - tab: \(tab.key)")
-                viewModel.resume()
+            FlareLog.debug("✅ [WaterfallView] Current tab, calling resume - tab: \(tab.key)")
+            viewModel.resume()
 //            } else {
 //                FlareLog.debug("⏸️ [WaterfallView] Not current tab, skipping resume - tab: \(tab.key)")
 //            }

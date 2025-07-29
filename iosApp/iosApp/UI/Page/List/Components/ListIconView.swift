@@ -9,7 +9,7 @@ enum ListGradientGenerator {
         [.green.opacity(0.6), .blue.opacity(0.4)],
         [.purple.opacity(0.6), .pink.opacity(0.4)],
         [.orange.opacity(0.6), .yellow.opacity(0.4)],
-        [.teal.opacity(0.6), .blue.opacity(0.4)],
+        [.teal.opacity(0.6), .blue.opacity(0.4)]
     ]
 
     static func getGradientIndex(for id: String) -> Int {

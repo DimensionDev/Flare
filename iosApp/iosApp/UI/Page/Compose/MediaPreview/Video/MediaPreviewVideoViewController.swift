@@ -51,7 +51,7 @@ extension MediaPreviewVideoViewController {
             playerViewController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             playerViewController.view.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             playerViewController.view.widthAnchor.constraint(equalTo: view.widthAnchor),
-            playerViewController.view.heightAnchor.constraint(equalTo: view.heightAnchor),
+            playerViewController.view.heightAnchor.constraint(equalTo: view.heightAnchor)
         ])
         playerViewController.didMove(toParent: self)
 
@@ -59,7 +59,7 @@ extension MediaPreviewVideoViewController {
         view.addSubview(loadingIndicator)
         NSLayoutConstraint.activate([
             loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
 
         if let contentOverlayView = playerViewController.contentOverlayView {
@@ -69,7 +69,7 @@ extension MediaPreviewVideoViewController {
                 previewImageView.topAnchor.constraint(equalTo: contentOverlayView.topAnchor),
                 previewImageView.leadingAnchor.constraint(equalTo: contentOverlayView.leadingAnchor),
                 previewImageView.trailingAnchor.constraint(equalTo: contentOverlayView.trailingAnchor),
-                previewImageView.bottomAnchor.constraint(equalTo: contentOverlayView.bottomAnchor),
+                previewImageView.bottomAnchor.constraint(equalTo: contentOverlayView.bottomAnchor)
             ])
         }
 
@@ -143,7 +143,7 @@ extension MediaPreviewVideoViewController {
                 with: previewURL,
                 placeholder: UIImage.placeholder(color: .systemFill),
                 options: [
-                    .requestModifier(modifier),
+                    .requestModifier(modifier)
                 ]
             )
 

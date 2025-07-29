@@ -66,13 +66,13 @@ private struct FullSwipeModifier: ViewModifier {
             .onChange(of: isEnabled, initial: true) { _, new in
                 guard let gestureID else { return }
                 NotificationCenter.default.post(name: .init(gestureID), object: nil, userInfo: [
-                    "status": new,
+                    "status": new
                 ])
             }
             .onDisappear {
                 guard let gestureID else { return }
                 NotificationCenter.default.post(name: .init(gestureID), object: nil, userInfo: [
-                    "status": false,
+                    "status": false
                 ])
             }
     }

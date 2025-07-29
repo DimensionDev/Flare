@@ -4,11 +4,12 @@ import SwiftUI
 import Tiercel
 
 struct StoragePrivacyScreen: View {
-    let presenter: StoragePresenter 
+    let presenter: StoragePresenter
 
     init(presenter: StoragePresenter) {
         self.presenter = presenter
-     }
+    }
+
     @State private var imageCacheSize: String = "Calculating..."
     @State private var isCleaningCache = false
     @Environment(FlareTheme.self) private var theme
@@ -69,7 +70,6 @@ struct StoragePrivacyScreen: View {
 
     var body: some View {
         ObserveOldPresenter(presenter: presenter) { state in
-           
             List {
                 // Storage Management Section
                 Section("Storage Management") {

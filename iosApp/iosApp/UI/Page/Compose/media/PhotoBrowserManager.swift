@@ -106,7 +106,7 @@ class PhotoBrowserManager {
                             .scaleFactor(UIScreen.main.scale),
                             .memoryCacheExpiration(.seconds(180)), // 3分钟内存缓存
                             .diskCacheExpiration(.days(14)), // 14天磁盘缓存
-                            .requestModifier(modifier),
+                            .requestModifier(modifier)
                         ]
                     ) { result in
                         switch result {
@@ -119,7 +119,7 @@ class PhotoBrowserManager {
                                     .transition(.fade(0.5)),
                                     .loadDiskFileSynchronously,
                                     .cacheOriginalImage,
-                                    .requestModifier(modifier),
+                                    .requestModifier(modifier)
                                 ]
                             ) { result in
                                 switch result {
@@ -138,7 +138,7 @@ class PhotoBrowserManager {
 
                                         NSLayoutConstraint.activate([
                                             markView.trailingAnchor.constraint(equalTo: cell.imageView.trailingAnchor, constant: -16),
-                                            markView.bottomAnchor.constraint(equalTo: cell.imageView.bottomAnchor, constant: bottomPadding),
+                                            markView.bottomAnchor.constraint(equalTo: cell.imageView.bottomAnchor, constant: bottomPadding)
                                         ])
                                     }
                                 case let .failure(error):

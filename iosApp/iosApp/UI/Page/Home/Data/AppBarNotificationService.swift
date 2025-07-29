@@ -33,7 +33,7 @@ class AppBarNotificationService {
             "listId": listId,
             "listTitle": listTitle,
             "isPinned": isPinned,
-            "itemType": isBlueskyFeed ? "feed" : "list",
+            "itemType": isBlueskyFeed ? "feed" : "list"
         ]
 
         if let iconUrl, !iconUrl.isEmpty {

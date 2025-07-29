@@ -115,7 +115,7 @@ struct ProfileMediaListScreen: View {
                 {
                     cell.imageView.kf.setImage(with: url, options: [
                         .transition(.fade(0.25)),
-                        .processor(DownsamplingImageProcessor(size: UIScreen.main.bounds.size)),
+                        .processor(DownsamplingImageProcessor(size: UIScreen.main.bounds.size))
                     ])
                 }
             default:
@@ -300,7 +300,7 @@ class HostingCell: UICollectionViewCell {
                 controller.view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
                 controller.view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
                 controller.view.topAnchor.constraint(equalTo: contentView.topAnchor),
-                controller.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+                controller.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
             ])
         }
     }

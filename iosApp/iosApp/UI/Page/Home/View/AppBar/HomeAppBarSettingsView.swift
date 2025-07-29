@@ -668,7 +668,7 @@ struct HomeAppBarSettingsView: View {
                 "listId": list.id,
                 "listTitle": list.title,
                 "isPinned": true,
-                "itemType": "list", // 明确指定为list类型
+                "itemType": "list"
             ]
 
             if let iconUrl = list.avatar {
@@ -699,7 +699,7 @@ struct HomeAppBarSettingsView: View {
                 "listId": feed.id,
                 "listTitle": feed.title,
                 "isPinned": true,
-                "itemType": "feed", // 明确指定为feed类型
+                "itemType": "feed"
             ]
 
             if let iconUrl = feed.avatar {
@@ -732,7 +732,7 @@ struct HomeAppBarSettingsView: View {
             userInfo: [
                 "listId": list.id,
                 "oldTitle": list.title,
-                "newTitle": newTitle,
+                "newTitle": newTitle
             ]
         )
 
@@ -763,7 +763,7 @@ struct HomeAppBarSettingsView: View {
                 "listId": listId,
                 "oldTitle": oldTitle,
                 "newTitle": newTitle,
-                "itemType": editingItemIsBlueskyFeed ? "feed" : "list", // 添加类型标识
+                "itemType": editingItemIsBlueskyFeed ? "feed" : "list" // 添加类型标识
             ]
         )
 

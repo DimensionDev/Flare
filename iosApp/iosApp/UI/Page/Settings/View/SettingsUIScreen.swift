@@ -5,8 +5,8 @@ struct SettingsUIScreen: View {
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     @State private var selectedDetail: SettingsDestination?
     @State private var presenter = ActiveAccountPresenter()
-    @State private var storagePresenter = StoragePresenter()  
-    @State private var appearancePresenter: AppearancePresenter = AppearancePresenter()
+    @State private var storagePresenter = StoragePresenter()
+    @State private var appearancePresenter: AppearancePresenter = .init()
 
     @Environment(FlareTheme.self) private var theme
 
@@ -127,7 +127,7 @@ struct SettingsUIScreen: View {
                             .padding()
                     }
                 }
-            } 
+            }
         }
         .scrollContentBackground(.hidden)
         .listRowBackground(theme.secondaryBackgroundColor)

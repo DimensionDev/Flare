@@ -389,7 +389,7 @@ class ProfileNewHeaderView: UIView {
                     stackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor),
                     stackView.topAnchor.constraint(equalTo: containerView.topAnchor),
                     stackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor),
-                    stackView.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor),
+                    stackView.trailingAnchor.constraint(lessThanOrEqualTo: containerView.trailingAnchor)
                 ])
 
                 // 添加 location
@@ -566,7 +566,7 @@ class ProfileNewHeaderView: UIView {
                         toast.centerXAnchor.constraint(equalTo: window.centerXAnchor),
                         toast.bottomAnchor.constraint(equalTo: window.safeAreaLayoutGuide.bottomAnchor, constant: -50),
                         toast.widthAnchor.constraint(greaterThanOrEqualToConstant: 150),
-                        toast.heightAnchor.constraint(equalToConstant: 40),
+                        toast.heightAnchor.constraint(equalToConstant: 40)
                     ])
 
                     UIView.animate(withDuration: 0.3, animations: {

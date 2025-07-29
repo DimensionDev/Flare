@@ -3,35 +3,33 @@ import os
 import shared
 import SwiftUI
 
-private let logger = Logger(subsystem: "com.flare.app", category: "HomeAppBarSettingsView")
-
 struct HomeAppBarSettingsView: View {
     @Environment(\.dismiss) var dismiss
     @ObservedObject var store: AppBarTabSettingStore = .shared
 
-    // 添加列表 presenter 状态
+    // 列表 presenter 状态
     @State private var listPresenter: AllListPresenter
     @State private var lastListState: AllListState?
     @State private var isActionInProgress = false
 
-    // 添加Feeds presenter状态（只用于Bluesky）
+    // Feeds presenter状态（只用于Bluesky）
     @State private var feedsPresenter: PinnableTimelineTabPresenter?
     @State private var lastFeedsState: PinnableTimelineTabPresenterState?
     @State private var isBlueskyPlatform: Bool = false
 
-    // 添加编辑标题所需的状态
+    // 编辑标题所需的状态
     @State private var isEditingTitle = false
     @State private var editingList: UiList?
     @State private var editedTitle = ""
 
-    // 添加使用ID和标题更新的状态
+    // 使用ID和标题更新的状态
     @State private var editingListId: String?
     @State private var editingListTitle: String = ""
 
-    // 添加新字段以标识编辑的是Feed还是List
+    // 新字段以标识编辑的是Feed还是List
     @State private var editingItemIsBlueskyFeed: Bool = false
 
-    // 添加折叠相关状态
+    // 折叠相关状态
     @State private var isAvailableListsExpanded: Bool = false
     @State private var isAvailableFeedsExpanded: Bool = false
     @State private var availableListsLimit: Int = 5 // 默认显示数量限制
@@ -110,7 +108,7 @@ struct HomeAppBarSettingsView: View {
                     // 主要标签
                     if let primaryTab = store.primaryHomeItems.first {
                         Section(header: Text("main tab")) {
-                            TabItemRow(tab: primaryTab, store: store, isPrimary: true)
+                            AppBarSettingRow(tab: primaryTab, store: store, isPrimary: true)
                         }.listRowBackground(theme.primaryBackgroundColor)
                     }
 
@@ -125,7 +123,7 @@ struct HomeAppBarSettingsView: View {
                     if !secondaryTabs.isEmpty {
                         Section(header: Text("used tabs")) {
                             ForEach(secondaryTabs, id: \.key) { tab in
-                                TabItemRow(tab: tab, store: store, isPrimary: false, defaultToggleValue: true)
+                                AppBarSettingRow(tab: tab, store: store, isPrimary: false, defaultToggleValue: true)
                             }
                             .onMove { source, destination in
                                 store.moveTab(from: source, to: destination)
@@ -140,7 +138,7 @@ struct HomeAppBarSettingsView: View {
                     if !unusedTabs.isEmpty {
                         Section(header: Text("unused tabs")) {
                             ForEach(unusedTabs, id: \.key) { tab in
-                                TabItemRow(tab: tab, store: store, isPrimary: false, defaultToggleValue: false)
+                                AppBarSettingRow(tab: tab, store: store, isPrimary: false, defaultToggleValue: false)
                             }
                         }.listRowBackground(theme.primaryBackgroundColor)
                     }
@@ -276,7 +274,7 @@ struct HomeAppBarSettingsView: View {
             editingListTitle = ""
         }) {
             if let list = editingList {
-                EditAppBarSettingListTitleView(
+                AppBarSettingEditListTitleView(
                     title: $editedTitle,
                     listId: list.id,
                     iconUrl: list.avatar,
@@ -291,7 +289,7 @@ struct HomeAppBarSettingsView: View {
                 )
             } else if let listId = editingListId, !editingListTitle.isEmpty {
                 // 使用 ID 和标题直接编辑
-                EditAppBarSettingListTitleView(
+                AppBarSettingEditListTitleView(
                     title: $editedTitle,
                     listId: listId,
                     iconUrl: store.listIconUrls[listId],
@@ -670,7 +668,7 @@ struct HomeAppBarSettingsView: View {
                 "listId": list.id,
                 "listTitle": list.title,
                 "isPinned": true,
-                "itemType": "list", // 明确指定为list类型
+                "itemType": "list" // 明确指定为list类型
             ]
 
             if let iconUrl = list.avatar {
@@ -701,7 +699,7 @@ struct HomeAppBarSettingsView: View {
                 "listId": feed.id,
                 "listTitle": feed.title,
                 "isPinned": true,
-                "itemType": "feed", // 明确指定为feed类型
+                "itemType": "feed" // 明确指定为feed类型
             ]
 
             if let iconUrl = feed.avatar {
@@ -725,7 +723,7 @@ struct HomeAppBarSettingsView: View {
 
         // 先设置处理状态，防止并发操作
         isActionInProgress = true
-        logger.debug("更新列表标题: \(list.id) 从 '\(list.title)' 到 '\(newTitle)'")
+        FlareLog.debug("更新列表标题: \(list.id) 从 '\(list.title)' 到 '\(newTitle)'")
 
         // 这里只更新本地存储的标题，不调用API
         NotificationCenter.default.post(
@@ -734,7 +732,7 @@ struct HomeAppBarSettingsView: View {
             userInfo: [
                 "listId": list.id,
                 "oldTitle": list.title,
-                "newTitle": newTitle,
+                "newTitle": newTitle
             ]
         )
 
@@ -755,7 +753,7 @@ struct HomeAppBarSettingsView: View {
 
         // 先设置处理状态，防止并发操作
         isActionInProgress = true
-        logger.debug("更新标题: \(listId) 从 '\(oldTitle)' 到 '\(newTitle)'")
+        FlareLog.debug("更新标题: \(listId) 从 '\(oldTitle)' 到 '\(newTitle)'")
 
         // 这里只更新本地存储的标题，不调用API
         NotificationCenter.default.post(
@@ -765,7 +763,7 @@ struct HomeAppBarSettingsView: View {
                 "listId": listId,
                 "oldTitle": oldTitle,
                 "newTitle": newTitle,
-                "itemType": editingItemIsBlueskyFeed ? "feed" : "list", // 添加类型标识
+                "itemType": editingItemIsBlueskyFeed ? "feed" : "list" // 添加类型标识
             ]
         )
 

@@ -9,63 +9,53 @@ import SwiftUI
 import UIKit
 
 struct StatusContentViewV2: View {
-    // 修改参数：使用TimelineItem替代StatusViewModel，去掉shared引用
     let item: TimelineItem
     let isDetailView: Bool
-    let enableTranslation: Bool
+    let enableGoogleTranslation: Bool
     let appSettings: AppSettings
     let theme: FlareTheme
     let openURL: OpenURLAction
-    let onMediaClick: (Int, Media) -> Void // 使用Swift Media类型
-    let onPodcastCardTap: (Card) -> Void // 使用Swift Card类型
+    let onMediaClick: (Int, Media) -> Void
+    let onPodcastCardTap: (Card) -> Void
 
     var body: some View {
         VStack(alignment: .leading) {
-            // Reply content
             if item.hasAboveTextContent, let aboveTextContent = item.aboveTextContent {
                 StatusReplyViewV2(aboveTextContent: aboveTextContent)
             }
 
-            // Content warning
             if item.hasContentWarning, let cwText = item.contentWarning {
                 StatusContentWarningViewV2(contentWarning: cwText, theme: theme, openURL: openURL)
             }
 
             Spacer().frame(height: 10)
 
-            // Main content
             StatusMainContentViewV2(
                 item: item,
-                enableTranslation: enableTranslation,
+                enableGoogleTranslation: enableGoogleTranslation,
                 appSettings: appSettings,
                 theme: theme,
                 openURL: openURL
             )
 
-            // Media
-//            let _ = FlareLog.debug("StatusContentViewV2 检查媒体显示")
-//            let _ = FlareLog.debug("StatusContentViewV2 item.hasImages: \(item.hasImages)")
-//            let _ = FlareLog.debug("StatusContentViewV2 item.images.count: \(item.images.count)")
-
             if item.hasImages {
-//                let _ = FlareLog.debug("StatusContentViewV2 显示StatusMediaViewV2")
                 StatusMediaViewV2(
-                    item: item,
+                    timelineItem: item,
                     appSettings: appSettings,
                     onMediaClick: onMediaClick
                 )
-            } else {
-//                let _ = FlareLog.debug("StatusContentViewV2 跳过媒体显示 - hasImages为false")
             }
 
             // Card (Podcast or Link Preview)
             if item.hasCard, let card = item.card {
-                StatusCardViewV2(
-                    card: card,
-                    item: item,
-                    appSettings: appSettings,
-                    onPodcastCardTap: onPodcastCardTap
-                )
+                if item.isPodcastCard {
+                    PodcastPreviewV2(card: card)
+                        .onTapGesture {
+                            onPodcastCardTap(card)
+                        }
+                } else if appSettings.appearanceSettings.showLinkPreview, item.shouldShowLinkPreview {
+                    LinkPreviewV2(card: card)
+                }
             }
 
             // Quote
@@ -80,14 +70,19 @@ struct StatusContentViewV2: View {
 
             // Detail date
             if isDetailView {
-                StatusDetailDateViewV2(createdAt: item.timestamp)
+                Spacer().frame(height: 4)
+                HStack {
+                    Text(item.timestamp, style: .date)
+                    Text(item.timestamp, style: .time)
+                }
+                .opacity(0.6)
             }
         }
     }
 }
 
 struct StatusReplyViewV2: View {
-    let aboveTextContent: AboveTextContent // 使用Swift AboveTextContent类型
+    let aboveTextContent: AboveTextContent
 
     var body: some View {
         switch aboveTextContent {
@@ -101,57 +96,30 @@ struct StatusReplyViewV2: View {
 }
 
 struct StatusMediaViewV2: View {
-    let item: TimelineItem // 使用TimelineItem替代StatusViewModel
+    let timelineItem: TimelineItem
     let appSettings: AppSettings
-    let onMediaClick: (Int, Media) -> Void // 使用Swift Media类型
+    let onMediaClick: (Int, Media) -> Void
 
     var body: some View {
-//        let _ = FlareLog.debug("StatusMediaViewV2 开始渲染媒体")
-//        let _ = FlareLog.debug("StatusMediaViewV2 item.hasImages: \(item.hasImages)")
-//        let _ = FlareLog.debug("StatusMediaViewV2 item.images.count: \(item.images.count)")
-//        let _ = FlareLog.debug("StatusMediaViewV2 item.images: \(item.images)")
-//        let _ = FlareLog.debug("StatusMediaViewV2 item.sensitive: \(item.sensitive)")
-//        let _ = FlareLog.debug("StatusMediaViewV2 showSensitiveContent: \(appSettings.appearanceSettings.showSensitiveContent)")
-
         Spacer().frame(height: 8)
 
         MediaComponentV2(
-            hideSensitive: item.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
-            medias: item.images, // ✅ 修复：使用item.images而不是空数组
+            hideSensitive: timelineItem.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
+            medias: timelineItem.images,
             onMediaClick: { index, media in
-                FlareLog.debug("StatusMediaViewV2 媒体点击: index=\(index), media=\(media)")
                 PhotoBrowserManagerV2.shared.showPhotoBrowser(
                     media: media,
-                    images: item.images, // ✅ 修复：使用item.images而不是空数组
+                    images: timelineItem.images,
                     initialIndex: index
                 )
             },
-            sensitive: item.sensitive
+            sensitive: timelineItem.sensitive
         )
     }
 }
 
-struct StatusCardViewV2: View {
-    let card: Card
-    let item: TimelineItem
-    let appSettings: AppSettings
-    let onPodcastCardTap: (Card) -> Void
-
-    var body: some View {
-        if item.isPodcastCard {
-            PodcastPreviewV2(card: card)
-                .onTapGesture {
-                    onPodcastCardTap(card)
-                }
-        } else if appSettings.appearanceSettings.showLinkPreview, item.shouldShowLinkPreview {
-            // 使用V2版本的LinkPreview，直接传递Swift Card
-            LinkPreviewV2(card: card)
-        }
-    }
-}
-
 struct StatusBottomContentViewV2: View {
-    let bottomContent: BottomContent // 使用Swift BottomContent类型
+    let bottomContent: BottomContent
 
     var body: some View {
         switch bottomContent {
@@ -162,7 +130,6 @@ struct StatusBottomContentViewV2: View {
                         ForEach(0 ..< emojiReactions.count, id: \.self) { index in
                             let reaction = emojiReactions[index]
                             Button(action: {
-                                // TODO: 需要实现Swift版本的点击处理
                                 // reaction.onClicked()
                             }) {
                                 HStack {
@@ -173,7 +140,7 @@ struct StatusBottomContentViewV2: View {
                                     } else {
                                         Text(reaction.name)
                                     }
-                                    Text("\(reaction.count)") // 使用Swift Int类型
+                                    Text("\(reaction.count)")
                                 }
                             }
                             .buttonStyle(.borderless)
@@ -185,21 +152,8 @@ struct StatusBottomContentViewV2: View {
     }
 }
 
-struct StatusDetailDateViewV2: View {
-    let createdAt: Date
-
-    var body: some View {
-        Spacer().frame(height: 4)
-        HStack {
-            Text(createdAt, style: .date)
-            Text(createdAt, style: .time)
-        }
-        .opacity(0.6)
-    }
-}
-
 struct StatusContentWarningViewV2: View {
-    let contentWarning: RichText // 使用Swift RichText类型
+    let contentWarning: RichText
     let theme: FlareTheme
     let openURL: OpenURLAction
 
@@ -250,15 +204,15 @@ struct StatusContentWarningViewV2: View {
 }
 
 struct StatusMainContentViewV2: View {
-    let item: TimelineItem // 使用TimelineItem替代StatusViewModel
-    let enableTranslation: Bool // 从StatusViewModel中提取
+    let item: TimelineItem
+    let enableGoogleTranslation: Bool
     let appSettings: AppSettings
     let theme: FlareTheme
     let openURL: OpenURLAction
 
     var body: some View {
         if item.hasContent {
-            let content = item.content // 使用Swift RichText类型
+            let content = item.content
             FlareText(
                 content.raw,
                 content.markdown,
@@ -278,8 +232,8 @@ struct StatusMainContentViewV2: View {
             .lineSpacing(CGFloat(theme.lineSpacing))
             .foregroundColor(theme.labelColor)
 
-            if appSettings.appearanceSettings.autoTranslate, enableTranslation {
-                TranslatableText(originalText: content.raw)
+            if enableGoogleTranslation {
+                TranslatableText(originalText: content.raw, forceTranslate: true)
             }
         } else {
             Text("")

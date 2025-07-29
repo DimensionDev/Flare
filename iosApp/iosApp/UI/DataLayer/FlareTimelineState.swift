@@ -274,7 +274,7 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
 //                    FlareLog.debug("TimelineItem Action[\(index)] Other - type: \(type(of: item))")
                 }
             } else if case let .group(group) = onEnum(of: action) {
-                FlareLog.debug("TimelineItem Action[\(index)] Group - displayItem: \(type(of: group.displayItem))")
+                // FlareLog.debug("TimelineItem Action[\(index)] Group - displayItem: \(type(of: group.displayItem))")
 
                 // 遍历Group中的所有SubActions来提取数据
                 for (subIndex, subAction) in group.actions.enumerated() {
@@ -369,7 +369,7 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
             // 🔥 新增：处理topMessage转换
             let topMessage = uiTimeline.topMessage?.toSwift()
             if let topMessage {
-                FlareLog.debug("TimelineItem Found topMessage: \(topMessage.type)")
+                // FlareLog.debug("TimelineItem Found topMessage: \(topMessage.type)")
             }
 
             return TimelineItem(
@@ -527,14 +527,14 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
 enum FlareTimelineState: Equatable {
     case loading
 
-    case loaded(items: [TimelineItem], hasMore: Bool, isRefreshing: Bool)
+    case loaded(items: [TimelineItem], hasMore: Bool)
 
     case error(FlareError)
 
     case empty
 
     var items: [TimelineItem] {
-        if case let .loaded(items, _, _) = self {
+        if case let .loaded(items, _) = self {
             return items
         }
         return []
@@ -544,15 +544,13 @@ enum FlareTimelineState: Equatable {
         switch self {
         case .loading:
             true
-        case let .loaded(_, _, isRefreshing):
-            isRefreshing
         default:
             false
         }
     }
 
     var hasMore: Bool {
-        if case let .loaded(_, hasMore, _) = self {
+        if case let .loaded(_, hasMore) = self {
             return hasMore
         }
         return false
@@ -566,7 +564,7 @@ enum FlareTimelineState: Equatable {
         switch self {
         case .empty:
             true
-        case let .loaded(items, _, _):
+        case let .loaded(items, _):
             items.isEmpty
         default:
             false
@@ -588,8 +586,8 @@ enum FlareTimelineState: Equatable {
     }
 
     func toLoading(preserveItems: Bool = false) -> FlareTimelineState {
-        if preserveItems, case let .loaded(items, hasMore, _) = self {
-            return .loaded(items: items, hasMore: hasMore, isRefreshing: true)
+        if preserveItems, case let .loaded(items, hasMore) = self {
+            return .loaded(items: items, hasMore: hasMore)
         }
         return .loading
     }
@@ -603,29 +601,29 @@ enum FlareTimelineState: Equatable {
             return .empty
         }
 
-        return .loaded(items: updatedItems, hasMore: hasMore, isRefreshing: false)
+        return .loaded(items: updatedItems, hasMore: hasMore)
     }
 
     func replacingItems(_ newItems: [TimelineItem], hasMore: Bool) -> FlareTimelineState {
         if newItems.isEmpty {
             return .empty
         }
-        return .loaded(items: newItems, hasMore: hasMore, isRefreshing: false)
+        return .loaded(items: newItems, hasMore: hasMore)
     }
 
     func updatingItem(_ item: TimelineItem, at index: Int) -> FlareTimelineState {
-        guard case .loaded(var items, let hasMore, let isRefreshing) = self,
+        guard case .loaded(var items, let hasMore) = self,
               index >= 0, index < items.count
         else {
             return self
         }
 
         items[index] = item
-        return .loaded(items: items, hasMore: hasMore, isRefreshing: isRefreshing)
+        return .loaded(items: items, hasMore: hasMore)
     }
 
     func removingItem(at index: Int) -> FlareTimelineState {
-        guard case .loaded(var items, let hasMore, let isRefreshing) = self,
+        guard case .loaded(var items, let hasMore) = self,
               index >= 0, index < items.count
         else {
             return self
@@ -637,18 +635,18 @@ enum FlareTimelineState: Equatable {
             return .empty
         }
 
-        return .loaded(items: items, hasMore: hasMore, isRefreshing: isRefreshing)
+        return .loaded(items: items, hasMore: hasMore)
     }
 
     func insertingItem(_ item: TimelineItem, at index: Int) -> FlareTimelineState {
-        guard case .loaded(var items, let hasMore, let isRefreshing) = self else {
-            return .loaded(items: [item], hasMore: hasMore, isRefreshing: false)
+        guard case .loaded(var items, let hasMore) = self else {
+            return .loaded(items: [item], hasMore: false)
         }
 
         let insertIndex = max(0, min(index, items.count))
         items.insert(item, at: insertIndex)
 
-        return .loaded(items: items, hasMore: hasMore, isRefreshing: isRefreshing)
+        return .loaded(items: items, hasMore: hasMore)
     }
 
     func toError(_ error: FlareError) -> FlareTimelineState {
@@ -656,10 +654,8 @@ enum FlareTimelineState: Equatable {
     }
 
     func stoppingRefresh() -> FlareTimelineState {
-        if case let .loaded(items, hasMore, _) = self {
-            return .loaded(items: items, hasMore: hasMore, isRefreshing: false)
-        }
-        return self
+        // 🔥 简化：移除isRefreshing后，此方法不再需要修改状态
+        self
     }
 }
 
@@ -672,9 +668,9 @@ extension FlareTimelineState {
             true
         case let (.error(lhsError), .error(rhsError)):
             lhsError == rhsError
-        case let (.loaded(lhsItems, lhsHasMore, lhsRefreshing),
-                  .loaded(rhsItems, rhsHasMore, rhsRefreshing)):
-            lhsItems == rhsItems && lhsHasMore == rhsHasMore && lhsRefreshing == rhsRefreshing
+        case let (.loaded(lhsItems, lhsHasMore),
+                  .loaded(rhsItems, rhsHasMore)):
+            lhsItems == rhsItems && lhsHasMore == rhsHasMore
         default:
             false
         }
@@ -690,8 +686,8 @@ extension FlareTimelineState: CustomStringConvertible {
             "FlareTimelineState.empty"
         case let .error(error):
             "FlareTimelineState.error(\(error.localizedDescription))"
-        case let .loaded(items, hasMore, isRefreshing):
-            "FlareTimelineState.loaded(items: \(items.count), hasMore: \(hasMore), isRefreshing: \(isRefreshing))"
+        case let .loaded(items, hasMore):
+            "FlareTimelineState.loaded(items: \(items.count), hasMore: \(hasMore))"
         }
     }
 }
@@ -871,16 +867,16 @@ extension FlareTimelineState {
         }
 
         // 如果是loaded状态，检查具体变化
-        if case let .loaded(oldItems, oldHasMore, oldRefreshing) = other,
-           case let .loaded(newItems, newHasMore, newRefreshing) = self
+        if case let .loaded(oldItems, oldHasMore) = other,
+           case let .loaded(newItems, newHasMore) = self
         {
             // 检查项目数量变化
             if oldItems.count != newItems.count {
                 return true
             }
 
-            // 检查hasMore或isRefreshing状态变化
-            if oldHasMore != newHasMore || oldRefreshing != newRefreshing {
+            // 检查hasMore状态变化
+            if oldHasMore != newHasMore {
                 return true
             }
 
@@ -899,9 +895,9 @@ extension FlareTimelineState {
 
     func changesSummary(from other: FlareTimelineState) -> String {
         switch (other, self) {
-        case let (.loading, .loaded(items, _, _)):
+        case let (.loading, .loaded(items, _)):
             return "Loaded \(items.count) items"
-        case let (.loaded(oldItems, _, _), .loaded(newItems, _, _)):
+        case let (.loaded(oldItems, _), .loaded(newItems, _)):
             let itemDiff = newItems.count - oldItems.count
             if itemDiff > 0 {
                 return "Added \(itemDiff) items"

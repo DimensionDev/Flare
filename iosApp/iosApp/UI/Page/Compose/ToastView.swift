@@ -82,7 +82,7 @@ public class ToastView: UIView {
         // 计算文本尺寸
         let textMaxWidth = maxWidth - padding * 2
         let textAttributes: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 14),
+            .font: UIFont.systemFont(ofSize: 14)
         ]
 
         let textRect = message.boundingRect(

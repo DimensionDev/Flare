@@ -46,7 +46,7 @@ class MediaCollectionViewCell: UICollectionViewCell {
             controller.view.topAnchor.constraint(equalTo: contentView.topAnchor),
             controller.view.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             controller.view.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-            controller.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            controller.view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
         ])
     }
 }

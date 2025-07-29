@@ -36,7 +36,7 @@ final class MediaPreviewVideoViewModel {
         case let .video(mediaContext):
             guard let assertURL = mediaContext.assetURL else { return }
             let asset = AVURLAsset(url: assertURL, options: [
-                "AVURLAssetHTTPHeaderFieldsKey": mediaContext.headers,
+                "AVURLAssetHTTPHeaderFieldsKey": mediaContext.headers
             ])
             let playerItem = AVPlayerItem(asset: asset)
             let _player = AVPlayer(playerItem: playerItem)
@@ -45,7 +45,7 @@ final class MediaPreviewVideoViewModel {
         case let .gif(mediaContext):
             guard let assertURL = mediaContext.assetURL else { return }
             let asset = AVURLAsset(url: assertURL, options: [
-                "AVURLAssetHTTPHeaderFieldsKey": mediaContext.headers,
+                "AVURLAssetHTTPHeaderFieldsKey": mediaContext.headers
             ])
             let playerItem = AVPlayerItem(asset: asset)
             let _player = AVQueuePlayer(playerItem: playerItem)
@@ -59,7 +59,7 @@ final class MediaPreviewVideoViewModel {
         case let .audio(mediaContext):
             guard let assertURL = mediaContext.assetURL else { return }
             let asset = AVURLAsset(url: assertURL, options: [
-                "AVURLAssetHTTPHeaderFieldsKey": mediaContext.headers,
+                "AVURLAssetHTTPHeaderFieldsKey": mediaContext.headers
             ])
             let playerItem = AVPlayerItem(asset: asset)
             let _player = AVPlayer(playerItem: playerItem)

@@ -9,8 +9,6 @@ import UIKit
 class FlareRouter {
     public var appState: FlareAppState
 
-    // 注意：@Observable类中不能使用@Environment，需要通过其他方式获取appSettings
-
     private var cancellables = Set<AnyCancellable>()
 
     var activeDestination: FlareDestination?
@@ -25,15 +23,15 @@ class FlareRouter {
 
     var previousPageSnapshot: UIImage?
 
-    // 新增：Tab选择管理
     var selectedTab: FlareHomeTabs = .timeline {
         didSet {
-            activeTab = selectedTab
+            let oldTab = oldValue
+            FlareLog.debug("[FlareRouter] Tab changed: \(oldTab) -> \(selectedTab)")
         }
     }
 
     var navigationDepth: Int {
-        let depth = switch activeTab {
+        let depth = switch selectedTab {
         case .menu: menuNavigationPath.count
         case .timeline: timelineNavigationPath.count
         case .discover: discoverNavigationPath.count
@@ -44,7 +42,7 @@ class FlareRouter {
 
         os_log("[FlareRouter] Current navigationDepth for tab %{public}@: %{public}d",
                log: .default, type: .debug,
-               String(describing: activeTab),
+               String(describing: selectedTab),
                depth)
 
         return depth
@@ -56,15 +54,13 @@ class FlareRouter {
     var notificationNavigationPath = NavigationPath()
     var profileNavigationPath = NavigationPath()
 
-    var activeTab: FlareHomeTabs = .timeline
-
     var navigationPath: NavigationPath {
         get { currentNavigationPath }
         set { updateCurrentNavigationPath(newValue) }
     }
 
     private var currentNavigationPath: NavigationPath {
-        switch activeTab {
+        switch selectedTab {
         case .menu: menuNavigationPath
         case .timeline: timelineNavigationPath
         case .discover: discoverNavigationPath
@@ -75,7 +71,7 @@ class FlareRouter {
     }
 
     private func updateCurrentNavigationPath(_ newPath: NavigationPath) {
-        switch activeTab {
+        switch selectedTab {
         case .menu: menuNavigationPath = newPath
         case .timeline: timelineNavigationPath = newPath
         case .discover: discoverNavigationPath = newPath
@@ -126,12 +122,12 @@ class FlareRouter {
         }
 
         let routerId = ObjectIdentifier(self)
-        os_log("[FlareRouter] Router %{public}@ navigating to %{public}@, current depth: %{public}d, activeTab: %{public}@",
+        os_log("[FlareRouter] Router %{public}@ navigating to %{public}@, current depth: %{public}d, selectedTab: %{public}@",
                log: .default, type: .debug,
                String(describing: routerId),
                String(describing: destination),
                navigationDepth,
-               String(describing: activeTab))
+               String(describing: selectedTab))
 
         presentationType = destination.navigationType
         activeDestination = destination
@@ -180,9 +176,9 @@ class FlareRouter {
                log: .default, type: .debug,
                String(describing: routerId),
                String(describing: destination),
-               String(describing: activeTab))
+               String(describing: selectedTab))
 
-        switch activeTab {
+        switch selectedTab {
         case .menu:
             menuNavigationPath.append(destination)
         case .timeline:
@@ -200,12 +196,12 @@ class FlareRouter {
 
     private func dismissCurrentView() {
         let routerId = ObjectIdentifier(self)
-        os_log("[FlareRouter] Router %{public}@ dismissing view, current type: %{public}@, depth: %{public}d, activeTab: %{public}@",
+        os_log("[FlareRouter] Router %{public}@ dismissing view, current type: %{public}@, depth: %{public}d, selectedTab: %{public}@",
                log: .default, type: .debug,
                String(describing: routerId),
                String(describing: presentationType),
                navigationDepth,
-               String(describing: activeTab))
+               String(describing: selectedTab))
 
         switch presentationType {
         case .sheet:
@@ -216,7 +212,7 @@ class FlareRouter {
             isDialogPresented = false
             activeDestination = nil
         case .push:
-            switch activeTab {
+            switch selectedTab {
             case .menu:
                 if !menuNavigationPath.isEmpty {
                     menuNavigationPath.removeLast()

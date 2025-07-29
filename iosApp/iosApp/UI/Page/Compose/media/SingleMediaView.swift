@@ -14,6 +14,7 @@ public struct SingleMediaView: View {
             ZStack {
                 if let previewUrl = viewModel.previewUrl {
                     KFImage(previewUrl)
+                        .flareTimelineMedia(size: CGSize(width: geometry.size.width, height: geometry.size.height))
                         .placeholder {
                             Rectangle()
                                 .foregroundColor(.gray.opacity(0.2))

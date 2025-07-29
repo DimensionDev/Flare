@@ -3,13 +3,10 @@ import os
 import shared
 import SwiftUI
 
-// 配置管理服务
 class AppBarConfigService {
-    private let logger = Logger(subsystem: "com.flare.app", category: "AppBarConfigService")
     private let settingsManager = FLTabSettingsManager()
     private let storageLock = NSLock()
 
-    // 加载AppBar配置
     func loadAppBarConfig(for user: UiUserV2) -> [AppBarItemConfig] {
         storageLock.lock()
         defer { storageLock.unlock() }
@@ -18,7 +15,7 @@ class AppBarConfigService {
         let config = settingsManager.getAppBarConfig(for: user)
         let items = config.enabledItems
 
-        logger.debug("加载到\(items.count)个配置项")
+        FlareLog.debug("加载到\(items.count)个配置项")
         return items
     }
 
@@ -31,14 +28,14 @@ class AppBarConfigService {
         let config = PlatformAppBarConfig(enabledItems: items)
         settingsManager.saveAppBarConfig(config, for: user)
 
-        logger.debug("保存\(items.count)个配置项")
+        FlareLog.debug("保存\(items.count)个配置项")
     }
 
     // 创建默认配置
     func createDefaultAppBarConfig(for user: UiUserV2) -> [AppBarItemConfig] {
         let defaultConfig = settingsManager.createDefaultAppBarConfig(for: user)
         let items = defaultConfig.enabledItems
-        logger.debug("创建默认AppBar配置")
+        FlareLog.debug("创建默认AppBar配置")
         return items
     }
 

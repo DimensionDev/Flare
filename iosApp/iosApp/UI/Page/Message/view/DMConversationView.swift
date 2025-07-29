@@ -204,7 +204,7 @@ struct DMConversationView: View {
                             id: UUID().uuidString,
                             url: url,
                             type: .image
-                        ),
+                        )
                     ]
                 }
 
@@ -216,7 +216,7 @@ struct DMConversationView: View {
                             id: UUID().uuidString,
                             url: url,
                             type: .video
-                        ),
+                        )
                     ]
                 }
 
@@ -228,7 +228,7 @@ struct DMConversationView: View {
                             id: UUID().uuidString,
                             url: url,
                             type: .video
-                        ),
+                        )
                     ]
                 }
 

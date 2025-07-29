@@ -29,7 +29,7 @@ class BaseTimelineCell: UITableViewCell {
             loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 loadingIndicator.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-                loadingIndicator.centerYAnchor.constraint(equalTo: contentView.centerYAnchor),
+                loadingIndicator.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
             ])
         }
 
@@ -45,7 +45,7 @@ class BaseTimelineCell: UITableViewCell {
             separator.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             separator.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             separator.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            separator.heightAnchor.constraint(equalToConstant: 0.5),
+            separator.heightAnchor.constraint(equalToConstant: 0.5)
         ])
     }
 
@@ -72,7 +72,7 @@ class BaseTimelineCell: UITableViewCell {
             hostingController.view.topAnchor.constraint(equalTo: contentView.layoutMarginsGuide.topAnchor),
             hostingController.view.leadingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.leadingAnchor),
             hostingController.view.trailingAnchor.constraint(equalTo: contentView.layoutMarginsGuide.trailingAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor),
+            hostingController.view.bottomAnchor.constraint(equalTo: contentView.layoutMarginsGuide.bottomAnchor)
         ])
 
         // 设置背景色和选中样式

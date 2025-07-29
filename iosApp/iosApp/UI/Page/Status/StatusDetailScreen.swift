@@ -36,6 +36,7 @@ struct StatusDetailScreen: View {
                        router.navigationDepth)
             }
             .onDisappear {
+                presenter.close()
                 os_log("[StatusDetailScreen] onDisappear - Router: %{public}@, current depth: %{public}d",
                        log: .default, type: .debug,
                        String(describing: ObjectIdentifier(router)),

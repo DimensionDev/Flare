@@ -232,7 +232,7 @@ struct ShareButtonV2: View {
                     .font(.system(size: 16))
                 Spacer()
             }
-            .frame(maxWidth: .infinity)
+            // .frame(maxWidth: .infinity)
             .contentShape(Rectangle())
         }
         #if canImport(_Translation_SwiftUI)

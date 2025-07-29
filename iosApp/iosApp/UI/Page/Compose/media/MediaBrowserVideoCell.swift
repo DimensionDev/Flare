@@ -116,7 +116,7 @@ class MediaBrowserVideoCell: UIView, UIGestureRecognizerDelegate {
             newVC.view.leadingAnchor.constraint(equalTo: leadingAnchor),
             newVC.view.trailingAnchor.constraint(equalTo: trailingAnchor),
             newVC.view.topAnchor.constraint(equalTo: topAnchor),
-            newVC.view.bottomAnchor.constraint(equalTo: bottomAnchor),
+            newVC.view.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
 
         // 默认不自动播放，等待 willDisplay 时再播放

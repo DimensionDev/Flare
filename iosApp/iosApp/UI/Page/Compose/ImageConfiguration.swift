@@ -28,7 +28,7 @@ public final class FlareImageConfiguration {
         cache.diskStorage.config.expiration = .days(7)
 
         cache.memoryStorage.config.expiration = .seconds(300)
-//        cache.memoryStorage.config.keepWhenEnteringBackground = true
+//       cache.memoryStorage.config.keepWhenEnteringBackground = true
 
         FlareLog.info("ImageCache Memory limit: \(memoryLimit / 1024 / 1024)MB, Disk limit: 100MB, KeepInBackground: true")
     }
@@ -112,26 +112,7 @@ public enum FlareImageOptions {
             .processor(DownsamplingImageProcessor(size: size)),
             .scaleFactor(UIScreen.main.scale),
             .memoryCacheExpiration(.seconds(180)),
-            .diskCacheExpiration(.days(3)),
-        ]
-    }
-
-    public static func timelineMedia(size: CGSize, priority: Float = 0.5) -> KingfisherOptionsInfo {
-        let scale = UIScreen.main.scale
-
-        return [
-            .processor(DownsamplingImageProcessor(size: size)),
-            .scaleFactor(scale),
-
-            .downloadPriority(priority),
-            .backgroundDecode,
-            .alsoPrefetchToMemory,
-
-            .memoryCacheExpiration(.seconds(240)),
-            .diskCacheExpiration(.days(5)),
-
-            .transition(.fade(0.25)),
-            .keepCurrentImageWhileLoading,
+            .diskCacheExpiration(.days(3))
         ]
     }
 
@@ -145,7 +126,7 @@ public enum FlareImageOptions {
             .alsoPrefetchToMemory,
             .memoryCacheExpiration(.seconds(600)),
             .diskCacheExpiration(.days(7)),
-            .transition(.fade(0.2)),
+            .transition(.fade(0.2))
         ]
     }
 }
@@ -172,35 +153,45 @@ public extension KFImage {
             .diskCacheExpiration(.days(30))
     }
 
-    // @MainActor
+    @MainActor
     func flareTimelineMedia(size: CGSize, priority: Float = 0.5) -> KFImage {
         let scale = UIScreen.main.scale
         let processor = DownsamplingImageProcessor(size: size)
 
-        return setProcessor(processor)
+        var image = setProcessor(processor)
             .scaleFactor(scale)
             .cancelOnDisappear(true)
             .reducePriorityOnDisappear(true)
             .downloadPriority(priority)
-            .backgroundDecode(true)
             .memoryCacheExpiration(.seconds(240))
             .diskCacheExpiration(.days(5))
             .fade(duration: 0.25)
+
+        #if !targetEnvironment(simulator)
+            image = image.backgroundDecode(true)
+        #endif
+
+        return image
     }
 
-    // @MainActor
+    @MainActor
     func flareTimelineAvatar(size: CGSize) -> KFImage {
         let scale = UIScreen.main.scale
 
         let processor = DownsamplingImageProcessor(size: size)
 
-        return setProcessor(processor)
+        var image = setProcessor(processor)
             .scaleFactor(scale)
             .cancelOnDisappear(true)
             .downloadPriority(0.7)
-            .backgroundDecode(true)
             .memoryCacheExpiration(.seconds(600))
             .diskCacheExpiration(.days(7))
             .fade(duration: 0.2)
+
+        #if !targetEnvironment(simulator)
+            image = image.backgroundDecode(true)
+        #endif
+
+        return image
     }
 }

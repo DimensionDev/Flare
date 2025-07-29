@@ -156,7 +156,7 @@ private struct EnhancedListRowView: View {
             "listId": list.id,
             "listTitle": list.title,
             "isPinned": isPinned,
-            "itemType": "list",
+            "itemType": "list"
         ]
         if let listIconUrl = list.avatar {
             listInfo["listIconUrl"] = listIconUrl

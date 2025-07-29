@@ -3,8 +3,7 @@ import os
 import shared
 import SwiftUI
 
-// Secondary
-struct TabItemRow: View {
+struct AppBarSettingRow: View {
     let tab: FLTabItem
     let store: AppBarTabSettingStore
     let isPrimary: Bool
@@ -13,11 +12,8 @@ struct TabItemRow: View {
     // 本地状态用于防止频繁操作
     @State private var isProcessing = false
 
-    // 添加日志记录器
-    private let logger = Logger(subsystem: "com.flare.app", category: "TabItemRow")
     @Environment(FlareTheme.self) private var theme
 
-    // 添加默认初始化器，默认值为true
     init(tab: FLTabItem, store: AppBarTabSettingStore, isPrimary: Bool, defaultToggleValue: Bool = true) {
         self.tab = tab
         self.store = store
@@ -43,45 +39,48 @@ struct TabItemRow: View {
                    let materialIcon = FLMaterialIcon(rawValue: firstIcon)
                 {
                     materialIcon.icon.foregroundColor(theme.tintColor)
-//                        .foregroundColor(FColors.State.swiftUIActive)//interactiveActive
                 }
             case .avatar:
                 Image(systemName: "person.circle")
-//                    .foregroundColor(FColors.State.swiftUIActive)
             }
 
             switch tab.metaData.title {
             case let .text(title):
                 Text(title)
-//                    .foregroundColor(FColors.State.swiftUIActive)
             case let .localized(key):
                 Text(NSLocalizedString(key, comment: ""))
-//                    .foregroundColor(FColors.Text.swiftUIPrimary)
             }
 
             Spacer()
 
             if !isPrimary {
-                Toggle("", isOn: Binding(
-                    get: {
-                        let isEnabled = store.availableAppBarTabsItems.contains(where: { $0.key == tab.key })
-                        logger.debug("Toggle GET: tab=\(tab.key), isEnabled=\(isEnabled), defaultValue=\(defaultToggleValue)")
-                        return isEnabled ? true : defaultToggleValue
-                    },
-                    set: { _ in
-                        if !isProcessing {
-                            isProcessing = true
-                            logger.debug("Toggle SET: tab=\(tab.key), 开始切换状态")
-                            store.toggleTab(tab.key)
-                            // 设置短暂延迟避免频繁操作
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                isProcessing = false
-                                logger.debug("Toggle SET: tab=\(tab.key), 切换完成")
+                Toggle(
+                    "",
+                    isOn: Binding(
+                        get: {
+                            let isEnabled = store.availableAppBarTabsItems.contains(
+                                where: { $0.key == tab.key
+                                })
+                            FlareLog
+                                .debug(
+                                    "Toggle GET: tab=\(tab.key), isEnabled=\(isEnabled), defaultValue=\(defaultToggleValue)"
+                                )
+                            return isEnabled ? true : defaultToggleValue
+                        },
+                        set: { _ in
+                            if !isProcessing {
+                                isProcessing = true
+                                FlareLog.debug("Toggle SET: tab=\(tab.key), 开始切换状态")
+                                store.toggleTab(tab.key)
+                                // 设置短暂延迟避免频繁操作
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                    isProcessing = false
+                                    FlareLog.debug("Toggle SET: tab=\(tab.key), 切换完成")
+                                }
                             }
                         }
-                    }
-                ))
-//                .tint(FColors.State.swiftUIActive)
+                    )
+                )
                 .disabled(isProcessing)
             }
         }
@@ -94,15 +93,12 @@ struct ListTabItemRowRow: View {
     let title: String
     let store: AppBarTabSettingStore
     let onRequestEdit: (String, String) -> Void
-    let isBlueskyFeed: Bool // 新增字段，标识是否为Bluesky Feed
-    let defaultToggleValue: Bool // 添加默认值参数
+    let isBlueskyFeed: Bool
+    let defaultToggleValue: Bool
 
     @Environment(FlareTheme.self) private var theme
     @State private var isProcessing = false
     @State private var currentTitle: String
-
-    // 添加日志记录器
-    private let logger = Logger(subsystem: "com.flare.app", category: "ListTabItemRowRow")
 
     init(listId: String, title: String, store: AppBarTabSettingStore, onRequestEdit: @escaping (String, String) -> Void, isBlueskyFeed: Bool = false, defaultToggleValue: Bool = true) {
         self.listId = listId
@@ -167,7 +163,7 @@ struct ListTabItemRowRow: View {
                             "feed_\(store.accountType)_\(listId)" :
                             "list_\(store.accountType)_\(listId)"
                         let isEnabled = store.availableAppBarTabsItems.contains(where: { $0.key == tabKey })
-                        logger.debug("Toggle GET: \(isBlueskyFeed ? "feed" : "list")=\(listId), isEnabled=\(isEnabled), defaultValue=\(defaultToggleValue)")
+                        FlareLog.debug("Toggle GET: \(isBlueskyFeed ? "feed" : "list")=\(listId), isEnabled=\(isEnabled), defaultValue=\(defaultToggleValue)")
                         return isEnabled ? true : defaultToggleValue
                     },
                     set: { _ in
@@ -176,12 +172,12 @@ struct ListTabItemRowRow: View {
                             let tabKey = isBlueskyFeed ?
                                 "feed_\(store.accountType)_\(listId)" :
                                 "list_\(store.accountType)_\(listId)"
-                            logger.debug("Toggle SET: \(isBlueskyFeed ? "feed" : "list")=\(listId), 开始切换状态")
+                            FlareLog.debug("Toggle SET: \(isBlueskyFeed ? "feed" : "list")=\(listId), 开始切换状态")
                             store.toggleTab(tabKey)
                             // 设置短暂延迟避免频繁操作
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 isProcessing = false
-                                logger.debug("Toggle SET: \(isBlueskyFeed ? "feed" : "list")=\(listId), 切换完成")
+                                FlareLog.debug("Toggle SET: \(isBlueskyFeed ? "feed" : "list")=\(listId), 切换完成")
                             }
                         }
                     }

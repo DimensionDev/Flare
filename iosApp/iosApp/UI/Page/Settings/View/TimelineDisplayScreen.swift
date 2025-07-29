@@ -5,15 +5,20 @@ import UIKit
 struct TimelineDisplayScreen: View {
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareTheme.self) private var theme
-    @State private var presenter = AppearancePresenter()
+    // @State private var presenter = AppearancePresenter()
     @State private var localValues = DisplaySettingsLocalValues()
     @State private var isFontSelectorPresented = false
 
     @State private var isThemeAutoSectionExpanded = true
     @State private var isFontSectionExpanded = true
+    let presenter: AppearancePresenter
+
+    init(presenter: AppearancePresenter) {
+        self.presenter = presenter
+    }
 
     var body: some View {
-        ObservePresenter(presenter: presenter) { state in
+        ObserveOldPresenter(presenter: presenter) { state in
             List {
                 if case let .success(success) = onEnum(of: state.sampleStatus) {
                     VStack {
@@ -21,7 +26,38 @@ struct TimelineDisplayScreen: View {
                             data: success.data,
                             detailKey: nil
                         )
+                        // if let user = UserManager.shared.getCurrentUser().0?.toSwift() {
+                        //     TimelineStatusViewV2(
+                        //         item: TimelineItem(
+                        //             id: "sample",
+                        //             content: RichText(
+                        //                 raw: "Sample content for \(user.name.raw)  on twitter.com [#flare](flare://Search/%23flare)"
+                        //             ),
+                        //             user: user,
+                        //             timestamp: Date(),
+                        //             images: [],
+                        //             url: "",
+                        //             platformType: "xqt",
+                        //             aboveTextContent: nil,
+                        //             contentWarning: nil,
+                        //             card: nil,
+                        //             quote: [],
+                        //             bottomContent: nil,
+                        //             topEndContent: nil,
+                        //             poll: nil,
+                        //             topMessage: nil,
+                        //             sensitive: false,
+                        //             visibility: "public",
+                        //             language: nil,
+                        //             actions: []
+                        //         ),
+                        //         index: 0
+                        //     ).padding(.vertical, 0)
+                        // }
+
                     }.allowsHitTesting(false)
+                        .listRowBackground(theme.primaryBackgroundColor)
+                        .listStyle(.plain)
                 }
 
                 // Theme部分
@@ -46,33 +82,6 @@ struct TimelineDisplayScreen: View {
                         }
                     }, label: {
                         Text("Text Render Engine")
-                    })
-                }.listRowBackground(theme.primaryBackgroundColor)
-
-                // Timeline版本选择部分
-                Section("Timeline Version") {
-                    Picker(selection: Binding(get: {
-                        appSettings.appearanceSettings.timelineVersion
-                    }, set: { value in
-                        // 更新设置
-                        appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.timelineVersion, to: value))
-
-                        // 同步到TimelineVersionManager
-                        let managerVersion = value.toManagerVersion()
-                        TimelineVersionManager.shared.updateFromSettings(managerVersion)
-                    }), content: {
-                        ForEach(TimelineVersionSetting.allCases, id: \.self) { version in
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(version.title)
-                                    .font(.body)
-                                Text(version.description)
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            .tag(version)
-                        }
-                    }, label: {
-                        Text("Timeline Version")
                     })
                 }.listRowBackground(theme.primaryBackgroundColor)
 
@@ -296,4 +305,14 @@ struct TimelineDisplayScreen: View {
             }
         }
     }
+}
+
+@MainActor
+@Observable class DisplaySettingsLocalValues {
+    var tintColor = FlareTheme.shared.tintColor
+    var primaryBackgroundColor = FlareTheme.shared.primaryBackgroundColor
+    var secondaryBackgroundColor = FlareTheme.shared.secondaryBackgroundColor
+    var labelColor = FlareTheme.shared.labelColor
+    var lineSpacing = FlareTheme.shared.lineSpacing
+    var fontSizeScale = FlareTheme.shared.fontSizeScale
 }

@@ -5,8 +5,6 @@ import SwiftUI
 
 // 通知管理服务
 class AppBarNotificationService {
-    private let logger = Logger(subsystem: "com.flare.app", category: "AppBarNotificationService")
-
     // 发送标签更新通知
     func postTabsDidUpdateNotification(updatedTabKey: String? = nil, newTitle: String? = nil) {
         var userInfo: [String: Any]?
@@ -35,7 +33,7 @@ class AppBarNotificationService {
             "listId": listId,
             "listTitle": listTitle,
             "isPinned": isPinned,
-            "itemType": isBlueskyFeed ? "feed" : "list",
+            "itemType": isBlueskyFeed ? "feed" : "list"
         ]
 
         if let iconUrl, !iconUrl.isEmpty {

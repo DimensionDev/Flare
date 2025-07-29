@@ -108,7 +108,7 @@ internal fun TopLevel.renderNotifications(
                         else -> UiTimeline.TopMessage.Icon.Info
                     }
                 val tweet =
-                    notificationTweet?.lastOrNull()?.let {
+                    notificationTweet?.firstOrNull()?.let {
                         Tweet(
                             restId = it.idStr,
                             core =

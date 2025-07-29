@@ -36,7 +36,7 @@ struct HomeScreenSwiftUI: View {
 
             HomeTabViewContentViewSwiftUI(
                 tabStore: tabStore,
-                selectedTab: $selectedHomeAppBarTabKey,
+                selectedTab: $selectedHomeAppBarTabKey
             )
         }.toolbarVisibility(.hidden, for: .navigationBar)
             .onAppear {

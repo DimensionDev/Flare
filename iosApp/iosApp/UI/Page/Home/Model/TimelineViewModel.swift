@@ -21,6 +21,13 @@ class TimelineViewModel {
 
     private(set) var isLoadingMore: Bool = false
 
+
+    var scrollToId: String?
+
+
+    @ObservationIgnored
+    private var visibleItems: [TimelineItem] = []
+
     var items: [TimelineItem] {
         if case let .loaded(items, _) = timelineState {
             return items
@@ -104,13 +111,19 @@ class TimelineViewModel {
                 await MainActor.run {
                     let oldItemsCount = self.items.count
                     let oldState = type(of: self.timelineState)
+                    let oldHasMore = self.hasMore
 
                     self.timelineState = flareState
 
                     let newItemsCount = self.items.count
                     let newState = type(of: self.timelineState)
+                    let newHasMore = self.hasMore
 
-                    FlareLog.debug("🎨 [Timeline ViewModel] UI state updated - stateChange: \(oldState) → \(newState), itemsChange: \(oldItemsCount) → \(newItemsCount), hasMore: \(self.hasMore)")
+                    FlareLog.debug("🎨 [Timeline ViewModel] UI state updated - stateChange: \(oldState) → \(newState), itemsChange: \(oldItemsCount) → \(newItemsCount), hasMoreChange: \(oldHasMore) → \(newHasMore)")
+
+                    if newItemsCount != oldItemsCount {
+                        FlareLog.debug("📊 [Timeline ViewModel] Items数量变化详情 - 新增: \(newItemsCount - oldItemsCount)")
+                    }
                 }
             }
 
@@ -204,15 +217,20 @@ class TimelineViewModel {
     }
 
     func handleError(_ error: FlareError) {
+        FlareLog.error("[TimelineViewModel] 处理错误: \(error)")
         currentError = error
         showErrorAlert = true
+        FlareLog.debug("[TimelineViewModel] 错误状态已设置 - showErrorAlert: true")
     }
 
     func handleScrollOffsetChange(_ offsetY: CGFloat, showFloatingButton: Binding<Bool>) {
         let shouldShow = offsetY > 50
 
+         //FlareLog.debug("[TimelineViewModel] 滚动偏移变化: offsetY=\(offsetY), shouldShow=\(shouldShow), current=\(showFloatingButton.wrappedValue)")
+
         if showFloatingButton.wrappedValue != shouldShow {
             showFloatingButton.wrappedValue = shouldShow
+            FlareLog.debug("[TimelineViewModel] 浮动按钮状态更新: \(showFloatingButton.wrappedValue)")
         }
     }
 
@@ -233,6 +251,10 @@ class TimelineViewModel {
         isLoadingMore = true
         FlareLog.debug("🔄 [Timeline ViewModel] isLoadingMore set to true, timestamp: \(timestamp)")
 
+
+        let topVisibleItem = visibleItems.first
+        FlareLog.debug("🎯 [Timeline ViewModel] 保存顶部可见item: \(topVisibleItem?.id ?? "nil")")
+
         defer {
             isLoadingMore = false
             let deferTimestamp = Date().timeIntervalSince1970
@@ -245,10 +267,51 @@ class TimelineViewModel {
 
             let completionTimestamp = Date().timeIntervalSince1970
             FlareLog.debug("✅ [Timeline ViewModel] handleLoadMore completed successfully, timestamp: \(completionTimestamp)")
+
+
+            if let topItem = topVisibleItem,
+               visibleItems.contains(where: { $0.id == topItem.id }) {
+                FlareLog.debug("🎯 [Timeline ViewModel] 恢复滚动位置到: \(topItem.id)")
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    self.scrollTo(itemId: topItem.id)
+                }
+            }
         } catch {
             let errorTimestamp = Date().timeIntervalSince1970
             FlareLog.error("💥 [Timeline ViewModel] handleLoadMore failed - error: \(error), timestamp: \(errorTimestamp)")
         }
+    }
+
+
+    func clearScrollTarget() {
+        FlareLog.debug("[TimelineViewModel] 清除滚动目标")
+        scrollToId = nil
+    }
+
+    func scrollTo(itemId: String) {
+        FlareLog.debug("[TimelineViewModel] 设置滚动目标: \(itemId)")
+        scrollToId = itemId
+    }
+
+
+    func itemDidAppear(item: TimelineItem) {
+
+        if !visibleItems.contains(where: { $0.id == item.id }) {
+            visibleItems.insert(item, at: 0)
+        }
+
+
+        if visibleItems.count > 50 {
+            visibleItems = Array(visibleItems.prefix(50))
+        }
+
+        FlareLog.debug("[TimelineViewModel] item出现: \(item.id), 当前可见items: \(visibleItems.count)")
+    }
+
+    func itemDidDisappear(item: TimelineItem) {
+        visibleItems.removeAll { $0.id == item.id }
+         FlareLog.debug("[TimelineViewModel] item消失: \(item.id), 当前可见items: \(visibleItems.count)")
     }
 }
 

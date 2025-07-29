@@ -93,6 +93,18 @@ struct TimelineViewSwiftUIV4: View {
                     proxy.scrollTo("timeline-top-v4", anchor: .center)
                 }
             }
+            .onChange(of: viewModel.scrollToId) { _, newValue in
+                if let newValue {
+                    FlareLog.debug("🎯 [TimelineV4] 滚动到指定位置: \(newValue)")
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        proxy.scrollTo(newValue, anchor: .top)
+                    }
+
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        viewModel.clearScrollTarget()
+                    }
+                }
+            }
             .task(id: tab.key) {
                 let timestamp = Date().timeIntervalSince1970
                 FlareLog.debug("📱 [TimelineV4] .task(id: \(tab.key)) triggered - isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")

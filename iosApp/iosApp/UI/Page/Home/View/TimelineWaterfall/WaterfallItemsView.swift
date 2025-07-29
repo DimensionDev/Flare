@@ -71,8 +71,10 @@ struct WaterfallItemsView: View {
                 .scrollOptions(direction: .vertical)
                 .padding(.horizontal, 8)
                 if hasMore {
-                    TimelineLoadMoreView(isRefreshing: false)
-                        .padding(.top, 16)
+                    TimelineLoadMoreView {
+                        try await viewModel.handleLoadMore()
+                    }
+                    .padding(.top, 16)
                 }
             }
         }

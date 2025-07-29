@@ -328,7 +328,7 @@ class PagingStateConverter {
         FlareLog.debug("[PagingStateConverter] 开始转换范围: [\(startIndex), \(endIndex))")
 
         for index in startIndex ..< endIndex {
-            FlareLog.debug("[PagingStateConverter] 尝试获取index=\(index)的数据")
+            //FlareLog.debug("[PagingStateConverter] 尝试获取index=\(index)的数据")
 
             let uiTimeline: UiTimeline?
 
@@ -348,7 +348,7 @@ class PagingStateConverter {
             if let timeline = uiTimeline {
                 let timelineItem = TimelineItem.from(timeline)
                 items.append(timelineItem)
-                FlareLog.debug("[PagingStateConverter] 成功转换index=\(index)的数据，当前items数量: \(items.count)")
+                //FlareLog.debug("[PagingStateConverter] 成功转换index=\(index)的数据，当前items数量: \(items.count)")
             } else {
                 FlareLog.warning("PagingStateConverter Failed to get item at index \(index)")
                 // 遇到nil时停止转换，避免空洞

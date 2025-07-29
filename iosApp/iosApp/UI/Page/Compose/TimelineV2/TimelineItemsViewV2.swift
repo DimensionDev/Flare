@@ -28,21 +28,10 @@ struct TimelineItemsViewV2: View {
             }
         }
 
-        if hasMore {
-            TimelineLoadMoreView(isRefreshing: false)
-                .onAppear {
-                    if hasMore, !(viewModel?.isLoadingMore ?? false) {
-                        FlareLog.debug("TimelineItemsViewV2 Load more triggered")
-                        handleLoadMore()
-                    }
-                }
-        }
-    }
-
-    private func handleLoadMore() {
-        FlareLog.debug("[TimelineItemsViewV2 LoadMore] UI层触发load more，委托给ViewModel")
-        Task {
-            await viewModel?.handleLoadMore()
+        if hasMore, let viewModel = viewModel {
+            TimelineLoadMoreView {
+                try await viewModel.handleLoadMore()
+            }
         }
     }
 }

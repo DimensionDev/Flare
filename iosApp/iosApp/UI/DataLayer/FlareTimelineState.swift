@@ -274,7 +274,7 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
 //                    FlareLog.debug("TimelineItem Action[\(index)] Other - type: \(type(of: item))")
                 }
             } else if case let .group(group) = onEnum(of: action) {
-                FlareLog.debug("TimelineItem Action[\(index)] Group - displayItem: \(type(of: group.displayItem))")
+               // FlareLog.debug("TimelineItem Action[\(index)] Group - displayItem: \(type(of: group.displayItem))")
 
                 // 遍历Group中的所有SubActions来提取数据
                 for (subIndex, subAction) in group.actions.enumerated() {
@@ -369,7 +369,7 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
             // 🔥 新增：处理topMessage转换
             let topMessage = uiTimeline.topMessage?.toSwift()
             if let topMessage {
-                FlareLog.debug("TimelineItem Found topMessage: \(topMessage.type)")
+               // FlareLog.debug("TimelineItem Found topMessage: \(topMessage.type)")
             }
 
             return TimelineItem(

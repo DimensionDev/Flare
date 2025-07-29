@@ -16,7 +16,7 @@ struct ShimmeringModifier: ViewModifier {
                             .init(color: .clear, location: 0),
                             .init(color: .white.opacity(0.5), location: 0.3),
                             .init(color: .white.opacity(0.5), location: 0.7),
-                            .init(color: .clear, location: 1),
+                            .init(color: .clear, location: 1)
                         ]),
                         startPoint: .leading,
                         endPoint: .trailing

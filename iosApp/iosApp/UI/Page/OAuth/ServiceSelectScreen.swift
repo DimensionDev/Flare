@@ -331,7 +331,7 @@ struct ServiceSelectScreen: View {
             "&amp;",
             "&lt;",
             "&gt;",
-            "&quot;",
+            "&quot;"
         ]
 
         let replacements = [
@@ -340,7 +340,7 @@ struct ServiceSelectScreen: View {
             "&",
             "<",
             ">",
-            "\"",
+            "\""
         ]
 
         for (pattern, replacement) in zip(patterns, replacements) {

@@ -28,7 +28,7 @@ struct TimelineItemsViewV2: View {
             }
         }
 
-        if hasMore, let viewModel = viewModel {
+        if hasMore, let viewModel {
             TimelineLoadMoreView {
                 try await viewModel.handleLoadMore()
             }

@@ -55,7 +55,7 @@ struct DMSingleMediaView: View {
                 }
 
                 KingfisherManager.shared.defaultOptions = [
-                    .requestModifier(modifier),
+                    .requestModifier(modifier)
                 ]
             }
         }

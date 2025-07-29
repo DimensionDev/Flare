@@ -403,7 +403,7 @@ public final class FlareTheme {
             ThemePristineSnowLight(),
             ThemePristineSnowDark(),
             ThemeEmeraldDepthsLight(),
-            ThemeEmeraldDepthsDark(),
+            ThemeEmeraldDepthsDark()
         ]
     }
 

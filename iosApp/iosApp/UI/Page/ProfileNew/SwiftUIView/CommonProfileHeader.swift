@@ -281,7 +281,7 @@ struct DynamicBannerBackground: View {
                         gradient: Gradient(colors: [
                             Color.black.opacity(0.3),
                             Color.black.opacity(0.1),
-                            Color.black.opacity(0.3),
+                            Color.black.opacity(0.3)
                         ]),
                         startPoint: .leading,
                         endPoint: .trailing

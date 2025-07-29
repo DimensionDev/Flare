@@ -34,7 +34,7 @@ struct ServiceIcon: View {
             urls.append(contentsOf: [
                 "https://\(domain)/logo.svg",
                 "https://\(domain)/apple-touch-icon.png",
-                "https://\(domain)/favicon.ico",
+                "https://\(domain)/favicon.ico"
             ])
         }
         return urls

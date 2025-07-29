@@ -259,7 +259,7 @@ class PagingStateConverter {
         var ids: [String] = []
         let maxCount = min(count, Int(successState.itemCount))
 
-        for i in 0 ..< maxCount { 
+        for i in 0 ..< maxCount {
             if let item = safePeek(successState, index: Int32(i)) {
                 ids.append(item.itemKey)
             } else {
@@ -328,13 +328,11 @@ class PagingStateConverter {
         FlareLog.debug("[PagingStateConverter] 开始转换范围: [\(startIndex), \(endIndex))")
 
         for index in startIndex ..< endIndex {
-            //FlareLog.debug("[PagingStateConverter] 尝试获取index=\(index)的数据")
+            // FlareLog.debug("[PagingStateConverter] 尝试获取index=\(index)的数据")
 
             let uiTimeline: UiTimeline?
 
-            
             if let peekedItem = safePeek(successState, index: Int32(index)) {
-                
                 uiTimeline = peekedItem
             } else {
                 FlareLog.warning("PagingStateConverter: safePeek returned nil at index \(index) in convertItemsInRange")
@@ -348,7 +346,7 @@ class PagingStateConverter {
             if let timeline = uiTimeline {
                 let timelineItem = TimelineItem.from(timeline)
                 items.append(timelineItem)
-                //FlareLog.debug("[PagingStateConverter] 成功转换index=\(index)的数据，当前items数量: \(items.count)")
+                // FlareLog.debug("[PagingStateConverter] 成功转换index=\(index)的数据，当前items数量: \(items.count)")
             } else {
                 FlareLog.warning("PagingStateConverter Failed to get item at index \(index)")
                 // 遇到nil时停止转换，避免空洞
@@ -360,15 +358,12 @@ class PagingStateConverter {
         return items
     }
 
- 
     private func safePeek(_ successState: PagingStateSuccess<UiTimeline>, index: Int32) -> UiTimeline? {
-       
-        guard index >= 0 && index < successState.itemCount else {
+        guard index >= 0, index < successState.itemCount else {
             FlareLog.warning("PagingStateConverter: Index \(index) out of bounds (itemCount: \(successState.itemCount))")
             return nil
         }
 
-       
         let result = successState.peek(index: index)
 
         if result == nil {

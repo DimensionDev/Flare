@@ -46,7 +46,7 @@ public class GoogleTranslationService: TranslationService {
             URLQueryItem(name: "dt", value: "t"),
             URLQueryItem(name: "q", value: text),
             URLQueryItem(name: "ie", value: "UTF-8"),
-            URLQueryItem(name: "oe", value: "UTF-8"),
+            URLQueryItem(name: "oe", value: "UTF-8")
         ]
 
         guard let url = components.url else {

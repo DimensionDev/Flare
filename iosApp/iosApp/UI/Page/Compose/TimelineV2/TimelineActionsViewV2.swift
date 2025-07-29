@@ -100,7 +100,7 @@ struct TimelineActionsViewV2: View {
                     item: item,
                     view: TimelineStatusViewV2(
                         item: item,
-                        index: 0,
+                        index: 0
                     )
                 )
             }

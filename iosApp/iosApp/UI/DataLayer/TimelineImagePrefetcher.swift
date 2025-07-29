@@ -42,7 +42,7 @@ class TimelineImagePrefetcher {
                 options: [
                     .backgroundDecode,
                     .downloadPriority(0.3),
-                    .diskCacheExpiration(.days(7)),
+                    .diskCacheExpiration(.days(7))
                     // .alsoPrefetchToMemory，
                 ],
                 progressBlock: nil,

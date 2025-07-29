@@ -212,7 +212,7 @@ private struct EnhancedFeedRowView: View {
             "listId": list.id,
             "listTitle": list.title,
             "isPinned": isPinned,
-            "itemType": "feed",
+            "itemType": "feed"
         ]
         if let listIconUrl = list.avatar {
             listInfo["listIconUrl"] = listIconUrl

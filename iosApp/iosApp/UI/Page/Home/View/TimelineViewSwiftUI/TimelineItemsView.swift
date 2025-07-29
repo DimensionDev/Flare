@@ -18,16 +18,15 @@ struct TimelineItemsView: View {
                 )
                 .padding(.vertical, 4)
                 .onAppear {
-                    //FlareLog.debug("[TimelineItemsView] item出现: \(item.id), index: \(index)")
+                    // FlareLog.debug("[TimelineItemsView] item出现: \(item.id), index: \(index)")
                     viewModel.itemDidAppear(item: item)
                 }
                 .onDisappear {
-                    //FlareLog.debug("[TimelineItemsView] item消失: \(item.id), index: \(index)")
+                    // FlareLog.debug("[TimelineItemsView] item消失: \(item.id), index: \(index)")
                     viewModel.itemDidDisappear(item: item)
                 }
-                //.id(item.id)
+                // .id(item.id)
             }
-
 
             if hasMore {
                 TimelineLoadMoreView {

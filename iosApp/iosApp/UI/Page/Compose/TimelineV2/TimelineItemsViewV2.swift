@@ -13,19 +13,20 @@ struct TimelineItemsViewV2: View {
     let viewModel: TimelineViewModel?
 
     var body: some View {
-        ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+        ForEach(items) { item in
+//            let item = items[index]
+
             TimelineStatusViewV2(
-                item: item,
-                index: index
+                item: item
 //                presenter: presenter,
 //                scrollPositionID: $scrollPositionID,
 //                onError: onError
             )
 
-            if index < items.count - 1 {
-                Divider()
-                    .padding(.horizontal, 16)
-            }
+//            if index < items.count - 1 {
+//                Divider()
+//                    .padding(.horizontal, 16)
+//            }
         }
 
         if hasMore, let viewModel {

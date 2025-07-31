@@ -6,7 +6,10 @@ import SwiftUI
 import UIKit
 
 @Observable
-class FlareRouter {
+class FlareRouter: ObservableObject {
+    
+    public static let shared = FlareRouter()
+
     public var appState: FlareAppState
 
     private var cancellables = Set<AnyCancellable>()

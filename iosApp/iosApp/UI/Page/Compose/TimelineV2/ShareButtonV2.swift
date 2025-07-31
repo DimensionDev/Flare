@@ -15,7 +15,7 @@ import UIKit
 struct ShareButtonV2: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.appSettings) var appSettings
-    @Environment(\.openURL) private var openURL
+    
     @Environment(FlareRouter.self) var router
     @Environment(FlareTheme.self) private var theme
 
@@ -125,7 +125,7 @@ struct ShareButtonV2: View {
                 }
 
                 Button(action: {
-                    openURL(url)
+                    router.handleDeepLink(url)
                 }) {
                     Label("Open in Browser", systemImage: "safari")
                 }

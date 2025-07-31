@@ -55,7 +55,7 @@ struct StatusQuoteViewV2: View {
 // 引用
 struct QuotedStatusV2: View {
     @State private var showMedia: Bool = false
-    @Environment(\.openURL) private var openURL
+
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
@@ -104,7 +104,7 @@ struct QuotedStatusV2: View {
                     cashtagColor: UIColor(theme.tintColor)
                 ), isRTL: item.content.isRTL)
                     .onLinkTap { url in
-                        openURL(url)
+                        router.handleDeepLink(url)
                     }
                     .font(.system(size: 16))
 

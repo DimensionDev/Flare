@@ -5,7 +5,7 @@ import SwiftUI
 // 引用
 struct QuotedStatus: View {
     @State private var showMedia: Bool = false
-    @Environment(\.openURL) private var openURL
+   
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
@@ -52,7 +52,7 @@ struct QuotedStatus: View {
                     cashtagColor: UIColor(theme.tintColor)
                 ), isRTL: data.content.isRTL)
                     .onLinkTap { url in
-                        openURL(url)
+                        router.handleDeepLink(url)
                     }
                     .font(.system(size: 16))
 

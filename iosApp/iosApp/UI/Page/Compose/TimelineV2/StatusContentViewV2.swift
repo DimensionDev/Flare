@@ -14,18 +14,23 @@ struct StatusContentViewV2: View {
     let enableGoogleTranslation: Bool
     let appSettings: AppSettings
     let theme: FlareTheme
-    let openURL: OpenURLAction
     let onMediaClick: (Int, Media) -> Void
     let onPodcastCardTap: (Card) -> Void
 
+    @Environment(FlareRouter.self) private var router
+
     var body: some View {
+                            #if DEBUG
+        let _ = Self._printChanges()  
+        let _ = print("🔍 [StatusContentViewV2]   view changed")
+#endif
         VStack(alignment: .leading) {
             if item.hasAboveTextContent, let aboveTextContent = item.aboveTextContent {
                 StatusReplyViewV2(aboveTextContent: aboveTextContent)
             }
 
             if item.hasContentWarning, let cwText = item.contentWarning {
-                StatusContentWarningViewV2(contentWarning: cwText, theme: theme, openURL: openURL)
+                StatusContentWarningViewV2(contentWarning: cwText, theme: theme)
             }
 
             Spacer().frame(height: 10)
@@ -34,8 +39,7 @@ struct StatusContentViewV2: View {
                 item: item,
                 enableGoogleTranslation: enableGoogleTranslation,
                 appSettings: appSettings,
-                theme: theme,
-                openURL: openURL
+                theme: theme
             )
 
             if item.hasImages {
@@ -155,7 +159,8 @@ struct StatusBottomContentViewV2: View {
 struct StatusContentWarningViewV2: View {
     let contentWarning: RichText
     let theme: FlareTheme
-    let openURL: OpenURLAction
+
+    @Environment(FlareRouter.self) private var router
 
     var body: some View {
         Button(action: {
@@ -180,7 +185,7 @@ struct StatusContentWarningViewV2: View {
                 isRTL: contentWarning.isRTL
             )
             .onLinkTap { url in
-                openURL(url)
+                router.handleDeepLink(url)
             }
             .lineSpacing(CGFloat(theme.lineSpacing))
             .foregroundColor(theme.labelColor)
@@ -208,7 +213,8 @@ struct StatusMainContentViewV2: View {
     let enableGoogleTranslation: Bool
     let appSettings: AppSettings
     let theme: FlareTheme
-    let openURL: OpenURLAction
+
+    @Environment(FlareRouter.self) private var router
 
     var body: some View {
         if item.hasContent {
@@ -227,7 +233,7 @@ struct StatusMainContentViewV2: View {
                 isRTL: content.isRTL
             )
             .onLinkTap { url in
-                openURL(url)
+                router.handleDeepLink(url)
             }
             .lineSpacing(CGFloat(theme.lineSpacing))
             .foregroundColor(theme.labelColor)

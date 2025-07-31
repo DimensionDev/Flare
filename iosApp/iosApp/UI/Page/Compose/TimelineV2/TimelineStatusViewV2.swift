@@ -11,19 +11,22 @@ import UIKit
 
 struct TimelineStatusViewV2: View {
     let item: TimelineItem
-    let index: Int
 
     let isDetail: Bool = false
     @State private var showAppleTranslation: Bool = false
     @State private var showGoogleTranslation: Bool = false
     @State private var isTranslating: Bool = false
 
-    @Environment(\.openURL) private var openURL
+    
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
+           #if DEBUG
+        let _ = Self._printChanges()  
+        let _ = print("🔍 [TimelineStatusViewV2]   view changed")
+        #endif
         if shouldHideInTimeline {
             EmptyView()
         } else {
@@ -47,7 +50,6 @@ struct TimelineStatusViewV2: View {
                     enableGoogleTranslation: showGoogleTranslation,
                     appSettings: appSettings,
                     theme: theme,
-                    openURL: openURL,
                     onMediaClick: { _, _ in
                     },
                     onPodcastCardTap: { card in
@@ -58,7 +60,7 @@ struct TimelineStatusViewV2: View {
                 TimelineActionsViewV2(
                     item: item,
                     onAction: { actionType, updatedItem in
-                        handleTimelineAction(actionType, item: updatedItem, at: index)
+                        handleTimelineAction(actionType, item: updatedItem)
                     }
                 )
             }
@@ -111,12 +113,12 @@ struct TimelineStatusViewV2: View {
         } else {
             let parsedRoute = AppDeepLinkHelper().parse(url: card.url)
             if let url = URL(string: card.url) {
-                openURL(url)
+                router.handleDeepLink(url)
             }
         }
     }
 
-    private func handleTimelineAction(_ actionType: TimelineActionType, item: TimelineItem, at _: Int) {
+    private func handleTimelineAction(_ actionType: TimelineActionType, item: TimelineItem) {
         if actionType == .translate {
             guard !isTranslating else {
                 return

@@ -14,6 +14,10 @@ struct TimelineLoadMoreView: View {
     }
 
     var body: some View {
+             #if DEBUG
+        let _ = Self._printChanges()  
+        let _ = print("🔍 [TimelineLoadMoreView]   view changed")
+        #endif
         HStack(spacing: 12) {
             if showRetry {
                 retryView

@@ -27,9 +27,9 @@ class TimelineViewModel {
     private var visibleItems: [TimelineItem] = []
 
     var items: [TimelineItem] {
-        if case let .loaded(items, _) = timelineState {
+            if case let .loaded(items, _) = timelineState {
             return items
-        }
+            }
         return []
     }
 

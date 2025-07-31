@@ -12,7 +12,7 @@ struct TimelineActionsViewV2: View {
     let item: TimelineItem
     let onAction: (TimelineActionType, TimelineItem) -> Void
 
-    @Environment(\.openURL) private var openURL
+    @Environment(FlareRouter.self) private var router
     @State private var errorMessage: String?
     @State private var showRetweetMenu = false
 
@@ -27,6 +27,10 @@ struct TimelineActionsViewV2: View {
     @State private var displayIsBookmarked: Bool = false
 
     var body: some View {
+                           #if DEBUG
+        let _ = Self._printChanges()  
+        let _ = print("🔍 [TimelineActionsViewV2]   view changed")
+#endif
         VStack(spacing: 0) {
             if let errorMessage {
                 Text(errorMessage)
@@ -99,8 +103,7 @@ struct TimelineActionsViewV2: View {
                 ShareButtonV2(
                     item: item,
                     view: TimelineStatusViewV2(
-                        item: item,
-                        index: 0
+                        item: item
                     )
                 )
             }
@@ -221,7 +224,7 @@ struct TimelineActionsViewV2: View {
 
                     if shouldExecute {
                         let openURLAction = OpenURLAction { url in
-                            openURL(url)
+                            router.handleDeepLink(url)
                             return .handled
                         }
 

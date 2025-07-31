@@ -4,7 +4,7 @@ import UIKit
 
 struct AboutScreen: View {
     @Environment(\.colorScheme) var colorScheme
-    @Environment(\.openURL) var openURL
+    @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
@@ -16,7 +16,7 @@ struct AboutScreen: View {
         ComposeView(
             controller: AboutViewController(
                 version: "\(versionName) (\(versionCode))",
-                onOpenLink: { openURL(.init(string: $0)!) },
+                onOpenLink: { router.handleDeepLink(.init(string: $0)!) },
                 darkMode: colorScheme == .dark,
                 backgroundColorValue: composeBackgroundColorUInt64
             )

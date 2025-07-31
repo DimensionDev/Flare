@@ -186,7 +186,7 @@ precompose-molecule = { module = "moe.tlaster:precompose-molecule", version = "1
 
 compose-cupertino = { module = "io.github.alexzhirkevich:cupertino-core", version = "0.1.0-alpha04" }
 
-xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91.1" }
+xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91.2" }
 
 fluent-ui = { module = "com.konyaco:fluent", version = "0.1.0-SNAPSHOT" }
 

@@ -1088,6 +1088,7 @@
       }
     },
     "%@-%@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -1272,6 +1273,7 @@
       }
     },
     "%@%%" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -1450,6 +1452,7 @@
       }
     },
     "%@fps" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -1628,6 +1631,7 @@
       }
     },
     "%@MB" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -2168,6 +2172,7 @@
       }
     },
     "%lld%@" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -5031,6 +5036,7 @@
       }
     },
     "Auto Translate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -5209,6 +5215,7 @@
       }
     },
     "Auto translate non-current language content" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -5921,6 +5928,7 @@
       }
     },
     "Average" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -9181,6 +9189,7 @@
       }
     },
     "Chart" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -9537,6 +9546,7 @@
       }
     },
     "Clear" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -14317,6 +14327,7 @@
       }
     },
     "CPU" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -14495,6 +14506,7 @@
       }
     },
     "CPU Usage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -14673,6 +14685,7 @@
       }
     },
     "Current" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -17369,6 +17382,7 @@
       }
     },
     "Download Cache" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -22954,6 +22968,7 @@
       }
     },
     "First Initialize Offline Languages" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -24028,6 +24043,7 @@
       }
     },
     "FPS" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -24206,6 +24222,7 @@
       }
     },
     "Frame Rate" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -25274,6 +25291,7 @@
       }
     },
     "Hide Monitor Window" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -30141,6 +30159,7 @@
       }
     },
     "Language Management" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -32276,6 +32295,9 @@
         }
       }
     },
+    "Load More" : {
+
+    },
     "loaded members: %lld" : {
       "localizations" : {
         "af" : {
@@ -32809,9 +32831,6 @@
           }
         }
       }
-    },
-    "Loading more..." : {
-
     },
     "Loading Spaces..." : {
       "localizations" : {
@@ -35736,6 +35755,7 @@
       }
     },
     "Max" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -36804,6 +36824,7 @@
       }
     },
     "MEM" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -37160,6 +37181,7 @@
       }
     },
     "Memory Usage" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -37516,6 +37538,7 @@
       }
     },
     "Min" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -42044,6 +42067,7 @@
       }
     },
     "No test data available" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -43797,6 +43821,7 @@
       }
     },
     "Other Settings" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -45933,6 +45958,7 @@
       }
     },
     "Privacy Settings" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -46111,6 +46137,7 @@
       }
     },
     "Privacy settings will be added here in future updates" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -47948,9 +47975,6 @@
         }
       }
     },
-    "Pull to load more" : {
-
-    },
     "quote" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -48135,6 +48159,9 @@
           }
         }
       }
+    },
+    "Quote Tweet" : {
+
     },
     "Refresh" : {
       "localizations" : {
@@ -49739,6 +49766,12 @@
         }
       }
     },
+    "Retweet" : {
+
+    },
+    "Retweet Options" : {
+
+    },
     "retweet_remove" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -51183,6 +51216,9 @@
           }
         }
       }
+    },
+    "Sensitive" : {
+
     },
     "Sensitive Content" : {
       "localizations" : {
@@ -54818,6 +54854,7 @@
       }
     },
     "settings_appearance_generic" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -55370,6 +55407,7 @@
       }
     },
     "settings_appearance_show_cw_img" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -55554,6 +55592,7 @@
       }
     },
     "settings_appearance_show_cw_img_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -57026,6 +57065,7 @@
       }
     },
     "settings_appearance_title" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -57210,6 +57250,7 @@
       }
     },
     "settings_storage_clear_database" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -57394,6 +57435,7 @@
       }
     },
     "settings_storage_clear_database_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -57578,6 +57620,7 @@
       }
     },
     "settings_storage_clear_image_cache" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -57762,6 +57805,7 @@
       }
     },
     "settings_storage_clear_image_cache_description" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -59567,6 +59611,7 @@
       }
     },
     "Show Monitor Window" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -63368,7 +63413,11 @@
         }
       }
     },
+    "Storage" : {
+
+    },
     "Storage & Privacy" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -64437,6 +64486,7 @@
       }
     },
     "System Offline Translation" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -64615,6 +64665,9 @@
       }
     },
     "System Translate" : {
+
+    },
+    "System Translation" : {
 
     },
     "Tabviews and labels does not match!" : {
@@ -65153,6 +65206,7 @@
       }
     },
     "Test" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -65331,6 +65385,7 @@
       }
     },
     "Test Results" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -65507,6 +65562,9 @@
           }
         }
       }
+    },
+    "Test System Translation" : {
+
     },
     "Test Translation" : {
       "localizations" : {
@@ -66942,6 +67000,7 @@
 
     },
     "Timeline Version" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -68558,6 +68617,7 @@
       }
     },
     "Translation Behavior" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -68914,6 +68974,7 @@
       }
     },
     "Translation Settings" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -72686,21 +72747,6 @@
           }
         }
       }
-    },
-    "取消" : {
-
-    },
-    "引用转发" : {
-
-    },
-    "敏感内容" : {
-
-    },
-    "转发" : {
-
-    },
-    "转发选项" : {
-
     }
   },
   "version" : "1.0"

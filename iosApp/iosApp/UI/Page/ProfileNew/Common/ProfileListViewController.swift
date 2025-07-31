@@ -61,7 +61,7 @@ class ProfileNewListViewController: UIViewController {
 
     @objc func loadMore() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            self.dataSource.append("加载更多成功")
+            self.dataSource.append("load more success")
             self.tableView.reloadData()
             self.tableView.mj_footer?.endRefreshing()
         }

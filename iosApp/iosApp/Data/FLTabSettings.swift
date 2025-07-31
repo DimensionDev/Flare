@@ -987,11 +987,11 @@ public enum FLTabSettingsError: Error {
     var localizedDescription: String {
         switch self {
         case let .serializationError(message):
-            "序列化错误: \(message)"
+            "error: \(message)"
         case let .corruptionError(message):
-            "数据损坏: \(message)"
+            "data error: \(message)"
         case let .storageError(message):
-            "存储错误: \(message)"
+            "save error: \(message)"
         }
     }
 }

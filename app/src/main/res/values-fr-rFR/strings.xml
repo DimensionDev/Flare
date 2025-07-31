@@ -134,8 +134,8 @@
     <string name="settings_appearance_compat_link_previews_description">Afficher les aperçus des liens en mode simplification dans le statut</string>
     <string name="settings_appearance_theme_color">Couleur du thème</string>
     <string name="settings_appearance_theme_color_description">Changer la couleur du thème de l\'application</string>
-    <string name="settings_appearance_theme_pure_color">Couleur pure</string>
-    <string name="settings_appearance_theme_pure_color_description">Utiliser une couleur blanche ou noire pure au lieu de la couleur de thème comme couleur de fond</string>
+    <string name="settings_appearance_theme_pure_color">Mode contraste élevé</string>
+    <string name="settings_appearance_theme_pure_color_description">Augmenter le contraste entre l\'arrière-plan et le texte</string>
     <string name="settings_storage_clear_image_cache">Vider le cache des images</string>
     <string name="settings_storage_clear_image_cache_description">%1$s Mo d\'images seront supprimés</string>
     <string name="settings_storage_clear_database">Vider la base de données du cache</string>
@@ -272,11 +272,7 @@
     <string name="home_tab_social_timeline_title">Réseaux sociaux</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Ajout de la prise en charge de la timeline sociale</li>
-                <li>Ajout du support RSSHub</li>
-                <li>Ajout du support pour la détection d\'éventuels flux RSS provenant des sites</li>
-                
-                <li>Améliorations UI/UX supplémentaires — nous sommes toujours sur le chemin du raffinement continu</li>
+                <li>Plus de raffinements UI/UX — nous sommes presque là</li>
                 <li>Corrections de bugs et améliorations de performances</li>
             </ul>
         ]]></string>

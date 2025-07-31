@@ -134,8 +134,6 @@
     <string name="settings_appearance_compat_link_previews_description">Прикажите прегледе линкова у поједностављеном режиму у статусу</string>
     <string name="settings_appearance_theme_color">Боја теме</string>
     <string name="settings_appearance_theme_color_description">Промените боју теме апликације</string>
-    <string name="settings_appearance_theme_pure_color">Чиста боја</string>
-    <string name="settings_appearance_theme_pure_color_description">Користите чисту белу или црну боју уместо боје теме као боју позадине</string>
     <string name="settings_storage_clear_image_cache">Очистите кеш слике</string>
     <string name="settings_storage_clear_image_cache_description">%1$s МБ слика биће уклоњено</string>
     <string name="settings_storage_clear_database">Очистите базу кеша</string>

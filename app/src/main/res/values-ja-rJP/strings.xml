@@ -134,8 +134,8 @@
     <string name="settings_appearance_compat_link_previews_description">シンプルモードでリンクのプレビューをステータスに表示する</string>
     <string name="settings_appearance_theme_color">テーマの色</string>
     <string name="settings_appearance_theme_color_description">アプリのテーマカラーを変更する</string>
-    <string name="settings_appearance_theme_pure_color">純粋な色</string>
-    <string name="settings_appearance_theme_pure_color_description">背景色にテーマカラーの代わりに純粋な白または黒の色を使用します</string>
+    <string name="settings_appearance_theme_pure_color">ハイコントラストモード</string>
+    <string name="settings_appearance_theme_pure_color_description">背景とテキストのコントラストを上げる</string>
     <string name="settings_storage_clear_image_cache">画像キャッシュをクリア</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MBの画像が削除されます</string>
     <string name="settings_storage_clear_database">キャッシュデータベースをクリア</string>
@@ -270,13 +270,4 @@
     <string name="tab_settings_mixed_timeline">混合タイムラインタブを追加</string>
     <string name="tab_settings_mixed_timeline_desc">混合されたタイムラインは、すべてのタブタイムラインの結果を1つのタブにミックスします</string>
     <string name="home_tab_social_timeline_title">ソーシャル</string>
-    <string name="changelog_current"><![CDATA[            <span>バージョン %1$s：</span>
-            <ul>
-                <li>Misskeyのソーシャルタイムラインに対応しました。</li>
-                <li>RSSHubのサポートを追加</li>
-                <li>ウェブサイトからの可能なRSSフィードを検出するためのサポートを追加しました。</li>
-                <li>より多くのUI/UX改善 - 継続的な改良の道を進んでいる。</li>
-                <li>バグ修正とパフォーマンス改善</li>
-            </ul>
-        ]]></string>
 </resources>

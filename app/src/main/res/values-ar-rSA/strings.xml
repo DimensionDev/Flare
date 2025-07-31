@@ -134,8 +134,8 @@
     <string name="settings_appearance_compat_link_previews_description">إظهار معاينات الرابط في وضع التبسيط في الحالة</string>
     <string name="settings_appearance_theme_color">لون السمة</string>
     <string name="settings_appearance_theme_color_description">تغيير لون السمة للتطبيق</string>
-    <string name="settings_appearance_theme_pure_color">لون خالص</string>
-    <string name="settings_appearance_theme_pure_color_description">استخدام اللون الأبيض أو الأسود النقي بدلاً من لون الموضوع كلون الخلفية</string>
+    <string name="settings_appearance_theme_pure_color">وضع التباين العالي</string>
+    <string name="settings_appearance_theme_pure_color_description">زيادة التباين بين الخلفية والنص</string>
     <string name="settings_storage_clear_image_cache">مسح ذاكرة التخزين المؤقت للصورة</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB من الصور سيتم إزالتها</string>
     <string name="settings_storage_clear_database">مسح قاعدة بيانات ذاكرة التخزين المؤقت</string>
@@ -272,11 +272,8 @@
     <string name="home_tab_social_timeline_title">إجتماعي</string>
     <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
             <ul>
-                <li>إضافة دعم إلى الخط الزمني الاجتماعي لـ Misskey\'s</li>
-                <li>إضافة دعم RSSHub</li></li>
-                <li>إضافة دعم للكشف عن التغذية المحتملة لـ RSS من مواقع الويب</li>
-                <li>المزيد من تحسينات UI/UX - ما زلنا على مسار التحسين المستمر</li>
-                <li></li>
+                <li>المزيد من التحسينات UI/UX - نحن تقريبا هناك</li>
+                <li>اصلاحات الشوائب وتحسين الأداء</li>
             </ul>
         ]]></string>
 </resources>

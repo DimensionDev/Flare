@@ -134,8 +134,8 @@
     <string name="settings_appearance_compat_link_previews_description">Показувати попередній перегляд посилань в режимі спрощення в статусі</string>
     <string name="settings_appearance_theme_color">Колір теми</string>
     <string name="settings_appearance_theme_color_description">Змінити колір теми програми</string>
-    <string name="settings_appearance_theme_pure_color">Яскравий колір</string>
-    <string name="settings_appearance_theme_pure_color_description">Використовувати лише білий або чорний колір замість кольору теми як тла</string>
+    <string name="settings_appearance_theme_pure_color">Висококонтрастний режим</string>
+    <string name="settings_appearance_theme_pure_color_description">Збільшити контраст між тлом і текстом</string>
     <string name="settings_storage_clear_image_cache">Очистити кеш зображень</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB із зображень буде видалено</string>
     <string name="settings_storage_clear_database">Очистити базу даних кешу</string>
@@ -270,13 +270,4 @@
     <string name="tab_settings_mixed_timeline">Додати змішану вкладку часової шкали</string>
     <string name="tab_settings_mixed_timeline_desc">Змішана часова шкала будуть змішувати всі вкладки в результаті однієї вкладки</string>
     <string name="home_tab_social_timeline_title">Соціальні мережі</string>
-    <string name="changelog_current"><![CDATA[            <span>Версія %1$s:</span>
-            <ul>
-                <li>Додано підтримку соціальної шкали Misskey\'s Social timeline</li>
-                <li>Додано підтримку RSSHub</li>
-                <li>Додано підтримку виявлення можливих RSS-каналів з веб-сайтів</li>
-                <li>Більше покращень UI/UX - ми все ще на шляху безперервного вдосконалення</li>
-                <li>Виправлення помилок та покращення продуктивності</li>
-            </ul>
-        ]]></string>
 </resources>

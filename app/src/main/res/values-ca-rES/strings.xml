@@ -134,8 +134,6 @@
     <string name="settings_appearance_compat_link_previews_description">Mostrar previsualitzacions d\'enllaç en mode simplificat a l\'estat</string>
     <string name="settings_appearance_theme_color">Color del tema</string>
     <string name="settings_appearance_theme_color_description">Canvia el color del tema de l\'aplicació</string>
-    <string name="settings_appearance_theme_pure_color">Color pur</string>
-    <string name="settings_appearance_theme_pure_color_description">Utilitzar un color blanc o negre pur en lloc del color del tema com a color de fons</string>
     <string name="settings_storage_clear_image_cache">Esborrar la memòria cau d\'imatges</string>
     <string name="settings_storage_clear_image_cache_description">S\'eliminaran %1$s MB d\'imatges</string>
     <string name="settings_storage_clear_database">Esborrar la base de dades de la memòria cau</string>

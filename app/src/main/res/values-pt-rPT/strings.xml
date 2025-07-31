@@ -134,8 +134,8 @@
     <string name="settings_appearance_compat_link_previews_description">Mostrar pré-visualizações de links no modo de simplificação no status</string>
     <string name="settings_appearance_theme_color">Cor do tema</string>
     <string name="settings_appearance_theme_color_description">Alterar a cor do tema do aplicativo</string>
-    <string name="settings_appearance_theme_pure_color">Cor pura</string>
-    <string name="settings_appearance_theme_pure_color_description">Usar cor pura branca ou preta em vez da cor temática como cor de fundo</string>
+    <string name="settings_appearance_theme_pure_color">Modo de Alto Contraste</string>
+    <string name="settings_appearance_theme_pure_color_description">Aumentar o contraste entre plano de fundo e texto</string>
     <string name="settings_storage_clear_image_cache">Limpar cache de imagens</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB de imagens serão removidas</string>
     <string name="settings_storage_clear_database">Limpar banco de dados de cache</string>
@@ -272,11 +272,8 @@
     <string name="home_tab_social_timeline_title">Sócio</string>
     <string name="changelog_current"><![CDATA[            <span>Versão %1$s:</span>
             <ul>
-                <li>Adicionado suporte à Linha de Tempo Social da Misskey</li>
-                <li>Adicionado suporte RSSHub</li>
-                <li>Adicionados suporte para detecção de possíveis feeds RSS de sites</li>
-                <li>Mais melhorias de UI/UX — ainda estamos no caminho de aperfeiçoamento contínuo</li>
-                Correções                <li>correções de bugs e melhorias de desempenho</li>
+                <li>Mais refinamentos de UI/UX — estamos quase lá</li>
+                <li>correções de bugs e melhorias de desempenho</li>
             </ul>
         ]]></string>
 </resources>

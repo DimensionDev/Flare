@@ -134,8 +134,8 @@
     <string name="settings_appearance_compat_link_previews_description">Link-Vorschau im vereinfachten Modus im Status anzeigen</string>
     <string name="settings_appearance_theme_color">Theme-Farbe</string>
     <string name="settings_appearance_theme_color_description">Ändern Sie die Designfarbe der App</string>
-    <string name="settings_appearance_theme_pure_color">Reine Farbe</string>
-    <string name="settings_appearance_theme_pure_color_description">Verwende reine weiße oder schwarze Farbe anstelle der Farbe des Themes als Hintergrundfarbe</string>
+    <string name="settings_appearance_theme_pure_color">Kontrastmodus</string>
+    <string name="settings_appearance_theme_pure_color_description">Kontrast zwischen Hintergrund und Text erhöhen</string>
     <string name="settings_storage_clear_image_cache">Bildercache leeren</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB Bilder werden entfernt</string>
     <string name="settings_storage_clear_database">Cache-Datenbank leeren</string>
@@ -272,12 +272,8 @@
     <string name="home_tab_social_timeline_title">Soziale</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Unterstützung für Misskey\'s Social Timeline</li>
+                <li>Weitere UI/UX Verfeinerungen — wir sind fast da</li>
                 
-                <li>RSSHub-Unterstützung</li>
-                
-                <li>Unterstützung für die Erkennung möglicher RSS-Feeds von Webseiten</li>
-                <li>Weitere UI/UX-Verbesserungen — wir befinden uns immer noch auf dem Pfad der kontinuierlichen Verfeinerung</li>
                 <li>Fehlerbehebungen und Leistungsverbesserungen</li>
             </ul>
         ]]></string>

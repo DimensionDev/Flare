@@ -134,8 +134,8 @@
     <string name="settings_appearance_compat_link_previews_description">Visa länkförhandsvisningar i förenklat läge i status</string>
     <string name="settings_appearance_theme_color">Tema färg</string>
     <string name="settings_appearance_theme_color_description">Ändra temafärgen på appen</string>
-    <string name="settings_appearance_theme_pure_color">Ren färg</string>
-    <string name="settings_appearance_theme_pure_color_description">Använd ren vit eller svart färg istället för tema färg som bakgrundsfärg</string>
+    <string name="settings_appearance_theme_pure_color">Hög kontrast läge</string>
+    <string name="settings_appearance_theme_pure_color_description">Öka kontrasten mellan bakgrund och text</string>
     <string name="settings_storage_clear_image_cache">Rensa bildcache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB av bilder kommer att tas bort</string>
     <string name="settings_storage_clear_database">Rensa cache-databas</string>
@@ -272,11 +272,8 @@
     <string name="home_tab_social_timeline_title">Socialt</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Tillagt stöd för Misskey\'s Social tidslinje</li>
-                <li>Tillagt RSSHub stöd</li>
-                <li>Tillagt stöd för att upptäcka möjliga RSS-flöden från webbplatser</li>
-                <li>Fler UI/UX-förbättringar — vi är fortfarande på väg mot kontinuerlig förfining</li>
-                <li>Felrättningar och prestandaförbättringar</li>
+                <li>Fler UI/UX-förbättringar — vi är nästan där</li>
+                <li>Felrättelser och prestandaförbättringar</li>
             </ul>
         ]]></string>
 </resources>

@@ -134,8 +134,6 @@
     <string name="settings_appearance_compat_link_previews_description">Durumda basit modda bağlantı önizlemelerini göster</string>
     <string name="settings_appearance_theme_color">Tema rengi</string>
     <string name="settings_appearance_theme_color_description">Uygulamanın tema rengini değiştir</string>
-    <string name="settings_appearance_theme_pure_color">Saf renk</string>
-    <string name="settings_appearance_theme_pure_color_description">Arka plan rengi olarak tema renginin yerine saf beyaz veya siyah rengi kullanın</string>
     <string name="settings_storage_clear_image_cache">Görüntü önbelleğini temizle</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB görüntü silinecek</string>
     <string name="settings_storage_clear_database">Önbellek veritabanını temizle</string>
@@ -270,13 +268,4 @@
     <string name="tab_settings_mixed_timeline">Karışık zaman çizelgesi sekmesi ekle</string>
     <string name="tab_settings_mixed_timeline_desc">Karışık zaman çizelgesi, tüm sekme zaman çizelgesi sonuçlarını tek bir sekmede karıştırır</string>
     <string name="home_tab_social_timeline_title">Sosyal</string>
-    <string name="changelog_current"><![CDATA[            <span>Sürüm %1$s:</span>
-            <ul>
-                <li>Misskey\'in Sosyal zaman çizelgesi için destek eklendi</li>
-                <li>RSSHub desteği eklendi</li>
-                <li>Web sitelerinden olası RSS beslemelerini tespit etmek için destek eklendi</li>
-                <li>Daha fazla UI/UX iyileştirmesi - hala sürekli iyileştirme yolundayız</li>
-                <li>Hata düzeltmeleri ve performans iyileştirmeleri</li>
-            </ul>
-        ]]></string>
 </resources>

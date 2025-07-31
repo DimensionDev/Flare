@@ -134,8 +134,8 @@
     <string name="settings_appearance_compat_link_previews_description">Εμφάνιση προεπισκοπήσεων συνδέσμων σε λειτουργία απλοποίησης στην κατάσταση</string>
     <string name="settings_appearance_theme_color">Χρώμα θέματος</string>
     <string name="settings_appearance_theme_color_description">Αλλαγή του χρώματος του θέματος της εφαρμογής</string>
-    <string name="settings_appearance_theme_pure_color">Καθαρό χρώμα</string>
-    <string name="settings_appearance_theme_pure_color_description">Χρήση αμιγούς λευκού ή μαύρου χρώματος αντί του θέματος ως χρώματος φόντου</string>
+    <string name="settings_appearance_theme_pure_color">Λειτουργία υψηλής αντίθεσης</string>
+    <string name="settings_appearance_theme_pure_color_description">Αύξηση της αντίθεσης μεταξύ φόντου και κειμένου</string>
     <string name="settings_storage_clear_image_cache">Εκκαθάριση προσωρινής μνήμης εικόνας</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB εικόνων θα αφαιρεθούν</string>
     <string name="settings_storage_clear_database">Εκκαθάριση βάσης δεδομένων προσωρινής μνήμης</string>
@@ -272,11 +272,8 @@
     <string name="home_tab_social_timeline_title">Κοινωνικά</string>
     <string name="changelog_current"><![CDATA[            <span>Έκδοση %1$s:</span>
             <ul>
-                <li>Προστέθηκε υποστήριξη για το κοινωνικό χρονοδιάγραμμα του Misskey\</li>
-                <li>Προστέθηκε υποστήριξη RSSHub</li>
-                <li>Προστέθηκε υποστήριξη για τον εντοπισμό πιθανών RSS feeds από ιστότοπους</li>
-                <li>Περισσότερες βελτιώσεις στο UI/UX - είμαστε ακόμα στο δρόμο της συνεχούς βελτίωσης</li>
-                <li>Διορθώσεις σφαλμάτων και βελτιώσεις επιδόσεων</li>
+                <li>Περισσότερες βελτιώσεις UI/UX - είμαστε σχεδόν εκεί</li>
+                <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης</li>
             </ul>
         ]]></string>
 </resources>

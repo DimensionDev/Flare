@@ -134,8 +134,6 @@
     <string name="settings_appearance_compat_link_previews_description">Hiển thị bản xem trước liên kết trong chế độ đơn giản hóa trong trạng thái</string>
     <string name="settings_appearance_theme_color">Màu chủ đề</string>
     <string name="settings_appearance_theme_color_description">Thay đổi màu chủ đề của ứng dụng</string>
-    <string name="settings_appearance_theme_pure_color">Màu nguyên chất</string>
-    <string name="settings_appearance_theme_pure_color_description">Sử dụng màu trắng hoặc đen nguyên chất thay cho màu chủ đề làm màu nền</string>
     <string name="settings_storage_clear_image_cache">Xóa bộ nhớ cache hình ảnh</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB hình ảnh sẽ được xóa</string>
     <string name="settings_storage_clear_database">Xóa cơ sở dữ liệu bộ nhớ cache</string>

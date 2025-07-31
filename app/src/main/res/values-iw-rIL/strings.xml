@@ -134,8 +134,6 @@
     <string name="settings_appearance_compat_link_previews_description">הראה תצוגות מקדימות של קישורים במצב מפושט בסטטוס</string>
     <string name="settings_appearance_theme_color">צבע נושא</string>
     <string name="settings_appearance_theme_color_description">שנה את צבע הנושא של האפליקציה</string>
-    <string name="settings_appearance_theme_pure_color">צבע טהור</string>
-    <string name="settings_appearance_theme_pure_color_description">השתמש בצבעים טהורים לבן או שחור במקום בצבע המותאם כנושא כרקע</string>
     <string name="settings_storage_clear_image_cache">נקה את מטמון התמונות</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB של תמונות יוסרו</string>
     <string name="settings_storage_clear_database">נקה את מסד הנתונים</string>

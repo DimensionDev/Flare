@@ -134,8 +134,8 @@
     <string name="settings_appearance_compat_link_previews_description">Toon linkvoorbeelden in de eenvoudigere modus in de status</string>
     <string name="settings_appearance_theme_color">Thema kleur</string>
     <string name="settings_appearance_theme_color_description">Verander de themakleur van de app</string>
-    <string name="settings_appearance_theme_pure_color">Pure kleur</string>
-    <string name="settings_appearance_theme_pure_color_description">Gebruik pure witte of zwarte kleur in plaats van de thema kleur als achtergrondkleur</string>
+    <string name="settings_appearance_theme_pure_color">Modus hoog contrast</string>
+    <string name="settings_appearance_theme_pure_color_description">Vergroot contrast tussen achtergrond en tekst</string>
     <string name="settings_storage_clear_image_cache">Afbeeldingencache legen</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB van afbeeldingen zal worden verwijderd</string>
     <string name="settings_storage_clear_database">Cache database wissen</string>
@@ -272,11 +272,8 @@
     <string name="home_tab_social_timeline_title">Sociaal</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
-                <li>Ondersteuning toegevoegd voor de sociale tijdlijn van Misskey\</li>
-                <li>RSSHub ondersteuning toegevoegd</li>
-                <li>Ondersteuning toegevoegd voor het detecteren van mogelijke RSS feeds van websites</li>
-                <li>Meer UI/UX verbeteringen - we zijn nog steeds op het pad van voortdurende verfijning</li>
-                <li>Bug fixes en prestatieverbeteringen</li>
+                <li>Meer UI/UX raffinancieringen — we zijn er bijna</li>
+                <li>foutjes verbeterd en prestatie verbeteringen</li>
             </ul>
-        ]]></string>
+        A        ]]></string>
 </resources>

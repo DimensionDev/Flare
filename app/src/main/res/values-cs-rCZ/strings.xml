@@ -134,8 +134,8 @@
     <string name="settings_appearance_compat_link_previews_description">Zobrazit náhledy odkazů v režimu zjednodušení ve stavu</string>
     <string name="settings_appearance_theme_color">Barva motivu</string>
     <string name="settings_appearance_theme_color_description">Změnit barvu motivu aplikace</string>
-    <string name="settings_appearance_theme_pure_color">Barva čisté</string>
-    <string name="settings_appearance_theme_pure_color_description">Použít čistě bílou nebo černou barvu namísto barvy motivu jako barvu pozadí</string>
+    <string name="settings_appearance_theme_pure_color">Režim vysokého kontrastu</string>
+    <string name="settings_appearance_theme_pure_color_description">Zvýšit kontrast mezi pozadím a textem</string>
     <string name="settings_storage_clear_image_cache">Vymazat cache obrázků</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB obrázků bude odstraněno</string>
     <string name="settings_storage_clear_database">Vymazat databázi mezipaměti</string>
@@ -272,11 +272,8 @@
     <string name="home_tab_social_timeline_title">Sociální</string>
     <string name="changelog_current"><![CDATA[            <span>Verze %1$s:</span>
             <ul>
-                <li>Přidána podpora pro sociální časovou osnovou</li>
-                <li>Přidána podpora RSSHubu</li>
-                <li>Přidána podpora pro detekci možných RSS kanálů z webových stránek</li>
-                <li>Více vylepšení UI/UX – stále jsme na cestě nepřetržité rafinace</li>
-                <li>Opravy chyb a zlepšení výkonu</li>
+                <li>Více upřesnění UI/UX – jsme skoro k</li>
+                <li>Opravy chyb a zlepšení výkonnosti</li>
             </ul>
         ]]></string>
 </resources>

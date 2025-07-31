@@ -607,7 +607,7 @@ internal fun DbEmoji.toUi(): List<UiEmoji> =
         is EmojiContent.Mastodon -> {
             content.data.filter { it.visibleInPicker == true }.map {
                 UiEmoji(
-                    shortcode = it.shortcode.orEmpty(),
+                    shortcode = it.shortcode.orEmpty().let { if (!it.startsWith(':') && !it.endsWith(':')) ":$it:"  else it },
                     url = it.url.orEmpty(),
                     category = it.category.orEmpty(),
                     searchKeywords =

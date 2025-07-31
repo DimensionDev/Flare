@@ -134,8 +134,8 @@
     <string name="settings_appearance_compat_link_previews_description">Показывать предпросмотр ссылок в упрощенном режиме в статусе</string>
     <string name="settings_appearance_theme_color">Цвет темы</string>
     <string name="settings_appearance_theme_color_description">Изменить цвет темы приложения</string>
-    <string name="settings_appearance_theme_pure_color">Чистый цвет</string>
-    <string name="settings_appearance_theme_pure_color_description">Использовать чистый белый или черный цвет вместо цвета темы в качестве цвета фона</string>
+    <string name="settings_appearance_theme_pure_color">Режим высокой контрастности</string>
+    <string name="settings_appearance_theme_pure_color_description">Увеличить контраст между фоном и текстом</string>
     <string name="settings_storage_clear_image_cache">Очистить кэш изображений</string>
     <string name="settings_storage_clear_image_cache_description">%1$s МБ изображений будет удалено</string>
     <string name="settings_storage_clear_database">Очистить базу данных кэша</string>
@@ -270,14 +270,10 @@
     <string name="tab_settings_mixed_timeline">Добавить вкладку смешанной ленты времени</string>
     <string name="tab_settings_mixed_timeline_desc">Смешанная лента времени будет смешивать результат всех вкладок в одной вкладке</string>
     <string name="home_tab_social_timeline_title">Соцсети</string>
-    <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>Версия %1$s:</span>
             <ul>
-                <li>Добавлена поддержка для Misskey\'s Social timeline</li>
-                <li>Добавлена поддержка RSSHub</li>
-                <li>Добавлена поддержка для обнаружения возможных RSS-каналов с веб-сайтов</li>
-                <li>Еще UI/UX - мы все еще находимся на пути непрерывной доработки</li>
+                <li>Больше улучшений UI/UX — почти у нас</li>
                 <li>Исправления ошибок и улучшения производительности</li>
             </ul>
-        </ul> 
         ]]></string>
 </resources>

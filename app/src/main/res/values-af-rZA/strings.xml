@@ -134,8 +134,6 @@
     <string name="settings_appearance_compat_link_previews_description">Wys skakel voorbeelde in vereenvoudigde modus in die status</string>
     <string name="settings_appearance_theme_color">Tema kleur</string>
     <string name="settings_appearance_theme_color_description">Verander die temakleur van die toepassing</string>
-    <string name="settings_appearance_theme_pure_color">Suiwer kleur</string>
-    <string name="settings_appearance_theme_pure_color_description">Gebruik suiwer wit of swart kleur in plaas van die tema kleur as agtergrond kleur</string>
     <string name="settings_storage_clear_image_cache">Maak beeldkas skoon</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB van beelde sal verwyder word</string>
     <string name="settings_storage_clear_database">Maak kas databasis skoon</string>

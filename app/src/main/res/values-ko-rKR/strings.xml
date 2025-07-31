@@ -134,8 +134,6 @@
     <string name="settings_appearance_compat_link_previews_description">상태에서 단순 모드로 링크 미리보기 표시</string>
     <string name="settings_appearance_theme_color">테마 색상</string>
     <string name="settings_appearance_theme_color_description">앱의 테마 색상 변경</string>
-    <string name="settings_appearance_theme_pure_color">순수한 색상</string>
-    <string name="settings_appearance_theme_pure_color_description">배경색으로 테마 색상 대신 순수한 흰색 또는 검은색 색상 사용</string>
     <string name="settings_storage_clear_image_cache">이미지 캐시 지우기</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB의 이미지가 제거됩니다</string>
     <string name="settings_storage_clear_database">캐시 데이터베이스 지우기</string>
@@ -270,13 +268,4 @@
     <string name="tab_settings_mixed_timeline">혼합된 타임라인 탭 추가</string>
     <string name="tab_settings_mixed_timeline_desc">혼합된 타임라인은 모든 탭의 타임라인 결과를 하나의 탭으로 혼합합니다</string>
     <string name="home_tab_social_timeline_title">소셜</string>
-    <string name="changelog_current"><![CDATA[            <span>버전 %1$s:</span>
-            <ul>
-                <li>미스키의 소셜 타임라인 지원 추가</li>
-                <li>RSSHub 지원 추가</li>
-                <li>웹 사이트에서 가능한 RSS 피드 감지 지원 추가</li>
-                <li>더 많은 UI / UX 개선-지속적인 개선 작업 중입니다.</li>
-                <li>버그 수정 및 성능 개선</li>
-            </ul>
-        ]]></string>
 </resources>

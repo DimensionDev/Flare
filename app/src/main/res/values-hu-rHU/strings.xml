@@ -134,8 +134,6 @@
     <string name="settings_appearance_compat_link_previews_description">Link előnézetek megjelenítése egyszerűsített módban az állapotban</string>
     <string name="settings_appearance_theme_color">Téma szín</string>
     <string name="settings_appearance_theme_color_description">Változtassa meg az alkalmazás színét</string>
-    <string name="settings_appearance_theme_pure_color">Tiszta szín</string>
-    <string name="settings_appearance_theme_pure_color_description">Tiszta fehér vagy fekete színt használjon a háttérszín helyett</string>
     <string name="settings_storage_clear_image_cache">Kép gyorsítótár törlése</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB kép törlődik</string>
     <string name="settings_storage_clear_database">Gyorsítótár adatbázisának törlése</string>
@@ -270,13 +268,4 @@
     <string name="tab_settings_mixed_timeline">Keverve idővonal fül hozzáadása</string>
     <string name="tab_settings_mixed_timeline_desc">A kevert idővonal minden tab idővonalát egy tabba keveri</string>
     <string name="home_tab_social_timeline_title">Szociális</string>
-    <string name="changelog_current"><![CDATA[            <span>Verzió %1$s:</span>
-            <ul>
-                <li>Hozzáadva a Misskey\'s Social timeline támogatása</li>
-                <li>RSSHub támogatás hozzáadva</li>
-                <li>Támogatás hozzáadva a weboldalak lehetséges RSS feedjeinek felismeréséhez</li>
-                <li>További UI/UX fejlesztések - még mindig a folyamatos finomítás útját járjuk.</li>
-                <li>Hibajavítások és teljesítményjavítások</li>
-            </ul>
-        ]]></string>
 </resources>

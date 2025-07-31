@@ -134,8 +134,6 @@
     <string name="settings_appearance_compat_link_previews_description">以簡化模式在狀態中顯示鏈接預覽</string>
     <string name="settings_appearance_theme_color">主題顏色</string>
     <string name="settings_appearance_theme_color_description">更改應用的主題顏色</string>
-    <string name="settings_appearance_theme_pure_color">純色</string>
-    <string name="settings_appearance_theme_pure_color_description">使用純白或黑色而不是主題顏色作為背景顏色</string>
     <string name="settings_storage_clear_image_cache">清除圖片快取</string>
     <string name="settings_storage_clear_image_cache_description">將移除%1$s MB的圖片</string>
     <string name="settings_storage_clear_database">清除快取數據庫</string>
@@ -270,13 +268,4 @@
     <string name="tab_settings_mixed_timeline">添加綜合時間線標籤</string>
     <string name="tab_settings_mixed_timeline_desc">綜合時間線將所有標籤的時間線結果混合成一個標籤</string>
     <string name="home_tab_social_timeline_title">社會</string>
-    <string name="changelog_current"><![CDATA[            <span>版本 %1$s：</span>
-            <ul>
-                <li>新增對 Misskey\'s Social Timeline 的支援</li>
-                <li>新增 RSSHub 支援</li>
-                <li>新增偵測網站 RSS feed 的支援</li>
-                <li>更多 UI/UX 的改進 - 我們仍在不斷改進的路上</li>
-                <li>錯誤修正與效能提升</li>
-            </ul>
-        ]]></string>
 </resources>

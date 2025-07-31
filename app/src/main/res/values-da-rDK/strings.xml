@@ -134,8 +134,8 @@
     <string name="settings_appearance_compat_link_previews_description">Vis link forhåndsvisninger i forenklet tilstand i status</string>
     <string name="settings_appearance_theme_color">Tema farve</string>
     <string name="settings_appearance_theme_color_description">Skift temafarven på app\'en</string>
-    <string name="settings_appearance_theme_pure_color">Ren farve</string>
-    <string name="settings_appearance_theme_pure_color_description">Brug ren hvid eller sort farve i stedet for den tema farve som baggrundsfarve</string>
+    <string name="settings_appearance_theme_pure_color">Høj kontrast tilstand</string>
+    <string name="settings_appearance_theme_pure_color_description">Forøg kontrasten mellem baggrund og tekst</string>
     <string name="settings_storage_clear_image_cache">Ryd billed-cache</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB billeder vil blive fjernet</string>
     <string name="settings_storage_clear_database">Ryd cache database</string>
@@ -272,10 +272,7 @@
     <string name="home_tab_social_timeline_title">Social</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Tilføjet understøttelse af Misskey\'s sociale tidslinje</li>
-                <li>Tilføjet RSSHub support</li>
-                <li>Tilføjet understøttelse for detektering af mulige RSS-feeds fra websites</li>
-                <li>Flere UI/UX forbedringer — vi er stadig på vejen til kontinuerlig raffinering</li>
+                <li>Flere UI/UX raffineringer — vi er næsten der</li>
                 <li>Fejlrettelser og præstationsforbedringer</li>
             </ul>
         ]]></string>

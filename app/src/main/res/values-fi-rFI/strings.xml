@@ -134,8 +134,8 @@
     <string name="settings_appearance_compat_link_previews_description">Näytä linkkien esikatselut yksinkertaisuuden tilassa tilassa</string>
     <string name="settings_appearance_theme_color">Teeman väri</string>
     <string name="settings_appearance_theme_color_description">Muuta sovelluksen teeman väriä</string>
-    <string name="settings_appearance_theme_pure_color">Todellinen väri</string>
-    <string name="settings_appearance_theme_pure_color_description">Käytä puhdasta valkoista tai mustaa väriä teeman sijaan taustaväri</string>
+    <string name="settings_appearance_theme_pure_color">Korkea kontrastitila</string>
+    <string name="settings_appearance_theme_pure_color_description">Lisää taustan ja tekstin välistä kontrastia</string>
     <string name="settings_storage_clear_image_cache">Tyhjennä kuvien välimuisti</string>
     <string name="settings_storage_clear_image_cache_description">%1$s MB kuvia poistetaan</string>
     <string name="settings_storage_clear_database">Tyhjennä välimuistin tietokanta</string>
@@ -270,13 +270,10 @@
     <string name="tab_settings_mixed_timeline">Lisää sekoitettu aikajana-välilehti</string>
     <string name="tab_settings_mixed_timeline_desc">Sekoitettu aikajana sekoittaa kaikki välilehdet aikajana tulos yhdessä välilehdessä</string>
     <string name="home_tab_social_timeline_title">Sosiaalinen</string>
-    <string name="changelog_current"><![CDATA[            <span>versio %1$s:</span>
+    <string name="changelog_current"><![CDATA[            <span>Versio %1$s:</span>
             <ul>
-                <li>Lisätty tuki Misskey\'s Social timeeline</li>
-                <li>Lisätty RSSHub tuki</li>
-                <li>Lisätty tuki mahdollisten RSS-syötteiden havaitsemiseen sivustoilta</li>
-                <li>Lisää UI/UX parannuksia — olemme edelleen jatkuvan parantamisen polulla</li>
-                <li>Korjaukset ja suorituskyvyn parannukset</li>
+                <li>Lisää UI/UX - olemme melkein siellä</li>
+                <li>virhekorjauksia ja suorituskyvyn parannuksia</li>
             </ul>
         ]]></string>
 </resources>

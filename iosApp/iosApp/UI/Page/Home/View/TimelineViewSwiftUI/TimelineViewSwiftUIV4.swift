@@ -95,13 +95,24 @@ struct TimelineViewSwiftUIV4: View {
             }
             .onChange(of: viewModel.scrollToId) { _, newValue in
                 if let newValue {
-                    FlareLog.debug("🎯 [TimelineV4] 滚动到指定位置: \(newValue)")
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        proxy.scrollTo(newValue, anchor: .top)
-                    }
+                    // 检查当前屏幕可视区域的tweet id数组是否包含滚动的id
+                    let currentVisibleIds = viewModel.getCurrentVisibleItemIds()
 
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    if currentVisibleIds.contains(newValue) {
+                        FlareLog.debug("🎯 [TimelineV4] 目标item已在当前可视区域，跳过滚动: \(newValue)")
+                        FlareLog.debug("🎯 [TimelineV4] 当前可视区域包含 \(currentVisibleIds.count) 个items")
+                        // 直接清除滚动目标，避免不必要的跳动
                         viewModel.clearScrollTarget()
+                    } else {
+                        FlareLog.debug("🎯 [TimelineV4] 目标item不在可视区域，执行滚动: \(newValue)")
+                        FlareLog.debug("🎯 [TimelineV4] 当前可视区域包含 \(currentVisibleIds.count) 个items")
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            proxy.scrollTo(newValue, anchor: .top)
+                        }
+
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            viewModel.clearScrollTarget()
+                        }
                     }
                 }
             }

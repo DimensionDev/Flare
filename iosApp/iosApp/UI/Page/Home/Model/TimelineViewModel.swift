@@ -288,6 +288,11 @@ class TimelineViewModel {
         scrollToId = itemId
     }
 
+
+    func getCurrentVisibleItemIds() -> [String] {
+        return visibleItems.map { $0.id }
+    }
+
     func itemDidAppear(item: TimelineItem) {
         if !visibleItems.contains(where: { $0.id == item.id }) {
             visibleItems.insert(item, at: 0)
@@ -297,12 +302,12 @@ class TimelineViewModel {
             visibleItems = Array(visibleItems.prefix(50))
         }
 
-        FlareLog.debug("[TimelineViewModel] item出现: \(item.id), 当前可见items: \(visibleItems.count)")
+        //FlareLog.debug("[TimelineViewModel] item出现: \(item.id), 当前可见items: \(visibleItems.count)")
     }
 
     func itemDidDisappear(item: TimelineItem) {
         visibleItems.removeAll { $0.id == item.id }
-        FlareLog.debug("[TimelineViewModel] item消失: \(item.id), 当前可见items: \(visibleItems.count)")
+        //FlareLog.debug("[TimelineViewModel] item消失: \(item.id), 当前可见items: \(visibleItems.count)")
     }
 }
 

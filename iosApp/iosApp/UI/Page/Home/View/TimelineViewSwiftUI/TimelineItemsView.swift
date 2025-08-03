@@ -10,10 +10,7 @@ struct TimelineItemsView: View {
     @Environment(\.appSettings) private var appSettings
 
     var body: some View {
-             #if DEBUG
-        let _ = Self._printChanges()  
-        let _ = print("🔍 [TimelineItemsView]   view changed")
-        #endif
+
         Group {
             ForEach(items) { item in
                 TimelineStatusViewV2(
@@ -27,8 +24,7 @@ struct TimelineItemsView: View {
                 .onDisappear {
                     // FlareLog.debug("[TimelineItemsView] item消失: \(item.id), index: \(index)")
                     viewModel.itemDidDisappear(item: item)
-                }
-                // .id(item.id)
+                }  
             }
 
             if hasMore {

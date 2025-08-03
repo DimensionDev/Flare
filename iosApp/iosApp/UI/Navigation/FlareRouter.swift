@@ -24,8 +24,7 @@ class FlareRouter: ObservableObject {
 
     var isDialogPresented: Bool = false
 
-    var previousPageSnapshot: UIImage?
-
+ 
     var selectedTab: FlareHomeTabs = .timeline {
         didSet {
             let oldTab = oldValue
@@ -150,8 +149,7 @@ class FlareRouter: ObservableObject {
         }
     }
 
-    func goBack() {
-        previousPageSnapshot = nil
+    func goBack() { 
         dismissCurrentView()
     }
 

@@ -20,10 +20,7 @@ struct StatusContentViewV2: View {
     @Environment(FlareRouter.self) private var router
 
     var body: some View {
-                            #if DEBUG
-        let _ = Self._printChanges()  
-        let _ = print("🔍 [StatusContentViewV2]   view changed")
-#endif
+
         VStack(alignment: .leading) {
             if item.hasAboveTextContent, let aboveTextContent = item.aboveTextContent {
                 StatusReplyViewV2(aboveTextContent: aboveTextContent)

@@ -7,7 +7,7 @@ import SwiftUI
 struct TranslatableText: View {
     let originalText: String
     let forceTranslate: Bool
-    @StateObject private var viewModel = TranslationViewModel()
+    @StateObject private var transViewModel = TranslationViewModel()
     private let languageDetector = LanguageDetector()
     @Environment(\.appSettings) private var appSettings
     @Environment(\.isInCaptureMode) private var isInCaptureMode
@@ -34,15 +34,15 @@ struct TranslatableText: View {
     }
 
     private func getTranslatedText() -> String? {
-        viewModel.translatedText
+        transViewModel.translatedText
     }
 
     private func isTranslating() -> Bool {
-        viewModel.isTranslating
+        transViewModel.isTranslating
     }
 
     private func startTranslation() {
-        viewModel.translate(originalText)
+        transViewModel.translate(originalText)
     }
 
     var body: some View {
@@ -62,7 +62,7 @@ struct TranslatableText: View {
                     .foregroundColor(.secondary)
             }
 
-            if let error = viewModel.error {
+            if let error = transViewModel.error {
                 Text(error.localizedDescription)
                     .font(.caption)
                     .foregroundColor(.red)

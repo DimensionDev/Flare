@@ -183,10 +183,10 @@ public extension KFImage {
         var image = setProcessor(processor)
             .scaleFactor(scale)
             .cancelOnDisappear(true)
-            .downloadPriority(0.7)
-            .memoryCacheExpiration(.seconds(600))
+            .downloadPriority(0.8)
+            .memoryCacheExpiration(.seconds(1800))
             .diskCacheExpiration(.days(7))
-            .fade(duration: 0.2)
+            .fade(duration: 0.13)
 
         #if !targetEnvironment(simulator)
             image = image.backgroundDecode(true)

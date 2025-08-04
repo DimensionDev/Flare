@@ -18,7 +18,7 @@ struct TimelineStatusViewV2: View {
     @State private var showGoogleTranslation: Bool = false
     @State private var isTranslating: Bool = false
 
-    @State private var isShareSheetPresented = false
+//    @State private var isShareSheetPresented = false
     @State private var isShareAsImageSheetPresented = false
     @State private var isPreparingShare = false
 
@@ -26,6 +26,11 @@ struct TimelineStatusViewV2: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
+
+    private var isGuestUser: Bool {
+        let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
+        return accountType is AccountTypeGuest
+    }
 
     var body: some View {
         if shouldHideInTimeline {
@@ -58,16 +63,20 @@ struct TimelineStatusViewV2: View {
                     }
                 )
 
-                TimelineActionsViewV2(
-                    item: item,
-                    timelineViewModel: timelineViewModel,
-                    onAction: { actionType, updatedItem in
-                        handleTimelineAction(actionType, item: updatedItem)
-                    },
-                    onShare: { shareType in
-                        handleShare(type: shareType)
-                    }
-                )
+                if !isGuestUser {
+                    TimelineActionsViewV2(
+                        item: item,
+                        timelineViewModel: timelineViewModel,
+                        onAction: { actionType, updatedItem in
+                            handleTimelineAction(actionType, item: updatedItem)
+                        },
+                        onShare: { shareType in
+                            handleShare(type: shareType)
+                        }
+                    )
+                } else {
+                    Spacer().frame(height: 16)
+                }
             }
             .padding(.horizontal, 16)
             .frame(alignment: .leading)

@@ -40,6 +40,66 @@ class TimelineViewModel {
         return false
     }
 
+     func updateItemOptimistically(itemId: String, actionType: ActionType) {
+        return
+        FlareLog.debug("🚀 [TimelineViewModel] 开始乐观更新: itemId=\(itemId), actionType=\(actionType)")
+
+        guard case let .loaded(items, hasMore) = timelineState else {
+            FlareLog.warning("⚠️ [TimelineViewModel] 乐观更新失败: timelineState不是loaded状态")
+            return
+        }
+
+        guard let index = items.firstIndex(where: { $0.id == itemId }) else {
+            FlareLog.warning("⚠️ [TimelineViewModel] 乐观更新失败: 未找到item \(itemId)")
+            return
+        }
+
+        var updatedItems = items
+        var item = updatedItems[index]
+
+        // 记录更新前的状态
+        let beforeState = getItemState(item: item, actionType: actionType)
+
+        // 执行乐观更新
+        switch actionType {
+        case .like:
+            item.isLiked.toggle()
+            item.likeCount += item.isLiked ? 1 : -1
+
+        case .retweet:
+            item.isRetweeted.toggle()
+            item.retweetCount += item.isRetweeted ? 1 : -1
+
+        case .bookmark:
+            item.isBookmarked.toggle()
+            item.bookmarkCount += item.isBookmarked ? 1 : -1
+        }
+
+        // 更新数组
+        updatedItems[index] = item
+
+        // 更新timelineState
+        timelineState = .loaded(items: updatedItems, hasMore: hasMore)
+
+        // 记录更新后的状态
+        let afterState = getItemState(item: item, actionType: actionType)
+
+        FlareLog.debug("✅ [TimelineViewModel] 乐观更新完成: \(actionType) for \(itemId)")
+        FlareLog.debug("📊 [TimelineViewModel] 状态变化: \(beforeState) → \(afterState)")
+    }
+
+
+    private func getItemState(item: TimelineItem, actionType: ActionType) -> String {
+        switch actionType {
+        case .like:
+            return "isLiked=\(item.isLiked), likeCount=\(item.likeCount)"
+        case .retweet:
+            return "isRetweeted=\(item.isRetweeted), retweetCount=\(item.retweetCount)"
+        case .bookmark:
+            return "isBookmarked=\(item.isBookmarked), bookmarkCount=\(item.bookmarkCount)"
+        }
+    }
+
     // 🔥 移除：isRefreshing属性不再需要
     // var isRefreshing: Bool {
     //     return false
@@ -374,5 +434,31 @@ struct TimelineEmptyView: View {
         }
         .frame(maxWidth: .infinity, minHeight: 200)
         .padding()
+    }
+}
+
+
+enum ActionType: String, CaseIterable {
+    case like = "like"
+    case retweet = "retweet"
+    case bookmark = "bookmark"
+}
+
+
+extension TimelineItem {
+    func isActive(for actionType: ActionType) -> Bool {
+        switch actionType {
+        case .like: return isLiked
+        case .retweet: return isRetweeted
+        case .bookmark: return isBookmarked
+        }
+    }
+
+    func count(for actionType: ActionType) -> Int {
+        switch actionType {
+        case .like: return likeCount
+        case .retweet: return retweetCount
+        case .bookmark: return bookmarkCount
+        }
     }
 }

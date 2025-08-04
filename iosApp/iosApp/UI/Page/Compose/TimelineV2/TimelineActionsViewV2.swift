@@ -10,6 +10,7 @@ extension NSNotification.Name {
 
 struct TimelineActionsViewV2: View {
     let item: TimelineItem
+    let timelineViewModel: TimelineViewModel?  
 
     let onAction: (TimelineActionType, TimelineItem) -> Void
     let onShare: (ShareType) -> Void
@@ -17,12 +18,6 @@ struct TimelineActionsViewV2: View {
     @Environment(FlareRouter.self) private var router
 
     @State private var showRetweetMenu = false
-    @State private var displayLikeCount: Int = 0
-    @State private var displayIsLiked: Bool = false
-    @State private var displayRetweetCount: Int = 0
-    @State private var displayIsRetweeted: Bool = false
-    @State private var displayBookmarkCount: Int = 0
-    @State private var displayIsBookmarked: Bool = false
 
     var body: some View {
         HStack(spacing: 0) {
@@ -38,8 +33,8 @@ struct TimelineActionsViewV2: View {
 
             ActionButtonV2(
                 iconImage: Image(asset: Asset.Image.Status.Toolbar.repeat),
-                count: displayRetweetCount,
-                isActive: displayIsRetweeted,
+                count: item.retweetCount,
+                isActive: item.isRetweeted,
                 activeColor: .green
             ) {
                 handleRetweetAction()
@@ -52,11 +47,11 @@ struct TimelineActionsViewV2: View {
             }
 
             ActionButtonV2(
-                iconImage: displayIsLiked ?
+                iconImage: item.isLiked ?
                     Image(asset: Asset.Image.Status.Toolbar.favorite) :
                     Image(asset: Asset.Image.Status.Toolbar.favoriteBorder),
-                count: displayLikeCount,
-                isActive: displayIsLiked,
+                count: item.likeCount,
+                isActive: item.isLiked,
                 activeColor: .red
             ) {
                 handleLikeAction()
@@ -64,11 +59,11 @@ struct TimelineActionsViewV2: View {
             .frame(maxWidth: .infinity)
 
             ActionButtonV2(
-                iconImage: displayIsBookmarked ?
+                iconImage: item.isBookmarked ?
                     Image(asset: Asset.Image.Status.Toolbar.bookmarkFilled) :
                     Image(asset: Asset.Image.Status.Toolbar.bookmark),
-                count: displayBookmarkCount,
-                isActive: displayIsBookmarked,
+                count: item.bookmarkCount,
+                isActive: item.isBookmarked,
                 activeColor: .orange
             ) {
                 handleBookmarkAction()
@@ -85,45 +80,22 @@ struct TimelineActionsViewV2: View {
             }
             // .frame(maxWidth: .infinity)
 
-            ShareButtonV2(
+            ShareButtonV3(
                 item: item,
                 onShare: onShare
             )
         }
         .padding(.vertical, 8)
         .id(item.id)
-        // .id("\(item.id)-\(displayLikeCount)-\(displayIsLiked)-\(displayRetweetCount)-\(displayIsRetweeted)-\(displayBookmarkCount)-\(displayIsBookmarked)-\(refreshTrigger)")
-        .onAppear { 
-            syncDisplayStateFromItem() 
-        }
-        .onChange(of: item.id) { newId in 
-            syncDisplayStateFromItem() 
-        } 
     }
 
-  
-    private func syncDisplayStateFromItem() {
-        displayLikeCount = item.likeCount
-        displayIsLiked = item.isLiked
-        displayRetweetCount = item.retweetCount
-        displayIsRetweeted = item.isRetweeted
-        displayBookmarkCount = item.bookmarkCount
-        displayIsBookmarked = item.isBookmarked
-    }
-
- 
     private func handleLikeAction() {
-        let newLikeCount = displayIsLiked ? displayLikeCount - 1 : displayLikeCount + 1
-        let newIsLiked = !displayIsLiked
+        FlareLog.debug("🔥 [TimelineActionsViewV2] handleLikeAction called for item: \(item.id)")
 
-        displayLikeCount = newLikeCount
-        displayIsLiked = newIsLiked
+         timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .like)
 
-        let updatedItem = item.withUpdatedLikeState(count: newLikeCount, isLiked: newIsLiked)
-
-        onAction(.like, updatedItem)
-
-        performKMPAction(actionType: .like)
+         self.performKMPAction(actionType: .like)
+         
     }
 
  
@@ -134,23 +106,16 @@ struct TimelineActionsViewV2: View {
  
     private func performRetweetAction(isQuote: Bool) {
         if isQuote {
+            FlareLog.debug("🔥 [TimelineActionsViewV2] performRetweetAction (quote) called for item: \(item.id)")
             performKMPAction(actionType: .quote)
             return
         }
 
-        let newRetweetCount = displayIsRetweeted ? displayRetweetCount - 1 : displayRetweetCount + 1
-        let newIsRetweeted = !displayIsRetweeted
+        FlareLog.debug("🔥 [TimelineActionsViewV2] performRetweetAction (repost) called for item: \(item.id)")
 
-        displayRetweetCount = newRetweetCount
-        displayIsRetweeted = newIsRetweeted
+         timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .retweet)
 
-        var updatedItem = item
-        updatedItem.retweetCount = newRetweetCount
-        updatedItem.isRetweeted = newIsRetweeted
-
-        onAction(.repost, updatedItem)
-
-        performKMPAction(actionType: .repost)
+         performKMPAction(actionType: .repost)
     }
 
     private func handleReplyAction() {
@@ -158,19 +123,11 @@ struct TimelineActionsViewV2: View {
     }
 
     private func handleBookmarkAction() {
-        let newBookmarkCount = displayIsBookmarked ? displayBookmarkCount - 1 : displayBookmarkCount + 1
-        let newIsBookmarked = !displayIsBookmarked
+        FlareLog.debug("🔥 [TimelineActionsViewV2] handleBookmarkAction called for item: \(item.id)")
 
-        displayBookmarkCount = newBookmarkCount
-        displayIsBookmarked = newIsBookmarked
+         timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .bookmark)
 
-        var updatedItem = item
-        updatedItem.bookmarkCount = newBookmarkCount
-        updatedItem.isBookmarked = newIsBookmarked
-
-        onAction(.bookmark, updatedItem)
-
-        performKMPAction(actionType: .bookmark)
+         performKMPAction(actionType: .bookmark)
     }
 
     private func handleTranslateAction() {
@@ -178,6 +135,7 @@ struct TimelineActionsViewV2: View {
     }
 
     private func performKMPAction(actionType: TimelineActionType) {
+        FlareLog.debug("🔥 [TimelineActionsViewV2] performKMPAction called - actionType: \(actionType), item: \(item.id)")
         func findAndExecuteAction(in actions: [StatusAction], actionType: TimelineActionType) -> Bool {
             for (_, action) in actions.enumerated() {
                 let enumResult = onEnum(of: action)
@@ -230,15 +188,25 @@ private struct ActionButtonV2: View {
                     .renderingMode(.template)
                     .foregroundColor(isActive ? activeColor : .primary)
 
+Group {
                 if count > 0 {
                     Text("\(formatCount(Int64(count)))")
                         .foregroundColor(isActive ? activeColor : .primary)
                         .font(.caption)
-                }
+                } }
             }
             .padding(8)
         }
         .buttonStyle(BorderlessButtonStyle())
+//        .onAppear {
+//            FlareLog.debug("🎨 [ActionButtonV2] Button appeared - isActive: \(isActive), count: \(count), color: \(isActive ? "active" : "primary")")
+//        }
+//        .onChange(of: isActive) { oldValue, newValue in
+//            FlareLog.debug("🎨 [ActionButtonV2] isActive changed: \(oldValue) → \(newValue), count: \(count)")
+//        }
+//        .onChange(of: count) { oldValue, newValue in
+//            FlareLog.debug("🎨 [ActionButtonV2] count changed: \(oldValue) → \(newValue), isActive: \(isActive)")
+//        }
     }
 }
 

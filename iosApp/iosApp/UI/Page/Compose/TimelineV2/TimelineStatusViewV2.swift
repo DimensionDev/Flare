@@ -11,6 +11,7 @@ import UIKit
 
 struct TimelineStatusViewV2: View {
     let item: TimelineItem
+    let timelineViewModel: TimelineViewModel?
 
     let isDetail: Bool = false
     @State private var showAppleTranslation: Bool = false
@@ -62,6 +63,7 @@ struct TimelineStatusViewV2: View {
 
                 TimelineActionsViewV2(
                     item: item,
+                    timelineViewModel: timelineViewModel,
                     onAction: { actionType, updatedItem in
                         handleTimelineAction(actionType, item: updatedItem)
                     },

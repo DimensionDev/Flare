@@ -14,7 +14,8 @@ struct TimelineItemsView: View {
         Group {
             ForEach(items) { item in
                 TimelineStatusViewV2(
-                    item: item
+                    item: item,
+                    timelineViewModel: viewModel
                 )
                 .padding(.vertical, 4)
                 .onAppear {
@@ -24,7 +25,7 @@ struct TimelineItemsView: View {
                 .onDisappear {
                     // FlareLog.debug("[TimelineItemsView] item消失: \(item.id), index: \(index)")
                     viewModel.itemDidDisappear(item: item)
-                }  
+                }
             }
 
             if hasMore {

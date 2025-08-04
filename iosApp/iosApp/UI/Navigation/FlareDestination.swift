@@ -7,6 +7,7 @@ enum FlareDestination: Identifiable, Hashable {
     case profileWithNameAndHost(accountType: AccountType, userName: String, host: String)
     case profileMedia(accountType: AccountType, userKey: MicroBlogKey)
     case statusDetail(accountType: AccountType, statusKey: MicroBlogKey)
+    case statusDetailV2(accountType: AccountType, statusKey: MicroBlogKey)
     case search(accountType: AccountType, keyword: String)
     case statusMedia(accountType: AccountType, statusKey: MicroBlogKey, index: Int)
     case download(accountType: AccountType)
@@ -52,6 +53,8 @@ enum FlareDestination: Identifiable, Hashable {
             "profileMedia_\(String(describing: accountType))_\(userKey.description)"
         case let .statusDetail(accountType, statusKey):
             "statusDetail_\(String(describing: accountType))_\(statusKey.description)"
+        case let .statusDetailV2(accountType, statusKey):
+            "statusDetailV2_\(String(describing: accountType))_\(statusKey.description)"
         case let .search(accountType, keyword):
             "search_\(String(describing: accountType))_\(keyword)"
         case let .statusMedia(accountType, statusKey, index):

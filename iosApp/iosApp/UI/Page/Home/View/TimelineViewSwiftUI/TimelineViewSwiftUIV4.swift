@@ -36,7 +36,7 @@ struct TimelineViewSwiftUIV4: View {
                         ForEach(0 ..< 5, id: \.self) { _ in
                             TimelineStatusViewV2(
                                 item: createSampleTimelineItem(),
-                                timelineViewModel: timeLineViewModel // 传递ViewModel
+                                timelineViewModel: timeLineViewModel  
                             )
                             .redacted(reason: .placeholder)
                             .listRowBackground(theme.primaryBackgroundColor)

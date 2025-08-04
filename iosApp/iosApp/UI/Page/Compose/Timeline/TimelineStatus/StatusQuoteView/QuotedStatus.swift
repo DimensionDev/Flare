@@ -15,7 +15,7 @@ struct QuotedStatus: View {
 
     var body: some View {
         Button(action: {
-            router.navigate(to: .statusDetail(
+            router.navigate(to: .statusDetailV2(
                 accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
                 statusKey: data.statusKey
             ))

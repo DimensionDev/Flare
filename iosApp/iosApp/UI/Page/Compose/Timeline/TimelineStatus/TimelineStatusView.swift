@@ -76,7 +76,7 @@ struct TimelineStatusView: View {
         //         width: tapLocation.frame.width - 32, height: 44
         //     )
         // if !bottomActionBarFrame.contains(tapLocation.frame.origin) {
-        router.navigate(to: .statusDetail(
+        router.navigate(to: .statusDetailV2(
             accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
             statusKey: viewModel.statusData.statusKey
         ))

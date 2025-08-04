@@ -125,7 +125,7 @@ struct TimelineStatusViewV2: View {
 
         let statusKey = item.createMicroBlogKey()
 
-        router.navigate(to: .statusDetail(
+        router.navigate(to: .statusDetailV2(
             accountType: accountType,
             statusKey: statusKey
         ))

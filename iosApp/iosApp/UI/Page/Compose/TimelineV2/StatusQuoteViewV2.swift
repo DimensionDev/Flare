@@ -68,7 +68,7 @@ struct QuotedStatusV2: View {
             let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
             let statusKey = item.createMicroBlogKey()
 
-            router.navigate(to: .statusDetail(
+            router.navigate(to: .statusDetailV2(
                 accountType: accountType,
                 statusKey: statusKey
             ))

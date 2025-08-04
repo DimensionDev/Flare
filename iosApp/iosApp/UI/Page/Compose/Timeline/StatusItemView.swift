@@ -72,7 +72,7 @@ struct StatusItemView: View {
                     case let .status(data): Button(action: {
                             if detailKey != data.statusKey {
                                 // data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                                router.navigate(to: .statusDetail(
+                                router.navigate(to: .statusDetailV2(
                                     accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
                                     statusKey: data.statusKey
                                 ))

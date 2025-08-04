@@ -290,7 +290,7 @@ class FlareRouter: ObservableObject {
             return .profileWithNameAndHost(accountType: route.accountType, userName: route.userName, host: route.host)
 
         case let route as AppleRoute.StatusDetail:
-            return .statusDetail(accountType: route.accountType, statusKey: route.statusKey)
+            return .statusDetailV2(accountType: route.accountType, statusKey: route.statusKey)
 
         case let route as AppleRoute.ProfileMedia:
             return .profileMedia(accountType: route.accountType, userKey: route.userKey)

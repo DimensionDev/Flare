@@ -5,14 +5,14 @@ import SwiftUI
 @MainActor
 @Observable
 class TimelineViewModel {
-    // 只保留暂停状态管理
-    private(set) var isPaused: Bool = true // 初始状态为暂停
+   
+    private(set) var isPaused: Bool = true 
 
     private(set) var timelineState: FlareTimelineState = .loading
     private(set) var showErrorAlert = false
     private(set) var currentError: FlareError?
 
-    private(set) var presenter: TimelinePresenter?
+    private(set) var presenter: PresenterBase<TimelineState>?
     private let stateConverter = PagingStateConverter()
     private var refreshDebounceTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
@@ -42,15 +42,15 @@ class TimelineViewModel {
 
     func updateItemOptimistically(itemId: String, actionType: ActionType) {
         return
-            FlareLog.debug("🚀 [TimelineViewModel] 开始乐观更新: itemId=\(itemId), actionType=\(actionType)")
+            FlareLog.debug("🚀 [TimelineViewModel] 开始更新: itemId=\(itemId), actionType=\(actionType)")
 
         guard case let .loaded(items, hasMore) = timelineState else {
-            FlareLog.warning("⚠️ [TimelineViewModel] 乐观更新失败: timelineState不是loaded状态")
+            FlareLog.warning("⚠️ [TimelineViewModel] 更新失败: timelineState不是loaded状态")
             return
         }
 
         guard let index = items.firstIndex(where: { $0.id == itemId }) else {
-            FlareLog.warning("⚠️ [TimelineViewModel] 乐观更新失败: 未找到item \(itemId)")
+            FlareLog.warning("⚠️ [TimelineViewModel] 更新失败: 未找到item \(itemId)")
             return
         }
 
@@ -60,7 +60,7 @@ class TimelineViewModel {
         // 记录更新前的状态
         let beforeState = getItemState(item: item, actionType: actionType)
 
-        // 执行乐观更新
+        // 执行更新
         switch actionType {
         case .like:
             item.isLiked.toggle()
@@ -84,7 +84,7 @@ class TimelineViewModel {
         // 记录更新后的状态
         let afterState = getItemState(item: item, actionType: actionType)
 
-        FlareLog.debug("✅ [TimelineViewModel] 乐观更新完成: \(actionType) for \(itemId)")
+        FlareLog.debug("✅ [TimelineViewModel] 更新完成: \(actionType) for \(itemId)")
         FlareLog.debug("📊 [TimelineViewModel] 状态变化: \(beforeState) → \(afterState)")
     }
 
@@ -99,12 +99,7 @@ class TimelineViewModel {
         }
     }
 
-    // 🔥 移除：isRefreshing属性不再需要
-    // var isRefreshing: Bool {
-    //     return false
-    // }
-
-    /// 暂停数据流处理
+   
     func pause() {
         guard !isPaused else {
             FlareLog.debug("⏸️ [Timeline ViewModel] Already paused, skipping")
@@ -116,7 +111,7 @@ class TimelineViewModel {
         FlareLog.debug("⏸️ [Timeline ViewModel] Paused Swift layer data processing")
     }
 
-    /// 恢复数据流处理
+  
     func resume() {
         guard isPaused else {
             FlareLog.debug("▶️ [Timeline ViewModel] Already active, skipping resume")
@@ -125,7 +120,7 @@ class TimelineViewModel {
 
         if presenter == nil {
             FlareLog.debug("⚠️ [Timeline ViewModel] No presenter yet, will resume after setup")
-            isPaused = false // 设置意图，但不启动监听
+            isPaused = false 
             return
         }
 
@@ -134,7 +129,7 @@ class TimelineViewModel {
         restartDataSourceMonitoring()
     }
 
-    /// 重新启动数据源监听
+   
     private func restartDataSourceMonitoring() {
         guard let presenter else {
             FlareLog.warning("⚠️ [Timeline ViewModel] No presenter available for restart")
@@ -186,18 +181,39 @@ class TimelineViewModel {
         }
     }
 
-    func setupDataSource(for tab: FLTabItem, using store: AppBarTabSettingStore) async {
+    func setupDataSource(presenter: PresenterBase<TimelineState>) async {
         let timestamp = Date().timeIntervalSince1970
         let hadPreviousTask = dataSourceTask != nil
 
-        FlareLog.debug("🔧 [Timeline ViewModel] setupDataSource started - tab: \(tab.key), hadPreviousTask: \(hadPreviousTask), timestamp: \(timestamp)")
+        FlareLog.debug("🔧 [Timeline ViewModel] setupDataSource (generic) started - hadPreviousTask: \(hadPreviousTask), timestamp: \(timestamp)")
 
         dataSourceTask?.cancel()
         if hadPreviousTask {
-            FlareLog.debug("❌ [Timeline ViewModel] Previous dataSourceTask cancelled - tab: \(tab.key)")
+            FlareLog.debug("❌ [Timeline ViewModel] Previous dataSourceTask cancelled")
         }
 
-        FlareLog.debug("🏪 [Timeline ViewModel] Getting cached presenter for tab: \(tab.key)")
+        if self.presenter === presenter {
+            FlareLog.debug("♻️ [Timeline ViewModel] Using existing presenter")
+        } else {
+            FlareLog.debug("🆕 [Timeline ViewModel] Setting new presenter")
+            self.presenter = presenter
+        }
+
+   
+        if !isPaused {
+            FlareLog.debug("▶️ [Timeline ViewModel] Starting data monitoring immediately (not paused)")
+            restartDataSourceMonitoring()
+        } else {
+            FlareLog.debug("⏸️ [Timeline ViewModel] Data source setup completed, but monitoring paused")
+        }
+    }
+
+ 
+    func setupDataSource(for tab: FLTabItem, using store: AppBarTabSettingStore) async {
+        let timestamp = Date().timeIntervalSince1970
+        FlareLog.debug("🔧 [Timeline ViewModel] setupDataSource (tab) started - tab: \(tab.key), timestamp: \(timestamp)")
+
+        FlareLog.debug("� [Timeline ViewModel] Getting cached presenter for tab: \(tab.key)")
 
         guard let cachedPresenter = store.getOrCreatePresenter(for: tab) else {
             FlareLog.error("💥 [Timeline ViewModel] Failed to get cached presenter for tab: \(tab.key)")
@@ -206,20 +222,8 @@ class TimelineViewModel {
             return
         }
 
-        if presenter === cachedPresenter {
-            FlareLog.debug("♻️ [Timeline ViewModel] Using existing presenter")
-        } else {
-            FlareLog.debug("🆕 [Timeline ViewModel] Setting new cached presenter")
-            presenter = cachedPresenter
-        }
-
-        // 如果当前未暂停，启动数据监听
-        if !isPaused {
-            FlareLog.debug("▶️ [Timeline ViewModel] Starting data monitoring immediately (not paused)")
-            restartDataSourceMonitoring()
-        } else {
-            FlareLog.debug("⏸️ [Timeline ViewModel] Data source setup completed, but monitoring paused")
-        }
+        
+        await setupDataSource(presenter: cachedPresenter)
     }
 
     func handleRefresh() async {

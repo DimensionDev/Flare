@@ -16,35 +16,20 @@ struct AccountsScreen: View {
                             let item = data.data.get(index: index)
                             switch onEnum(of: item.second) {
                             case let .success(user):
-                                Button {
-                                    NotificationCenter.default.post(name: .accountChanged, object: nil)
-                                    state.setActiveAccount(accountKey: user.data.key)
-                                } label: {
-                                    HStack {
-                                        UserComponent(user: user.data, topEndContent: nil)
-                                        Spacer()
-                                        switch onEnum(of: state.activeAccount) {
-                                        case let .success(activeAccount):
-                                            Image(
-                                                systemName: activeAccount.data.accountKey == user.data.key ?
-                                                    "checkmark.circle.fill" :
-                                                    "circle"
-                                            )
-                                            .foregroundStyle(theme.tintColor)
-                                        default:
-                                            Image(systemName: "circle")
-                                                .foregroundStyle(theme.tintColor)
-                                        }
+                                accountRowContent(user: user.data, activeAccount: state.activeAccount)
+                                .highPriorityGesture(
+                                    TapGesture().onEnded {
+                                        NotificationCenter.default.post(name: .accountChanged, object: nil)
+                                        state.setActiveAccount(accountKey: user.data.key)
                                     }
-                                    .swipeActions(edge: .trailing) {
-                                        Button(role: .destructive) {
-                                            state.removeAccount(accountKey: user.data.key)
-                                        } label: {
-                                            Label("delete", systemImage: "trash")
-                                        }
+                                )
+                                .swipeActions(edge: .trailing) {
+                                    Button(role: .destructive) {
+                                        state.removeAccount(accountKey: user.data.key)
+                                    } label: {
+                                        Label("delete", systemImage: "trash")
                                     }
                                 }
-                                .buttonStyle(.plain)
                                 #if os(macOS)
                                     .contextMenu {
                                         Button(role: .destructive) {
@@ -97,5 +82,30 @@ struct AccountsScreen: View {
             })
         }.scrollContentBackground(.hidden)
             .background(theme.secondaryBackgroundColor)
+    }
+
+    @ViewBuilder
+    private func accountRowContent(user: UiUserV2, activeAccount: UiState<UiAccount>) -> some View {
+        HStack {
+            UserComponent(user: user, topEndContent: nil)
+            Spacer()
+            accountStatusIcon(for: user.key, activeAccount: activeAccount)
+        }
+    }
+
+    @ViewBuilder
+    private func accountStatusIcon(for userKey: MicroBlogKey, activeAccount: UiState<UiAccount>) -> some View {
+        switch onEnum(of: activeAccount) {
+        case let .success(activeAccount):
+            Image(
+                systemName: activeAccount.data.accountKey.isEqual(userKey) ?
+                    "checkmark.circle.fill" :
+                    "circle"
+            )
+            .foregroundStyle(theme.tintColor)
+        default:
+            Image(systemName: "circle")
+                .foregroundStyle(theme.tintColor)
+        }
     }
 }

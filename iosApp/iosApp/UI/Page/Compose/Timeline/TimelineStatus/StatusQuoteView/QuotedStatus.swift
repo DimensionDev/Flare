@@ -5,7 +5,7 @@ import SwiftUI
 // 引用
 struct QuotedStatus: View {
     @State private var showMedia: Bool = false
-   
+
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme

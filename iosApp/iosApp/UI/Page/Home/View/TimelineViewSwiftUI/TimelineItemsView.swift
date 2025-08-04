@@ -6,11 +6,9 @@ struct TimelineItemsView: View {
     let hasMore: Bool
     let viewModel: TimelineViewModel
 
-   
     @Environment(\.appSettings) private var appSettings
 
     var body: some View {
-
         Group {
             ForEach(items) { item in
                 TimelineStatusViewV2(
@@ -45,6 +43,4 @@ struct TimelineItemsView: View {
             FlareLog.debug("[Timeline ItemsView] TimelineItemsView appeared with \(items.count) items")
         }
     }
-
-
 }

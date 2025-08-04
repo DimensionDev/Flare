@@ -27,9 +27,9 @@ class TimelineViewModel {
     private var visibleItems: [TimelineItem] = []
 
     var items: [TimelineItem] {
-            if case let .loaded(items, _) = timelineState {
+        if case let .loaded(items, _) = timelineState {
             return items
-            }
+        }
         return []
     }
 
@@ -40,9 +40,9 @@ class TimelineViewModel {
         return false
     }
 
-     func updateItemOptimistically(itemId: String, actionType: ActionType) {
+    func updateItemOptimistically(itemId: String, actionType: ActionType) {
         return
-        FlareLog.debug("🚀 [TimelineViewModel] 开始乐观更新: itemId=\(itemId), actionType=\(actionType)")
+            FlareLog.debug("🚀 [TimelineViewModel] 开始乐观更新: itemId=\(itemId), actionType=\(actionType)")
 
         guard case let .loaded(items, hasMore) = timelineState else {
             FlareLog.warning("⚠️ [TimelineViewModel] 乐观更新失败: timelineState不是loaded状态")
@@ -88,15 +88,14 @@ class TimelineViewModel {
         FlareLog.debug("📊 [TimelineViewModel] 状态变化: \(beforeState) → \(afterState)")
     }
 
-
     private func getItemState(item: TimelineItem, actionType: ActionType) -> String {
         switch actionType {
         case .like:
-            return "isLiked=\(item.isLiked), likeCount=\(item.likeCount)"
+            "isLiked=\(item.isLiked), likeCount=\(item.likeCount)"
         case .retweet:
-            return "isRetweeted=\(item.isRetweeted), retweetCount=\(item.retweetCount)"
+            "isRetweeted=\(item.isRetweeted), retweetCount=\(item.retweetCount)"
         case .bookmark:
-            return "isBookmarked=\(item.isBookmarked), bookmarkCount=\(item.bookmarkCount)"
+            "isBookmarked=\(item.isBookmarked), bookmarkCount=\(item.bookmarkCount)"
         }
     }
 
@@ -348,9 +347,8 @@ class TimelineViewModel {
         scrollToId = itemId
     }
 
-
     func getCurrentVisibleItemIds() -> [String] {
-        return visibleItems.map { $0.id }
+        visibleItems.map(\.id)
     }
 
     func itemDidAppear(item: TimelineItem) {
@@ -362,12 +360,12 @@ class TimelineViewModel {
             visibleItems = Array(visibleItems.prefix(50))
         }
 
-        //FlareLog.debug("[TimelineViewModel] item出现: \(item.id), 当前可见items: \(visibleItems.count)")
+        // FlareLog.debug("[TimelineViewModel] item出现: \(item.id), 当前可见items: \(visibleItems.count)")
     }
 
     func itemDidDisappear(item: TimelineItem) {
         visibleItems.removeAll { $0.id == item.id }
-        //FlareLog.debug("[TimelineViewModel] item消失: \(item.id), 当前可见items: \(visibleItems.count)")
+        // FlareLog.debug("[TimelineViewModel] item消失: \(item.id), 当前可见items: \(visibleItems.count)")
     }
 }
 
@@ -437,28 +435,26 @@ struct TimelineEmptyView: View {
     }
 }
 
-
 enum ActionType: String, CaseIterable {
-    case like = "like"
-    case retweet = "retweet"
-    case bookmark = "bookmark"
+    case like
+    case retweet
+    case bookmark
 }
-
 
 extension TimelineItem {
     func isActive(for actionType: ActionType) -> Bool {
         switch actionType {
-        case .like: return isLiked
-        case .retweet: return isRetweeted
-        case .bookmark: return isBookmarked
+        case .like: isLiked
+        case .retweet: isRetweeted
+        case .bookmark: isBookmarked
         }
     }
 
     func count(for actionType: ActionType) -> Int {
         switch actionType {
-        case .like: return likeCount
-        case .retweet: return retweetCount
-        case .bookmark: return bookmarkCount
+        case .like: likeCount
+        case .retweet: retweetCount
+        case .bookmark: bookmarkCount
         }
     }
 }

@@ -10,7 +10,7 @@ extension NSNotification.Name {
 
 struct TimelineActionsViewV2: View {
     let item: TimelineItem
-    let timelineViewModel: TimelineViewModel?  
+    let timelineViewModel: TimelineViewModel?
 
     let onAction: (TimelineActionType, TimelineItem) -> Void
     let onShare: (ShareType) -> Void
@@ -92,18 +92,15 @@ struct TimelineActionsViewV2: View {
     private func handleLikeAction() {
         FlareLog.debug("🔥 [TimelineActionsViewV2] handleLikeAction called for item: \(item.id)")
 
-         timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .like)
+        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .like)
 
-         self.performKMPAction(actionType: .like)
-         
+        performKMPAction(actionType: .like)
     }
 
- 
     private func handleRetweetAction() {
         showRetweetMenu = true
     }
 
- 
     private func performRetweetAction(isQuote: Bool) {
         if isQuote {
             FlareLog.debug("🔥 [TimelineActionsViewV2] performRetweetAction (quote) called for item: \(item.id)")
@@ -113,9 +110,9 @@ struct TimelineActionsViewV2: View {
 
         FlareLog.debug("🔥 [TimelineActionsViewV2] performRetweetAction (repost) called for item: \(item.id)")
 
-         timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .retweet)
+        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .retweet)
 
-         performKMPAction(actionType: .repost)
+        performKMPAction(actionType: .repost)
     }
 
     private func handleReplyAction() {
@@ -125,9 +122,9 @@ struct TimelineActionsViewV2: View {
     private func handleBookmarkAction() {
         FlareLog.debug("🔥 [TimelineActionsViewV2] handleBookmarkAction called for item: \(item.id)")
 
-         timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .bookmark)
+        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .bookmark)
 
-         performKMPAction(actionType: .bookmark)
+        performKMPAction(actionType: .bookmark)
     }
 
     private func handleTranslateAction() {
@@ -188,12 +185,13 @@ private struct ActionButtonV2: View {
                     .renderingMode(.template)
                     .foregroundColor(isActive ? activeColor : .primary)
 
-Group {
-                if count > 0 {
-                    Text("\(formatCount(Int64(count)))")
-                        .foregroundColor(isActive ? activeColor : .primary)
-                        .font(.caption)
-                } }
+                Group {
+                    if count > 0 {
+                        Text("\(formatCount(Int64(count)))")
+                            .foregroundColor(isActive ? activeColor : .primary)
+                            .font(.caption)
+                    }
+                }
             }
             .padding(8)
         }

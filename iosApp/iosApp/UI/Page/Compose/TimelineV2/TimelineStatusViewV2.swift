@@ -18,11 +18,9 @@ struct TimelineStatusViewV2: View {
     @State private var showGoogleTranslation: Bool = false
     @State private var isTranslating: Bool = false
 
-     
     @State private var isShareSheetPresented = false
     @State private var isShareAsImageSheetPresented = false
     @State private var isPreparingShare = false
-
 
     @Environment(\.appSettings) private var appSettings
     @Environment(\.colorScheme) private var colorScheme
@@ -30,7 +28,6 @@ struct TimelineStatusViewV2: View {
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
-
         if shouldHideInTimeline {
             EmptyView()
         } else {
@@ -163,6 +160,7 @@ struct TimelineStatusViewV2: View {
     }
 
     // MARK: - 分享功能
+
     private func handleShare(type: ShareType) {
         switch type {
         case .sharePost:

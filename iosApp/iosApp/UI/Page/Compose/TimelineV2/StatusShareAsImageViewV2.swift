@@ -46,10 +46,8 @@ struct StatusShareAsImageViewV2: View {
     let shareText: String
 
     @State private var capturedImage: UIImage?
-    @State private var isGenerating: Bool = true   
-    @State private var isOptimizing: Bool = false 
-
-
+    @State private var isGenerating: Bool = true
+    @State private var isOptimizing: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -78,8 +76,6 @@ struct StatusShareAsImageViewV2: View {
                     }
                 }
                 .listRowBackground(colorScheme == .dark ? Color.black : Color.white)
-
-
             }
             .scrollContentBackground(.hidden)
             .toolbar {
@@ -121,10 +117,8 @@ struct StatusShareAsImageViewV2: View {
     }
 
     private func generateScreenshot() {
-        
         generateQuickScreenshot()
 
-        
         DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
             generateOptimizedScreenshot()
         }
@@ -133,7 +127,7 @@ struct StatusShareAsImageViewV2: View {
     private func generateQuickScreenshot() {
         let captureView = createCaptureView()
         let renderer = ImageRenderer(content: captureView)
-        renderer.scale = 2.0   
+        renderer.scale = 2.0
         renderer.isOpaque = true
         renderer.proposedSize = ProposedViewSize(
             width: UIScreen.main.bounds.width - 24,
@@ -150,7 +144,7 @@ struct StatusShareAsImageViewV2: View {
     private func generateOptimizedScreenshot() {
         let captureView = createCaptureView()
         let renderer = ImageRenderer(content: captureView)
-        renderer.scale = 3.0   
+        renderer.scale = 3.0
         renderer.isOpaque = true
         renderer.proposedSize = ProposedViewSize(
             width: UIScreen.main.bounds.width - 24,
@@ -163,7 +157,7 @@ struct StatusShareAsImageViewV2: View {
                 isOptimizing = false
             }
         } else {
-             isOptimizing = false
+            isOptimizing = false
         }
     }
 

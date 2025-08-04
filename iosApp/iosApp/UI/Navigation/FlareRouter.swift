@@ -7,7 +7,6 @@ import UIKit
 
 @Observable
 class FlareRouter: ObservableObject {
-    
     public static let shared = FlareRouter()
 
     public var appState: FlareAppState
@@ -24,7 +23,6 @@ class FlareRouter: ObservableObject {
 
     var isDialogPresented: Bool = false
 
- 
     var selectedTab: FlareHomeTabs = .timeline {
         didSet {
             let oldTab = oldValue
@@ -149,7 +147,7 @@ class FlareRouter: ObservableObject {
         }
     }
 
-    func goBack() { 
+    func goBack() {
         dismissCurrentView()
     }
 

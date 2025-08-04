@@ -22,7 +22,6 @@ struct TimelineViewSwiftUIV4: View {
     @State private var refreshDebounceTimer: Timer?
 
     var body: some View {
-
         ScrollViewReader { proxy in
             VStack {
                 List {
@@ -34,10 +33,10 @@ struct TimelineViewSwiftUIV4: View {
 
                     switch timeLineViewModel.timelineState {
                     case .loading:
-                        ForEach(0 ..< 5, id: \.self) { index in
+                        ForEach(0 ..< 5, id: \.self) { _ in
                             TimelineStatusViewV2(
                                 item: createSampleTimelineItem(),
-                                timelineViewModel: timeLineViewModel  // 传递ViewModel
+                                timelineViewModel: timeLineViewModel // 传递ViewModel
                             )
                             .redacted(reason: .placeholder)
                             .listRowBackground(theme.primaryBackgroundColor)

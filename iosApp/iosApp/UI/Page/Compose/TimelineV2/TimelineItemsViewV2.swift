@@ -18,7 +18,7 @@ struct TimelineItemsViewV2: View {
 
             TimelineStatusViewV2(
                 item: item,
-                timelineViewModel: nil  // 这个文件暂时不支持乐观更新
+                timelineViewModel: nil // 这个文件暂时不支持乐观更新
 //                presenter: presenter,
 //                scrollPositionID: $scrollPositionID,
 //                onError: onError

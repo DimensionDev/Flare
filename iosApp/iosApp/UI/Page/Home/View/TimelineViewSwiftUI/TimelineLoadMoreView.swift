@@ -14,7 +14,6 @@ struct TimelineLoadMoreView: View {
     }
 
     var body: some View {
-
         HStack(spacing: 12) {
             if showRetry {
                 retryView

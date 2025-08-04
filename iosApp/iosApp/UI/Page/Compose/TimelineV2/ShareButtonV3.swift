@@ -12,7 +12,7 @@ import UIKit
     import Translation
 #endif
 
- struct ShareButtonV3: View {
+struct ShareButtonV3: View {
     @Environment(\.isInCaptureMode) private var isInCaptureMode: Bool
 
     let item: TimelineItem
@@ -37,7 +37,7 @@ import UIKit
                 if isMenuContentReady {
                     LazyShareMenuContent(item: item, onShare: onShare)
                 } else {
-                    Button("") { }
+                    Button("") {}
                         .onAppear {
                             isMenuContentReady = true
                         }
@@ -49,9 +49,7 @@ import UIKit
     }
 }
 
-
 struct LazyShareMenuContent: View {
-
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.appSettings) var appSettings
     @Environment(FlareRouter.self) var router
@@ -60,11 +58,9 @@ struct LazyShareMenuContent: View {
     let item: TimelineItem
     let onShare: (ShareType) -> Void
 
-
     @State private var showTextForSelection: Bool = false
     @State private var showTranslation: Bool = false
     @State private var showSelectUrlSheet: Bool = false
-
 
     private var statusUrl: URL? {
         guard !item.url.isEmpty else { return nil }
@@ -84,7 +80,7 @@ struct LazyShareMenuContent: View {
             // Report功能
             Button(action: {
                 ToastView(icon: UIImage(systemName: "checkmark.circle"),
-                         message: NSLocalizedString("Report Success", comment: "")).show()
+                          message: NSLocalizedString("Report Success", comment: "")).show()
             }) {
                 Label("Report", systemImage: "exclamationmark.triangle")
             }
@@ -95,7 +91,7 @@ struct LazyShareMenuContent: View {
             Button(action: {
                 UIPasteboard.general.string = item.content.raw
                 ToastView(icon: UIImage(systemName: "checkmark.circle"),
-                         message: NSLocalizedString("Copy Success", comment: "")).show()
+                          message: NSLocalizedString("Copy Success", comment: "")).show()
             }) {
                 Label("Copy Text", systemImage: "doc.on.doc")
             }
@@ -103,7 +99,7 @@ struct LazyShareMenuContent: View {
             Button(action: {
                 UIPasteboard.general.string = item.content.markdown
                 ToastView(icon: UIImage(systemName: "checkmark.circle"),
-                         message: NSLocalizedString("Copy Success", comment: "")).show()
+                          message: NSLocalizedString("Copy Success", comment: "")).show()
             }) {
                 Label("Copy Text (MarkDown)", systemImage: "doc.on.doc")
             }
@@ -126,7 +122,7 @@ struct LazyShareMenuContent: View {
                 Button(action: {
                     UIPasteboard.general.string = url.absoluteString
                     ToastView(icon: UIImage(systemName: "checkmark.circle"),
-                             message: NSLocalizedString("Copy Success", comment: "")).show()
+                              message: NSLocalizedString("Copy Success", comment: "")).show()
                 }) {
                     Label("Copy Tweet Link", systemImage: "link")
                 }
@@ -159,11 +155,11 @@ struct LazyShareMenuContent: View {
 
             // Tools功能组
             #if canImport(_Translation_SwiftUI)
-            Button(action: {
-                showTranslation = true
-            }) {
-                Label("System Translate", systemImage: "character.bubble")
-            }
+                Button(action: {
+                    showTranslation = true
+                }) {
+                    Label("System Translate", systemImage: "character.bubble")
+                }
             #endif
 
             Button(action: {
@@ -197,4 +193,3 @@ struct LazyShareMenuContent: View {
         #endif
     }
 }
-

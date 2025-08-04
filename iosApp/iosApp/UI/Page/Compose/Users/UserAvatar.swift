@@ -7,20 +7,19 @@ struct UserAvatar: View {
 
     let data: String
     var size: CGFloat = 48
-   
-   private var avatarShape: some Shape {
+
+    private var avatarShape: some Shape {
         switch appSettings.appearanceSettings.avatarShape {
         case .circle: RoundedRectangle(cornerRadius: size)
         case .square: RoundedRectangle(cornerRadius: 8)
         }
     }
+
     private var avatarURL: URL? {
-            URL(string: data)
-        }
-        
+        URL(string: data)
+    }
 
     var body: some View {
-        
         KFImage(avatarURL)
             .flareTimelineAvatar(size: CGSize(width: size, height: size))
             .resizable()

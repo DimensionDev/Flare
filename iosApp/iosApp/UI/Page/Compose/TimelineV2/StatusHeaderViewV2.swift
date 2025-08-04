@@ -16,7 +16,6 @@ struct StatusHeaderViewV2: View {
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
-
         HStack(alignment: .top) {
             HStack(alignment: .center, spacing: 1) {
                 if timelineItem.hasUser, let user = timelineItem.user {

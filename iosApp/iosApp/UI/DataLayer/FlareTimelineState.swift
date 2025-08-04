@@ -520,28 +520,27 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
     }
 
     static func == (lhs: TimelineItem, rhs: TimelineItem) -> Bool {
-
-        return lhs.id == rhs.id &&
-               lhs.isLiked == rhs.isLiked &&
-               lhs.likeCount == rhs.likeCount &&
-               lhs.isRetweeted == rhs.isRetweeted &&
-               lhs.retweetCount == rhs.retweetCount &&
-               lhs.isBookmarked == rhs.isBookmarked &&
-               lhs.bookmarkCount == rhs.bookmarkCount &&
-               lhs.replyCount == rhs.replyCount &&
-               lhs.content == rhs.content &&
-               lhs.user == rhs.user &&
-               lhs.timestamp == rhs.timestamp &&
-               lhs.images == rhs.images &&
-               lhs.card == rhs.card &&
-               lhs.poll == rhs.poll &&
-               lhs.topMessage == rhs.topMessage &&
-               lhs.aboveTextContent == rhs.aboveTextContent &&
-               lhs.bottomContent == rhs.bottomContent &&
-               lhs.topEndContent == rhs.topEndContent &&
-               lhs.quote == rhs.quote &&
-               lhs.sensitive == rhs.sensitive &&
-               lhs.contentWarning == rhs.contentWarning
+        lhs.id == rhs.id &&
+            lhs.isLiked == rhs.isLiked &&
+            lhs.likeCount == rhs.likeCount &&
+            lhs.isRetweeted == rhs.isRetweeted &&
+            lhs.retweetCount == rhs.retweetCount &&
+            lhs.isBookmarked == rhs.isBookmarked &&
+            lhs.bookmarkCount == rhs.bookmarkCount &&
+            lhs.replyCount == rhs.replyCount &&
+            lhs.content == rhs.content &&
+            lhs.user == rhs.user &&
+            lhs.timestamp == rhs.timestamp &&
+            lhs.images == rhs.images &&
+            lhs.card == rhs.card &&
+            lhs.poll == rhs.poll &&
+            lhs.topMessage == rhs.topMessage &&
+            lhs.aboveTextContent == rhs.aboveTextContent &&
+            lhs.bottomContent == rhs.bottomContent &&
+            lhs.topEndContent == rhs.topEndContent &&
+            lhs.quote == rhs.quote &&
+            lhs.sensitive == rhs.sensitive &&
+            lhs.contentWarning == rhs.contentWarning
     }
 }
 

@@ -175,7 +175,6 @@ class PagingStateConverter {
 
                 FlareLog.debug("[PagingStateConverter] 获取KMP数据完成: \(kmpItems.count) 个items")
 
-
                 let (updatedItems, newItemsToAdd) = processIntelligentDeduplication(
                     kmpItems: kmpItems,
                     existingItems: convertedItems
@@ -188,7 +187,6 @@ class PagingStateConverter {
                 incrementalItems = newItemsToAdd
 
                 FlareLog.debug("[PagingStateConverter] 智能去重处理完成 - 原始: \(kmpItems.count), 更新: \(updatedItems.count), 新增: \(newItemsToAdd.count)")
-
 
                 let duplicateCount = kmpItems.count - updatedItems.count - newItemsToAdd.count
                 if duplicateCount > 0 {
@@ -373,7 +371,6 @@ class PagingStateConverter {
         return result
     }
 
-
     private func processIntelligentDeduplication(
         kmpItems: [TimelineItem],
         existingItems: [TimelineItem]
@@ -390,7 +387,7 @@ class PagingStateConverter {
                 if hasOperationStateChanged(existing: existingItem, new: kmpItem) {
                     FlareLog.debug("[PagingStateConverter] 检测到状态变化 - ID: \(kmpItem.id)")
                     logStateChanges(existing: existingItem, new: kmpItem)
-                    updatedItems.append(kmpItem)  // 状态有变化，用于更新
+                    updatedItems.append(kmpItem) // 状态有变化，用于更新
                 }
             } else {
                 FlareLog.debug("[PagingStateConverter] 发现新item - ID: \(kmpItem.id)")
@@ -402,17 +399,14 @@ class PagingStateConverter {
         return (updatedItems, newItems)
     }
 
-
     private func hasOperationStateChanged(existing: TimelineItem, new: TimelineItem) -> Bool {
-        return
-               existing.likeCount != new.likeCount ||
-               existing.isLiked != new.isLiked ||
-                existing.retweetCount != new.retweetCount ||
-               existing.isRetweeted != new.isRetweeted ||
-                existing.bookmarkCount != new.bookmarkCount ||
-               existing.isBookmarked != new.isBookmarked
+        existing.likeCount != new.likeCount ||
+            existing.isLiked != new.isLiked ||
+            existing.retweetCount != new.retweetCount ||
+            existing.isRetweeted != new.isRetweeted ||
+            existing.bookmarkCount != new.bookmarkCount ||
+            existing.isBookmarked != new.isBookmarked
     }
-
 
     private func logStateChanges(existing: TimelineItem, new: TimelineItem) {
         if existing.likeCount != new.likeCount || existing.isLiked != new.isLiked {
@@ -426,11 +420,10 @@ class PagingStateConverter {
         }
     }
 
-
     private func updateExistingItems(with updatedItems: [TimelineItem]) {
         for updatedItem in updatedItems {
             if let existingIndex = convertedItems.firstIndex(where: { $0.id == updatedItem.id }) {
-                 convertedItems[existingIndex] = updatedItem
+                convertedItems[existingIndex] = updatedItem
                 FlareLog.debug("[PagingStateConverter] 更新convertedItems中的item: \(updatedItem.id)")
             }
         }

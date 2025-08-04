@@ -17,19 +17,19 @@ struct AccountsScreen: View {
                             switch onEnum(of: item.second) {
                             case let .success(user):
                                 accountRowContent(user: user.data, activeAccount: state.activeAccount)
-                                .highPriorityGesture(
-                                    TapGesture().onEnded {
-                                        NotificationCenter.default.post(name: .accountChanged, object: nil)
-                                        state.setActiveAccount(accountKey: user.data.key)
+                                    .highPriorityGesture(
+                                        TapGesture().onEnded {
+                                            NotificationCenter.default.post(name: .accountChanged, object: nil)
+                                            state.setActiveAccount(accountKey: user.data.key)
+                                        }
+                                    )
+                                    .swipeActions(edge: .trailing) {
+                                        Button(role: .destructive) {
+                                            state.removeAccount(accountKey: user.data.key)
+                                        } label: {
+                                            Label("delete", systemImage: "trash")
+                                        }
                                     }
-                                )
-                                .swipeActions(edge: .trailing) {
-                                    Button(role: .destructive) {
-                                        state.removeAccount(accountKey: user.data.key)
-                                    } label: {
-                                        Label("delete", systemImage: "trash")
-                                    }
-                                }
                                 #if os(macOS)
                                     .contextMenu {
                                         Button(role: .destructive) {

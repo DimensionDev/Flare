@@ -5,8 +5,7 @@ import SwiftUI
 @MainActor
 @Observable
 class TimelineViewModel {
-   
-    private(set) var isPaused: Bool = true 
+    private(set) var isPaused: Bool = true
 
     private(set) var timelineState: FlareTimelineState = .loading
     private(set) var showErrorAlert = false
@@ -99,7 +98,6 @@ class TimelineViewModel {
         }
     }
 
-   
     func pause() {
         guard !isPaused else {
             FlareLog.debug("⏸️ [Timeline ViewModel] Already paused, skipping")
@@ -111,7 +109,6 @@ class TimelineViewModel {
         FlareLog.debug("⏸️ [Timeline ViewModel] Paused Swift layer data processing")
     }
 
-  
     func resume() {
         guard isPaused else {
             FlareLog.debug("▶️ [Timeline ViewModel] Already active, skipping resume")
@@ -120,7 +117,7 @@ class TimelineViewModel {
 
         if presenter == nil {
             FlareLog.debug("⚠️ [Timeline ViewModel] No presenter yet, will resume after setup")
-            isPaused = false 
+            isPaused = false
             return
         }
 
@@ -129,7 +126,6 @@ class TimelineViewModel {
         restartDataSourceMonitoring()
     }
 
-   
     private func restartDataSourceMonitoring() {
         guard let presenter else {
             FlareLog.warning("⚠️ [Timeline ViewModel] No presenter available for restart")
@@ -199,7 +195,6 @@ class TimelineViewModel {
             self.presenter = presenter
         }
 
-   
         if !isPaused {
             FlareLog.debug("▶️ [Timeline ViewModel] Starting data monitoring immediately (not paused)")
             restartDataSourceMonitoring()
@@ -208,7 +203,6 @@ class TimelineViewModel {
         }
     }
 
- 
     func setupDataSource(for tab: FLTabItem, using store: AppBarTabSettingStore) async {
         let timestamp = Date().timeIntervalSince1970
         FlareLog.debug("🔧 [Timeline ViewModel] setupDataSource (tab) started - tab: \(tab.key), timestamp: \(timestamp)")
@@ -222,7 +216,6 @@ class TimelineViewModel {
             return
         }
 
-        
         await setupDataSource(presenter: cachedPresenter)
     }
 

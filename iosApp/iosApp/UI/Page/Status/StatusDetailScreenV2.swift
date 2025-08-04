@@ -2,7 +2,7 @@ import Foundation
 import shared
 import SwiftUI
 
- struct StatusDetailScreenV2: View {
+struct StatusDetailScreenV2: View {
     let accountType: AccountType
     let statusKey: MicroBlogKey
 
@@ -10,7 +10,7 @@ import SwiftUI
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
-        ScrollViewReader { proxy in
+        ScrollViewReader { _ in
             VStack {
                 List {
                     EmptyView()
@@ -69,10 +69,10 @@ import SwiftUI
                 }
             }
         }
-        .safeAreaInset(edge: .bottom) { 
+        .safeAreaInset(edge: .bottom) {
             Rectangle()
                 .fill(Color.clear)
-                .frame(height: 120)  
+                .frame(height: 120)
         }
         .task {
             FlareLog.debug("🔧 [StatusDetailScreenV2] 开始初始化 - statusKey: \(statusKey)")
@@ -90,5 +90,3 @@ import SwiftUI
         }
     }
 }
-
- 

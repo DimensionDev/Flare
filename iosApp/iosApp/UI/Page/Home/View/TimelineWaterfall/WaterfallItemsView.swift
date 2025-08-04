@@ -5,7 +5,7 @@ import WaterfallGrid
 struct WaterfallItemsView: View {
     let items: [TimelineItem]
     let displayType: TimelineDisplayType
-    let hasMore: Bool 
+    let hasMore: Bool
     let onError: (FlareError) -> Void
     @Binding var scrolledID: String?
     let isCurrentTab: Bool

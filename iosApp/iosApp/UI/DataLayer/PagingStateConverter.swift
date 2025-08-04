@@ -388,8 +388,8 @@ class PagingStateConverter {
                     FlareLog.debug("[PagingStateConverter] 检测到状态变化 - ID: \(kmpItem.id)")
                     logStateChanges(existing: existingItem, new: kmpItem)
                     updatedItems.append(kmpItem) // 状态有变化，用于更新
-                }else{
-                    FlareLog.debug("[PagingStateConverter] 检测到状态无变化 - ID: \(kmpItem.id)") 
+                } else {
+                    FlareLog.debug("[PagingStateConverter] 检测到状态无变化 - ID: \(kmpItem.id)")
                 }
             } else {
                 FlareLog.debug("[PagingStateConverter] 发现新item - ID: \(kmpItem.id)")

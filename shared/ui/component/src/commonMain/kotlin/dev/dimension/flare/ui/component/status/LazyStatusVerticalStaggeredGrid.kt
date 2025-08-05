@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -44,16 +45,23 @@ public fun LazyStatusVerticalStaggeredGrid(
         } else {
             2.dp
         }
-    LazyVerticalStaggeredGrid(
-        modifier = modifier,
-        columns = columns,
-        state = state,
-        contentPadding = padding,
-        reverseLayout = reverseLayout,
-        verticalItemSpacing = actualVerticalSpacing,
-        horizontalArrangement = horizontalArrangement,
-        flingBehavior = flingBehavior,
-        userScrollEnabled = userScrollEnabled,
-        content = content,
-    )
+    CompositionLocalProvider(
+        LocalIsScrollingInProgress provides state.isScrollInProgress,
+    ) {
+        LazyVerticalStaggeredGrid(
+            modifier = modifier,
+            columns = columns,
+            state = state,
+            contentPadding = padding,
+            reverseLayout = reverseLayout,
+            verticalItemSpacing = actualVerticalSpacing,
+            horizontalArrangement = horizontalArrangement,
+            flingBehavior = flingBehavior,
+            userScrollEnabled = userScrollEnabled,
+            content = content,
+        )
+    }
 }
+
+internal val LocalIsScrollingInProgress =
+    androidx.compose.runtime.compositionLocalOf { false }

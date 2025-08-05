@@ -73,7 +73,7 @@ internal class ListTimelineRemoteMediator(
         cursor = response.cursor()
         val result = response.tweets()
 
-        val data = result.map { it.toDbPagingTimeline(accountKey, pagingKey) }
+        val data = result.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
 
         return Result(
             endOfPaginationReached = response.isEmpty(),

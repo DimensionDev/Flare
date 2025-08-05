@@ -76,7 +76,7 @@ internal class UserMediaTimelineRemoteMediator(
         cursor = instructions.cursor()
 
         val data =
-            tweet.map {
+            tweet.mapNotNull {
                 it.toDbPagingTimeline(
                     accountKey = accountKey,
                     pagingKey = pagingKey,

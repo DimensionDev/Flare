@@ -78,7 +78,7 @@ internal class UserTimelineRemoteMediator(
             )
         cursor = instructions.cursor()
 
-        val data = tweet.map { it.toDbPagingTimeline(accountKey, pagingKey) }
+        val data = tweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
 
         return Result(
             endOfPaginationReached = tweet.isEmpty(),

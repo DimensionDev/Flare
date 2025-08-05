@@ -4,7 +4,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -197,10 +199,19 @@ internal fun HomeTimelineScreen(
                 navigationIcon = {
                     if (LocalBottomBarShowing.current) {
                         state.user.onSuccess {
-                            IconButton(
-                                onClick = toQuickMenu,
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .padding(start = 16.dp)
+                                        .clip(CircleShape)
+                                        .clickable {
+                                            toQuickMenu()
+                                        },
                             ) {
-                                AvatarComponent(it.avatar, size = 24.dp)
+                                AvatarComponent(
+                                    it.avatar,
+                                    size = 36.dp,
+                                )
                             }
                         }
                     }

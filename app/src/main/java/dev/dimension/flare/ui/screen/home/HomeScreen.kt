@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -77,6 +78,8 @@ import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TopLevelBackStack
+import dev.dimension.flare.ui.component.listCard
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.isError
@@ -367,7 +370,16 @@ private fun HomeRailHeader(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier =
                                 Modifier
-                                    .fillMaxWidth()
+                                    .let {
+                                        if (isBigScreen() || layoutType != NavigationSuiteType.NavigationBar) {
+                                            it
+                                        } else {
+                                            it
+                                                .padding(horizontal = 16.dp)
+                                                .listCard()
+                                                .background(MaterialTheme.colorScheme.surface)
+                                        }
+                                    }.fillMaxWidth()
                                     .clickable {
                                         userState.onSuccess { user ->
                                             navigate(

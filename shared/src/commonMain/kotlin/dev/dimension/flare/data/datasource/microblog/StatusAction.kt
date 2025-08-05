@@ -2,7 +2,9 @@ package dev.dimension.flare.data.datasource.microblog
 
 import dev.dimension.flare.ui.humanizer.humanize
 import dev.dimension.flare.ui.model.ClickContext
+import dev.dimension.flare.ui.model.Digit
 import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.Flow
 
 public sealed interface StatusAction {
@@ -48,6 +50,13 @@ public sealed interface StatusAction {
                     .orEmpty()
             }
 
+            val digits: ImmutableList<Digit>
+                get() =
+                    humanizedCount
+                        .mapIndexed { index, char ->
+                            Digit(char, index, count)
+                        }.toImmutableList()
+
             override val color: Colorized.Color
                 get() = if (liked) Colorized.Color.Red else Colorized.Color.ContentColor
         }
@@ -67,6 +76,13 @@ public sealed interface StatusAction {
                     .orEmpty()
             }
 
+            val digits: ImmutableList<Digit>
+                get() =
+                    humanizedCount
+                        .mapIndexed { index, char ->
+                            Digit(char, index, count)
+                        }.toImmutableList()
+
             override val color: Colorized.Color
                 get() = if (retweeted) Colorized.Color.PrimaryColor else Colorized.Color.ContentColor
         }
@@ -83,6 +99,13 @@ public sealed interface StatusAction {
                     }?.humanize()
                     .orEmpty()
             }
+
+            val digits: ImmutableList<Digit>
+                get() =
+                    humanizedCount
+                        .mapIndexed { index, char ->
+                            Digit(char, index, count)
+                        }.toImmutableList()
         }
 
         public data class Quote internal constructor(
@@ -97,6 +120,13 @@ public sealed interface StatusAction {
                     }?.humanize()
                     .orEmpty()
             }
+
+            val digits: ImmutableList<Digit>
+                get() =
+                    humanizedCount
+                        .mapIndexed { index, char ->
+                            Digit(char, index, count)
+                        }.toImmutableList()
         }
 
         public data class Bookmark internal constructor(
@@ -112,6 +142,13 @@ public sealed interface StatusAction {
                     }?.humanize()
                     .orEmpty()
             }
+
+            val digits: ImmutableList<Digit>
+                get() =
+                    humanizedCount
+                        .mapIndexed { index, char ->
+                            Digit(char, index, count)
+                        }.toImmutableList()
         }
 
         public data class Delete internal constructor(

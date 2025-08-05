@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
@@ -20,7 +22,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.LocalContentColor
@@ -275,6 +276,7 @@ internal fun TimelineItemContent(
                                         Column(
                                             modifier =
                                                 Modifier
+                                                    .fillMaxWidth()
                                                     .padding(
                                                         horizontal = screenHorizontalPadding,
                                                     ).padding(top = 16.dp, bottom = 8.dp),
@@ -301,7 +303,7 @@ internal fun TimelineItemContent(
                                         }
                                     }
                                     if (!isBigScreen()) {
-                                        HorizontalDivider()
+                                        Spacer(modifier = Modifier.height(12.dp))
                                     }
                                 }
                             }

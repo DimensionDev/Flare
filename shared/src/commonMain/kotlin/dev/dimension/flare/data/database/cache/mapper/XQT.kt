@@ -55,7 +55,7 @@ internal object XQT {
         tweet: List<XQTTimeline>,
         sortIdProvider: (XQTTimeline) -> Long = { it.sortedIndex },
     ) {
-        val items = tweet.map { it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider) }
+        val items = tweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey, sortIdProvider) }
         saveToDatabase(database, items)
     }
 
@@ -221,26 +221,27 @@ internal fun XQTTimeline.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
     sortIdProvider: (XQTTimeline) -> Long = { sortedIndex },
-): DbPagingTimelineWithStatus =
-    createDbPagingTimelineWithStatus(
-        accountKey = accountKey,
-        pagingKey = pagingKey,
-        sortId = sortIdProvider(this),
-        status = tweets.toDbStatusWithUser(accountKey),
-        references =
-            listOfNotNull(
-                tweets.tweetResults.result?.getRetweet()?.toDbStatusWithUser(accountKey)?.let {
-                    ReferenceType.Retweet to it
-                },
-                tweets.tweetResults.result?.getQuoted()?.toDbStatusWithUser(accountKey)?.let {
-                    ReferenceType.Quote to it
-                },
-            ).toMap(),
-    )
+): DbPagingTimelineWithStatus? =
+    tweets.toDbStatusWithUser(accountKey)?.let { tweet ->
+        createDbPagingTimelineWithStatus(
+            accountKey = accountKey,
+            pagingKey = pagingKey,
+            sortId = sortIdProvider(this),
+            status = tweet,
+            references =
+                listOfNotNull(
+                    tweets.tweetResults.result?.getRetweet()?.toDbStatusWithUser(accountKey)?.let {
+                        ReferenceType.Retweet to it
+                    },
+                    tweets.tweetResults.result?.getQuoted()?.toDbStatusWithUser(accountKey)?.let {
+                        ReferenceType.Quote to it
+                    },
+                ).toMap(),
+        )
+    }
 
-private fun TimelineTweet.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser =
+private fun TimelineTweet.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser? =
     tweetResults.result?.toDbStatusWithUser(accountKey)
-        ?: throw IllegalStateException("Tweet should not be null")
 
 private fun TweetUnion.toDbStatusWithUser(accountKey: MicroBlogKey): DbStatusWithUser? =
     when (this) {

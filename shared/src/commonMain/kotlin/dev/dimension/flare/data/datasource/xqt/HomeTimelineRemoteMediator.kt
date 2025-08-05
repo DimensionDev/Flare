@@ -71,7 +71,7 @@ internal class HomeTimelineRemoteMediator(
         cursor = instructions.cursor()
         val tweet = instructions.tweets()
 
-        val data = tweet.map { it.toDbPagingTimeline(accountKey, pagingKey) }
+        val data = tweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
 
         return Result(
             endOfPaginationReached = tweet.isEmpty(),
@@ -134,7 +134,7 @@ internal class FeaturedTimelineRemoteMediator(
         cursor = instructions.cursor()
         val tweet = instructions.tweets()
 
-        val data = tweet.map { it.toDbPagingTimeline(accountKey, pagingKey) }
+        val data = tweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
 
         return Result(
             endOfPaginationReached = tweet.isEmpty(),
@@ -197,7 +197,7 @@ internal class BookmarkTimelineRemoteMediator(
         cursor = instructions.cursor()
         val tweet = instructions.tweets()
 
-        val data = tweet.map { it.toDbPagingTimeline(accountKey, pagingKey) }
+        val data = tweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
 
         return Result(
             endOfPaginationReached = tweet.isEmpty(),

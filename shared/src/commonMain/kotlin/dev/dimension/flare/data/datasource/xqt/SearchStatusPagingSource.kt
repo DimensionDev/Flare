@@ -69,7 +69,7 @@ internal class SearchStatusPagingSource(
         val tweets = response.tweets()
         cursor = response.cursor()
 
-        val data = tweets.map { it.toDbPagingTimeline(accountKey, pagingKey) }
+        val data = tweets.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
 
         return Result(
             endOfPaginationReached = response.isBottomEnd(),

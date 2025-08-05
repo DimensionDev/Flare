@@ -158,7 +158,7 @@ internal class StatusDetailRemoteMediator(
 
             return Result(
                 endOfPaginationReached = response.isBottomEnd() || actualTweet.size == 1 || cursor == null,
-                data = actualTweet.map { it.toDbPagingTimeline(accountKey, pagingKey) },
+                data = actualTweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) },
             )
         }
     }

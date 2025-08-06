@@ -153,9 +153,10 @@ internal fun TabSettingScreen(
                         },
                         modifier =
                             Modifier
+                                .listCard()
                                 .clickable {
                                     state.setEnableMixedTimeline(!enabled)
-                                }.listCard(),
+                                },
                     )
                 }
             }

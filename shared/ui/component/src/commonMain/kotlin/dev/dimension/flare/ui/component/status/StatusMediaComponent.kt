@@ -28,7 +28,6 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.CircleExclamation
 import compose.icons.fontawesomeicons.solid.CirclePlay
 import compose.icons.fontawesomeicons.solid.EyeSlash
 import dev.dimension.flare.common.AppDeepLink
@@ -296,14 +295,25 @@ public fun MediaItem(
                                         .fillMaxSize(),
                             )
                         }
-                        PlatformCircularProgressIndicator(
+                        Box(
                             modifier =
                                 Modifier
-                                    .align(Alignment.BottomStart)
-                                    .padding(24.dp)
-                                    .size(24.dp),
-                            color = Color.White,
-                        )
+                                    .padding(16.dp)
+                                    .background(
+                                        Color.Black.copy(alpha = 0.5f),
+                                        shape = PlatformTheme.shapes.small,
+                                    ).padding(horizontal = 8.dp, vertical = 4.dp)
+                                    .align(Alignment.BottomStart),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            PlatformCircularProgressIndicator(
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.BottomStart)
+                                        .size(16.dp),
+                                color = Color.White,
+                            )
+                        }
                     },
                     errorContent = {
                         Box(
@@ -321,21 +331,26 @@ public fun MediaItem(
                                         .fillMaxSize(),
                             )
                         }
-                        FAIcon(
-                            FontAwesomeIcons.Solid.CircleExclamation,
+                        Box(
                             modifier =
                                 Modifier
                                     .padding(16.dp)
-                                    .align(Alignment.BottomStart)
                                     .background(
-                                        color = Color.Black.copy(alpha = 0.75f),
-                                        shape = PlatformTheme.shapes.medium,
-                                    ).padding(
-                                        8.dp,
-                                    ),
-                            tint = Color.White,
-                            contentDescription = null,
-                        )
+                                        Color.Black.copy(alpha = 0.5f),
+                                        shape = PlatformTheme.shapes.small,
+                                    ).padding(horizontal = 8.dp, vertical = 4.dp)
+                                    .align(Alignment.BottomStart),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            FAIcon(
+                                FontAwesomeIcons.Solid.CirclePlay,
+                                contentDescription = null,
+                                modifier =
+                                    Modifier
+                                        .size(16.dp),
+                                tint = Color.White,
+                            )
+                        }
                     },
                     remainingTimeContent =
                         if (showCountdown) {
@@ -388,16 +403,26 @@ public fun MediaItem(
                                     }
                                 },
                     )
-                    FAIcon(
-                        FontAwesomeIcons.Solid.CirclePlay,
-                        contentDescription = null,
+                    Box(
                         modifier =
                             Modifier
-                                .align(Alignment.BottomStart)
                                 .padding(16.dp)
-                                .size(48.dp),
-                        tint = PlatformTheme.colorScheme.card,
-                    )
+                                .background(
+                                    Color.Black.copy(alpha = 0.5f),
+                                    shape = PlatformTheme.shapes.small,
+                                ).padding(horizontal = 8.dp, vertical = 4.dp)
+                                .align(Alignment.BottomStart),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        FAIcon(
+                            FontAwesomeIcons.Solid.CirclePlay,
+                            contentDescription = null,
+                            modifier =
+                                Modifier
+                                    .size(16.dp),
+                            tint = Color.White,
+                        )
+                    }
                 }
             }
         }

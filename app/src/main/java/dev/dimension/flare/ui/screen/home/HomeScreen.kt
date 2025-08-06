@@ -3,6 +3,7 @@ package dev.dimension.flare.ui.screen.home
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -56,6 +57,8 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Gear
 import compose.icons.fontawesomeicons.solid.Pen
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.R
 import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.Bluesky
@@ -77,6 +80,8 @@ import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.NavigationSuiteScaffold2
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.component.TopLevelBackStack
+import dev.dimension.flare.ui.component.listCard
+import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.isError
@@ -113,6 +118,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
     val wideNavigationRailState = rememberWideNavigationRailState()
     state.tabs
         .onSuccess { tabs ->
+            val rootHazeState = rememberHazeState()
             val topLevelBackStack by producePresenter(
                 key = "home_top_level_back_stack_${tabs.all.first().tabItem}",
                 useImmediateClock = true,
@@ -159,7 +165,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
             Box {
                 NavigationSuiteScaffold2(
                     wideNavigationRailState = wideNavigationRailState,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().hazeSource(rootHazeState),
                     bottomBarAutoHideEnabled = state.navigationState.bottomBarAutoHideEnabled,
                     layoutType = layoutType,
                     showFab = userState.isSuccess && accountType !is AccountType.Guest,
@@ -307,6 +313,7 @@ internal fun HomeScreen(afterInit: () -> Unit) {
                 }
                 InAppNotificationComponent(
                     modifier = Modifier.align(Alignment.TopCenter),
+                    hazeState = rootHazeState,
                 )
             }
         }.onLoading {
@@ -367,7 +374,16 @@ private fun HomeRailHeader(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier =
                                 Modifier
-                                    .fillMaxWidth()
+                                    .let {
+                                        if (isBigScreen() || layoutType != NavigationSuiteType.NavigationBar) {
+                                            it
+                                        } else {
+                                            it
+                                                .padding(horizontal = 16.dp)
+                                                .listCard()
+                                                .background(MaterialTheme.colorScheme.surface)
+                                        }
+                                    }.fillMaxWidth()
                                     .clickable {
                                         userState.onSuccess { user ->
                                             navigate(

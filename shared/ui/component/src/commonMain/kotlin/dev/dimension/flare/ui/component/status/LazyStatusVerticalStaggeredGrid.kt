@@ -10,6 +10,11 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -17,7 +22,11 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 
+@OptIn(FlowPreview::class)
 @Composable
 public fun LazyStatusVerticalStaggeredGrid(
     modifier: Modifier = Modifier,
@@ -44,16 +53,28 @@ public fun LazyStatusVerticalStaggeredGrid(
         } else {
             2.dp
         }
-    LazyVerticalStaggeredGrid(
-        modifier = modifier,
-        columns = columns,
-        state = state,
-        contentPadding = padding,
-        reverseLayout = reverseLayout,
-        verticalItemSpacing = actualVerticalSpacing,
-        horizontalArrangement = horizontalArrangement,
-        flingBehavior = flingBehavior,
-        userScrollEnabled = userScrollEnabled,
-        content = content,
-    )
+    val isScrollInProgressDebounced by remember(state) {
+        snapshotFlow { state.isScrollInProgress }
+            .distinctUntilChanged()
+            .debounce(500)
+    }.collectAsState(false)
+    CompositionLocalProvider(
+        LocalIsScrollingInProgress provides isScrollInProgressDebounced,
+    ) {
+        LazyVerticalStaggeredGrid(
+            modifier = modifier,
+            columns = columns,
+            state = state,
+            contentPadding = padding,
+            reverseLayout = reverseLayout,
+            verticalItemSpacing = actualVerticalSpacing,
+            horizontalArrangement = horizontalArrangement,
+            flingBehavior = flingBehavior,
+            userScrollEnabled = userScrollEnabled,
+            content = content,
+        )
+    }
 }
+
+internal val LocalIsScrollingInProgress =
+    androidx.compose.runtime.compositionLocalOf { false }

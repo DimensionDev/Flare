@@ -7,6 +7,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.Interaction
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,8 +34,8 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults.floatingToolbarVerticalNestedScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalWideNavigationRail
 import androidx.compose.material3.NavigationBarItem
@@ -141,6 +143,8 @@ fun NavigationSuiteScaffold2(
                     navigationSuiteColors.wideNavigationRailColors
                         .copy(
                             containerColor = Color.Transparent,
+                            modalContainerColor = MaterialTheme.colorScheme.background,
+                            modalContentColor = contentColorFor(MaterialTheme.colorScheme.background),
                         ),
             ) {
                 val actualLayoutType =
@@ -187,9 +191,77 @@ fun NavigationSuiteScaffold2(
                     }
                     if (wideNavigationRailState.currentValue == WideNavigationRailValue.Expanded) {
                         if (secondaryScope.itemList.isNotEmpty()) {
-                            HorizontalDivider()
+                            Spacer(modifier = Modifier.height(16.dp))
                         }
-                        secondaryScope.itemList.forEach {
+                        if (layoutType == NavigationSuiteType.NavigationBar) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(2.dp),
+                            ) {
+                                secondaryScope.itemList.forEachIndexed { index, it ->
+                                    ListItem(
+                                        headlineContent = {
+                                            it.label?.invoke()
+                                        },
+                                        leadingContent = it.icon,
+                                        trailingContent = it.badge,
+                                        modifier =
+                                            it.modifier
+                                                .padding(horizontal = 16.dp)
+                                                .listCard(
+                                                    index = index,
+                                                    totalCount = secondaryScope.itemsCount,
+                                                ).clickable(
+                                                    enabled = it.enabled,
+                                                    onClick = it.onClick,
+                                                    interactionSource = it.interactionSource,
+                                                ),
+                                    )
+                                }
+                            }
+                        } else {
+                            secondaryScope.itemList.forEach {
+                                androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem(
+                                    modifier = it.modifier,
+                                    selected = it.selected,
+                                    onClick = it.onClick,
+                                    icon = it.icon,
+                                    enabled = it.enabled,
+                                    label = it.label,
+                                    interactionSource = it.interactionSource,
+                                    navigationSuiteType = actualLayoutType,
+                                    badge = it.badge,
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    if (layoutType == NavigationSuiteType.NavigationBar) {
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(2.dp),
+                        ) {
+                            footerScope.itemList.forEachIndexed { index, it ->
+                                ListItem(
+                                    headlineContent = {
+                                        it.label?.invoke()
+                                    },
+                                    leadingContent = it.icon,
+                                    trailingContent = it.badge,
+                                    modifier =
+                                        it.modifier
+                                            .padding(horizontal = 16.dp)
+                                            .listCard(
+                                                index = index,
+                                                totalCount = footerScope.itemsCount,
+                                            ).clickable(
+                                                enabled = it.enabled,
+                                                onClick = it.onClick,
+                                                interactionSource = it.interactionSource,
+                                            ),
+                                )
+                            }
+                        }
+                    } else {
+                        footerScope.itemList.forEach {
                             androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem(
                                 modifier = it.modifier,
                                 selected = it.selected,
@@ -202,20 +274,6 @@ fun NavigationSuiteScaffold2(
                                 badge = it.badge,
                             )
                         }
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    footerScope.itemList.forEach {
-                        androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItem(
-                            modifier = it.modifier,
-                            selected = it.selected,
-                            onClick = it.onClick,
-                            icon = it.icon,
-                            enabled = it.enabled,
-                            label = it.label,
-                            interactionSource = it.interactionSource,
-                            navigationSuiteType = actualLayoutType,
-                            badge = it.badge,
-                        )
                     }
                 }
             }

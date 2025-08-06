@@ -22,19 +22,21 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.ui.component.AnimatedNumber
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenu
 import dev.dimension.flare.ui.component.platform.PlatformDropdownMenuScope
 import dev.dimension.flare.ui.component.platform.PlatformIcon
-import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformTextStyle
 import dev.dimension.flare.ui.component.platform.rippleIndication
+import dev.dimension.flare.ui.model.Digit
 import dev.dimension.flare.ui.theme.PlatformContentColor
+import kotlinx.collections.immutable.ImmutableList
 
 @Composable
 public fun StatusActionButton(
     icon: ImageVector,
-    text: String?,
+    digits: ImmutableList<Digit>?,
     onClicked: () -> Unit,
     modifier: Modifier = Modifier,
     color: Color = PlatformContentColor.current,
@@ -77,10 +79,10 @@ public fun StatusActionButton(
                     ),
             tint = color,
         )
-        if (!text.isNullOrEmpty() && appearanceSettings.showNumbers) {
+        if (digits != null && appearanceSettings.showNumbers) {
             Spacer(modifier = Modifier.width(4.dp))
-            PlatformText(
-                text = text,
+            AnimatedNumber(
+                digits = digits,
 //                style = MaterialTheme.typography.bodySmall,
                 color = color,
                 modifier =
@@ -109,7 +111,7 @@ public fun StatusActionButton(
 @Composable
 internal fun StatusActionGroup(
     icon: ImageVector,
-    text: String?,
+    digits: ImmutableList<Digit>?,
     modifier: Modifier = Modifier,
     color: Color = PlatformContentColor.current,
     contentDescription: String? = null,
@@ -120,7 +122,7 @@ internal fun StatusActionGroup(
     var showMenu by remember { mutableStateOf(false) }
     StatusActionButton(
         icon = icon,
-        text = text,
+        digits = digits,
         modifier = modifier,
         contentDescription = contentDescription,
         onClicked = {

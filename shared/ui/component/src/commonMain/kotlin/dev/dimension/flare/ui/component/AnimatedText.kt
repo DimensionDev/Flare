@@ -1,0 +1,89 @@
+package dev.dimension.flare.ui.component
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.text.InlineTextContent
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.TextUnit
+import dev.dimension.flare.ui.component.platform.PlatformText
+import dev.dimension.flare.ui.component.platform.PlatformTextStyle
+import dev.dimension.flare.ui.model.Digit
+import kotlinx.collections.immutable.ImmutableList
+
+@Composable
+internal fun AnimatedNumber(
+    digits: ImmutableList<Digit>,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontStyle: FontStyle? = null,
+    fontWeight: FontWeight? = null,
+    fontFamily: FontFamily? = null,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    textAlign: TextAlign? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    inlineContent: Map<String, InlineTextContent> = mapOf(),
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+    style: TextStyle = PlatformTextStyle.current,
+) {
+    Row(
+        modifier =
+            modifier
+                .animateContentSize(),
+    ) {
+        digits
+            .forEach { digit ->
+                AnimatedContent(
+                    targetState = digit,
+                    transitionSpec = {
+                        if (targetState > initialState) {
+                            slideInVertically { -it } togetherWith slideOutVertically { it }
+                        } else {
+                            slideInVertically { it } togetherWith slideOutVertically { -it }
+                        }
+                    },
+                ) { digit ->
+                    PlatformText(
+                        "${digit.digitChar}",
+                        color = color,
+                        fontSize = fontSize,
+                        fontStyle = fontStyle,
+                        fontWeight = fontWeight,
+                        fontFamily = fontFamily,
+                        letterSpacing = letterSpacing,
+                        textDecoration = textDecoration,
+                        textAlign = textAlign,
+                        lineHeight = lineHeight,
+                        overflow = overflow,
+                        softWrap = softWrap,
+                        maxLines = maxLines,
+                        minLines = minLines,
+                        inlineContent = inlineContent,
+                        onTextLayout = onTextLayout,
+                        style = style,
+                    )
+                }
+            }
+    }
+}
+
+private operator fun Digit.compareTo(other: Digit): Int = fullNumber.compareTo(other.fullNumber)

@@ -44,25 +44,11 @@ private fun ColorScheme.withPureColorLightMode(): ColorScheme =
         onBackground = Color.Black,
         onSurface = Color.Black,
         surfaceContainer = Color.White,
-        surfaceContainerLow = Color.White,
+        surfaceContainerLow = MoreColors.Gray100,
         surfaceContainerHigh = Color.White,
         surfaceContainerLowest = Color.White,
         surfaceContainerHighest = Color.White,
         onSurfaceVariant = MoreColors.Gray800,
-    )
-
-private fun ColorScheme.withPureColorLightModeInBigScreen(): ColorScheme =
-    copy(
-        background = MoreColors.Gray50,
-        surface = Color.White,
-        onBackground = Color.Black,
-        onSurface = Color.Black,
-        surfaceContainer = Color.White,
-        surfaceContainerLow = Color.White,
-        surfaceContainerHigh = Color.White,
-        surfaceContainerLowest = Color.White,
-        surfaceContainerHighest = Color.White,
-        onSurfaceVariant = Color.Black,
     )
 
 private fun ColorScheme.withPureColorDarkMode(): ColorScheme =
@@ -72,7 +58,7 @@ private fun ColorScheme.withPureColorDarkMode(): ColorScheme =
         onBackground = Color.White,
         onSurface = Color.White,
         surfaceContainer = Color.Black,
-        surfaceContainerLow = Color.Black,
+        surfaceContainerLow = MoreColors.Gray900,
         surfaceContainerHigh = Color.Black,
         surfaceContainerLowest = Color.Black,
         surfaceContainerHighest = Color.Black,
@@ -114,9 +100,7 @@ fun FlareTheme(
         }.let {
             remember(it) {
                 if (pureColorMode) {
-                    if (bigScreen && !darkTheme) {
-                        it.withPureColorLightModeInBigScreen()
-                    } else if (!darkTheme) {
+                    if (!darkTheme) {
                         it.withPureColorLightMode()
                     } else {
                         it.withPureColorDarkMode()

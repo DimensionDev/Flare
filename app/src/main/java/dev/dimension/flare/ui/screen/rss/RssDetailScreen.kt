@@ -3,20 +3,26 @@ package dev.dimension.flare.ui.screen.rss
 import android.content.Intent
 import android.graphics.Color
 import android.webkit.WebView
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -52,6 +58,7 @@ import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.FlareTopAppBar
+import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
 import dev.dimension.flare.ui.model.localizedFullTime
@@ -68,7 +75,7 @@ import kotlinx.coroutines.flow.map
 import moe.tlaster.precompose.molecule.producePresenter
 import org.koin.compose.koinInject
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun RssDetailScreen(
     url: String,
@@ -132,16 +139,22 @@ internal fun RssDetailScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(contentPadding)
                     .padding(horizontal = screenHorizontalPadding),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             state.data
                 .onSuccess {
                     Text(
                         text = it.title,
                         style = MaterialTheme.typography.titleLarge,
+                        modifier =
+                            Modifier
+                                .padding(horizontal = screenHorizontalPadding),
                     )
                     Row(
                         verticalAlignment = Alignment.Bottom,
+                        modifier =
+                            Modifier
+                                .padding(horizontal = screenHorizontalPadding),
                     ) {
                         it.publishDateTime?.let {
                             Text(
@@ -165,56 +178,64 @@ internal fun RssDetailScreen(
                 }.onLoading {
                     Text(
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                        modifier = Modifier.placeholder(true),
+                        modifier =
+                            Modifier
+                                .padding(horizontal = screenHorizontalPadding)
+                                .placeholder(true),
                     )
                 }
-            HorizontalDivider()
             state.data
                 .onSuccess { data ->
-                    if (state.showTldr) {
+                    AnimatedVisibility(state.showTldr) {
                         state.tldrState?.let { tldrState ->
-                            ElevatedCard(
-                                onClick = {
-                                    tldrState.onError {
-                                        state.refreshTldr()
-                                    }
-                                },
+                            Column(
+                                modifier =
+                                    Modifier
+                                        .animateContentSize()
+                                        .fillMaxWidth()
+                                        .listCard()
+                                        .background(MaterialTheme.colorScheme.surface)
+                                        .padding(8.dp)
+                                        .clickable {
+                                            tldrState.onError {
+                                                state.refreshTldr()
+                                            }
+                                        },
+                                verticalArrangement = Arrangement.spacedBy(4.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
                             ) {
-                                Column(
-                                    modifier = Modifier.padding(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ) {
-                                    tldrState
+                                AnimatedContent(tldrState) {
+                                    it
                                         .onSuccess {
                                             Text(
-                                                text = stringResource(R.string.rss_detail_tldr_title),
-                                                style = MaterialTheme.typography.titleMedium,
-                                            )
-                                            HorizontalDivider()
-                                            Text(
                                                 text = it,
+                                                modifier =
+                                                    Modifier
+                                                        .padding(
+                                                            horizontal = screenHorizontalPadding,
+                                                            vertical = 8.dp,
+                                                        ),
                                             )
                                         }.onLoading {
-                                            Text(
-                                                text = stringResource(R.string.rss_detail_tldr_loading),
-                                                style = MaterialTheme.typography.titleMedium,
-                                            )
-                                            HorizontalDivider()
-                                            Text(
-                                                "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-                                                modifier = Modifier.placeholder(true),
+                                            LinearWavyProgressIndicator(
+                                                modifier =
+                                                    Modifier
+                                                        .padding(
+                                                            horizontal = screenHorizontalPadding,
+                                                            vertical = 8.dp,
+                                                        ),
                                             )
                                         }.onError {
                                             Text(
                                                 text = stringResource(R.string.rss_detail_tldr_error),
                                                 color = MaterialTheme.colorScheme.error,
                                                 style = MaterialTheme.typography.titleMedium,
-                                            )
-                                            HorizontalDivider()
-                                            Text(
-                                                text = it.message.orEmpty(),
-                                                color = MaterialTheme.colorScheme.error,
+                                                modifier =
+                                                    Modifier
+                                                        .padding(
+                                                            horizontal = screenHorizontalPadding,
+                                                            vertical = 8.dp,
+                                                        ),
                                             )
                                         }
                                 }
@@ -223,6 +244,11 @@ internal fun RssDetailScreen(
                     }
 
                     AndroidView(
+                        modifier =
+                            Modifier
+                                .listCard()
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(horizontal = screenHorizontalPadding, vertical = 8.dp),
                         factory = {
                             WebView(it).apply {
                                 isVerticalScrollBarEnabled = false
@@ -252,7 +278,12 @@ internal fun RssDetailScreen(
                 }.onLoading {
                     Text(
                         "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam elementum eget dui a bibendum. Fusce eget porttitor est, et rhoncus massa. Etiam cursus urna at odio vulputate semper. Interdum et malesuada fames ac ante ipsum primis in faucibus. Quisque tincidunt rhoncus massa sed volutpat. Nulla porta orci et finibus accumsan. Duis maximus diam quis congue suscipit. Suspendisse velit enim, mollis non tellus eu, auctor vulputate diam. Sed ut purus eleifend, tempor lectus ac, imperdiet tellus. Proin eleifend lorem ut risus gravida, id bibendum metus posuere. Cras pretium tortor mi. Quisque ac congue urna. Morbi posuere ac orci vestibulum euismod. Maecenas venenatis, justo at aliquet venenatis, arcu mauris sodales ligula, a iaculis nulla eros at turpis. Quisque varius lobortis porttitor.",
-                        modifier = Modifier.placeholder(true),
+                        modifier =
+                            Modifier
+                                .listCard()
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(horizontal = screenHorizontalPadding, vertical = 8.dp)
+                                .placeholder(true),
                     )
                 }
         }

@@ -34,6 +34,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.modifiers.resizeWithContentScale
 import androidx.media3.ui.compose.state.rememberPresentationState
+import dev.dimension.flare.ui.component.status.LocalIsScrollingInProgress
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -96,83 +97,87 @@ public fun VideoPlayer(
         }
     },
 ) {
-    var isLoaded by remember { mutableStateOf(true) }
-    var remainingTime by remember { mutableLongStateOf(0L) }
-    val audioAttributes =
-        remember {
-            AudioAttributes
-                .Builder()
-                .setUsage(C.USAGE_MEDIA)
-                .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
-                .build()
-        }
+    var isLoaded by remember { mutableStateOf(false) }
     Box(modifier = modifier) {
-        val player =
-            remember(uri) {
-                playerPool
-                    .get(uri)
-                    .apply {
-                        volume = if (muted) 0f else 1f
-                    }
-            }
-        val state = rememberPresentationState(player)
-        LaunchedEffect(muted, player) {
-            player.volume = if (muted) 0f else 1f
-            if (muted) {
-                player.setAudioAttributes(audioAttributes, false)
-            } else {
-                player.setAudioAttributes(audioAttributes, true)
-            }
-        }
-        LaunchedEffect(autoPlay) {
-            if (autoPlay) {
-                player.play()
-            }
-        }
-        LaunchedEffect(player) {
-            while (true) {
-                isLoaded = !player.isLoading || player.duration > 0
-                if (remainingTimeContent != null) {
-                    remainingTime = player.duration - player.currentPosition
-                }
-                delay(500)
-            }
-        }
-        val isActive = rememberSurfaceBinding(uri)
-        val playerModifier =
-            Modifier
-                .clipToBounds()
-                .resizeWithContentScale(
-                    contentScale = contentScale,
-                    sourceSizeDp = state.videoSizeDp,
-                ).let {
-                    if (onClick != null) {
-                        it.combinedClickable(
-                            onClick = onClick,
-                            onLongClick = onLongClick,
-                        )
-                    } else {
-                        it
-                    }
-                }.matchParentSize()
-        if (isActive) {
-            PlayerSurface(
-                player = player,
-                modifier = playerModifier,
-            )
-        } else {
-            loadingPlaceholder.invoke(this)
-        }
-        if (!isLoaded) {
+        if (!isLoaded && LocalIsScrollingInProgress.current) {
             loadingPlaceholder()
         } else {
-            remainingTimeContent?.invoke(this, remainingTime)
-        }
-        DisposableEffect(uri) {
-            onDispose {
-                player.volume = 0f
-                player.setAudioAttributes(audioAttributes, false)
-                playerPool.release(uri)
+            var remainingTime by remember { mutableLongStateOf(0L) }
+            val audioAttributes =
+                remember {
+                    AudioAttributes
+                        .Builder()
+                        .setUsage(C.USAGE_MEDIA)
+                        .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+                        .build()
+                }
+            val player =
+                remember(uri) {
+                    playerPool
+                        .get(uri)
+                        .apply {
+                            volume = if (muted) 0f else 1f
+                        }
+                }
+            val state = rememberPresentationState(player)
+            LaunchedEffect(muted, player) {
+                player.volume = if (muted) 0f else 1f
+                if (muted) {
+                    player.setAudioAttributes(audioAttributes, false)
+                } else {
+                    player.setAudioAttributes(audioAttributes, true)
+                }
+            }
+            LaunchedEffect(autoPlay) {
+                if (autoPlay) {
+                    player.play()
+                }
+            }
+            LaunchedEffect(player) {
+                while (true) {
+                    isLoaded = !player.isLoading || player.duration > 0
+                    if (remainingTimeContent != null) {
+                        remainingTime = player.duration - player.currentPosition
+                    }
+                    delay(500)
+                }
+            }
+            val isActive = rememberSurfaceBinding(uri)
+            val playerModifier =
+                Modifier
+                    .clipToBounds()
+                    .resizeWithContentScale(
+                        contentScale = contentScale,
+                        sourceSizeDp = state.videoSizeDp,
+                    ).let {
+                        if (onClick != null) {
+                            it.combinedClickable(
+                                onClick = onClick,
+                                onLongClick = onLongClick,
+                            )
+                        } else {
+                            it
+                        }
+                    }.matchParentSize()
+            if (isActive) {
+                PlayerSurface(
+                    player = player,
+                    modifier = playerModifier,
+                )
+            } else {
+                loadingPlaceholder.invoke(this)
+            }
+            if (!isLoaded) {
+                loadingPlaceholder()
+            } else {
+                remainingTimeContent?.invoke(this, remainingTime)
+            }
+            DisposableEffect(uri) {
+                onDispose {
+                    player.volume = 0f
+                    player.setAudioAttributes(audioAttributes, false)
+                    playerPool.release(uri)
+                }
             }
         }
     }

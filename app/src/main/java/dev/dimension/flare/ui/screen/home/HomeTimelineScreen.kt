@@ -4,12 +4,16 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
@@ -20,7 +24,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.LocalContentColor
@@ -196,10 +199,19 @@ internal fun HomeTimelineScreen(
                 navigationIcon = {
                     if (LocalBottomBarShowing.current) {
                         state.user.onSuccess {
-                            IconButton(
-                                onClick = toQuickMenu,
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .padding(start = 16.dp)
+                                        .clip(CircleShape)
+                                        .clickable {
+                                            toQuickMenu()
+                                        },
                             ) {
-                                AvatarComponent(it.avatar, size = 24.dp)
+                                AvatarComponent(
+                                    it.avatar,
+                                    size = 36.dp,
+                                )
                             }
                         }
                     }
@@ -275,6 +287,7 @@ internal fun TimelineItemContent(
                                         Column(
                                             modifier =
                                                 Modifier
+                                                    .fillMaxWidth()
                                                     .padding(
                                                         horizontal = screenHorizontalPadding,
                                                     ).padding(top = 16.dp, bottom = 8.dp),
@@ -301,7 +314,7 @@ internal fun TimelineItemContent(
                                         }
                                     }
                                     if (!isBigScreen()) {
-                                        HorizontalDivider()
+                                        Spacer(modifier = Modifier.height(12.dp))
                                     }
                                 }
                             }

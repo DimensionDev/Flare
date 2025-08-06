@@ -119,6 +119,7 @@ import dev.dimension.flare.ui.component.status_detail_translate
 import dev.dimension.flare.ui.component.unlike
 import dev.dimension.flare.ui.component.vote
 import dev.dimension.flare.ui.model.ClickContext
+import dev.dimension.flare.ui.model.Digit
 import dev.dimension.flare.ui.model.UiCard
 import dev.dimension.flare.ui.model.UiPoll
 import dev.dimension.flare.ui.model.UiTimeline
@@ -642,7 +643,7 @@ internal fun StatusActions(
                 is StatusAction.Group -> {
                     StatusActionGroup(
                         icon = action.displayItem.icon,
-                        text = action.displayItem.iconText,
+                        digits = action.displayItem.iconText,
                         color = statusActionItemColor(item = action.displayItem),
                         withTextMinWidth = index != items.lastIndex,
                     ) { closeMenu, isMenuShown ->
@@ -712,7 +713,7 @@ internal fun StatusActions(
                 is StatusAction.Item -> {
                     StatusActionButton(
                         icon = action.icon,
-                        text = action.iconText,
+                        digits = action.iconText,
                         color = statusActionItemColor(item = action),
                         withTextMinWidth = index != items.lastIndex,
                         onClicked = {
@@ -771,7 +772,7 @@ private fun PlatformDropdownMenuScope.StatusActionItemMenu(
         leadingIcon = {
             FAIcon(
                 imageVector = subActions.icon,
-                contentDescription = subActions.iconText,
+                contentDescription = null,
                 tint = color,
                 modifier =
                     Modifier
@@ -834,18 +835,18 @@ private val StatusAction.Item.icon: ImageVector
             is StatusAction.Item.Retweet -> FontAwesomeIcons.Solid.Retweet
         }
 
-private val StatusAction.Item.iconText: String?
+private val StatusAction.Item.iconText: ImmutableList<Digit>?
     get() =
         when (this) {
-            is StatusAction.Item.Bookmark -> humanizedCount
+            is StatusAction.Item.Bookmark -> digits
             is StatusAction.Item.Delete -> null
-            is StatusAction.Item.Like -> humanizedCount
+            is StatusAction.Item.Like -> digits
             StatusAction.Item.More -> null
-            is StatusAction.Item.Quote -> humanizedCount
+            is StatusAction.Item.Quote -> digits
             is StatusAction.Item.Reaction -> null
-            is StatusAction.Item.Reply -> humanizedCount
+            is StatusAction.Item.Reply -> digits
             is StatusAction.Item.Report -> null
-            is StatusAction.Item.Retweet -> humanizedCount
+            is StatusAction.Item.Retweet -> digits
         }
 
 @Composable

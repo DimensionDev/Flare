@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +31,7 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleCheck
 import compose.icons.fontawesomeicons.solid.CircleExclamation
+import dev.chrisbanes.haze.HazeState
 import dev.dimension.flare.common.ComposeInAppNotification
 import dev.dimension.flare.common.Notification
 import kotlinx.coroutines.delay
@@ -40,6 +41,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @Composable
 internal fun InAppNotificationComponent(
+    hazeState: HazeState,
     modifier: Modifier = Modifier,
     notification: ComposeInAppNotification = koinInject(),
 ) {
@@ -64,8 +66,9 @@ internal fun InAppNotificationComponent(
                     delay(500.milliseconds)
                     showText = true
                     delay(3.seconds)
-                    showNotification = false
                     showText = false
+                    delay(1.seconds)
+                    showNotification = false
                 }
                 AnimatedVisibility(
                     showNotification,
@@ -75,10 +78,11 @@ internal fun InAppNotificationComponent(
                     enter = fadeIn() + slideInVertically(),
                     exit = fadeOut() + slideOutVertically(),
                 ) {
-                    Surface(
-                        shape = MaterialTheme.shapes.large,
+                    Glassify(
+                        shape = RoundedCornerShape(50),
                         shadowElevation = 8.dp,
                         tonalElevation = 8.dp,
+                        hazeState = hazeState,
                     ) {
                         Row(
                             modifier =

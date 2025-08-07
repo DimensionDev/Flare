@@ -1,6 +1,5 @@
 {
   "client_id": "https://flareapp.moe/client-metadata.json",
-  "application_type": "native",
   "client_name": "Flare",
   "client_uri": "https://flareapp.moe/",
   "dpop_bound_access_tokens": true,

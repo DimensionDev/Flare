@@ -8,22 +8,40 @@ struct TimelineItemsView: View {
 
     @Environment(\.appSettings) private var appSettings
 
+      
     var body: some View {
-        Group {
-            ForEach(items) { item in
+             ForEach(items) { item in
                 TimelineStatusViewV2(
                     item: item,
                     timelineViewModel: viewModel
                 )
                 .padding(.vertical, 4)
                 .onAppear {
-                    // FlareLog.debug("[TimelineItemsView] item出现: \(item.id), index: \(index)")
-                    viewModel.itemDidAppear(item: item)
+                  //   viewModel.itemDidAppear(item: item)
+
+                    Task {
+                    if hasMore &&
+                    !viewModel.isLoadingMore &&
+                    items.count >= 7 &&
+                    (
+                     item.id == items[items.count - 5].id ||
+                     item.id == items[items.count - 6].id) {
+                         
+                        FlareLog.debug("[TimelineItemsView] 🚀 预加载触发 ")
+                        
+                       
+                            do {
+                                try await viewModel.handleLoadMore()
+                                FlareLog.debug("[TimelineItemsView] ✅ 预加载成功 - 新总数: \(items.count)")
+                            } catch {
+                                FlareLog.error("[TimelineItemsView] ❌ 预加载失败: \(error)")
+                            }
+                        }
+                    }
                 }
-                .onDisappear {
-                    // FlareLog.debug("[TimelineItemsView] item消失: \(item.id), index: \(index)")
-                    viewModel.itemDidDisappear(item: item)
-                }
+//                .onDisappear {
+//                     viewModel.itemDidDisappear(item: item)
+//                }
             }
 
             if hasMore {
@@ -31,16 +49,6 @@ struct TimelineItemsView: View {
                     FlareLog.debug("[TimelineItemsView] LoadMoreView触发handleLoadMore")
                     try await viewModel.handleLoadMore()
                 }
-                .onAppear {
-                    FlareLog.debug("[TimelineItemsView] 创建TimelineLoadMoreView - hasMore: \(hasMore), items数量: \(items.count)")
-                }
-            }
-        }
-        .onChange(of: items) { oldItems, newItems in
-            FlareLog.debug("[Timeline ItemsView] items数组变化: \(oldItems.count) -> \(newItems.count)")
-        }
-        .onAppear {
-            FlareLog.debug("[Timeline ItemsView] TimelineItemsView appeared with \(items.count) items")
-        }
-    }
+             }
+     }
 }

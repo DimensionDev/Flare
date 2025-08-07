@@ -75,7 +75,7 @@ struct StatusShareAsImageViewV2: View {
                         }
                     }
                 }
-                .listRowBackground(colorScheme == .dark ? Color.black : Color.white)
+//                .listRowBackground(colorScheme == .dark ? Color.black : Color.white)
             }
             .scrollContentBackground(.hidden)
             .toolbar {
@@ -119,7 +119,7 @@ struct StatusShareAsImageViewV2: View {
     private func generateScreenshot() {
         generateQuickScreenshot()
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
             generateOptimizedScreenshot()
         }
     }
@@ -130,7 +130,7 @@ struct StatusShareAsImageViewV2: View {
         renderer.scale = 2.0
         renderer.isOpaque = true
         renderer.proposedSize = ProposedViewSize(
-            width: UIScreen.main.bounds.width - 24,
+            width: UIScreen.main.bounds.width,
             height: nil
         )
 
@@ -152,7 +152,7 @@ struct StatusShareAsImageViewV2: View {
         )
 
         if let image = renderer.uiImage {
-            withAnimation(.easeInOut(duration: 0.3)) {
+            withAnimation(.easeInOut(duration: 1)) {
                 capturedImage = image
                 isOptimizing = false
             }
@@ -162,11 +162,14 @@ struct StatusShareAsImageViewV2: View {
     }
 
     private func createCaptureView() -> some View {
+    
         StatusCaptureWrapperV2(content: content)
             .environment(\.appSettings, appSettings)
-            .environment(\.colorScheme, colorScheme)
             .environment(\.isInCaptureMode, true)
             .environment(router)
-            .environment(theme).applyTheme(theme)
+            .environment(theme)
+            .preferredColorScheme(theme.selectedScheme == .dark ? .dark : .light)
+            .tint(theme.tintColor)
+            .background(theme.primaryBackgroundColor)
     }
 }

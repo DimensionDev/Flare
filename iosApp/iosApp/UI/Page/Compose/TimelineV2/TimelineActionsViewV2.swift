@@ -8,16 +8,27 @@ extension NSNotification.Name {
     static let timelineItemUpdated = NSNotification.Name("timelineItemUpdated")
 }
 
-struct TimelineActionsViewV2: View {
+struct TimelineActionsViewV2: View, Equatable {
     let item: TimelineItem
     let timelineViewModel: TimelineViewModel?
 
     let onAction: (TimelineActionType, TimelineItem) -> Void
-    let onShare: (ShareType) -> Void
+    let onShare: (MoreActionType) -> Void
 
     @Environment(FlareRouter.self) private var router
 
     @State private var showRetweetMenu = false
+
+    
+    static func == (lhs: TimelineActionsViewV2, rhs: TimelineActionsViewV2) -> Bool {
+        lhs.item.id == rhs.item.id &&
+        lhs.item.likeCount == rhs.item.likeCount &&
+        lhs.item.isLiked == rhs.item.isLiked &&
+        lhs.item.retweetCount == rhs.item.retweetCount &&
+        lhs.item.isRetweeted == rhs.item.isRetweeted &&
+        lhs.item.bookmarkCount == rhs.item.bookmarkCount &&
+        lhs.item.isBookmarked == rhs.item.isBookmarked
+    }
 
     var body: some View {
         HStack(spacing: 0) {
@@ -70,31 +81,41 @@ struct TimelineActionsViewV2: View {
             }
             .frame(maxWidth: .infinity)
 
-            ActionButtonV2(
-                iconImage: Image(systemName: "character.bubble"),
-                count: 0,
-                isActive: false,
-                activeColor: .blue
-            ) {
-                handleTranslateAction()
-            }
+            // ActionButtonV2(
+            //     iconImage: Image(systemName: "character.bubble"),
+            //     count: 0,
+            //     isActive: false,
+            //     activeColor: .blue
+            // ) {
+            //     handleTranslateAction()
+            // }
             // .frame(maxWidth: .infinity)
 
             ShareButtonV3(
                 item: item,
-                onShare: onShare
+                onMoreAction: onShare
             )
         }
         .padding(.vertical, 8)
-        .id(item.id)
+//        .id(item.id)
     }
 
     private func handleLikeAction() {
         FlareLog.debug("🔥 [TimelineActionsViewV2] handleLikeAction called for item: \(item.id)")
+        FlareLog.debug("🔍 [TimelineActionsViewV2] handleLikeAction called for item: isLiked=\(item.isLiked), likeCount=\(item.likeCount)")
 
-        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .like)
+         timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .like)
 
-        performKMPAction(actionType: .like)
+//        for action in item.actions {
+//            let enumResult = onEnum(of: action)
+//            if case let .item(actionItem) = enumResult,
+//               let likeAction = actionItem as? StatusActionItemLike {
+//                FlareLog.debug("🔍 [DEBUG] KMP将使用的状态: liked=\(likeAction.liked), count=\(likeAction.count)")
+//                break
+//            }
+//        }
+
+         performKMPAction(actionType: .like)
     }
 
     private func handleRetweetAction() {
@@ -110,7 +131,7 @@ struct TimelineActionsViewV2: View {
 
         FlareLog.debug("🔥 [TimelineActionsViewV2] performRetweetAction (repost) called for item: \(item.id)")
 
-        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .retweet)
+         timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .retweet)
 
         performKMPAction(actionType: .repost)
     }
@@ -122,7 +143,7 @@ struct TimelineActionsViewV2: View {
     private func handleBookmarkAction() {
         FlareLog.debug("🔥 [TimelineActionsViewV2] handleBookmarkAction called for item: \(item.id)")
 
-        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .bookmark)
+          timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .bookmark)
 
         performKMPAction(actionType: .bookmark)
     }
@@ -178,17 +199,19 @@ private struct ActionButtonV2: View {
     let activeColor: Color
     let action: () -> Void
 
+    @Environment(FlareTheme.self) private var theme
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 4) {
                 iconImage
                     .renderingMode(.template)
-                    .foregroundColor(isActive ? activeColor : .primary)
+                    .foregroundColor(isActive ? activeColor : theme.labelColor)
 
                 Group {
                     if count > 0 {
                         Text("\(formatCount(Int64(count)))")
-                            .foregroundColor(isActive ? activeColor : .primary)
+                            .foregroundColor(isActive ? activeColor : theme.labelColor)
                             .font(.caption)
                     }
                 }

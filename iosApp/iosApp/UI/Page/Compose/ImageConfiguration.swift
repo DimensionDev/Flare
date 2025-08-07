@@ -183,8 +183,9 @@ public extension KFImage {
         var image = setProcessor(processor)
             .scaleFactor(scale)
             .cancelOnDisappear(true)
-            .downloadPriority(0.8)
-            .memoryCacheExpiration(.seconds(1800))
+            .reducePriorityOnDisappear(true)
+            .downloadPriority(0.5)
+            .memoryCacheExpiration(.seconds(240))
             .diskCacheExpiration(.days(7))
             .fade(duration: 0.13)
 

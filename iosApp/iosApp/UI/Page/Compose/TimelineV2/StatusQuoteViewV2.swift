@@ -82,6 +82,7 @@ struct QuotedStatusV2: View {
                         Markdown(user.name.markdown)
                             .lineLimit(1)
                             .font(.subheadline)
+                            .markdownTheme(.flareMarkdownStyle(using: theme.bodyTextStyle, fontScale: theme.fontSizeScale))
                             .markdownInlineImageProvider(.emoji)
                         Text(user.handle)
                             .lineLimit(1)
@@ -95,14 +96,12 @@ struct QuotedStatusV2: View {
                     .padding(.horizontal, 9)
                 }
 
-                FlareText(item.content.raw, item.content.markdown, style: FlareTextStyle.Style(
-                    font: Font.scaledBodyFont,
-                    textColor: UIColor(theme.labelColor),
-                    linkColor: UIColor(theme.tintColor),
-                    mentionColor: UIColor(theme.tintColor),
-                    hashtagColor: UIColor(theme.tintColor),
-                    cashtagColor: UIColor(theme.tintColor)
-                ), isRTL: item.content.isRTL)
+                FlareText(
+                    item.content.raw,
+                    item.content.markdown,
+                    textType: .body,
+                    isRTL: item.content.isRTL
+                )
                     .onLinkTap { url in
                         router.handleDeepLink(url)
                     }

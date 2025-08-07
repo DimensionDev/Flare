@@ -377,8 +377,17 @@ class PagingStateConverter {
     ) -> ([TimelineItem], [TimelineItem]) {
         FlareLog.debug("[PagingStateConverter] 开始智能去重 - KMP数据: \(kmpItems.count), 缓存数据: \(existingItems.count)")
 
-        let existingItemsMap = Dictionary(uniqueKeysWithValues: existingItems.map { ($0.id, $0) })
+//        let existingItemsMap = Dictionary(uniqueKeysWithValues: existingItems.map { ($0.id, $0) })
 
+        // crash
+        var existingItemsMap: [String: TimelineItem] = [:]
+        for item in existingItems {
+            if existingItemsMap[item.id] != nil {
+                FlareLog.warning("[PagingStateConverter] 发现重复ID   后面的覆盖前面的 existingItems: \(item.id)")
+            }
+            existingItemsMap[item.id] = item
+        }
+        
         var updatedItems: [TimelineItem] = []
         var newItems: [TimelineItem] = []
 
@@ -446,6 +455,28 @@ extension PagingStateConverter {
         reset()
         DispatchQueue.main.async {
             NotificationCenter.default.post(name: .timelineItemUpdated, object: nil)
+        }
+    }
+
+    func syncUpdateItem(itemId: String, updatedItem: TimelineItem) {
+        FlareLog.debug("🔄 [PagingStateConverter] 开始同步更新convertedItems - itemId: \(itemId)")
+
+        conversionQueue.async { [weak self] in
+            guard let self else {
+                FlareLog.warning("⚠️ [PagingStateConverter] self已释放，取消同步更新")
+                return
+            }
+
+            if let index = convertedItems.firstIndex(where: { $0.id == itemId }) {
+                let oldItem = convertedItems[index]
+                convertedItems[index] = updatedItem
+
+                FlareLog.debug("✅ [PagingStateConverter] 异步同步更新convertedItems成功 - itemId: \(itemId)")
+                FlareLog.debug("📊 [PagingStateConverter] 状态对比 - 旧: isLiked=\(oldItem.isLiked), likeCount=\(oldItem.likeCount)")
+                FlareLog.debug("📊 [PagingStateConverter] 状态对比 - 新: isLiked=\(updatedItem.isLiked), likeCount=\(updatedItem.likeCount)")
+            } else {
+                FlareLog.warning("⚠️ [PagingStateConverter] 异步同步更新失败 - 未找到itemId: \(itemId), convertedItems.count: \(convertedItems.count)")
+            }
         }
     }
 }

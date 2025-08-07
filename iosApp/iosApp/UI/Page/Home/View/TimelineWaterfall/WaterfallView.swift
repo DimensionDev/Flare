@@ -34,7 +34,6 @@ struct WaterfallView: View {
                     items: items,
                     displayType: displayType,
                     hasMore: hasMore,
-                    presenter: viewModel.presenter,
                     onError: viewModel.handleError,
                     scrolledID: $scrolledID,
                     isCurrentTab: isCurrentTab,
@@ -66,11 +65,11 @@ struct WaterfallView: View {
             }
         }
         .onAppear {
-            let timestamp = Date().timeIntervalSince1970
-            FlareLog.debug("👁️ [WaterfallView] onAppear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
+//            let timestamp = Date().timeIntervalSince1970
+            // FlareLog.debug("👁️ [WaterfallView] onAppear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
 
 //            if isCurrentTab {
-            FlareLog.debug("✅ [WaterfallView] Current tab, calling resume - tab: \(tab.key)")
+            //  FlareLog.debug("✅ [WaterfallView] Current tab, calling resume - tab: \(tab.key)")
             viewModel.resume()
 //            } else {
 //                FlareLog.debug("⏸️ [WaterfallView] Not current tab, skipping resume - tab: \(tab.key)")

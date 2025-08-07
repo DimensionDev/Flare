@@ -193,7 +193,7 @@ struct TimelineItem: Identifiable, Equatable, Hashable {
 
     // - 操作相关字段
 
-    let actions: [StatusAction] // 对应 UiTimelineItemContentStatus.actions
+    var actions: [StatusAction]
 
     // - UI状态字段 (可变)
 

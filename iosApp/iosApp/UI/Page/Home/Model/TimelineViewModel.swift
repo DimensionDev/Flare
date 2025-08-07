@@ -25,6 +25,9 @@ class TimelineViewModel {
     @ObservationIgnored
     private var visibleItems: [TimelineItem] = []
 
+   
+   // private let visibilityQueue = DispatchQueue(label: "timeline.visibility", qos: .userInitiated)
+
     var items: [TimelineItem] {
         if case let .loaded(items, _) = timelineState {
             return items
@@ -40,8 +43,7 @@ class TimelineViewModel {
     }
 
     func updateItemOptimistically(itemId: String, actionType: ActionType) {
-        return
-            FlareLog.debug("🚀 [TimelineViewModel] 开始更新: itemId=\(itemId), actionType=\(actionType)")
+        FlareLog.debug("🚀 [TimelineViewModel] 开始更新: itemId=\(itemId), actionType=\(actionType)")
 
         guard case let .loaded(items, hasMore) = timelineState else {
             FlareLog.warning("⚠️ [TimelineViewModel] 更新失败: timelineState不是loaded状态")
@@ -64,14 +66,17 @@ class TimelineViewModel {
         case .like:
             item.isLiked.toggle()
             item.likeCount += item.isLiked ? 1 : -1
+//            item.actions = updateActions(item.actions, actionType: ActionType.like, newState: item.isLiked, newCount: item.likeCount)
 
         case .retweet:
             item.isRetweeted.toggle()
             item.retweetCount += item.isRetweeted ? 1 : -1
+//            item.actions = updateActions(item.actions, actionType: ActionType.retweet, newState: item.isRetweeted, newCount: item.retweetCount)
 
         case .bookmark:
             item.isBookmarked.toggle()
             item.bookmarkCount += item.isBookmarked ? 1 : -1
+//            item.actions = updateActions(item.actions, actionType: ActionType.bookmark, newState: item.isBookmarked, newCount: item.bookmarkCount)
         }
 
         // 更新数组
@@ -80,11 +85,15 @@ class TimelineViewModel {
         // 更新timelineState
         timelineState = .loaded(items: updatedItems, hasMore: hasMore)
 
+        // 更新 PagingStateConverter
+        stateConverter.syncUpdateItem(itemId: itemId, updatedItem: item)
+
         // 记录更新后的状态
         let afterState = getItemState(item: item, actionType: actionType)
 
         FlareLog.debug("✅ [TimelineViewModel] 更新完成: \(actionType) for \(itemId)")
         FlareLog.debug("📊 [TimelineViewModel] 状态变化: \(beforeState) → \(afterState)")
+        FlareLog.debug("🔧 [TimelineViewModel] Actions 数组已同步更新")
     }
 
     private func getItemState(item: TimelineItem, actionType: ActionType) -> String {
@@ -97,7 +106,7 @@ class TimelineViewModel {
             "isBookmarked=\(item.isBookmarked), bookmarkCount=\(item.bookmarkCount)"
         }
     }
-
+ 
     func pause() {
         guard !isPaused else {
             FlareLog.debug("⏸️ [Timeline ViewModel] Already paused, skipping")
@@ -278,8 +287,7 @@ class TimelineViewModel {
     func handleScrollOffsetChange(_ offsetY: CGFloat, showFloatingButton: Binding<Bool>) {
         let shouldShow = offsetY > 50
 
-        // FlareLog.debug("[TimelineViewModel] 滚动偏移变化: offsetY=\(offsetY), shouldShow=\(shouldShow), current=\(showFloatingButton.wrappedValue)")
-
+ 
         if showFloatingButton.wrappedValue != shouldShow {
             showFloatingButton.wrappedValue = shouldShow
             FlareLog.debug("[TimelineViewModel] 浮动按钮状态更新: \(showFloatingButton.wrappedValue)")
@@ -319,15 +327,15 @@ class TimelineViewModel {
             let completionTimestamp = Date().timeIntervalSince1970
             FlareLog.debug("✅ [Timeline ViewModel] handleLoadMore completed successfully, timestamp: \(completionTimestamp)")
 
-            if let topItem = topVisibleItem,
-               visibleItems.contains(where: { $0.id == topItem.id })
-            {
-                FlareLog.debug("🎯 [Timeline ViewModel] 恢复滚动位置到: \(topItem.id)")
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    self.scrollTo(itemId: topItem.id)
-                }
-            }
+//            if let topItem = topVisibleItem,
+//               visibleItems.contains(where: { $0.id == topItem.id })
+//            {
+//                FlareLog.debug("🎯 [Timeline ViewModel] 恢复滚动位置到: \(topItem.id)")
+//
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//                    self.scrollTo(itemId: topItem.id)
+//                }
+//            }
         } catch {
             let errorTimestamp = Date().timeIntervalSince1970
             FlareLog.error("💥 [Timeline ViewModel] handleLoadMore failed - error: \(error), timestamp: \(errorTimestamp)")
@@ -344,26 +352,47 @@ class TimelineViewModel {
         scrollToId = itemId
     }
 
-    func getCurrentVisibleItemIds() -> [String] {
-        visibleItems.map(\.id)
-    }
+//    func getCurrentVisibleItemIds() -> [String] {
+//        visibleItems.map(\.id)
+//    }
 
-    func itemDidAppear(item: TimelineItem) {
-        if !visibleItems.contains(where: { $0.id == item.id }) {
-            visibleItems.insert(item, at: 0)
-        }
+//    func itemDidAppear(item: TimelineItem) {
+//    
+//        visibilityQueue.async { [weak self] in
+//            guard let self = self else { return }
+//
+//             
+//            var newVisibleItems = self.visibleItems
+//
+//            if !newVisibleItems.contains(where: { $0.id == item.id }) {
+//                newVisibleItems.insert(item, at: 0)
+//            }
+//
+//            if newVisibleItems.count > 50 {
+//                newVisibleItems = Array(newVisibleItems.prefix(50))
+//            }
+//
+//          
+//            DispatchQueue.main.async {
+//                self.visibleItems = newVisibleItems
+//            }
+//        }
+//    }
 
-        if visibleItems.count > 50 {
-            visibleItems = Array(visibleItems.prefix(50))
-        }
-
-        // FlareLog.debug("[TimelineViewModel] item出现: \(item.id), 当前可见items: \(visibleItems.count)")
-    }
-
-    func itemDidDisappear(item: TimelineItem) {
-        visibleItems.removeAll { $0.id == item.id }
-        // FlareLog.debug("[TimelineViewModel] item消失: \(item.id), 当前可见items: \(visibleItems.count)")
-    }
+//    func itemDidDisappear(item: TimelineItem) {
+//       
+//        visibilityQueue.async { [weak self] in
+//            guard let self = self else { return }
+//
+//           
+//            let newVisibleItems = self.visibleItems.filter { $0.id != item.id }
+//
+//           
+//            DispatchQueue.main.async {
+//                self.visibleItems = newVisibleItems
+//            }
+//        }
+//    }
 }
 
 struct TimelineLoadingView: View {

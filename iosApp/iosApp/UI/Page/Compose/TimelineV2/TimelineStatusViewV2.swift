@@ -9,18 +9,63 @@ import SwiftDate
 import SwiftUI
 import UIKit
 
-struct TimelineStatusViewV2: View {
+ 
+struct TimelineItemState {
+    
+    var currentSheet: SheetType? = nil
+
+     
+    var isTranslating: Bool = false
+    var isPreparingShare: Bool = false
+    var enableGoogleTranslation: Bool = false
+
+    enum SheetType {
+        case appleTranslation
+        case shareAsImage
+        case textSelection
+        case urlSelection
+        case manualTranslation
+    }
+
+    
+    var showAppleTranslation: Bool { currentSheet == .appleTranslation }
+    var showShareAsImage: Bool { currentSheet == .shareAsImage }
+    var showTextForSelection: Bool { currentSheet == .textSelection }
+    var showSelectUrlSheet: Bool { currentSheet == .urlSelection }
+    var showManualTranslation: Bool { currentSheet == .manualTranslation }
+}
+
+struct TimelineStatusViewV2: View, Equatable {
     let item: TimelineItem
     let timelineViewModel: TimelineViewModel?
 
     let isDetail: Bool = false
-    @State private var showAppleTranslation: Bool = false
-    @State private var showGoogleTranslation: Bool = false
-    @State private var isTranslating: Bool = false
 
-//    @State private var isShareSheetPresented = false
-    @State private var isShareAsImageSheetPresented = false
-    @State private var isPreparingShare = false
+ 
+    static func == (lhs: TimelineStatusViewV2, rhs: TimelineStatusViewV2) -> Bool {
+        
+        guard lhs.item.id == rhs.item.id else { return false }
+
+         
+        return lhs.item.content.raw == rhs.item.content.raw &&
+               lhs.item.user?.key == rhs.item.user?.key &&
+               lhs.item.timestamp == rhs.item.timestamp &&
+
+                
+               lhs.item.likeCount == rhs.item.likeCount &&
+               lhs.item.isLiked == rhs.item.isLiked &&
+               lhs.item.retweetCount == rhs.item.retweetCount &&
+               lhs.item.isRetweeted == rhs.item.isRetweeted &&
+               lhs.item.replyCount == rhs.item.replyCount &&
+               lhs.item.bookmarkCount == rhs.item.bookmarkCount &&
+               lhs.item.isBookmarked == rhs.item.isBookmarked &&
+               lhs.item.sensitive == rhs.item.sensitive &&
+               lhs.item.images.count == rhs.item.images.count &&
+               lhs.isDetail == rhs.isDetail
+    }
+
+     
+    @State private var state = TimelineItemState()
 
     @Environment(\.appSettings) private var appSettings
     @Environment(\.colorScheme) private var colorScheme
@@ -33,10 +78,7 @@ struct TimelineStatusViewV2: View {
     }
 
     var body: some View {
-        if shouldHideInTimeline {
-            EmptyView()
-        } else {
-            VStack(alignment: .leading) {
+        VStack(alignment: .leading) {
                 Spacer().frame(height: 5)
 
                 if let topMessage = item.topMessage {
@@ -53,7 +95,7 @@ struct TimelineStatusViewV2: View {
                 StatusContentViewV2(
                     item: item,
                     isDetailView: isDetail,
-                    enableGoogleTranslation: showGoogleTranslation,
+                    enableGoogleTranslation: state.enableGoogleTranslation,
                     appSettings: appSettings,
                     theme: theme,
                     onMediaClick: { _, _ in
@@ -61,7 +103,10 @@ struct TimelineStatusViewV2: View {
                     onPodcastCardTap: { card in
                         handlePodcastCardTap(card: card)
                     }
-                )
+                ).contentShape(Rectangle())
+            .onTapGesture {
+                handleStatusTap()
+            }
 
                 if !isGuestUser {
                     TimelineActionsViewV2(
@@ -70,8 +115,8 @@ struct TimelineStatusViewV2: View {
                         onAction: { actionType, updatedItem in
                             handleTimelineAction(actionType, item: updatedItem)
                         },
-                        onShare: { shareType in
-                            handleShare(type: shareType)
+                        onShare: { actionType in
+                            handleMoreAction(actionType)
                         }
                     )
                 } else {
@@ -80,14 +125,20 @@ struct TimelineStatusViewV2: View {
             }
             .padding(.horizontal, 16)
             .frame(alignment: .leading)
-            .contentShape(Rectangle())
-            .onTapGesture {
-                handleStatusTap()
-            }
+            
             #if canImport(_Translation_SwiftUI)
-            .addTranslateView(isPresented: $showAppleTranslation, text: item.content.raw)
+            .addTranslateView(
+                isPresented: Binding(
+                    get: { state.showAppleTranslation },
+                    set: { _ in state.currentSheet = nil }
+                ),
+                text: item.content.raw
+            )
             #endif
-            .sheet(isPresented: $isShareAsImageSheetPresented) {
+            .sheet(isPresented: Binding(
+                get: { state.showShareAsImage },
+                set: { _ in state.currentSheet = nil }
+            )) {
                 StatusShareAsImageViewV2(
                     content: self,
                     shareText: getShareTitle(allContent: false)
@@ -97,28 +148,39 @@ struct TimelineStatusViewV2: View {
                 .environment(router)
                 .environment(theme).applyTheme(theme)
             }
-        }
+            .sheet(isPresented: Binding(
+                get: { state.showTextForSelection },
+                set: { _ in state.currentSheet = nil }
+            )) {
+                let imageURLsString = item.images.map(\.url).joined(separator: "\n")
+                let selectableContent = AttributedString(item.content.markdown + "\n" + imageURLsString)
+                StatusRowSelectableTextView(content: selectableContent)
+                    .tint(.accentColor)
+                    .environment(theme)
+            }
+            .sheet(isPresented: Binding(
+                get: { state.showSelectUrlSheet },
+                set: { _ in state.currentSheet = nil }
+            )) {
+                let urlsString = item.images.map(\.url).joined(separator: "\n")
+                StatusRowSelectableTextView(content: AttributedString(urlsString))
+                    .tint(.accentColor)
+                    .environment(theme)
+            }
+            #if canImport(_Translation_SwiftUI)
+            .addTranslateView(
+                isPresented: Binding(
+                    get: { state.showManualTranslation },
+                    set: { _ in state.currentSheet = nil }
+                ),
+                text: item.content.raw
+            )
+            #endif
+        
     }
 
-    private var shouldHideInTimeline: Bool {
-        let sensitiveSettings = appSettings.appearanceSettings.sensitiveContentSettings
-
-        guard sensitiveSettings.hideInTimeline else {
-            return false
-        }
-
-        guard item.sensitive else {
-            return false
-        }
-
-        if let timeRange = sensitiveSettings.timeRange {
-            let shouldHide = timeRange.isCurrentTimeInRange()
-            return shouldHide
-        } else {
-            return true
-        }
-    }
-
+   
+   
     private func handleStatusTap() {
         // detailKey == data.statusKey
         let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
@@ -144,7 +206,7 @@ struct TimelineStatusViewV2: View {
 
     private func handleTimelineAction(_ actionType: TimelineActionType, item: TimelineItem) {
         if actionType == .translate {
-            guard !isTranslating else {
+            guard !state.isTranslating else {
                 return
             }
 
@@ -152,35 +214,67 @@ struct TimelineStatusViewV2: View {
                 return
             }
 
-            isTranslating = true
+            state.isTranslating = true
             let provider = appSettings.otherSettings.translationProvider
 
             if provider == .systemOffline {
-                showAppleTranslation = true
+                state.currentSheet = .appleTranslation
             } else {
-                showGoogleTranslation = true
+                state.enableGoogleTranslation = true
             }
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                isTranslating = false
+                state.isTranslating = false
             }
             return
         }
     }
 
-    // MARK: - 分享功能
+    
 
-    private func handleShare(type: ShareType) {
-        switch type {
+    private func handleMoreAction(_ actionType: MoreActionType) {
+        switch actionType {
         case .sharePost:
             handleSharePost()
         case .shareAsImage:
-            handleShareAsImage()
+            state.currentSheet = .shareAsImage
+        case .showTextForSelection:
+            state.currentSheet = .textSelection
+        case .translate:
+            state.currentSheet = .manualTranslation
+        case .copyMediaLink, .copyMediaURLs:
+            state.currentSheet = .urlSelection
+        case .copyText:
+            UIPasteboard.general.string = item.content.raw
+            showSuccessToast()
+        case .copyMarkdown:
+            UIPasteboard.general.string = item.content.markdown
+            showSuccessToast()
+        case .copyTweetLink:
+            if !item.url.isEmpty {
+                UIPasteboard.general.string = item.url
+                showSuccessToast()
+            }
+        case .openInBrowser:
+            if let url = URL(string: item.url) {
+                router.handleDeepLink(url)
+            }
+        case .report:
+            showSuccessToast(message: "Report Success")
+        case .saveMedia:
+            showSuccessToast(message: "download to App \n Download Manager")
         }
     }
 
+    private func showSuccessToast(message: String = "Copy Success") {
+        ToastView(
+            icon: UIImage(systemName: "checkmark.circle"),
+            message: NSLocalizedString(message, comment: "")
+        ).show()
+    }
+
     private func handleSharePost() {
-        isPreparingShare = true
+        state.isPreparingShare = true
         prepareScreenshot { image in
             if let image {
                 var activityItems: [Any] = []
@@ -205,14 +299,11 @@ struct TimelineStatusViewV2: View {
                     rootVC.present(activityVC, animated: true)
                 }
             }
-            isPreparingShare = false
+            state.isPreparingShare = false
         }
     }
 
-    private func handleShareAsImage() {
-        // 立即打开Sheet，截图将在Sheet中进行
-        isShareAsImageSheetPresented = true
-    }
+    
 
     private func prepareScreenshot(completion: @escaping (UIImage?) -> Void) {
         let captureView = StatusCaptureWrapperV2(content: self)
@@ -225,7 +316,7 @@ struct TimelineStatusViewV2: View {
         let controller = UIHostingController(rootView: captureView)
 
         let targetSize = controller.sizeThatFits(in: CGSize(
-            width: UIScreen.main.bounds.width - 24,
+            width: UIScreen.main.bounds.width,
             height: UIView.layoutFittingExpandedSize.height
         ))
 
@@ -263,7 +354,6 @@ struct StatusCaptureWrapperV2: View {
 
     var body: some View {
         content
-            .padding(.horizontal, 12)
             .padding(.vertical, 8)
     }
 }

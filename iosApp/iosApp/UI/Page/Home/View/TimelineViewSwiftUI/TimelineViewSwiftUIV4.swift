@@ -93,29 +93,24 @@ struct TimelineViewSwiftUIV4: View {
                     proxy.scrollTo("timeline-top-v4", anchor: .center)
                 }
             }
-            .onChange(of: timeLineViewModel.scrollToId) { _, newValue in
-                if let newValue {
-                    // 检查当前屏幕可视区域的tweet id数组是否包含滚动的id
-                    let currentVisibleIds = timeLineViewModel.getCurrentVisibleItemIds()
-
-                    if currentVisibleIds.contains(newValue) {
-                        FlareLog.debug("🎯 [TimelineV4] 目标item已在当前可视区域，跳过滚动: \(newValue)")
-                        FlareLog.debug("🎯 [TimelineV4] 当前可视区域包含 \(currentVisibleIds.count) 个items")
-                        // 直接清除滚动目标，避免不必要的跳动
-                        timeLineViewModel.clearScrollTarget()
-                    } else {
-                        FlareLog.debug("🎯 [TimelineV4] 目标item不在可视区域，执行滚动: \(newValue)")
-                        FlareLog.debug("🎯 [TimelineV4] 当前可视区域包含 \(currentVisibleIds.count) 个items")
-                        withAnimation(.easeInOut(duration: 0.1)) {
-                            proxy.scrollTo(newValue, anchor: .top)
-                        }
-
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            timeLineViewModel.clearScrollTarget()
-                        }
-                    }
-                }
-            }
+//            .onChange(of: timeLineViewModel.scrollToId) { _, newValue in
+//                if let newValue {
+//                    // 检查当前屏幕可视区域的tweet id数组是否包含滚动的id
+//                    let currentVisibleIds = timeLineViewModel.getCurrentVisibleItemIds()
+//
+//                    if currentVisibleIds.contains(newValue) {
+//                         timeLineViewModel.clearScrollTarget()
+//                    } else {
+//                         withAnimation(.easeInOut(duration: 0.1)) {
+//                            proxy.scrollTo(newValue, anchor: .top)
+//                        }
+//
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//                            timeLineViewModel.clearScrollTarget()
+//                        }
+//                    }
+//                }
+//            }
             .task(id: tab.key) {
                 let timestamp = Date().timeIntervalSince1970
                 FlareLog.debug("📱 [TimelineV4] .task(id: \(tab.key)) triggered - isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
@@ -133,15 +128,13 @@ struct TimelineViewSwiftUIV4: View {
                 let timestamp = Date().timeIntervalSince1970
                 FlareLog.debug("👁️ [TimelineV4] onAppear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
 
-                // 移除isCurrentTab检查，总是尝试resume
-                timeLineViewModel.resume()
+                 timeLineViewModel.resume()
             }
             .onDisappear {
                 let timestamp = Date().timeIntervalSince1970
                 FlareLog.debug("👋 [TimelineV4] onDisappear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
 
-                // 页面消失时，无论什么tab都暂停
-                timeLineViewModel.pause()
+                 timeLineViewModel.pause()
             }
             .onReceive(NotificationCenter.default.publisher(for: .timelineItemUpdated)) { _ in
                 let timestamp = Date().timeIntervalSince1970
@@ -162,9 +155,7 @@ struct TimelineViewSwiftUIV4: View {
                     FlareLog.debug("🔄 [TimelineV4] Starting handleRefresh - tab: \(tab.key)")
                     Task {
                         await timeLineViewModel.handleRefresh()
-                        await MainActor.run {
-                            FlareLog.debug("✅ [TimelineV4] handleRefresh completed - tab: \(tab.key), timestamp: \(Date().timeIntervalSince1970)")
-                        }
+                        
                     }
                 }
             }

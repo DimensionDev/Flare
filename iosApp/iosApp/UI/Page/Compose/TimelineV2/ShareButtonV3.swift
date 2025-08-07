@@ -12,13 +12,40 @@ import UIKit
     import Translation
 #endif
 
-struct ShareButtonV3: View {
+enum MoreActionType {
+    
+    case sharePost
+    case shareAsImage
+
+    
+    case showTextForSelection
+    case copyText
+    case copyMarkdown
+    case copyTweetLink
+
+    
+    case copyMediaLink
+    case copyMediaURLs
+    case saveMedia
+
+   
+    case translate
+    case openInBrowser
+    case report
+}
+
+struct ShareButtonV3: View, Equatable {
     @Environment(\.isInCaptureMode) private var isInCaptureMode: Bool
 
     let item: TimelineItem
-    let onShare: (ShareType) -> Void
+    let onMoreAction: (MoreActionType) -> Void
 
     @State private var isMenuContentReady = false
+
+     
+    static func == (lhs: ShareButtonV3, rhs: ShareButtonV3) -> Bool {
+        lhs.item.id == rhs.item.id
+    }
 
     private var shareIcon: some View {
         HStack {
@@ -35,7 +62,7 @@ struct ShareButtonV3: View {
         if !isInCaptureMode {
             Menu {
                 if isMenuContentReady {
-                    LazyShareMenuContent(item: item, onShare: onShare)
+                    LazyMoreMenuContent(item: item, onMoreAction: onMoreAction)
                 } else {
                     Button("") {}
                         .onAppear {
@@ -49,18 +76,16 @@ struct ShareButtonV3: View {
     }
 }
 
-struct LazyShareMenuContent: View {
+struct LazyMoreMenuContent: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.appSettings) var appSettings
     @Environment(FlareRouter.self) var router
     @Environment(FlareTheme.self) private var theme
 
     let item: TimelineItem
-    let onShare: (ShareType) -> Void
+    let onMoreAction: (MoreActionType) -> Void
 
-    @State private var showTextForSelection: Bool = false
-    @State private var showTranslation: Bool = false
-    @State private var showSelectUrlSheet: Bool = false
+
 
     private var statusUrl: URL? {
         guard !item.url.isEmpty else { return nil }
@@ -77,52 +102,45 @@ struct LazyShareMenuContent: View {
 
     var body: some View {
         Group {
-            // Report功能
+          
             Button(action: {
-                ToastView(icon: UIImage(systemName: "checkmark.circle"),
-                          message: NSLocalizedString("Report Success", comment: "")).show()
+                onMoreAction(.report)
             }) {
                 Label("Report", systemImage: "exclamationmark.triangle")
             }
 
             Divider()
 
-            // Copy功能组
+          
             Button(action: {
-                UIPasteboard.general.string = item.content.raw
-                ToastView(icon: UIImage(systemName: "checkmark.circle"),
-                          message: NSLocalizedString("Copy Success", comment: "")).show()
+                onMoreAction(.copyText)
             }) {
                 Label("Copy Text", systemImage: "doc.on.doc")
             }
 
             Button(action: {
-                UIPasteboard.general.string = item.content.markdown
-                ToastView(icon: UIImage(systemName: "checkmark.circle"),
-                          message: NSLocalizedString("Copy Success", comment: "")).show()
+                onMoreAction(.copyMarkdown)
             }) {
                 Label("Copy Text (MarkDown)", systemImage: "doc.on.doc")
             }
 
             if !item.images.isEmpty {
                 Button(action: {
-                    showSelectUrlSheet = true
+                    onMoreAction(.copyMediaLink)
                 }) {
                     Label("Copy Media Link", systemImage: "photo.on.rectangle")
                 }
             }
 
             Button(action: {
-                showTextForSelection = true
+                onMoreAction(.showTextForSelection)
             }) {
                 Label("Copy Any", systemImage: "text.cursor")
             }
 
             if let url = statusUrl {
                 Button(action: {
-                    UIPasteboard.general.string = url.absoluteString
-                    ToastView(icon: UIImage(systemName: "checkmark.circle"),
-                              message: NSLocalizedString("Copy Success", comment: "")).show()
+                    onMoreAction(.copyTweetLink)
                 }) {
                     Label("Copy Tweet Link", systemImage: "link")
                 }
@@ -130,7 +148,7 @@ struct LazyShareMenuContent: View {
                 Divider()
 
                 Button(action: {
-                    router.handleDeepLink(url)
+                    onMoreAction(.openInBrowser)
                 }) {
                     Label("Open in Browser", systemImage: "safari")
                 }
@@ -138,58 +156,52 @@ struct LazyShareMenuContent: View {
 
             Divider()
 
-            // Share功能组
+             
             Button(action: {
-                onShare(.sharePost)
+                onMoreAction(.sharePost)
             }) {
                 Label("Share Post", systemImage: "square.and.arrow.up")
             }
 
             Button(action: {
-                onShare(.shareAsImage)
+                onMoreAction(.shareAsImage)
             }) {
                 Label("Share as Image", systemImage: "camera")
             }
 
             Divider()
 
-            // Tools功能组
+            
             #if canImport(_Translation_SwiftUI)
                 Button(action: {
-                    showTranslation = true
+                    onMoreAction(.translate)
                 }) {
                     Label("System Translate", systemImage: "character.bubble")
                 }
+            #else
+                 
+                Button(action: {
+                    onMoreAction(.translate)
+                }) {
+                    Label("System Translate (Unavailable)", systemImage: "character.bubble")
+                }
+                .disabled(true)
             #endif
-
-            Button(action: {
-                FlareLog.debug("ShareButtonV3 Save Media tapped")
-                ToastView(
-                    icon: UIImage(systemName: "arrow.down.to.line"),
-                    message: String(localized: "download to App \n Download Manager")
-                ).show()
-            }) {
-                Label("Save Media", systemImage: "arrow.down.to.line")
-            }
 
             if !item.images.isEmpty {
                 Button(action: {
-                    showSelectUrlSheet = true
+                    onMoreAction(.saveMedia)
+                }) {
+                    Label("Save Media", systemImage: "arrow.down.to.line")
+                }
+
+                Button(action: {
+                    onMoreAction(.copyMediaURLs)
                 }) {
                     Label("Copy Media URLs", systemImage: "link")
                 }
             }
         }
-        .sheet(isPresented: $showTextForSelection) {
-            StatusRowSelectableTextView(content: selectableContent)
-                .tint(.accentColor)
-        }
-        .sheet(isPresented: $showSelectUrlSheet) {
-            StatusRowSelectableTextView(content: AttributedString(imageURLsString))
-                .tint(.accentColor)
-        }
-        #if canImport(_Translation_SwiftUI)
-        .addTranslateView(isPresented: $showTranslation, text: item.content.raw)
-        #endif
+        
     }
 }

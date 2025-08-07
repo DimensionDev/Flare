@@ -12,10 +12,6 @@ import UIKit
     import Translation
 #endif
 
-enum ShareType {
-    case sharePost
-    case shareAsImage
-}
 
 struct ShareButtonV2: View {
     @Environment(\.colorScheme) var colorScheme
@@ -30,7 +26,7 @@ struct ShareButtonV2: View {
     @State private var showSelectUrlSheet: Bool = false
 
     let item: TimelineItem
-    let onShare: (ShareType) -> Void
+    let onShare: (MoreActionType) -> Void
 
     private var statusUrl: URL? {
         guard !item.url.isEmpty else { return nil }

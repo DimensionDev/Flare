@@ -80,25 +80,5 @@ struct MediaComponent: View {
         }
         .frame(maxWidth: 600)
         .clipShape(RoundedRectangle(cornerRadius: 8))
-        .task {
-            // 只有在启用AI分析且原本不是敏感内容时才进行分析
-            if appSettings.otherSettings.sensitiveContentAnalysisEnabled, !sensitive {
-                await analyzeMediaContent()
-            }
-        }
-    }
-
-    private func analyzeMediaContent() async {
-        for media in medias {
-            if let imageMedia = media as? UiMediaImage {
-                let isSensitive = await SensitiveContentAnalyzer.shared.analyzeImage(url: imageMedia.url)
-                if isSensitive {
-                    await MainActor.run {
-                        aiDetectedSensitive = true
-                    }
-                    break // 只要有一个敏感 就覆盖
-                }
-            }
-        }
     }
 }

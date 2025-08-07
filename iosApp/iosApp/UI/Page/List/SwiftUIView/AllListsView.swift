@@ -4,7 +4,6 @@ import os
 import shared
 import SwiftUI
 
- 
 struct AllListsView: View {
     @State private var presenter: AllListPresenter
     @Environment(FlareRouter.self) private var router

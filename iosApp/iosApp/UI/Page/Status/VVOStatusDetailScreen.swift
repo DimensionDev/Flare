@@ -7,7 +7,6 @@ struct VVOStatusDetailScreen: View {
     @State private var type: DetailStatusType = .comment
     private let statusKey: MicroBlogKey
 
-     
     @Environment(FlareMenuState.self) private var menuState
 
     init(accountType: AccountType, statusKey: MicroBlogKey) {

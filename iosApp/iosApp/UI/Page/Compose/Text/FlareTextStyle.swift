@@ -20,13 +20,22 @@ private extension String {
 }
 
 public enum FlareTextStyle {
-    public struct Style {
+    public struct Style: Equatable {
         public let font: UIFont
         public let textColor: UIColor
         public let linkColor: UIColor
         public let mentionColor: UIColor
         public let hashtagColor: UIColor
         public let cashtagColor: UIColor
+
+        public static func == (lhs: Style, rhs: Style) -> Bool {
+            lhs.font == rhs.font &&
+                lhs.textColor == rhs.textColor &&
+                lhs.linkColor == rhs.linkColor &&
+                lhs.mentionColor == rhs.mentionColor &&
+                lhs.hashtagColor == rhs.hashtagColor &&
+                lhs.cashtagColor == rhs.cashtagColor
+        }
 
         // public static let `default` = Style(
         //     font: .systemFont(ofSize: 16),

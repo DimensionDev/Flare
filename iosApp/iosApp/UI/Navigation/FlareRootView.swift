@@ -4,7 +4,7 @@ import SwiftUI
 
 struct FlareRootView: View {
     @State var appState = FlareAppState()
-    @State private var router = FlareRouter()
+    @StateObject private var router = FlareRouter.shared
     @StateObject private var composeManager = ComposeManager.shared
     @StateObject private var timelineState = TimelineExtState()
     @State private var presenter = ActiveAccountPresenter()

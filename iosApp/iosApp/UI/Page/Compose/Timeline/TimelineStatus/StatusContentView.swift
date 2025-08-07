@@ -195,14 +195,7 @@ struct StatusContentWarningView: View {
             FlareText(
                 contentWarning.raw,
                 contentWarning.markdown,
-                style: FlareTextStyle.Style(
-                    font: Font.scaledCaptionFont,
-                    textColor: UIColor(.gray),
-                    linkColor: UIColor(theme.tintColor),
-                    mentionColor: UIColor(theme.tintColor),
-                    hashtagColor: UIColor(theme.tintColor),
-                    cashtagColor: UIColor(theme.tintColor)
-                ),
+                textType: .caption,
                 isRTL: contentWarning.isRTL
             )
             .onLinkTap { url in
@@ -241,14 +234,7 @@ struct StatusMainContentView: View {
             FlareText(
                 content.raw,
                 content.markdown,
-                style: FlareTextStyle.Style(
-                    font: Font.scaledBodyFont,
-                    textColor: UIColor(theme.labelColor),
-                    linkColor: UIColor(theme.tintColor),
-                    mentionColor: UIColor(theme.tintColor),
-                    hashtagColor: UIColor(theme.tintColor),
-                    cashtagColor: UIColor(theme.tintColor)
-                ),
+                textType: .body,
                 isRTL: content.isRTL
             )
             .onLinkTap { url in

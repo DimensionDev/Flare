@@ -6,7 +6,9 @@ import SwiftUI
 import UIKit
 
 @Observable
-class FlareRouter {
+class FlareRouter: ObservableObject {
+    public static let shared = FlareRouter()
+
     public var appState: FlareAppState
 
     private var cancellables = Set<AnyCancellable>()
@@ -20,8 +22,6 @@ class FlareRouter {
     var isFullScreenPresented: Bool = false
 
     var isDialogPresented: Bool = false
-
-    var previousPageSnapshot: UIImage?
 
     var selectedTab: FlareHomeTabs = .timeline {
         didSet {
@@ -148,7 +148,6 @@ class FlareRouter {
     }
 
     func goBack() {
-        previousPageSnapshot = nil
         dismissCurrentView()
     }
 
@@ -291,7 +290,7 @@ class FlareRouter {
             return .profileWithNameAndHost(accountType: route.accountType, userName: route.userName, host: route.host)
 
         case let route as AppleRoute.StatusDetail:
-            return .statusDetail(accountType: route.accountType, statusKey: route.statusKey)
+            return .statusDetailV2(accountType: route.accountType, statusKey: route.statusKey)
 
         case let route as AppleRoute.ProfileMedia:
             return .profileMedia(accountType: route.accountType, userKey: route.userKey)

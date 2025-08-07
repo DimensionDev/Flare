@@ -3,10 +3,14 @@ import MarkdownUI
 import shared
 import SwiftUI
 
-struct StatusRetweetHeaderComponentV2: View {
+struct StatusRetweetHeaderComponentV2: View, Equatable {
     let topMessage: TopMessage
     @Environment(FlareTheme.self) private var theme
     @Environment(FlareRouter.self) private var router
+
+    static func == (lhs: StatusRetweetHeaderComponentV2, rhs: StatusRetweetHeaderComponentV2) -> Bool {
+        lhs.topMessage.statusKey == rhs.topMessage.statusKey
+    }
 
     var body: some View {
         let text = getLocalizedText(for: topMessage.type)
@@ -17,8 +21,6 @@ struct StatusRetweetHeaderComponentV2: View {
         }) {
             HStack(alignment: .center) {
                 getIcon(for: topMessage.icon)
-                    .foregroundColor(theme.labelColor)
-                    .font(.system(size: 14))
                     .frame(maxWidth: 14, maxHeight: 14, alignment: .center)
 
                 Markdown {
@@ -26,6 +28,7 @@ struct StatusRetweetHeaderComponentV2: View {
                 }
                 .frame(alignment: .center)
                 .lineLimit(1)
+                .markdownTheme(.flareMarkdownStyle(using: theme.captionTextStyle, fontScale: theme.fontSizeScale))
                 .markdownTextStyle(\.text) {
                     FontSize(12)
                 }
@@ -33,7 +36,6 @@ struct StatusRetweetHeaderComponentV2: View {
 
                 Spacer()
             }
-            .foregroundColor(.primary)
             .opacity(0.6)
         }
         .buttonStyle(.plain)
@@ -53,34 +55,52 @@ struct StatusRetweetHeaderComponentV2: View {
         ))
     }
 
-    /// 根据图标类型获取对应的图标
     @ViewBuilder
     private func getIcon(for iconType: TopMessageIcon) -> some View {
         switch iconType {
         case .retweet:
             Awesome.Classic.Solid.retweet.image
+                .foregroundColor(UIColor(theme.labelColor))
+                .size(14)
         case .follow:
             Awesome.Classic.Solid.userPlus.image
+                .foregroundColor(UIColor(theme.labelColor))
+                .size(14)
         case .favourite:
             Awesome.Classic.Solid.heart.image
+                .foregroundColor(UIColor(theme.labelColor))
+                .size(14)
         case .mention:
             Awesome.Classic.Solid.at.image
+                .foregroundColor(UIColor(theme.labelColor))
+                .size(14)
         case .poll:
             Awesome.Classic.Solid.squarePollHorizontal.image
+                .foregroundColor(UIColor(theme.labelColor))
+                .size(14)
         case .edit:
             Awesome.Classic.Solid.pen.image
+                .foregroundColor(UIColor(theme.labelColor))
+                .size(14)
         case .info:
             Awesome.Classic.Solid.circleInfo.image
+                .foregroundColor(UIColor(theme.labelColor))
+                .size(14)
         case .reply:
             Awesome.Classic.Solid.reply.image
+                .foregroundColor(UIColor(theme.labelColor))
+                .size(14)
         case .quote:
             Awesome.Classic.Solid.quoteLeft.image
+                .foregroundColor(UIColor(theme.labelColor))
+                .size(14)
         case .pin:
             Awesome.Classic.Solid.thumbtack.image
+                .foregroundColor(UIColor(theme.labelColor))
+                .size(14)
         }
     }
 
-    /// 根据消息类型获取本地化文本
     private func getLocalizedText(for messageType: TopMessageType) -> String {
         switch messageType {
         case let .bluesky(type):

@@ -8,170 +8,129 @@ extension NSNotification.Name {
     static let timelineItemUpdated = NSNotification.Name("timelineItemUpdated")
 }
 
-struct TimelineActionsViewV2: View {
+struct TimelineActionsViewV2: View, Equatable {
     let item: TimelineItem
-    let onAction: (TimelineActionType, TimelineItem) -> Void
+    let timelineViewModel: TimelineViewModel?
 
-    @Environment(\.openURL) private var openURL
-    @State private var errorMessage: String?
+    let onAction: (TimelineActionType, TimelineItem) -> Void
+    let onShare: (MoreActionType) -> Void
+
+    @Environment(FlareRouter.self) private var router
+
     @State private var showRetweetMenu = false
 
-    @State private var itemId: String = ""
-    @State private var refreshTrigger: Int = 0
-
-    @State private var displayLikeCount: Int = 0
-    @State private var displayIsLiked: Bool = false
-    @State private var displayRetweetCount: Int = 0
-    @State private var displayIsRetweeted: Bool = false
-    @State private var displayBookmarkCount: Int = 0
-    @State private var displayIsBookmarked: Bool = false
+    static func == (lhs: TimelineActionsViewV2, rhs: TimelineActionsViewV2) -> Bool {
+        lhs.item.id == rhs.item.id &&
+            lhs.item.likeCount == rhs.item.likeCount &&
+            lhs.item.isLiked == rhs.item.isLiked &&
+            lhs.item.retweetCount == rhs.item.retweetCount &&
+            lhs.item.isRetweeted == rhs.item.isRetweeted &&
+            lhs.item.bookmarkCount == rhs.item.bookmarkCount &&
+            lhs.item.isBookmarked == rhs.item.isBookmarked
+    }
 
     var body: some View {
-        VStack(spacing: 0) {
-            if let errorMessage {
-                Text(errorMessage)
-                    .foregroundColor(.red)
-                    .font(.caption)
-                    .padding(.horizontal, 16)
-                    .padding(.bottom, 4)
+        HStack(spacing: 0) {
+            ActionButtonV2(
+                iconImage: Image(asset: Asset.Image.Status.Toolbar.chatBubbleOutline),
+                count: item.replyCount,
+                isActive: false,
+                activeColor: .blue
+            ) {
+                handleReplyAction()
+            }
+            .frame(maxWidth: .infinity)
+
+            ActionButtonV2(
+                iconImage: Image(asset: Asset.Image.Status.Toolbar.repeat),
+                count: item.retweetCount,
+                isActive: item.isRetweeted,
+                activeColor: .green
+            ) {
+                handleRetweetAction()
+            }
+            .frame(maxWidth: .infinity)
+            .confirmationDialog("Retweet Options", isPresented: $showRetweetMenu) {
+                Button("Retweet") { performRetweetAction(isQuote: false) }
+                Button("Quote Tweet") { performRetweetAction(isQuote: true) }
+                Button("Cancel", role: .cancel) {}
             }
 
-            HStack(spacing: 0) {
-                ActionButtonV2(
-                    iconImage: Image(asset: Asset.Image.Status.Toolbar.chatBubbleOutline),
-                    count: item.replyCount,
-                    isActive: false,
-                    activeColor: .blue
-                ) {
-                    handleReplyAction()
-                }
-                .frame(maxWidth: .infinity)
-
-                ActionButtonV2(
-                    iconImage: Image(asset: Asset.Image.Status.Toolbar.repeat),
-                    count: displayRetweetCount,
-                    isActive: displayIsRetweeted,
-                    activeColor: .green
-                ) {
-                    handleRetweetAction()
-                }
-                .frame(maxWidth: .infinity)
-                .confirmationDialog("Retweet Options", isPresented: $showRetweetMenu) {
-                    Button("Retweet") { performRetweetAction(isQuote: false) }
-                    Button("Quote Tweet") { performRetweetAction(isQuote: true) }
-                    Button("Cancel", role: .cancel) {}
-                }
-
-                ActionButtonV2(
-                    iconImage: displayIsLiked ?
-                        Image(asset: Asset.Image.Status.Toolbar.favorite) :
-                        Image(asset: Asset.Image.Status.Toolbar.favoriteBorder),
-                    count: displayLikeCount,
-                    isActive: displayIsLiked,
-                    activeColor: .red
-                ) {
-                    handleLikeAction()
-                }
-                .frame(maxWidth: .infinity)
-
-                ActionButtonV2(
-                    iconImage: displayIsBookmarked ?
-                        Image(asset: Asset.Image.Status.Toolbar.bookmarkFilled) :
-                        Image(asset: Asset.Image.Status.Toolbar.bookmark),
-                    count: displayBookmarkCount,
-                    isActive: displayIsBookmarked,
-                    activeColor: .orange
-                ) {
-                    handleBookmarkAction()
-                }
-                .frame(maxWidth: .infinity)
-
-                ActionButtonV2(
-                    iconImage: Image(systemName: "character.bubble"),
-                    count: 0,
-                    isActive: false,
-                    activeColor: .blue
-                ) {
-                    handleTranslateAction()
-                }
-                // .frame(maxWidth: .infinity)
-
-                ShareButtonV2(
-                    item: item,
-                    view: TimelineStatusViewV2(
-                        item: item,
-                        index: 0
-                    )
-                )
+            ActionButtonV2(
+                iconImage: item.isLiked ?
+                    Image(asset: Asset.Image.Status.Toolbar.favorite) :
+                    Image(asset: Asset.Image.Status.Toolbar.favoriteBorder),
+                count: item.likeCount,
+                isActive: item.isLiked,
+                activeColor: .red
+            ) {
+                handleLikeAction()
             }
-            .padding(.vertical, 8)
-            // .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity)
+
+            ActionButtonV2(
+                iconImage: item.isBookmarked ?
+                    Image(asset: Asset.Image.Status.Toolbar.bookmarkFilled) :
+                    Image(asset: Asset.Image.Status.Toolbar.bookmark),
+                count: item.bookmarkCount,
+                isActive: item.isBookmarked,
+                activeColor: .orange
+            ) {
+                handleBookmarkAction()
+            }
+            .frame(maxWidth: .infinity)
+
+            // ActionButtonV2(
+            //     iconImage: Image(systemName: "character.bubble"),
+            //     count: 0,
+            //     isActive: false,
+            //     activeColor: .blue
+            // ) {
+            //     handleTranslateAction()
+            // }
+            // .frame(maxWidth: .infinity)
+
+            ShareButtonV3(
+                item: item,
+                onMoreAction: onShare
+            )
         }
-        .id("\(item.id)-\(displayLikeCount)-\(displayIsLiked)-\(displayRetweetCount)-\(displayIsRetweeted)-\(displayBookmarkCount)-\(displayIsBookmarked)-\(refreshTrigger)")
-        .onAppear {
-            // 🔥 初始化显示状态
-            syncDisplayStateFromItem()
-            itemId = item.id
-        }
-        .onChange(of: item.id) { newId in
-            // 🔥 当item变化时，同步显示状态
-            syncDisplayStateFromItem()
-            itemId = newId
-        }
+        .padding(.vertical, 8)
+//        .id(item.id)
     }
 
-    /// 🔥 同步显示状态从item
-    private func syncDisplayStateFromItem() {
-        displayLikeCount = item.likeCount
-        displayIsLiked = item.isLiked
-        displayRetweetCount = item.retweetCount
-        displayIsRetweeted = item.isRetweeted
-        displayBookmarkCount = item.bookmarkCount
-        displayIsBookmarked = item.isBookmarked
-    }
-
-    /// 处理点赞操作
     private func handleLikeAction() {
-        let newLikeCount = displayIsLiked ? displayLikeCount - 1 : displayLikeCount + 1
-        let newIsLiked = !displayIsLiked
+        FlareLog.debug("🔥 [TimelineActionsViewV2] handleLikeAction called for item: \(item.id)")
+        FlareLog.debug("🔍 [TimelineActionsViewV2] handleLikeAction called for item: isLiked=\(item.isLiked), likeCount=\(item.likeCount)")
 
-        displayLikeCount = newLikeCount
-        displayIsLiked = newIsLiked
+        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .like)
 
-        let updatedItem = item.withUpdatedLikeState(count: newLikeCount, isLiked: newIsLiked)
-
-        onAction(.like, updatedItem)
-
-        refreshTrigger += 1
+//        for action in item.actions {
+//            let enumResult = onEnum(of: action)
+//            if case let .item(actionItem) = enumResult,
+//               let likeAction = actionItem as? StatusActionItemLike {
+//                FlareLog.debug("🔍 [DEBUG] KMP将使用的状态: liked=\(likeAction.liked), count=\(likeAction.count)")
+//                break
+//            }
+//        }
 
         performKMPAction(actionType: .like)
     }
 
-    /// 处理转发操作
     private func handleRetweetAction() {
         showRetweetMenu = true
     }
 
-    /// 执行转发操作
     private func performRetweetAction(isQuote: Bool) {
         if isQuote {
+            FlareLog.debug("🔥 [TimelineActionsViewV2] performRetweetAction (quote) called for item: \(item.id)")
             performKMPAction(actionType: .quote)
             return
         }
 
-        let newRetweetCount = displayIsRetweeted ? displayRetweetCount - 1 : displayRetweetCount + 1
-        let newIsRetweeted = !displayIsRetweeted
+        FlareLog.debug("🔥 [TimelineActionsViewV2] performRetweetAction (repost) called for item: \(item.id)")
 
-        displayRetweetCount = newRetweetCount
-        displayIsRetweeted = newIsRetweeted
-
-        var updatedItem = item
-        updatedItem.retweetCount = newRetweetCount
-        updatedItem.isRetweeted = newIsRetweeted
-
-        onAction(.repost, updatedItem)
-
-        refreshTrigger += 1
+        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .retweet)
 
         performKMPAction(actionType: .repost)
     }
@@ -181,19 +140,9 @@ struct TimelineActionsViewV2: View {
     }
 
     private func handleBookmarkAction() {
-        let newBookmarkCount = displayIsBookmarked ? displayBookmarkCount - 1 : displayBookmarkCount + 1
-        let newIsBookmarked = !displayIsBookmarked
+        FlareLog.debug("🔥 [TimelineActionsViewV2] handleBookmarkAction called for item: \(item.id)")
 
-        displayBookmarkCount = newBookmarkCount
-        displayIsBookmarked = newIsBookmarked
-
-        var updatedItem = item
-        updatedItem.bookmarkCount = newBookmarkCount
-        updatedItem.isBookmarked = newIsBookmarked
-
-        onAction(.bookmark, updatedItem)
-
-        refreshTrigger += 1
+        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .bookmark)
 
         performKMPAction(actionType: .bookmark)
     }
@@ -203,8 +152,9 @@ struct TimelineActionsViewV2: View {
     }
 
     private func performKMPAction(actionType: TimelineActionType) {
+        FlareLog.debug("🔥 [TimelineActionsViewV2] performKMPAction called - actionType: \(actionType), item: \(item.id)")
         func findAndExecuteAction(in actions: [StatusAction], actionType: TimelineActionType) -> Bool {
-            for (index, action) in actions.enumerated() {
+            for (_, action) in actions.enumerated() {
                 let enumResult = onEnum(of: action)
 
                 if case let .item(actionItem) = enumResult,
@@ -221,7 +171,7 @@ struct TimelineActionsViewV2: View {
 
                     if shouldExecute {
                         let openURLAction = OpenURLAction { url in
-                            openURL(url)
+                            router.handleDeepLink(url)
                             return .handled
                         }
 
@@ -248,22 +198,35 @@ private struct ActionButtonV2: View {
     let activeColor: Color
     let action: () -> Void
 
+    @Environment(FlareTheme.self) private var theme
+
     var body: some View {
         Button(action: action) {
             HStack(spacing: 4) {
                 iconImage
                     .renderingMode(.template)
-                    .foregroundColor(isActive ? activeColor : .primary)
+                    .foregroundColor(isActive ? activeColor : theme.labelColor)
 
-                if count > 0 {
-                    Text("\(formatCount(Int64(count)))")
-                        .foregroundColor(isActive ? activeColor : .primary)
-                        .font(.caption)
+                Group {
+                    if count > 0 {
+                        Text("\(formatCount(Int64(count)))")
+                            .foregroundColor(isActive ? activeColor : theme.labelColor)
+                            .font(.caption)
+                    }
                 }
             }
             .padding(8)
         }
         .buttonStyle(BorderlessButtonStyle())
+//        .onAppear {
+//            FlareLog.debug("🎨 [ActionButtonV2] Button appeared - isActive: \(isActive), count: \(count), color: \(isActive ? "active" : "primary")")
+//        }
+//        .onChange(of: isActive) { oldValue, newValue in
+//            FlareLog.debug("🎨 [ActionButtonV2] isActive changed: \(oldValue) → \(newValue), count: \(count)")
+//        }
+//        .onChange(of: count) { oldValue, newValue in
+//            FlareLog.debug("🎨 [ActionButtonV2] count changed: \(oldValue) → \(newValue), isActive: \(isActive)")
+//        }
     }
 }
 

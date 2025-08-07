@@ -5,14 +5,13 @@ import SwiftUI
 @MainActor
 @Observable
 class TimelineViewModel {
-    // 只保留暂停状态管理
-    private(set) var isPaused: Bool = true // 初始状态为暂停
+    private(set) var isPaused: Bool = true
 
     private(set) var timelineState: FlareTimelineState = .loading
     private(set) var showErrorAlert = false
     private(set) var currentError: FlareError?
 
-    private(set) var presenter: TimelinePresenter?
+    private(set) var presenter: PresenterBase<TimelineState>?
     private let stateConverter = PagingStateConverter()
     private var refreshDebounceTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
@@ -25,6 +24,8 @@ class TimelineViewModel {
 
     @ObservationIgnored
     private var visibleItems: [TimelineItem] = []
+
+    // private let visibilityQueue = DispatchQueue(label: "timeline.visibility", qos: .userInitiated)
 
     var items: [TimelineItem] {
         if case let .loaded(items, _) = timelineState {
@@ -40,12 +41,71 @@ class TimelineViewModel {
         return false
     }
 
-    // 🔥 移除：isRefreshing属性不再需要
-    // var isRefreshing: Bool {
-    //     return false
-    // }
+    func updateItemOptimistically(itemId: String, actionType: ActionType) {
+        FlareLog.debug("🚀 [TimelineViewModel] 开始更新: itemId=\(itemId), actionType=\(actionType)")
 
-    /// 暂停数据流处理
+        guard case let .loaded(items, hasMore) = timelineState else {
+            FlareLog.warning("⚠️ [TimelineViewModel] 更新失败: timelineState不是loaded状态")
+            return
+        }
+
+        guard let index = items.firstIndex(where: { $0.id == itemId }) else {
+            FlareLog.warning("⚠️ [TimelineViewModel] 更新失败: 未找到item \(itemId)")
+            return
+        }
+
+        var updatedItems = items
+        var item = updatedItems[index]
+
+        // 记录更新前的状态
+        let beforeState = getItemState(item: item, actionType: actionType)
+
+        // 执行更新
+        switch actionType {
+        case .like:
+            item.isLiked.toggle()
+            item.likeCount += item.isLiked ? 1 : -1
+//            item.actions = updateActions(item.actions, actionType: ActionType.like, newState: item.isLiked, newCount: item.likeCount)
+
+        case .retweet:
+            item.isRetweeted.toggle()
+            item.retweetCount += item.isRetweeted ? 1 : -1
+//            item.actions = updateActions(item.actions, actionType: ActionType.retweet, newState: item.isRetweeted, newCount: item.retweetCount)
+
+        case .bookmark:
+            item.isBookmarked.toggle()
+            item.bookmarkCount += item.isBookmarked ? 1 : -1
+//            item.actions = updateActions(item.actions, actionType: ActionType.bookmark, newState: item.isBookmarked, newCount: item.bookmarkCount)
+        }
+
+        // 更新数组
+        updatedItems[index] = item
+
+        // 更新timelineState
+        timelineState = .loaded(items: updatedItems, hasMore: hasMore)
+
+        // 更新 PagingStateConverter
+        stateConverter.syncUpdateItem(itemId: itemId, updatedItem: item)
+
+        // 记录更新后的状态
+        let afterState = getItemState(item: item, actionType: actionType)
+
+        FlareLog.debug("✅ [TimelineViewModel] 更新完成: \(actionType) for \(itemId)")
+        FlareLog.debug("📊 [TimelineViewModel] 状态变化: \(beforeState) → \(afterState)")
+        FlareLog.debug("🔧 [TimelineViewModel] Actions 数组已同步更新")
+    }
+
+    private func getItemState(item: TimelineItem, actionType: ActionType) -> String {
+        switch actionType {
+        case .like:
+            "isLiked=\(item.isLiked), likeCount=\(item.likeCount)"
+        case .retweet:
+            "isRetweeted=\(item.isRetweeted), retweetCount=\(item.retweetCount)"
+        case .bookmark:
+            "isBookmarked=\(item.isBookmarked), bookmarkCount=\(item.bookmarkCount)"
+        }
+    }
+
     func pause() {
         guard !isPaused else {
             FlareLog.debug("⏸️ [Timeline ViewModel] Already paused, skipping")
@@ -57,7 +117,6 @@ class TimelineViewModel {
         FlareLog.debug("⏸️ [Timeline ViewModel] Paused Swift layer data processing")
     }
 
-    /// 恢复数据流处理
     func resume() {
         guard isPaused else {
             FlareLog.debug("▶️ [Timeline ViewModel] Already active, skipping resume")
@@ -66,7 +125,7 @@ class TimelineViewModel {
 
         if presenter == nil {
             FlareLog.debug("⚠️ [Timeline ViewModel] No presenter yet, will resume after setup")
-            isPaused = false // 设置意图，但不启动监听
+            isPaused = false
             return
         }
 
@@ -75,7 +134,6 @@ class TimelineViewModel {
         restartDataSourceMonitoring()
     }
 
-    /// 重新启动数据源监听
     private func restartDataSourceMonitoring() {
         guard let presenter else {
             FlareLog.warning("⚠️ [Timeline ViewModel] No presenter available for restart")
@@ -127,18 +185,37 @@ class TimelineViewModel {
         }
     }
 
-    func setupDataSource(for tab: FLTabItem, using store: AppBarTabSettingStore) async {
+    func setupDataSource(presenter: PresenterBase<TimelineState>) async {
         let timestamp = Date().timeIntervalSince1970
         let hadPreviousTask = dataSourceTask != nil
 
-        FlareLog.debug("🔧 [Timeline ViewModel] setupDataSource started - tab: \(tab.key), hadPreviousTask: \(hadPreviousTask), timestamp: \(timestamp)")
+        FlareLog.debug("🔧 [Timeline ViewModel] setupDataSource (generic) started - hadPreviousTask: \(hadPreviousTask), timestamp: \(timestamp)")
 
         dataSourceTask?.cancel()
         if hadPreviousTask {
-            FlareLog.debug("❌ [Timeline ViewModel] Previous dataSourceTask cancelled - tab: \(tab.key)")
+            FlareLog.debug("❌ [Timeline ViewModel] Previous dataSourceTask cancelled")
         }
 
-        FlareLog.debug("🏪 [Timeline ViewModel] Getting cached presenter for tab: \(tab.key)")
+        if self.presenter === presenter {
+            FlareLog.debug("♻️ [Timeline ViewModel] Using existing presenter")
+        } else {
+            FlareLog.debug("🆕 [Timeline ViewModel] Setting new presenter")
+            self.presenter = presenter
+        }
+
+        if !isPaused {
+            FlareLog.debug("▶️ [Timeline ViewModel] Starting data monitoring immediately (not paused)")
+            restartDataSourceMonitoring()
+        } else {
+            FlareLog.debug("⏸️ [Timeline ViewModel] Data source setup completed, but monitoring paused")
+        }
+    }
+
+    func setupDataSource(for tab: FLTabItem, using store: AppBarTabSettingStore) async {
+        let timestamp = Date().timeIntervalSince1970
+        FlareLog.debug("🔧 [Timeline ViewModel] setupDataSource (tab) started - tab: \(tab.key), timestamp: \(timestamp)")
+
+        FlareLog.debug("� [Timeline ViewModel] Getting cached presenter for tab: \(tab.key)")
 
         guard let cachedPresenter = store.getOrCreatePresenter(for: tab) else {
             FlareLog.error("💥 [Timeline ViewModel] Failed to get cached presenter for tab: \(tab.key)")
@@ -147,20 +224,7 @@ class TimelineViewModel {
             return
         }
 
-        if presenter === cachedPresenter {
-            FlareLog.debug("♻️ [Timeline ViewModel] Using existing presenter")
-        } else {
-            FlareLog.debug("🆕 [Timeline ViewModel] Setting new cached presenter")
-            presenter = cachedPresenter
-        }
-
-        // 如果当前未暂停，启动数据监听
-        if !isPaused {
-            FlareLog.debug("▶️ [Timeline ViewModel] Starting data monitoring immediately (not paused)")
-            restartDataSourceMonitoring()
-        } else {
-            FlareLog.debug("⏸️ [Timeline ViewModel] Data source setup completed, but monitoring paused")
-        }
+        await setupDataSource(presenter: cachedPresenter)
     }
 
     func handleRefresh() async {
@@ -222,8 +286,6 @@ class TimelineViewModel {
     func handleScrollOffsetChange(_ offsetY: CGFloat, showFloatingButton: Binding<Bool>) {
         let shouldShow = offsetY > 50
 
-        // FlareLog.debug("[TimelineViewModel] 滚动偏移变化: offsetY=\(offsetY), shouldShow=\(shouldShow), current=\(showFloatingButton.wrappedValue)")
-
         if showFloatingButton.wrappedValue != shouldShow {
             showFloatingButton.wrappedValue = shouldShow
             FlareLog.debug("[TimelineViewModel] 浮动按钮状态更新: \(showFloatingButton.wrappedValue)")
@@ -263,15 +325,15 @@ class TimelineViewModel {
             let completionTimestamp = Date().timeIntervalSince1970
             FlareLog.debug("✅ [Timeline ViewModel] handleLoadMore completed successfully, timestamp: \(completionTimestamp)")
 
-            if let topItem = topVisibleItem,
-               visibleItems.contains(where: { $0.id == topItem.id })
-            {
-                FlareLog.debug("🎯 [Timeline ViewModel] 恢复滚动位置到: \(topItem.id)")
-
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    self.scrollTo(itemId: topItem.id)
-                }
-            }
+//            if let topItem = topVisibleItem,
+//               visibleItems.contains(where: { $0.id == topItem.id })
+//            {
+//                FlareLog.debug("🎯 [Timeline ViewModel] 恢复滚动位置到: \(topItem.id)")
+//
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//                    self.scrollTo(itemId: topItem.id)
+//                }
+//            }
         } catch {
             let errorTimestamp = Date().timeIntervalSince1970
             FlareLog.error("💥 [Timeline ViewModel] handleLoadMore failed - error: \(error), timestamp: \(errorTimestamp)")
@@ -288,22 +350,47 @@ class TimelineViewModel {
         scrollToId = itemId
     }
 
-    func itemDidAppear(item: TimelineItem) {
-        if !visibleItems.contains(where: { $0.id == item.id }) {
-            visibleItems.insert(item, at: 0)
-        }
+//    func getCurrentVisibleItemIds() -> [String] {
+//        visibleItems.map(\.id)
+//    }
 
-        if visibleItems.count > 50 {
-            visibleItems = Array(visibleItems.prefix(50))
-        }
+//    func itemDidAppear(item: TimelineItem) {
+//
+//        visibilityQueue.async { [weak self] in
+//            guard let self = self else { return }
+//
+//
+//            var newVisibleItems = self.visibleItems
+//
+//            if !newVisibleItems.contains(where: { $0.id == item.id }) {
+//                newVisibleItems.insert(item, at: 0)
+//            }
+//
+//            if newVisibleItems.count > 50 {
+//                newVisibleItems = Array(newVisibleItems.prefix(50))
+//            }
+//
+//
+//            DispatchQueue.main.async {
+//                self.visibleItems = newVisibleItems
+//            }
+//        }
+//    }
 
-        FlareLog.debug("[TimelineViewModel] item出现: \(item.id), 当前可见items: \(visibleItems.count)")
-    }
-
-    func itemDidDisappear(item: TimelineItem) {
-        visibleItems.removeAll { $0.id == item.id }
-        FlareLog.debug("[TimelineViewModel] item消失: \(item.id), 当前可见items: \(visibleItems.count)")
-    }
+//    func itemDidDisappear(item: TimelineItem) {
+//
+//        visibilityQueue.async { [weak self] in
+//            guard let self = self else { return }
+//
+//
+//            let newVisibleItems = self.visibleItems.filter { $0.id != item.id }
+//
+//
+//            DispatchQueue.main.async {
+//                self.visibleItems = newVisibleItems
+//            }
+//        }
+//    }
 }
 
 struct TimelineLoadingView: View {
@@ -369,5 +456,29 @@ struct TimelineEmptyView: View {
         }
         .frame(maxWidth: .infinity, minHeight: 200)
         .padding()
+    }
+}
+
+enum ActionType: String, CaseIterable {
+    case like
+    case retweet
+    case bookmark
+}
+
+extension TimelineItem {
+    func isActive(for actionType: ActionType) -> Bool {
+        switch actionType {
+        case .like: isLiked
+        case .retweet: isRetweeted
+        case .bookmark: isBookmarked
+        }
+    }
+
+    func count(for actionType: ActionType) -> Int {
+        switch actionType {
+        case .like: likeCount
+        case .retweet: retweetCount
+        case .bookmark: bookmarkCount
+        }
     }
 }

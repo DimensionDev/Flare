@@ -47,6 +47,7 @@ struct Tag: Hashable, Identifiable {
 
 struct StatusRowSelectableTextView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(FlareTheme.self) private var theme
     let content: AttributedString
 
     @State private var selectedTags: Set<Tag> = []
@@ -267,7 +268,7 @@ struct StatusRowSelectableTextView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Tag Types")
                             .font(.headline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(theme.labelColor)
 
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 8) {
@@ -295,7 +296,7 @@ struct StatusRowSelectableTextView: View {
                                         )
                                         .foregroundColor(
                                             selectedTagTypes.contains(tagType) ?
-                                                tagType.color : .secondary
+                                                tagType.color : theme.labelColor.opacity(0.6)
                                         )
                                         .cornerRadius(16)
                                         .overlay(
@@ -313,7 +314,6 @@ struct StatusRowSelectableTextView: View {
                         }
                     }
 
-                    // 语言信息和统计
                     HStack {
                         if let language = detectedLanguage {
                             HStack(spacing: 4) {
@@ -321,18 +321,18 @@ struct StatusRowSelectableTextView: View {
                                 Text("Language: \(language.rawValue.uppercased())")
                             }
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(theme.labelColor.opacity(0.6))
                         }
 
                         Spacer()
 
                         Text("Total: \(filteredTags.count) tags")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(theme.labelColor.opacity(0.6))
                     }
                 }
                 .padding()
-                .background(Color(.systemGray6))
+                .background(theme.secondaryBackgroundColor)
 
                 // 标签显示区域
                 ZStack {
@@ -394,8 +394,8 @@ struct StatusRowSelectableTextView: View {
                 processTextWithNaturalLanguage()
             }
         }
-        // .presentationBackground(.ultraThinMaterial)
-        // .presentationCornerRadius(16)
+        .background(theme.primaryBackgroundColor)
+        .presentationBackground(theme.primaryBackgroundColor)
     }
 
     private func toggleSelection(_ tag: Tag) {
@@ -459,13 +459,14 @@ struct EnhancedTagView: View {
 struct TagView: View {
     let tag: String
     let isSelected: Bool
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         Text(tag)
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
-            .background(isSelected ? Color.accentColor : Color.secondary.opacity(0.1))
-            .foregroundColor(isSelected ? .white : .primary)
+            .background(isSelected ? Color.accentColor : theme.labelColor.opacity(0.1))
+            .foregroundColor(isSelected ? .white : theme.labelColor)
             .cornerRadius(16)
             .animation(.spring(), value: isSelected)
     }

@@ -55,7 +55,7 @@ struct StatusQuoteViewV2: View {
 // 引用
 struct QuotedStatusV2: View {
     @State private var showMedia: Bool = false
-    @Environment(\.openURL) private var openURL
+
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
@@ -68,7 +68,7 @@ struct QuotedStatusV2: View {
             let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
             let statusKey = item.createMicroBlogKey()
 
-            router.navigate(to: .statusDetail(
+            router.navigate(to: .statusDetailV2(
                 accountType: accountType,
                 statusKey: statusKey
             ))
@@ -82,6 +82,7 @@ struct QuotedStatusV2: View {
                         Markdown(user.name.markdown)
                             .lineLimit(1)
                             .font(.subheadline)
+                            .markdownTheme(.flareMarkdownStyle(using: theme.bodyTextStyle, fontScale: theme.fontSizeScale))
                             .markdownInlineImageProvider(.emoji)
                         Text(user.handle)
                             .lineLimit(1)
@@ -95,18 +96,16 @@ struct QuotedStatusV2: View {
                     .padding(.horizontal, 9)
                 }
 
-                FlareText(item.content.raw, item.content.markdown, style: FlareTextStyle.Style(
-                    font: Font.scaledBodyFont,
-                    textColor: UIColor(theme.labelColor),
-                    linkColor: UIColor(theme.tintColor),
-                    mentionColor: UIColor(theme.tintColor),
-                    hashtagColor: UIColor(theme.tintColor),
-                    cashtagColor: UIColor(theme.tintColor)
-                ), isRTL: item.content.isRTL)
-                    .onLinkTap { url in
-                        openURL(url)
-                    }
-                    .font(.system(size: 16))
+                FlareText(
+                    item.content.raw,
+                    item.content.markdown,
+                    textType: .body,
+                    isRTL: item.content.isRTL
+                )
+                .onLinkTap { url in
+                    router.handleDeepLink(url)
+                }
+                .font(.system(size: 16))
 
                 // if appSettings.appearanceSettings.autoTranslate {
                 //     TranslatableText(originalText: item.content.raw)

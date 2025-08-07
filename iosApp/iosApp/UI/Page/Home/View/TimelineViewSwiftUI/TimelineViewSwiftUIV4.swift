@@ -9,7 +9,7 @@ struct TimelineViewSwiftUIV4: View {
     @Environment(FlareTheme.self) private var theme
     @EnvironmentObject private var timelineState: TimelineExtState
 
-    @State private var viewModel = TimelineViewModel()
+    @State private var timeLineViewModel = TimelineViewModel()
     @State private var isInitialized: Bool = false
 
     init(tab: FLTabItem, store: AppBarTabSettingStore, isCurrentTab: Bool) {
@@ -31,12 +31,12 @@ struct TimelineViewSwiftUIV4: View {
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
 
-                    switch viewModel.timelineState {
+                    switch timeLineViewModel.timelineState {
                     case .loading:
-                        ForEach(0 ..< 5, id: \.self) { index in
+                        ForEach(0 ..< 5, id: \.self) { _ in
                             TimelineStatusViewV2(
                                 item: createSampleTimelineItem(),
-                                index: index
+                                timelineViewModel: timeLineViewModel
                             )
                             .redacted(reason: .placeholder)
                             .listRowBackground(theme.primaryBackgroundColor)
@@ -48,7 +48,7 @@ struct TimelineViewSwiftUIV4: View {
                         TimelineItemsView(
                             items: items,
                             hasMore: hasMore,
-                            viewModel: viewModel
+                            viewModel: timeLineViewModel
                         )
                         .listRowBackground(theme.primaryBackgroundColor)
                         .listRowInsets(EdgeInsets())
@@ -56,7 +56,7 @@ struct TimelineViewSwiftUIV4: View {
                     case let .error(error):
                         TimelineErrorView(error: error) {
                             Task {
-                                await viewModel.handleRefresh()
+                                await timeLineViewModel.handleRefresh()
                             }
                         }
                         .listRowInsets(EdgeInsets())
@@ -77,12 +77,12 @@ struct TimelineViewSwiftUIV4: View {
                 .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
                     geometry
                 } action: { _, newValue in
-                    viewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $timelineState.showFloatingButton)
+                    timeLineViewModel.handleScrollOffsetChange(newValue.contentOffset.y, showFloatingButton: $timelineState.showFloatingButton)
                 }
                 .refreshable {
                     // 🔥 添加日志：下拉刷新触发
                     FlareLog.debug("[TimelineV4] 下拉刷新触发")
-                    await viewModel.handleRefresh()
+                    await timeLineViewModel.handleRefresh()
                     FlareLog.debug("[TimelineV4] 下拉刷新完成")
                 }
             }
@@ -93,18 +93,24 @@ struct TimelineViewSwiftUIV4: View {
                     proxy.scrollTo("timeline-top-v4", anchor: .center)
                 }
             }
-            .onChange(of: viewModel.scrollToId) { _, newValue in
-                if let newValue {
-                    FlareLog.debug("🎯 [TimelineV4] 滚动到指定位置: \(newValue)")
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        proxy.scrollTo(newValue, anchor: .top)
-                    }
-
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        viewModel.clearScrollTarget()
-                    }
-                }
-            }
+//            .onChange(of: timeLineViewModel.scrollToId) { _, newValue in
+//                if let newValue {
+//                    // 检查当前屏幕可视区域的tweet id数组是否包含滚动的id
+//                    let currentVisibleIds = timeLineViewModel.getCurrentVisibleItemIds()
+//
+//                    if currentVisibleIds.contains(newValue) {
+//                         timeLineViewModel.clearScrollTarget()
+//                    } else {
+//                         withAnimation(.easeInOut(duration: 0.1)) {
+//                            proxy.scrollTo(newValue, anchor: .top)
+//                        }
+//
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//                            timeLineViewModel.clearScrollTarget()
+//                        }
+//                    }
+//                }
+//            }
             .task(id: tab.key) {
                 let timestamp = Date().timeIntervalSince1970
                 FlareLog.debug("📱 [TimelineV4] .task(id: \(tab.key)) triggered - isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
@@ -112,7 +118,7 @@ struct TimelineViewSwiftUIV4: View {
                 if !isInitialized {
                     isInitialized = true
                     FlareLog.debug("🚀 [TimelineV4] First time initialization for tab: \(tab.key)")
-                    await viewModel.setupDataSource(for: tab, using: store)
+                    await timeLineViewModel.setupDataSource(for: tab, using: store)
                     FlareLog.debug("✅ [TimelineV4] setupDataSource completed for tab: \(tab.key)")
                 } else {
                     FlareLog.debug("⏭️ [TimelineV4] Tab reappeared, skipping setupDataSource for tab: \(tab.key)")
@@ -122,15 +128,13 @@ struct TimelineViewSwiftUIV4: View {
                 let timestamp = Date().timeIntervalSince1970
                 FlareLog.debug("👁️ [TimelineV4] onAppear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
 
-                // 移除isCurrentTab检查，总是尝试resume
-                viewModel.resume()
+                timeLineViewModel.resume()
             }
             .onDisappear {
                 let timestamp = Date().timeIntervalSince1970
                 FlareLog.debug("👋 [TimelineV4] onDisappear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
 
-                // 页面消失时，无论什么tab都暂停
-                viewModel.pause()
+                timeLineViewModel.pause()
             }
             .onReceive(NotificationCenter.default.publisher(for: .timelineItemUpdated)) { _ in
                 let timestamp = Date().timeIntervalSince1970
@@ -150,10 +154,7 @@ struct TimelineViewSwiftUIV4: View {
 
                     FlareLog.debug("🔄 [TimelineV4] Starting handleRefresh - tab: \(tab.key)")
                     Task {
-                        await viewModel.handleRefresh()
-                        await MainActor.run {
-                            FlareLog.debug("✅ [TimelineV4] handleRefresh completed - tab: \(tab.key), timestamp: \(Date().timeIntervalSince1970)")
-                        }
+                        await timeLineViewModel.handleRefresh()
                     }
                 }
             }

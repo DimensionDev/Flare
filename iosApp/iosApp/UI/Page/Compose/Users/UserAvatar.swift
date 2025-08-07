@@ -2,23 +2,38 @@ import Generated
 import Kingfisher
 import SwiftUI
 
-struct UserAvatar: View {
+struct UserAvatar: View, Equatable {
     @Environment(\.appSettings) private var appSettings
 
     let data: String
     var size: CGFloat = 48
 
-    var body: some View {
-        let shape = switch appSettings.appearanceSettings.avatarShape {
+    static func == (lhs: UserAvatar, rhs: UserAvatar) -> Bool {
+        lhs.data == rhs.data && lhs.size == rhs.size
+    }
+
+    private var avatarShape: some Shape {
+        switch appSettings.appearanceSettings.avatarShape {
         case .circle: RoundedRectangle(cornerRadius: size)
         case .square: RoundedRectangle(cornerRadius: 8)
         }
-        KFImage(URL(string: data))
+    }
+
+    private var avatarURL: URL? {
+        URL(string: data)
+    }
+
+    var body: some View {
+        KFImage(avatarURL)
+            .placeholder {
+                Rectangle()
+                    .foregroundColor(.gray.opacity(0.2))
+            }
             .flareTimelineAvatar(size: CGSize(width: size, height: size))
             .resizable()
             .scaledToFit()
             .frame(width: size, height: size)
-            .clipShape(shape)
+            .clipShape(avatarShape)
     }
 }
 

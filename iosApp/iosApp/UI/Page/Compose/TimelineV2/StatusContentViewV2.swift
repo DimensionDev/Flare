@@ -8,15 +8,20 @@ import SwiftDate
 import SwiftUI
 import UIKit
 
-struct StatusContentViewV2: View {
+struct StatusContentViewV2: View, Equatable {
     let item: TimelineItem
     let isDetailView: Bool
     let enableGoogleTranslation: Bool
     let appSettings: AppSettings
     let theme: FlareTheme
-    let openURL: OpenURLAction
     let onMediaClick: (Int, Media) -> Void
     let onPodcastCardTap: (Card) -> Void
+
+    @Environment(FlareRouter.self) private var router
+
+    static func == (lhs: StatusContentViewV2, rhs: StatusContentViewV2) -> Bool {
+        lhs.item.id == rhs.item.id && lhs.enableGoogleTranslation == rhs.enableGoogleTranslation
+    }
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -25,7 +30,7 @@ struct StatusContentViewV2: View {
             }
 
             if item.hasContentWarning, let cwText = item.contentWarning {
-                StatusContentWarningViewV2(contentWarning: cwText, theme: theme, openURL: openURL)
+                StatusContentWarningViewV2(contentWarning: cwText, theme: theme)
             }
 
             Spacer().frame(height: 10)
@@ -34,8 +39,7 @@ struct StatusContentViewV2: View {
                 item: item,
                 enableGoogleTranslation: enableGoogleTranslation,
                 appSettings: appSettings,
-                theme: theme,
-                openURL: openURL
+                theme: theme
             )
 
             if item.hasImages {
@@ -83,13 +87,18 @@ struct StatusContentViewV2: View {
 
 struct StatusReplyViewV2: View {
     let aboveTextContent: AboveTextContent
+    @Environment(FlareTheme.self) private var theme
 
     var body: some View {
         switch aboveTextContent {
         case let .replyTo(handle):
             Text(String(localized: "Reply to \(handle.removingHandleFirstPrefix("@"))"))
                 .font(.caption)
-                .opacity(0.6)
+                .foregroundColor(theme.labelColor.opacity(0.6))
+            // .padding(.horizontal, 12)
+            // .padding(.vertical, 6)
+            // .background(theme.secondaryBackgroundColor)
+            // .cornerRadius(8)
         }
         Spacer().frame(height: 4)
     }
@@ -155,7 +164,8 @@ struct StatusBottomContentViewV2: View {
 struct StatusContentWarningViewV2: View {
     let contentWarning: RichText
     let theme: FlareTheme
-    let openURL: OpenURLAction
+
+    @Environment(FlareRouter.self) private var router
 
     var body: some View {
         Button(action: {
@@ -169,18 +179,11 @@ struct StatusContentWarningViewV2: View {
             FlareText(
                 contentWarning.raw,
                 contentWarning.markdown,
-                style: FlareTextStyle.Style(
-                    font: Font.scaledCaptionFont,
-                    textColor: UIColor(.gray),
-                    linkColor: UIColor(theme.tintColor),
-                    mentionColor: UIColor(theme.tintColor),
-                    hashtagColor: UIColor(theme.tintColor),
-                    cashtagColor: UIColor(theme.tintColor)
-                ),
+                textType: .caption,
                 isRTL: contentWarning.isRTL
             )
             .onLinkTap { url in
-                openURL(url)
+                router.handleDeepLink(url)
             }
             .lineSpacing(CGFloat(theme.lineSpacing))
             .foregroundColor(theme.labelColor)
@@ -208,7 +211,8 @@ struct StatusMainContentViewV2: View {
     let enableGoogleTranslation: Bool
     let appSettings: AppSettings
     let theme: FlareTheme
-    let openURL: OpenURLAction
+
+    @Environment(FlareRouter.self) private var router
 
     var body: some View {
         if item.hasContent {
@@ -216,18 +220,11 @@ struct StatusMainContentViewV2: View {
             FlareText(
                 content.raw,
                 content.markdown,
-                style: FlareTextStyle.Style(
-                    font: Font.scaledBodyFont,
-                    textColor: UIColor(theme.labelColor),
-                    linkColor: UIColor(theme.tintColor),
-                    mentionColor: UIColor(theme.tintColor),
-                    hashtagColor: UIColor(theme.tintColor),
-                    cashtagColor: UIColor(theme.tintColor)
-                ),
+                textType: .body,
                 isRTL: content.isRTL
             )
             .onLinkTap { url in
-                openURL(url)
+                router.handleDeepLink(url)
             }
             .lineSpacing(CGFloat(theme.lineSpacing))
             .foregroundColor(theme.labelColor)

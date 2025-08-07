@@ -42,60 +42,66 @@ struct StatusShareAsImageViewV2: View {
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
-    let content: TimelineStatusViewV2 // ✅ 修改：使用TimelineStatusViewV2
-    let renderer: ImageRenderer<AnyView>
-    @State private var capturedImage: UIImage?
-    @State private var isImageReady: Bool = false
+    let content: TimelineStatusViewV2
     let shareText: String
 
-    var rendererImage: Image {
-        if let image = capturedImage {
-            return Image(uiImage: image)
-        }
-        return Image(uiImage: renderer.uiImage ?? UIImage())
-    }
+    @State private var capturedImage: UIImage?
+    @State private var isGenerating: Bool = true
+    @State private var isOptimizing: Bool = false
 
     var body: some View {
         NavigationStack {
             Form {
                 Section {
-                    if isImageReady {
-                        rendererImage
-                            .resizable()
-                            .scaledToFit()
-                    } else {
-                        ProgressView()
+                    if isGenerating {
+                        ProgressView("Generating image...")
                             .frame(maxWidth: .infinity, minHeight: 200)
-                    }
-                }
-                .listRowBackground(colorScheme == .dark ? Color.black : Color.white)
+                    } else if let capturedImage {
+                        VStack {
+                            Image(uiImage: capturedImage)
+                                .resizable()
+                                .scaledToFit()
 
-                Section {
-                    if let image = capturedImage {
-                        ShareLink(
-                            item: TransferableImageV2(image: image),
-                            subject: Text(shareText),
-                            message: Text(shareText),
-                            preview: SharePreview(
-                                shareText,
-                                image: rendererImage
-                            )
-                        ) {
-                            Label("Share", systemImage: "square.and.arrow.up")
-                                .foregroundColor(theme.tintColor)
+                            if isOptimizing {
+                                HStack {
+                                    ProgressView()
+                                        .scaleEffect(0.7)
+                                    Text("Optimizing...")
+                                        .font(.caption2)
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.top, 4)
+                            }
                         }
-                        .disabled(!isImageReady)
                     }
                 }
+//                .listRowBackground(colorScheme == .dark ? Color.black : Color.white)
             }
             .scrollContentBackground(.hidden)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button {
                         dismiss()
                     } label: {
                         Text("Done")
                             .bold()
+                    }
+                }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if !isGenerating, let capturedImage {
+                        ShareLink(
+                            item: TransferableImageV2(image: capturedImage),
+                            subject: Text(shareText),
+                            message: Text(shareText),
+                            preview: SharePreview(
+                                shareText,
+                                image: Image(uiImage: capturedImage)
+                            )
+                        ) {
+                            Image(systemName: "square.and.arrow.up")
+                                .foregroundColor(theme.tintColor)
+                        }
                     }
                 }
             }
@@ -105,21 +111,64 @@ struct StatusShareAsImageViewV2: View {
         .presentationBackground(.ultraThinMaterial)
         .presentationCornerRadius(16)
         .onAppear {
-            let view = StatusCaptureWrapperV2(content: content)
-                .environment(\.appSettings, appSettings)
-                .environment(\.colorScheme, colorScheme)
-                .environment(\.isInCaptureMode, true)
-                .environment(router)
-                .environment(theme).applyTheme(theme)
-
-            // 增加延迟时间，确保敏感内容和媒体完全加载后再截图
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) {
-                if let image = ScreenshotRendererV2.render(view) {
-                    capturedImage = image
-                    isImageReady = true
-                }
-            }
+            generateScreenshot()
         }
         .environment(theme).applyTheme(theme)
+    }
+
+    private func generateScreenshot() {
+        generateQuickScreenshot()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.5) {
+            generateOptimizedScreenshot()
+        }
+    }
+
+    private func generateQuickScreenshot() {
+        let captureView = createCaptureView()
+        let renderer = ImageRenderer(content: captureView)
+        renderer.scale = 2.0
+        renderer.isOpaque = true
+        renderer.proposedSize = ProposedViewSize(
+            width: UIScreen.main.bounds.width,
+            height: nil
+        )
+
+        if let image = renderer.uiImage {
+            capturedImage = image
+            isGenerating = false
+            isOptimizing = true
+        }
+    }
+
+    private func generateOptimizedScreenshot() {
+        let captureView = createCaptureView()
+        let renderer = ImageRenderer(content: captureView)
+        renderer.scale = 3.0
+        renderer.isOpaque = true
+        renderer.proposedSize = ProposedViewSize(
+            width: UIScreen.main.bounds.width - 24,
+            height: nil
+        )
+
+        if let image = renderer.uiImage {
+            withAnimation(.easeInOut(duration: 1)) {
+                capturedImage = image
+                isOptimizing = false
+            }
+        } else {
+            isOptimizing = false
+        }
+    }
+
+    private func createCaptureView() -> some View {
+        StatusCaptureWrapperV2(content: content)
+            .environment(\.appSettings, appSettings)
+            .environment(\.isInCaptureMode, true)
+            .environment(router)
+            .environment(theme)
+            .preferredColorScheme(theme.selectedScheme == .dark ? .dark : .light)
+            .tint(theme.tintColor)
+            .background(theme.primaryBackgroundColor)
     }
 }

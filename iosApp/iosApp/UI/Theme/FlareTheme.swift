@@ -171,6 +171,45 @@ public final class FlareTheme {
 
     let themeStorage = ThemeStorage()
 
+    private var _bodyTextStyle: FlareTextStyle.Style?
+    private var _captionTextStyle: FlareTextStyle.Style?
+
+    public var bodyTextStyle: FlareTextStyle.Style {
+        if let cached = _bodyTextStyle {
+            return cached
+        }
+
+        let style = FlareTextStyle.Style(
+            font: UIFont.systemFont(ofSize: 17 * fontSizeScale), // 直接计算字体大小，避免循环依赖
+            textColor: UIColor(labelColor),
+            linkColor: UIColor(tintColor),
+            mentionColor: UIColor(tintColor),
+            hashtagColor: UIColor(tintColor),
+            cashtagColor: UIColor(tintColor)
+        )
+
+        _bodyTextStyle = style
+        return style
+    }
+
+    public var captionTextStyle: FlareTextStyle.Style {
+        if let cached = _captionTextStyle {
+            return cached
+        }
+
+        let style = FlareTextStyle.Style(
+            font: UIFont.systemFont(ofSize: 13 * fontSizeScale), // 直接计算字体大小，避免循环依赖
+            textColor: UIColor(.gray),
+            linkColor: UIColor(tintColor),
+            mentionColor: UIColor(tintColor),
+            hashtagColor: UIColor(tintColor),
+            cashtagColor: UIColor(tintColor)
+        )
+
+        _captionTextStyle = style
+        return style
+    }
+
     public var isThemePreviouslySet: Bool {
         didSet {
             themeStorage.isThemePreviouslySet = isThemePreviouslySet
@@ -358,9 +397,14 @@ public final class FlareTheme {
         statusActionSecondary = themeStorage.statusActionSecondary
         showContentGradient = themeStorage.showContentGradient
         compactLayoutPadding = themeStorage.compactLayoutPadding
+
         selectedSet = storedSet
 
         computeContrastingTintColor()
+
+        // 预初始化Markdown样式缓存
+        _ = bodyTextStyle
+        _ = captionTextStyle
     }
 
     public static var allColorSet: [ColorSet] {
@@ -425,6 +469,10 @@ public final class FlareTheme {
     }
 
     private func notifyThemeChanged() {
+        // 清空样式缓存，确保主题变化时重新计算
+        _bodyTextStyle = nil
+        _captionTextStyle = nil
+
         DispatchQueue.main.async {
             NotificationCenter.default.post(name: NSNotification.Name("FlareThemeDidChange"), object: self)
         }

@@ -9,7 +9,7 @@ struct FlareApp: SwiftUI.App {
     #else
         @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
     #endif
-    @State private var router = FlareRouter()
+    @StateObject private var router = FlareRouter.shared
     @StateObject private var podcastManager = IOSPodcastManager.shared
     @State var theme = FlareTheme.shared
 

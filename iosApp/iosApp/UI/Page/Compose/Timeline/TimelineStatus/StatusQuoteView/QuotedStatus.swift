@@ -5,7 +5,7 @@ import SwiftUI
 // 引用
 struct QuotedStatus: View {
     @State private var showMedia: Bool = false
-    @Environment(\.openURL) private var openURL
+
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
@@ -15,7 +15,7 @@ struct QuotedStatus: View {
 
     var body: some View {
         Button(action: {
-            router.navigate(to: .statusDetail(
+            router.navigate(to: .statusDetailV2(
                 accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
                 statusKey: data.statusKey
             ))
@@ -43,18 +43,16 @@ struct QuotedStatus: View {
                 }
 
                 // 原文和翻译
-                FlareText(data.content.raw, data.content.markdown, style: FlareTextStyle.Style(
-                    font: Font.scaledBodyFont,
-                    textColor: UIColor(theme.labelColor),
-                    linkColor: UIColor(theme.tintColor),
-                    mentionColor: UIColor(theme.tintColor),
-                    hashtagColor: UIColor(theme.tintColor),
-                    cashtagColor: UIColor(theme.tintColor)
-                ), isRTL: data.content.isRTL)
-                    .onLinkTap { url in
-                        openURL(url)
-                    }
-                    .font(.system(size: 16))
+                FlareText(
+                    data.content.raw,
+                    data.content.markdown,
+                    textType: .body,
+                    isRTL: data.content.isRTL
+                )
+                .onLinkTap { url in
+                    router.handleDeepLink(url)
+                }
+                .font(.system(size: 16))
 
                 // if appSettings.appearanceSettings.autoTranslate {
                 // TranslatableText(originalText: data.content.raw)

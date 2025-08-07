@@ -9,11 +9,15 @@ import SwiftDate
 import SwiftUI
 import UIKit
 
-struct StatusHeaderViewV2: View {
+struct StatusHeaderViewV2: View, Equatable {
     let timelineItem: TimelineItem
     let isDetailView: Bool
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
+
+    static func == (lhs: StatusHeaderViewV2, rhs: StatusHeaderViewV2) -> Bool {
+        lhs.timelineItem.id == rhs.timelineItem.id
+    }
 
     var body: some View {
         HStack(alignment: .top) {
@@ -23,7 +27,7 @@ struct StatusHeaderViewV2: View {
                         user: user,
                         topEndContent: timelineItem.topEndContent
                     )
-                    .id("UserComponent_\(user.key)")
+//                    .id("UserComponent_\(user.key)")
                     .environment(router)
                 }
 
@@ -44,11 +48,16 @@ struct StatusHeaderViewV2: View {
     }
 }
 
-struct UserComponentV2: View {
+struct UserComponentV2: View, Equatable {
     let user: User
     let topEndContent: TopEndContent?
 
     @Environment(FlareRouter.self) private var router
+    @Environment(FlareTheme.self) private var theme
+
+    static func == (lhs: UserComponentV2, rhs: UserComponentV2) -> Bool {
+        lhs.user == rhs.user && lhs.topEndContent == rhs.topEndContent
+    }
 
     var body: some View {
         Button(
@@ -73,6 +82,7 @@ struct UserComponentV2: View {
                             Markdown(user.name.markdown)
                                 .lineLimit(1)
                                 .font(.headline)
+                                .markdownTheme(.flareMarkdownStyle(using: theme.bodyTextStyle, fontScale: theme.fontSizeScale))
                                 .markdownInlineImageProvider(.emoji)
                         }
                         HStack {

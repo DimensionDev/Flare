@@ -10,7 +10,7 @@ struct AllFeedsView: View {
     @State private var presenter: PinnableTimelineTabPresenter
     @Environment(FlareRouter.self) private var router
     @Environment(\.appSettings) private var appSettings
-    @Environment(FlareAppState.self) private var appState
+    @Environment(FlareMenuState.self) private var menuState
     @State private var lastKnownItemCount: Int = 0
     @State private var currentUser: UiUserV2?
     @State private var isMissingFeedData: Bool = false

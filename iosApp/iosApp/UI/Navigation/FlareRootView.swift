@@ -3,7 +3,7 @@ import shared
 import SwiftUI
 
 struct FlareRootView: View {
-    @State var appState = FlareAppState()
+    @State var menuState = FlareMenuState()
     @StateObject private var router = FlareRouter.shared
     @StateObject private var composeManager = ComposeManager.shared
     @StateObject private var timelineState = TimelineExtState()
@@ -34,7 +34,7 @@ struct FlareRootView: View {
                         HomeTabViewContentV2(accountType: accountType)
                             .environment(theme)
                             .applyTheme(theme)
-                            .environment(appState)
+                            .environment(menuState)
                             .environment(router)
                             .environmentObject(timelineState)
                             .sheet(isPresented: $router.isSheetPresented) {
@@ -44,7 +44,7 @@ struct FlareRootView: View {
                                         router: router
                                     ).environment(theme)
                                         .applyTheme(theme)
-                                        .environment(appState)
+                                        .environment(menuState)
                                 }
                             }
                             .fullScreenCover(isPresented: $router.isFullScreenPresented) {
@@ -56,7 +56,7 @@ struct FlareRootView: View {
                                         .environment(theme)
                                         .applyTheme(theme)
                                         .environment(\.appSettings, appSettings)
-                                        .environment(appState)
+                                        .environment(menuState)
                                 }
                             }
                             .alert(isPresented: $router.isDialogPresented) {
@@ -78,7 +78,7 @@ struct FlareRootView: View {
                                         .environment(theme)
                                         .applyTheme(theme)
                                         .environment(router)
-                                        .environment(appState)
+                                        .environment(menuState)
                                         .environment(\.appSettings, appSettings)
                                     }
                                 }
@@ -92,7 +92,7 @@ struct FlareRootView: View {
                 .navigationViewStyle(StackNavigationViewStyle())
                 .onAppear {
                     setupInitialState()
-                    router.appState = appState
+                    router.menuState = menuState
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             )

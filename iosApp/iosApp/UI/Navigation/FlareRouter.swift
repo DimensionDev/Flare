@@ -9,7 +9,7 @@ import UIKit
 class FlareRouter: ObservableObject {
     public static let shared = FlareRouter()
 
-    public var appState: FlareAppState
+    public var menuState: FlareMenuState
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -110,8 +110,8 @@ class FlareRouter: ObservableObject {
                log: .default, type: .debug, String(describing: tab))
     }
 
-    init(appState: FlareAppState = FlareAppState()) {
-        self.appState = appState
+    init(menuState: FlareMenuState = FlareMenuState()) {
+        self.menuState = menuState
         os_log("[FlareRouter] Initialized router: %{public}@", log: .default, type: .debug, String(describing: ObjectIdentifier(self)))
     }
 

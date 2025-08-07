@@ -82,7 +82,7 @@ struct UserComponentV2: View, Equatable {
                             Markdown(user.name.markdown)
                                 .lineLimit(1)
                                 .font(.headline)
-                                .markdownTheme(.flareMarkdownStyle(using: theme.bodyTextStyle, fontScale: theme.fontSizeScale))
+                                .markdownTheme(.flareMarkdownStyle(using: theme.flareTextBodyTextStyle, fontScale: theme.fontSizeScale))
                                 .markdownInlineImageProvider(.emoji)
                         }
                         HStack {

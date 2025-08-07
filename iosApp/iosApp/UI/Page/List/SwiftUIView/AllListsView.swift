@@ -4,13 +4,12 @@ import os
 import shared
 import SwiftUI
 
-private let logger = Logger(subsystem: "com.flare.app", category: "AllListsView")
-
+ 
 struct AllListsView: View {
     @State private var presenter: AllListPresenter
     @Environment(FlareRouter.self) private var router
     @Environment(\.appSettings) private var appSettings
-    @Environment(FlareAppState.self) private var appState
+    @Environment(FlareMenuState.self) private var menuState
     @State private var lastKnownItemCount: Int = 0
     @State private var currentUser: UiUserV2?
     @State private var isMastodonUser: Bool = false
@@ -36,7 +35,10 @@ struct AllListsView: View {
 
             if platformTypeString == "mastodon" {
                 isMastodon = true
-                logger.debug("current user platform: \(platformTypeString), is Mastodon: \(isMastodon)")
+                FlareLog
+                    .debug(
+                        "current user platform: \(platformTypeString), is Mastodon: \(isMastodon)"
+                    )
             }
         }
         _isMastodonUser = State(initialValue: isMastodon)

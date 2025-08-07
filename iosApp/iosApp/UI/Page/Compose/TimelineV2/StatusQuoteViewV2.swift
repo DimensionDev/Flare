@@ -82,7 +82,7 @@ struct QuotedStatusV2: View {
                         Markdown(user.name.markdown)
                             .lineLimit(1)
                             .font(.subheadline)
-                            .markdownTheme(.flareMarkdownStyle(using: theme.bodyTextStyle, fontScale: theme.fontSizeScale))
+                            .markdownTheme(.flareMarkdownStyle(using: theme.flareTextBodyTextStyle, fontScale: theme.fontSizeScale))
                             .markdownInlineImageProvider(.emoji)
                         Text(user.handle)
                             .lineLimit(1)
@@ -99,7 +99,7 @@ struct QuotedStatusV2: View {
                 FlareText(
                     item.content.raw,
                     item.content.markdown,
-                    textType: .body,
+                    textType: .flareTextTypeBody,
                     isRTL: item.content.isRTL
                 )
                 .onLinkTap { url in

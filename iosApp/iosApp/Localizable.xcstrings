@@ -13614,6 +13614,9 @@
         }
       }
     },
+    "Copy Text" : {
+
+    },
     "Copy Text " : {
       "localizations" : {
         "af" : {
@@ -24577,6 +24580,9 @@
           }
         }
       }
+    },
+    "Generating image..." : {
+
     },
     "GIF" : {
       "localizations" : {
@@ -43819,6 +43825,9 @@
           }
         }
       }
+    },
+    "Optimizing..." : {
+
     },
     "Other Settings" : {
       "extractionState" : "stale",
@@ -70043,6 +70052,7 @@
       }
     },
     "user_block" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {
@@ -70227,6 +70237,7 @@
       }
     },
     "user_unblock" : {
+      "extractionState" : "stale",
       "localizations" : {
         "af" : {
           "stringUnit" : {

@@ -382,7 +382,7 @@ private fun timelinePresenter(
                     )
                 } else {
                     listOfNotNull(
-                        if (settings.enableMixedTimeline) {
+                        if (settings.enableMixedTimeline && settings.mainTabs.size > 1) {
                             MixedTimelineTabItem(
                                 subTimelineTabItem = settings.mainTabs,
                             )

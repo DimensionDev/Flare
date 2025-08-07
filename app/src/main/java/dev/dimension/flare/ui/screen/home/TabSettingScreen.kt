@@ -135,29 +135,32 @@ internal fun TabSettingScreen(
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             state.enableMixedTimeline.onSuccess { enabled ->
-                item("header") {
-                    ListItem(
-                        headlineContent = {
-                            Text(stringResource(R.string.tab_settings_mixed_timeline))
-                        },
-                        trailingContent = {
-                            Switch(
-                                checked = enabled,
-                                onCheckedChange = {
-                                    state.setEnableMixedTimeline(it)
-                                },
-                            )
-                        },
-                        supportingContent = {
-                            Text(stringResource(R.string.tab_settings_mixed_timeline_desc))
-                        },
-                        modifier =
-                            Modifier
-                                .listCard()
-                                .clickable {
-                                    state.setEnableMixedTimeline(!enabled)
-                                },
-                    )
+                if (state.currentTabs.size > 1) {
+                    item("header") {
+                        ListItem(
+                            headlineContent = {
+                                Text(stringResource(R.string.tab_settings_mixed_timeline))
+                            },
+                            trailingContent = {
+                                Switch(
+                                    checked = enabled,
+                                    onCheckedChange = {
+                                        state.setEnableMixedTimeline(it)
+                                    },
+                                )
+                            },
+                            supportingContent = {
+                                Text(stringResource(R.string.tab_settings_mixed_timeline_desc))
+                            },
+                            modifier =
+                                Modifier
+                                    .animateItem()
+                                    .listCard()
+                                    .clickable {
+                                        state.setEnableMixedTimeline(!enabled)
+                                    },
+                        )
+                    }
                 }
             }
             item {

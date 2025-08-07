@@ -1,0 +1,12 @@
+{
+  "client_id": "https://flareapp.moe/client-metadata.json",
+  "application_type": "native",
+  "client_name": "Flare",
+  "client_uri": "https://flareapp.moe/",
+  "dpop_bound_access_tokens": true,
+  "grant_types": ["authorization_code", "refresh_token"],
+  "redirect_uris": ["flare://Callback/SignIn/Bluesky"],
+  "response_types": ["code"],
+  "scope": "atproto transition:chat.bsky transition:generic",
+  "token_endpoint_auth_method": "none"
+}

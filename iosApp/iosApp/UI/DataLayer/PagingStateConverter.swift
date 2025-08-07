@@ -387,7 +387,7 @@ class PagingStateConverter {
             }
             existingItemsMap[item.id] = item
         }
-        
+
         var updatedItems: [TimelineItem] = []
         var newItems: [TimelineItem] = []
 

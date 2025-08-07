@@ -18,7 +18,7 @@ struct StatusContentViewV2: View, Equatable {
     let onPodcastCardTap: (Card) -> Void
 
     @Environment(FlareRouter.self) private var router
- 
+
     static func == (lhs: StatusContentViewV2, rhs: StatusContentViewV2) -> Bool {
         lhs.item.id == rhs.item.id && lhs.enableGoogleTranslation == rhs.enableGoogleTranslation
     }
@@ -95,10 +95,10 @@ struct StatusReplyViewV2: View {
             Text(String(localized: "Reply to \(handle.removingHandleFirstPrefix("@"))"))
                 .font(.caption)
                 .foregroundColor(theme.labelColor.opacity(0.6))
-                //.padding(.horizontal, 12)
-               // .padding(.vertical, 6)
-                //.background(theme.secondaryBackgroundColor)
-               // .cornerRadius(8)
+            // .padding(.horizontal, 12)
+            // .padding(.vertical, 6)
+            // .background(theme.secondaryBackgroundColor)
+            // .cornerRadius(8)
         }
         Spacer().frame(height: 4)
     }

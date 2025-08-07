@@ -12,7 +12,6 @@ import UIKit
     import Translation
 #endif
 
-
 struct ShareButtonV2: View {
     @Environment(\.colorScheme) var colorScheme
     @Environment(\.appSettings) var appSettings

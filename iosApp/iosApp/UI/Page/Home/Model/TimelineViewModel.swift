@@ -25,8 +25,7 @@ class TimelineViewModel {
     @ObservationIgnored
     private var visibleItems: [TimelineItem] = []
 
-   
-   // private let visibilityQueue = DispatchQueue(label: "timeline.visibility", qos: .userInitiated)
+    // private let visibilityQueue = DispatchQueue(label: "timeline.visibility", qos: .userInitiated)
 
     var items: [TimelineItem] {
         if case let .loaded(items, _) = timelineState {
@@ -106,7 +105,7 @@ class TimelineViewModel {
             "isBookmarked=\(item.isBookmarked), bookmarkCount=\(item.bookmarkCount)"
         }
     }
- 
+
     func pause() {
         guard !isPaused else {
             FlareLog.debug("⏸️ [Timeline ViewModel] Already paused, skipping")
@@ -287,7 +286,6 @@ class TimelineViewModel {
     func handleScrollOffsetChange(_ offsetY: CGFloat, showFloatingButton: Binding<Bool>) {
         let shouldShow = offsetY > 50
 
- 
         if showFloatingButton.wrappedValue != shouldShow {
             showFloatingButton.wrappedValue = shouldShow
             FlareLog.debug("[TimelineViewModel] 浮动按钮状态更新: \(showFloatingButton.wrappedValue)")
@@ -357,11 +355,11 @@ class TimelineViewModel {
 //    }
 
 //    func itemDidAppear(item: TimelineItem) {
-//    
+//
 //        visibilityQueue.async { [weak self] in
 //            guard let self = self else { return }
 //
-//             
+//
 //            var newVisibleItems = self.visibleItems
 //
 //            if !newVisibleItems.contains(where: { $0.id == item.id }) {
@@ -372,7 +370,7 @@ class TimelineViewModel {
 //                newVisibleItems = Array(newVisibleItems.prefix(50))
 //            }
 //
-//          
+//
 //            DispatchQueue.main.async {
 //                self.visibleItems = newVisibleItems
 //            }
@@ -380,14 +378,14 @@ class TimelineViewModel {
 //    }
 
 //    func itemDidDisappear(item: TimelineItem) {
-//       
+//
 //        visibilityQueue.async { [weak self] in
 //            guard let self = self else { return }
 //
-//           
+//
 //            let newVisibleItems = self.visibleItems.filter { $0.id != item.id }
 //
-//           
+//
 //            DispatchQueue.main.async {
 //                self.visibleItems = newVisibleItems
 //            }

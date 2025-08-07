@@ -49,10 +49,10 @@ struct QuotedStatus: View {
                     textType: .body,
                     isRTL: data.content.isRTL
                 )
-                    .onLinkTap { url in
-                        router.handleDeepLink(url)
-                    }
-                    .font(.system(size: 16))
+                .onLinkTap { url in
+                    router.handleDeepLink(url)
+                }
+                .font(.system(size: 16))
 
                 // if appSettings.appearanceSettings.autoTranslate {
                 // TranslatableText(originalText: data.content.raw)

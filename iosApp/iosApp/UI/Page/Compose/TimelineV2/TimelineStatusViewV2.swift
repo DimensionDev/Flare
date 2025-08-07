@@ -9,12 +9,9 @@ import SwiftDate
 import SwiftUI
 import UIKit
 
- 
 struct TimelineItemState {
-    
-    var currentSheet: SheetType? = nil
+    var currentSheet: SheetType?
 
-     
     var isTranslating: Bool = false
     var isPreparingShare: Bool = false
     var enableGoogleTranslation: Bool = false
@@ -27,7 +24,6 @@ struct TimelineItemState {
         case manualTranslation
     }
 
-    
     var showAppleTranslation: Bool { currentSheet == .appleTranslation }
     var showShareAsImage: Bool { currentSheet == .shareAsImage }
     var showTextForSelection: Bool { currentSheet == .textSelection }
@@ -41,30 +37,25 @@ struct TimelineStatusViewV2: View, Equatable {
 
     let isDetail: Bool = false
 
- 
     static func == (lhs: TimelineStatusViewV2, rhs: TimelineStatusViewV2) -> Bool {
-        
         guard lhs.item.id == rhs.item.id else { return false }
 
-         
         return lhs.item.content.raw == rhs.item.content.raw &&
-               lhs.item.user?.key == rhs.item.user?.key &&
-               lhs.item.timestamp == rhs.item.timestamp &&
+            lhs.item.user?.key == rhs.item.user?.key &&
+            lhs.item.timestamp == rhs.item.timestamp &&
 
-                
-               lhs.item.likeCount == rhs.item.likeCount &&
-               lhs.item.isLiked == rhs.item.isLiked &&
-               lhs.item.retweetCount == rhs.item.retweetCount &&
-               lhs.item.isRetweeted == rhs.item.isRetweeted &&
-               lhs.item.replyCount == rhs.item.replyCount &&
-               lhs.item.bookmarkCount == rhs.item.bookmarkCount &&
-               lhs.item.isBookmarked == rhs.item.isBookmarked &&
-               lhs.item.sensitive == rhs.item.sensitive &&
-               lhs.item.images.count == rhs.item.images.count &&
-               lhs.isDetail == rhs.isDetail
+            lhs.item.likeCount == rhs.item.likeCount &&
+            lhs.item.isLiked == rhs.item.isLiked &&
+            lhs.item.retweetCount == rhs.item.retweetCount &&
+            lhs.item.isRetweeted == rhs.item.isRetweeted &&
+            lhs.item.replyCount == rhs.item.replyCount &&
+            lhs.item.bookmarkCount == rhs.item.bookmarkCount &&
+            lhs.item.isBookmarked == rhs.item.isBookmarked &&
+            lhs.item.sensitive == rhs.item.sensitive &&
+            lhs.item.images.count == rhs.item.images.count &&
+            lhs.isDetail == rhs.isDetail
     }
 
-     
     @State private var state = TimelineItemState()
 
     @Environment(\.appSettings) private var appSettings
@@ -79,54 +70,54 @@ struct TimelineStatusViewV2: View, Equatable {
 
     var body: some View {
         VStack(alignment: .leading) {
-                Spacer().frame(height: 5)
+            Spacer().frame(height: 5)
 
-                if let topMessage = item.topMessage {
-                    StatusRetweetHeaderComponentV2(topMessage: topMessage)
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 4)
+            if let topMessage = item.topMessage {
+                StatusRetweetHeaderComponentV2(topMessage: topMessage)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 4)
+            }
+
+            StatusHeaderViewV2(
+                timelineItem: item,
+                isDetailView: isDetail
+            )
+
+            StatusContentViewV2(
+                item: item,
+                isDetailView: isDetail,
+                enableGoogleTranslation: state.enableGoogleTranslation,
+                appSettings: appSettings,
+                theme: theme,
+                onMediaClick: { _, _ in
+                },
+                onPodcastCardTap: { card in
+                    handlePodcastCardTap(card: card)
+                }
+            ).contentShape(Rectangle())
+                .onTapGesture {
+                    handleStatusTap()
                 }
 
-                StatusHeaderViewV2(
-                    timelineItem: item,
-                    isDetailView: isDetail
-                )
-
-                StatusContentViewV2(
+            if !isGuestUser {
+                TimelineActionsViewV2(
                     item: item,
-                    isDetailView: isDetail,
-                    enableGoogleTranslation: state.enableGoogleTranslation,
-                    appSettings: appSettings,
-                    theme: theme,
-                    onMediaClick: { _, _ in
+                    timelineViewModel: timelineViewModel,
+                    onAction: { actionType, updatedItem in
+                        handleTimelineAction(actionType, item: updatedItem)
                     },
-                    onPodcastCardTap: { card in
-                        handlePodcastCardTap(card: card)
+                    onShare: { actionType in
+                        handleMoreAction(actionType)
                     }
-                ).contentShape(Rectangle())
-            .onTapGesture {
-                handleStatusTap()
+                )
+            } else {
+                Spacer().frame(height: 16)
             }
+        }
+        .padding(.horizontal, 16)
+        .frame(alignment: .leading)
 
-                if !isGuestUser {
-                    TimelineActionsViewV2(
-                        item: item,
-                        timelineViewModel: timelineViewModel,
-                        onAction: { actionType, updatedItem in
-                            handleTimelineAction(actionType, item: updatedItem)
-                        },
-                        onShare: { actionType in
-                            handleMoreAction(actionType)
-                        }
-                    )
-                } else {
-                    Spacer().frame(height: 16)
-                }
-            }
-            .padding(.horizontal, 16)
-            .frame(alignment: .leading)
-            
-            #if canImport(_Translation_SwiftUI)
+        #if canImport(_Translation_SwiftUI)
             .addTranslateView(
                 isPresented: Binding(
                     get: { state.showAppleTranslation },
@@ -134,7 +125,7 @@ struct TimelineStatusViewV2: View, Equatable {
                 ),
                 text: item.content.raw
             )
-            #endif
+        #endif
             .sheet(isPresented: Binding(
                 get: { state.showShareAsImage },
                 set: { _ in state.currentSheet = nil }
@@ -167,7 +158,7 @@ struct TimelineStatusViewV2: View, Equatable {
                     .tint(.accentColor)
                     .environment(theme)
             }
-            #if canImport(_Translation_SwiftUI)
+        #if canImport(_Translation_SwiftUI)
             .addTranslateView(
                 isPresented: Binding(
                     get: { state.showManualTranslation },
@@ -175,12 +166,9 @@ struct TimelineStatusViewV2: View, Equatable {
                 ),
                 text: item.content.raw
             )
-            #endif
-        
+        #endif
     }
 
-   
-   
     private func handleStatusTap() {
         // detailKey == data.statusKey
         let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
@@ -229,8 +217,6 @@ struct TimelineStatusViewV2: View, Equatable {
             return
         }
     }
-
-    
 
     private func handleMoreAction(_ actionType: MoreActionType) {
         switch actionType {
@@ -302,8 +288,6 @@ struct TimelineStatusViewV2: View, Equatable {
             state.isPreparingShare = false
         }
     }
-
-    
 
     private func prepareScreenshot(completion: @escaping (UIImage?) -> Void) {
         let captureView = StatusCaptureWrapperV2(content: self)

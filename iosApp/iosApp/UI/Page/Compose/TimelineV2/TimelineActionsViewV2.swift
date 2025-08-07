@@ -19,15 +19,14 @@ struct TimelineActionsViewV2: View, Equatable {
 
     @State private var showRetweetMenu = false
 
-    
     static func == (lhs: TimelineActionsViewV2, rhs: TimelineActionsViewV2) -> Bool {
         lhs.item.id == rhs.item.id &&
-        lhs.item.likeCount == rhs.item.likeCount &&
-        lhs.item.isLiked == rhs.item.isLiked &&
-        lhs.item.retweetCount == rhs.item.retweetCount &&
-        lhs.item.isRetweeted == rhs.item.isRetweeted &&
-        lhs.item.bookmarkCount == rhs.item.bookmarkCount &&
-        lhs.item.isBookmarked == rhs.item.isBookmarked
+            lhs.item.likeCount == rhs.item.likeCount &&
+            lhs.item.isLiked == rhs.item.isLiked &&
+            lhs.item.retweetCount == rhs.item.retweetCount &&
+            lhs.item.isRetweeted == rhs.item.isRetweeted &&
+            lhs.item.bookmarkCount == rhs.item.bookmarkCount &&
+            lhs.item.isBookmarked == rhs.item.isBookmarked
     }
 
     var body: some View {
@@ -104,7 +103,7 @@ struct TimelineActionsViewV2: View, Equatable {
         FlareLog.debug("🔥 [TimelineActionsViewV2] handleLikeAction called for item: \(item.id)")
         FlareLog.debug("🔍 [TimelineActionsViewV2] handleLikeAction called for item: isLiked=\(item.isLiked), likeCount=\(item.likeCount)")
 
-         timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .like)
+        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .like)
 
 //        for action in item.actions {
 //            let enumResult = onEnum(of: action)
@@ -115,7 +114,7 @@ struct TimelineActionsViewV2: View, Equatable {
 //            }
 //        }
 
-         performKMPAction(actionType: .like)
+        performKMPAction(actionType: .like)
     }
 
     private func handleRetweetAction() {
@@ -131,7 +130,7 @@ struct TimelineActionsViewV2: View, Equatable {
 
         FlareLog.debug("🔥 [TimelineActionsViewV2] performRetweetAction (repost) called for item: \(item.id)")
 
-         timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .retweet)
+        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .retweet)
 
         performKMPAction(actionType: .repost)
     }
@@ -143,7 +142,7 @@ struct TimelineActionsViewV2: View, Equatable {
     private func handleBookmarkAction() {
         FlareLog.debug("🔥 [TimelineActionsViewV2] handleBookmarkAction called for item: \(item.id)")
 
-          timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .bookmark)
+        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .bookmark)
 
         performKMPAction(actionType: .bookmark)
     }

@@ -128,13 +128,13 @@ struct TimelineViewSwiftUIV4: View {
                 let timestamp = Date().timeIntervalSince1970
                 FlareLog.debug("👁️ [TimelineV4] onAppear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
 
-                 timeLineViewModel.resume()
+                timeLineViewModel.resume()
             }
             .onDisappear {
                 let timestamp = Date().timeIntervalSince1970
                 FlareLog.debug("👋 [TimelineV4] onDisappear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
 
-                 timeLineViewModel.pause()
+                timeLineViewModel.pause()
             }
             .onReceive(NotificationCenter.default.publisher(for: .timelineItemUpdated)) { _ in
                 let timestamp = Date().timeIntervalSince1970
@@ -155,7 +155,6 @@ struct TimelineViewSwiftUIV4: View {
                     FlareLog.debug("🔄 [TimelineV4] Starting handleRefresh - tab: \(tab.key)")
                     Task {
                         await timeLineViewModel.handleRefresh()
-                        
                     }
                 }
             }

@@ -9,7 +9,7 @@ struct UserAvatar: View, Equatable {
     var size: CGFloat = 48
 
     static func == (lhs: UserAvatar, rhs: UserAvatar) -> Bool {
-        return lhs.data == rhs.data && lhs.size == rhs.size
+        lhs.data == rhs.data && lhs.size == rhs.size
     }
 
     private var avatarShape: some Shape {
@@ -25,10 +25,10 @@ struct UserAvatar: View, Equatable {
 
     var body: some View {
         KFImage(avatarURL)
-         .placeholder {
-                            Rectangle()
-                                .foregroundColor(.gray.opacity(0.2))
-                        }
+            .placeholder {
+                Rectangle()
+                    .foregroundColor(.gray.opacity(0.2))
+            }
             .flareTimelineAvatar(size: CGSize(width: size, height: size))
             .resizable()
             .scaledToFit()

@@ -14,9 +14,9 @@ struct StatusHeaderViewV2: View, Equatable {
     let isDetailView: Bool
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
- 
+
     static func == (lhs: StatusHeaderViewV2, rhs: StatusHeaderViewV2) -> Bool {
-        lhs.timelineItem.id == rhs.timelineItem.id 
+        lhs.timelineItem.id == rhs.timelineItem.id
     }
 
     var body: some View {
@@ -56,7 +56,7 @@ struct UserComponentV2: View, Equatable {
     @Environment(FlareTheme.self) private var theme
 
     static func == (lhs: UserComponentV2, rhs: UserComponentV2) -> Bool {
-        return lhs.user == rhs.user && lhs.topEndContent == rhs.topEndContent
+        lhs.user == rhs.user && lhs.topEndContent == rhs.topEndContent
     }
 
     var body: some View {

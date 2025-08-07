@@ -13,22 +13,18 @@ import UIKit
 #endif
 
 enum MoreActionType {
-    
     case sharePost
     case shareAsImage
 
-    
     case showTextForSelection
     case copyText
     case copyMarkdown
     case copyTweetLink
 
-    
     case copyMediaLink
     case copyMediaURLs
     case saveMedia
 
-   
     case translate
     case openInBrowser
     case report
@@ -42,7 +38,6 @@ struct ShareButtonV3: View, Equatable {
 
     @State private var isMenuContentReady = false
 
-     
     static func == (lhs: ShareButtonV3, rhs: ShareButtonV3) -> Bool {
         lhs.item.id == rhs.item.id
     }
@@ -85,8 +80,6 @@ struct LazyMoreMenuContent: View {
     let item: TimelineItem
     let onMoreAction: (MoreActionType) -> Void
 
-
-
     private var statusUrl: URL? {
         guard !item.url.isEmpty else { return nil }
         return URL(string: item.url)
@@ -102,7 +95,6 @@ struct LazyMoreMenuContent: View {
 
     var body: some View {
         Group {
-          
             Button(action: {
                 onMoreAction(.report)
             }) {
@@ -111,7 +103,6 @@ struct LazyMoreMenuContent: View {
 
             Divider()
 
-          
             Button(action: {
                 onMoreAction(.copyText)
             }) {
@@ -156,7 +147,6 @@ struct LazyMoreMenuContent: View {
 
             Divider()
 
-             
             Button(action: {
                 onMoreAction(.sharePost)
             }) {
@@ -171,7 +161,6 @@ struct LazyMoreMenuContent: View {
 
             Divider()
 
-            
             #if canImport(_Translation_SwiftUI)
                 Button(action: {
                     onMoreAction(.translate)
@@ -179,7 +168,7 @@ struct LazyMoreMenuContent: View {
                     Label("System Translate", systemImage: "character.bubble")
                 }
             #else
-                 
+
                 Button(action: {
                     onMoreAction(.translate)
                 }) {
@@ -202,6 +191,5 @@ struct LazyMoreMenuContent: View {
                 }
             }
         }
-        
     }
 }

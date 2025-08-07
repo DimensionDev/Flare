@@ -29,12 +29,12 @@ public enum FlareTextStyle {
         public let cashtagColor: UIColor
 
         public static func == (lhs: Style, rhs: Style) -> Bool {
-            return lhs.font == rhs.font &&
-                   lhs.textColor == rhs.textColor &&
-                   lhs.linkColor == rhs.linkColor &&
-                   lhs.mentionColor == rhs.mentionColor &&
-                   lhs.hashtagColor == rhs.hashtagColor &&
-                   lhs.cashtagColor == rhs.cashtagColor
+            lhs.font == rhs.font &&
+                lhs.textColor == rhs.textColor &&
+                lhs.linkColor == rhs.linkColor &&
+                lhs.mentionColor == rhs.mentionColor &&
+                lhs.hashtagColor == rhs.hashtagColor &&
+                lhs.cashtagColor == rhs.cashtagColor
         }
 
         // public static let `default` = Style(

@@ -162,7 +162,6 @@ struct StatusShareAsImageViewV2: View {
     }
 
     private func createCaptureView() -> some View {
-    
         StatusCaptureWrapperV2(content: content)
             .environment(\.appSettings, appSettings)
             .environment(\.isInCaptureMode, true)

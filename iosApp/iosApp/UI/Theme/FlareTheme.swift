@@ -171,10 +171,8 @@ public final class FlareTheme {
 
     let themeStorage = ThemeStorage()
 
-
     private var _bodyTextStyle: FlareTextStyle.Style?
     private var _captionTextStyle: FlareTextStyle.Style?
-
 
     public var bodyTextStyle: FlareTextStyle.Style {
         if let cached = _bodyTextStyle {

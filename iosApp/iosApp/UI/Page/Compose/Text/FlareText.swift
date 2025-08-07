@@ -3,7 +3,6 @@ import MarkdownUI
 import SwiftUI
 import TwitterText
 
-
 public enum FlareTextType {
     case body
     case caption
@@ -19,14 +18,13 @@ public struct FlareText: View, Equatable {
     @Environment(\.appSettings) private var appSettings
 
     public static func == (lhs: FlareText, rhs: FlareText) -> Bool {
-        return lhs.text == rhs.text &&
-               lhs.markdownText == rhs.markdownText &&
-               lhs.textType == rhs.textType &&
-               lhs.isRTL == rhs.isRTL
+        lhs.text == rhs.text &&
+            lhs.markdownText == rhs.markdownText &&
+            lhs.textType == rhs.textType &&
+            lhs.isRTL == rhs.isRTL
         // 注意：linkHandler是函数类型，无法比较，但通常不影响渲染
         // Environment变量由SwiftUI自动处理
     }
-
 
     public init(
         _ text: String,
@@ -47,14 +45,12 @@ public struct FlareText: View, Equatable {
     }
 
     public var body: some View {
-        let currentStyle: FlareTextStyle.Style = {
-            switch textType {
-            case .body:
-                return theme.bodyTextStyle
-            case .caption:
-                return theme.captionTextStyle
-            }
-        }()
+        let currentStyle: FlareTextStyle.Style = switch textType {
+        case .body:
+            theme.bodyTextStyle
+        case .caption:
+            theme.captionTextStyle
+        }
 
         switch appSettings.appearanceSettings.renderEngine {
         case .markdown:

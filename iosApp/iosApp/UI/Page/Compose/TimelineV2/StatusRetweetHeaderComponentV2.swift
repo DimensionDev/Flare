@@ -8,7 +8,6 @@ struct StatusRetweetHeaderComponentV2: View, Equatable {
     @Environment(FlareTheme.self) private var theme
     @Environment(FlareRouter.self) private var router
 
-    
     static func == (lhs: StatusRetweetHeaderComponentV2, rhs: StatusRetweetHeaderComponentV2) -> Bool {
         lhs.topMessage.statusKey == rhs.topMessage.statusKey
     }
@@ -56,7 +55,6 @@ struct StatusRetweetHeaderComponentV2: View, Equatable {
         ))
     }
 
-    
     @ViewBuilder
     private func getIcon(for iconType: TopMessageIcon) -> some View {
         switch iconType {
@@ -103,7 +101,6 @@ struct StatusRetweetHeaderComponentV2: View, Equatable {
         }
     }
 
-    
     private func getLocalizedText(for messageType: TopMessageType) -> String {
         switch messageType {
         case let .bluesky(type):

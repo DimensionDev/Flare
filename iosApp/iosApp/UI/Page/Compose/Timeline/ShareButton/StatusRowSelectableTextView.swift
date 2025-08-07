@@ -314,7 +314,6 @@ struct StatusRowSelectableTextView: View {
                         }
                     }
 
-                    
                     HStack {
                         if let language = detectedLanguage {
                             HStack(spacing: 4) {

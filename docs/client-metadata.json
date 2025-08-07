@@ -5,7 +5,7 @@
   "client_uri": "https://flareapp.moe/",
   "dpop_bound_access_tokens": true,
   "grant_types": ["authorization_code", "refresh_token"],
-  "redirect_uris": ["moe.flareapp:/Callback/SignIn/Bluesky"],
+  "redirect_uris": ["https://flareapp.moe/callback"],
   "response_types": ["code"],
   "scope": "atproto transition:chat.bsky transition:generic",
   "token_endpoint_auth_method": "none"

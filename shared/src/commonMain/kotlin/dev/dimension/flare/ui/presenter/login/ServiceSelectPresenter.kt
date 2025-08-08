@@ -24,6 +24,7 @@ public class ServiceSelectPresenter(
     override fun body(): ServiceSelectState {
         val nodeInfoState = remember { NodeInfoPresenter() }.body()
         val blueskyLoginState = remember { BlueskyLoginPresenter(toHome) }.body()
+        val blueskyOauthLoginState = remember { BlueskyOAuthLoginPresenter(toHome) }.body()
         val mastodonLoginState = mastodonLoginPresenter(toHome)
         val misskeyLoginState = misskeyLoginPresenter(toHome)
         val loading =
@@ -35,6 +36,7 @@ public class ServiceSelectPresenter(
 
         return object : ServiceSelectState, NodeInfoState by nodeInfoState {
             override val blueskyLoginState = blueskyLoginState
+            override val blueskyOauthLoginState = blueskyOauthLoginState
             override val mastodonLoginState = mastodonLoginState
             override val misskeyLoginState = misskeyLoginState
             override val loading = loading
@@ -143,6 +145,7 @@ public class ServiceSelectPresenter(
 @Immutable
 public interface ServiceSelectState : NodeInfoState {
     public val blueskyLoginState: BlueskyLoginState
+    public val blueskyOauthLoginState: BlueskyOAuthLoginPresenter.State
     public val mastodonLoginState: MastodonLoginState
     public val misskeyLoginState: MisskeyLoginState
     public val loading: Boolean

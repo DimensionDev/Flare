@@ -1,40 +1,22 @@
 package dev.dimension.flare.data.network.bluesky
 
-import com.atproto.server.RefreshSessionResponse
-import dev.dimension.flare.common.JSON
-import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.data.network.ktorClient
-import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
-import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.UiAccount
 import io.ktor.client.HttpClient
-import io.ktor.client.call.HttpClientCall
-import io.ktor.client.call.body
-import io.ktor.client.call.save
 import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpClientPlugin
-import io.ktor.client.plugins.HttpSend
-import io.ktor.client.plugins.plugin
 import io.ktor.client.request.HttpRequestPipeline
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.post
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpHeaders.Authorization
-import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.http.Url
 import io.ktor.util.AttributeKey
-import kotlinx.serialization.json.Json
 import sh.christian.ozone.BlueskyApi
 import sh.christian.ozone.XrpcBlueskyApi
-import sh.christian.ozone.api.response.AtpErrorDescription
-import sh.christian.ozone.api.response.StatusCode
 
 internal data class BlueskyService(
     private val baseUrl: String,
     private val accountKey: MicroBlogKey? = null,
-    private val accessToken: String? = null,
-    private val refreshToken: String? = null,
-    private val onTokenRefreshed: ((accessToken: String, refreshToken: String) -> Unit)? = null,
+    private val credential: UiAccount.Bluesky.Credential? = null,
+    private val onCredentialRefreshed: (UiAccount.Bluesky.Credential) -> Unit = {},
 ) : BlueskyApi by XrpcBlueskyApi(
         ktorClient {
             install(DefaultRequest) {
@@ -43,21 +25,16 @@ internal data class BlueskyService(
                 url.host = hostUrl.host
                 url.port = hostUrl.port
             }
-            install(XrpcAuthPlugin) {
-                json = JSON
-                access = accessToken
-                refresh = refreshToken
-                tokenRefreshed = onTokenRefreshed
-                this.baseUrl = baseUrl
+            install(AtprotoProxyPlugin)
+            install(BlueskyAuthPlugin) {
+                this.authTokens = credential
+                this.onAuthTokensChanged = onCredentialRefreshed
                 this.accountKey = accountKey
             }
-            install(AtprotoProxyPlugin)
 
             expectSuccess = false
         },
     )
-
-// internal data object UnspeccedBlueskyService : UnspeccedBlueskyApi by XrpcUnspeccedBlueskyApi()
 
 private class AtprotoProxyPlugin {
     companion object : HttpClientPlugin<Unit, AtprotoProxyPlugin> {
@@ -76,106 +53,6 @@ private class AtprotoProxyPlugin {
                 ) {
                     context.headers["Atproto-Proxy"] = "did:web:api.bsky.chat#bsky_chat"
                 }
-            }
-        }
-    }
-}
-
-/**
- * Appends the `Authorization` header to XRPC requests, as well as automatically refreshing and
- * replaying a network request if it fails due to an expired access token.
- */
-internal class XrpcAuthPlugin(
-    private val json: Json,
-    private val baseUrl: String,
-    private val accountKey: MicroBlogKey? = null,
-    private val accessToken: String? = null,
-    private val refreshToken: String? = null,
-    private val onTokenRefreshed: ((accessToken: String, refreshToken: String) -> Unit)? = null,
-) {
-    class Config(
-        var json: Json = Json { ignoreUnknownKeys = true },
-        var access: String? = null,
-        var refresh: String? = null,
-        var tokenRefreshed: ((accessToken: String, refreshToken: String) -> Unit)? = null,
-        var baseUrl: String? = null,
-        var accountKey: MicroBlogKey? = null,
-    )
-
-    companion object : HttpClientPlugin<Config, XrpcAuthPlugin> {
-        override val key = AttributeKey<XrpcAuthPlugin>("XrpcAuthPlugin")
-
-        override fun prepare(block: Config.() -> Unit): XrpcAuthPlugin {
-            val config = Config().apply(block)
-            return XrpcAuthPlugin(
-                json = config.json,
-                accessToken = config.access,
-                refreshToken = config.refresh,
-                onTokenRefreshed = config.tokenRefreshed,
-                baseUrl = config.baseUrl!!,
-                accountKey = config.accountKey,
-            )
-        }
-
-        override fun install(
-            plugin: XrpcAuthPlugin,
-            scope: HttpClient,
-        ) {
-            scope.plugin(HttpSend).intercept { context ->
-                if (!context.headers.contains(Authorization)) {
-                    plugin.accessToken?.let { context.bearerAuth(it) }
-                }
-                var result: HttpClientCall = execute(context)
-                if (result.response.status != BadRequest) {
-                    return@intercept result
-                }
-
-                // Cache the response in memory since we will need to decode it potentially more than once.
-                result = result.save()
-
-                val response =
-                    runCatching<AtpErrorDescription> {
-                        plugin.json.decodeFromString(result.response.bodyAsText())
-                    }
-
-                if (response.getOrNull()?.error == "ExpiredToken") {
-                    scope.attributes
-                    val refreshResponse =
-                        ktorClient {
-                            install(DefaultRequest) {
-                                val hostUrl = Url(plugin.baseUrl)
-                                url.protocol = hostUrl.protocol
-                                url.host = hostUrl.host
-                                url.port = hostUrl.port
-                            }
-                        }.post("/xrpc/com.atproto.server.refreshSession") {
-                            plugin.refreshToken?.let { bearerAuth(it) }
-                        }
-                    if (StatusCode.fromCode(refreshResponse.status.value) == StatusCode.Okay) {
-                        val refreshed = refreshResponse.body<String>().decodeJson<RefreshSessionResponse>()
-                        val newAccessToken = refreshed.accessJwt
-                        val newRefreshToken = refreshed.refreshJwt
-
-                        plugin.onTokenRefreshed?.invoke(newAccessToken, newRefreshToken)
-
-                        context.headers.remove(Authorization)
-                        context.bearerAuth(newAccessToken)
-                        result = execute(context)
-                    } else {
-                        val refreshBody =
-                            runCatching<AtpErrorDescription> {
-                                plugin.json.decodeFromString(refreshResponse.bodyAsText())
-                            }
-                        if (refreshBody.getOrNull()?.error == "ExpiredToken") {
-                            throw LoginExpiredException(
-                                accountKey = plugin.accountKey ?: throw IllegalStateException("No account key provided"),
-                                platformType = PlatformType.Bluesky,
-                            )
-                        }
-                    }
-                }
-
-                result
             }
         }
     }

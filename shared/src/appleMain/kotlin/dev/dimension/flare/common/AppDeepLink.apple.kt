@@ -14,6 +14,7 @@ public object AppDeepLinkHelper {
                         when (data.segments.getOrNull(1)) {
                             "Mastodon" -> AppleRoute.Callback.Mastodon
                             "Misskey" -> AppleRoute.Callback.Misskey
+                            "Bluesky" -> AppleRoute.Callback.Bluesky
                             else -> null
                         }
                     else -> null
@@ -174,6 +175,11 @@ public sealed class AppleRoute {
         }
 
         public data object Misskey : Callback() {
+            override val routeType: RouteType
+                get() = RouteType.Screen
+        }
+
+        public data object Bluesky : Callback() {
             override val routeType: RouteType
                 get() = RouteType.Screen
         }

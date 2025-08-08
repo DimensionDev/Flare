@@ -17,9 +17,12 @@ import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ButtonGroup
+import androidx.compose.material3.CircularWavyProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
@@ -29,7 +32,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -73,7 +78,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.distinctUntilChanged
 import moe.tlaster.precompose.molecule.producePresenter
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ServiceSelectScreen(
     onXQT: () -> Unit,
@@ -178,7 +183,7 @@ internal fun ServiceSelectScreen(
                                         contentDescription = null,
                                     )
                                 }.onLoading {
-                                    CircularProgressIndicator(
+                                    CircularWavyProgressIndicator(
                                         modifier = Modifier.size(24.dp),
                                     )
                                 }
@@ -194,51 +199,116 @@ internal fun ServiceSelectScreen(
                             when (state.detectedPlatformType.takeSuccess()) {
                                 null -> Unit
                                 PlatformType.Bluesky -> {
+                                    val oauthString = stringResource(id = R.string.bluesky_login_oauth_button)
+                                    val passwordString =
+                                        stringResource(id = R.string.bluesky_login_use_password_button)
+                                    ButtonGroup(
+                                        overflowIndicator = {},
+                                    ) {
+                                        toggleableItem(
+                                            !state.blueskyInputState.usePasswordLogin,
+                                            onCheckedChange = {
+                                                state.blueskyLoginState.clear()
+                                                state.blueskyOauthLoginState.clear()
+                                                state.blueskyInputState.setUsePasswordLogin(!it)
+                                            },
+                                            label = oauthString,
+                                        )
+                                        toggleableItem(
+                                            state.blueskyInputState.usePasswordLogin,
+                                            onCheckedChange = {
+                                                state.blueskyLoginState.clear()
+                                                state.blueskyOauthLoginState.clear()
+                                                state.blueskyInputState.setUsePasswordLogin(it)
+                                            },
+                                            label = passwordString,
+                                        )
+                                    }
                                     OutlinedTextField(
                                         state = state.blueskyInputState.username,
                                         label = {
                                             Text(text = stringResource(id = R.string.bluesky_login_username_hint))
                                         },
-                                        enabled = !state.blueskyLoginState.loading,
+                                        enabled =
+                                            !state.blueskyOauthLoginState.loading &&
+                                                !state.blueskyLoginState.loading,
                                         modifier =
                                             Modifier
                                                 .width(300.dp),
                                         lineLimits = TextFieldLineLimits.SingleLine,
                                     )
-                                    OutlinedSecureTextField(
-                                        state = state.blueskyInputState.password,
-                                        label = {
-                                            Text(text = stringResource(id = R.string.bluesky_login_password_hint))
-                                        },
-                                        enabled = !state.blueskyLoginState.loading,
-                                        modifier =
-                                            Modifier
-                                                .width(300.dp),
-//                                lineLimits = TextFieldLineLimits.SingleLine,
-                                        onKeyboardAction = {
-                                            state.blueskyLoginState.login(
-                                                "https://${state.instanceInputState.text}",
-                                                state.blueskyInputState.username.text
-                                                    .toString(),
-                                                state.blueskyInputState.password.text
-                                                    .toString(),
-                                            )
-                                        },
-                                    )
+                                    AnimatedVisibility(state.blueskyInputState.usePasswordLogin) {
+                                        OutlinedSecureTextField(
+                                            state = state.blueskyInputState.password,
+                                            label = {
+                                                Text(text = stringResource(id = R.string.bluesky_login_password_hint))
+                                            },
+                                            enabled = !state.blueskyLoginState.loading,
+                                            modifier =
+                                                Modifier
+                                                    .width(300.dp),
+                                        )
+                                    }
+                                    AnimatedVisibility(state.blueskyLoginState.require2FA && state.blueskyInputState.usePasswordLogin) {
+                                        OutlinedTextField(
+                                            state = state.blueskyInputState.authFactorToken,
+                                            label = {
+                                                Text(text = stringResource(id = R.string.bluesky_login_auth_factor_token_hint))
+                                            },
+                                            enabled = !state.blueskyLoginState.loading,
+                                            modifier =
+                                                Modifier
+                                                    .width(300.dp),
+                                            lineLimits = TextFieldLineLimits.SingleLine,
+                                        )
+                                    }
+                                    if (!state.blueskyInputState.usePasswordLogin) {
+                                        OnNewIntent {
+                                            state.blueskyOauthLoginState.resume(it.dataString.orEmpty())
+                                        }
+                                    }
+
                                     Button(
                                         onClick = {
-                                            state.blueskyLoginState.login(
-                                                "https://${state.instanceInputState.text}",
-                                                state.blueskyInputState.username.text
-                                                    .toString(),
-                                                state.blueskyInputState.password.text
-                                                    .toString(),
-                                            )
+                                            if (state.blueskyInputState.usePasswordLogin) {
+                                                state.blueskyLoginState.login(
+                                                    baseUrl = state.instanceInputState.text.toString(),
+                                                    username =
+                                                        state.blueskyInputState.username.text
+                                                            .toString(),
+                                                    password =
+                                                        state.blueskyInputState.password.text
+                                                            .toString(),
+                                                    authFactorToken =
+                                                        state.blueskyInputState.authFactorToken.text
+                                                            .toString(),
+                                                )
+                                            } else {
+                                                state.blueskyOauthLoginState.login(
+                                                    userName =
+                                                        state.blueskyInputState.username.text
+                                                            .toString(),
+                                                    launchUrl = uriHandler::openUri,
+                                                )
+                                            }
                                         },
                                         modifier = Modifier.width(300.dp),
-                                        enabled = state.blueskyInputState.canLogin && !state.blueskyLoginState.loading,
+                                        enabled =
+                                            state.blueskyInputState.canLogin &&
+                                                (
+                                                    !state.blueskyOauthLoginState.loading &&
+                                                        !state.blueskyLoginState.loading
+                                                ),
                                     ) {
                                         Text(text = stringResource(id = R.string.login_button))
+                                    }
+                                    if (state.blueskyOauthLoginState.error != null) {
+                                        Text(
+                                            text = state.blueskyOauthLoginState.error.toString(),
+                                        )
+                                    }
+                                    if (state.blueskyOauthLoginState.loading) {
+                                        LinearWavyProgressIndicator()
                                     }
                                 }
 
@@ -251,7 +321,7 @@ internal fun ServiceSelectScreen(
                                             Text(
                                                 text = stringResource(id = R.string.mastodon_login_verify_message),
                                             )
-                                            CircularProgressIndicator()
+                                            LinearWavyProgressIndicator()
                                         }?.onError {
                                             Text(text = it.message ?: "Unknown error")
                                         } ?: run {
@@ -284,7 +354,7 @@ internal fun ServiceSelectScreen(
                                             Text(
                                                 text = stringResource(id = R.string.mastodon_login_verify_message),
                                             )
-                                            CircularProgressIndicator()
+                                            LinearWavyProgressIndicator()
                                         }?.onError {
                                             Text(text = it.message ?: "Unknown error")
                                         } ?: run {
@@ -479,10 +549,10 @@ private fun serviceSelectPresenter(onBack: (() -> Unit)?) =
                     state.setFilter(it.toString())
                 }
         }
-        val blueskyLoginState = blueskyLoginPresenter()
+        val blueskyInputState = blueskyInputPresenter()
         object : ServiceSelectState by state {
             val instanceInputState = instanceInputState
-            val blueskyInputState = blueskyLoginState
+            val blueskyInputState = blueskyInputState
 
             fun selectInstance(instance: UiInstance) {
                 instanceInputState.edit {
@@ -501,18 +571,31 @@ private fun serviceSelectPresenter(onBack: (() -> Unit)?) =
     }
 
 @Composable
-private fun blueskyLoginPresenter() =
+private fun blueskyInputPresenter() =
     run {
+        var usePasswordLogin by remember { mutableStateOf(false) }
         val username = rememberTextFieldState()
         val password = rememberTextFieldState()
+        val authFactorToken = rememberTextFieldState()
         val canLogin by remember(username, password) {
             derivedStateOf {
-                username.text.isNotEmpty() && password.text.isNotEmpty()
+                username.text.isNotEmpty() &&
+                    if (usePasswordLogin) {
+                        password.text.isNotEmpty()
+                    } else {
+                        true
+                    }
             }
         }
         object {
             val username = username
             val password = password
+            val authFactorToken = authFactorToken
+            val usePasswordLogin = usePasswordLogin
             val canLogin = canLogin
+
+            fun setUsePasswordLogin(value: Boolean) {
+                usePasswordLogin = value
+            }
         }
     }

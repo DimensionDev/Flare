@@ -101,6 +101,9 @@ internal class NotificationRemoteMediator(
                         ListNotificationsReason.StarterpackJoined -> null
                         ListNotificationsReason.Unverified -> null
                         ListNotificationsReason.Verified -> null
+                        ListNotificationsReason.LikeViaRepost -> it.uri
+                        ListNotificationsReason.RepostViaRepost -> it.uri
+                        ListNotificationsReason.SubscribedPost -> it.uri
                     }
                 }.distinct()
                 .toImmutableList()

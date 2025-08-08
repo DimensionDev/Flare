@@ -176,7 +176,8 @@ struct ServiceSelectScreen: View {
                 state.blueskyLoginState.login(
                     baseUrl: blueskyInputViewModel.baseUrl,
                     username: blueskyInputViewModel.username,
-                    password: blueskyInputViewModel.password
+                    password: blueskyInputViewModel.password,
+                    authFactorToken: nil
                 )
             }, label: {
                 Text("confirm")

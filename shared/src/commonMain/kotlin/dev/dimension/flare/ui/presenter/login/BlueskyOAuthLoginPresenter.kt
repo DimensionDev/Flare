@@ -138,7 +138,7 @@ public class BlueskyOAuthLoginPresenter(
                     OAuthScope("transition:chat.bsky"),
                     OAuthScope("transition:generic"),
                 ),
-            loginHandleHint = userName,
+            loginHandleHint = userName.takeIf { !it.contains('@') && it.contains('.') },
         )
 
     private suspend fun resume(

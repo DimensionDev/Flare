@@ -88,6 +88,9 @@
 
     <string name="bluesky_login_username_hint">Username</string>
     <string name="bluesky_login_password_hint">Password</string>
+    <string name="bluesky_login_auth_factor_token_hint">Authentication Factor Token</string>
+    <string name="bluesky_login_oauth_button">Login with OAuth</string>
+    <string name="bluesky_login_use_password_button">Use Password</string>
 
     <string name="report_title">Report</string>
     <string name="report_description">What\'s the issue with this post?</string>

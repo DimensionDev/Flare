@@ -12,6 +12,8 @@ public object AppDeepLink {
     public object Callback {
         public const val MASTODON: String = "$APPSCHEMA://Callback/SignIn/Mastodon"
         public const val MISSKEY: String = "$APPSCHEMA://Callback/SignIn/Misskey"
+
+        public const val BLUESKY: String = "$APPSCHEMA://Callback/SignIn/Bluesky"
     }
 
     public object Search {

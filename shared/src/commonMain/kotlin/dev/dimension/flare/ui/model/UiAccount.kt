@@ -14,6 +14,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import sh.christian.ozone.oauth.OAuthToken
 
 @Immutable
 public sealed class UiAccount {
@@ -95,14 +96,35 @@ public sealed class UiAccount {
         override val platformType: PlatformType
             get() = PlatformType.Bluesky
 
-        @Immutable
         @Serializable
-        @SerialName("BlueskyCredential")
-        data class Credential(
-            val baseUrl: String,
-            val accessToken: String,
-            val refreshToken: String,
-        ) : UiAccount.Credential
+        sealed interface Credential : UiAccount.Credential {
+            val baseUrl: String
+            val accessToken: String
+            val refreshToken: String
+
+            @Immutable
+            @Serializable
+            @SerialName("BlueskyCredential")
+            data class BlueskyCredential(
+                override val baseUrl: String,
+                override val accessToken: String,
+                override val refreshToken: String,
+            ) : Bluesky.Credential
+
+            @Immutable
+            @Serializable
+            @SerialName("BlueskyOAuthCredential")
+            data class OAuthCredential(
+                override val baseUrl: String,
+                val oAuthToken: OAuthToken,
+            ) : Bluesky.Credential {
+                override val accessToken: String
+                    get() = oAuthToken.accessToken
+
+                override val refreshToken: String
+                    get() = oAuthToken.refreshToken
+            }
+        }
 
         override val dataSource by lazy {
             BlueskyDataSource(accountKey = accountKey, credential = credential)

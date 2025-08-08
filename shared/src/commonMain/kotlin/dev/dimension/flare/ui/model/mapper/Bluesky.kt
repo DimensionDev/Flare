@@ -330,6 +330,9 @@ private val ListNotificationsReason.icon: UiTimeline.TopMessage.Icon
             ListNotificationsReason.StarterpackJoined -> UiTimeline.TopMessage.Icon.Info
             ListNotificationsReason.Unverified -> UiTimeline.TopMessage.Icon.Info
             ListNotificationsReason.Verified -> UiTimeline.TopMessage.Icon.Info
+            ListNotificationsReason.LikeViaRepost -> UiTimeline.TopMessage.Icon.Favourite
+            ListNotificationsReason.RepostViaRepost -> UiTimeline.TopMessage.Icon.Retweet
+            ListNotificationsReason.SubscribedPost -> UiTimeline.TopMessage.Icon.Info
         }
 
 private val ListNotificationsReason.type: UiTimeline.TopMessage.MessageType
@@ -345,6 +348,9 @@ private val ListNotificationsReason.type: UiTimeline.TopMessage.MessageType
             ListNotificationsReason.StarterpackJoined -> UiTimeline.TopMessage.MessageType.Bluesky.StarterpackJoined
             ListNotificationsReason.Unverified -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
             ListNotificationsReason.Verified -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
+            ListNotificationsReason.LikeViaRepost -> UiTimeline.TopMessage.MessageType.Bluesky.Like
+            ListNotificationsReason.RepostViaRepost -> UiTimeline.TopMessage.MessageType.Bluesky.Repost
+            ListNotificationsReason.SubscribedPost -> UiTimeline.TopMessage.MessageType.Bluesky.UnKnown
         }
 
 internal fun PostView.render(

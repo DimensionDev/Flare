@@ -31,8 +31,8 @@ kotlin {
         iosX64(),
         iosArm64(),
         iosSimulatorArm64(),
-//        macosArm64(),
-//        macosX64(),
+        macosArm64(),
+        macosX64(),
     ).forEach { appleTarget ->
         appleTarget.binaries.framework {
             baseName = "shared"
@@ -73,6 +73,7 @@ kotlin {
                 implementation(libs.twitter.parser)
                 implementation(libs.molecule.runtime)
                 api(libs.bluesky)
+                api(libs.bluesky.oauth)
                 implementation(libs.room.runtime)
                 implementation(libs.room.paging)
                 implementation(libs.sqlite.bundled)

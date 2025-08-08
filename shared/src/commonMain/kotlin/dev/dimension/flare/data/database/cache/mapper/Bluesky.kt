@@ -319,6 +319,107 @@ internal fun List<ListNotificationsNotification>.toDb(
                     )
                 }
             }
+
+            ListNotificationsReason.LikeViaRepost ->
+                items.mapNotNull {
+                    val post = references[it.uri] ?: return@mapNotNull null
+                    val content = Post(post = post)
+                    val user = post.author.toDbUser(accountKey.host)
+                    val data =
+                        DbStatusWithUser(
+                            user = user,
+                            data =
+                                DbStatus(
+                                    statusKey =
+                                        MicroBlogKey(
+                                            id = it.uri.atUri,
+                                            host = accountKey.host,
+                                        ),
+                                    accountType = AccountType.Specific(accountKey),
+                                    userKey = user.userKey,
+                                    content = content,
+                                    text = null,
+                                    createdAt = it.indexedAt.toStdlibInstant(),
+                                ),
+                        )
+                    createDbPagingTimelineWithStatus(
+                        accountKey = accountKey,
+                        pagingKey = pagingKey,
+                        sortId = it.indexedAt.toStdlibInstant().toEpochMilliseconds(),
+                        status = data,
+                        references =
+                            mapOf(
+                                ReferenceType.Notification to post.toDbStatusWithUser(accountKey),
+                            ),
+                    )
+                }
+            ListNotificationsReason.RepostViaRepost ->
+                items.mapNotNull {
+                    val post = references[it.uri] ?: return@mapNotNull null
+                    val content = Post(post = post)
+                    val user = post.author.toDbUser(accountKey.host)
+                    val data =
+                        DbStatusWithUser(
+                            user = user,
+                            data =
+                                DbStatus(
+                                    statusKey =
+                                        MicroBlogKey(
+                                            id = it.uri.atUri,
+                                            host = accountKey.host,
+                                        ),
+                                    accountType = AccountType.Specific(accountKey),
+                                    userKey = user.userKey,
+                                    content = content,
+                                    text = null,
+                                    createdAt = it.indexedAt.toStdlibInstant(),
+                                ),
+                        )
+                    createDbPagingTimelineWithStatus(
+                        accountKey = accountKey,
+                        pagingKey = pagingKey,
+                        sortId = it.indexedAt.toStdlibInstant().toEpochMilliseconds(),
+                        status = data,
+                        references =
+                            mapOf(
+                                ReferenceType.Notification to post.toDbStatusWithUser(accountKey),
+                            ),
+                    )
+                }
+            ListNotificationsReason.SubscribedPost -> {
+                items.mapNotNull {
+                    val post = references[it.uri] ?: return@mapNotNull null
+                    val content = Post(post = post)
+                    val user = post.author.toDbUser(accountKey.host)
+                    val data =
+                        DbStatusWithUser(
+                            user = user,
+                            data =
+                                DbStatus(
+                                    statusKey =
+                                        MicroBlogKey(
+                                            id = it.uri.atUri,
+                                            host = accountKey.host,
+                                        ),
+                                    accountType = AccountType.Specific(accountKey),
+                                    userKey = user.userKey,
+                                    content = content,
+                                    text = null,
+                                    createdAt = it.indexedAt.toStdlibInstant(),
+                                ),
+                        )
+                    createDbPagingTimelineWithStatus(
+                        accountKey = accountKey,
+                        pagingKey = pagingKey,
+                        sortId = it.indexedAt.toStdlibInstant().toEpochMilliseconds(),
+                        status = data,
+                        references =
+                            mapOf(
+                                ReferenceType.Notification to post.toDbStatusWithUser(accountKey),
+                            ),
+                    )
+                }
+            }
         }
     }
 }

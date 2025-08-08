@@ -120,6 +120,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -157,17 +158,12 @@ internal class BlueskyDataSource(
         BlueskyService(
             baseUrl = credential.baseUrl,
             accountKey = accountKey,
-            accessToken = credential.accessToken,
-            refreshToken = credential.refreshToken,
-            onTokenRefreshed = { accessToken, refreshToken ->
+            credential = credential,
+            onCredentialRefreshed = { credential ->
                 coroutineScope.launch {
                     appDatabase.accountDao().setCredential(
                         accountKey,
-                        credential
-                            .copy(
-                                accessToken = accessToken,
-                                refreshToken = refreshToken,
-                            ).encodeJson(),
+                        credential.encodeJson(),
                     )
                 }
             },
@@ -1007,7 +1003,7 @@ internal class BlueskyDataSource(
             key = "preferences_$accountKey",
         ) {
             service
-                .getPreferences()
+                .getPreferencesForActor()
                 .maybeResponse()
                 ?.preferences
                 .orEmpty()
@@ -1022,7 +1018,7 @@ internal class BlueskyDataSource(
         ) {
             val preferences =
                 service
-                    .getPreferences()
+                    .getPreferencesForActor()
                     .maybeResponse()
                     ?.preferences
                     .orEmpty()
@@ -1142,7 +1138,7 @@ internal class BlueskyDataSource(
             (it + data).toImmutableList()
         }
         tryRun {
-            val currentPreferences = service.getPreferences().requireResponse()
+            val currentPreferences = service.getPreferencesForActor().requireResponse()
             val feedInfo =
                 service
                     .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(data.id)))
@@ -1201,7 +1197,7 @@ internal class BlueskyDataSource(
             it.filterNot { item -> item.id == data.id }.toImmutableList()
         }
         tryRun {
-            val currentPreferences = service.getPreferences().requireResponse()
+            val currentPreferences = service.getPreferencesForActor().requireResponse()
             val feedInfo =
                 service
                     .getFeedGenerator(GetFeedGeneratorQueryParams(feed = AtUri(data.id)))

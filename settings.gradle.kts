@@ -13,7 +13,6 @@ dependencyResolutionManagement {
         maven("https://jitpack.io")
         maven("https://central.sonatype.com/repository/maven-snapshots/")
         maven("https://androidx.dev/snapshots/builds/13617490/artifacts/repository")
-        maven("https://repo.repsy.io/mvn/uakihir0/public")
     }
 }
 

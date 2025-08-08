@@ -178,7 +178,7 @@ kotlin-codepoints-deluxe = { group = "de.cketti.unicode", name = "kotlin-codepoi
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics" }
-play-integrity = { group = "com.google.android.play", name = "integrity", version = ""1.4.0 }
+play-integrity = { group = "com.google.android.play", name = "integrity", version = "1.4.0" }
 
 materialKolor = { module = "com.materialkolor:material-kolor", version.ref = "materialKolor" }
 colorpicker-compose = { module = "com.github.skydoves:colorpicker-compose", version = "1.1.2" }

@@ -75,6 +75,9 @@
     <string name="misskey_visibility_specified_description">Только упомянутые пользователи могут видеть это тоже</string>
     <string name="bluesky_login_username_hint">Имя пользователя</string>
     <string name="bluesky_login_password_hint">Пароль</string>
+    <string name="bluesky_login_auth_factor_token_hint">Токен фактора аутентификации</string>
+    <string name="bluesky_login_oauth_button">Войти с OAuth</string>
+    <string name="bluesky_login_use_password_button">Использовать пароль</string>
     <string name="report_title">Отчет</string>
     <string name="report_description">В чем проблема с этим сообщением?</string>
     <string name="report_reason_spam_title">Спам</string>

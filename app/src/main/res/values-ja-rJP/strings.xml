@@ -75,6 +75,9 @@
     <string name="misskey_visibility_specified_description">メンションされたユーザーのみがこのノートを見ることができます。</string>
     <string name="bluesky_login_username_hint">ユーザー名</string>
     <string name="bluesky_login_password_hint">パスワード</string>
+    <string name="bluesky_login_auth_factor_token_hint">認証因子トークン</string>
+    <string name="bluesky_login_oauth_button">OAuthでログイン</string>
+    <string name="bluesky_login_use_password_button">パスワードを使用</string>
     <string name="report_title">レポート</string>
     <string name="report_description">この投稿の問題点は何ですか?</string>
     <string name="report_reason_spam_title">迷惑メール</string>

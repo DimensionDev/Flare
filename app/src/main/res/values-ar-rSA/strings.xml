@@ -75,6 +75,9 @@
     <string name="misskey_visibility_specified_description">يمكن للمستخدمين المذكورين فقط رؤية هذا التبويق</string>
     <string name="bluesky_login_username_hint">اسم المستخدم</string>
     <string name="bluesky_login_password_hint">كلمة المرور</string>
+    <string name="bluesky_login_auth_factor_token_hint">عامل المصادقة رمز</string>
+    <string name="bluesky_login_oauth_button">تسجيل الدخول باستخدام OAuth</string>
+    <string name="bluesky_login_use_password_button">استخدام كلمة المرور</string>
     <string name="report_title">تقرير</string>
     <string name="report_description">ما هي المشكلة مع هذا المنشور؟</string>
     <string name="report_reason_spam_title">مزعج</string>

@@ -75,6 +75,9 @@
     <string name="misskey_visibility_specified_description">Numai utilizatorii menționați pot vedea această notiță</string>
     <string name="bluesky_login_username_hint">Nume</string>
     <string name="bluesky_login_password_hint">Parolă</string>
+    <string name="bluesky_login_auth_factor_token_hint">Token factor de autentificare</string>
+    <string name="bluesky_login_oauth_button">Autentificare cu OAuth</string>
+    <string name="bluesky_login_use_password_button">Utilizare parolă</string>
     <string name="report_title">Raport</string>
     <string name="report_description">Care este problema cu acest post?</string>
     <string name="report_reason_spam_title">Spam</string>

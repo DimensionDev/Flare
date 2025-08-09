@@ -75,6 +75,9 @@
     <string name="misskey_visibility_specified_description">只有提到的人可以看到这条嘟文</string>
     <string name="bluesky_login_username_hint">用户名</string>
     <string name="bluesky_login_password_hint">密码</string>
+    <string name="bluesky_login_auth_factor_token_hint">认证因子令牌</string>
+    <string name="bluesky_login_oauth_button">使用 OAuth 登录</string>
+    <string name="bluesky_login_use_password_button">使用密码</string>
     <string name="report_title">举报</string>
     <string name="report_description">这篇帖子有什么问题？</string>
     <string name="report_reason_spam_title">垃圾信息</string>

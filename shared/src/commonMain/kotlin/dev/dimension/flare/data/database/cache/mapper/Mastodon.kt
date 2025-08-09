@@ -61,7 +61,7 @@ internal fun List<Notification>.toDb(
             references =
                 listOfNotNull(
                     if (it.status != null) {
-                        ReferenceType.Notification to it.status.toDbStatusWithUser(accountKey)
+                        ReferenceType.Notification to listOfNotNull(it.status.toDbStatusWithUser(accountKey))
                     } else {
                         null
                     },
@@ -116,7 +116,7 @@ internal fun List<Status>.toDbPagingTimeline(
             references =
                 listOfNotNull(
                     if (it.reblog != null) {
-                        ReferenceType.Retweet to it.reblog.toDbStatusWithUser(accountKey)
+                        ReferenceType.Retweet to listOfNotNull(it.reblog.toDbStatusWithUser(accountKey))
                     } else {
                         null
                     },

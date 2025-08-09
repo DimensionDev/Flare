@@ -210,9 +210,9 @@ private fun parseBluesky(
 internal fun FeedViewPostReasonUnion.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Bluesky,
-    references: Map<ReferenceType, StatusContent>,
+    references: Map<ReferenceType, List<StatusContent>>,
 ): UiTimeline {
-    val data = (references[ReferenceType.Retweet] as? StatusContent.Bluesky)?.data
+    val data = (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.Bluesky)?.data
     val topMessage =
         when (this) {
             is FeedViewPostReasonUnion.ReasonPin -> {
@@ -253,7 +253,7 @@ internal fun FeedViewPostReasonUnion.render(
 internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
     accountKey: MicroBlogKey,
     event: StatusEvent.Bluesky,
-    references: Map<ReferenceType, StatusContent> = emptyMap(),
+    references: Map<ReferenceType, List<StatusContent>> = emptyMap(),
 ): UiTimeline {
     return when (this) {
         is StatusContent.BlueskyNotification.Normal -> {
@@ -278,7 +278,7 @@ internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
             )
         }
         is StatusContent.BlueskyNotification.Post ->
-            references[ReferenceType.Notification]?.render(event) ?: post.render(accountKey, event = event)
+            references[ReferenceType.Notification]?.firstOrNull()?.render(event) ?: post.render(accountKey, event = event)
         is StatusContent.BlueskyNotification.UserList -> {
             val reason = this.data.firstOrNull()?.reason
             val uri =
@@ -304,7 +304,7 @@ internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
                 UiTimeline.ItemContent.UserList(
                     users = this.data.map { it.author.render(accountKey = accountKey) }.toImmutableList(),
                     status =
-                        references[ReferenceType.Notification]?.let { it as? StatusContent.Bluesky }?.data?.renderStatus(
+                        references[ReferenceType.Notification]?.firstOrNull()?.let { it as? StatusContent.Bluesky }?.data?.renderStatus(
                             accountKey,
                             event,
                         ),
@@ -356,14 +356,16 @@ private val ListNotificationsReason.type: UiTimeline.TopMessage.MessageType
 internal fun PostView.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Bluesky,
+    references: Map<ReferenceType, List<StatusContent>> = mapOf(),
 ) = UiTimeline(
     topMessage = null,
-    content = renderStatus(accountKey, event),
+    content = renderStatus(accountKey, event, references),
 )
 
 internal fun PostView.renderStatus(
     accountKey: MicroBlogKey,
     event: StatusEvent.Bluesky,
+    references: Map<ReferenceType, List<StatusContent>> = mapOf(),
 ): UiTimeline.ItemContent.Status {
     val user = author.render(accountKey)
     val isFromMe = user.key == accountKey
@@ -372,6 +374,13 @@ internal fun PostView.renderStatus(
             id = uri.atUri,
             host = accountKey.host,
         )
+    val parent =
+        references[ReferenceType.Reply]?.firstOrNull()?.let {
+            when (it) {
+                is StatusContent.Bluesky -> it.data
+                else -> null
+            }
+        }
 
     return UiTimeline.ItemContent.Status(
         platformType = PlatformType.Bluesky,
@@ -383,6 +392,10 @@ internal fun PostView.renderStatus(
         poll = null,
         quote = listOfNotNull(findQuote(accountKey, this, event)).toImmutableList(),
         contentWarning = null,
+        parents =
+            listOfNotNull(
+                parent?.renderStatus(accountKey, event),
+            ).toPersistentList(),
         actions =
             listOfNotNull(
                 StatusAction.Item.Reply(

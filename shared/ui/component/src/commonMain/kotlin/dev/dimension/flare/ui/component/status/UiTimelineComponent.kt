@@ -6,16 +6,22 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.At
@@ -31,8 +37,10 @@ import compose.icons.fontawesomeicons.solid.Thumbtack
 import compose.icons.fontawesomeicons.solid.UserPlus
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Res
+import dev.dimension.flare.ui.component.VerticalDivider
 import dev.dimension.flare.ui.component.bluesky_notification_item_favourited_your_status
 import dev.dimension.flare.ui.component.bluesky_notification_item_followed_you
 import dev.dimension.flare.ui.component.bluesky_notification_item_mentioned_you
@@ -305,9 +313,8 @@ private fun ItemContentComponent(
             StatusContent(
                 data = item,
                 detailStatusKey = detailStatusKey,
-                modifier =
-                    modifier
-                        .padding(paddingValues),
+                paddingValues = paddingValues,
+                modifier = modifier,
             )
 
         is UiTimeline.ItemContent.User -> {
@@ -465,12 +472,67 @@ private fun StatusContent(
     data: UiTimeline.ItemContent.Status,
     detailStatusKey: MicroBlogKey?,
     modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(0.dp),
 ) {
-    CommonStatusComponent(
-        item = data,
-        isDetail = detailStatusKey == data.statusKey,
+    Column(
         modifier = modifier,
-    )
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        Layout(
+            content = {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    data.parents.forEach {
+                        CommonStatusComponent(
+                            item = it,
+                            isDetail = false,
+                            enableStartPadding = true,
+                            modifier = Modifier.padding(paddingValues),
+                        )
+                    }
+                }
+                VerticalDivider(
+                    modifier =
+                        Modifier
+                            .zIndex(-1f)
+                            .padding(
+                                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
+                            ).padding(start = AvatarComponentDefaults.size / 2)
+                            .offset(y = AvatarComponentDefaults.size / 2),
+                )
+            },
+            measurePolicy = { measurables, constraints ->
+                val divider = measurables.last()
+                val content = measurables.first()
+                val placeables = content.measure(constraints)
+                val dividerPlaceable =
+                    divider.measure(
+                        Constraints(
+                            maxWidth = constraints.maxWidth,
+                            minWidth = constraints.minWidth,
+                            maxHeight = placeables.measuredHeight,
+                            minHeight = placeables.measuredHeight,
+                        ),
+                    )
+                layout(
+                    width = placeables.width,
+                    height = placeables.height,
+                ) {
+                    dividerPlaceable.placeRelative(
+                        x = 0,
+                        y = 0,
+                    )
+                    placeables.placeRelative(0, 0)
+                }
+            },
+        )
+        CommonStatusComponent(
+            item = data,
+            isDetail = detailStatusKey == data.statusKey,
+            modifier = Modifier.padding(paddingValues),
+        )
+    }
 }
 
 @Composable

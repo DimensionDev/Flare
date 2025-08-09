@@ -41,7 +41,6 @@ internal class HomeTimelineRemoteMediator(
                     service
                         .getTimeline(
                             GetTimelineQueryParams(
-                                algorithm = "reverse-chronological",
                                 limit = state.config.pageSize.toLong(),
                             ),
                         ).maybeResponse()
@@ -51,7 +50,6 @@ internal class HomeTimelineRemoteMediator(
                     service
                         .getTimeline(
                             GetTimelineQueryParams(
-                                algorithm = "reverse-chronological",
                                 limit = state.config.pageSize.toLong(),
                                 cursor = cursor,
                             ),

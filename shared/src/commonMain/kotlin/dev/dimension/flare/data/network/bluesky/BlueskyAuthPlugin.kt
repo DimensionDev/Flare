@@ -20,6 +20,8 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpHeaders
 import io.ktor.http.isSuccess
 import io.ktor.util.AttributeKey
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.Json
 import sh.christian.ozone.BlueskyJson
 import sh.christian.ozone.api.response.AtpErrorDescription
@@ -48,6 +50,7 @@ internal class BlueskyAuthPlugin(
 
     companion object : HttpClientPlugin<Config, BlueskyAuthPlugin> {
         override val key = AttributeKey<BlueskyAuthPlugin>("BlueskyAuthPlugin")
+        val refreshMutex = Mutex()
 
         override fun prepare(block: Config.() -> Unit): BlueskyAuthPlugin {
             val config = Config().apply(block)
@@ -110,8 +113,9 @@ internal class BlueskyAuthPlugin(
                             PlatformType.Bluesky,
                         )
                         null -> Unit
-                        else -> throw IllegalStateException(
-                            "Unexpected error after refreshing token: ${newResponse.getOrNull()?.error}",
+                        else -> throw LoginExpiredException(
+                            plugin.accountKey!!,
+                            PlatformType.Bluesky,
                         )
                     }
                 }
@@ -174,45 +178,53 @@ internal class BlueskyAuthPlugin(
         private suspend fun refreshExpiredToken(
             plugin: BlueskyAuthPlugin,
             scope: HttpClient,
-        ): UiAccount.Bluesky.Credential? =
-            when (val tokens = plugin.authTokens) {
-                is UiAccount.Bluesky.Credential.BlueskyCredential -> {
-                    val refreshResponse =
-                        scope.post("/xrpc/com.atproto.server.refreshSession") {
-                            refresh(plugin)
-                        }
-                    refreshResponse
-                        .toAtpResponse<RefreshSessionResponse>()
-                        .maybeResponse()
-                        ?.let { refreshed ->
-                            UiAccount.Bluesky.Credential.BlueskyCredential(
-                                accessToken = refreshed.accessJwt,
-                                refreshToken = refreshed.refreshJwt,
-                                baseUrl = plugin.authTokens.baseUrl,
-                            )
-                        }
-                }
+        ): UiAccount.Bluesky.Credential? {
+            if (refreshMutex.isLocked) {
+                throw IllegalStateException(
+                    "Refresh already in progress, please wait for it to complete.",
+                )
+            }
+            return refreshMutex.withLock {
+                when (val tokens = plugin.authTokens) {
+                    is UiAccount.Bluesky.Credential.BlueskyCredential -> {
+                        val refreshResponse =
+                            scope.post("/xrpc/com.atproto.server.refreshSession") {
+                                refresh(plugin)
+                            }
+                        refreshResponse
+                            .toAtpResponse<RefreshSessionResponse>()
+                            .maybeResponse()
+                            ?.let { refreshed ->
+                                UiAccount.Bluesky.Credential.BlueskyCredential(
+                                    accessToken = refreshed.accessJwt,
+                                    refreshToken = refreshed.refreshJwt,
+                                    baseUrl = plugin.authTokens.baseUrl,
+                                )
+                            }
+                    }
 
-                is UiAccount.Bluesky.Credential.OAuthCredential -> {
-                    plugin.oauthApi
-                        .refreshToken(
-                            clientId = tokens.oAuthToken.clientId,
-                            nonce = tokens.oAuthToken.nonce,
-                            refreshToken = tokens.oAuthToken.refreshToken,
-                            keyPair = tokens.oAuthToken.keyPair,
-                        ).let { refreshed ->
-                            UiAccount.Bluesky.Credential.OAuthCredential(
-                                baseUrl = tokens.baseUrl,
-                                oAuthToken = refreshed,
-                            )
-                        }
-                }
+                    is UiAccount.Bluesky.Credential.OAuthCredential -> {
+                        plugin.oauthApi
+                            .refreshToken(
+                                clientId = tokens.oAuthToken.clientId,
+                                nonce = tokens.oAuthToken.nonce,
+                                refreshToken = tokens.oAuthToken.refreshToken,
+                                keyPair = tokens.oAuthToken.keyPair,
+                            ).let { refreshed ->
+                                UiAccount.Bluesky.Credential.OAuthCredential(
+                                    baseUrl = tokens.baseUrl,
+                                    oAuthToken = refreshed,
+                                )
+                            }
+                    }
 
-                null -> {
-                    // No tokens available, unable to refresh
-                    null
+                    null -> {
+                        // No tokens available, unable to refresh
+                        null
+                    }
                 }
             }
+        }
 
         private fun refreshDpopNonce(
             plugin: BlueskyAuthPlugin,

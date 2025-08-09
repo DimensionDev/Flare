@@ -58,7 +58,7 @@ internal fun Status.toDbPagingTimeline(
         references =
             listOfNotNull(
                 if (this.retweetedStatus != null) {
-                    ReferenceType.Retweet to this.retweetedStatus.toDbStatusWithUser(accountKey)
+                    ReferenceType.Retweet to listOfNotNull(this.retweetedStatus.toDbStatusWithUser(accountKey))
                 } else {
                     null
                 },
@@ -98,7 +98,7 @@ internal fun Comment.toDbPagingTimeline(
         status = this.toDbStatusWithUser(accountKey),
         references =
             commentList.orEmpty().associate {
-                ReferenceType.Reply to it.toDbStatusWithUser(accountKey)
+                ReferenceType.Reply to listOfNotNull(it.toDbStatusWithUser(accountKey))
             },
     )
 

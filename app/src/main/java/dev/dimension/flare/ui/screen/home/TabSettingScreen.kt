@@ -298,10 +298,16 @@ private fun presenter(
         }
 
         fun deleteTab(tab: TimelineTabItem) {
+            if (cacheTabs.size <= 1) {
+                return
+            }
             cacheTabs.removeIf { it.key == tab.key }
         }
 
         fun deleteTab(key: String) {
+            if (cacheTabs.size <= 1) {
+                return
+            }
             cacheTabs.removeIf { it.key == key }
         }
 

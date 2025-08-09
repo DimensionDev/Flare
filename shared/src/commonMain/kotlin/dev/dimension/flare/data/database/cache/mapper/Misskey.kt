@@ -46,7 +46,7 @@ internal fun List<Notification>.toDb(
             references =
                 listOfNotNull(
                     if (it.note != null) {
-                        ReferenceType.Notification to it.note.toDbStatusWithUser(accountKey)
+                        ReferenceType.Notification to listOfNotNull(it.note.toDbStatusWithUser(accountKey))
                     } else {
                         null
                     },
@@ -94,15 +94,15 @@ internal fun List<Note>.toDbPagingTimeline(
                 listOfNotNull(
                     if (it.renote != null) {
                         if (it.text.isNullOrEmpty() && it.files.isNullOrEmpty() && it.poll == null) {
-                            ReferenceType.Retweet to it.renote.toDbStatusWithUser(accountKey)
+                            ReferenceType.Retweet to listOfNotNull(it.renote.toDbStatusWithUser(accountKey))
                         } else {
-                            ReferenceType.Quote to it.renote.toDbStatusWithUser(accountKey)
+                            ReferenceType.Quote to listOfNotNull(it.renote.toDbStatusWithUser(accountKey))
                         }
                     } else {
                         null
                     },
                     if (it.reply != null) {
-                        ReferenceType.Reply to it.reply.toDbStatusWithUser(accountKey)
+                        ReferenceType.Reply to listOfNotNull(it.reply.toDbStatusWithUser(accountKey))
                     } else {
                         null
                     },

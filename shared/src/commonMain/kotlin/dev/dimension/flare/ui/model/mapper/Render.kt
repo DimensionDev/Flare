@@ -30,7 +30,12 @@ internal fun DbPagingTimelineWithStatus.render(
         .render(
             event,
             references =
-                status.references.associate { it.reference.referenceType to it.status.data.content },
+                status.references
+                    .groupBy {
+                        it.reference.referenceType
+                    }.mapValues { (_, references) ->
+                        references.map { it.status.data.content }
+                    },
         ).let {
             if (useDbKey) {
                 it.copy(dbKey = timeline.accountType.toString())
@@ -43,12 +48,16 @@ internal fun DbStatusWithReference.render(event: StatusEvent?): UiTimeline =
     status.data.content.render(
         event,
         references =
-            references.associate { it.reference.referenceType to it.status.data.content },
+            references
+                .groupBy { it.reference.referenceType }
+                .mapValues { (_, references) ->
+                    references.map { it.status.data.content }
+                },
     )
 
 internal fun StatusContent.render(
     event: StatusEvent?,
-    references: Map<ReferenceType, StatusContent> = emptyMap(),
+    references: Map<ReferenceType, List<StatusContent>> = emptyMap(),
 ) = when (this) {
     is StatusContent.Mastodon ->
         data.render(
@@ -89,6 +98,7 @@ internal fun StatusContent.render(
         data.render(
             event = event as StatusEvent.Bluesky,
             accountKey = event.accountKey,
+            references = references,
         )
 
     is StatusContent.BlueskyNotification ->

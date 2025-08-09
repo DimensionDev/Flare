@@ -65,8 +65,8 @@ internal class BlueskyAuthPlugin(
             scope: HttpClient,
         ) {
             scope.plugin(HttpSend.Plugin).intercept { context ->
-                if (!context.headers.contains(HttpHeaders.Authorization)) {
-                    context.auth(plugin)
+                if (!context.headers.contains(HttpHeaders.Authorization) && plugin.authTokens != null) {
+                    context.auth(plugin, plugin.authTokens)
                 }
 
                 var result: HttpClientCall = execute(context)
@@ -87,10 +87,7 @@ internal class BlueskyAuthPlugin(
                     when (response.getOrNull()?.error) {
                         "ExpiredToken" -> refreshExpiredToken(plugin, scope)
                         "use_dpop_nonce" -> refreshDpopNonce(plugin, result.response)
-                        "invalid_token" -> throw LoginExpiredException(
-                            plugin.accountKey!!,
-                            PlatformType.Bluesky,
-                        )
+                        "invalid_token" -> refreshExpiredToken(plugin, scope)
 
                         else -> null
                     }
@@ -100,7 +97,7 @@ internal class BlueskyAuthPlugin(
 
                     context.headers.remove(HttpHeaders.Authorization)
                     context.headers.remove("DPoP")
-                    context.auth(plugin)
+                    context.auth(plugin, newTokens)
                     result = execute(context)
 
                     val newResponse =
@@ -124,8 +121,11 @@ internal class BlueskyAuthPlugin(
             }
         }
 
-        private suspend fun HttpRequestBuilder.auth(plugin: BlueskyAuthPlugin) {
-            when (val tokens = plugin.authTokens) {
+        private suspend fun HttpRequestBuilder.auth(
+            plugin: BlueskyAuthPlugin,
+            credential: UiAccount.Bluesky.Credential,
+        ) {
+            when (val tokens = credential) {
                 is UiAccount.Bluesky.Credential.BlueskyCredential ->
                     header(
                         HttpHeaders.Authorization,
@@ -138,10 +138,6 @@ internal class BlueskyAuthPlugin(
                         tokens,
                         tokens.accessToken,
                     )
-
-                null -> {
-                    // No tokens available, do not add Authorization header
-                }
             }
         }
 

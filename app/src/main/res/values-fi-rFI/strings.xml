@@ -75,6 +75,9 @@
     <string name="misskey_visibility_specified_description">Vain mainitut käyttäjät voivat nähdä tämän tootin.</string>
     <string name="bluesky_login_username_hint">Käyttäjätunnus</string>
     <string name="bluesky_login_password_hint">Salasana</string>
+    <string name="bluesky_login_auth_factor_token_hint">Todennustekijän Tunnus</string>
+    <string name="bluesky_login_oauth_button">Kirjaudu sisään OAuthilla</string>
+    <string name="bluesky_login_use_password_button">Käytä Salasanaa</string>
     <string name="report_title">Raportoi</string>
     <string name="report_description">Mikä on ongelma tässä viestissä?</string>
     <string name="report_reason_spam_title">Roskaposti</string>

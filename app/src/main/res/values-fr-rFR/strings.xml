@@ -75,6 +75,9 @@
     <string name="misskey_visibility_specified_description">Seuls les utilisateurs mentionnés peuvent voir ce pouet</string>
     <string name="bluesky_login_username_hint">Nom d\'utilisateur</string>
     <string name="bluesky_login_password_hint">Mot de passe</string>
+    <string name="bluesky_login_auth_factor_token_hint">Jeton de facteur d\'authentification</string>
+    <string name="bluesky_login_oauth_button">Connexion avec OAuth</string>
+    <string name="bluesky_login_use_password_button">Utiliser le mot de passe</string>
     <string name="report_title">Rapporter</string>
     <string name="report_description">Quel est le problème avec ce message ?</string>
     <string name="report_reason_spam_title">Spam</string>

@@ -75,6 +75,9 @@
     <string name="misskey_visibility_specified_description">Μόνο οι αναφερόμενοι χρήστες μπορούν να δουν αυτή την φωνή</string>
     <string name="bluesky_login_username_hint">Όνομα Χρήστη</string>
     <string name="bluesky_login_password_hint">Κωδικός</string>
+    <string name="bluesky_login_auth_factor_token_hint">Διακριτικό Παράγοντα Ελέγχου Ταυτότητας</string>
+    <string name="bluesky_login_oauth_button">Σύνδεση με OAuth</string>
+    <string name="bluesky_login_use_password_button">Χρήση Κωδικού Πρόσβασης</string>
     <string name="report_title">Αναφορά</string>
     <string name="report_description">Ποιο είναι το ζήτημα με αυτή την ανάρτηση?</string>
     <string name="report_reason_spam_title">Ανεπιθύμητα</string>

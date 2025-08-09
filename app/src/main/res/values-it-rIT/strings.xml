@@ -75,6 +75,9 @@
     <string name="misskey_visibility_specified_description">Solo gli utenti menzionati possono vedere questo toot</string>
     <string name="bluesky_login_username_hint">Username</string>
     <string name="bluesky_login_password_hint">Password</string>
+    <string name="bluesky_login_auth_factor_token_hint">Token Del Fattore Di Autenticazione</string>
+    <string name="bluesky_login_oauth_button">Accedi con OAuth</string>
+    <string name="bluesky_login_use_password_button">Usa Password</string>
     <string name="report_title">Segnala</string>
     <string name="report_description">Qual è il problema con questo post?</string>
     <string name="report_reason_spam_title">Spam</string>

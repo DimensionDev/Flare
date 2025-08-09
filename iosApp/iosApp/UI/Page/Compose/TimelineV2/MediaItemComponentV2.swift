@@ -4,10 +4,10 @@ import shared
 import SwiftUI
 
 struct MediaItemComponentV2: View {
-    let media: Media // 使用Swift Media类型
+    let media: Media
 
     var body: some View {
-        let viewModel = FeedMediaViewModel.from(media) // 使用MediaComponentV2中定义的转换方法
+        let viewModel = FeedMediaViewModel.from(media)
         SingleMediaView(
             viewModel: viewModel,
             isSingleVideo: true,

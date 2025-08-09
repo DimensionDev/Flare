@@ -18,7 +18,7 @@ struct FlareMenuView: View {
     @State private var accountType: AccountType = AccountTypeGuest()
 
     @Environment(FlareRouter.self) private var router
-    @Environment(FlareAppState.self) private var appState
+    @Environment(FlareMenuState.self) private var menuState
     @Environment(FlareTheme.self) private var theme
 
     var body: some View {
@@ -40,7 +40,7 @@ struct FlareMenuView: View {
                 // only show list button when user login
                 if !(accountType is AccountTypeGuest) {
                     Button(action: {
-                        appState.isCustomTabBarHidden = true
+                        menuState.isCustomTabBarHidden = true
                         router.navigate(to: .lists(accountType: accountType))
                     }) {
                         HStack {
@@ -60,7 +60,7 @@ struct FlareMenuView: View {
                     // only show feeds button when user login and platform is Bluesky
                     if currentUser?.isBluesky == true {
                         Button(action: {
-                            appState.isCustomTabBarHidden = true
+                            menuState.isCustomTabBarHidden = true
                             router.navigate(to: .feeds(accountType: accountType))
                         }) {
                             HStack {
@@ -81,7 +81,7 @@ struct FlareMenuView: View {
                     // Message
                     if currentUser?.isXQt == true || currentUser?.isBluesky == true {
                         Button(action: {
-                            appState.isCustomTabBarHidden = true
+                            menuState.isCustomTabBarHidden = true
                             router.navigate(to: .messages(accountType: accountType))
                         }) {
                             HStack {
@@ -101,7 +101,7 @@ struct FlareMenuView: View {
                     // X Spaces
                     if currentUser?.isXQt == true {
                         Button(action: {
-                            appState.isCustomTabBarHidden = true
+                            menuState.isCustomTabBarHidden = true
                             router.navigate(to: .spaces(accountType: accountType))
                         }) {
                             HStack {
@@ -121,7 +121,7 @@ struct FlareMenuView: View {
 
                     // download manager
                     Button(action: {
-                        appState.isCustomTabBarHidden = true
+                        menuState.isCustomTabBarHidden = true
                         router.navigate(to: .download(accountType: accountType))
                     }) {
                         HStack {
@@ -141,7 +141,7 @@ struct FlareMenuView: View {
                     if currentUser?.isMastodon == true || currentUser?.isMisskey == true {
                         Spacer()
                         Button(action: {
-                            appState.isCustomTabBarHidden = true
+                            menuState.isCustomTabBarHidden = true
                             let host = UserManager.shared.instanceMetadata?.instance.domain ?? currentUser?.key.host ?? ""
                             let platformType = currentUser?.platformType ?? PlatformType.mastodon
                             router.navigate(to: .instanceScreen(host: host, platformType: platformType))
@@ -192,7 +192,7 @@ struct FlareMenuView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .onAppear {
-            appState.isCustomTabBarHidden = false
+            menuState.isCustomTabBarHidden = false
             checkAndUpdateUserState()
         }
         .sheet(isPresented: $showLogin) {

@@ -46,7 +46,7 @@ struct QuotedStatus: View {
                 FlareText(
                     data.content.raw,
                     data.content.markdown,
-                    textType: .body,
+                    textType: .flareTextTypeBody,
                     isRTL: data.content.isRTL
                 )
                 .onLinkTap { url in

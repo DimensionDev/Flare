@@ -8,7 +8,7 @@ import SwiftUI
 
 struct HomeTabViewContentV2: View {
     @Environment(FlareRouter.self) private var router
-    @Environment(FlareAppState.self) private var appState
+    @Environment(FlareMenuState.self) private var menuState
     @Environment(FlareTheme.self) private var theme
     @Environment(\.appSettings) private var appSettings
     @EnvironmentObject private var timelineState: TimelineExtState
@@ -48,7 +48,7 @@ struct HomeTabViewContentV2: View {
                     FlareTabItem(tabType: .menu) {
                         FlareMenuView()
                     }
-                    .environment(appState)
+                    .environment(menuState)
                 }
                 .customizationID("tabview_menu")
 
@@ -61,7 +61,7 @@ struct HomeTabViewContentV2: View {
                             }
                         )
                     }
-                    .environment(appState)
+                    .environment(menuState)
                 }
                 .customizationID("tabview_timeline")
 
@@ -71,7 +71,7 @@ struct HomeTabViewContentV2: View {
                         FlareTabItem(tabType: .notification) {
                             NotificationTabScreen(accountType: accountType)
                         }
-                        .environment(appState)
+                        .environment(menuState)
                     }
                     .customizationID("tabview_notification")
                 }
@@ -81,7 +81,7 @@ struct HomeTabViewContentV2: View {
                     FlareTabItem(tabType: .discover) {
                         DiscoverTabScreen(accountType: accountType)
                     }
-                    .environment(appState)
+                    .environment(menuState)
                 }
                 .customizationID("tabview_discover")
 
@@ -95,7 +95,7 @@ struct HomeTabViewContentV2: View {
                                 toProfileMedia: { _ in }
                             )
                         }
-                        .environment(appState)
+                        .environment(menuState)
                     }
                     .customizationID("tabview_profile")
                 }
@@ -104,7 +104,7 @@ struct HomeTabViewContentV2: View {
             .ignoresSafeArea(.container, edges: .bottom)
             .padding(.bottom, -120)
 
-            if !appState.isCustomTabBarHidden {
+            if !menuState.isCustomTabBarHidden {
                 VStack(spacing: 0) {
                     FlareTabBarV2(
                         accountType: accountType

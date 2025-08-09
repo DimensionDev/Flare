@@ -13,8 +13,8 @@ class PhotoBrowserManagerV2 {
 
     @MainActor
     func showPhotoBrowser(
-        media _: Media, // 使用Swift Media类型
-        images: [Media], // 使用Swift Media类型
+        media _: Media,
+        images: [Media],
         initialIndex: Int,
         headers: [String: String] = [:],
         onDismiss: (() -> Void)? = nil
@@ -31,7 +31,7 @@ class PhotoBrowserManagerV2 {
 
         browser.cellClassAtIndex = { index in
             let media = images[index]
-            switch media.type { // 使用Swift Media类型判断
+            switch media.type {
             case .video:
                 return MediaBrowserVideoCell.self
             case .gif:
@@ -157,7 +157,7 @@ class PhotoBrowserManagerV2 {
 
         browser.cellWillAppear = { [weak self] cell, index in
             let media = images[index]
-            switch media.type { // 使用Swift Media类型判断
+            switch media.type {
             case .video:
                 if let videoCell = cell as? MediaBrowserVideoCell {
                     self?.currentVideoCell = videoCell

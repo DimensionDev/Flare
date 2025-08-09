@@ -1,8 +1,7 @@
-// import Foundation
 import SwiftUI
 
 struct PodcastPreviewV2: View {
-    let card: Card // 使用Swift Card类型
+    let card: Card
 
     private var podcastId: String {
         URL(string: card.url)?.lastPathComponent ?? ""

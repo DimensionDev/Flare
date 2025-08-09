@@ -18,7 +18,7 @@ struct ShareableFile: Identifiable {
 @MainActor
 struct DownloadManagerScreen: View {
     @Environment(FlareRouter.self) private var router
-    @Environment(FlareAppState.self) private var menuState
+    @Environment(FlareMenuState.self) private var menuState
 
     let accountType: AccountType
     @State private var downloadTasks: [DownloadTask] = []

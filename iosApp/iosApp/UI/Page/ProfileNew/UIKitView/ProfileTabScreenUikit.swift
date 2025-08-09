@@ -23,7 +23,7 @@ struct ProfileTabScreenUikit: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareRouter.self) private var router
-    @Environment(FlareAppState.self) private var appState
+    @Environment(FlareMenuState.self) private var menuState
 
     init(
         accountType: AccountType, userKey: MicroBlogKey?,

@@ -28,7 +28,7 @@ struct StatusRetweetHeaderComponentV2: View, Equatable {
                 }
                 .frame(alignment: .center)
                 .lineLimit(1)
-                .markdownTheme(.flareMarkdownStyle(using: theme.captionTextStyle, fontScale: theme.fontSizeScale))
+                .markdownTheme(.flareMarkdownStyle(using: theme.flareTextCaptionTextStyle, fontScale: theme.fontSizeScale))
                 .markdownTextStyle(\.text) {
                     FontSize(12)
                 }

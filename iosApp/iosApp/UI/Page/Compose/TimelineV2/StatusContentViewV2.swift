@@ -179,7 +179,7 @@ struct StatusContentWarningViewV2: View {
             FlareText(
                 contentWarning.raw,
                 contentWarning.markdown,
-                textType: .caption,
+                textType: .flareTextTypeCaption,
                 isRTL: contentWarning.isRTL
             )
             .onLinkTap { url in
@@ -220,7 +220,7 @@ struct StatusMainContentViewV2: View {
             FlareText(
                 content.raw,
                 content.markdown,
-                textType: .body,
+                textType: .flareTextTypeBody,
                 isRTL: content.isRTL
             )
             .onLinkTap { url in

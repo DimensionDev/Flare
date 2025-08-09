@@ -3,20 +3,19 @@ import Kingfisher
 import shared
 import SwiftUI
 
-// medias
 struct MediaComponentV2: View {
     @State var hideSensitive: Bool
     @State private var aiDetectedSensitive: Bool = false
     @Environment(\.appSettings) private var appSettings
     @Environment(\.isInCaptureMode) private var isInCaptureMode
 
-    let medias: [Media] // 使用Swift Media类型
-    let onMediaClick: (Int, Media) -> Void // 使用Swift Media类型
+    let medias: [Media]
+    let onMediaClick: (Int, Media) -> Void
     let sensitive: Bool
 
     var body: some View {
         let showSensitiveButton = medias.allSatisfy { media in
-            media.type == .image || media.type == .video // 使用Swift Media类型判断
+            media.type == .image || media.type == .video
         } && (sensitive || aiDetectedSensitive)
 
         // - 媒体遮罩逻辑
@@ -85,14 +84,8 @@ struct MediaComponentV2: View {
     }
 }
 
-// - FeedMediaViewModel扩展，添加从Swift Media转换的方法
-
 extension FeedMediaViewModel {
-    /// 从Swift Media类型创建FeedMediaViewModel
-    /// - Parameter media: Swift Media对象
-    /// - Returns: FeedMediaViewModel实例
     static func from(_ media: Media) -> FeedMediaViewModel {
-        // 直接创建FeedMediaViewModel，不依赖UiMedia
         let id = media.url
         let url = URL(string: media.url) ?? URL(string: "about:blank")!
         let previewUrl = URL(string: media.previewUrl ?? media.url)
@@ -114,7 +107,6 @@ extension FeedMediaViewModel {
             videoMedia = nil
         }
 
-        // 创建一个自定义的FeedMediaViewModel实例
         return FeedMediaViewModel(
             id: id,
             url: url,
@@ -129,10 +121,7 @@ extension FeedMediaViewModel {
     }
 }
 
-// - FeedMediaViewModel自定义初始化器
-
 extension FeedMediaViewModel {
-    /// 自定义初始化器，用于从Swift Media创建FeedMediaViewModel
     init(
         id: String,
         url: URL,

@@ -6,7 +6,7 @@ import SwiftUI
 
 struct FlareTabBarV2: View {
     @Environment(FlareRouter.self) private var router
-    @Environment(FlareAppState.self) private var appState
+    @Environment(FlareMenuState.self) private var menuState
     @Environment(FlareTheme.self) private var theme
     @Environment(\.appSettings) private var appSettings
     @EnvironmentObject private var timelineState: TimelineExtState

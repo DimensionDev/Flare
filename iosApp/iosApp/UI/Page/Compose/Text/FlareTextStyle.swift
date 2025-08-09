@@ -37,33 +37,6 @@ public enum FlareTextStyle {
                 lhs.cashtagColor == rhs.cashtagColor
         }
 
-        // public static let `default` = Style(
-        //     font: .systemFont(ofSize: 16),
-        //     textColor: UIColor.black, // .Text.primary,
-        //     linkColor: UIColor.black,
-        //     mentionColor: UIColor.black,
-        //     hashtagColor: UIColor.black,
-        //     cashtagColor: UIColor.black
-        // )
-
-        // public static let timeline = Style(
-        //     font: .systemFont(ofSize: 16),
-        //     textColor: UIColor.black,
-        //     linkColor: UIColor.black,
-        //     mentionColor: UIColor.black,
-        //     hashtagColor: UIColor.black,
-        //     cashtagColor: UIColor.black
-        // )
-
-        // public static let quote = Style(
-        //     font: .systemFont(ofSize: 15),
-        //     textColor: UIColor.black,
-        //     linkColor: UIColor.black.withAlphaComponent(0.8),
-        //     mentionColor: UIColor.black.withAlphaComponent(0.8),
-        //     hashtagColor: UIColor.black.withAlphaComponent(0.8),
-        //     cashtagColor: UIColor.black.withAlphaComponent(0.8)
-        // )
-
         public init(
             font: UIFont = .systemFont(ofSize: 16),
             textColor: UIColor = UIColor.black,

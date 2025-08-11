@@ -4,14 +4,19 @@ import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpClientPlugin
 import io.ktor.client.request.HttpRequestPipeline
+import io.ktor.http.takeFrom
 import io.ktor.util.AttributeKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import sh.christian.ozone.BlueskyApi
 import sh.christian.ozone.XrpcBlueskyApi
+import sh.christian.ozone.api.xrpc.BSKY_SOCIAL
+import sh.christian.ozone.oauth.OAuthApi
+import sh.christian.ozone.oauth.OAuthCodeChallengeMethod
 
 internal data class BlueskyService private constructor(
     private val baseUrlFlow: Flow<String>,
@@ -26,6 +31,16 @@ internal data class BlueskyService private constructor(
                 this.accountKey = accountKey
                 this.authTokenFlow = authTokenFlow
                 this.onAuthTokensChanged = onCredentialRefreshed
+                this.oauthApi =
+                    OAuthApi(
+                        httpClient =
+                            ktorClient {
+                                install(DefaultRequest) {
+                                    url.takeFrom(BSKY_SOCIAL)
+                                }
+                            },
+                        challengeSelector = { OAuthCodeChallengeMethod.S256 },
+                    )
             }
 
             expectSuccess = false

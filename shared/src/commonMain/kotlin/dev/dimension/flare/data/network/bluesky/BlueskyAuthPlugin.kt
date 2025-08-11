@@ -102,7 +102,7 @@ internal class BlueskyAuthPlugin(
 
                 if (credential != null) {
                     var shouldRetry = false
-                    val error = response.getOrNull()?.error
+                    var error = response.getOrNull()?.error
                     if (error == "ExpiredToken" || error == "invalid_token" || error == "use_dpop_nonce") {
                         shouldRetry = true
                     }
@@ -118,7 +118,7 @@ internal class BlueskyAuthPlugin(
                             )
                         }
                         val newTokens =
-                            when (response.getOrNull()?.error) {
+                            when (error) {
                                 "invalid_token", "ExpiredToken" ->
                                     refreshExpiredToken(currentCredential, oAuthApi, scope)
 
@@ -128,7 +128,6 @@ internal class BlueskyAuthPlugin(
 
                         if (newTokens != null) {
                             currentCredential = newTokens
-                            plugin.onAuthTokensChanged(newTokens)
                             context.headers.remove(HttpHeaders.Authorization)
                             context.headers.remove("DPoP")
                             context.auth(newTokens, oAuthApi)
@@ -138,11 +137,12 @@ internal class BlueskyAuthPlugin(
                                 runCatching<AtpErrorDescription> {
                                     plugin.json.decodeFromString(result.response.bodyAsText())
                                 }
-                            val newError = newResponse.getOrNull()?.error
-                            if (newError == "ExpiredToken" || newError == "invalid_token" || newError == "use_dpop_nonce") {
+                            error = newResponse.getOrNull()?.error
+                            if (error == "ExpiredToken" || error == "invalid_token" || error == "use_dpop_nonce") {
                                 // Retry again if the token is still invalid
                                 shouldRetry = true
                             } else {
+                                plugin.onAuthTokensChanged(newTokens)
                                 // No more retries needed, break the loop
                                 shouldRetry = false
                             }

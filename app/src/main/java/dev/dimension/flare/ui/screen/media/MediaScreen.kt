@@ -21,9 +21,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,8 +51,11 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Download
 import compose.icons.fontawesomeicons.solid.Xmark
+import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.Glassify
 import dev.dimension.flare.ui.theme.FlareTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -80,6 +84,7 @@ internal fun MediaScreen(
     previewUrl: String?,
     onDismiss: () -> Unit,
 ) {
+    val hazeState = rememberHazeState()
     val context = LocalContext.current
     val permissionState =
         rememberPermissionState(
@@ -103,7 +108,12 @@ internal fun MediaScreen(
                     .background(MaterialTheme.colorScheme.background.copy(alpha = 1 - swiperState.progress))
                     .alpha(1 - swiperState.progress),
         ) {
-            Swiper(state = swiperState) {
+            Swiper(
+                state = swiperState,
+                modifier =
+                    Modifier
+                        .hazeSource(state = hazeState),
+            ) {
                 val zoomableState =
                     rememberZoomableState(zoomSpec = ZoomSpec(maxZoomFactor = 10f))
                 val painter =
@@ -153,17 +163,21 @@ internal fun MediaScreen(
                             .padding(horizontal = 4.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    FilledTonalIconButton(
+                    Glassify(
                         onClick = {
                             onDismiss.invoke()
                         },
+                        modifier = Modifier.size(40.dp),
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        hazeState = hazeState,
                     ) {
                         FAIcon(
                             FontAwesomeIcons.Solid.Xmark,
                             contentDescription = stringResource(id = R.string.navigate_back),
                         )
                     }
-                    FilledTonalIconButton(
+                    Glassify(
                         onClick = {
                             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                                 if (!permissionState.status.isGranted) {
@@ -175,6 +189,10 @@ internal fun MediaScreen(
                                 state.save()
                             }
                         },
+                        hazeState = hazeState,
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                        modifier = Modifier.size(40.dp),
+                        shape = CircleShape,
                     ) {
                         FAIcon(
                             FontAwesomeIcons.Solid.Download,

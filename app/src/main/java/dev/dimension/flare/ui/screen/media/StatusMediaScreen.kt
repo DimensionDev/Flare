@@ -95,6 +95,7 @@ import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.fornewid.placeholder.material3.placeholder
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -102,8 +103,8 @@ import kotlinx.coroutines.android.awaitFrame
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.saket.telephoto.ExperimentalTelephotoApi
+import me.saket.telephoto.zoomable.Viewport
 import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.ZoomableContent
 import me.saket.telephoto.zoomable.coil3.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
@@ -112,7 +113,6 @@ import moe.tlaster.precompose.molecule.producePresenter
 import moe.tlaster.swiper.Swiper
 import moe.tlaster.swiper.rememberSwiperState
 import org.koin.compose.koinInject
-import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(
     ExperimentalMaterial3Api::class,
@@ -205,11 +205,13 @@ internal fun StatusMediaScreen(
                         }
                     }
                 }
-                Swiper(state = swiperState) {
+                Swiper(
+                    state = swiperState,
+                    modifier =
+                        Modifier
+                            .hazeSource(state = hazeState),
+                ) {
                     HorizontalPager(
-                        modifier =
-                            Modifier
-                                .hazeSource(state = hazeState),
                         state = pagerState,
                         userScrollEnabled = !state.lockPager,
                         key = {
@@ -604,9 +606,9 @@ private fun ImageItem(
         }
     }
     val aspectRatio =
-        remember(zoomableState.coordinateSystem) {
+        remember(zoomableState.coordinateSystem.unscaledContentBounds) {
             with(zoomableState.coordinateSystem) {
-                zoomableState.coordinateSystem.unscaledContentBounds.rectIn(CoordinateSpace.ZoomableContent)
+                unscaledContentBounds.rectIn(CoordinateSpace.Viewport)
             }.let {
                 it.height / it.width
             }

@@ -26,6 +26,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.serialization.json.Json
 import sh.christian.ozone.BlueskyJson
 import sh.christian.ozone.api.response.AtpErrorDescription
+import sh.christian.ozone.api.response.AtpException
 import sh.christian.ozone.api.response.AtpResponse
 import sh.christian.ozone.api.response.StatusCode
 import sh.christian.ozone.oauth.OAuthApi
@@ -118,12 +119,28 @@ internal class BlueskyAuthPlugin(
                             )
                         }
                         val newTokens =
-                            when (error) {
-                                "invalid_token", "ExpiredToken" ->
-                                    refreshExpiredToken(currentCredential, oAuthApi, scope)
+                            runCatching {
+                                when (error) {
+                                    "invalid_token", "ExpiredToken" ->
+                                        refreshExpiredToken(currentCredential, oAuthApi, scope)
 
-                                "use_dpop_nonce" -> refreshDpopNonce(currentCredential, result.response)
-                                else -> null
+                                    "use_dpop_nonce" ->
+                                        refreshDpopNonce(
+                                            currentCredential,
+                                            result.response,
+                                        )
+
+                                    else -> null
+                                }
+                            }.getOrElse {
+                                if (it is AtpException && it.error?.error == "invalid_grant") {
+                                    throw LoginExpiredException(
+                                        plugin.accountKey ?: MicroBlogKey("unknown", "unknown"),
+                                        PlatformType.Bluesky,
+                                    )
+                                } else {
+                                    null
+                                }
                             }
 
                         if (newTokens != null) {

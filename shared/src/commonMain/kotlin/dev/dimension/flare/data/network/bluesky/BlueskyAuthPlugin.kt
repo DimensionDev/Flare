@@ -104,38 +104,53 @@ internal class BlueskyAuthPlugin(
                     }
 
                 if (credentialFlow != null) {
-                    val newTokens =
-                        when (response.getOrNull()?.error) {
-                            "invalid_token", "ExpiredToken" ->
-                                refreshExpiredToken(credentialFlow, oAuthApi, scope)
-
-                            "use_dpop_nonce" -> refreshDpopNonce(credentialFlow, result.response)
-                            else -> null
+                    var shouldRetry = false
+                    val error = response.getOrNull()?.error
+                    if (error == "ExpiredToken" || error == "invalid_token" || error == "use_dpop_nonce") {
+                        shouldRetry = true
+                    }
+                    var retryCount = 0
+                    while (shouldRetry) {
+                        retryCount++
+                        if (retryCount > 5) {
+                            // Prevent infinite retry loop
+                            throw LoginExpiredException(
+                                plugin.accountKey ?: MicroBlogKey("unknown", "unknown"),
+                                PlatformType.Bluesky,
+                            )
                         }
+                        val newTokens =
+                            when (response.getOrNull()?.error) {
+                                "invalid_token", "ExpiredToken" ->
+                                    refreshExpiredToken(credentialFlow, oAuthApi, scope)
 
-                    if (newTokens != null) {
-                        plugin.onAuthTokensChanged(newTokens)
-
-                        context.headers.remove(HttpHeaders.Authorization)
-                        context.headers.remove("DPoP")
-                        context.auth(flowOf(newTokens), oAuthApi)
-                        result = execute(context)
-
-                        val newResponse =
-                            runCatching<AtpErrorDescription> {
-                                plugin.json.decodeFromString(result.response.bodyAsText())
+                                "use_dpop_nonce" -> refreshDpopNonce(credentialFlow, result.response)
+                                else -> null
                             }
-                        when (newResponse.getOrNull()?.error) {
-                            "ExpiredToken" -> throw LoginExpiredException(
-                                plugin.accountKey!!,
-                                PlatformType.Bluesky,
-                            )
 
-                            null -> Unit
-                            else -> throw LoginExpiredException(
-                                plugin.accountKey!!,
-                                PlatformType.Bluesky,
-                            )
+                        if (newTokens != null) {
+                            plugin.onAuthTokensChanged(newTokens)
+
+                            context.headers.remove(HttpHeaders.Authorization)
+                            context.headers.remove("DPoP")
+                            context.auth(flowOf(newTokens), oAuthApi)
+                            result = execute(context)
+
+                            val newResponse =
+                                runCatching<AtpErrorDescription> {
+                                    plugin.json.decodeFromString(result.response.bodyAsText())
+                                }
+                            val newError = newResponse.getOrNull()?.error
+                            if (newError == "ExpiredToken" || newError == "invalid_token" || newError == "use_dpop_nonce") {
+                                // Retry again if the token is still invalid
+                                shouldRetry = true
+                            } else {
+                                // No more retries needed, break the loop
+                                shouldRetry = false
+                            }
+                        } else {
+                            // No new tokens available, do not retry
+                            shouldRetry = false
                         }
                     }
 

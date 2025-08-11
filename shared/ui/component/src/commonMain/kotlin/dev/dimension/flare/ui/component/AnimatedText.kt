@@ -59,9 +59,9 @@ internal fun AnimatedNumber(
                     targetState = digit,
                     transitionSpec = {
                         if (targetState > initialState) {
-                            fadeIn() + slideInVertically { -it } togetherWith fadeOut() + slideOutVertically { it }
-                        } else {
                             fadeIn() + slideInVertically { it } togetherWith fadeOut() + slideOutVertically { -it }
+                        } else {
+                            fadeIn() + slideInVertically { -it } togetherWith fadeOut() + slideOutVertically { it }
                         }.using(SizeTransform(clip = false))
                     },
                 ) { digit ->

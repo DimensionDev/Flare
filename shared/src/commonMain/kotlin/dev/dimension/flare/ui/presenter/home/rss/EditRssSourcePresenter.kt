@@ -48,6 +48,8 @@ public class EditRssSourcePresenter(
                 public fun checkWithServer(server: String)
 
                 public fun save(title: String)
+
+                public val actualUrl: String
             }
         }
 
@@ -123,12 +125,8 @@ public class EditRssSourcePresenter(
                             override val checkState: UiState<RssState>
                                 get() = checkRssHubState.state
 
-                            override fun checkWithServer(server: String) {
-                                serverStr = server
-                            }
-
-                            override fun save(title: String) {
-                                val actualUrl =
+                            override val actualUrl: String
+                                get() =
                                     buildUrl {
                                         serverStr
                                             .removePrefix("https://")
@@ -143,6 +141,12 @@ public class EditRssSourcePresenter(
                                             }
                                         set(scheme = "https")
                                     }.toString()
+
+                            override fun checkWithServer(server: String) {
+                                serverStr = server
+                            }
+
+                            override fun save(title: String) {
                                 scope.launch {
                                     appDatabase
                                         .rssSourceDao()

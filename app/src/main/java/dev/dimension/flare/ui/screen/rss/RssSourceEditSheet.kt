@@ -288,7 +288,15 @@ internal fun RssSourceEditSheet(
                             inputState.save(
                                 title = state.title.text.toString(),
                             )
-                            state.save()
+                            state.save(
+                                sources =
+                                    listOf(
+                                        state.url.text.toString() to
+                                            state.title.text.toString().ifEmpty {
+                                                null
+                                            },
+                                    ),
+                            )
                             onDismissRequest.invoke()
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -327,7 +335,15 @@ internal fun RssSourceEditSheet(
                             inputState.save(
                                 title = state.title.text.toString(),
                             )
-                            state.save()
+                            state.save(
+                                sources =
+                                    listOf(
+                                        inputState.actualUrl to
+                                            state.title.text.toString().ifEmpty {
+                                                null
+                                            },
+                                    ),
+                            )
                             onDismissRequest.invoke()
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -343,7 +359,12 @@ internal fun RssSourceEditSheet(
                             inputState.save(
                                 sources = state.selectedSource,
                             )
-                            state.save()
+                            state.save(
+                                sources =
+                                    state.selectedSource.map { source ->
+                                        source.url to source.title
+                                    },
+                            )
                             onDismissRequest.invoke()
                         },
                         modifier = Modifier.fillMaxWidth(),
@@ -445,7 +466,7 @@ private fun presenter(
             }
         }
 
-        fun save() {
+        fun save(sources: List<Pair<String, String?>>) {
             appScope.launch {
                 settingsRepository.updateTabSettings {
                     if (pinnedInTabs) {
@@ -453,21 +474,22 @@ private fun presenter(
                             mainTabs =
                                 mainTabs
                                     .filterNot { tab ->
-                                        tab is RssTimelineTabItem && tab.feedUrl == urlText.text.toString()
-                                    }.plus(
+                                        tab is RssTimelineTabItem && sources.any { it.first == tab.feedUrl }
+                                    } +
+                                    sources.map { source ->
                                         RssTimelineTabItem(
-                                            feedUrl = urlText.text.toString(),
-                                            title = titleText.text.toString(),
-                                        ),
-                                    ).toImmutableList(),
+                                            feedUrl = source.first,
+                                            title = source.second.orEmpty(),
+                                        )
+                                    },
                         )
                     } else {
                         copy(
                             mainTabs =
                                 mainTabs
                                     .filterNot { tab ->
-                                        tab is RssTimelineTabItem && tab.feedUrl == urlText.text.toString()
-                                    }.toImmutableList(),
+                                        tab is RssTimelineTabItem && sources.any { it.first == tab.feedUrl }
+                                    },
                         )
                     }
                 }

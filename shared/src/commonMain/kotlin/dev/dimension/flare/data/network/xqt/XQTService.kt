@@ -175,75 +175,83 @@ private class XQTHeaderConfig {
     var accountKey: MicroBlogKey? = null
 }
 
-private val XQTHeaderPlugin = createClientPlugin("XQTHeaderPlugin", ::XQTHeaderConfig) {
-    val chocolateFlow = pluginConfig.chocolateFlow
-    val accountKey = pluginConfig.accountKey
-    onRequest { request, body ->
-        val elonMusk1145141919810 =
-            runCatching {
-                ElonMusk1145141919810.senpaiSukissu(
-                    method = request.method.value,
-                    path = request.url.encodedPath,
-                )
-            }.onFailure {
-                it.printStackTrace()
-            }.getOrNull()
-        val chocolate = chocolateFlow?.firstOrNull()
-        request.headers {
-            append("x-twitter-client-language", "en")
-            append(
-                "Sec-Ch-Ua",
-                "\"Chromium\";v=\"116\", \"Not)A;Brand\";v=\"24\", \"Google Chrome\";v=\"116\"",
-            )
-            append("Sec-Ch-Ua-Mobile", "?0")
-            append("Sec-Fetch-Dest", "empty")
-            append("Sec-Fetch-Mode", "cors")
-            append("Sec-Fetch-Site", "same-origin")
-            append("Sec-Ch-Ua-Platform", "\"Windows\"")
-            append(
-                "User-Agent",
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
-            )
-            if (chocolate != null) {
-                if (elonMusk1145141919810 != null) {
-                    append(
-                        "x-client-transaction-id",
-                        elonMusk1145141919810,
+private val XQTHeaderPlugin =
+    createClientPlugin("XQTHeaderPlugin", ::XQTHeaderConfig) {
+        val chocolateFlow = pluginConfig.chocolateFlow
+        val accountKey = pluginConfig.accountKey
+        onRequest { request, body ->
+            val elonMusk1145141919810 =
+                runCatching {
+                    ElonMusk1145141919810.senpaiSukissu(
+                        method = request.method.value,
+                        path = request.url.encodedPath,
                     )
+                }.onFailure {
+                    it.printStackTrace()
+                }.getOrNull()
+            val chocolate = chocolateFlow?.firstOrNull()
+            request.headers {
+                append("Authorization", "Bearer $token")
+                append("x-twitter-client-language", "en")
+                append(
+                    "Sec-Ch-Ua",
+                    "\"Chromium\";v=\"116\", \"Not)A;Brand\";v=\"24\", \"Google Chrome\";v=\"116\"",
+                )
+                append("Sec-Ch-Ua-Mobile", "?0")
+                append("Sec-Fetch-Dest", "empty")
+                append("Sec-Fetch-Mode", "cors")
+                append("Sec-Fetch-Site", "same-origin")
+                append("Sec-Ch-Ua-Platform", "\"Windows\"")
+                append(
+                    "User-Agent",
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36",
+                )
+                if (chocolate != null) {
+                    if (elonMusk1145141919810 != null) {
+                        append(
+                            "x-client-transaction-id",
+                            elonMusk1145141919810,
+                        )
+                    }
+                    val guestToken =
+                        chocolate
+                            .split("; ")
+                            .firstOrNull { it.startsWith("gt=") }
+                            ?.removePrefix("gt=")
+                    val csrfToken =
+                        chocolate
+                            .split("; ")
+                            .firstOrNull { it.startsWith("ct0=") }
+                            ?.removePrefix("ct0=")
+                    if (guestToken != null) {
+                        append("x-guest-token", guestToken)
+                    }
+                    if (csrfToken != null) {
+                        append("x-twitter-active-user", "yes")
+                        append("x-twitter-auth-type", "OAuth2Session")
+                        append("x-csrf-token", csrfToken)
+                    }
+                    append("Cookie", chocolate)
                 }
-                val guestToken =
-                    chocolate
-                        .split("; ")
-                        .firstOrNull { it.startsWith("gt=") }
-                        ?.removePrefix("gt=")
-                val csrfToken =
-                    chocolate
-                        .split("; ")
-                        .firstOrNull { it.startsWith("ct0=") }
-                        ?.removePrefix("ct0=")
-                if (guestToken != null) {
-                    append("x-guest-token", guestToken)
-                }
-                if (csrfToken != null) {
-                    append("x-twitter-active-user", "yes")
-                    append("x-twitter-auth-type", "OAuth2Session")
-                    append("x-csrf-token", csrfToken)
-                }
-                append("Cookie", chocolate)
+            }
+        }
+        onResponse { response ->
+            val error =
+                runCatching {
+                    val bodyJson = response.body<JsonObject>()
+                    bodyJson["errors"]
+                        ?.jsonArray
+                        ?.firstOrNull()
+                        ?.jsonObject
+                        ?.get("code")
+                        ?.jsonPrimitive
+                        ?.longOrNull
+                }.getOrNull()
+            if ((error == 215L || response.status == HttpStatusCode.Forbidden) && accountKey != null) {
+                throw LoginExpiredException(
+                    accountKey,
+                    PlatformType.xQt,
+                )
             }
         }
     }
-    onResponse { response ->
-        val error = runCatching {
-            val bodyJson = response.body<JsonObject>()
-            bodyJson["errors"]?.jsonArray?.firstOrNull()?.jsonObject?.get("code")?.jsonPrimitive?.longOrNull
-        }.getOrNull()
-        if ((error == 215L || response.status == HttpStatusCode.Forbidden) && accountKey != null) {
-            throw LoginExpiredException(
-                accountKey,
-                PlatformType.xQt,
-            )
-        }
-    }
-}
-

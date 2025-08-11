@@ -23,9 +23,9 @@ import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.utils.io.core.writeFully
-import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlin.time.Duration.Companion.minutes
 
 private val baseUrl = "https://$vvoHost/"
 

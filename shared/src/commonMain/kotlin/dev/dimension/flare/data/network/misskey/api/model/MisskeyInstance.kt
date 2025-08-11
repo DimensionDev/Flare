@@ -26,6 +26,7 @@ internal data class InstancesInfo(
 //    val banner: Boolean,
 //    val background: Boolean,
 )
+
 //
 // @Serializable
 // internal data class Meta(
@@ -214,8 +215,8 @@ internal data class InstancesInfo(
 //    val canCreateVoiceChannel: Boolean? = null,
 // )
 //
- @Serializable
- internal data class Nodeinfo(
+@Serializable
+internal data class Nodeinfo(
 //    val version: String,
 //    val software: Software,
 //    val protocols: List<String>,
@@ -224,7 +225,8 @@ internal data class InstancesInfo(
     val usage: Usage? = null,
 //    val metadata: Metadata,
 //    val mulukhiya: Mulukhiya? = null,
- )
+)
+
 //
 // @Serializable
 // internal data class Metadata(
@@ -325,19 +327,19 @@ internal data class InstancesInfo(
 //    val repository: String? = null,
 // )
 //
- @Serializable
- internal data class Usage(
+@Serializable
+internal data class Usage(
     val users: Users? = null,
 //    val localPosts: Long? = null,
 //    val localComments: Long? = null,
- )
+)
 
- @Serializable
- internal data class Users(
+@Serializable
+internal data class Users(
     val total: Long? = null,
 //    val activeHalfyear: Long? = null,
 //    val activeMonth: Long? = null,
- )
+)
 
 @Serializable
 internal data class InstancesInfoStats(
@@ -351,10 +353,10 @@ internal data class InstancesInfoStats(
 //    val driveUsageRemote: Long,
 )
 
-//@Serializable
-//internal data class MisskeyInstanceStats(
+// @Serializable
+// internal data class MisskeyInstanceStats(
 //    val notesCount: Long,
 //    val usersCount: Long,
 //    val mau: Long,
 //    val instancesCount: Long,
-//)
+// )

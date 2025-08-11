@@ -45,7 +45,11 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                                     domain = it.url,
                                     type = PlatformType.Misskey,
                                     bannerUrl = it.meta?.bannerURL,
-                                    usersCount = it.stats?.usersCount ?: it.nodeinfo?.usage?.users?.total ?: 0,
+                                    usersCount =
+                                        it.stats?.usersCount ?: it.nodeinfo
+                                            ?.usage
+                                            ?.users
+                                            ?.total ?: 0,
                                 )
                             }
                         }.getOrDefault(emptyList())

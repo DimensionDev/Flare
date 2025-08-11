@@ -22,7 +22,6 @@ import com.materialkolor.dynamiccolor.ColorSpec
 import com.materialkolor.rememberDynamicColorScheme
 import dev.dimension.flare.data.model.LocalAppearanceSettings
 import dev.dimension.flare.data.model.Theme
-import dev.dimension.flare.ui.component.platform.isBigScreen
 
 private object MoreColors {
     val Gray50 = Color(0xFFFAFAFA)
@@ -34,7 +33,7 @@ private object MoreColors {
     val Gray600 = Color(0xFF757575)
     val Gray700 = Color(0xFF616161)
     val Gray800 = Color(0xFF424242)
-    val Gray900 = Color(0xFF212121)
+    val Gray900 = Color(0xFF141414)
 }
 
 private fun ColorScheme.withPureColorLightMode(): ColorScheme =
@@ -76,7 +75,6 @@ fun FlareTheme(
     val context = LocalContext.current
     val seed = Color(LocalAppearanceSettings.current.colorSeed)
     val pureColorMode = LocalAppearanceSettings.current.pureColorMode
-    val bigScreen = isBigScreen()
     val colorScheme =
         if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             remember(

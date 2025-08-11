@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import app.bsky.feed.GetPostThreadQueryParams
 import app.bsky.feed.GetPostThreadResponseThreadUnion
 import app.bsky.feed.GetPostsQueryParams
+import app.bsky.feed.ThreadViewPost
 import app.bsky.feed.ThreadViewPostParentUnion
 import app.bsky.feed.ThreadViewPostReplieUnion
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
@@ -88,11 +89,16 @@ internal class StatusDetailRemoteMediator(
                         ).requireResponse()
                 when (val thread = context.thread) {
                     is GetPostThreadResponseThreadUnion.ThreadViewPost -> {
-                        val parent =
-                            when (val value = thread.value.parent) {
-                                is ThreadViewPostParentUnion.ThreadViewPost -> value.value
-                                else -> null
-                            }
+                        val parents = mutableListOf<ThreadViewPost>()
+                        var current: ThreadViewPost? = thread.value
+                        while (current != null) {
+                            parents.add(current)
+                            current =
+                                when (val parent = current.parent) {
+                                    is ThreadViewPostParentUnion.ThreadViewPost -> parent.value
+                                    else -> null
+                                }
+                        }
                         val replies =
                             thread.value.replies.mapNotNull {
                                 when (it) {
@@ -100,7 +106,7 @@ internal class StatusDetailRemoteMediator(
                                     else -> null
                                 }
                             }
-                        listOfNotNull(parent?.post) + thread.value.post + replies
+                        parents.map { it.post }.reversed() + thread.value.post + replies
                     }
 
                     else -> emptyList()

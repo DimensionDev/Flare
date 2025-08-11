@@ -103,7 +103,6 @@ public abstract class TimelinePresenter :
     private fun cachePager(
         mediator: BaseTimelineRemoteMediator,
         scope: CoroutineScope,
-        pageSize: Int = 20,
     ): Flow<PagingData<UiTimeline>> {
         val pagerFlow =
             Pager(
@@ -131,16 +130,21 @@ public abstract class TimelinePresenter :
                                     }
                                 }
                             }?.dataSource
-                        data.render(dataSource, useDbKeyInItemKey)
+                        data
+                            .render(dataSource, useDbKeyInItemKey)
+                            .let {
+                                transform(it)
+                            }
                     }
                 }
         }
     }
 
+    protected open fun transform(data: UiTimeline): UiTimeline = data
+
     private fun networkPager(
         pagingSource: BaseTimelinePagingSourceFactory<*>,
         scope: CoroutineScope,
-        pageSize: Int = 20,
     ): Flow<PagingData<UiTimeline>> =
         Pager(
             config = pagingConfig,

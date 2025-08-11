@@ -42,12 +42,12 @@ import kotlin.time.Instant
 internal fun Notification.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Mastodon,
-    references: Map<ReferenceType, StatusContent>,
+    references: Map<ReferenceType, List<StatusContent>>,
 ): UiTimeline {
     requireNotNull(account) { "account is null" }
     val user = account.render(accountKey, host = accountKey.host)
     val status =
-        (references[ReferenceType.Notification] as? StatusContent.Mastodon)
+        (references[ReferenceType.Notification]?.firstOrNull() as? StatusContent.Mastodon)
             ?.data
             ?.renderStatus(
                 host = accountKey.host,
@@ -153,7 +153,7 @@ internal fun Status.renderGuest(host: String) =
             reblog
                 ?.let { reblog ->
                     mapOf(
-                        ReferenceType.Retweet to StatusContent.Mastodon(reblog),
+                        ReferenceType.Retweet to listOfNotNull(StatusContent.Mastodon(reblog)),
                     )
                 }.orEmpty(),
     )
@@ -161,13 +161,13 @@ internal fun Status.renderGuest(host: String) =
 internal fun Status.render(
     host: String,
     event: StatusEvent.Mastodon?,
-    references: Map<ReferenceType, StatusContent> = mapOf(),
+    references: Map<ReferenceType, List<StatusContent>> = mapOf(),
 ): UiTimeline {
     val accountKey = event?.accountKey
     requireNotNull(account) { "account is null" }
     val user = account.render(accountKey, host)
     val currentStatus = this.renderStatus(host, accountKey, event)
-    val actualStatus = (references[ReferenceType.Retweet] as? StatusContent.Mastodon)?.data ?: this
+    val actualStatus = (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.Mastodon)?.data ?: this
     val topMessage =
         if (pinned == true) {
             UiTimeline.TopMessage(

@@ -100,6 +100,7 @@ public data class UiTimeline internal constructor(
             val bottomContent: BottomContent? = null,
             val topEndContent: TopEndContent? = null,
             val aboveTextContent: AboveTextContent? = null,
+            val parents: ImmutableList<Status> = persistentListOf(),
             val url: String,
             val onClicked: ClickContext.() -> Unit,
             val onMediaClicked: ClickContext.(media: UiMedia, index: Int) -> Unit,

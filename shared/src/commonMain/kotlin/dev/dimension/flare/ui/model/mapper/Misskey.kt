@@ -59,7 +59,7 @@ import kotlin.time.Instant
 internal fun Notification.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Misskey,
-    references: Map<ReferenceType, StatusContent>,
+    references: Map<ReferenceType, List<StatusContent>>,
 ): UiTimeline {
     val user = user?.render(accountKey)
     val notificationType =
@@ -138,7 +138,7 @@ internal fun Notification.render(
             statusKey = MicroBlogKey(id, accountKey.host),
         )
     val status =
-        (references[ReferenceType.Notification] as? StatusContent.Misskey)
+        (references[ReferenceType.Notification]?.firstOrNull() as? StatusContent.Misskey)
             ?.data
             ?.let {
                 if (notificationType == NotificationType.Renote) {
@@ -280,10 +280,10 @@ public enum class MisskeyAchievement(
 internal fun Note.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.Misskey,
-    references: Map<ReferenceType, StatusContent>,
+    references: Map<ReferenceType, List<StatusContent>>,
 ): UiTimeline {
     val user = user.render(accountKey)
-    val renote = (references[ReferenceType.Retweet] as? StatusContent.Misskey)?.data
+    val renote = (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.Misskey)?.data
     val currentStatus = this.renderStatus(accountKey, event)
     val actualStatus = renote ?: this
     val topMessage =

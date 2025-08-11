@@ -81,7 +81,9 @@ internal object Bluesky {
         pagingKey: String,
         database: CacheDatabase,
         data: List<PostView>,
-        sortIdProvider: (PostView) -> Long = { it.indexedAt.toStdlibInstant().toEpochMilliseconds() },
+        sortIdProvider: (PostView) -> Long = {
+            it.indexedAt.toStdlibInstant().toEpochMilliseconds()
+        },
     ) {
         save(database, data.toDb(accountKey, pagingKey, sortIdProvider))
     }
@@ -244,7 +246,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                             listOfNotNull(
                                 post,
                             ).associate {
-                                ReferenceType.Notification to it.toDbStatusWithUser(accountKey = accountKey)
+                                ReferenceType.Notification to listOfNotNull(it.toDbStatusWithUser(accountKey = accountKey))
                             },
                     ),
                 )
@@ -314,7 +316,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                         status = data,
                         references =
                             mapOf(
-                                ReferenceType.Notification to post.toDbStatusWithUser(accountKey),
+                                ReferenceType.Notification to listOfNotNull(post.toDbStatusWithUser(accountKey)),
                             ),
                     )
                 }
@@ -349,10 +351,11 @@ internal fun List<ListNotificationsNotification>.toDb(
                         status = data,
                         references =
                             mapOf(
-                                ReferenceType.Notification to post.toDbStatusWithUser(accountKey),
+                                ReferenceType.Notification to listOfNotNull(post.toDbStatusWithUser(accountKey)),
                             ),
                     )
                 }
+
             ListNotificationsReason.RepostViaRepost ->
                 items.mapNotNull {
                     val post = references[it.uri] ?: return@mapNotNull null
@@ -382,10 +385,11 @@ internal fun List<ListNotificationsNotification>.toDb(
                         status = data,
                         references =
                             mapOf(
-                                ReferenceType.Notification to post.toDbStatusWithUser(accountKey),
+                                ReferenceType.Notification to listOfNotNull(post.toDbStatusWithUser(accountKey)),
                             ),
                     )
                 }
+
             ListNotificationsReason.SubscribedPost -> {
                 items.mapNotNull {
                     val post = references[it.uri] ?: return@mapNotNull null
@@ -415,7 +419,7 @@ internal fun List<ListNotificationsNotification>.toDb(
                         status = data,
                         references =
                             mapOf(
-                                ReferenceType.Notification to post.toDbStatusWithUser(accountKey),
+                                ReferenceType.Notification to listOfNotNull(post.toDbStatusWithUser(accountKey)),
                             ),
                     )
                 }
@@ -449,35 +453,43 @@ private fun ListNotificationsNotification.toDbStatus(accountKey: MicroBlogKey): 
     )
 }
 
-internal fun List<FeedViewPost>.toDbPagingTimeline(
+internal suspend fun List<FeedViewPost>.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (FeedViewPost) -> Long = {
+    sortIdProvider: suspend (FeedViewPost) -> Long = {
         when (val reason = it.reason) {
-            is FeedViewPostReasonUnion.ReasonRepost -> {
-                reason.value.indexedAt
-                    .toStdlibInstant()
-                    .toEpochMilliseconds()
-            }
+//            is FeedViewPostReasonUnion.ReasonRepost -> {
+//                reason.value.indexedAt
+//                    .toStdlibInstant()
+//                    .toEpochMilliseconds()
+//            }
 
             is FeedViewPostReasonUnion.ReasonPin -> {
                 Long.MAX_VALUE
             }
 
             else -> {
-                it.post.indexedAt
-                    .toStdlibInstant()
-                    .toEpochMilliseconds()
+                -SnowflakeIdGenerator.nextId()
+//                it.post.indexedAt
+//                    .toStdlibInstant()
+//                    .toEpochMilliseconds()
             }
         }
     },
 ): List<DbPagingTimelineWithStatus> =
-    this.map {
+    this.flatMap {
         val reply =
             when (val reply = it.reply?.parent) {
-                is ReplyRefParentUnion.PostView -> reply.value.toDbStatusWithUser(accountKey)
+                is ReplyRefParentUnion.PostView ->
+                    if (reply.value.uri != it.post.uri) {
+                        reply.value
+                    } else {
+                        null
+                    }
+
                 else -> null
             }
+
         val status =
             when (val data = it.reason) {
                 is FeedViewPostReasonUnion.ReasonRepost -> {
@@ -531,22 +543,33 @@ internal fun List<FeedViewPost>.toDbPagingTimeline(
         val references =
             listOfNotNull(
                 if (reply != null) {
-                    ReferenceType.Reply to reply
+                    ReferenceType.Reply to listOfNotNull(reply.toDbStatusWithUser(accountKey))
                 } else {
                     null
                 },
                 if (it.reason != null) {
-                    ReferenceType.Retweet to it.post.toDbStatusWithUser(accountKey)
+                    ReferenceType.Retweet to listOfNotNull(it.post.toDbStatusWithUser(accountKey))
                 } else {
                     null
                 },
             ).toMap()
-        createDbPagingTimelineWithStatus(
-            accountKey = accountKey,
-            pagingKey = pagingKey,
-            sortId = sortIdProvider(it),
-            status = status,
-            references = references,
+        listOfNotNull(
+//            reply?.let {
+//                createDbPagingTimelineWithStatus(
+//                    accountKey = accountKey,
+//                    pagingKey = pagingKey,
+//                    sortId = -SnowflakeIdGenerator.nextId(),
+//                    status = it,
+//                    references = references,
+//                )
+//            },
+            createDbPagingTimelineWithStatus(
+                accountKey = accountKey,
+                pagingKey = pagingKey,
+                sortId = sortIdProvider(it),
+                status = status,
+                references = references,
+            ),
         )
     }
 
@@ -664,8 +687,18 @@ private fun ConvoView.toDbMessageRoom(host: String) =
         platformType = PlatformType.Bluesky,
         messageKey =
             when (val message = lastMessage) {
-                is ConvoViewLastMessageUnion.MessageView -> MicroBlogKey(id = message.value.id, host = host)
-                is ConvoViewLastMessageUnion.DeletedMessageView -> MicroBlogKey(id = message.value.id, host = host)
+                is ConvoViewLastMessageUnion.MessageView ->
+                    MicroBlogKey(
+                        id = message.value.id,
+                        host = host,
+                    )
+
+                is ConvoViewLastMessageUnion.DeletedMessageView ->
+                    MicroBlogKey(
+                        id = message.value.id,
+                        host = host,
+                    )
+
                 null -> null
                 is ConvoViewLastMessageUnion.Unknown -> null
             },

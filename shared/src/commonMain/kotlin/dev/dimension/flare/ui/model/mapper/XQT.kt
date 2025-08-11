@@ -238,10 +238,10 @@ internal fun TopLevel.renderNotifications(
 internal fun Tweet.render(
     accountKey: MicroBlogKey,
     event: StatusEvent.XQT,
-    references: Map<ReferenceType, StatusContent> = emptyMap(),
+    references: Map<ReferenceType, List<StatusContent>> = emptyMap(),
 ): UiTimeline {
     val retweet =
-        (references[ReferenceType.Retweet] as? StatusContent.XQT)
+        (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.XQT)
             ?.data
             ?.renderStatus(accountKey = accountKey, event = event, references = emptyMap())
     val currentTweet = renderStatus(accountKey, event, references)
@@ -275,10 +275,16 @@ internal fun Tweet.render(
 internal fun Tweet.renderStatus(
     accountKey: MicroBlogKey,
     event: StatusEvent.XQT,
-    references: Map<ReferenceType, StatusContent>,
+    references: Map<ReferenceType, List<StatusContent>>,
 ): UiTimeline.ItemContent.Status {
+    val parents =
+        references[ReferenceType.Reply]
+            ?.mapNotNull { it as? StatusContent.XQT }
+            ?.map { it.data.renderStatus(accountKey, event, emptyMap()) }
+            ?.toImmutableList()
+            ?: persistentListOf()
     val quote =
-        (references[ReferenceType.Quote] as? StatusContent.XQT)
+        (references[ReferenceType.Quote]?.firstOrNull() as? StatusContent.XQT)
             ?.data
             ?.renderStatus(accountKey = accountKey, event = event, references = emptyMap())
     val user =
@@ -497,6 +503,7 @@ internal fun Tweet.renderStatus(
         contentWarning = null,
         createdAt = createAt.toUi(),
         aboveTextContent = aboveTextContent,
+        parents = parents,
         actions =
             listOfNotNull(
                 StatusAction.Item.Reply(

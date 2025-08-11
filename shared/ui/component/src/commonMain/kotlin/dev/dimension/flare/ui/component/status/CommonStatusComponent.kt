@@ -73,6 +73,7 @@ import dev.dimension.flare.data.datasource.microblog.StatusAction
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.common.PlatformShare
 import dev.dimension.flare.ui.component.AdaptiveGrid
+import dev.dimension.flare.ui.component.AvatarComponentDefaults
 import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.EmojiImage
 import dev.dimension.flare.ui.component.FAIcon
@@ -143,6 +144,7 @@ public fun CommonStatusComponent(
     item: UiTimeline.ItemContent.Status,
     isDetail: Boolean,
     modifier: Modifier = Modifier,
+    enableStartPadding: Boolean = false,
 ) {
     val uriHandler = LocalUriHandler.current
     val appearanceSettings = LocalComponentAppearance.current
@@ -206,117 +208,131 @@ public fun CommonStatusComponent(
                 }
             }
         }
-        when (val content = item.aboveTextContent) {
-            is UiTimeline.ItemContent.Status.AboveTextContent.ReplyTo -> {
-                Spacer(modifier = Modifier.height(4.dp))
-                StatusReplyComponent(
-                    replyHandle = content.handle,
-                )
-            }
+        Column(
+            modifier =
+                Modifier
+                    .let {
+                        if (enableStartPadding) {
+                            it.padding(
+                                start = AvatarComponentDefaults.size + 8.dp,
+                            )
+                        } else {
+                            it
+                        }
+                    },
+        ) {
+            when (val content = item.aboveTextContent) {
+                is UiTimeline.ItemContent.Status.AboveTextContent.ReplyTo -> {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    StatusReplyComponent(
+                        replyHandle = content.handle,
+                    )
+                }
 
-            null -> Unit
-        }
-        if (isDetail) {
-            SelectionContainer {
+                null -> Unit
+            }
+            if (isDetail) {
+                SelectionContainer {
+                    StatusContentComponent(
+                        content = item.content,
+                        contentWarning = item.contentWarning,
+                        poll = item.poll,
+                        maxLines = Int.MAX_VALUE,
+                    )
+                }
+            } else {
                 StatusContentComponent(
                     content = item.content,
                     contentWarning = item.contentWarning,
                     poll = item.poll,
-                    maxLines = Int.MAX_VALUE,
+                    maxLines = 6,
                 )
             }
-        } else {
-            StatusContentComponent(
-                content = item.content,
-                contentWarning = item.contentWarning,
-                poll = item.poll,
-                maxLines = 6,
-            )
-        }
 
-        if (isDetail && !item.content.isEmpty) {
-            TranslationComponent(
-                statusKey = item.statusKey,
-                contentWarning = item.contentWarning,
-                rawContent = item.content.innerText,
-                content = item.content,
-            )
-        }
+            if (isDetail && !item.content.isEmpty) {
+                TranslationComponent(
+                    statusKey = item.statusKey,
+                    contentWarning = item.contentWarning,
+                    rawContent = item.content.innerText,
+                    content = item.content,
+                )
+            }
 
-        if (item.images.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(8.dp))
-            StatusMediasComponent(appearanceSettings, item)
-        }
-        item.card?.let { card ->
-            if (appearanceSettings.showLinkPreview && item.images.isEmpty() && item.quote.isEmpty()) {
+            if (item.images.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                StatusCardComponent(
-                    card = card,
-                    modifier =
-                        Modifier
-                            .pointerHoverIcon(PointerIcon.Hand)
-                            .clickable {
-                                uriHandler.openUri(card.url)
-                            }.fillMaxWidth(),
-                )
+                StatusMediasComponent(appearanceSettings, item)
             }
-        }
-        if (item.quote.isNotEmpty()) {
-            Spacer(modifier = Modifier.height(4.dp))
-            StatusQuoteComponent(
-                quotes = item.quote,
-            )
-        }
-
-        when (val content = item.bottomContent) {
-            is UiTimeline.ItemContent.Status.BottomContent.Reaction -> {
-                Spacer(modifier = Modifier.height(4.dp))
-                StatusReactionComponent(
-                    data = content,
-                )
-            }
-
-            null -> Unit
-        }
-
-        if (isDetail) {
-            Spacer(modifier = Modifier.height(8.dp))
-            PlatformText(
-                text = item.createdAt.value.localizedFullTime,
-                style = PlatformTheme.typography.caption,
-                color = PlatformTheme.colorScheme.caption,
-            )
-        }
-        if (appearanceSettings.showActions || isDetail) {
-            Spacer(modifier = Modifier.height(8.dp))
-            if (isDetail) {
-                CompositionLocalProvider(
-                    PlatformContentColor provides PlatformTheme.colorScheme.caption,
-                ) {
-                    StatusActions(
-                        item.actions,
-                        onShare = {
-                            PlatformShare.shareText(
-                                context = platformContext,
-                                text = item.url,
-                            )
-                        },
+            item.card?.let { card ->
+                if (appearanceSettings.showLinkPreview && item.images.isEmpty() && item.quote.isEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    StatusCardComponent(
+                        card = card,
+                        modifier =
+                            Modifier
+                                .pointerHoverIcon(PointerIcon.Hand)
+                                .clickable {
+                                    uriHandler.openUri(card.url)
+                                }.fillMaxWidth(),
                     )
                 }
-            } else {
-                CompositionLocalProvider(
-                    PlatformContentColor provides PlatformTheme.colorScheme.caption.copy(alpha = MediumAlpha),
-                    PlatformTextStyle provides PlatformTheme.typography.caption,
-                ) {
-                    StatusActions(
-                        item.actions,
-                        onShare = {
-                            PlatformShare.shareText(
-                                context = platformContext,
-                                text = item.url,
-                            )
-                        },
+            }
+            if (item.quote.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                StatusQuoteComponent(
+                    quotes = item.quote,
+                )
+            }
+
+            when (val content = item.bottomContent) {
+                is UiTimeline.ItemContent.Status.BottomContent.Reaction -> {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    StatusReactionComponent(
+                        data = content,
                     )
+                }
+
+                null -> Unit
+            }
+
+            if (isDetail) {
+                Spacer(modifier = Modifier.height(8.dp))
+                PlatformText(
+                    text = item.createdAt.value.localizedFullTime,
+                    style = PlatformTheme.typography.caption,
+                    color = PlatformTheme.colorScheme.caption,
+                )
+            }
+            if (appearanceSettings.showActions || isDetail) {
+                Spacer(modifier = Modifier.height(8.dp))
+                if (isDetail) {
+                    CompositionLocalProvider(
+                        PlatformContentColor provides PlatformTheme.colorScheme.caption,
+                    ) {
+                        StatusActions(
+                            item.actions,
+                            onShare = {
+                                PlatformShare.shareText(
+                                    context = platformContext,
+                                    text = item.url,
+                                )
+                            },
+                        )
+                    }
+                } else {
+                    CompositionLocalProvider(
+                        PlatformContentColor provides PlatformTheme.colorScheme.caption.copy(alpha = MediumAlpha),
+                        PlatformTextStyle provides PlatformTheme.typography.caption,
+                    ) {
+                        StatusActions(
+                            item.actions,
+                            onShare = {
+                                PlatformShare.shareText(
+                                    context = platformContext,
+                                    text = item.url,
+                                )
+                            },
+                        )
+                    }
                 }
             }
         }

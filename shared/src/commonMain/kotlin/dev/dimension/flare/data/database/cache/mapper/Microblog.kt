@@ -102,7 +102,7 @@ internal fun createDbPagingTimelineWithStatus(
     pagingKey: String,
     sortId: Long,
     status: DbStatusWithUser,
-    references: Map<ReferenceType, DbStatusWithUser>,
+    references: Map<ReferenceType, List<DbStatusWithUser>>,
 ): DbPagingTimelineWithStatus {
     val timeline =
         DbPagingTimeline(
@@ -117,8 +117,10 @@ internal fun createDbPagingTimelineWithStatus(
             DbStatusWithReference(
                 status = status,
                 references =
-                    references.map { (type, reference) ->
-                        reference.toDbStatusReference(status.data.statusKey, type)
+                    references.flatMap { (type, reference) ->
+                        reference.map {
+                            it.toDbStatusReference(status.data.statusKey, type)
+                        }
                     },
             ),
     )
@@ -129,7 +131,7 @@ internal fun createDbPagingTimelineWithStatus(
     pagingKey: String,
     sortId: Long,
     status: DbStatusWithUser,
-    references: Map<ReferenceType, DbStatusWithUser>,
+    references: Map<ReferenceType, List<DbStatusWithUser>>,
 ): DbPagingTimelineWithStatus =
     createDbPagingTimelineWithStatus(
         accountType = AccountType.Specific(accountKey),

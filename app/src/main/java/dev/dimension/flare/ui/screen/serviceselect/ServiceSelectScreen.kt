@@ -206,15 +206,6 @@ internal fun ServiceSelectScreen(
                                         overflowIndicator = {},
                                     ) {
                                         toggleableItem(
-                                            !state.blueskyInputState.usePasswordLogin,
-                                            onCheckedChange = {
-                                                state.blueskyLoginState.clear()
-                                                state.blueskyOauthLoginState.clear()
-                                                state.blueskyInputState.setUsePasswordLogin(!it)
-                                            },
-                                            label = oauthString,
-                                        )
-                                        toggleableItem(
                                             state.blueskyInputState.usePasswordLogin,
                                             onCheckedChange = {
                                                 state.blueskyLoginState.clear()
@@ -222,6 +213,15 @@ internal fun ServiceSelectScreen(
                                                 state.blueskyInputState.setUsePasswordLogin(it)
                                             },
                                             label = passwordString,
+                                        )
+                                        toggleableItem(
+                                            !state.blueskyInputState.usePasswordLogin,
+                                            onCheckedChange = {
+                                                state.blueskyLoginState.clear()
+                                                state.blueskyOauthLoginState.clear()
+                                                state.blueskyInputState.setUsePasswordLogin(!it)
+                                            },
+                                            label = oauthString,
                                         )
                                     }
                                     OutlinedTextField(
@@ -261,6 +261,9 @@ internal fun ServiceSelectScreen(
                                                     .width(300.dp),
                                             lineLimits = TextFieldLineLimits.SingleLine,
                                         )
+                                    }
+                                    AnimatedVisibility(!state.blueskyInputState.usePasswordLogin) {
+                                        Text(stringResource(R.string.bluesky_login_oauth_hint))
                                     }
                                     if (!state.blueskyInputState.usePasswordLogin) {
                                         OnNewIntent {
@@ -573,7 +576,7 @@ private fun serviceSelectPresenter(onBack: (() -> Unit)?) =
 @Composable
 private fun blueskyInputPresenter() =
     run {
-        var usePasswordLogin by remember { mutableStateOf(false) }
+        var usePasswordLogin by remember { mutableStateOf(true) }
         val username = rememberTextFieldState()
         val password = rememberTextFieldState()
         val authFactorToken = rememberTextFieldState()

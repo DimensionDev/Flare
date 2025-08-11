@@ -11,6 +11,7 @@ import dev.dimension.flare.common.BaseRemoteMediator
 import dev.dimension.flare.common.BaseTimelineLoader
 import dev.dimension.flare.common.CacheData
 import dev.dimension.flare.common.Cacheable
+import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.MemCacheable
 import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
@@ -103,6 +104,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -121,7 +123,6 @@ private const val MAX_ASYNC_UPLOAD_SIZE = 10
 @OptIn(ExperimentalPagingApi::class)
 internal class XQTDataSource(
     override val accountKey: MicroBlogKey,
-    private val credential: UiAccount.XQT.Credential,
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.XQT,
@@ -131,8 +132,19 @@ internal class XQTDataSource(
     private val localFilterRepository: LocalFilterRepository by inject()
     private val coroutineScope: CoroutineScope by inject()
     private val accountRepository: AccountRepository by inject()
+    private val inAppNotification: InAppNotification by inject()
+    private val credentialFlow by lazy {
+        accountRepository
+            .credentialFlow<UiAccount.XQT.Credential>(accountKey)
+            .distinctUntilChanged()
+    }
     private val service by lazy {
-        XQTService(chocolate = credential.chocolate)
+        XQTService(
+            accountKey = accountKey,
+            chocolateFlow =
+                credentialFlow
+                    .map { it.chocolate },
+        )
     }
 
     override fun homeTimeline() =
@@ -140,6 +152,7 @@ internal class XQTDataSource(
             service,
             database,
             accountKey,
+            inAppNotification,
         )
 
     fun featuredTimeline(
@@ -1496,8 +1509,9 @@ internal class XQTDataSource(
                 )
             },
         ).flow
-            .map {
-                it.map {
+            .cachedIn(scope)
+            .combine(credentialFlow) { paging, credential ->
+                paging.map {
                     it.render(accountKey = accountKey, credential = credential, statusEvent = this)
                 }
             }.cachedIn(scope)
@@ -1522,8 +1536,9 @@ internal class XQTDataSource(
                 )
             },
         ).flow
-            .map {
-                it.map {
+            .cachedIn(scope)
+            .combine(credentialFlow) { paging, credential ->
+                paging.map {
                     it.render(accountKey = accountKey, credential = credential, statusEvent = this)
                 }
             }.cachedIn(scope)
@@ -1649,13 +1664,15 @@ internal class XQTDataSource(
                         roomKey = roomKey,
                         accountType = AccountType.Specific(accountKey),
                     ).distinctUntilChanged()
-                    .mapNotNull {
-                        it?.render(
+                    .combine(
+                        credentialFlow,
+                    ) { room, credential ->
+                        room?.render(
                             accountKey = accountKey,
                             credential = credential,
                             statusEvent = this,
                         )
-                    }
+                    }.mapNotNull { it }
             },
         )
 

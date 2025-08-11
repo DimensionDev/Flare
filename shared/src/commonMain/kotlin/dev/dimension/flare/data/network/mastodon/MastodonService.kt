@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.network.mastodon
 
 import dev.dimension.flare.common.decodeJson
-import dev.dimension.flare.data.network.authorization.BearerAuthorization
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.mastodon.api.AccountResources
 import dev.dimension.flare.data.network.mastodon.api.FriendshipResources
@@ -24,17 +23,43 @@ import dev.dimension.flare.data.network.mastodon.api.createTrendsResources
 import dev.dimension.flare.data.network.mastodon.api.model.UploadResponse
 import io.ktor.client.plugins.HttpResponseValidator
 import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
+
+private class MastodonHeaderConfig {
+    var accessTokenFlow: Flow<String>? = null
+}
+
+private val MastodonHeaderPlugin =
+    createClientPlugin("MastodonHeaderPlugin", ::MastodonHeaderConfig) {
+        val accessTokenFlow = pluginConfig.accessTokenFlow
+        onRequest { request, _ ->
+            accessTokenFlow?.let { flow ->
+                val accessToken = flow.firstOrNull()
+                if (accessToken != null) {
+                    request.headers.append(
+                        HttpHeaders.Authorization,
+                        "Bearer $accessToken",
+                    )
+                }
+            }
+        }
+    }
 
 private fun config(
     baseUrl: String,
-    accessToken: String,
-) = ktorfit(baseUrl, BearerAuthorization(accessToken)) {
+    accessTokenFlow: Flow<String>,
+) = ktorfit(baseUrl) {
     expectSuccess = true
+    install(MastodonHeaderPlugin) {
+        this.accessTokenFlow = accessTokenFlow
+    }
     HttpResponseValidator {
         handleResponseExceptionWithRequest { exception, _ ->
             if (exception is ResponseException) {
@@ -51,17 +76,17 @@ private fun config(
 }
 
 internal class MastodonService(
-    private val baseUrl: String,
-    private val accessToken: String,
-) : TimelineResources by config(baseUrl, accessToken).createTimelineResources(),
-    LookupResources by config(baseUrl, accessToken).createLookupResources(),
-    FriendshipResources by config(baseUrl, accessToken).createFriendshipResources(),
-    AccountResources by config(baseUrl, accessToken).createAccountResources(),
-    SearchResources by config(baseUrl, accessToken).createSearchResources(),
-    StatusResources by config(baseUrl, accessToken).createStatusResources(),
-    ListsResources by config(baseUrl, accessToken).createListsResources(),
-    TrendsResources by config(baseUrl, accessToken).createTrendsResources(),
-    MastodonResources by config(baseUrl, accessToken).createMastodonResources() {
+    baseUrl: String,
+    accessTokenFlow: Flow<String>,
+) : TimelineResources by config(baseUrl, accessTokenFlow).createTimelineResources(),
+    LookupResources by config(baseUrl, accessTokenFlow).createLookupResources(),
+    FriendshipResources by config(baseUrl, accessTokenFlow).createFriendshipResources(),
+    AccountResources by config(baseUrl, accessTokenFlow).createAccountResources(),
+    SearchResources by config(baseUrl, accessTokenFlow).createSearchResources(),
+    StatusResources by config(baseUrl, accessTokenFlow).createStatusResources(),
+    ListsResources by config(baseUrl, accessTokenFlow).createListsResources(),
+    TrendsResources by config(baseUrl, accessTokenFlow).createTrendsResources(),
+    MastodonResources by config(baseUrl, accessTokenFlow).createMastodonResources() {
     suspend fun upload(
         data: ByteArray,
         name: String,

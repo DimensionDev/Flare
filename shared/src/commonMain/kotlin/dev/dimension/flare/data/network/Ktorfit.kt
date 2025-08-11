@@ -8,8 +8,6 @@ import de.jensklingenberg.ktorfit.converter.FlowConverterFactory
 import de.jensklingenberg.ktorfit.converter.ResponseConverterFactory
 import dev.dimension.flare.common.BuildConfig
 import dev.dimension.flare.common.JSON
-import dev.dimension.flare.data.network.authorization.Authorization
-import dev.dimension.flare.data.network.authorization.AuthorizationPlugin
 import dev.dimension.flare.data.network.mastodon.api.model.MastodonPagingConverterFactory
 import dev.dimension.flare.data.repository.DebugRepository
 import io.ktor.client.HttpClient
@@ -23,13 +21,12 @@ import kotlinx.serialization.json.Json
 
 internal fun ktorfit(
     baseUrl: String,
-    authorization: Authorization? = null,
     json: Json = JSON,
     config: HttpClientConfig<*>.() -> Unit = {},
 ) = de.jensklingenberg.ktorfit.ktorfit {
     baseUrl(baseUrl)
     httpClient(
-        ktorClient(authorization) {
+        ktorClient {
             install(ContentNegotiation) {
                 json(json)
             }
@@ -45,18 +42,12 @@ internal fun ktorfit(
 }
 
 internal fun ktorClient(
-    authorization: Authorization? = null,
     config: HttpClientConfig<*>.() -> Unit = {
         install(ContentNegotiation) {
             json(JSON)
         }
     },
 ) = HttpClient(httpClientEngine) {
-    if (authorization != null) {
-        install(AuthorizationPlugin) {
-            this.authorization = authorization
-        }
-    }
     config.invoke(this)
     install(Logging) {
         logger = NapierLogger

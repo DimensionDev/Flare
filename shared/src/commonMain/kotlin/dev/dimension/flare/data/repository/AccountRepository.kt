@@ -6,6 +6,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import dev.dimension.flare.common.Locale
+import dev.dimension.flare.common.decodeJson
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.app.AppDatabase
 import dev.dimension.flare.data.database.app.model.DbAccount
@@ -20,13 +21,15 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiAccount.Companion.toUi
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.collectAsUiState
+import dev.dimension.flare.ui.model.takeSuccess
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlin.time.Clock
 
@@ -36,10 +39,19 @@ internal class AccountRepository(
     internal val appDataStore: AppDataStore,
     private val cacheDatabase: CacheDatabase,
 ) {
-    val activeAccount: Flow<UiAccount?> by lazy {
-        appDatabase.accountDao().activeAccount().map {
-            it?.toUi()
-        }
+    val activeAccount: Flow<UiState<UiAccount>> by lazy {
+        appDatabase
+            .accountDao()
+            .activeAccount()
+            .map {
+                it?.toUi()
+            }.map {
+                if (it == null) {
+                    UiState.Error(NoActiveAccountException)
+                } else {
+                    UiState.Success(it)
+                }
+            }
     }
     val allAccounts: Flow<ImmutableList<UiAccount>> by lazy {
         appDatabase.accountDao().allAccounts().map {
@@ -47,17 +59,19 @@ internal class AccountRepository(
         }
     }
 
-    fun addAccount(account: UiAccount) =
-        coroutineScope.launch {
-            appDatabase.accountDao().insert(
-                DbAccount(
-                    account_key = account.accountKey,
-                    platform_type = account.platformType,
-                    last_active = Clock.System.now().toEpochMilliseconds(),
-                    credential_json = account.credential.encodeJson(),
-                ),
-            )
-        }
+    fun addAccount(
+        account: UiAccount,
+        credential: UiAccount.Credential,
+    ) = coroutineScope.launch {
+        appDatabase.accountDao().insert(
+            DbAccount(
+                account_key = account.accountKey,
+                platform_type = account.platformType,
+                last_active = Clock.System.now().toEpochMilliseconds(),
+                credential_json = credential.encodeJson(),
+            ),
+        )
+    }
 
     fun setActiveAccount(accountKey: MicroBlogKey) =
         coroutineScope.launch {
@@ -87,10 +101,23 @@ internal class AccountRepository(
             appDatabase.accountDao().delete(accountKey)
         }
 
-    fun getFlow(accountKey: MicroBlogKey): Flow<UiAccount?> =
+    fun getFlow(accountKey: MicroBlogKey): Flow<UiState<UiAccount>> =
         appDatabase.accountDao().get(accountKey).map {
-            it?.toUi()
+            if (it == null) {
+                UiState.Error(NoActiveAccountException)
+            } else {
+                UiState.Success(it.toUi())
+            }
         }
+
+    inline fun <reified T : UiAccount.Credential> credentialFlow(accountKey: MicroBlogKey): Flow<T> =
+        appDatabase
+            .accountDao()
+            .get(accountKey)
+            .mapNotNull { it }
+            .map {
+                it.credential_json.decodeJson<T>()
+            }
 }
 
 public data object NoActiveAccountException : Exception("No active account.")
@@ -99,19 +126,6 @@ public data class LoginExpiredException(
     val accountKey: MicroBlogKey,
     val platformType: PlatformType,
 ) : Exception("Login expired.")
-
-@Composable
-internal fun activeAccountPresenter(repository: AccountRepository): State<UiState<UiAccount>> =
-    remember(repository) {
-        repository.activeAccount
-            .map<UiAccount?, UiState<UiAccount>> {
-                if (it == null) {
-                    UiState.Error(NoActiveAccountException)
-                } else {
-                    UiState.Success(it)
-                }
-            }
-    }.collectAsState(initial = UiState.Loading())
 
 @Composable
 internal fun accountProvider(
@@ -124,18 +138,17 @@ internal fun accountProvider(
     ) {
         when (accountType) {
             AccountType.Active -> repository.activeAccount
-            is AccountType.Specific -> repository.getFlow(accountKey = accountType.accountKey)
-            AccountType.Guest -> flowOf(null)
-        }.distinctUntilChanged()
-            .map {
-                if (it == null) {
-                    UiState.Error(NoActiveAccountException)
-                } else {
-                    UiState.Success(it)
-                }
-            }.collect {
-                value = it
-            }
+            AccountType.Guest ->
+                flowOf(
+                    UiState.Error(
+                        NoActiveAccountException,
+                    ),
+                )
+
+            is AccountType.Specific -> repository.getFlow(accountType.accountKey)
+        }.collect {
+            value = it
+        }
     }
 
 @Composable
@@ -158,10 +171,13 @@ internal fun accountServiceFlow(
 ): Flow<MicroblogDataSource> =
     when (accountType) {
         AccountType.Active -> {
-            repository.activeAccount.map {
-                it?.dataSource ?: throw NoActiveAccountException
-            }
+            repository
+                .activeAccount
+                .map { it.takeSuccess() ?: throw NoActiveAccountException }
+                .distinctUntilChangedBy { it.accountKey }
+                .map { it.dataSource }
         }
+
         AccountType.Guest -> {
             val guestData = repository.appDataStore.guestDataStore.data
             guestData.map {
@@ -171,16 +187,18 @@ internal fun accountServiceFlow(
                             host = it.host,
                             locale = Locale.language,
                         )
+
                     else -> throw UnsupportedOperationException()
                 }
             }
         }
+
         is AccountType.Specific -> {
             repository
                 .getFlow(accountType.accountKey)
-                .map {
-                    it?.dataSource ?: throw NoActiveAccountException
-                }
+                .map { it.takeSuccess() ?: throw NoActiveAccountException }
+                .distinctUntilChangedBy { it.accountKey }
+                .map { it.dataSource }
         }
     }
 

@@ -77,6 +77,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -85,7 +86,7 @@ import org.koin.core.component.inject
 @OptIn(ExperimentalPagingApi::class)
 internal class MisskeyDataSource(
     override val accountKey: MicroBlogKey,
-    val credential: UiAccount.Misskey.Credential,
+    private val host: String,
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.Misskey,
@@ -97,8 +98,11 @@ internal class MisskeyDataSource(
     private val accountRepository: AccountRepository by inject()
     private val service by lazy {
         dev.dimension.flare.data.network.misskey.MisskeyService(
-            baseUrl = "https://${credential.host}/api/",
-            token = credential.accessToken,
+            baseUrl = "https://$host/api/",
+            accessTokenFlow =
+                accountRepository
+                    .credentialFlow<UiAccount.Misskey.Credential>(accountKey)
+                    .map { it.accessToken },
         )
     }
 

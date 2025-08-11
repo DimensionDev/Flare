@@ -1,7 +1,10 @@
 package dev.dimension.flare.ui.component
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -56,10 +59,10 @@ internal fun AnimatedNumber(
                     targetState = digit,
                     transitionSpec = {
                         if (targetState > initialState) {
-                            slideInVertically { -it } togetherWith slideOutVertically { it }
+                            fadeIn() + slideInVertically { -it } togetherWith fadeOut() + slideOutVertically { it }
                         } else {
-                            slideInVertically { it } togetherWith slideOutVertically { -it }
-                        }
+                            fadeIn() + slideInVertically { it } togetherWith fadeOut() + slideOutVertically { -it }
+                        }.using(SizeTransform(clip = false))
                     },
                 ) { digit ->
                     PlatformText(

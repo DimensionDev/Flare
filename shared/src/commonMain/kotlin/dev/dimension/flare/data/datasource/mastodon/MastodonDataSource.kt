@@ -46,6 +46,7 @@ import dev.dimension.flare.data.repository.tryRun
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.PlatformType
+import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.UiHashtag
 import dev.dimension.flare.ui.model.UiList
@@ -67,6 +68,7 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -77,7 +79,6 @@ import kotlin.uuid.Uuid
 internal open class MastodonDataSource(
     override val accountKey: MicroBlogKey,
     val instance: String,
-    val accessToken: String,
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.Mastodon,
@@ -89,7 +90,10 @@ internal open class MastodonDataSource(
     private val service by lazy {
         MastodonService(
             baseUrl = "https://$instance/",
-            accessToken = accessToken,
+            accessTokenFlow =
+                accountRepository
+                    .credentialFlow<UiAccount.Mastodon.Credential>(accountKey)
+                    .map { it.accessToken },
         )
     }
 

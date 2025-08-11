@@ -4,37 +4,52 @@ import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiAccount
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.DefaultRequest
 import io.ktor.client.plugins.HttpClientPlugin
 import io.ktor.client.request.HttpRequestPipeline
-import io.ktor.http.Url
 import io.ktor.util.AttributeKey
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import sh.christian.ozone.BlueskyApi
 import sh.christian.ozone.XrpcBlueskyApi
 
-internal data class BlueskyService(
-    private val baseUrl: String,
+internal data class BlueskyService private constructor(
+    private val baseUrlFlow: Flow<String>,
     private val accountKey: MicroBlogKey? = null,
-    private val credential: UiAccount.Bluesky.Credential? = null,
+    private val authTokenFlow: Flow<UiAccount.Bluesky.Credential>? = null,
     private val onCredentialRefreshed: (UiAccount.Bluesky.Credential) -> Unit = {},
 ) : BlueskyApi by XrpcBlueskyApi(
         ktorClient {
-            install(DefaultRequest) {
-                val hostUrl = Url(baseUrl)
-                url.protocol = hostUrl.protocol
-                url.host = hostUrl.host
-                url.port = hostUrl.port
-            }
             install(AtprotoProxyPlugin)
             install(BlueskyAuthPlugin) {
-                this.authTokens = credential
-                this.onAuthTokensChanged = onCredentialRefreshed
+                this.baseUrlFlow = baseUrlFlow
                 this.accountKey = accountKey
+                this.authTokenFlow = authTokenFlow
+                this.onAuthTokensChanged = onCredentialRefreshed
             }
 
             expectSuccess = false
         },
+    ) {
+    constructor(
+        accountKey: MicroBlogKey,
+        credentialFlow: Flow<UiAccount.Bluesky.Credential>,
+        onCredentialRefreshed: (UiAccount.Bluesky.Credential) -> Unit,
+    ) : this(
+        baseUrlFlow = credentialFlow.map { it.baseUrl },
+        accountKey = accountKey,
+        authTokenFlow = credentialFlow,
+        onCredentialRefreshed = onCredentialRefreshed,
     )
+
+    constructor(
+        baseUrl: String,
+    ) : this(
+        baseUrlFlow = flowOf(baseUrl),
+    )
+
+    fun newBaseUrlService(baseUrl: String): BlueskyService = copy(baseUrlFlow = flowOf(baseUrl))
+}
 
 private class AtprotoProxyPlugin {
     companion object : HttpClientPlugin<Unit, AtprotoProxyPlugin> {

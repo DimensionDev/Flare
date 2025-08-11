@@ -15,6 +15,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.xqtHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -60,7 +61,7 @@ public class XQTLoginPresenter(
         chocolate: String,
         accountRepository: AccountRepository,
     ) {
-        val xqtService = XQTService(chocolate)
+        val xqtService = XQTService(flowOf(chocolate))
         val userId = xqtService.getInitialUserId(chocolate = chocolate)
         requireNotNull(userId)
         val account =
@@ -74,16 +75,16 @@ public class XQTLoginPresenter(
         require(account is User)
         accountRepository.addAccount(
             UiAccount.XQT(
-                credential =
-                    UiAccount.XQT.Credential(
-                        chocolate = chocolate,
-                    ),
                 accountKey =
                     MicroBlogKey(
                         id = account.restId,
                         host = xqtHost,
                     ),
             ),
+            credential =
+                UiAccount.XQT.Credential(
+                    chocolate = chocolate,
+                ),
         )
     }
 }

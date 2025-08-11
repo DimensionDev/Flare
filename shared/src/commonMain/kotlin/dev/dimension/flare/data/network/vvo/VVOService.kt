@@ -13,10 +13,8 @@ import dev.dimension.flare.data.network.vvo.api.createTimelineApi
 import dev.dimension.flare.data.network.vvo.api.createUserApi
 import dev.dimension.flare.data.network.vvo.model.UploadResponse
 import dev.dimension.flare.model.vvoHost
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.HttpClientPlugin
 import io.ktor.client.plugins.HttpTimeout
-import io.ktor.client.request.HttpRequestPipeline
+import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.request.forms.append
 import io.ktor.client.request.forms.formData
 import io.ktor.client.request.forms.submitFormWithBinaryData
@@ -24,28 +22,28 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
-import io.ktor.util.AttributeKey
-import io.ktor.utils.io.KtorDsl
 import io.ktor.utils.io.core.writeFully
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlin.time.Duration.Companion.minutes
 
 private val baseUrl = "https://$vvoHost/"
 
 private fun config(
     url: String = baseUrl,
-    chocolate: String,
+    chocolateFlow: Flow<String>,
 ) = ktorfit(url) {
     install(VVOHeaderPlugin) {
-        this.chocolate = chocolate
+        this.chocolateFlow = chocolateFlow
     }
 }
 
 internal class VVOService(
-    private val chocolate: String,
-) : TimelineApi by config(chocolate = chocolate).createTimelineApi(),
-    UserApi by config(chocolate = chocolate).createUserApi(),
-    ConfigApi by config(chocolate = chocolate).createConfigApi(),
-    StatusApi by config(chocolate = chocolate).createStatusApi() {
+    private val chocolateFlow: Flow<String>,
+) : TimelineApi by config(chocolateFlow = chocolateFlow).createTimelineApi(),
+    UserApi by config(chocolateFlow = chocolateFlow).createUserApi(),
+    ConfigApi by config(chocolateFlow = chocolateFlow).createConfigApi(),
+    StatusApi by config(chocolateFlow = chocolateFlow).createStatusApi() {
     companion object {
         fun checkChocolates(chocolate: String): Boolean =
             chocolate
@@ -89,7 +87,7 @@ internal class VVOService(
                 socketTimeoutMillis = 2.minutes.inWholeMilliseconds
             }
             install(VVOHeaderPlugin) {
-                this.chocolate = this@VVOService.chocolate
+                this.chocolateFlow = this@VVOService.chocolateFlow
             }
         }.submitFormWithBinaryData(
             url = "https://$vvoHost/api/statuses/uploadPic",
@@ -115,36 +113,20 @@ internal class VVOService(
             .decodeJson<UploadResponse>()
 }
 
-private class VVOHeaderPlugin(
-    private val chocolate: String,
-) {
-    @KtorDsl
-    class Config {
-        var chocolate: String = ""
-    }
-
-    @KtorDsl
-    companion object Plugin : HttpClientPlugin<Config, VVOHeaderPlugin> {
-        override val key: AttributeKey<VVOHeaderPlugin>
-            get() = AttributeKey("VVOHeaderPlugin")
-
-        override fun prepare(block: Config.() -> Unit): VVOHeaderPlugin {
-            val config = Config().apply(block)
-            return VVOHeaderPlugin(config.chocolate)
-        }
-
-        override fun install(
-            plugin: VVOHeaderPlugin,
-            scope: HttpClient,
-        ) {
-            plugin.setHeader(scope)
-        }
-    }
-
-    private fun setHeader(client: HttpClient) {
-        client.requestPipeline.intercept(HttpRequestPipeline.State) {
-            context.header("Cookie", chocolate)
-            context.header("Referer", "https://$vvoHost/")
-        }
-    }
+private class VVOHeaderConfig {
+    var chocolateFlow: Flow<String>? = null
 }
+
+private val VVOHeaderPlugin =
+    createClientPlugin("VVOHeaderPlugin", ::VVOHeaderConfig) {
+        val chocolateFlow = pluginConfig.chocolateFlow
+        onRequest { request, _ ->
+            chocolateFlow?.let { flow ->
+                val chocolate = flow.firstOrNull()
+                if (chocolate != null) {
+                    request.headers.append("Cookie", chocolate)
+                }
+            }
+            request.headers.append("Referer", "https://$vvoHost/")
+        }
+    }

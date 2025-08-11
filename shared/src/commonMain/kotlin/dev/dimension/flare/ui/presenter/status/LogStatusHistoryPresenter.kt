@@ -6,14 +6,15 @@ import androidx.compose.runtime.remember
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.repository.AccountRepository
-import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.DbAccountType
 import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.model.UiState
+import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.flow.map
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import kotlin.time.Clock
@@ -36,7 +37,7 @@ public class LogStatusHistoryPresenter(
     override fun body(): State {
         when (accountType) {
             is AccountType.Active ->
-                activeAccountPresenter(accountRepository).value.map {
+                accountRepository.activeAccount.flattenUiState().value.map {
                     remember(it.accountKey) {
                         AccountType.Specific(it.accountKey) as DbAccountType
                     }

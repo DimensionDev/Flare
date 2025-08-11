@@ -52,6 +52,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
@@ -61,7 +62,6 @@ import kotlin.time.Clock
 @OptIn(ExperimentalPagingApi::class)
 internal class VVODataSource(
     override val accountKey: MicroBlogKey,
-    private val credential: UiAccount.VVo.Credential,
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.VVO {
@@ -71,7 +71,12 @@ internal class VVODataSource(
     private val accountRepository: AccountRepository by inject()
     private val inAppNotification: InAppNotification by inject()
     private val service by lazy {
-        VVOService(credential.chocolate)
+        VVOService(
+            chocolateFlow =
+                accountRepository
+                    .credentialFlow<UiAccount.VVo.Credential>(accountKey)
+                    .map { it.chocolate },
+        )
     }
 
     override fun homeTimeline() =

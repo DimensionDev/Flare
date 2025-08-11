@@ -20,7 +20,6 @@ import sh.christian.ozone.oauth.OAuthToken
 public sealed class UiAccount {
     public abstract val accountKey: MicroBlogKey
     public abstract val platformType: PlatformType
-    internal abstract val credential: Credential
     internal abstract val dataSource: AuthenticatedMicroblogDataSource
 
     @Immutable
@@ -29,8 +28,9 @@ public sealed class UiAccount {
 
     @Immutable
     internal data class Mastodon(
-        override val credential: Credential,
         override val accountKey: MicroBlogKey,
+        internal val forkType: Credential.ForkType = Credential.ForkType.Mastodon,
+        internal val instance: String,
     ) : UiAccount() {
         override val platformType: PlatformType
             get() = PlatformType.Mastodon
@@ -50,18 +50,16 @@ public sealed class UiAccount {
         }
 
         override val dataSource by lazy {
-            when (credential.forkType) {
+            when (forkType) {
                 Credential.ForkType.Mastodon ->
                     MastodonDataSource(
                         accountKey = accountKey,
-                        instance = credential.instance,
-                        accessToken = credential.accessToken,
+                        instance = instance,
                     )
                 Credential.ForkType.Pleroma ->
                     PleromaDataSource(
                         accountKey = accountKey,
-                        instance = credential.instance,
-                        accessToken = credential.accessToken,
+                        instance = instance,
                     )
             }
         }
@@ -69,8 +67,8 @@ public sealed class UiAccount {
 
     @Immutable
     internal data class Misskey(
-        override val credential: Credential,
         override val accountKey: MicroBlogKey,
+        private val host: String,
     ) : UiAccount() {
         override val platformType: PlatformType
             get() = PlatformType.Misskey
@@ -84,13 +82,12 @@ public sealed class UiAccount {
         ) : UiAccount.Credential
 
         override val dataSource by lazy {
-            MisskeyDataSource(accountKey = accountKey, credential = credential)
+            MisskeyDataSource(accountKey = accountKey, host = host)
         }
     }
 
     @Immutable
     internal data class Bluesky(
-        override val credential: Credential,
         override val accountKey: MicroBlogKey,
     ) : UiAccount() {
         override val platformType: PlatformType
@@ -127,14 +124,13 @@ public sealed class UiAccount {
         }
 
         override val dataSource by lazy {
-            BlueskyDataSource(accountKey = accountKey, credential = credential)
+            BlueskyDataSource(accountKey = accountKey)
         }
     }
 
     @Immutable
     internal data class XQT(
         override val accountKey: MicroBlogKey,
-        override val credential: Credential,
     ) : UiAccount() {
         override val platformType: PlatformType
             get() = PlatformType.xQt
@@ -147,14 +143,13 @@ public sealed class UiAccount {
         ) : UiAccount.Credential
 
         override val dataSource by lazy {
-            XQTDataSource(accountKey = accountKey, credential = credential)
+            XQTDataSource(accountKey = accountKey)
         }
     }
 
     @Immutable
     internal data class VVo(
         override val accountKey: MicroBlogKey,
-        override val credential: Credential,
     ) : UiAccount() {
         override val platformType: PlatformType
             get() = PlatformType.VVo
@@ -167,7 +162,7 @@ public sealed class UiAccount {
         ) : UiAccount.Credential
 
         override val dataSource by lazy {
-            VVODataSource(accountKey = accountKey, credential = credential)
+            VVODataSource(accountKey = accountKey)
         }
     }
 
@@ -177,39 +172,34 @@ public sealed class UiAccount {
                 PlatformType.Mastodon -> {
                     val credential = credential_json.decodeJson<Mastodon.Credential>()
                     Mastodon(
-                        credential = credential,
                         accountKey = account_key,
+                        forkType = credential.forkType,
+                        instance = credential.instance,
                     )
                 }
 
                 PlatformType.Misskey -> {
                     val credential = credential_json.decodeJson<Misskey.Credential>()
                     Misskey(
-                        credential = credential,
                         accountKey = account_key,
+                        host = credential.host,
                     )
                 }
 
                 PlatformType.Bluesky -> {
-                    val credential = credential_json.decodeJson<Bluesky.Credential>()
                     Bluesky(
-                        credential = credential,
                         accountKey = account_key,
                     )
                 }
 
                 PlatformType.xQt -> {
-                    val credential = credential_json.decodeJson<XQT.Credential>()
                     XQT(
-                        credential = credential,
                         accountKey = account_key,
                     )
                 }
 
                 PlatformType.VVo -> {
-                    val credential = credential_json.decodeJson<VVo.Credential>()
                     VVo(
-                        credential = credential,
                         accountKey = account_key,
                     )
                 }

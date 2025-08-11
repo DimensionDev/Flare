@@ -41,11 +41,15 @@ internal class RecommendInstancePagingSource : BasePagingSource<Int, UiInstance>
                                 UiInstance(
                                     name = it.name,
                                     description = it.description,
-                                    iconUrl = it.meta.iconURL,
+                                    iconUrl = it.meta?.iconURL,
                                     domain = it.url,
                                     type = PlatformType.Misskey,
-                                    bannerUrl = it.meta.bannerURL,
-                                    usersCount = it.stats.usersCount,
+                                    bannerUrl = it.meta?.bannerURL,
+                                    usersCount =
+                                        it.stats?.usersCount ?: it.nodeinfo
+                                            ?.usage
+                                            ?.users
+                                            ?.total ?: 0,
                                 )
                             }
                         }.getOrDefault(emptyList())

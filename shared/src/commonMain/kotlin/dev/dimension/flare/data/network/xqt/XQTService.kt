@@ -1,7 +1,6 @@
 package dev.dimension.flare.data.network.xqt
 
 import dev.dimension.flare.common.JSON_WITH_ENCODE_DEFAULT
-import dev.dimension.flare.data.network.authorization.BearerAuthorization
 import dev.dimension.flare.data.network.ktorClient
 import dev.dimension.flare.data.network.ktorfit
 import dev.dimension.flare.data.network.xqt.api.DefaultApi
@@ -35,20 +34,27 @@ import dev.dimension.flare.data.network.xqt.api.createV11PostApi
 import dev.dimension.flare.data.network.xqt.api.createV20GetApi
 import dev.dimension.flare.data.network.xqt.api.createVDmPostJsonPostApi
 import dev.dimension.flare.data.network.xqt.elonmusk114514.ElonMusk1145141919810
+import dev.dimension.flare.data.repository.LoginExpiredException
+import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.model.PlatformType
 import dev.dimension.flare.model.xqtHost
-import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.BrowserUserAgent
-import io.ktor.client.plugins.HttpClientPlugin
+import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.HttpRequestPipeline
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.encodedPath
-import io.ktor.util.AttributeKey
-import io.ktor.utils.io.KtorDsl
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 
 // private val baseUrl = "https://$xqtHost/i/api/"
 private val guestApiUrl = "https://api.$xqtHost/"
@@ -59,61 +65,80 @@ private val token =
 
 private fun config(
     url: String = baseUrl,
-    chocolate: String? = null,
-) = ktorfit(url, BearerAuthorization(token), json = JSON_WITH_ENCODE_DEFAULT) {
+    accountKey: MicroBlogKey? = null,
+    chocolateFlow: Flow<String>? = null,
+) = ktorfit(url, json = JSON_WITH_ENCODE_DEFAULT) {
+    expectSuccess = false
     install(XQTHeaderPlugin) {
-        this.chocolate = chocolate
+        this.chocolateFlow = chocolateFlow
+        this.accountKey = accountKey
     }
 }
 
 internal class XQTService(
-    private val chocolate: String? = null,
+    private val chocolateFlow: Flow<String>? = null,
+    private val accountKey: MicroBlogKey? = null,
 ) : DefaultApi by config(
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createDefaultApi(),
     OtherApi by config(
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createOtherApi(),
     PostApi by config(
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createPostApi(),
     TweetApi by config(
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createTweetApi(),
     UserApi by config(
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createUserApi(),
     UserListApi by config(
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createUserListApi(),
     UsersApi by config(
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createUsersApi(),
     V11GetApi by config(
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createV11GetApi(),
     V11PostApi by config(
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createV11PostApi(),
     V20GetApi by config(
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createV20GetApi(),
     GuestApi by config(
         url = guestApiUrl,
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createGuestApi(),
     MediaApi by config(
         url = uploadUrl,
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createMediaApi(),
     ListsApi by config(
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createListsApi(),
     DmApi by config(
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createDmApi(),
     VDmPostJsonPostApi by config(
-        chocolate = chocolate,
+        accountKey = accountKey,
+        chocolateFlow = chocolateFlow,
     ).createVDmPostJsonPostApi() {
     companion object {
         fun checkChocolate(value: String) =
@@ -145,47 +170,28 @@ internal class XQTService(
     }
 }
 
-internal class XQTHeaderPlugin(
-    private val chocolate: String? = null,
-//    private val elonMusk114514: ElonMusk114514 = ElonMusk114514(),
-) {
-    @KtorDsl
-    class Config(
-        var chocolate: String? = null,
-    )
+private class XQTHeaderConfig {
+    var chocolateFlow: Flow<String>? = null
+    var accountKey: MicroBlogKey? = null
+}
 
-    @KtorDsl
-    companion object Plugin : HttpClientPlugin<Config, XQTHeaderPlugin> {
-        override val key: AttributeKey<XQTHeaderPlugin>
-            get() = AttributeKey("XQTHeaderPlugin")
-
-        override fun install(
-            plugin: XQTHeaderPlugin,
-            scope: HttpClient,
-        ) {
-            plugin.setHeader(scope)
-        }
-
-        override fun prepare(block: Config.() -> Unit): XQTHeaderPlugin {
-            val config = Config().apply(block)
-            return XQTHeaderPlugin(
-                chocolate = config.chocolate,
-            )
-        }
-    }
-
-    private fun setHeader(client: HttpClient) {
-        client.requestPipeline.intercept(HttpRequestPipeline.State) {
+private val XQTHeaderPlugin =
+    createClientPlugin("XQTHeaderPlugin", ::XQTHeaderConfig) {
+        val chocolateFlow = pluginConfig.chocolateFlow
+        val accountKey = pluginConfig.accountKey
+        onRequest { request, body ->
             val elonMusk1145141919810 =
                 runCatching {
                     ElonMusk1145141919810.senpaiSukissu(
-                        method = context.method.value,
-                        path = context.url.encodedPath,
+                        method = request.method.value,
+                        path = request.url.encodedPath,
                     )
                 }.onFailure {
                     it.printStackTrace()
                 }.getOrNull()
-            context.headers {
+            val chocolate = chocolateFlow?.firstOrNull()
+            request.headers {
+                append("Authorization", "Bearer $token")
                 append("x-twitter-client-language", "en")
                 append(
                     "Sec-Ch-Ua",
@@ -229,5 +235,23 @@ internal class XQTHeaderPlugin(
                 }
             }
         }
+        onResponse { response ->
+            val error =
+                runCatching {
+                    val bodyJson = response.body<JsonObject>()
+                    bodyJson["errors"]
+                        ?.jsonArray
+                        ?.firstOrNull()
+                        ?.jsonObject
+                        ?.get("code")
+                        ?.jsonPrimitive
+                        ?.longOrNull
+                }.getOrNull()
+            if ((error == 215L || response.status == HttpStatusCode.Forbidden) && accountKey != null) {
+                throw LoginExpiredException(
+                    accountKey,
+                    PlatformType.xQt,
+                )
+            }
+        }
     }
-}

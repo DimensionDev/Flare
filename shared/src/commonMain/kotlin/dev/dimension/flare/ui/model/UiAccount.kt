@@ -120,6 +120,25 @@ public sealed class UiAccount {
 
                 override val refreshToken: String
                     get() = oAuthToken.refreshToken
+
+                override fun equals(other: Any?): Boolean {
+                    if (this === other) return true
+                    if (other !is OAuthCredential) return false
+
+                    if (baseUrl != other.baseUrl) return false
+                    if (oAuthToken.accessToken != other.oAuthToken.accessToken) return false
+                    if (oAuthToken.refreshToken != other.oAuthToken.refreshToken) return false
+                    if (oAuthToken.nonce != other.oAuthToken.nonce) return false
+                    if (oAuthToken.expiresIn != other.oAuthToken.expiresIn) return false
+
+                    return true
+                }
+
+                override fun hashCode(): Int {
+                    var result = baseUrl.hashCode()
+                    result = 31 * result + oAuthToken.hashCode()
+                    return result
+                }
             }
         }
 

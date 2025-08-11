@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class MisskeyInstance(
     val date: String,
-    val stats: MisskeyInstanceStats,
+//    val stats: MisskeyInstanceStats,
     val instancesInfos: List<InstancesInfo>,
 )
 
@@ -13,9 +13,9 @@ internal data class MisskeyInstance(
 internal data class InstancesInfo(
     val url: String,
 //    val value: Double,
-    val meta: Meta200Response,
-//    val nodeinfo: Nodeinfo,
-    val stats: InstancesInfoStats,
+    val meta: Meta200Response? = null,
+    val nodeinfo: Nodeinfo? = null,
+    val stats: InstancesInfoStats? = null,
 //    val npd15: Double,
     val name: String,
     val description: String? = null,
@@ -214,17 +214,17 @@ internal data class InstancesInfo(
 //    val canCreateVoiceChannel: Boolean? = null,
 // )
 //
-// @Serializable
-// internal data class Nodeinfo(
+ @Serializable
+ internal data class Nodeinfo(
 //    val version: String,
 //    val software: Software,
 //    val protocols: List<String>,
 //    val services: Services,
 //    val openRegistrations: Boolean,
-//    val usage: Usage,
+    val usage: Usage? = null,
 //    val metadata: Metadata,
 //    val mulukhiya: Mulukhiya? = null,
-// )
+ )
 //
 // @Serializable
 // internal data class Metadata(
@@ -325,25 +325,25 @@ internal data class InstancesInfo(
 //    val repository: String? = null,
 // )
 //
-// @Serializable
-// internal data class Usage(
-//    val users: Users,
+ @Serializable
+ internal data class Usage(
+    val users: Users? = null,
 //    val localPosts: Long? = null,
 //    val localComments: Long? = null,
-// )
-//
-// @Serializable
-// internal data class Users(
-//    val total: Long? = null,
+ )
+
+ @Serializable
+ internal data class Users(
+    val total: Long? = null,
 //    val activeHalfyear: Long? = null,
 //    val activeMonth: Long? = null,
-// )
+ )
 
 @Serializable
 internal data class InstancesInfoStats(
 //    val notesCount: Long,
 //    val originalNotesCount: Long,
-    val usersCount: Long,
+    val usersCount: Long? = null,
 //    val originalUsersCount: Long,
 //    val reactionsCount: Long? = null,
 //    val instances: Long,
@@ -351,10 +351,10 @@ internal data class InstancesInfoStats(
 //    val driveUsageRemote: Long,
 )
 
-@Serializable
-internal data class MisskeyInstanceStats(
-    val notesCount: Long,
-    val usersCount: Long,
-    val mau: Long,
-    val instancesCount: Long,
-)
+//@Serializable
+//internal data class MisskeyInstanceStats(
+//    val notesCount: Long,
+//    val usersCount: Long,
+//    val mau: Long,
+//    val instancesCount: Long,
+//)

@@ -86,18 +86,19 @@ public class MastodonCallbackPresenter(
             }
         accountRepository.addAccount(
             UiAccount.Mastodon(
-                credential =
-                    UiAccount.Mastodon.Credential(
-                        instance = host,
-                        accessToken = accessTokenResponse.accessToken,
-                        forkType = forkType,
-                    ),
                 accountKey =
                     MicroBlogKey(
                         id = id,
                         host = host,
                     ),
+                instance = host,
             ),
+            credential =
+                UiAccount.Mastodon.Credential(
+                    instance = host,
+                    accessToken = accessTokenResponse.accessToken,
+                    forkType = forkType,
+                ),
         )
     }
 }

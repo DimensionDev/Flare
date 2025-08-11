@@ -4,6 +4,8 @@ import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
+import dev.dimension.flare.common.InAppNotification
+import dev.dimension.flare.common.Message
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.cursor
@@ -11,6 +13,7 @@ import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.xqt.XQTService
+import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
@@ -20,6 +23,7 @@ internal class HomeTimelineRemoteMediator(
     private val service: XQTService,
     private val database: CacheDatabase,
     private val accountKey: MicroBlogKey,
+    private val inAppNotification: InAppNotification,
 ) : BaseTimelineRemoteMediator(
         database = database,
     ) {
@@ -77,6 +81,16 @@ internal class HomeTimelineRemoteMediator(
             endOfPaginationReached = tweet.isEmpty(),
             data = data,
         )
+    }
+
+    override fun onError(e: Throwable) {
+        super.onError(e)
+        if (e is LoginExpiredException) {
+            inAppNotification.onError(
+                Message.LoginExpired,
+                e,
+            )
+        }
     }
 }
 

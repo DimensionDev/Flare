@@ -78,17 +78,18 @@ public class MisskeyCallbackPresenter(
         requireNotNull(id) { "No user id" }
         accountRepository.addAccount(
             UiAccount.Misskey(
-                credential =
-                    UiAccount.Misskey.Credential(
-                        host = host,
-                        accessToken = response.token,
-                    ),
                 accountKey =
                     MicroBlogKey(
                         id = id,
                         host = host,
                     ),
+                host = host,
             ),
+            credential =
+                UiAccount.Misskey.Credential(
+                    host = host,
+                    accessToken = response.token,
+                ),
         )
     }
 }

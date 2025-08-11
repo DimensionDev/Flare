@@ -9,7 +9,6 @@ import dev.dimension.flare.common.collectAsState
 import dev.dimension.flare.common.toImmutableListWrapper
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.accountServiceProvider
-import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.data.repository.allAccountsPresenter
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
@@ -17,6 +16,7 @@ import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.toUi
 import dev.dimension.flare.ui.presenter.PresenterBase
@@ -32,7 +32,7 @@ public class AccountsPresenter :
     @Composable
     override fun body(): AccountsState {
         val accounts by allAccountsPresenter(repository = accountRepository)
-        val activeAccount by activeAccountPresenter(repository = accountRepository)
+        val activeAccount by accountRepository.activeAccount.flattenUiState()
         val user =
             accounts.map {
                 it

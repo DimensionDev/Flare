@@ -10,11 +10,11 @@ import dev.dimension.flare.data.datasource.microblog.AuthenticatedMicroblogDataS
 import dev.dimension.flare.data.repository.AccountRepository
 import dev.dimension.flare.data.repository.NoActiveAccountException
 import dev.dimension.flare.data.repository.accountServiceProvider
-import dev.dimension.flare.data.repository.activeAccountPresenter
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.UiUserV2
 import dev.dimension.flare.ui.model.flatMap
+import dev.dimension.flare.ui.model.flattenUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
@@ -30,7 +30,7 @@ public class ActiveAccountPresenter :
 
     @Composable
     override fun body(): UserState {
-        val account by activeAccountPresenter(repository = accountRepository)
+        val account by accountRepository.activeAccount.flattenUiState()
         val user =
             account
                 .flatMap {

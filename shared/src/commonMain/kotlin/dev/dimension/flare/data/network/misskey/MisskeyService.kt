@@ -30,16 +30,18 @@ import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentLength
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 
 private fun config(
     baseUrl: String,
-    accessToken: String?,
+    accessTokenFlow: Flow<String>?,
 ) = ktorfit(
     baseUrl = baseUrl,
     config = {
-        if (accessToken != null) {
+        if (accessTokenFlow != null) {
             install(MisskeyAuthorizationPlugin) {
-                token = accessToken
+                this.accessTokenFlow = accessTokenFlow
             }
         }
         install(DefaultRequest) {
@@ -51,23 +53,24 @@ private fun config(
 )
 
 internal class MisskeyService(
-    private val baseUrl: String,
-    private val token: String?,
-) : UsersApi by config(baseUrl, token).createUsersApi(),
-    MetaApi by config(baseUrl, token).createMetaApi(),
-    NotesApi by config(baseUrl, token).createNotesApi(),
-    AccountApi by config(baseUrl, token).createAccountApi(),
-    DriveApi by config(baseUrl, token).createDriveApi(),
-    ReactionsApi by config(baseUrl, token).createReactionsApi(),
-    FollowingApi by config(baseUrl, token).createFollowingApi(),
-    HashtagsApi by config(baseUrl, token).createHashtagsApi(),
-    ListsApi by config(baseUrl, token).createListsApi(),
-    AntennasApi by config(baseUrl, token).createAntennasApi() {
+    baseUrl: String,
+    private val accessTokenFlow: Flow<String>?,
+) : UsersApi by config(baseUrl, accessTokenFlow).createUsersApi(),
+    MetaApi by config(baseUrl, accessTokenFlow).createMetaApi(),
+    NotesApi by config(baseUrl, accessTokenFlow).createNotesApi(),
+    AccountApi by config(baseUrl, accessTokenFlow).createAccountApi(),
+    DriveApi by config(baseUrl, accessTokenFlow).createDriveApi(),
+    ReactionsApi by config(baseUrl, accessTokenFlow).createReactionsApi(),
+    FollowingApi by config(baseUrl, accessTokenFlow).createFollowingApi(),
+    HashtagsApi by config(baseUrl, accessTokenFlow).createHashtagsApi(),
+    ListsApi by config(baseUrl, accessTokenFlow).createListsApi(),
+    AntennasApi by config(baseUrl, accessTokenFlow).createAntennasApi() {
     suspend fun upload(
         data: ByteArray,
         name: String,
         sensitive: Boolean = false,
     ): DriveFile? {
+        val token = accessTokenFlow?.firstOrNull()
         val multipart =
             MultiPartFormDataContent(
                 formData {

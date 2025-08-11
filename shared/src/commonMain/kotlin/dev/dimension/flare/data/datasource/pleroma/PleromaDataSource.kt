@@ -8,11 +8,9 @@ import dev.dimension.flare.model.MicroBlogKey
 internal class PleromaDataSource(
     override val accountKey: MicroBlogKey,
     instance: String,
-    accessToken: String,
 ) : MastodonDataSource(
         accountKey = accountKey,
         instance = instance,
-        accessToken = accessToken,
     ),
     ReactionDataSource,
     StatusEvent.Pleroma {

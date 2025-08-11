@@ -170,13 +170,13 @@ public class BlueskyOAuthLoginPresenter(
             )
         accountRepository.addAccount(
             UiAccount.Bluesky(
-                credential = credential,
                 accountKey =
                     MicroBlogKey(
                         id = token.subject.did,
                         host = host,
                     ),
             ),
+            credential = credential,
         )
     }
 }

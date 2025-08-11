@@ -142,7 +142,6 @@ import kotlin.uuid.Uuid
 @OptIn(ExperimentalPagingApi::class)
 internal class BlueskyDataSource(
     override val accountKey: MicroBlogKey,
-    val credential: UiAccount.Bluesky.Credential,
 ) : AuthenticatedMicroblogDataSource,
     KoinComponent,
     StatusEvent.Bluesky,
@@ -154,11 +153,13 @@ internal class BlueskyDataSource(
     private val coroutineScope: CoroutineScope by inject()
     private val accountRepository: AccountRepository by inject()
     private val inAppNotification: InAppNotification by inject()
+    private val credentialFlow by lazy {
+        accountRepository.credentialFlow<UiAccount.Bluesky.Credential>(accountKey)
+    }
     private val service by lazy {
         BlueskyService(
-            baseUrl = credential.baseUrl,
             accountKey = accountKey,
-            credential = credential,
+            credentialFlow = credentialFlow,
             onCredentialRefreshed = { credential ->
                 coroutineScope.launch {
                     appDatabase.accountDao().setCredential(
@@ -184,7 +185,7 @@ internal class BlueskyDataSource(
             cachedEndpoint = entryPoint
         }
         return cachedEndpoint?.let {
-            service.copy(baseUrl = it)
+            service.newBaseUrlService(it)
         } ?: service
     }
 
@@ -533,7 +534,10 @@ internal class BlueskyDataSource(
                                                         uri = AtUri(uri),
                                                         cid = Cid(cid),
                                                     ),
-                                                createdAt = Clock.System.now().toDeprecatedInstant(),
+                                                createdAt =
+                                                    Clock.System
+                                                        .now()
+                                                        .toDeprecatedInstant(),
                                             ).bskyJson(),
                                 ),
                             ).requireResponse()
@@ -1775,8 +1779,9 @@ internal class BlueskyDataSource(
                 )
             },
         ).flow
-            .map {
-                it.map {
+            .cachedIn(scope)
+            .combine(credentialFlow) { paging, credential ->
+                paging.map {
                     it.render(accountKey = accountKey, credential = credential, statusEvent = this)
                 }
             }.cachedIn(scope)
@@ -1801,9 +1806,14 @@ internal class BlueskyDataSource(
                 )
             },
         ).flow
-            .map {
-                it.map {
-                    it.render(accountKey = accountKey, credential = credential, statusEvent = this)
+            .cachedIn(scope)
+            .combine(credentialFlow) { paging, credential ->
+                paging.map {
+                    it.render(
+                        accountKey = accountKey,
+                        credential = credential,
+                        statusEvent = this,
+                    )
                 }
             }.cachedIn(scope)
 
@@ -1827,13 +1837,15 @@ internal class BlueskyDataSource(
                         roomKey = roomKey,
                         accountType = AccountType.Specific(accountKey),
                     ).distinctUntilChanged()
-                    .mapNotNull {
-                        it?.render(
+                    .combine(
+                        credentialFlow,
+                    ) { room, credential ->
+                        room?.render(
                             accountKey = accountKey,
                             credential = credential,
                             statusEvent = this,
                         )
-                    }
+                    }.mapNotNull { it }
             },
         )
 

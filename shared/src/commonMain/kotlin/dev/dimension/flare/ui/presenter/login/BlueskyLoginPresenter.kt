@@ -122,18 +122,18 @@ public class BlueskyLoginPresenter(
 
         accountRepository.addAccount(
             UiAccount.Bluesky(
-                credential =
-                    UiAccount.Bluesky.Credential.BlueskyCredential(
-                        baseUrl = baseUrl,
-                        accessToken = response.accessJwt,
-                        refreshToken = response.refreshJwt,
-                    ),
                 accountKey =
                     MicroBlogKey(
                         id = response.did.did,
                         host = Url(baseUrl).host,
                     ),
             ),
+            credential =
+                UiAccount.Bluesky.Credential.BlueskyCredential(
+                    baseUrl = baseUrl,
+                    accessToken = response.accessJwt,
+                    refreshToken = response.refreshJwt,
+                ),
         )
     }
 }

@@ -13,6 +13,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.model.vvoHost
 import dev.dimension.flare.ui.model.UiAccount
 import dev.dimension.flare.ui.presenter.PresenterBase
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -59,7 +60,7 @@ public class VVOLoginPresenter(
         chocolate: String,
         accountRepository: AccountRepository,
     ) {
-        val service = VVOService(chocolate)
+        val service = VVOService(flowOf(chocolate))
         val config = service.config()
         val uid = config.data?.uid
         requireNotNull(uid) { "uid is null" }
@@ -74,11 +75,11 @@ public class VVOLoginPresenter(
                         id = uid,
                         host = vvoHost,
                     ),
-                credential =
-                    UiAccount.VVo.Credential(
-                        chocolate = chocolate,
-                    ),
             ),
+            credential =
+                UiAccount.VVo.Credential(
+                    chocolate = chocolate,
+                ),
         )
     }
 }

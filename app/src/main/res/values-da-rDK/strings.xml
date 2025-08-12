@@ -78,6 +78,7 @@
     <string name="bluesky_login_auth_factor_token_hint">Godkendelsesfaktor Token</string>
     <string name="bluesky_login_oauth_button">Log ind med OAuth</string>
     <string name="bluesky_login_use_password_button">Brug Adgangskode</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth er muligvis ikke stabil nok, brug venligst adgangskode login, hvis du støder på problemer.</string>
     <string name="report_title">Rapport</string>
     <string name="report_description">Hvad er problemet med dette indlæg?</string>
     <string name="report_reason_spam_title">Spam</string>

@@ -3,15 +3,19 @@ package dev.dimension.flare.data.datasource.bluesky
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.LoadType
 import androidx.paging.PagingState
+import app.bsky.feed.FeedViewPost
 import app.bsky.feed.GetPostThreadQueryParams
 import app.bsky.feed.GetPostThreadResponseThreadUnion
 import app.bsky.feed.GetPostsQueryParams
+import app.bsky.feed.ReplyRef
+import app.bsky.feed.ReplyRefParentUnion
+import app.bsky.feed.ReplyRefRootUnion
 import app.bsky.feed.ThreadViewPost
 import app.bsky.feed.ThreadViewPostParentUnion
 import app.bsky.feed.ThreadViewPostReplieUnion
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.mapper.toDb
+import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
@@ -78,7 +82,7 @@ internal class StatusDetailRemoteMediator(
                         ).requireResponse()
                         .posts
                         .firstOrNull()
-                listOfNotNull(current)
+                listOfNotNull(current).map(::FeedViewPost)
             } else {
                 val context =
                     service
@@ -102,11 +106,49 @@ internal class StatusDetailRemoteMediator(
                         val replies =
                             thread.value.replies.mapNotNull {
                                 when (it) {
-                                    is ThreadViewPostReplieUnion.ThreadViewPost -> it.value.post
+                                    is ThreadViewPostReplieUnion.ThreadViewPost -> {
+                                        if (it.value.replies.any()) {
+                                            val last =
+                                                it.value.replies.last().let {
+                                                    when (it) {
+                                                        is ThreadViewPostReplieUnion.ThreadViewPost -> it.value.post
+                                                        else -> null
+                                                    }
+                                                }
+                                            if (last != null) {
+                                                val parents =
+                                                    listOfNotNull(it.value.post) +
+                                                        it.value.replies.toList().dropLast(1).mapNotNull {
+                                                            when (it) {
+                                                                is ThreadViewPostReplieUnion.ThreadViewPost -> it.value.post
+                                                                else -> null
+                                                            }
+                                                        }
+                                                val currentRef =
+                                                    ReplyRef(
+                                                        root = ReplyRefRootUnion.PostView(parents.last()),
+                                                        parent = ReplyRefParentUnion.PostView(parents.last()),
+                                                    )
+
+                                                FeedViewPost(
+                                                    post = last,
+                                                    reply = currentRef,
+                                                )
+                                            } else {
+                                                FeedViewPost(
+                                                    it.value.post,
+                                                )
+                                            }
+                                        } else {
+                                            FeedViewPost(
+                                                it.value.post,
+                                            )
+                                        }
+                                    }
                                     else -> null
                                 }
                             }
-                        parents.map { it.post }.reversed() + thread.value.post + replies
+                        parents.map { FeedViewPost(it.post) }.reversed() + FeedViewPost(thread.value.post) + replies
                     }
 
                     else -> emptyList()
@@ -115,7 +157,7 @@ internal class StatusDetailRemoteMediator(
         return Result(
             endOfPaginationReached = true,
             data =
-                result.toDb(
+                result.toDbPagingTimeline(
                     accountKey,
                     pagingKey,
                 ) {

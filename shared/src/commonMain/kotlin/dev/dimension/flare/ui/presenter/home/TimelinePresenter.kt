@@ -132,15 +132,13 @@ public abstract class TimelinePresenter :
                             }?.dataSource
                         data
                             .render(dataSource, useDbKeyInItemKey)
-                            .let {
-                                transform(it)
-                            }
+                            .let { transform(it) }
                     }
                 }
         }
     }
 
-    protected open fun transform(data: UiTimeline): UiTimeline = data
+    protected open suspend fun transform(data: UiTimeline): UiTimeline = data
 
     private fun networkPager(
         pagingSource: BaseTimelinePagingSourceFactory<*>,

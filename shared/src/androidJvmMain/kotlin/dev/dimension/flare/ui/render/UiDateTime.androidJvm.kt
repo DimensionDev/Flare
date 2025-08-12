@@ -14,6 +14,8 @@ public actual data class UiDateTime internal constructor(
 
 internal actual fun Instant.toUi(): UiDateTime = UiDateTime(this)
 
+internal actual operator fun UiDateTime.compareTo(other: UiDateTime): Int = value.compareTo(other.value)
+
 public sealed interface LocalizedShortTime {
     public data class String(
         val value: kotlin.String,

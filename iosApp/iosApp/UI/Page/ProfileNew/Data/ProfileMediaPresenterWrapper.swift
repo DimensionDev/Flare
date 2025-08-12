@@ -3,8 +3,7 @@ import os.log
 import shared
 import SwiftUI
 
-class ProfileMediaPresenterWrapper: ObservableObject {
-    // - Properties
+class ProfileMediaPresenterWrapper: ObservableObject { 
     let presenter: ProfileMediaPresenter
 
     // - Init

@@ -7,7 +7,6 @@ import shared
 import SwiftUI
 
 struct ProfileTabScreenUikit: View {
-    let toProfileMedia: (MicroBlogKey) -> Void
     let accountType: AccountType
     let userKey: MicroBlogKey?
     let showBackButton: Bool
@@ -26,10 +25,8 @@ struct ProfileTabScreenUikit: View {
     @Environment(FlareMenuState.self) private var menuState
 
     init(
-        accountType: AccountType, userKey: MicroBlogKey?,
-        toProfileMedia: @escaping (MicroBlogKey) -> Void, showBackButton: Bool = true
+        accountType: AccountType, userKey: MicroBlogKey?, showBackButton: Bool = true
     ) {
-        self.toProfileMedia = toProfileMedia
         self.accountType = accountType
         self.userKey = userKey
         self.showBackButton = showBackButton
@@ -63,7 +60,7 @@ struct ProfileTabScreenUikit: View {
             )
 
             if userKey == nil {
-                //
+                 
                 ProfileNewRefreshViewControllerWrapper(
                     userInfo: userInfo,
                     state: state as! ProfileNewState,
@@ -72,13 +69,9 @@ struct ProfileTabScreenUikit: View {
                         get: { presenterWrapper.isShowAppBar },
                         set: { presenterWrapper.updateNavigationState(showAppBar: $0) }
                     ),
-                    isShowsegmentedBackButton: Binding(
-                        get: { presenterWrapper.isShowsegmentedBackButton },
-                        set: { _ in } // 只读绑定，因为这个值由 isShowAppBar 控制
-                    ),
+                     
                     horizontalSizeClass: horizontalSizeClass,
                     appSettings: appSettings,
-                    toProfileMedia: toProfileMedia,
                     accountType: accountType,
                     userKey: userKey,
                     tabStore: tabStore,
@@ -96,13 +89,9 @@ struct ProfileTabScreenUikit: View {
                         get: { presenterWrapper.isShowAppBar },
                         set: { presenterWrapper.updateNavigationState(showAppBar: $0) }
                     ),
-                    isShowsegmentedBackButton: Binding(
-                        get: { presenterWrapper.isShowsegmentedBackButton },
-                        set: { _ in } // 只读绑定，因为这个值由 isShowAppBar 控制
-                    ),
+                   
                     horizontalSizeClass: horizontalSizeClass,
                     appSettings: appSettings,
-                    toProfileMedia: toProfileMedia,
                     accountType: accountType,
                     userKey: userKey,
                     tabStore: tabStore,
@@ -120,10 +109,8 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
     let state: ProfileNewState
     @Binding var selectedTab: Int
     @Binding var isShowAppBar: Bool?
-    @Binding var isShowsegmentedBackButton: Bool
     let horizontalSizeClass: UserInterfaceSizeClass?
     let appSettings: AppSettings
-    let toProfileMedia: (MicroBlogKey) -> Void
     let accountType: AccountType
     let userKey: MicroBlogKey?
     let tabStore: ProfileTabSettingStore
@@ -139,7 +126,6 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
             isShowAppBar: $isShowAppBar,
             horizontalSizeClass: horizontalSizeClass,
             appSettings: appSettings,
-            toProfileMedia: toProfileMedia,
             accountType: accountType,
             userKey: userKey,
             tabStore: tabStore,
@@ -160,7 +146,6 @@ struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
                 isShowAppBar: $isShowAppBar,
                 horizontalSizeClass: horizontalSizeClass,
                 appSettings: appSettings,
-                toProfileMedia: toProfileMedia,
                 accountType: accountType,
                 userKey: userKey,
                 tabStore: tabStore,

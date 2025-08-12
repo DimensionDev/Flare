@@ -24,8 +24,7 @@ struct FlareDestinationView: View {
             case let .profile(accountType, userKey):
                 ProfileTabScreenUikit(
                     accountType: accountType,
-                    userKey: userKey,
-                    toProfileMedia: { _ in }
+                    userKey: userKey
                 )
                 .environment(router)
 
@@ -33,8 +32,7 @@ struct FlareDestinationView: View {
                 ProfileWithUserNameScreen(
                     accountType: accountType,
                     userName: userName,
-                    host: host,
-                    toProfileMedia: { _ in }
+                    host: host
                 )
                 .environment(router)
 

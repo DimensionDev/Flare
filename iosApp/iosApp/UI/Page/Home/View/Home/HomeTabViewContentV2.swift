@@ -91,8 +91,7 @@ struct HomeTabViewContentV2: View {
                         FlareTabItem(tabType: .profile) {
                             ProfileTabScreenUikit(
                                 accountType: accountType,
-                                userKey: nil,
-                                toProfileMedia: { _ in }
+                                userKey: nil
                             )
                         }
                         .environment(menuState)

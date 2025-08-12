@@ -17,10 +17,8 @@ class ProfileNewRefreshViewController: UIViewController {
     private var state: ProfileNewState?
     private var selectedTab: Binding<Int>?
     private var isShowAppBar: Binding<Bool?>?
-    private var isShowsegmentedBackButton: Binding<Bool>?
     private var horizontalSizeClass: UserInterfaceSizeClass?
     private var appSettings: AppSettings?
-    private var toProfileMedia: ((MicroBlogKey) -> Void)?
     private var accountType: AccountType?
     private var userKey: MicroBlogKey?
     private var tabStore: ProfileTabSettingStore?
@@ -57,7 +55,6 @@ class ProfileNewRefreshViewController: UIViewController {
         isShowAppBar: Binding<Bool?>,
         horizontalSizeClass: UserInterfaceSizeClass?,
         appSettings: AppSettings,
-        toProfileMedia: @escaping (MicroBlogKey) -> Void,
         accountType: AccountType,
         userKey: MicroBlogKey?,
         tabStore: ProfileTabSettingStore,
@@ -70,7 +67,6 @@ class ProfileNewRefreshViewController: UIViewController {
         self.isShowAppBar = isShowAppBar
         self.horizontalSizeClass = horizontalSizeClass
         self.appSettings = appSettings
-        self.toProfileMedia = toProfileMedia
         self.accountType = accountType
         self.userKey = userKey
         self.tabStore = tabStore
@@ -418,8 +414,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 离开页面时重置状态，不然 详情页会导致没appbar
         isShowAppBar?.wrappedValue = true
-        isShowsegmentedBackButton?.wrappedValue = false
-
+ 
         // 确保系统导航栏状态正确
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
@@ -454,8 +449,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 在返回前重置导航状态 // 离开页面时重置状态，不然 详情页会导致没appbar
         isShowAppBar?.wrappedValue = true
-        isShowsegmentedBackButton?.wrappedValue = false
-
+ 
         // 确保导航栏可见
         navigationController?.setNavigationBarHidden(false, animated: true)
 

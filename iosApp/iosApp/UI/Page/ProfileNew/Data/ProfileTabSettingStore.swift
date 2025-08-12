@@ -4,8 +4,8 @@ import shared
 import SwiftUI
 
 class ProfileTabSettingStore: ObservableObject, TabStateProvider {
-    @Published var availableTabs: [FLTabItem] = [] // 当前显示的所有标签
-    @Published var selectedTabKey: String? // 当前选中的标签
+    @Published var availableTabs: [FLTabItem] = []
+    @Published var selectedTabKey: String?
     @Published var currentUser: UiUserV2?
     @Published var currentPresenter: TimelinePresenter?
     @Published var currentMediaPresenter: ProfileMediaPresenter?
@@ -13,7 +13,7 @@ class ProfileTabSettingStore: ObservableObject, TabStateProvider {
     private var isInitializing = false
 
     private var presenterCache: [String: TimelinePresenter] = [:]
-    private var mediaPresenterCache: [String: ProfileMediaPresenter] = [:] // 媒体presenter缓存
+    private var mediaPresenterCache: [String: ProfileMediaPresenter] = [:]
 
     var onTabChange: ((Int) -> Void)?
 

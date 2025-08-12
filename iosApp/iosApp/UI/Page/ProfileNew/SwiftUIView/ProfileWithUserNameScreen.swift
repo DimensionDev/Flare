@@ -8,14 +8,12 @@ import SwiftUI
 struct ProfileWithUserNameScreen: View {
     @State private var presenter: ProfileWithUserNameAndHostPresenter
     private let accountType: AccountType
-    let toProfileMedia: (MicroBlogKey) -> Void
     @Environment(FlareRouter.self) var router
     @Environment(FlareTheme.self) private var theme
 
-    init(accountType: AccountType, userName: String, host: String, toProfileMedia: @escaping (MicroBlogKey) -> Void) {
+    init(accountType: AccountType, userName: String, host: String) {
         self.accountType = accountType
         presenter = .init(userName: userName, host: host, accountType: accountType)
-        self.toProfileMedia = toProfileMedia
         os_log("[📔][ProfileWithUserNameScreen - init]ProfileWithUserNameScreen: userName=%{public}@, host=%{public}@", log: .default, type: .debug, userName, host)
     }
 
@@ -61,8 +59,7 @@ struct ProfileWithUserNameScreen: View {
 
                     ProfileTabScreenUikit(
                         accountType: accountType,
-                        userKey: data.data.key,
-                        toProfileMedia: toProfileMedia
+                        userKey: data.data.key
                     )
                     .onAppear {
                         os_log("[📔][ProfileWithUserNameScreen]成功加载用户信息: userKey=%{public}@", log: .default, type: .debug, data.data.key.description)

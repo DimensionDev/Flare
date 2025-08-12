@@ -22,22 +22,22 @@ class MediaCollectionViewCell: UICollectionViewCell {
     }
 
     func configure(with media: UiMedia, appSettings: AppSettings, onTap: @escaping () -> Void) {
-        // 创建 ProfileMediaItemView
+   
         let mediaView = ProfileMediaItemView(
             media: media,
             appSetting: appSettings,
             onTap: onTap
         )
 
-        // 如果已经有 hostingController，先移除
+        
         hostingController?.view.removeFromSuperview()
         hostingController = nil
 
-        // 创建新的 hostingController
+         
         let controller = UIHostingController(rootView: mediaView)
         hostingController = controller
 
-        // 添加到 contentView
+   
         controller.view.backgroundColor = .clear
         contentView.addSubview(controller.view)
         controller.view.translatesAutoresizingMaskIntoConstraints = false

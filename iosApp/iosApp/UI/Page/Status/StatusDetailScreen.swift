@@ -8,7 +8,7 @@ struct StatusDetailScreen: View {
     private let statusKey: MicroBlogKey
 
     @Environment(FlareRouter.self) private var router
-    @Environment(FlareAppState.self) private var menuState
+    @Environment(FlareMenuState.self) private var menuState
     @Environment(FlareTheme.self) private var theme
 
     init(accountType: AccountType, statusKey: MicroBlogKey) {

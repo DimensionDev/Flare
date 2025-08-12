@@ -8,7 +8,7 @@ struct FlareDestinationView: View {
     let destination: FlareDestination
     let router: FlareRouter
 
-    @Environment(FlareAppState.self) private var appState
+    @Environment(FlareMenuState.self) private var menuState
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareTheme.self) private var theme
 
@@ -24,8 +24,7 @@ struct FlareDestinationView: View {
             case let .profile(accountType, userKey):
                 ProfileTabScreenUikit(
                     accountType: accountType,
-                    userKey: userKey,
-                    toProfileMedia: { _ in }
+                    userKey: userKey
                 )
                 .environment(router)
 
@@ -33,8 +32,7 @@ struct FlareDestinationView: View {
                 ProfileWithUserNameScreen(
                     accountType: accountType,
                     userName: userName,
-                    host: host,
-                    toProfileMedia: { _ in }
+                    host: host
                 )
                 .environment(router)
 
@@ -125,23 +123,23 @@ struct FlareDestinationView: View {
             case let .download(accountType):
                 DownloadManagerScreen(accountType: accountType)
                     .environment(router)
-                    .environment(appState)
+                    .environment(menuState)
 
             case let .instanceScreen(host, _):
                 InstanceScreen(host: host)
                     .environment(router)
-                    .environment(appState)
+                    .environment(menuState)
 
             case let .podcastSheet(accountType, podcastId):
                 PodcastSheetView(accountType: accountType, podcastId: podcastId)
                     .environment(router)
-                    .environment(appState)
+                    .environment(menuState)
                     .environment(\.appSettings, appSettings)
 
             case let .spaces(accountType):
                 SpaceScreen(accountType: accountType)
                     .environment(router)
-                    .environment(appState)
+                    .environment(menuState)
 
             default:
                 Text("page not found for destination: \(String(describing: destination))")
@@ -149,7 +147,7 @@ struct FlareDestinationView: View {
             }
         }
         .environment(router)
-        .environment(appState)
+        .environment(menuState)
         .background(theme.primaryBackgroundColor)
         .foregroundColor(theme.labelColor)
     }

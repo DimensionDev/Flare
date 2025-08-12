@@ -37,11 +37,11 @@ struct TimelineViewSwiftUIV4: View {
                             TimelineStatusViewV2(
                                 item: createSampleTimelineItem(),
                                 timelineViewModel: timeLineViewModel
-                            )
-                            .redacted(reason: .placeholder)
-                            .listRowBackground(theme.primaryBackgroundColor)
-                            .listRowInsets(EdgeInsets())
-                            .listRowSeparator(.hidden)
+                            ).padding(.horizontal, 16)
+                                .redacted(reason: .placeholder)
+                                .listRowBackground(theme.primaryBackgroundColor)
+                                .listRowInsets(EdgeInsets())
+                                .listRowSeparator(.hidden)
                         }
 
                     case let .loaded(items, hasMore):

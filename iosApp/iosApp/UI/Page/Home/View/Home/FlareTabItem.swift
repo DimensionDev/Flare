@@ -9,7 +9,7 @@ struct FlareTabItem<Content: View>: View {
 
     let content: () -> Content
 
-    @Environment(FlareAppState.self) private var appState
+    @Environment(FlareMenuState.self) private var menuState
     @Environment(FlareTheme.self) private var theme
 
     init(tabType: FlareHomeTabs, @ViewBuilder content: @escaping () -> Content) {
@@ -22,7 +22,7 @@ struct FlareTabItem<Content: View>: View {
             content()
                 .navigationDestination(for: FlareDestination.self) { destination in
                     FlareDestinationView(destination: destination, router: router)
-                        .environment(appState)
+                        .environment(menuState)
                 }
                 .background(theme.primaryBackgroundColor)
                 .foregroundColor(theme.labelColor)

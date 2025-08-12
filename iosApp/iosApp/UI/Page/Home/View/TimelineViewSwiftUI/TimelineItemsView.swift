@@ -13,30 +13,29 @@ struct TimelineItemsView: View {
             TimelineStatusViewV2(
                 item: item,
                 timelineViewModel: viewModel
-            )
-            .padding(.vertical, 4)
-            .onAppear {
-                //   viewModel.itemDidAppear(item: item)
+            ).padding(.horizontal, 16)
+                .padding(.vertical, 4)
+                .onAppear {
+                    //   viewModel.itemDidAppear(item: item)
 
-                Task {
-                    if hasMore,
-                       !viewModel.isLoadingMore,
-                       items.count >= 7,
+                    Task {
+                        if hasMore, !viewModel.isLoadingMore,
+                           items.count >= 7,
 
-                       item.id == items[items.count - 5].id ||
-                       item.id == items[items.count - 6].id
-                    {
-                        FlareLog.debug("[TimelineItemsView] 🚀 预加载触发 ")
+                           item.id == items[items.count - 5].id ||
+                           item.id == items[items.count - 6].id
+                        {
+                            FlareLog.debug("[TimelineItemsView] 🚀 预加载触发 ")
 
-                        do {
-                            try await viewModel.handleLoadMore()
-                            FlareLog.debug("[TimelineItemsView] ✅ 预加载成功 - 新总数: \(items.count)")
-                        } catch {
-                            FlareLog.error("[TimelineItemsView] ❌ 预加载失败: \(error)")
+                            do {
+                                try await viewModel.handleLoadMore()
+                                FlareLog.debug("[TimelineItemsView] ✅ 预加载成功 - 新总数: \(items.count)")
+                            } catch {
+                                FlareLog.error("[TimelineItemsView] ❌ 预加载失败: \(error)")
+                            }
                         }
                     }
                 }
-            }
 //                .onDisappear {
 //                     viewModel.itemDidDisappear(item: item)
 //                }

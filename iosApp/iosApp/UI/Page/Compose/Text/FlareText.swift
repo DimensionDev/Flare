@@ -4,8 +4,8 @@ import SwiftUI
 import TwitterText
 
 public enum FlareTextType {
-    case body
-    case caption
+    case flareTextTypeBody
+    case flareTextTypeCaption
 }
 
 public struct FlareText: View, Equatable {
@@ -20,10 +20,7 @@ public struct FlareText: View, Equatable {
     public static func == (lhs: FlareText, rhs: FlareText) -> Bool {
         lhs.text == rhs.text &&
             lhs.markdownText == rhs.markdownText &&
-            lhs.textType == rhs.textType &&
-            lhs.isRTL == rhs.isRTL
-        // 注意：linkHandler是函数类型，无法比较，但通常不影响渲染
-        // Environment变量由SwiftUI自动处理
+            lhs.textType == rhs.textType
     }
 
     public init(
@@ -46,10 +43,10 @@ public struct FlareText: View, Equatable {
 
     public var body: some View {
         let currentStyle: FlareTextStyle.Style = switch textType {
-        case .body:
-            theme.bodyTextStyle
-        case .caption:
-            theme.captionTextStyle
+        case .flareTextTypeBody:
+            theme.flareTextBodyTextStyle
+        case .flareTextTypeCaption:
+            theme.flareTextCaptionTextStyle
         }
 
         switch appSettings.appearanceSettings.renderEngine {

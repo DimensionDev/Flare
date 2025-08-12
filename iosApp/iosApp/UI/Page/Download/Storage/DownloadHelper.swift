@@ -14,7 +14,7 @@ class DownloadHelper {
         DownloadManager.shared.download(url: url, fileName: downloadFileName)
     }
 
-    func startMediaDownload(url: String, mediaType: MediaType, previewImageUrl: String? = nil) {
+    func startMediaDownload(url: String, mediaType: DownMediaType, previewImageUrl: String? = nil) {
         let fileName = getFileNameWithExtension(url: url, mediaType: mediaType)
         let task = DownloadManager.shared.download(url: url, fileName: fileName)
 
@@ -23,7 +23,7 @@ class DownloadHelper {
         }
     }
 
-    private func getFileNameWithExtension(url: String, mediaType: MediaType) -> String {
+    private func getFileNameWithExtension(url: String, mediaType: DownMediaType) -> String {
         if let urlObj = URL(string: url), !urlObj.lastPathComponent.isEmpty {
             let fileName = urlObj.lastPathComponent
 
@@ -67,7 +67,7 @@ class DownloadHelper {
     }
 }
 
-enum MediaType {
+enum DownMediaType {
     case image
     case gif
     case video

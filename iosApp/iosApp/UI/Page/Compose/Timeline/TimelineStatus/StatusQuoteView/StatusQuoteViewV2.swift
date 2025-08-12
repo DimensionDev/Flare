@@ -1,27 +1,80 @@
+import Awesome
+import Generated
+import JXPhotoBrowser
+import Kingfisher
 import MarkdownUI
+import os.log
 import shared
+import SwiftDate
 import SwiftUI
+import UIKit
+
+enum SwiftAccountType {
+    case specific(accountKey: String)
+    case active
+    case guest
+}
+
+struct SwiftMicroBlogKey {
+    let id: String
+    let host: String
+
+    init(id: String, host: String) {
+        self.id = id
+        self.host = host
+    }
+}
+
+struct StatusQuoteViewV2: View {
+    let quotes: [TimelineItem]
+    let onMediaClick: (Int, Media) -> Void
+
+    var body: some View {
+        Spacer().frame(height: 10)
+
+        VStack {
+            ForEach(0 ..< quotes.count, id: \.self) { index in
+                let quote = quotes[index]
+                QuotedStatusV2(item: quote, onMediaClick: onMediaClick)
+                    .foregroundColor(.gray)
+
+                if index != quotes.count - 1 {
+                    Divider()
+                }
+            }
+        }
+        .padding(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.gray.opacity(0.3), lineWidth: 1)
+        )
+        .cornerRadius(8)
+    }
+}
 
 // 引用
-struct QuotedStatus: View {
+struct QuotedStatusV2: View {
     @State private var showMedia: Bool = false
 
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareRouter.self) private var router
     @Environment(FlareTheme.self) private var theme
 
-    let data: UiTimelineItemContentStatus
-    let onMediaClick: (Int, UiMedia) -> Void
+    let item: TimelineItem
+    let onMediaClick: (Int, Media) -> Void
 
     var body: some View {
         Button(action: {
+            let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
+            let statusKey = item.createMicroBlogKey()
+
             router.navigate(to: .statusDetailV2(
-                accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
-                statusKey: data.statusKey
+                accountType: accountType,
+                statusKey: statusKey
             ))
         }, label: {
             VStack(alignment: .leading) {
-                if let user = data.user {
+                if let user = item.user {
                     Spacer()
                         .frame(height: 8)
                     HStack {
@@ -29,25 +82,25 @@ struct QuotedStatus: View {
                         Markdown(user.name.markdown)
                             .lineLimit(1)
                             .font(.subheadline)
+                            .markdownTheme(.flareMarkdownStyle(using: theme.flareTextBodyTextStyle, fontScale: theme.fontSizeScale))
                             .markdownInlineImageProvider(.emoji)
                         Text(user.handle)
                             .lineLimit(1)
                             .font(.subheadline)
                             .foregroundColor(.gray)
                         Spacer()
-                        dateFormatter(data.createdAt)
+                        dateFormatter(item.timestamp)
                             .font(.caption)
                             .foregroundColor(.gray)
                     }
                     .padding(.horizontal, 9)
                 }
 
-                // 原文和翻译
                 FlareText(
-                    data.content.raw,
-                    data.content.markdown,
+                    item.content.raw,
+                    item.content.markdown,
                     textType: .flareTextTypeBody,
-                    isRTL: data.content.isRTL
+                    isRTL: item.content.isRTL
                 )
                 .onLinkTap { url in
                     router.handleDeepLink(url)
@@ -55,18 +108,18 @@ struct QuotedStatus: View {
                 .font(.system(size: 16))
 
                 // if appSettings.appearanceSettings.autoTranslate {
-                // TranslatableText(originalText: data.content.raw)
+                //     TranslatableText(originalText: item.content.raw)
                 // }
 
                 Spacer()
                     .frame(height: 8)
-                if !data.images.isEmpty {
+                if !item.images.isEmpty {
                     if appSettings.appearanceSettings.showMedia || showMedia {
-                        MediaComponent(
-                            hideSensitive: data.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
-                            medias: data.images,
+                        MediaComponentV2(
+                            hideSensitive: item.sensitive && !appSettings.appearanceSettings.showSensitiveContent,
+                            medias: [],
                             onMediaClick: handleMediaClick,
-                            sensitive: data.sensitive
+                            sensitive: item.sensitive
                         )
                     } else {
                         Button {
@@ -85,11 +138,10 @@ struct QuotedStatus: View {
         .buttonStyle(.plain)
     }
 
-    private func handleMediaClick(_ index: Int, _ media: UiMedia) {
-        // Show preview
-        PhotoBrowserManager.shared.showPhotoBrowser(
+    private func handleMediaClick(_ index: Int, _ media: Media) {
+        PhotoBrowserManagerV2.shared.showPhotoBrowser(
             media: media,
-            images: data.images,
+            images: item.images,
             initialIndex: index
         )
     }

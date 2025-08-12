@@ -5,6 +5,7 @@ struct StatusItemView: View {
     @Environment(\.openURL) private var openURL
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareRouter.self) private var router
+    @Environment(FlareTheme.self) private var theme
 
     let data: UiTimeline
     let detailKey: MicroBlogKey?
@@ -69,30 +70,40 @@ struct StatusItemView: View {
 
                 if let content = data.content {
                     switch onEnum(of: content) {
-                    case let .status(data): Button(action: {
-                            if detailKey != data.statusKey {
-                                // data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
-                                router.navigate(to: .statusDetailV2(
-                                    accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
-                                    statusKey: data.statusKey
-                                ))
-                            }
-                        }, label: {
-                            TimelineStatusView(
-                                data: data,
-                                onMediaClick: { index, _ in
-                                    // data.onMediaClicked(.init(launcher: AppleUriLauncher(openURL: openURL)), media, KotlinInt(integerLiteral: index))
-                                    router.navigate(to: .statusMedia(
-                                        accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
-                                        statusKey: data.statusKey,
-                                        index: index
-                                    ))
-                                },
-                                isDetail: detailKey == data.statusKey,
-                                enableTranslation: enableTranslation
-                            ).id("CommonTimelineStatusComponent_\(data.statusKey)")
-                        })
-                        .buttonStyle(.plain)
+                    case let .status(data):
+                        //  Button(action: {
+                        //         if detailKey != data.statusKey {
+                        //             // data.onClicked(.init(launcher: AppleUriLauncher(openURL: openURL)))
+                        //             router.navigate(to: .statusDetailV2(
+                        //                 accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
+                        //                 statusKey: data.statusKey
+                        //             ))
+                        //         }
+                        //     }, label: {
+                        TimelineStatusViewV2(
+                            item: TimelineItem.from(self.data),
+                            timelineViewModel: nil
+//                                isDetail: detailKey == data.statusKey
+                        )
+                        .listStyle(.plain)
+                        .listRowBackground(theme.primaryBackgroundColor)
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                    // TimelineStatusView(
+                    //     data: data,
+                    //     onMediaClick: { index, _ in
+                    //         // data.onMediaClicked(.init(launcher: AppleUriLauncher(openURL: openURL)), media, KotlinInt(integerLiteral: index))
+                    //         router.navigate(to: .statusMedia(
+                    //             accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
+                    //             statusKey: data.statusKey,
+                    //             index: index
+                    //         ))
+                    //     },
+                    //     isDetail: detailKey == data.statusKey,
+                    //     enableTranslation: enableTranslation
+                    // ).id("CommonTimelineStatusComponent_\(data.statusKey)")
+                    // })
+                    // .buttonStyle(.plain)
                     case let .user(data):
                         HStack {
                             UserComponent(

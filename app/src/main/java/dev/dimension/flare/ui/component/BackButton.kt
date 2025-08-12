@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.vector.ImageVector.Builder
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import compose.icons.FontAwesomeIcons
 import dev.dimension.flare.R
 
 @Composable
@@ -33,13 +34,13 @@ fun BackButton(
             ),
     ) {
         FAIcon(
-            imageVector = arrow,
+            imageVector = FontAwesomeIcons.BackArrow,
             contentDescription = stringResource(id = R.string.navigate_back),
         )
     }
 }
 
-private val arrow by lazy {
+val FontAwesomeIcons.BackArrow by lazy {
     Builder(
         name = "Arrow",
         defaultWidth = 448.0.dp,

@@ -132,12 +132,12 @@ internal fun RssSourcesScreen(
                 ListItem(
                     modifier =
                         Modifier
-                            .clickable {
-                                onClicked.invoke(it)
-                            }.listCard(
+                            .listCard(
                                 index = index,
                                 totalCount = itemCount,
-                            ),
+                            ).clickable {
+                                onClicked.invoke(it)
+                            },
                     headlineContent = {
                         it.title?.let {
                             Text(text = it)

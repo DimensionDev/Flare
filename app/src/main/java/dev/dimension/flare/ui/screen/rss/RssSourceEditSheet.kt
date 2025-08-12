@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -32,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
@@ -42,6 +44,8 @@ import dev.dimension.flare.R
 import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.NetworkImage
+import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.flatMap
@@ -148,6 +152,11 @@ internal fun RssSourceEditSheet(
                         label = { Text(text = stringResource(id = R.string.rss_sources_title_label)) },
                         modifier = Modifier.fillMaxWidth(),
                         lineLimits = TextFieldLineLimits.SingleLine,
+                        keyboardOptions =
+                            KeyboardOptions(
+                                imeAction = ImeAction.Done,
+                                autoCorrectEnabled = false,
+                            ),
                     )
                 }
 
@@ -216,26 +225,37 @@ internal fun RssSourceEditSheet(
                             Text(text = stringResource(id = R.string.rss_sources_rss_hub_host_hint))
                         },
                     )
-                    publicRssHubServer.forEach {
+                    publicRssHubServer.forEachIndexed { index, it ->
                         ListItem(
                             headlineContent = {
                                 Text(text = it)
                             },
                             modifier =
-                                Modifier.clickable {
-                                    state.rssHubHostText.edit {
-                                        delete(0, state.rssHubHostText.text.length)
-                                        append(it)
-                                    }
-                                },
+                                Modifier
+                                    .listCard(
+                                        index = index,
+                                        totalCount = publicRssHubServer.size,
+                                    ).clickable {
+                                        state.rssHubHostText.edit {
+                                            delete(0, state.rssHubHostText.text.length)
+                                            append(it)
+                                        }
+                                    },
                         )
                     }
                 }
 
                 is CheckRssSourcePresenter.State.RssState.RssSources -> {
                     Text(stringResource(R.string.rss_sources_discovered_rss_sources))
-                    rssState.sources.forEach { source ->
+                    rssState.sources.forEachIndexed { index, source ->
                         ListItem(
+                            leadingContent = {
+                                NetworkImage(
+                                    source.favIcon,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            },
                             headlineContent = {
                                 Text(text = source.title.orEmpty())
                             },
@@ -251,9 +271,13 @@ internal fun RssSourceEditSheet(
                                 )
                             },
                             modifier =
-                                Modifier.clickable {
-                                    state.selectSource(source)
-                                },
+                                Modifier
+                                    .listCard(
+                                        index = index,
+                                        totalCount = rssState.sources.size,
+                                    ).clickable {
+                                        state.selectSource(source)
+                                    },
                         )
                     }
                 }

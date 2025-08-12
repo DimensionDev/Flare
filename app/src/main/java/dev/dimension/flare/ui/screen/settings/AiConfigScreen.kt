@@ -30,7 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -51,7 +50,8 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.FlareServerProviderPresenter
-import dev.dimension.flare.ui.theme.ListCardShapes
+import dev.dimension.flare.ui.theme.listCardContainer
+import dev.dimension.flare.ui.theme.listCardItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -89,17 +89,16 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                     .verticalScroll(rememberScrollState())
                     .padding(it)
                     .padding(horizontal = screenHorizontalPadding)
-                    .clip(ListCardShapes.container()),
+                    .listCardContainer(),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             ListItem(
                 modifier =
                     Modifier
+                        .listCardItem()
                         .clickable {
                             state.setShowServerDialog(true)
-                        }.clip(
-                            ListCardShapes.item(),
-                        ),
+                        },
                 overlineContent = {
                     Text(
                         text = stringResource(id = R.string.settings_ai_config_server),
@@ -142,13 +141,12 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                 },
                 modifier =
                     Modifier
+                        .listCardItem()
                         .clickable {
                             state.update {
                                 copy(translation = !state.aiConfig.translation)
                             }
-                        }.clip(
-                            ListCardShapes.item(),
-                        ),
+                        },
             )
             ListItem(
                 headlineContent = {
@@ -173,13 +171,12 @@ internal fun AiConfigScreen(onBack: () -> Unit) {
                 },
                 modifier =
                     Modifier
+                        .listCardItem()
                         .clickable {
                             state.update {
                                 copy(tldr = !state.aiConfig.tldr)
                             }
-                        }.clip(
-                            ListCardShapes.item(),
-                        ),
+                        },
             )
         }
     }

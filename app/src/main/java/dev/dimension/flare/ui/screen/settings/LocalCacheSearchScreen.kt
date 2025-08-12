@@ -30,7 +30,7 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.common.itemsIndexed
-import dev.dimension.flare.ui.component.BackButton
+import dev.dimension.flare.ui.component.BackArrow
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.status.AdaptiveCard
@@ -78,15 +78,20 @@ internal fun LocalCacheSearchScreen(onBack: () -> Unit) {
                                 Text(stringResource(R.string.local_history_search_placeholder))
                             },
                             leadingIcon = {
-                                BackButton(
-                                    onBack = {
+                                IconButton(
+                                    onClick = {
                                         if (state.searchBarExpanded) {
                                             state.setSearchBarExpanded(false)
                                         } else {
                                             onBack()
                                         }
                                     },
-                                )
+                                ) {
+                                    FAIcon(
+                                        imageVector = FontAwesomeIcons.BackArrow,
+                                        contentDescription = stringResource(id = R.string.navigate_back),
+                                    )
+                                }
                             },
                             trailingIcon = {
                                 if (text.isNotEmpty()) {

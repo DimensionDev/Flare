@@ -17,7 +17,6 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -37,7 +36,8 @@ import dev.dimension.flare.ui.component.ThemedIcon
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.StoragePresenter
 import dev.dimension.flare.ui.presenter.settings.StorageState
-import dev.dimension.flare.ui.theme.ListCardShapes
+import dev.dimension.flare.ui.theme.listCardContainer
+import dev.dimension.flare.ui.theme.listCardItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -72,7 +72,7 @@ internal fun StorageScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(it)
                     .padding(horizontal = screenHorizontalPadding)
-                    .clip(ListCardShapes.container()),
+                    .listCardContainer(),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             ListItem(
@@ -90,11 +90,10 @@ internal fun StorageScreen(
                 },
                 modifier =
                     Modifier
+                        .listCardItem()
                         .clickable {
                             state.clearImageCache()
-                        }.clip(
-                            ListCardShapes.item(),
-                        ),
+                        },
                 leadingContent = {
                     ThemedIcon(
                         FontAwesomeIcons.Solid.Images,
@@ -119,11 +118,10 @@ internal fun StorageScreen(
                 },
                 modifier =
                     Modifier
+                        .listCardItem()
                         .clickable {
                             state.clearCacheDatabase()
-                        }.clip(
-                            ListCardShapes.item(),
-                        ),
+                        },
                 leadingContent = {
                     ThemedIcon(
                         FontAwesomeIcons.Solid.Database,
@@ -144,11 +142,10 @@ internal fun StorageScreen(
                 },
                 modifier =
                     Modifier
+                        .listCardItem()
                         .clickable {
                             toAppLog.invoke()
-                        }.clip(
-                            ListCardShapes.item(),
-                        ),
+                        },
                 leadingContent = {
                     ThemedIcon(
                         FontAwesomeIcons.Solid.Envelope,

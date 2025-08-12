@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.screen.serviceselect
 
 import android.graphics.Color
-import android.view.View
 import android.view.ViewGroup.LayoutParams
 import android.webkit.CookieManager
 import android.widget.FrameLayout
@@ -59,7 +58,7 @@ internal fun VVOLoginScreen(toHome: () -> Unit) {
                     .padding(it)
                     .fillMaxSize(),
             onCreated = {
-                it.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
+//                it.setLayerType(View.LAYER_TYPE_SOFTWARE, null)
                 it.setBackgroundColor(Color.TRANSPARENT)
                 // clea all cookies
                 CookieManager.getInstance().removeAllCookies(null)

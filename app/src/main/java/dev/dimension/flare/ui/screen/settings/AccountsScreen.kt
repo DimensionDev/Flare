@@ -140,7 +140,7 @@ internal fun AccountsScreen(
                         LaunchedEffect(swipeState.settledValue) {
                             if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {
                                 delay(AnimationConstants.DefaultDurationMillis.toLong())
-                                swipeState.reset()
+                                swipeState.snapTo(SwipeToDismissBoxValue.Settled)
                                 state.logout(account.accountKey)
                             }
                         }

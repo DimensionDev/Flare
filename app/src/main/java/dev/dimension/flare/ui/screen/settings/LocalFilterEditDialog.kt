@@ -23,7 +23,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -40,7 +39,8 @@ import dev.dimension.flare.ui.model.UiKeywordFilter
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.LocalFilterPresenter
-import dev.dimension.flare.ui.theme.ListCardShapes
+import dev.dimension.flare.ui.theme.listCardContainer
+import dev.dimension.flare.ui.theme.listCardItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -111,7 +111,7 @@ internal fun LocalFilterEditDialog(
             Column(
                 modifier =
                     Modifier
-                        .clip(ListCardShapes.container()),
+                        .listCardContainer(),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 ListItem(
@@ -126,9 +126,10 @@ internal fun LocalFilterEditDialog(
                     },
                     modifier =
                         Modifier
+                            .listCardItem()
                             .clickable {
                                 state.setForTimeline(!state.forTimeline)
-                            }.clip(ListCardShapes.item()),
+                            },
                 )
                 ListItem(
                     headlineContent = {
@@ -142,9 +143,10 @@ internal fun LocalFilterEditDialog(
                     },
                     modifier =
                         Modifier
+                            .listCardItem()
                             .clickable {
                                 state.setForNotification(!state.forNotification)
-                            }.clip(ListCardShapes.item()),
+                            },
                 )
                 ListItem(
                     headlineContent = {
@@ -158,9 +160,10 @@ internal fun LocalFilterEditDialog(
                     },
                     modifier =
                         Modifier
+                            .listCardItem()
                             .clickable {
                                 state.setForSearch(!state.forSearch)
-                            }.clip(ListCardShapes.item()),
+                            },
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -181,10 +184,11 @@ internal fun LocalFilterEditDialog(
                     },
                     modifier =
                         Modifier
+                            .listCardItem()
                             .clickable {
                                 state.delete()
                                 onBack()
-                            }.clip(ListCardShapes.container()),
+                            },
                 )
             }
         }

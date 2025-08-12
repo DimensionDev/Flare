@@ -1,12 +1,9 @@
 package dev.dimension.flare.data.datasource.misskey
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.AdminAdListRequest
 import dev.dimension.flare.model.MicroBlogKey
@@ -16,7 +13,7 @@ import kotlin.time.Instant
 internal class FavouriteTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
-    private val database: CacheDatabase,
+    database: CacheDatabase,
 ) : BaseTimelineRemoteMediator(
         database = database,
     ) {
@@ -28,33 +25,28 @@ internal class FavouriteTimelineRemoteMediator(
             }
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.PREPEND -> return Result(
+            when (request) {
+                is Request.Prepend -> return Result(
                     endOfPaginationReached = true,
                 )
 
-                LoadType.REFRESH -> {
+                Request.Refresh -> {
                     service.iFavorites(
                         AdminAdListRequest(
-                            limit = state.config.pageSize,
+                            limit = pageSize,
                         ),
                     )
                 }
 
-                LoadType.APPEND -> {
-                    val lastItem =
-                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return Result(
-                                endOfPaginationReached = true,
-                            )
+                is Request.Append -> {
                     service.iFavorites(
                         AdminAdListRequest(
-                            limit = state.config.pageSize,
-                            untilId = lastItem.timeline.statusKey.id,
+                            limit = pageSize,
+                            untilId = request.nextKey,
                         ),
                     )
                 }
@@ -77,6 +69,7 @@ internal class FavouriteTimelineRemoteMediator(
         return Result(
             endOfPaginationReached = response.isEmpty(),
             data = data,
+            nextKey = response.lastOrNull()?.noteId,
         )
     }
 }

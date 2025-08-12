@@ -235,9 +235,14 @@ internal fun XQTTimeline.toDbPagingTimeline(
                     tweets.tweetResults.result?.getRetweet()?.toDbStatusWithUser(accountKey)?.let {
                         ReferenceType.Retweet to listOfNotNull(it)
                     },
-                    tweets.tweetResults.result?.getQuoted()?.toDbStatusWithUser(accountKey)?.let {
-                        ReferenceType.Quote to listOfNotNull(it)
-                    },
+                    (
+                        tweets.tweetResults.result
+                            ?.getRetweet()
+                            ?.getQuoted() ?: tweets.tweetResults.result?.getQuoted()
+                    )?.toDbStatusWithUser(accountKey)
+                        ?.let {
+                            ReferenceType.Quote to listOfNotNull(it)
+                        },
                     parents
                         .mapNotNull { it.tweets.toDbStatusWithUser(accountKey) }
                         .takeIf { it.isNotEmpty() }

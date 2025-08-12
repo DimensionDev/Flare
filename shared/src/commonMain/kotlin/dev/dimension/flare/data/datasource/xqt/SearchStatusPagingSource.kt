@@ -1,8 +1,6 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -10,7 +8,6 @@ import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.isBottomEnd
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
 import io.ktor.http.encodeURLQueryComponent
@@ -20,60 +17,58 @@ import kotlinx.serialization.Serializable
 @OptIn(ExperimentalPagingApi::class)
 internal class SearchStatusPagingSource(
     private val service: XQTService,
-    private val database: CacheDatabase,
+    database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val query: String,
 ) : BaseTimelineRemoteMediator(
         database = database,
     ) {
     override val pagingKey = "search_status_$query"
-    private var cursor: String? = null
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
-                    cursor = null
+            when (request) {
+                Request.Refresh -> {
                     service
                         .getSearchTimeline(
                             variables =
                                 SearchRequest(
                                     rawQuery = query,
-                                    count = state.config.pageSize.toLong(),
+                                    count = pageSize.toLong(),
                                 ).encodeJson(),
                             referer = "https://${accountKey.host}/search?q=${query.encodeURLQueryComponent()}",
                         )
                 }
 
-                LoadType.PREPEND -> {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
+                is Request.Append -> {
                     service.getSearchTimeline(
                         variables =
                             SearchRequest(
                                 rawQuery = query,
-                                count = state.config.pageSize.toLong(),
-                                cursor = cursor,
+                                count = pageSize.toLong(),
+                                cursor = request.nextKey,
                             ).encodeJson(),
                         referer = "https://${accountKey.host}/search?q=${query.encodeURLQueryComponent()}",
                     )
                 }
             }.body()?.data?.searchByRawQuery?.searchTimeline?.timeline?.instructions.orEmpty()
         val tweets = response.tweets()
-        cursor = response.cursor()
 
         val data = tweets.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
 
         return Result(
             endOfPaginationReached = response.isBottomEnd(),
             data = data,
+            nextKey = response.cursor(),
         )
     }
 }

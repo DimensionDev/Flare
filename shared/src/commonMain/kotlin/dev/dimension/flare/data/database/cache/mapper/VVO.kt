@@ -45,10 +45,10 @@ internal object VVO {
     }
 }
 
-internal fun Status.toDbPagingTimeline(
+internal suspend fun Status.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (Status) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0L },
+    sortIdProvider: suspend (Status) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0L },
 ): DbPagingTimelineWithStatus =
     createDbPagingTimelineWithStatus(
         accountKey = accountKey,
@@ -86,10 +86,10 @@ private fun Status.toDbStatus(accountKey: MicroBlogKey): DbStatus =
         createdAt = createdAt ?: Clock.System.now(),
     )
 
-internal fun Comment.toDbPagingTimeline(
+internal suspend fun Comment.toDbPagingTimeline(
     accountKey: MicroBlogKey,
     pagingKey: String,
-    sortIdProvider: (Comment) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0L },
+    sortIdProvider: suspend (Comment) -> Long = { it.createdAt?.toEpochMilliseconds() ?: 0L },
 ): DbPagingTimelineWithStatus =
     createDbPagingTimelineWithStatus(
         accountKey = accountKey,

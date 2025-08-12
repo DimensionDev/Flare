@@ -1,8 +1,6 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.common.InAppNotification
 import dev.dimension.flare.common.Message
@@ -11,7 +9,6 @@ import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -21,46 +18,44 @@ import kotlinx.serialization.Serializable
 @OptIn(ExperimentalPagingApi::class)
 internal class HomeTimelineRemoteMediator(
     private val service: XQTService,
-    private val database: CacheDatabase,
+    database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val inAppNotification: InAppNotification,
 ) : BaseTimelineRemoteMediator(
         database = database,
     ) {
     override val pagingKey = "home_$accountKey"
-    private var cursor: String? = null
 
     override suspend fun initialize(): InitializeAction = InitializeAction.SKIP_INITIAL_REFRESH
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
-                    cursor = null
+            when (request) {
+                Request.Refresh -> {
                     service
                         .getHomeLatestTimeline(
                             variables =
                                 HomeTimelineRequest(
-                                    count = state.config.pageSize.toLong(),
+                                    count = pageSize.toLong(),
                                 ).encodeJson(),
                         )
                 }
 
-                LoadType.PREPEND -> {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
+                is Request.Append -> {
                     service.getHomeLatestTimeline(
                         variables =
                             HomeTimelineRequest(
-                                count = state.config.pageSize.toLong(),
-                                cursor = cursor,
+                                count = pageSize.toLong(),
+                                cursor = request.nextKey,
                             ).encodeJson(),
                     )
                 }
@@ -72,7 +67,7 @@ internal class HomeTimelineRemoteMediator(
                 ?.homeTimelineUrt
                 ?.instructions
                 .orEmpty()
-        cursor = instructions.cursor()
+        val cursor = instructions.cursor()
         val tweet = instructions.tweets()
 
         val data = tweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
@@ -80,6 +75,7 @@ internal class HomeTimelineRemoteMediator(
         return Result(
             endOfPaginationReached = tweet.isEmpty(),
             data = data,
+            nextKey = cursor,
         )
     }
 
@@ -97,43 +93,43 @@ internal class HomeTimelineRemoteMediator(
 @OptIn(ExperimentalPagingApi::class)
 internal class FeaturedTimelineRemoteMediator(
     private val service: XQTService,
-    private val database: CacheDatabase,
+    database: CacheDatabase,
     private val accountKey: MicroBlogKey,
 ) : BaseTimelineRemoteMediator(
         database = database,
     ) {
     override val pagingKey = "featured_$accountKey"
-    private var cursor: String? = null
+
+    override suspend fun initialize(): InitializeAction = InitializeAction.SKIP_INITIAL_REFRESH
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
-                    cursor = null
+            when (request) {
+                Request.Refresh -> {
                     service
                         .getHomeTimeline(
                             variables =
                                 HomeTimelineRequest(
-                                    count = state.config.pageSize.toLong(),
+                                    count = pageSize.toLong(),
                                 ).encodeJson(),
                         )
                 }
 
-                LoadType.PREPEND -> {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
+                is Request.Append -> {
                     service.getHomeTimeline(
                         variables =
                             HomeTimelineRequest(
-                                count = state.config.pageSize.toLong(),
-                                cursor = cursor,
+                                count = pageSize.toLong(),
+                                cursor = request.nextKey,
                             ).encodeJson(),
                     )
                 }
@@ -145,7 +141,6 @@ internal class FeaturedTimelineRemoteMediator(
                 ?.homeTimelineUrt
                 ?.instructions
                 .orEmpty()
-        cursor = instructions.cursor()
         val tweet = instructions.tweets()
 
         val data = tweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
@@ -153,6 +148,7 @@ internal class FeaturedTimelineRemoteMediator(
         return Result(
             endOfPaginationReached = tweet.isEmpty(),
             data = data,
+            nextKey = instructions.cursor(),
         )
     }
 }
@@ -160,43 +156,41 @@ internal class FeaturedTimelineRemoteMediator(
 @OptIn(ExperimentalPagingApi::class)
 internal class BookmarkTimelineRemoteMediator(
     private val service: XQTService,
-    private val database: CacheDatabase,
+    database: CacheDatabase,
     private val accountKey: MicroBlogKey,
 ) : BaseTimelineRemoteMediator(
         database = database,
     ) {
     override val pagingKey = "bookmark_$accountKey"
-    private var cursor: String? = null
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
-                    cursor = null
+            when (request) {
+                Request.Refresh -> {
                     service
                         .getBookmarks(
                             variables =
                                 HomeTimelineRequest(
-                                    count = state.config.pageSize.toLong(),
+                                    count = pageSize.toLong(),
                                 ).encodeJson(),
                         )
                 }
 
-                LoadType.PREPEND -> {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
+                is Request.Append -> {
                     service.getBookmarks(
                         variables =
                             HomeTimelineRequest(
-                                count = state.config.pageSize.toLong(),
-                                cursor = cursor,
+                                count = pageSize.toLong(),
+                                cursor = request.nextKey,
                             ).encodeJson(),
                     )
                 }
@@ -208,7 +202,6 @@ internal class BookmarkTimelineRemoteMediator(
                 ?.timeline
                 ?.instructions
                 .orEmpty()
-        cursor = instructions.cursor()
         val tweet = instructions.tweets()
 
         val data = tweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
@@ -216,6 +209,7 @@ internal class BookmarkTimelineRemoteMediator(
         return Result(
             endOfPaginationReached = tweet.isEmpty(),
             data = data,
+            nextKey = instructions.cursor(),
         )
     }
 }

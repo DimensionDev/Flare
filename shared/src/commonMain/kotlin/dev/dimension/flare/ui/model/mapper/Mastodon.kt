@@ -547,7 +547,6 @@ internal fun Account.render(
         description =
             parseNote(
                 this,
-                host = host,
                 accountKey = accountKey,
             ).toUi(),
         matrices =
@@ -596,7 +595,6 @@ internal fun Account.render(
 
 private fun parseNote(
     account: Account,
-    host: String,
     accountKey: MicroBlogKey?,
 ): Element {
     val emoji = account.emojis.orEmpty()
@@ -609,7 +607,7 @@ private fun parseNote(
             )
     }
     return parseHtml(content).let {
-        updateHtmlTagToken(it, accountKey, host)
+        updateHtmlTagToken(it, accountKey)
         it
     }
 }
@@ -617,7 +615,6 @@ private fun parseNote(
 private fun updateHtmlTagToken(
     node: Node,
     accountKey: MicroBlogKey?,
-    host: String,
 ) {
     if (node is Element && node.nameIs("a")) {
         val text = node.text()
@@ -637,9 +634,10 @@ private fun updateHtmlTagToken(
             }
 
             is UserNameToken -> {
+                val nodeHost = node.attribute("href")?.value?.let { Url(it).host } ?: ""
                 val acct = token.value.removePrefix("@")
                 val name = acct.substringBefore('@')
-                val actualHost = acct.substringAfter('@', host)
+                val actualHost = acct.substringAfter('@', nodeHost)
                 node.attributes().put(
                     "href",
                     AppDeepLink.ProfileWithNameAndHost(
@@ -657,7 +655,6 @@ private fun updateHtmlTagToken(
         updateHtmlTagToken(
             it,
             accountKey = accountKey,
-            host = host,
         )
     }
 }

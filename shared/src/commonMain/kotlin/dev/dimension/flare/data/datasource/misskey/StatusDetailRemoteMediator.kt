@@ -1,14 +1,11 @@
 package dev.dimension.flare.data.datasource.misskey
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.connect
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.IPinRequest
 import dev.dimension.flare.data.network.misskey.api.model.NotesChildrenRequest
@@ -39,10 +36,10 @@ internal class StatusDetailRemoteMediator(
     private var page = 1
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
-        if (loadType == LoadType.PREPEND) {
+        if (request is Request.Prepend) {
             return Result(
                 endOfPaginationReached = true,
             )
@@ -76,7 +73,7 @@ internal class StatusDetailRemoteMediator(
                 listOf(current)
             } else {
                 val current =
-                    if (loadType == LoadType.REFRESH) {
+                    if (request is Request.Refresh) {
                         page = 0
                         service
                             .notesShow(
@@ -96,7 +93,7 @@ internal class StatusDetailRemoteMediator(
                             NotesChildrenRequest(
                                 noteId = statusKey.id,
                                 untilId = lastItem?.timeline?.statusKey?.id,
-                                limit = state.config.pageSize,
+                                limit = pageSize,
                             ),
                         ).orEmpty()
                 listOfNotNull(current?.reply, current) + children
@@ -110,7 +107,7 @@ internal class StatusDetailRemoteMediator(
                     pagingKey = pagingKey,
                     sortIdProvider = {
                         val index = result.indexOf(it)
-                        -(index + page * state.config.pageSize).toLong()
+                        -(index + page * pageSize).toLong()
                     },
                 ),
         )

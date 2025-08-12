@@ -1,19 +1,16 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
 internal class UserTimelineRemoteMediator(
     private val service: MastodonService,
-    private val database: CacheDatabase,
+    database: CacheDatabase,
     private val accountKey: MicroBlogKey,
     private val userKey: MicroBlogKey,
     private val onlyMedia: Boolean = false,
@@ -39,17 +36,17 @@ internal class UserTimelineRemoteMediator(
         }
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
+            when (request) {
+                Request.Refresh -> {
                     val pinned =
                         if (withPinned) {
                             service.userTimeline(
                                 user_id = userKey.id,
-                                limit = state.config.pageSize,
+                                limit = pageSize,
                                 pinned = true,
                             )
                         } else {
@@ -58,33 +55,23 @@ internal class UserTimelineRemoteMediator(
                     service
                         .userTimeline(
                             user_id = userKey.id,
-                            limit = state.config.pageSize,
+                            limit = pageSize,
                             only_media = onlyMedia,
                             exclude_replies = !withReplies,
                         ) + pinned
                 }
 
-                LoadType.PREPEND -> {
-                    val firstItem = state.firstItemOrNull()
-                    service.userTimeline(
-                        user_id = userKey.id,
-                        limit = state.config.pageSize,
-                        min_id = firstItem?.timeline?.statusKey?.id,
-                        only_media = onlyMedia,
-                        exclude_replies = !withReplies,
+                is Request.Prepend -> {
+                    return Result(
+                        endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
-                    val lastItem =
-                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return Result(
-                                endOfPaginationReached = true,
-                            )
+                is Request.Append -> {
                     service.userTimeline(
                         user_id = userKey.id,
-                        limit = state.config.pageSize,
-                        max_id = lastItem.timeline.statusKey.id,
+                        limit = pageSize,
+                        max_id = request.nextKey,
                         only_media = onlyMedia,
                         exclude_replies = !withReplies,
                     )
@@ -98,6 +85,8 @@ internal class UserTimelineRemoteMediator(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                 ),
+            nextKey = response.next,
+            previousKey = response.prev,
         )
     }
 }

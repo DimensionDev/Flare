@@ -1,19 +1,16 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
 internal class HomeTimelineRemoteMediator(
     private val service: MastodonService,
-    private val database: CacheDatabase,
+    database: CacheDatabase,
     private val accountKey: MicroBlogKey,
 ) : BaseTimelineRemoteMediator(
         database = database,
@@ -23,35 +20,29 @@ internal class HomeTimelineRemoteMediator(
     override suspend fun initialize(): InitializeAction = InitializeAction.SKIP_INITIAL_REFRESH
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
+            when (request) {
+                Request.Refresh -> {
                     service
                         .homeTimeline(
-                            limit = state.config.pageSize,
+                            limit = pageSize,
                         )
                 }
 
-                LoadType.PREPEND -> {
-                    val firstItem = state.firstItemOrNull()
+                is Request.Prepend -> {
                     service.homeTimeline(
-                        limit = state.config.pageSize,
-                        min_id = firstItem?.timeline?.statusKey?.id,
+                        limit = pageSize,
+                        min_id = request.previousKey,
                     )
                 }
 
-                LoadType.APPEND -> {
-                    val lastItem =
-                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return Result(
-                                endOfPaginationReached = true,
-                            )
+                is Request.Append -> {
                     service.homeTimeline(
-                        limit = state.config.pageSize,
-                        max_id = lastItem.timeline.statusKey.id,
+                        limit = pageSize,
+                        max_id = request.nextKey,
                     )
                 }
             }
@@ -63,6 +54,8 @@ internal class HomeTimelineRemoteMediator(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                 ),
+            nextKey = response.next,
+            previousKey = response.prev,
         )
     }
 }

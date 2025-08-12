@@ -1,19 +1,16 @@
 package dev.dimension.flare.data.datasource.mastodon
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.mastodon.MastodonService
 import dev.dimension.flare.model.MicroBlogKey
 
 @OptIn(ExperimentalPagingApi::class)
 internal class FavouriteTimelineRemoteMediator(
     private val service: MastodonService,
-    private val database: CacheDatabase,
+    database: CacheDatabase,
     private val accountKey: MicroBlogKey,
 ) : BaseTimelineRemoteMediator(
         database = database,
@@ -21,33 +18,28 @@ internal class FavouriteTimelineRemoteMediator(
     override val pagingKey: String = "favourite_$accountKey"
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
+            when (request) {
+                Request.Refresh -> {
                     service
                         .favorites(
-                            limit = state.config.pageSize,
+                            limit = pageSize,
                         )
                 }
 
-                LoadType.PREPEND -> {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
-                    val lastKey =
-                        database.pagingTimelineDao().getPagingKey(pagingKey)?.nextKey
-                            ?: return Result(
-                                endOfPaginationReached = true,
-                            )
+                is Request.Append -> {
                     service.favorites(
-                        limit = state.config.pageSize,
-                        max_id = lastKey,
+                        limit = pageSize,
+                        max_id = request.nextKey,
                     )
                 }
             }

@@ -1,12 +1,10 @@
 package dev.dimension.flare.data.datasource.vvo
 
+import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -17,17 +15,15 @@ internal class CommentChildRemoteMediator(
     private val service: VVOService,
     private val commentKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
-    private val database: CacheDatabase,
+    database: CacheDatabase,
 ) : BaseTimelineRemoteMediator(
         database = database,
     ) {
     override val pagingKey: String = "status_comments_child_${commentKey}_$accountKey"
-    private var maxId: Long? = null
-    private var page = 0
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val config = service.config()
         if (config.data?.login != true) {
@@ -36,33 +32,30 @@ internal class CommentChildRemoteMediator(
                 platformType = PlatformType.VVo,
             )
         }
-
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
-                    page = 0
+            when (request) {
+                Request.Refresh -> {
                     service
                         .getHotFlowChild(
                             cid = commentKey.id,
                         )
                 }
 
-                LoadType.PREPEND -> {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
-                    page++
+                is Request.Append -> {
                     service.getHotFlowChild(
                         cid = commentKey.id,
-                        maxId = maxId,
+                        maxId = request.nextKey.toLongOrNull(),
                     )
                 }
             }
 
-        maxId = response.maxID?.takeIf { it != 0L }
+        val maxId = response.maxID?.takeIf { it != 0L }
         val status = response.data.orEmpty()
 
         val data =
@@ -71,8 +64,7 @@ internal class CommentChildRemoteMediator(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                     sortIdProvider = {
-                        val index = status.indexOf(it)
-                        -(index + page * state.config.pageSize).toLong()
+                        -SnowflakeIdGenerator.nextId()
                     },
                 )
             }
@@ -80,6 +72,7 @@ internal class CommentChildRemoteMediator(
         return Result(
             endOfPaginationReached = maxId == null,
             data = data,
+            nextKey = maxId?.toString(),
         )
     }
 }

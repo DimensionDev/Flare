@@ -1,8 +1,6 @@
 package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import app.bsky.feed.GetPostsQueryParams
 import app.bsky.feed.Like
 import app.bsky.feed.Repost
@@ -12,7 +10,6 @@ import app.bsky.notification.UpdateSeenRequest
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDb
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import kotlinx.collections.immutable.toImmutableList
@@ -29,7 +26,6 @@ internal class NotificationRemoteMediator(
 ) : BaseTimelineRemoteMediator(
         database = database,
     ) {
-    private var cursor: String? = null
     override val pagingKey: String =
         buildString {
             append("notification_")
@@ -37,16 +33,16 @@ internal class NotificationRemoteMediator(
         }
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
+            when (request) {
+                Request.Refresh -> {
                     service
                         .listNotifications(
                             ListNotificationsQueryParams(
-                                limit = state.config.pageSize.toLong(),
+                                limit = pageSize.toLong(),
                             ),
                         ).maybeResponse()
                         .also {
@@ -60,12 +56,12 @@ internal class NotificationRemoteMediator(
                         }
                 }
 
-                LoadType.APPEND -> {
+                is Request.Append -> {
                     service
                         .listNotifications(
                             ListNotificationsQueryParams(
-                                limit = state.config.pageSize.toLong(),
-                                cursor = cursor,
+                                limit = pageSize.toLong(),
+                                cursor = request.nextKey,
                             ),
                         ).maybeResponse()
                 }
@@ -115,15 +111,15 @@ internal class NotificationRemoteMediator(
                 .orEmpty()
                 .associateBy { it.uri }
                 .toImmutableMap()
-        cursor = response.cursor
         return Result(
-            endOfPaginationReached = cursor == null,
+            endOfPaginationReached = response.cursor == null,
             data =
                 response.notifications.toDb(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                     references = references,
                 ),
+            nextKey = response.cursor,
         )
     }
 }

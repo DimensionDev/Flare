@@ -58,10 +58,9 @@ internal expect object CacheDatabaseConstructor : RoomDatabaseConstructor<CacheD
     override fun initialize(): CacheDatabase
 }
 
-internal suspend fun RoomDatabase.connect(block: suspend () -> Unit) {
+internal suspend fun <R> RoomDatabase.connect(block: suspend () -> R): R =
     useWriterConnection {
         it.immediateTransaction {
             block.invoke()
         }
     }
-}

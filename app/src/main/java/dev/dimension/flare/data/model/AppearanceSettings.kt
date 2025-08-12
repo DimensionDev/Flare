@@ -22,7 +22,7 @@ val LocalAppearanceSettings = staticCompositionLocalOf { AppearanceSettings() }
 data class AppearanceSettings(
     val theme: Theme = Theme.SYSTEM,
     val dynamicTheme: Boolean = true,
-    val colorSeed: ULong = Color.Blue.value,
+    val colorSeed: ULong = Color(red = 103, green = 80, blue = 164).value,
     val avatarShape: AvatarShape = AvatarShape.CIRCLE,
     val showActions: Boolean = true,
     val pureColorMode: Boolean = true,

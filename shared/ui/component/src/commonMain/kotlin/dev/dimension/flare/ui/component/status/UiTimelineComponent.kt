@@ -478,55 +478,57 @@ private fun StatusContent(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(2.dp),
     ) {
-        Layout(
-            content = {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    data.parents.forEach {
-                        CommonStatusComponent(
-                            item = it,
-                            isDetail = false,
-                            enableStartPadding = true,
-                            modifier = Modifier.padding(paddingValues),
-                        )
+        if (data.parents.any()) {
+            Layout(
+                content = {
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        data.parents.forEach {
+                            CommonStatusComponent(
+                                item = it,
+                                isDetail = false,
+                                enableStartPadding = true,
+                                modifier = Modifier.padding(paddingValues),
+                            )
+                        }
                     }
-                }
-                VerticalDivider(
-                    modifier =
-                        Modifier
-                            .zIndex(-1f)
-                            .padding(
-                                start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
-                            ).padding(start = AvatarComponentDefaults.size / 2)
-                            .offset(y = AvatarComponentDefaults.size / 2),
-                )
-            },
-            measurePolicy = { measurables, constraints ->
-                val divider = measurables.last()
-                val content = measurables.first()
-                val placeables = content.measure(constraints)
-                val dividerPlaceable =
-                    divider.measure(
-                        Constraints(
-                            maxWidth = constraints.maxWidth,
-                            minWidth = constraints.minWidth,
-                            maxHeight = placeables.measuredHeight,
-                            minHeight = placeables.measuredHeight,
-                        ),
+                    VerticalDivider(
+                        modifier =
+                            Modifier
+                                .zIndex(-1f)
+                                .padding(
+                                    start = paddingValues.calculateStartPadding(LocalLayoutDirection.current),
+                                ).padding(start = AvatarComponentDefaults.size / 2)
+                                .offset(y = AvatarComponentDefaults.size / 2),
                     )
-                layout(
-                    width = placeables.width,
-                    height = placeables.height,
-                ) {
-                    dividerPlaceable.placeRelative(
-                        x = 0,
-                        y = 0,
-                    )
-                    placeables.placeRelative(0, 0)
-                }
-            },
-        )
+                },
+                measurePolicy = { measurables, constraints ->
+                    val divider = measurables.last()
+                    val content = measurables.first()
+                    val placeables = content.measure(constraints)
+                    val dividerPlaceable =
+                        divider.measure(
+                            Constraints(
+                                maxWidth = constraints.maxWidth,
+                                minWidth = constraints.minWidth,
+                                maxHeight = placeables.measuredHeight,
+                                minHeight = placeables.measuredHeight,
+                            ),
+                        )
+                    layout(
+                        width = placeables.width,
+                        height = placeables.height,
+                    ) {
+                        dividerPlaceable.placeRelative(
+                            x = 0,
+                            y = 0,
+                        )
+                        placeables.placeRelative(0, 0)
+                    }
+                },
+            )
+        }
         CommonStatusComponent(
             item = data,
             isDetail = detailStatusKey == data.statusKey,

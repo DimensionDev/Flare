@@ -37,7 +37,16 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.collections.immutable.toPersistentList
+import moe.tlaster.twitter.parser.HashTagToken
+import moe.tlaster.twitter.parser.TwitterParser
+import moe.tlaster.twitter.parser.UserNameToken
 import kotlin.time.Instant
+
+private val mastodonParser by lazy {
+    TwitterParser(
+        validMarkInUserName = listOf('@', '.'),
+    )
+}
 
 internal fun Notification.render(
     accountKey: MicroBlogKey,
@@ -535,7 +544,12 @@ internal fun Account.render(
         handle = "@$username@$remoteHost",
         key = userKey,
         banner = header,
-        description = parseNote(this).toUi(),
+        description =
+            parseNote(
+                this,
+                host = host,
+                accountKey = accountKey,
+            ).toUi(),
         matrices =
             UiProfile.Matrices(
                 fansCount = followersCount ?: 0,
@@ -580,7 +594,11 @@ internal fun Account.render(
     )
 }
 
-private fun parseNote(account: Account): Element {
+private fun parseNote(
+    account: Account,
+    host: String,
+    accountKey: MicroBlogKey?,
+): Element {
     val emoji = account.emojis.orEmpty()
     var content = account.note.orEmpty()
     emoji.forEach {
@@ -590,7 +608,58 @@ private fun parseNote(account: Account): Element {
                 "<img src=\"${it.url}\" alt=\"${it.shortcode}\" />",
             )
     }
-    return parseHtml(content)
+    return parseHtml(content).let {
+        updateHtmlTagToken(it, accountKey, host)
+        it
+    }
+}
+
+private fun updateHtmlTagToken(
+    node: Node,
+    accountKey: MicroBlogKey?,
+    host: String,
+) {
+    if (node is Element && node.nameIs("a")) {
+        val text = node.text()
+        val token =
+            runCatching {
+                mastodonParser.parse(text)
+            }.getOrDefault(emptyList()).firstOrNull()
+        when (token) {
+            is HashTagToken -> {
+                node.attributes().put(
+                    "href",
+                    AppDeepLink.Search(
+                        accountKey = accountKey,
+                        keyword = "#${token.value.trim('#')}",
+                    ),
+                )
+            }
+
+            is UserNameToken -> {
+                val acct = token.value.removePrefix("@")
+                val name = acct.substringBefore('@')
+                val actualHost = acct.substringAfter('@', host)
+                node.attributes().put(
+                    "href",
+                    AppDeepLink.ProfileWithNameAndHost(
+                        accountKey = accountKey,
+                        userName = name,
+                        host = actualHost,
+                    ),
+                )
+            }
+
+            else -> Unit
+        }
+    }
+    node.childNodes().forEach {
+        updateHtmlTagToken(
+            it,
+            accountKey = accountKey,
+            host = host,
+        )
+    }
 }
 
 internal fun RelationshipResponse.toUi(): UiRelation =

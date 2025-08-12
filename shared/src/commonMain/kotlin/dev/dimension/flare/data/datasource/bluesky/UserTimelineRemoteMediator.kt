@@ -1,14 +1,11 @@
 package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import app.bsky.feed.GetAuthorFeedFilter
 import app.bsky.feed.GetAuthorFeedQueryParams
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import sh.christian.ozone.api.Did
@@ -24,7 +21,6 @@ internal class UserTimelineRemoteMediator(
 ) : BaseTimelineRemoteMediator(
         database = database,
     ) {
-    var cursor: String? = null
     override val pagingKey =
         buildString {
             append("user_timeline")
@@ -39,8 +35,8 @@ internal class UserTimelineRemoteMediator(
         }
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val filter =
             when {
@@ -49,30 +45,30 @@ internal class UserTimelineRemoteMediator(
                 else -> GetAuthorFeedFilter.PostsAndAuthorThreads
             }
         val response =
-            when (loadType) {
-                LoadType.REFRESH ->
+            when (request) {
+                Request.Refresh ->
                     service
                         .getAuthorFeed(
                             GetAuthorFeedQueryParams(
-                                limit = state.config.pageSize.toLong(),
+                                limit = pageSize.toLong(),
                                 actor = Did(did = userKey.id),
                                 filter = filter,
                                 includePins = true,
                             ),
                         ).maybeResponse()
 
-                LoadType.PREPEND -> {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
+                is Request.Append -> {
                     service
                         .getAuthorFeed(
                             GetAuthorFeedQueryParams(
-                                limit = state.config.pageSize.toLong(),
-                                cursor = cursor,
+                                limit = pageSize.toLong(),
+                                cursor = request.nextKey,
                                 actor = Did(did = userKey.id),
                                 filter = filter,
                                 includePins = true,
@@ -83,14 +79,14 @@ internal class UserTimelineRemoteMediator(
                 endOfPaginationReached = true,
             )
 
-        cursor = response.cursor
         return Result(
-            endOfPaginationReached = cursor == null,
+            endOfPaginationReached = response.cursor == null,
             data =
                 response.feed.toDbPagingTimeline(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                 ),
+            nextKey = response.cursor,
         )
     }
 }

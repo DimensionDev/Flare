@@ -1,15 +1,12 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.cursor
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.model.MicroBlogKey
 
@@ -23,39 +20,37 @@ internal class UserLikesTimelineRemoteMediator(
         database = database,
     ) {
     override val pagingKey = "user_likes_${userKey}_$accountKey"
-    private var cursor: String? = null
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
-                    cursor = null
+            when (request) {
+                Request.Refresh -> {
                     service
                         .getLikes(
                             variables =
                                 UserTimelineRequest(
                                     userID = userKey.id,
-                                    count = state.config.pageSize.toLong(),
+                                    count = pageSize.toLong(),
                                 ).encodeJson(),
                         )
                 }
 
-                LoadType.PREPEND -> {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
+                is Request.Append -> {
                     service.getLikes(
                         variables =
                             UserTimelineRequest(
                                 userID = userKey.id,
-                                count = state.config.pageSize.toLong(),
-                                cursor = cursor,
+                                count = pageSize.toLong(),
+                                cursor = request.nextKey,
                             ).encodeJson(),
                     )
                 }
@@ -71,15 +66,15 @@ internal class UserLikesTimelineRemoteMediator(
                 .orEmpty()
         val tweet =
             instructions.tweets(
-                includePin = cursor == null,
+                includePin = request is Request.Refresh,
             )
-        cursor = instructions.cursor()
 
         val data = tweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) }
 
         return Result(
             endOfPaginationReached = tweet.isEmpty(),
             data = data,
+            nextKey = instructions.cursor(),
         )
     }
 }

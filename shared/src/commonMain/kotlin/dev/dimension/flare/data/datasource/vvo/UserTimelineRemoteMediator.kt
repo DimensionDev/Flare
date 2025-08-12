@@ -1,12 +1,10 @@
 package dev.dimension.flare.data.datasource.vvo
 
+import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -33,11 +31,10 @@ internal class UserTimelineRemoteMediator(
             append(userKey.toString())
         }
     private var containerid: String? = null
-    var page = 0
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         if (mediaOnly) {
             // Not supported yet
@@ -65,9 +62,8 @@ internal class UserTimelineRemoteMediator(
                     }?.containerid
         }
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
-                    page = 0
+            when (request) {
+                Request.Refresh -> {
                     service
                         .getContainerIndex(
                             type = "uid",
@@ -76,24 +72,18 @@ internal class UserTimelineRemoteMediator(
                         )
                 }
 
-                LoadType.PREPEND -> {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
-                    page++
-                    val lastItem =
-                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return Result(
-                                endOfPaginationReached = true,
-                            )
+                is Request.Append -> {
                     service.getContainerIndex(
                         type = "uid",
                         value = userKey.id,
                         containerId = containerid,
-                        sinceId = lastItem.timeline.statusKey.id,
+                        sinceId = request.nextKey,
                     )
                 }
             }
@@ -109,8 +99,7 @@ internal class UserTimelineRemoteMediator(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                     sortIdProvider = {
-                        val index = status.indexOf(it)
-                        -(index + page * state.config.pageSize).toLong()
+                        -SnowflakeIdGenerator.nextId()
                     },
                 )
             }
@@ -118,6 +107,11 @@ internal class UserTimelineRemoteMediator(
         return Result(
             endOfPaginationReached = response.data?.cardlistInfo?.sinceID == null,
             data = data,
+            nextKey =
+                response.data
+                    ?.cardlistInfo
+                    ?.sinceID
+                    ?.toString(),
         )
     }
 }

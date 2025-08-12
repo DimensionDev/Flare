@@ -1,12 +1,9 @@
 package dev.dimension.flare.data.datasource.misskey
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.UsersNotesRequest
 import dev.dimension.flare.data.network.misskey.api.model.UsersShowRequest
@@ -18,7 +15,7 @@ internal class UserTimelineRemoteMediator(
     private val accountKey: MicroBlogKey,
     private val service: MisskeyService,
     private val userKey: MicroBlogKey,
-    private val database: CacheDatabase,
+    database: CacheDatabase,
     private val onlyMedia: Boolean = false,
     private val withReplies: Boolean = false,
     private val withPinned: Boolean = false,
@@ -45,16 +42,16 @@ internal class UserTimelineRemoteMediator(
             }
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.PREPEND -> return Result(
+            when (request) {
+                is Request.Prepend -> return Result(
                     endOfPaginationReached = true,
                 )
 
-                LoadType.REFRESH -> {
+                Request.Refresh -> {
                     val pinned =
                         if (withPinned) {
                             service
@@ -75,7 +72,7 @@ internal class UserTimelineRemoteMediator(
                             .usersNotes(
                                 UsersNotesRequest(
                                     userId = userKey.id,
-                                    limit = state.config.pageSize,
+                                    limit = pageSize,
                                     withReplies = withReplies,
                                 ).let {
                                     if (onlyMedia) {
@@ -94,18 +91,13 @@ internal class UserTimelineRemoteMediator(
                             }
                 }
 
-                LoadType.APPEND -> {
-                    val lastItem =
-                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return Result(
-                                endOfPaginationReached = true,
-                            )
+                is Request.Append -> {
                     service
                         .usersNotes(
                             UsersNotesRequest(
                                 userId = userKey.id,
-                                limit = state.config.pageSize,
-                                untilId = lastItem.timeline.statusKey.id,
+                                limit = pageSize,
+                                untilId = request.nextKey,
                                 withReplies = withReplies,
                             ).let {
                                 if (onlyMedia) {
@@ -141,6 +133,7 @@ internal class UserTimelineRemoteMediator(
                         }
                     },
                 ),
+            nextKey = response.lastOrNull()?.id,
         )
     }
 }

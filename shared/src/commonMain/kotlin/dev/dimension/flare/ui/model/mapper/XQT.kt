@@ -243,7 +243,11 @@ internal fun Tweet.render(
     val retweet =
         (references[ReferenceType.Retweet]?.firstOrNull() as? StatusContent.XQT)
             ?.data
-            ?.renderStatus(accountKey = accountKey, event = event, references = emptyMap())
+            ?.renderStatus(
+                accountKey = accountKey,
+                event = event,
+                references = mapOf(ReferenceType.Quote to references[ReferenceType.Quote].orEmpty()),
+            )
     val currentTweet = renderStatus(accountKey, event, references)
     val actualTweet = retweet ?: currentTweet
     val user = currentTweet.user

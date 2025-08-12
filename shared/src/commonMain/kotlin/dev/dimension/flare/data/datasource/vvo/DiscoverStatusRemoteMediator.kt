@@ -1,12 +1,10 @@
 package dev.dimension.flare.data.datasource.vvo
 
+import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -15,18 +13,17 @@ import dev.dimension.flare.model.PlatformType
 @OptIn(ExperimentalPagingApi::class)
 internal class DiscoverStatusRemoteMediator(
     private val service: VVOService,
-    private val database: CacheDatabase,
+    database: CacheDatabase,
     private val accountKey: MicroBlogKey,
 ) : BaseTimelineRemoteMediator(
         database = database,
     ) {
     override val pagingKey: String = "discover_status_$accountKey"
-    private var page = 0
     private val containerId = "102803"
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val config = service.config()
         if (config.data?.login != true) {
@@ -36,21 +33,26 @@ internal class DiscoverStatusRemoteMediator(
             )
         }
 
+        val page =
+            when (request) {
+                is Request.Append -> request.nextKey.toIntOrNull() ?: 0
+                is Request.Prepend -> 0
+                Request.Refresh -> 0
+            }
+
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
-                    page = 0
+            when (request) {
+                Request.Refresh -> {
                     service.getContainerIndex(containerId = containerId)
                 }
 
-                LoadType.PREPEND -> {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
-                    page++
+                is Request.Append -> {
                     service.getContainerIndex(containerId = containerId, sinceId = page.toString())
                 }
             }
@@ -67,8 +69,7 @@ internal class DiscoverStatusRemoteMediator(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                     sortIdProvider = {
-                        val index = status.indexOf(it)
-                        -(index + page * state.config.pageSize).toLong()
+                        -SnowflakeIdGenerator.nextId()
                     },
                 )
             }
@@ -76,6 +77,7 @@ internal class DiscoverStatusRemoteMediator(
         return Result(
             endOfPaginationReached = status.isEmpty(),
             data = data,
+            nextKey = (page + 1).toString(),
         )
     }
 }

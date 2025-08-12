@@ -1,13 +1,10 @@
 package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import app.bsky.feed.GetFeedQueryParams
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 import sh.christian.ozone.api.AtUri
@@ -22,51 +19,50 @@ internal class FeedTimelineRemoteMediator(
         database = database,
     ) {
     override val pagingKey = "feed_timeline_$uri"
-    var cursor: String? = null
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.REFRESH ->
+            when (request) {
+                Request.Refresh ->
                     service
                         .getFeed(
                             GetFeedQueryParams(
                                 feed = AtUri(atUri = uri),
-                                limit = state.config.pageSize.toLong(),
+                                limit = pageSize.toLong(),
                             ),
                         ).maybeResponse()
 
-                LoadType.PREPEND -> {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
+                is Request.Append -> {
                     service
                         .getFeed(
                             GetFeedQueryParams(
                                 feed = AtUri(atUri = uri),
-                                limit = state.config.pageSize.toLong(),
-                                cursor = cursor,
+                                limit = pageSize.toLong(),
+                                cursor = request.nextKey,
                             ),
                         ).maybeResponse()
                 }
             } ?: return Result(
                 endOfPaginationReached = true,
             )
-        cursor = response.cursor
 
         return Result(
-            endOfPaginationReached = cursor == null,
+            endOfPaginationReached = response.cursor == null,
             data =
                 response.feed.toDbPagingTimeline(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                 ),
+            nextKey = response.cursor,
         )
     }
 }

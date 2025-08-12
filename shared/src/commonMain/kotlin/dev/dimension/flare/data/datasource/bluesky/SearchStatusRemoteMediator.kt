@@ -1,13 +1,10 @@
 package dev.dimension.flare.data.datasource.bluesky
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import app.bsky.feed.SearchPostsQueryParams
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDb
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.bluesky.BlueskyService
 import dev.dimension.flare.model.MicroBlogKey
 
@@ -20,8 +17,6 @@ internal class SearchStatusRemoteMediator(
 ) : BaseTimelineRemoteMediator(
         database = database,
     ) {
-    var cursor: String? = null
-
     override val pagingKey: String =
         buildString {
             append("search_")
@@ -30,44 +25,44 @@ internal class SearchStatusRemoteMediator(
         }
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.PREPEND -> {
+            when (request) {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
-                LoadType.REFRESH -> {
+                Request.Refresh -> {
                     service.searchPosts(
                         SearchPostsQueryParams(
                             q = query,
-                            limit = state.config.pageSize.toLong(),
+                            limit = pageSize.toLong(),
                         ),
                     )
                 }
 
-                LoadType.APPEND -> {
+                is Request.Append -> {
                     service.searchPosts(
                         SearchPostsQueryParams(
                             q = query,
-                            limit = state.config.pageSize.toLong(),
-                            cursor = cursor,
+                            limit = pageSize.toLong(),
+                            cursor = request.nextKey,
                         ),
                     )
                 }
             }.requireResponse()
-        cursor = response.cursor
 
         return Result(
-            endOfPaginationReached = cursor == null,
+            endOfPaginationReached = response.cursor == null,
             data =
                 response.posts.toDb(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                 ),
+            nextKey = response.cursor,
         )
     }
 }

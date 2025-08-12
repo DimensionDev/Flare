@@ -117,4 +117,16 @@ internal interface PagingTimelineDao {
 
     @Query("DELETE FROM DbPagingKey WHERE pagingKey = :pagingKey")
     suspend fun deletePagingKey(pagingKey: String)
+
+    @Query("UPDATE DbPagingKey SET nextKey = :nextKey WHERE pagingKey = :pagingKey")
+    suspend fun updatePagingKeyNextKey(
+        pagingKey: String,
+        nextKey: String,
+    )
+
+    @Query("UPDATE DbPagingKey SET prevKey = :prevKey WHERE pagingKey = :pagingKey")
+    suspend fun updatePagingKeyPrevKey(
+        pagingKey: String,
+        prevKey: String,
+    )
 }

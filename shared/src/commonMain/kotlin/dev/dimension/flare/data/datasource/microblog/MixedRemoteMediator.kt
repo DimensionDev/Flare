@@ -2,11 +2,8 @@ package dev.dimension.flare.data.datasource.microblog
 
 import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -27,14 +24,14 @@ internal class MixedRemoteMediator(
 
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result =
         coroutineScope {
-            if (loadType == LoadType.PREPEND) {
+            if (request is Request.Prepend) {
                 Result(endOfPaginationReached = true)
             } else {
-                if (loadType == LoadType.REFRESH) {
+                if (request is Request.Refresh) {
                     currentMediators = mediators
                 }
                 val response =
@@ -42,7 +39,7 @@ internal class MixedRemoteMediator(
                         .map {
                             async {
                                 it to
-                                    runCatching { it.timeline(loadType, state) }
+                                    runCatching { it.timeline(pageSize, request) }
                                         .onFailure { it.printStackTrace() }
                                         .getOrElse {
                                             // TODO: Handle errors for each mediator
@@ -70,24 +67,6 @@ internal class MixedRemoteMediator(
                                     ),
                             )
                         }
-
-//                database.connect {
-//                    if (loadType == LoadType.REFRESH) {
-//                        currentMediators.forEach {
-//                            database.pagingTimelineDao().delete(pagingKey = it.pagingKey)
-//                        }
-//                        database.pagingTimelineDao().delete(pagingKey = pagingKey)
-//                    }
-//
-//                    saveToDatabase(
-//                        database = database,
-//                        items = timelineResult,
-//                    )
-//                    saveToDatabase(
-//                        database = database,
-//                        items = mixedTimelineResult,
-//                    )
-//                }
 
                 currentMediators =
                     response.mapNotNull {

@@ -1,12 +1,10 @@
 package dev.dimension.flare.data.datasource.vvo
 
+import SnowflakeIdGenerator
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.vvo.VVOService
 import dev.dimension.flare.data.repository.LoginExpiredException
 import dev.dimension.flare.model.MicroBlogKey
@@ -14,7 +12,7 @@ import dev.dimension.flare.model.PlatformType
 
 @OptIn(ExperimentalPagingApi::class)
 internal class StatusCommentRemoteMediator(
-    private val database: CacheDatabase,
+    database: CacheDatabase,
     private val service: VVOService,
     private val statusKey: MicroBlogKey,
     private val accountKey: MicroBlogKey,
@@ -22,12 +20,10 @@ internal class StatusCommentRemoteMediator(
         database = database,
     ) {
     override val pagingKey: String = "status_comments_${statusKey}_$accountKey"
-    private var maxId: Long? = null
-    private var page = 0
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val config = service.config()
         if (config.data?.login != true) {
@@ -38,9 +34,8 @@ internal class StatusCommentRemoteMediator(
         }
 
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
-                    page = 0
+            when (request) {
+                Request.Refresh -> {
                     service
                         .getHotComments(
                             id = statusKey.id,
@@ -49,23 +44,22 @@ internal class StatusCommentRemoteMediator(
                         )
                 }
 
-                LoadType.PREPEND -> {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
-                    page++
+                is Request.Append -> {
                     service.getHotComments(
                         id = statusKey.id,
                         mid = statusKey.id,
-                        maxId = maxId,
+                        maxId = request.nextKey.toLongOrNull(),
                     )
                 }
             }
 
-        maxId = response.data?.maxID?.takeIf { it != 0L }
+        val maxId = response.data?.maxID?.takeIf { it != 0L }
         val comments = response.data?.data.orEmpty()
 
         val data =
@@ -74,8 +68,7 @@ internal class StatusCommentRemoteMediator(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                     sortIdProvider = { item ->
-                        val index = comments.indexOf(item)
-                        -(index + page * state.config.pageSize).toLong()
+                        -SnowflakeIdGenerator.nextId()
                     },
                 )
             }
@@ -83,6 +76,7 @@ internal class StatusCommentRemoteMediator(
         return Result(
             endOfPaginationReached = maxId == null,
             data = data,
+            nextKey = maxId?.toString(),
         )
     }
 }

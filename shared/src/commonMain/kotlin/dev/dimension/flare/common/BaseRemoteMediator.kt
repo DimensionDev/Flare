@@ -51,7 +51,28 @@ internal abstract class BaseTimelineRemoteMediator(
         loadType: LoadType,
         state: PagingState<Int, DbPagingTimelineWithStatus>,
     ): MediatorResult {
-        val result = timeline(loadType, state)
+        val request: Request =
+            when (loadType) {
+                LoadType.REFRESH -> Request.Refresh
+                LoadType.PREPEND -> {
+                    val previousKey =
+                        database.pagingTimelineDao().getPagingKey(pagingKey)?.prevKey
+                            ?: return MediatorResult.Success(endOfPaginationReached = true)
+                    Request.Prepend(previousKey)
+                }
+                LoadType.APPEND -> {
+                    val nextKey =
+                        database.pagingTimelineDao().getPagingKey(pagingKey)?.nextKey
+                            ?: return MediatorResult.Success(endOfPaginationReached = true)
+                    Request.Append(nextKey)
+                }
+            }
+
+        val result =
+            timeline(
+                pageSize = state.config.pageSize,
+                request = request,
+            )
         database.connect {
             if (loadType == LoadType.REFRESH) {
                 result.data.groupBy { it.timeline.pagingKey }.keys.forEach { key ->
@@ -60,27 +81,60 @@ internal abstract class BaseTimelineRemoteMediator(
                         .delete(pagingKey = key)
                 }
                 database.pagingTimelineDao().deletePagingKey(pagingKey)
+                database.pagingTimelineDao().insertPagingKey(
+                    DbPagingKey(
+                        pagingKey = pagingKey,
+                        nextKey = result.nextKey,
+                        prevKey = result.previousKey,
+                    ),
+                )
+            } else if (loadType == LoadType.PREPEND && result.previousKey != null) {
+                database.pagingTimelineDao().updatePagingKeyPrevKey(
+                    pagingKey = pagingKey,
+                    prevKey = result.previousKey,
+                )
+            } else if (loadType == LoadType.APPEND && result.nextKey != null) {
+                database.pagingTimelineDao().updatePagingKeyNextKey(
+                    pagingKey = pagingKey,
+                    nextKey = result.nextKey,
+                )
             }
             saveToDatabase(database, result.data)
-            database
-                .pagingTimelineDao()
-                .insertPagingKey(DbPagingKey(pagingKey = pagingKey, nextKey = result.nextKey))
         }
         return MediatorResult.Success(
-            endOfPaginationReached = result.endOfPaginationReached,
+            endOfPaginationReached =
+                result.endOfPaginationReached ||
+                    when (loadType) {
+                        LoadType.REFRESH -> false
+                        LoadType.PREPEND -> result.previousKey == null
+                        LoadType.APPEND -> result.nextKey == null
+                    },
         )
     }
 
     abstract suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result
 
     data class Result(
         val endOfPaginationReached: Boolean,
         val data: List<DbPagingTimelineWithStatus> = emptyList(),
         val nextKey: String? = null,
+        val previousKey: String? = null,
     )
+
+    sealed interface Request {
+        data object Refresh : Request
+
+        data class Prepend(
+            val previousKey: String,
+        ) : Request
+
+        data class Append(
+            val nextKey: String,
+        ) : Request
+    }
 }
 
 internal fun interface BaseTimelinePagingSourceFactory<T : Any> : BaseTimelineLoader {

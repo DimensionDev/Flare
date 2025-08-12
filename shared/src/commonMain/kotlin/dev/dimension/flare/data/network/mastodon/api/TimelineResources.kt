@@ -17,7 +17,7 @@ internal interface TimelineResources {
         @Query("min_id") min_id: String? = null,
         @Query("limit") limit: Int? = null,
         @Query("local") local: Boolean? = null,
-    ): List<Status>
+    ): MastodonPaging<Status>
 
     @GET("api/v1/timelines/public")
     suspend fun publicTimeline(
@@ -28,7 +28,7 @@ internal interface TimelineResources {
         @Query("local") local: Boolean? = null,
         @Query("remote") remote: Boolean? = null,
         @Query("only_media") only_media: Boolean? = null,
-    ): List<Status>
+    ): MastodonPaging<Status>
 
     @GET("api/v1/accounts/{id}/statuses")
     suspend fun userTimeline(
@@ -40,7 +40,7 @@ internal interface TimelineResources {
         @Query("limit") limit: Int? = null,
         @Query("pinned") pinned: Boolean? = null,
         @Query("only_media") only_media: Boolean? = null,
-    ): List<Status>
+    ): MastodonPaging<Status>
 
     @GET("api/v1/favourites")
     suspend fun favoritesList(
@@ -59,7 +59,7 @@ internal interface TimelineResources {
         @Query("limit") limit: Int? = null,
         @Query("exclude_types[]") exclude_types: List<NotificationTypes>? = null,
         @Query("account_id") account_id: String? = null,
-    ): List<Notification>
+    ): MastodonPaging<Notification>
 
     @GET("api/v1/statuses/{id}/context")
     suspend fun context(
@@ -75,7 +75,7 @@ internal interface TimelineResources {
         @Query("limit") limit: Int? = null,
         @Query("local") local: Boolean? = null,
         @Query("only_media") only_media: Boolean? = null,
-    ): List<Status>
+    ): MastodonPaging<Status>
 
     @GET("api/v1//timelines/list/{id}")
     suspend fun listTimeline(
@@ -84,7 +84,7 @@ internal interface TimelineResources {
         @Query("since_id") since_id: String? = null,
         @Query("min_id") min_id: String? = null,
         @Query("limit") limit: Int? = null,
-    ): List<Status>
+    ): MastodonPaging<Status>
 
     @GET("api/v1/bookmarks")
     suspend fun bookmarks(

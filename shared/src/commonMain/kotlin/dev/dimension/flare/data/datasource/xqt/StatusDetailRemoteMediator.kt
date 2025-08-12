@@ -1,8 +1,6 @@
 package dev.dimension.flare.data.datasource.xqt
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.common.encodeJson
 import dev.dimension.flare.data.database.cache.CacheDatabase
@@ -13,7 +11,6 @@ import dev.dimension.flare.data.database.cache.mapper.isBottomEnd
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
 import dev.dimension.flare.data.database.cache.mapper.tweets
 import dev.dimension.flare.data.database.cache.model.DbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.datasource.microblog.StatusEvent
 import dev.dimension.flare.data.network.xqt.XQTService
 import dev.dimension.flare.data.network.xqt.model.Tweet
@@ -47,14 +44,13 @@ internal class StatusDetailRemoteMediator(
             append("_")
             append(accountKey.toString())
         }
-    private var cursor: String? = null
     private var conversationId: String? = null
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
-        if (loadType == LoadType.REFRESH) {
+        if (request == Request.Refresh) {
             if (!database.pagingTimelineDao().existsPaging(accountKey, pagingKey)) {
                 database.statusDao().get(statusKey, AccountType.Specific(accountKey)).firstOrNull()?.let {
                     database.connect {
@@ -105,6 +101,12 @@ internal class StatusDetailRemoteMediator(
                 endOfPaginationReached = true,
             )
         } else {
+            val cursor =
+                if (request is Request.Append) {
+                    request.nextKey
+                } else {
+                    null
+                }
             val response =
                 service
                     .getTweetDetail(
@@ -154,11 +156,10 @@ internal class StatusDetailRemoteMediator(
                         }
                     }
 
-            cursor = response.cursor()
-
             return Result(
-                endOfPaginationReached = response.isBottomEnd() || actualTweet.size == 1 || cursor == null,
+                endOfPaginationReached = response.isBottomEnd() || actualTweet.size == 1 || response.cursor() == null,
                 data = actualTweet.mapNotNull { it.toDbPagingTimeline(accountKey, pagingKey) },
+                nextKey = response.cursor(),
             )
         }
     }

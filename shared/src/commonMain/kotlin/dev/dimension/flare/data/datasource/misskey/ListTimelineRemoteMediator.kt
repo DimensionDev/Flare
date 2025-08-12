@@ -1,12 +1,9 @@
 package dev.dimension.flare.data.datasource.misskey
 
 import androidx.paging.ExperimentalPagingApi
-import androidx.paging.LoadType
-import androidx.paging.PagingState
 import dev.dimension.flare.common.BaseTimelineRemoteMediator
 import dev.dimension.flare.data.database.cache.CacheDatabase
 import dev.dimension.flare.data.database.cache.mapper.toDbPagingTimeline
-import dev.dimension.flare.data.database.cache.model.DbPagingTimelineWithStatus
 import dev.dimension.flare.data.network.misskey.MisskeyService
 import dev.dimension.flare.data.network.misskey.api.model.NotesUserListTimelineRequest
 import dev.dimension.flare.model.MicroBlogKey
@@ -15,7 +12,7 @@ import dev.dimension.flare.model.MicroBlogKey
 internal class ListTimelineRemoteMediator(
     private val listId: String,
     private val service: MisskeyService,
-    private val database: CacheDatabase,
+    database: CacheDatabase,
     private val accountKey: MicroBlogKey,
 ) : BaseTimelineRemoteMediator(
         database = database,
@@ -23,41 +20,36 @@ internal class ListTimelineRemoteMediator(
     override val pagingKey = "list_${accountKey}_$listId"
 
     override suspend fun timeline(
-        loadType: LoadType,
-        state: PagingState<Int, DbPagingTimelineWithStatus>,
+        pageSize: Int,
+        request: Request,
     ): Result {
         val response =
-            when (loadType) {
-                LoadType.REFRESH -> {
+            when (request) {
+                Request.Refresh -> {
                     service
                         .notesUserListTimeline(
                             NotesUserListTimelineRequest(
                                 listId = listId,
-                                limit = state.config.pageSize,
+                                limit = pageSize,
                                 withRenotes = true,
                                 allowPartial = true,
                             ),
                         )
                 }
 
-                LoadType.PREPEND -> {
+                is Request.Prepend -> {
                     return Result(
                         endOfPaginationReached = true,
                     )
                 }
 
-                LoadType.APPEND -> {
-                    val lastItem =
-                        database.pagingTimelineDao().getLastPagingTimeline(pagingKey)
-                            ?: return Result(
-                                endOfPaginationReached = true,
-                            )
+                is Request.Append -> {
                     service
                         .notesUserListTimeline(
                             NotesUserListTimelineRequest(
                                 listId = listId,
-                                limit = state.config.pageSize,
-                                untilId = lastItem.timeline.statusKey.id,
+                                limit = pageSize,
+                                untilId = request.nextKey,
                                 withRenotes = true,
                                 allowPartial = true,
                             ),
@@ -74,6 +66,7 @@ internal class ListTimelineRemoteMediator(
                     accountKey = accountKey,
                     pagingKey = pagingKey,
                 ),
+            nextKey = response.lastOrNull()?.id,
         )
     }
 }

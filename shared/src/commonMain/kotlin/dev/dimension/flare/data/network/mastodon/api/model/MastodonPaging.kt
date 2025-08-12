@@ -13,7 +13,7 @@ import io.ktor.utils.io.InternalAPI
 import kotlinx.serialization.builtins.ListSerializer
 
 internal class MastodonPaging<T>(
-    data: List<T>,
+    private val data: List<T>,
     val next: String? = null,
     val prev: String? = null,
 ) : List<T> by data {
@@ -29,6 +29,13 @@ internal class MastodonPaging<T>(
             )
         }
     }
+
+    operator fun plus(other: List<T>): MastodonPaging<T> =
+        MastodonPaging(
+            data = this.data.plus(other),
+            next = this.next,
+            prev = this.prev,
+        )
 }
 
 internal class MastodonPagingConverterFactory : Converter.Factory {

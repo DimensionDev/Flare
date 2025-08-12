@@ -18,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -47,7 +46,8 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.theme.ListCardShapes
+import dev.dimension.flare.ui.theme.listCardContainer
+import dev.dimension.flare.ui.theme.listCardItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 
@@ -120,73 +120,94 @@ internal fun SettingsScreen(
         ) {
             state.user
                 .onSuccess {
-                    AccountItem(
-                        userState = state.user,
-                        avatarSize = 40.dp,
-                        onClick = {
-                            toAccounts.invoke()
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_accounts_title))
-                        },
-                        toLogin = {
-                            toAccounts.invoke()
-                        },
+                    Column(
                         modifier =
                             Modifier
-                                .clip(shape = ListCardShapes.container()),
-                    )
+                                .listCardContainer(),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        AccountItem(
+                            userState = state.user,
+                            avatarSize = 40.dp,
+                            onClick = {
+                                toAccounts.invoke()
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_accounts_title))
+                            },
+                            toLogin = {
+                                toAccounts.invoke()
+                            },
+                            modifier =
+                                Modifier
+                                    .listCardItem(),
+                        )
+                    }
                 }.onError {
-                    ListItem(
-                        headlineContent = {
-                            Text(text = stringResource(id = R.string.settings_accounts_title))
-                        },
+                    Column(
                         modifier =
                             Modifier
-                                .clickable {
-                                    toAccounts.invoke()
-                                }.clip(shape = ListCardShapes.container()),
-                        leadingContent = {
-                            ThemedIcon(
-                                imageVector = FontAwesomeIcons.Solid.CircleUser,
-                                contentDescription = null,
-                                color = ThemeIconData.Color.ImperialMagenta,
-                            )
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_accounts_title))
-                        },
-                    )
+                                .listCardContainer(),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        ListItem(
+                            headlineContent = {
+                                Text(text = stringResource(id = R.string.settings_accounts_title))
+                            },
+                            modifier =
+                                Modifier
+                                    .listCardItem()
+                                    .clickable {
+                                        toAccounts.invoke()
+                                    },
+                            leadingContent = {
+                                ThemedIcon(
+                                    imageVector = FontAwesomeIcons.Solid.CircleUser,
+                                    contentDescription = null,
+                                    color = ThemeIconData.Color.ImperialMagenta,
+                                )
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_accounts_title))
+                            },
+                        )
+                    }
                 }
 
             state.user
                 .onError {
-                    ListItem(
-                        headlineContent = {
-                            Text(text = stringResource(id = R.string.settings_guest_setting_title))
-                        },
+                    Column(
                         modifier =
                             Modifier
-                                .clickable {
-                                    toGuestSettings.invoke()
-                                },
-                        leadingContent = {
-                            ThemedIcon(
-                                imageVector = FontAwesomeIcons.Solid.Globe,
-                                contentDescription = stringResource(id = R.string.settings_guest_setting_title),
-                                color = ThemeIconData.Color.SapphireBlue,
-                            )
-                        },
-                        supportingContent = {
-                            Text(text = stringResource(id = R.string.settings_guest_setting_description))
-                        },
-                    )
+                                .listCardContainer(),
+                        verticalArrangement = Arrangement.spacedBy(2.dp),
+                    ) {
+                        ListItem(
+                            headlineContent = {
+                                Text(text = stringResource(id = R.string.settings_guest_setting_title))
+                            },
+                            modifier =
+                                Modifier
+                                    .listCardItem()
+                                    .clickable {
+                                        toGuestSettings.invoke()
+                                    },
+                            leadingContent = {
+                                ThemedIcon(
+                                    imageVector = FontAwesomeIcons.Solid.Globe,
+                                    contentDescription = stringResource(id = R.string.settings_guest_setting_title),
+                                    color = ThemeIconData.Color.SapphireBlue,
+                                )
+                            },
+                            supportingContent = {
+                                Text(text = stringResource(id = R.string.settings_guest_setting_description))
+                            },
+                        )
+                    }
                 }
-
             Column(
                 modifier =
-                    Modifier
-                        .clip(ListCardShapes.container()),
+                    Modifier.listCardContainer(),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 ListItem(
@@ -205,9 +226,10 @@ internal fun SettingsScreen(
                     },
                     modifier =
                         Modifier
+                            .listCardItem()
                             .clickable {
                                 toAppearance.invoke()
-                            }.clip(shape = ListCardShapes.item()),
+                            },
                 )
                 state.user.onSuccess {
                     ListItem(
@@ -226,9 +248,10 @@ internal fun SettingsScreen(
                         },
                         modifier =
                             Modifier
+                                .listCardItem()
                                 .clickable {
                                     toTabCustomization.invoke()
-                                }.clip(shape = ListCardShapes.item()),
+                                },
                     )
                 }
             }
@@ -237,7 +260,7 @@ internal fun SettingsScreen(
                 Column(
                     modifier =
                         Modifier
-                            .clip(ListCardShapes.container()),
+                            .listCardContainer(),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
                     ListItem(
@@ -256,9 +279,10 @@ internal fun SettingsScreen(
                         },
                         modifier =
                             Modifier
+                                .listCardItem()
                                 .clickable {
                                     toLocalFilter.invoke()
-                                }.clip(shape = ListCardShapes.item()),
+                                },
                     )
                     ListItem(
                         headlineContent = {
@@ -266,9 +290,10 @@ internal fun SettingsScreen(
                         },
                         modifier =
                             Modifier
+                                .listCardItem()
                                 .clickable {
                                     toLocalHistory.invoke()
-                                }.clip(shape = ListCardShapes.item()),
+                                },
                         leadingContent = {
                             ThemedIcon(
                                 imageVector = FontAwesomeIcons.Solid.ClockRotateLeft,
@@ -296,9 +321,10 @@ internal fun SettingsScreen(
                         },
                         modifier =
                             Modifier
+                                .listCardItem()
                                 .clickable {
                                     toStorage.invoke()
-                                }.clip(shape = ListCardShapes.item()),
+                                },
                     )
                 }
 //            ListItem(
@@ -323,7 +349,7 @@ internal fun SettingsScreen(
             Column(
                 modifier =
                     Modifier
-                        .clip(ListCardShapes.container()),
+                        .listCardContainer(),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 ListItem(
@@ -342,15 +368,16 @@ internal fun SettingsScreen(
                     },
                     modifier =
                         Modifier
+                            .listCardItem()
                             .clickable {
                                 toAiConfig.invoke()
-                            }.clip(shape = ListCardShapes.item()),
+                            },
                 )
             }
             Column(
                 modifier =
                     Modifier
-                        .clip(ListCardShapes.container()),
+                        .listCardContainer(),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 if (BuildConfig.DEBUG) {
@@ -367,9 +394,10 @@ internal fun SettingsScreen(
                         },
                         modifier =
                             Modifier
+                                .listCardItem()
                                 .clickable {
                                     toColorSpace.invoke()
-                                }.clip(shape = ListCardShapes.item()),
+                                },
                     )
                 }
                 ListItem(
@@ -388,9 +416,10 @@ internal fun SettingsScreen(
                     },
                     modifier =
                         Modifier
+                            .listCardItem()
                             .clickable {
                                 toAbout.invoke()
-                            }.clip(shape = ListCardShapes.item()),
+                            },
                 )
             }
         }

@@ -25,7 +25,7 @@ data class AppearanceSettings(
     val colorSeed: ULong = Color.Blue.value,
     val avatarShape: AvatarShape = AvatarShape.CIRCLE,
     val showActions: Boolean = true,
-    val pureColorMode: Boolean = false,
+    val pureColorMode: Boolean = true,
     val showNumbers: Boolean = true,
     val showLinkPreview: Boolean = true,
     val showMedia: Boolean = true,

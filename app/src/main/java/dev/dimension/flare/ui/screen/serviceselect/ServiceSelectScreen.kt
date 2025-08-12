@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
@@ -42,6 +43,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -143,6 +145,11 @@ internal fun ServiceSelectScreen(
                     )
                     OutlinedTextField(
                         state = state.instanceInputState,
+                        keyboardOptions =
+                            KeyboardOptions(
+                                imeAction = ImeAction.Done,
+                                autoCorrectEnabled = false,
+                            ),
                         placeholder = {
                             Text(
                                 text = stringResource(id = R.string.service_select_instance_input_placeholder),
@@ -236,6 +243,11 @@ internal fun ServiceSelectScreen(
                                             Modifier
                                                 .width(300.dp),
                                         lineLimits = TextFieldLineLimits.SingleLine,
+                                        keyboardOptions =
+                                            KeyboardOptions(
+                                                imeAction = ImeAction.Done,
+                                                autoCorrectEnabled = false,
+                                            ),
                                     )
                                     AnimatedVisibility(state.blueskyInputState.usePasswordLogin) {
                                         OutlinedSecureTextField(
@@ -260,6 +272,11 @@ internal fun ServiceSelectScreen(
                                                 Modifier
                                                     .width(300.dp),
                                             lineLimits = TextFieldLineLimits.SingleLine,
+                                            keyboardOptions =
+                                                KeyboardOptions(
+                                                    imeAction = ImeAction.Done,
+                                                    autoCorrectEnabled = false,
+                                                ),
                                         )
                                     }
                                     AnimatedVisibility(!state.blueskyInputState.usePasswordLogin) {

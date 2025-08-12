@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -41,6 +40,7 @@ import dev.dimension.flare.settings_about_source_code
 import dev.dimension.flare.settings_about_telegram
 import dev.dimension.flare.settings_about_telegram_description
 import dev.dimension.flare.settings_privacy_policy
+import dev.dimension.flare.ui.component.compatClip
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -84,7 +84,7 @@ public fun AboutScreenContent(
         Column(
             modifier =
                 Modifier
-                    .clip(MaterialTheme.shapes.medium),
+                    .compatClip(MaterialTheme.shapes.medium),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             ListItem(
@@ -98,11 +98,10 @@ public fun AboutScreenContent(
                 },
                 modifier =
                     Modifier
+                        .compatClip(MaterialTheme.shapes.extraSmall)
                         .clickable {
                             uriHandler.openUri("https://github.com/DimensionDev/Flare")
-                        }.clip(
-                            MaterialTheme.shapes.extraSmall,
-                        ),
+                        },
                 leadingContent = {
                     Icon(
                         imageVector = FontAwesomeIcons.Brands.Github,
@@ -122,11 +121,10 @@ public fun AboutScreenContent(
                 },
                 modifier =
                     Modifier
+                        .compatClip(MaterialTheme.shapes.extraSmall)
                         .clickable {
                             uriHandler.openUri("https://t.me/+0UtcP6_qcDoyOWE1")
-                        }.clip(
-                            MaterialTheme.shapes.extraSmall,
-                        ),
+                        },
                 leadingContent = {
                     Icon(
                         imageVector = FontAwesomeIcons.Brands.Telegram,
@@ -146,11 +144,10 @@ public fun AboutScreenContent(
                 },
                 modifier =
                     Modifier
+                        .compatClip(MaterialTheme.shapes.extraSmall)
                         .clickable {
                             uriHandler.openUri("https://line.me/ti/g/hf95HyGJ9k")
-                        }.clip(
-                            MaterialTheme.shapes.extraSmall,
-                        ),
+                        },
                 leadingContent = {
                     Icon(
                         imageVector = FontAwesomeIcons.Brands.Line,
@@ -170,11 +167,10 @@ public fun AboutScreenContent(
                 },
                 modifier =
                     Modifier
+                        .compatClip(MaterialTheme.shapes.extraSmall)
                         .clickable {
                             uriHandler.openUri("https://crowdin.com/project/flareapp")
-                        }.clip(
-                            MaterialTheme.shapes.extraSmall,
-                        ),
+                        },
                 leadingContent = {
                     Icon(
                         imageVector = FontAwesomeIcons.Solid.Language,
@@ -194,11 +190,10 @@ public fun AboutScreenContent(
                 },
                 modifier =
                     Modifier
+                        .compatClip(MaterialTheme.shapes.extraSmall)
                         .clickable {
                             uriHandler.openUri("https://legal.mask.io/maskbook/")
-                        }.clip(
-                            MaterialTheme.shapes.extraSmall,
-                        ),
+                        },
                 leadingContent = {
                     Icon(
                         imageVector = FontAwesomeIcons.Solid.Lock,

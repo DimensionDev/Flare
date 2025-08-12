@@ -30,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -52,7 +51,8 @@ import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AppearancePresenter
 import dev.dimension.flare.ui.presenter.settings.AppearanceState
-import dev.dimension.flare.ui.theme.ListCardShapes
+import dev.dimension.flare.ui.theme.listCardContainer
+import dev.dimension.flare.ui.theme.listCardItem
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.launch
@@ -95,7 +95,7 @@ internal fun AppearanceScreen(
             Column(
                 modifier =
                     Modifier
-                        .clip(ListCardShapes.container()),
+                        .listCardContainer(),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 BoxWithConstraints {
@@ -103,11 +103,12 @@ internal fun AppearanceScreen(
                     ListItem(
                         modifier =
                             Modifier
+                                .listCardItem()
                                 .clickable {
                                     if (maxWidth < 400.dp) {
                                         showMenu = true
                                     }
-                                }.clip(ListCardShapes.item()),
+                                },
                         headlineContent = {
                             Text(text = stringResource(id = R.string.settings_appearance_theme))
                         },
@@ -213,11 +214,12 @@ internal fun AppearanceScreen(
                     },
                     modifier =
                         Modifier
+                            .listCardItem()
                             .clickable {
                                 state.updateSettings {
                                     copy(pureColorMode = !pureColorMode)
                                 }
-                            }.clip(ListCardShapes.item()),
+                            },
                 )
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     ListItem(
@@ -239,11 +241,12 @@ internal fun AppearanceScreen(
                         },
                         modifier =
                             Modifier
+                                .listCardItem()
                                 .clickable {
                                     state.updateSettings {
                                         copy(dynamicTheme = !dynamicTheme)
                                     }
-                                }.clip(ListCardShapes.item()),
+                                },
                     )
                 }
                 AnimatedVisibility(visible = !appearanceSettings.dynamicTheme || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
@@ -266,9 +269,10 @@ internal fun AppearanceScreen(
                         },
                         modifier =
                             Modifier
+                                .listCardItem()
                                 .clickable {
                                     toColorPicker.invoke()
-                                }.clip(ListCardShapes.item()),
+                                },
                     )
                 }
             }
@@ -276,7 +280,7 @@ internal fun AppearanceScreen(
             Column(
                 modifier =
                     Modifier
-                        .clip(ListCardShapes.container()),
+                        .listCardContainer(),
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 state.sampleStatus.onSuccess {
@@ -284,8 +288,8 @@ internal fun AppearanceScreen(
                         it,
                         modifier =
                             Modifier
-                                .background(MaterialTheme.colorScheme.surface)
-                                .clip(ListCardShapes.item()),
+                                .listCardItem()
+                                .background(MaterialTheme.colorScheme.surface),
                     )
                 }
                 BoxWithConstraints {
@@ -293,11 +297,12 @@ internal fun AppearanceScreen(
                     ListItem(
                         modifier =
                             Modifier
+                                .listCardItem()
                                 .clickable {
                                     if (maxWidth < 400.dp) {
                                         showMenu = true
                                     }
-                                }.clip(ListCardShapes.item()),
+                                },
                         headlineContent = {
                             Text(text = stringResource(id = R.string.settings_appearance_avatar_shape))
                         },
@@ -388,11 +393,12 @@ internal fun AppearanceScreen(
                     },
                     modifier =
                         Modifier
+                            .listCardItem()
                             .clickable {
                                 state.updateSettings {
                                     copy(showActions = !showActions)
                                 }
-                            }.clip(ListCardShapes.item()),
+                            },
                 )
                 AnimatedVisibility(appearanceSettings.showActions) {
                     ListItem(
@@ -414,11 +420,12 @@ internal fun AppearanceScreen(
                         },
                         modifier =
                             Modifier
+                                .listCardItem()
                                 .clickable {
                                     state.updateSettings {
                                         copy(showNumbers = !showNumbers)
                                     }
-                                }.clip(ListCardShapes.item()),
+                                },
                     )
                 }
                 ListItem(
@@ -440,11 +447,12 @@ internal fun AppearanceScreen(
                     },
                     modifier =
                         Modifier
+                            .listCardItem()
                             .clickable {
                                 state.updateSettings {
                                     copy(showLinkPreview = !showLinkPreview)
                                 }
-                            }.clip(ListCardShapes.item()),
+                            },
                 )
                 AnimatedVisibility(visible = appearanceSettings.showLinkPreview) {
                     ListItem(
@@ -466,11 +474,12 @@ internal fun AppearanceScreen(
                         },
                         modifier =
                             Modifier
+                                .listCardItem()
                                 .clickable {
                                     state.updateSettings {
                                         copy(compatLinkPreview = !compatLinkPreview)
                                     }
-                                }.clip(ListCardShapes.item()),
+                                },
                     )
                 }
                 ListItem(
@@ -492,11 +501,12 @@ internal fun AppearanceScreen(
                     },
                     modifier =
                         Modifier
+                            .listCardItem()
                             .clickable {
                                 state.updateSettings {
                                     copy(showMedia = !showMedia)
                                 }
-                            }.clip(ListCardShapes.item()),
+                            },
                 )
                 AnimatedVisibility(appearanceSettings.showMedia) {
                     ListItem(
@@ -518,11 +528,12 @@ internal fun AppearanceScreen(
                         },
                         modifier =
                             Modifier
+                                .listCardItem()
                                 .clickable {
                                     state.updateSettings {
                                         copy(showSensitiveContent = !showSensitiveContent)
                                     }
-                                }.clip(ListCardShapes.item()),
+                                },
                     )
                 }
                 AnimatedVisibility(appearanceSettings.showMedia) {
@@ -545,11 +556,12 @@ internal fun AppearanceScreen(
                         },
                         modifier =
                             Modifier
+                                .listCardItem()
                                 .clickable {
                                     state.updateSettings {
                                         copy(expandMediaSize = !expandMediaSize)
                                     }
-                                }.clip(ListCardShapes.item()),
+                                },
                     )
                 }
                 AnimatedVisibility(appearanceSettings.showMedia) {
@@ -558,11 +570,12 @@ internal fun AppearanceScreen(
                         ListItem(
                             modifier =
                                 Modifier
+                                    .listCardItem()
                                     .clickable {
                                         if (maxWidth < 400.dp) {
                                             showMenu = true
                                         }
-                                    }.clip(ListCardShapes.item()),
+                                    },
                             headlineContent = {
                                 Text(text = stringResource(id = R.string.settings_appearance_video_autoplay))
                             },

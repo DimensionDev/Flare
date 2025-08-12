@@ -23,7 +23,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -41,7 +40,7 @@ import dev.dimension.flare.ui.component.listCard
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.DevModePresenter
 import dev.dimension.flare.ui.screen.media.saveByteArrayToDownloads
-import dev.dimension.flare.ui.theme.ListCardShapes
+import dev.dimension.flare.ui.theme.listCardContainer
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import moe.tlaster.precompose.molecule.producePresenter
 import kotlin.time.Clock
@@ -124,9 +123,10 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
                     },
                     modifier =
                         Modifier
+                            .listCardContainer()
                             .clickable {
                                 state.setEnabled(!state.enabled)
-                            }.clip(ListCardShapes.container()),
+                            },
                 )
             }
             item {
@@ -139,9 +139,10 @@ internal fun AppLoggingScreen(onBack: () -> Unit) {
                     },
                     modifier =
                         Modifier
+                            .listCard(index = index, totalCount = state.messages.size)
                             .clickable {
                                 selectedMessage = it
-                            }.listCard(index = index, totalCount = state.messages.size),
+                            },
                 )
             }
         }

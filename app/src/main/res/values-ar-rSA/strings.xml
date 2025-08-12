@@ -78,6 +78,7 @@
     <string name="bluesky_login_auth_factor_token_hint">عامل المصادقة رمز</string>
     <string name="bluesky_login_oauth_button">تسجيل الدخول باستخدام OAuth</string>
     <string name="bluesky_login_use_password_button">استخدام كلمة المرور</string>
+    <string name="bluesky_login_oauth_hint">قد لا يكون Bluesky OAuth مستقرًا بما فيه الكفاية، يرجى استخدام تسجيل الدخول لكلمة المرور إذا واجهت أي مشاكل.</string>
     <string name="report_title">تقرير</string>
     <string name="report_description">ما هي المشكلة مع هذا المنشور؟</string>
     <string name="report_reason_spam_title">مزعج</string>

@@ -78,6 +78,7 @@
     <string name="bluesky_login_auth_factor_token_hint">Authenticatie factor token</string>
     <string name="bluesky_login_oauth_button">Log in met OAuth</string>
     <string name="bluesky_login_use_password_button">Wachtwoord gebruiken</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth is mogelijk niet stabiel genoeg. Gebruik een wachtwoord login als je problemen ondervindt.</string>
     <string name="report_title">Rapporteren</string>
     <string name="report_description">Wat is het probleem met dit bericht?</string>
     <string name="report_reason_spam_title">Spam</string>

@@ -78,6 +78,7 @@
     <string name="bluesky_login_auth_factor_token_hint">Authentifizierungsfaktor-Token</string>
     <string name="bluesky_login_oauth_button">Mit OAuh anmelden</string>
     <string name="bluesky_login_use_password_button">Passwort verwenden</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth könnte nicht stabil genug sein, bitte benutze das Passwort-Login, wenn du irgendwelche Probleme hast.</string>
     <string name="report_title">Bericht</string>
     <string name="report_description">Was ist das Problem mit diesem Beitrag?</string>
     <string name="report_reason_spam_title">Spam</string>

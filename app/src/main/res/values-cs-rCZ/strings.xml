@@ -78,6 +78,7 @@
     <string name="bluesky_login_auth_factor_token_hint">Faktor ověření tokenu</string>
     <string name="bluesky_login_oauth_button">Přihlásit se pomocí OAuth</string>
     <string name="bluesky_login_use_password_button">Použít heslo</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth nemusí být dostatečně stabilní, použijte prosím heslo, pokud narazíte na nějaké problémy.</string>
     <string name="report_title">Nahlásit</string>
     <string name="report_description">Jaký je problém s tímto příspěvkem?</string>
     <string name="report_reason_spam_title">Nevyžádaná pošta</string>

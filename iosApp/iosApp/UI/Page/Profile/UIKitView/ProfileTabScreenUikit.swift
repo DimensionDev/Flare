@@ -68,7 +68,6 @@ struct ProfileTabScreenUikit: View {
             }
 
             if userKey == nil {
-                 
                 ProfileNewRefreshViewControllerWrapper(
                     userInfo: userInfo,
                     state: state as! ProfileNewState,
@@ -77,7 +76,7 @@ struct ProfileTabScreenUikit: View {
                         get: { presenterWrapper.isShowAppBar },
                         set: { presenterWrapper.updateNavigationState(showAppBar: $0) }
                     ),
-                     
+
                     horizontalSizeClass: horizontalSizeClass,
                     appSettings: appSettings,
                     accountType: accountType,
@@ -98,7 +97,7 @@ struct ProfileTabScreenUikit: View {
                         get: { presenterWrapper.isShowAppBar },
                         set: { presenterWrapper.updateNavigationState(showAppBar: $0) }
                     ),
-                   
+
                     horizontalSizeClass: horizontalSizeClass,
                     appSettings: appSettings,
                     accountType: accountType,

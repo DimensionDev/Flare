@@ -4,7 +4,6 @@ import shared
 import SwiftUI
 
 class ProfilePresenterWrapper: ObservableObject {
-
     let presenter: ProfileNewPresenter
     @Published var isShowAppBar: Bool? = nil // nil: 初始状态, true: 显示, false: 隐藏
 
@@ -13,7 +12,6 @@ class ProfilePresenterWrapper: ObservableObject {
     private let accountType: AccountType
     private let userKey: MicroBlogKey?
 
-
     init(accountType: AccountType, userKey: MicroBlogKey?) {
         os_log("[📔][ProfilePresenterWrapper - init]初始化: accountType=%{public}@, userKey=%{public}@", log: .default, type: .debug, String(describing: accountType), userKey?.description ?? "nil")
 
@@ -21,10 +19,8 @@ class ProfilePresenterWrapper: ObservableObject {
         self.userKey = userKey
         presenter = .init(accountType: accountType, userKey: userKey)
 
-
         isShowAppBar = nil
-     }
-
+    }
 
     func updateNavigationState(showAppBar: Bool?) {
         os_log("[📔][ProfilePresenterWrapper]更新导航栏状态: showAppBar=%{public}@", log: .default, type: .debug, String(describing: showAppBar))
@@ -45,7 +41,7 @@ class ProfilePresenterWrapper: ObservableObject {
 
         // 创建TimelineViewModel实例
         let viewModel = TimelineViewModel()
-        self.timelineViewModel = viewModel
+        timelineViewModel = viewModel
 
         // 从ProfileTabSettingStore获取当前的Timeline Presenter
         if let timelinePresenter = tabStore.currentPresenter {
@@ -70,6 +66,6 @@ class ProfilePresenterWrapper: ObservableObject {
 
     // 新增：获取TimelineViewModel（如果已初始化）
     func getTimelineViewModel() -> TimelineViewModel? {
-        return timelineViewModel
+        timelineViewModel
     }
 }

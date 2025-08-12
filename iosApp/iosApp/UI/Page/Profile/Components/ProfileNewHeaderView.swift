@@ -585,6 +585,7 @@ class ProfileNewHeaderView: UIView {
         return hostingController.view
     }
 }
+
 struct UserFollowsFansCount: View {
     let followCount: String
     let fansCount: String
@@ -630,12 +631,12 @@ struct UserInfoFieldsView: View {
                 .padding(.horizontal)
             }
             .padding(.vertical)
-#if os(iOS)
-            .background(Color(UIColor.secondarySystemBackground))
-#else
-            .background(Color(NSColor.windowBackgroundColor))
-#endif
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            #if os(iOS)
+                .background(Color(UIColor.secondarySystemBackground))
+            #else
+                .background(Color(NSColor.windowBackgroundColor))
+            #endif
+                .clipShape(RoundedRectangle(cornerRadius: 8))
         } else {
             EmptyView()
         }

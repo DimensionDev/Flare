@@ -8,28 +8,26 @@ import SwiftDate
 import SwiftUI
 import UIKit
 
-
 #if canImport(_Translation_SwiftUI)
-import Translation
+    import Translation
 #endif
 
-
 #if canImport(_Translation_SwiftUI)
-extension View {
-    func addTranslateView(isPresented: Binding<Bool>, text: String) -> some View {
-#if targetEnvironment(macCatalyst) || os(visionOS)
-        FlareLog.warning("addTranslateView: Translation not supported on macCatalyst/visionOS")
-        return self
-#else
-        if #available(iOS 17.4, *) {
-            return self.translationPresentation(isPresented: isPresented, text: text)
-        } else {
-            FlareLog.warning("addTranslateView: iOS version < 17.4, translation not available")
-            return self
+    extension View {
+        func addTranslateView(isPresented: Binding<Bool>, text: String) -> some View {
+            #if targetEnvironment(macCatalyst) || os(visionOS)
+                FlareLog.warning("addTranslateView: Translation not supported on macCatalyst/visionOS")
+                return self
+            #else
+                if #available(iOS 17.4, *) {
+                    return self.translationPresentation(isPresented: isPresented, text: text)
+                } else {
+                    FlareLog.warning("addTranslateView: iOS version < 17.4, translation not available")
+                    return self
+                }
+            #endif
         }
-#endif
     }
-}
 #endif
 
 private struct CaptureMode: EnvironmentKey {

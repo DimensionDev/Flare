@@ -1,7 +1,6 @@
 import Foundation
 import shared
 
- 
 struct ProfileUserInfo: Equatable {
     let profile: UiProfile
     let relation: UiRelation?
@@ -11,16 +10,13 @@ struct ProfileUserInfo: Equatable {
     let fields: [String: UiRichText]
     let canSendMessage: Bool
 
-  
     static func from(state: ProfileNewState) -> ProfileUserInfo? {
-     
         guard case let .success(user) = onEnum(of: state.userState),
               let profile = user.data as? UiProfile
         else {
             return nil
         }
 
-       
         let relation: UiRelation? = {
             if case let .success(rel) = onEnum(of: state.relationState) {
                 return rel.data
@@ -28,24 +24,24 @@ struct ProfileUserInfo: Equatable {
             return nil
         }()
 
-         let isMe: Bool = {
+        let isMe: Bool = {
             if case let .success(me) = onEnum(of: state.isMe) {
                 return me.data as! Bool
             }
             return false
         }()
 
-         let canSendMessage: Bool = {
+        let canSendMessage: Bool = {
             if case let .success(can) = onEnum(of: state.canSendMessage) {
                 return can.data as! Bool
             }
             return false
         }()
 
-         let followCount = profile.matrices.followsCountHumanized
+        let followCount = profile.matrices.followsCountHumanized
         let fansCount = profile.matrices.fansCountHumanized
 
-         let fields: [String: UiRichText] = {
+        let fields: [String: UiRichText] = {
             if let bottomContent = profile.bottomContent,
                let fieldsContent = bottomContent as? UiProfileBottomContentFields
             {
@@ -64,10 +60,8 @@ struct ProfileUserInfo: Equatable {
             canSendMessage: canSendMessage
         )
     }
- 
 
     static func == (lhs: ProfileUserInfo, rhs: ProfileUserInfo) -> Bool {
-      
         lhs.profile.key.description == rhs.profile.key.description &&
             lhs.isMe == rhs.isMe &&
             lhs.followCount == rhs.followCount &&

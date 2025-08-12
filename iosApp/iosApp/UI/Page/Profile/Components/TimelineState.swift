@@ -7,13 +7,12 @@ class TimelineLoadingState {
     // 当前加载中的行
     private(set) var loadingRows: Set<Int> = []
     private let preloadDistance: Int = 10
- 
+
     // 清空加载队列
     func clearLoadingRows() {
         loadingRows.removeAll()
     }
 
-  
     // 检查并触发预加载
     func checkAndTriggerPreload(currentRow: Int, data: PagingState<UiTimeline>) {
         guard case let .success(successData) = onEnum(of: data) else { return }

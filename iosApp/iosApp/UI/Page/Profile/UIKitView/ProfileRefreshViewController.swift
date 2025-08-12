@@ -426,7 +426,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 离开页面时重置状态，不然 详情页会导致没appbar
         isShowAppBar?.wrappedValue = true
- 
+
         // 确保系统导航栏状态正确
         navigationController?.setNavigationBarHidden(false, animated: animated)
     }
@@ -461,7 +461,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 在返回前重置导航状态 // 离开页面时重置状态，不然 详情页会导致没appbar
         isShowAppBar?.wrappedValue = true
- 
+
         // 确保导航栏可见
         navigationController?.setNavigationBarHidden(false, animated: true)
 

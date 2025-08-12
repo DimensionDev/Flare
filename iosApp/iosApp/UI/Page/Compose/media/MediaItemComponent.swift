@@ -2,8 +2,9 @@ import AVKit
 import Kingfisher
 import shared
 import SwiftUI
+
 //
-//struct MediaItemComponent: View {
+// struct MediaItemComponent: View {
 //    let media: UiMedia
 //
 //    var body: some View {
@@ -15,4 +16,4 @@ import SwiftUI
 //            action: {}
 //        )
 //    }
-//}
+// }

@@ -124,7 +124,6 @@ class ProfileMediaViewController: UIViewController {
 
     private func showPhotoBrowser(media: UiMedia, images: [UiMedia], initialIndex: Int) {
         Task { @MainActor in
-            
             PhotoBrowserManager.shared.showPhotoBrowser(
                 media: media,
                 images: images,

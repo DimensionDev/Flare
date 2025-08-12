@@ -22,22 +22,18 @@ class MediaCollectionViewCell: UICollectionViewCell {
     }
 
     func configure(with media: UiMedia, appSettings: AppSettings, onTap: @escaping () -> Void) {
-   
         let mediaView = ProfileMediaItemView(
             media: media,
             appSetting: appSettings,
             onTap: onTap
         )
 
-        
         hostingController?.view.removeFromSuperview()
         hostingController = nil
 
-         
         let controller = UIHostingController(rootView: mediaView)
         hostingController = controller
 
-   
         controller.view.backgroundColor = .clear
         contentView.addSubview(controller.view)
         controller.view.translatesAutoresizingMaskIntoConstraints = false

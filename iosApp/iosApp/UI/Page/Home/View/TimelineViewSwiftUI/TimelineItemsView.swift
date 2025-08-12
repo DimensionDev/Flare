@@ -13,14 +13,13 @@ struct TimelineItemsView: View {
             TimelineStatusViewV2(
                 item: item,
                 timelineViewModel: viewModel
-            )
+            ).padding(.horizontal, 16)
             .padding(.vertical, 4)
             .onAppear {
                 //   viewModel.itemDidAppear(item: item)
 
                 Task {
-                    if hasMore,
-                       !viewModel.isLoadingMore,
+                    if hasMore,  !viewModel.isLoadingMore,
                        items.count >= 7,
 
                        item.id == items[items.count - 5].id ||

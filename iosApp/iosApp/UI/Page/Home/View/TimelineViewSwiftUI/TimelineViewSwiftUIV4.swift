@@ -37,7 +37,7 @@ struct TimelineViewSwiftUIV4: View {
                             TimelineStatusViewV2(
                                 item: createSampleTimelineItem(),
                                 timelineViewModel: timeLineViewModel
-                            )
+                            ).padding(.horizontal, 16)
                             .redacted(reason: .placeholder)
                             .listRowBackground(theme.primaryBackgroundColor)
                             .listRowInsets(EdgeInsets())

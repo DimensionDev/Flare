@@ -8,67 +8,7 @@ import shared
 import SwiftDate
 import SwiftUI
 import UIKit
-
-@Observable
-class StatusContentViewModel {
-    let content: UiRichText
-    let isRTL: Bool
-
-    init(content: UiRichText) {
-        self.content = content
-        isRTL = content.isRTL
-    }
-
-    var hasContent: Bool { !content.raw.isEmpty }
-    var rawText: String { content.raw }
-    var markdownText: String { content.markdown }
-}
-
-struct StatusViewModel {
-    let data: UiTimelineItemContentStatus
-    let isDetail: Bool
-    let enableTranslation: Bool
-
-    init(data: UiTimelineItemContentStatus, isDetail: Bool, enableTranslation: Bool = true) {
-        self.data = data
-        self.isDetail = isDetail
-        self.enableTranslation = enableTranslation
-    }
-
-    var statusData: UiTimelineItemContentStatus { data }
-    var shouldShowTranslation: Bool { enableTranslation }
-    var isDetailView: Bool { isDetail }
-
-    var hasUser: Bool { data.user != nil }
-    var hasAboveTextContent: Bool { data.aboveTextContent != nil }
-    var hasContentWarning: Bool { data.contentWarning != nil && !data.contentWarning!.raw.isEmpty }
-    var hasContent: Bool { !data.content.raw.isEmpty }
-    var hasImages: Bool { !data.images.isEmpty }
-    var hasCard: Bool { data.card != nil }
-    var hasQuote: Bool { !data.quote.isEmpty }
-    var hasBottomContent: Bool { data.bottomContent != nil }
-    var hasActions: Bool { !data.actions.isEmpty }
-
-    var isPodcastCard: Bool {
-        guard let card = data.card,
-              let url = URL(string: card.url) else { return false }
-        return url.scheme == "flare" && url.host?.lowercased() == "podcast"
-    }
-
-    var shouldShowLinkPreview: Bool {
-        guard let card = data.card else { return false }
-        return !isPodcastCard && card.media != nil
-    }
-
-    func getProcessedActions() -> (mainActions: [StatusAction], moreActions: [StatusActionItem]) {
-        ActionProcessor.processActions(data.actions)
-    }
-
-    func getFormattedDate() -> String {
-        let dateInRegion = DateInRegion(data.createdAt, region: .current)
-        return dateInRegion.toRelative(since: DateInRegion(Date(), region: .current))
-    }
-}
+ 
 
 enum ActionProcessor {
     /***

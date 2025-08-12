@@ -114,7 +114,6 @@ struct TimelineStatusViewV2: View, Equatable {
                 Spacer().frame(height: 16)
             }
         }
-        .padding(.horizontal, 16)
         .frame(alignment: .leading)
 
         #if canImport(_Translation_SwiftUI)

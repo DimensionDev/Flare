@@ -36,20 +36,23 @@ struct SearchScreen: View {
                                 view.padding(.horizontal)
                             }
                         }
-                    }.listRowBackground(theme.primaryBackgroundColor)
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(theme.primaryBackgroundColor)
                 default:
                     EmptyView()
                         .listRowSeparator(.hidden)
                 }
-                Section("search_status_title") {
-                    StatusTimelineComponent(
+                     StatusTimelineComponent(
                         data: state.status,
                         detailKey: nil
-                    )
-                    .listStyle(.plain)
-                    .listRowBackground(theme.primaryBackgroundColor)
-                }.listStyle(.plain).listRowBackground(theme.primaryBackgroundColor)
-            }
+                    ).listRowBackground(theme.primaryBackgroundColor)
+                        .listRowInsets(EdgeInsets())
+
+             
+
+            } .padding(.horizontal, 16).listStyle(.plain)
         }
     }
 }

@@ -5,6 +5,7 @@ struct StatusTimelineComponent: View {
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     let data: PagingState<UiTimeline>
     let detailKey: MicroBlogKey?
+    @Environment(\.appSettings) private var appSettings
 
     var body: some View {
         switch onEnum(of: data) {
@@ -41,7 +42,7 @@ struct StatusTimelineComponent: View {
                     }
                 }
                 .onAppear {
-                    // success.get(index: index)
+                    success.get(index: index)
                 }
                 .if(horizontalSizeClass != .compact) { view in
                     view.padding([.horizontal])

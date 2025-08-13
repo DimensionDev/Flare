@@ -27,7 +27,7 @@ public fun AdaptiveCard(
                         horizontal = 2.dp,
                         vertical = 6.dp,
                     ),
-            elevated = true,
+            elevated = false,
             containerColor = PlatformTheme.colorScheme.card,
         ) {
             content.invoke()

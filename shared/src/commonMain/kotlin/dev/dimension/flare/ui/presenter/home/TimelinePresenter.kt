@@ -125,7 +125,7 @@ public abstract class TimelinePresenter :
                             when (data.timeline.accountType) {
                                 AccountType.Guest -> null
                                 is AccountType.Specific -> {
-                                    accounts.first {
+                                    accounts.firstOrNull {
                                         it.accountKey == data.timeline.accountType.accountKey
                                     }
                                 }

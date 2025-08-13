@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
-import compose.icons.fontawesomeicons.solid.Sliders
+import compose.icons.fontawesomeicons.solid.Plus
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.R
@@ -75,6 +75,7 @@ import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
+import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
@@ -84,6 +85,7 @@ import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.presenter.settings.AccountEventPresenter
 import dev.dimension.flare.ui.screen.settings.TabIcon
 import dev.dimension.flare.ui.screen.settings.TabTitle
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -138,20 +140,29 @@ internal fun HomeTimelineScreen(
                 title = {
                     state.pagerState.onSuccess { pagerState ->
                         state.tabState.onSuccess { tabs ->
-                            if (tabs.size > 1) {
+                            if (tabs.any()) {
                                 SecondaryScrollableTabRow(
                                     containerColor = Color.Transparent,
                                     modifier =
                                         Modifier
                                             .fillMaxWidth(),
-                                    selectedTabIndex = minOf(pagerState.currentPage, tabs.lastIndex),
+                                    selectedTabIndex =
+                                        minOf(
+                                            pagerState.currentPage,
+                                            tabs.lastIndex,
+                                        ),
                                     edgePadding = 0.dp,
                                     divider = {},
                                     indicator = {
                                         TabRowIndicator(
-                                            selectedIndex = minOf(pagerState.currentPage, tabs.lastIndex),
+                                            selectedIndex =
+                                                minOf(
+                                                    pagerState.currentPage,
+                                                    tabs.lastIndex,
+                                                ),
                                         )
                                     },
+                                    minTabWidth = 48.dp,
                                 ) {
                                     state.tabState.onSuccess { tabs ->
                                         tabs.forEachIndexed { index, tab ->
@@ -186,9 +197,17 @@ internal fun HomeTimelineScreen(
                                             )
                                         }
                                     }
+                                    IconButton(
+                                        onClick = {
+                                            toTabSettings.invoke()
+                                        },
+                                    ) {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.Plus,
+                                            contentDescription = null,
+                                        )
+                                    }
                                 }
-                            } else {
-                                TabTitle(title = tabs[0].timelineTabItem.metaData.title)
                             }
                         }
                     }
@@ -217,14 +236,6 @@ internal fun HomeTimelineScreen(
                                 Text(text = stringResource(id = R.string.login_button))
                             }
                         }.onSuccess {
-                            IconButton(
-                                onClick = toTabSettings,
-                            ) {
-                                FAIcon(
-                                    FontAwesomeIcons.Solid.Sliders,
-                                    contentDescription = null,
-                                )
-                            }
                         }
                 },
             )
@@ -373,6 +384,43 @@ private fun timelinePresenter(
             )
         }.invoke()
 
+    val accountEvent =
+        remember {
+            AccountEventPresenter()
+        }.invoke()
+
+    LaunchedEffect(accountEvent.onAdded) {
+        accountEvent.onAdded.collect { account ->
+            val tab =
+                HomeTimelineTabItem(
+                    accountKey = account.accountKey,
+                    icon = UiRssSource.favIconUrl(account.accountKey.host),
+                    title =
+                        account.accountKey.host
+                            .substringBeforeLast('.')
+                            .substringAfter('.'),
+                )
+            settingsRepository.updateTabSettings {
+                copy(
+                    mainTabs =
+                        (mainTabs + tab).distinctBy {
+                            it.key
+                        },
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(accountEvent.onRemoved) {
+        accountEvent.onRemoved.collect { accountKey ->
+            settingsRepository.updateTabSettings {
+                copy(
+                    mainTabs = mainTabs.filterNot { it.account == AccountType.Specific(accountKey) },
+                )
+            }
+        }
+    }
+
     val tabs by remember {
         settingsRepository.tabSettings
             .map { settings ->
@@ -381,15 +429,23 @@ private fun timelinePresenter(
                         HomeTimelineTabItem(AccountType.Guest),
                     )
                 } else {
-                    listOfNotNull(
-                        if (settings.enableMixedTimeline && settings.mainTabs.size > 1) {
-                            MixedTimelineTabItem(
-                                subTimelineTabItem = settings.mainTabs,
-                            )
-                        } else {
-                            null
-                        },
-                    ) + settings.mainTabs
+                    (
+                        listOfNotNull(
+                            if (settings.enableMixedTimeline && settings.mainTabs.size > 1) {
+                                MixedTimelineTabItem(
+                                    subTimelineTabItem = settings.mainTabs,
+                                )
+                            } else {
+                                null
+                            },
+                        ) + settings.mainTabs
+                    ).ifEmpty {
+                        listOf(
+                            HomeTimelineTabItem(
+                                accountType = AccountType.Active,
+                            ),
+                        )
+                    }
                 }
             }.map {
                 it.toImmutableList()

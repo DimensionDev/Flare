@@ -45,13 +45,13 @@ struct SearchScreen: View {
                         .listRowSeparator(.hidden)
                 }
                 TimelineV4Component(
-                    data: state.status 
+                    data: state.status
                 ).scrollContentBackground(.hidden)
-                .listRowBackground(theme.primaryBackgroundColor)
-                .listRowInsets(EdgeInsets())
+                    .listRowBackground(theme.primaryBackgroundColor)
+                    .listRowInsets(EdgeInsets())
 
             }.padding(.horizontal, 16)
-            .listStyle(.plain)
+                .listStyle(.plain)
         }
     }
 }

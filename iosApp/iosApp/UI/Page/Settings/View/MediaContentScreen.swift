@@ -44,8 +44,6 @@ struct MediaContentScreen: View {
                  */
             }.listRowBackground(theme.primaryBackgroundColor)
 
-             
-
             // 敏感内容定时器设置
             SensitiveContentSection()
         }
@@ -84,5 +82,3 @@ struct MediaContentScreen: View {
         #endif
     }
 }
-
- 

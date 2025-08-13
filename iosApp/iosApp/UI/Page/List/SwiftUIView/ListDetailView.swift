@@ -13,7 +13,6 @@ struct ListDetailView: View {
     @Environment(\.presentationMode) var presentationMode
     @Environment(FlareTheme.self) private var theme
 
-    
     @State private var timelineViewModel = TimelineViewModel()
 
     private let gradientColors: [Color]
@@ -28,10 +27,9 @@ struct ListDetailView: View {
     }
 
     var body: some View {
-        ScrollViewReader { proxy in
+        ScrollViewReader { _ in
             VStack {
                 List {
-                    
                     EmptyView()
                         .id("list-timeline-top")
                         .frame(height: 0)
@@ -103,7 +101,6 @@ struct ListDetailView: View {
                             .listFeedContentStyle()
                     }.scrollContentBackground(.hidden).listRowBackground(theme.primaryBackgroundColor)
 
-                 
                     switch timelineViewModel.timelineState {
                     case .loading:
                         ForEach(0 ..< 5, id: \.self) { _ in
@@ -140,7 +137,6 @@ struct ListDetailView: View {
                             .listRowInsets(EdgeInsets())
                     }
 
-                   
                     EmptyView()
                         .id("list-timeline-bottom")
                         .frame(height: 0)
@@ -149,7 +145,6 @@ struct ListDetailView: View {
                 }
                 .listStyle(.plain)
                 .refreshable {
-                  
                     FlareLog.debug("[ListDetailView] 下拉刷新触发")
                     await timelineViewModel.handleRefresh()
                     FlareLog.debug("[ListDetailView] 下拉刷新完成")
@@ -180,7 +175,7 @@ struct ListDetailView: View {
                     EmptyView()
                 }
             )
-            
+
             .task {
                 FlareLog.debug("🔧 [ListDetailView] 开始初始化 TimelineViewModel")
                 await timelineViewModel.setupDataSource(presenter: presenter)

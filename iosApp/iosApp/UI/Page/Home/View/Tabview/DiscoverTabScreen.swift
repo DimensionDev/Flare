@@ -41,7 +41,7 @@ struct DiscoverTabScreen: View {
                                         view.padding(.horizontal)
                                     }
                                 }
-                            } .listRowBackground(theme.primaryBackgroundColor)
+                            }.listRowBackground(theme.primaryBackgroundColor)
                                 .listRowSeparator(.hidden)
                         default:
                             EmptyView()
@@ -62,8 +62,8 @@ struct DiscoverTabScreen: View {
                                             if let item = data.peek(index: index) {
                                                 UserComponent(
                                                     user: item,
-                                                    topEndContent: nil 
-                                                ) 
+                                                    topEndContent: nil
+                                                )
                                                 .frame(width: 200, alignment: .leading)
                                                 .onAppear {
                                                     data.get(index: index)
@@ -117,7 +117,7 @@ struct DiscoverTabScreen: View {
                             Section("discover_status") {
                                 TimelineV4Component(
                                     data: state.status
-                                 )
+                                )
                                 .listRowBackground(theme.primaryBackgroundColor)
                             }
                         }

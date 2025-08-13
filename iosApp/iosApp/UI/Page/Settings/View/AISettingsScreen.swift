@@ -5,8 +5,6 @@ import SwiftUI
 struct AISettingsScreen: View {
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareTheme.self) private var theme
- 
- 
 
     var body: some View {
         List {
@@ -17,7 +15,6 @@ struct AISettingsScreen: View {
                     Text("AI-powered features will be added here in future updates.")
                         .font(.body)
                         .foregroundColor(.secondary)
-                   
                 }
                 .padding(.vertical, 8)
             }

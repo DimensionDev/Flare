@@ -13,6 +13,9 @@ struct ListDetailView: View {
     @Environment(\.presentationMode) var presentationMode
     @Environment(FlareTheme.self) private var theme
 
+    
+    @State private var timelineViewModel = TimelineViewModel()
+
     private let gradientColors: [Color]
 
     init(list: UiList, accountType: AccountType, defaultUser: UiUserV2? = nil) {
@@ -25,80 +28,133 @@ struct ListDetailView: View {
     }
 
     var body: some View {
-        ObservePresenter(presenter: presenter) { state in
-            List {
-                Group {
-                    ListFeedHeaderView.ListFeedHeaderBackgroundView(listInfo: listInfo, gradientColors: gradientColors)
-                        .listFeedHeaderStyle()
-                        .onAppear {
-                            showNavigationTitle = false
-                        }
-                        .onDisappear {
-                            showNavigationTitle = true
-                        }
+        ScrollViewReader { proxy in
+            VStack {
+                List {
+                    
+                    EmptyView()
+                        .id("list-timeline-top")
+                        .frame(height: 0)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
 
-                    VStack(alignment: .leading, spacing: 0) {
-                        Text(listInfo.title)
-                            .font(.title)
-                            .bold()
-                            .padding(.top, 16)
-
-                        HStack(alignment: .center, spacing: 12) {
-                            if let user = defaultUser {
-                                ListFeedHeaderView.ListFeedCreatorProfileView(creator: user)
-                            } else if let creator = listInfo.creator {
-                                ListFeedHeaderView.ListFeedCreatorProfileView(creator: creator)
-                            } else {
-                                ListFeedHeaderView.ListFeedUnknownCreatorView()
+                    Group {
+                        ListFeedHeaderView.ListFeedHeaderBackgroundView(listInfo: listInfo, gradientColors: gradientColors)
+                            .listFeedHeaderStyle()
+                            .onAppear {
+                                showNavigationTitle = false
+                            }
+                            .onDisappear {
+                                showNavigationTitle = true
                             }
 
-                            Spacer()
-                            if defaultUser == nil {
-                                ListFeedHeaderView.ListFeedMemberCountsView(count: listInfo.likedCount, isListView: true)
-                            }
-                        }
-                        .padding(.vertical, 12)
-                    }
-                    .listFeedContentStyle()
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text(listInfo.title)
+                                .font(.title)
+                                .bold()
+                                .padding(.top, 16)
 
-                    if let description = listInfo.description_, !description.isEmpty {
-                        Text(description)
-                            .font(.body)
-                            .padding(.vertical, 8)
-                            .listFeedContentStyle()
-                    }
+                            HStack(alignment: .center, spacing: 12) {
+                                if let user = defaultUser {
+                                    ListFeedHeaderView.ListFeedCreatorProfileView(creator: user)
+                                } else if let creator = listInfo.creator {
+                                    ListFeedHeaderView.ListFeedCreatorProfileView(creator: creator)
+                                } else {
+                                    ListFeedHeaderView.ListFeedUnknownCreatorView()
+                                }
 
-                    if defaultUser == nil {
-                        Button(action: {
-                            showMembers = true
-                        }) {
-                            HStack {
-                                Image(systemName: "person.2")
-                                    .foregroundColor(.blue)
-                                Text("Show Members")
-                                    .foregroundColor(.primary)
                                 Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(.gray)
-                                    .font(.caption)
+                                if defaultUser == nil {
+                                    ListFeedHeaderView.ListFeedMemberCountsView(count: listInfo.likedCount, isListView: true)
+                                }
                             }
+                            .padding(.vertical, 12)
                         }
                         .listFeedContentStyle()
-                    }
-                    Text("List Timeline")
-                        .font(.headline)
-                        .padding(.top, 16)
-                        .padding(.bottom, 8)
-                        .listFeedContentStyle()
-                }.scrollContentBackground(.hidden).listRowBackground(theme.primaryBackgroundColor)
 
-                StatusTimelineComponent(
-                    data: state.listState,
-                    detailKey: nil
-                ).listRowBackground(theme.primaryBackgroundColor)
-                    .listFeedContentStyle()
+                        if let description = listInfo.description_, !description.isEmpty {
+                            Text(description)
+                                .font(.body)
+                                .padding(.vertical, 8)
+                                .listFeedContentStyle()
+                        }
+
+                        if defaultUser == nil {
+                            Button(action: {
+                                showMembers = true
+                            }) {
+                                HStack {
+                                    Image(systemName: "person.2")
+                                        .foregroundColor(.blue)
+                                    Text("Show Members")
+                                        .foregroundColor(.primary)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundColor(.gray)
+                                        .font(.caption)
+                                }
+                            }
+                            .listFeedContentStyle()
+                        }
+                        Text("List Timeline")
+                            .font(.headline)
+                            .padding(.top, 16)
+                            .padding(.bottom, 8)
+                            .listFeedContentStyle()
+                    }.scrollContentBackground(.hidden).listRowBackground(theme.primaryBackgroundColor)
+
+                 
+                    switch timelineViewModel.timelineState {
+                    case .loading:
+                        ForEach(0 ..< 5, id: \.self) { _ in
+                            TimelineStatusViewV2(
+                                item: createSampleTimelineItem(),
+                                timelineViewModel: timelineViewModel
+                            ).padding(.horizontal, 16)
+                                .redacted(reason: .placeholder)
+                                .listRowBackground(theme.primaryBackgroundColor)
+                                .listRowInsets(EdgeInsets())
+                                .listRowSeparator(.hidden)
+                        }
+
+                    case let .loaded(items, hasMore):
+                        TimelineItemsView(
+                            items: items,
+                            hasMore: hasMore,
+                            viewModel: timelineViewModel
+                        )
+                        .listRowBackground(theme.primaryBackgroundColor)
+                        .listRowInsets(EdgeInsets())
+
+                    case let .error(error):
+                        TimelineErrorView(error: error) {
+                            Task {
+                                await timelineViewModel.handleRefresh()
+                            }
+                        }
+                        .listRowInsets(EdgeInsets())
+
+                    case .empty:
+                        TimelineEmptyView()
+                            .listRowBackground(theme.primaryBackgroundColor)
+                            .listRowInsets(EdgeInsets())
+                    }
+
+                   
+                    EmptyView()
+                        .id("list-timeline-bottom")
+                        .frame(height: 0)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
+                }
+                .listStyle(.plain)
+                .refreshable {
+                  
+                    FlareLog.debug("[ListDetailView] 下拉刷新触发")
+                    await timelineViewModel.handleRefresh()
+                    FlareLog.debug("[ListDetailView] 下拉刷新完成")
+                }
             }
-            .listStyle(PlainListStyle())
             .edgesIgnoringSafeArea(.top)
             .navigationBarTitle(showNavigationTitle ? listInfo.title : "", displayMode: .inline)
             .navigationBarBackButtonHidden(true)
@@ -124,6 +180,20 @@ struct ListDetailView: View {
                     EmptyView()
                 }
             )
+            
+            .task {
+                FlareLog.debug("🔧 [ListDetailView] 开始初始化 TimelineViewModel")
+                await timelineViewModel.setupDataSource(presenter: presenter)
+                FlareLog.debug("✅ [ListDetailView] TimelineViewModel 初始化完成")
+            }
+            .onAppear {
+                FlareLog.debug("👁️ [ListDetailView] onAppear - 调用resume()")
+                timelineViewModel.resume()
+            }
+            .onDisappear {
+                FlareLog.debug("👁️ [ListDetailView] onDisappear - 调用pause()")
+                timelineViewModel.pause()
+            }
         }
     }
 }

@@ -44,10 +44,7 @@ struct MediaContentScreen: View {
                  */
             }.listRowBackground(theme.primaryBackgroundColor)
 
-            // 内容过滤设置
-            Section("Content Filtering") {
-                AIContentAnalysisToggle()
-            }.listRowBackground(theme.primaryBackgroundColor)
+             
 
             // 敏感内容定时器设置
             SensitiveContentSection()
@@ -88,46 +85,4 @@ struct MediaContentScreen: View {
     }
 }
 
-// 打包不了
-private struct AIContentAnalysisToggle: View {
-    @Environment(\.appSettings) private var appSettings
-    @Environment(FlareTheme.self) private var theme
-
-    // 使用SensitiveContentAnalysis框架
-    @available(iOS 17.0, *)
-    private let analyzer = SCSensitivityAnalyzer()
-
-    private var isSystemAnalysisEnabled: Bool {
-        if #available(iOS 17.0, *) {
-            analyzer.analysisPolicy.rawValue != 0
-        } else {
-            false
-        }
-    }
-
-    var body: some View {
-        Toggle(isOn: Binding(
-            get: {
-                isSystemAnalysisEnabled && appSettings.otherSettings.sensitiveContentAnalysisEnabled
-            },
-            set: { newValue in
-                if isSystemAnalysisEnabled {
-                    appSettings.updateOther(newValue: appSettings.otherSettings.also { settings in
-                        settings.sensitiveContentAnalysisEnabled = newValue
-                    })
-                }
-            }
-        )) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Sensitive Content Analysis")
-                    .font(.body)
-                Text(isSystemAnalysisEnabled ?
-                    "Automatically detect and blur sensitive images using Apple's Sensitive Content Analysis framework runs locally on your device" :
-                    "No feature enabled that is requiring Sensitive Analysis on device, analysis will be disabled. Please enable it in System Settings > Privacy & Security > Sensitive Content Warning.")
-                    .font(.caption)
-                    .foregroundColor(isSystemAnalysisEnabled ? .secondary : .orange)
-            }
-        }
-        .disabled(true) //! isSystemAnalysisEnabled
-    }
-}
+ 

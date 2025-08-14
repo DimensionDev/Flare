@@ -276,7 +276,7 @@
     <string name="home_tab_social_timeline_title">Κοινωνικά</string>
     <string name="changelog_current"><![CDATA[            <span>Έκδοση %1$s:</span>
             <ul>
-                <li>Περισσότερες βελτιώσεις UI/UX - είμαστε σχεδόν εκεί</li>
+                <li>Έχουμε ολοκληρώσει τις ρυθμίσεις UI/UX για την εφαρμογή, και θα συνεχίσει τη βελτιστοποίηση</li>
                 <li>Διορθώσεις σφαλμάτων και βελτιώσεις απόδοσης</li>
             </ul>
         ]]></string>

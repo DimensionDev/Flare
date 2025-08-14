@@ -276,7 +276,7 @@
     <string name="home_tab_social_timeline_title">社交活动</string>
     <string name="changelog_current"><![CDATA[            <span> %1$s版本：</span>
             <ul>
-                <li>更多的UI/UX细节调整，我们就要完成了</li>
+                <li>我们已经完成了UI/UX 对应用程序的调整， 并将继续优化</li>
                 <li>Bug 修复和性能改进</li>
             </ul>
         ]]></string>

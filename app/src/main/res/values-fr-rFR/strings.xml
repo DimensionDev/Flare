@@ -276,8 +276,8 @@
     <string name="home_tab_social_timeline_title">Réseaux sociaux</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Plus de raffinements UI/UX — nous sommes presque là</li>
-                <li>Corrections de bugs et améliorations de performances</li>
+                <li>Nous avons complété les réglages UI/UX pour l'application, et continuera d'optimiser</li>
+                <li>Corrections de bugs et améliorations des performances</li>
             </ul>
         ]]></string>
 </resources>

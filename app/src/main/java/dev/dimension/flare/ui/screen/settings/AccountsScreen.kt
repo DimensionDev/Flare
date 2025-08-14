@@ -132,7 +132,11 @@ internal fun AccountsScreen(
                 }
 
                 is UiState.Success -> {
-                    items(accountState.data.size, key = { index -> accountState.data[index].first.accountKey.toString() }) { index ->
+                    items(accountState.data.size, key = { index ->
+                        accountState.data[index]
+                            .first.accountKey
+                            .toString()
+                    }) { index ->
                         val (account, data) = accountState.data[index]
                         val swipeState =
                             rememberSwipeToDismissBoxState()

@@ -204,9 +204,10 @@ struct WaterfallItemsView: View {
             let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
             let statusKey = timelineItem.createMicroBlogKey()
 
-            router.navigate(to: .statusDetail(
+            router.navigate(to: .statusDetailV2(
                 accountType: accountType,
-                statusKey: statusKey
+                statusKey: statusKey,
+                preloadItem: timelineItem
             ))
         }
     }

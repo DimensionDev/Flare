@@ -216,7 +216,7 @@ internal fun accountServiceFlow(
         is AccountType.Specific -> {
             repository
                 .getFlow(accountType.accountKey)
-                .map { it.takeSuccess() ?: throw NoActiveAccountException }
+                .mapNotNull { it.takeSuccess() }
                 .distinctUntilChangedBy { it.accountKey }
                 .map { it.dataSource }
         }

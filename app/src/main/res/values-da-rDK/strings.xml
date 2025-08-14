@@ -276,8 +276,8 @@
     <string name="home_tab_social_timeline_title">Social</string>
     <string name="changelog_current"><![CDATA[            <span>Version %1$s:</span>
             <ul>
-                <li>Flere UI/UX raffineringer — vi er næsten der</li>
-                <li>Fejlrettelser og præstationsforbedringer</li>
+                <li>Vi har fuldført UI/UX justeringer for appen, og vil fortsætte med at optimere</li>
+                <li>Fejlrettelser og ydeevneforbedringer</li>
             </ul>
         ]]></string>
 </resources>

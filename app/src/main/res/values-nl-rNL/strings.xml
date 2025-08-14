@@ -276,8 +276,9 @@
     <string name="home_tab_social_timeline_title">Sociaal</string>
     <string name="changelog_current"><![CDATA[            <span>Versie %1$s:</span>
             <ul>
-                <li>Meer UI/UX raffinancieringen — we zijn er bijna</li>
-                <li>foutjes verbeterd en prestatie verbeteringen</li>
+                <li>We hebben de aanpassingen UI/UX voor de app voltooid, en zal doorgaan met optimaliseren van</li>
+                <li>Bug fixes en prestatie verbeteringen</li>
             </ul>
-        A        ]]></string>
+        
+ A        ]]></string>
 </resources>

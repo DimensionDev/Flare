@@ -276,8 +276,8 @@
     <string name="home_tab_social_timeline_title">إجتماعي</string>
     <string name="changelog_current"><![CDATA[            <span>الإصدار %1$s:</span>
             <ul>
-                <li>المزيد من التحسينات UI/UX - نحن تقريبا هناك</li>
-                <li>اصلاحات الشوائب وتحسين الأداء</li>
+                <li>أكملنا تعديلات UI/UX للتطبيق، وسيستمر في تحسين</li>
+                <li>إصلاحات الشوائب وتحسين الأداء</li>
             </ul>
         ]]></string>
 </resources>

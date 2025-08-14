@@ -27,8 +27,8 @@ import java.io.OutputStream
 @Serializable
 public data class TabSettings(
     val secondaryItems: List<TabItem>? = null,
-    val enableMixedTimeline: Boolean = false,
-    val mainTabs: List<TimelineTabItem> = listOf(HomeTimelineTabItem(AccountType.Active)),
+    val enableMixedTimeline: Boolean = true,
+    val mainTabs: List<TimelineTabItem> = listOf(),
 )
 
 @Serializable
@@ -628,6 +628,16 @@ public data class HomeTimelineTabItem(
                 TabMetaData(
                     title = TitleType.Localized(TitleType.Localized.LocalizedKey.Home),
                     icon = IconType.Material(IconType.Material.MaterialIcon.Home),
+                ),
+        )
+
+    public constructor(accountKey: MicroBlogKey, icon: String, title: String) :
+        this(
+            account = AccountType.Specific(accountKey),
+            metaData =
+                TabMetaData(
+                    title = TitleType.Text(title),
+                    icon = IconType.Url(icon),
                 ),
         )
 }

@@ -26,6 +26,7 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -59,6 +60,23 @@ internal class AccountRepository(
         }
     }
 
+    private val _onAdded by lazy {
+        MutableStateFlow<UiAccount?>(null)
+    }
+    val onAdded: Flow<UiAccount> by lazy {
+        _onAdded
+            .mapNotNull { it }
+            .distinctUntilChangedBy { it.accountKey }
+    }
+    private val _onRemoved by lazy {
+        MutableStateFlow<MicroBlogKey?>(null)
+    }
+    val onRemoved: Flow<MicroBlogKey> by lazy {
+        _onRemoved
+            .mapNotNull { it }
+            .distinctUntilChangedBy { it }
+    }
+
     fun addAccount(
         account: UiAccount,
         credential: UiAccount.Credential,
@@ -71,6 +89,7 @@ internal class AccountRepository(
                 credential_json = credential.encodeJson(),
             ),
         )
+        _onAdded.value = account
     }
 
     fun setActiveAccount(accountKey: MicroBlogKey) =
@@ -83,6 +102,7 @@ internal class AccountRepository(
 
     fun delete(accountKey: MicroBlogKey) =
         coroutineScope.launch {
+            _onRemoved.value = accountKey
             cacheDatabase.pagingTimelineDao().deleteByAccountType(
                 AccountType.Specific(accountKey),
             )

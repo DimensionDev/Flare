@@ -132,7 +132,7 @@ internal fun AccountsScreen(
                 }
 
                 is UiState.Success -> {
-                    items(accountState.data.size) { index ->
+                    items(accountState.data.size, key = { index -> accountState.data[index].first.accountKey.toString() }) { index ->
                         val (account, data) = accountState.data[index]
                         val swipeState =
                             rememberSwipeToDismissBoxState()
@@ -140,7 +140,6 @@ internal fun AccountsScreen(
                         LaunchedEffect(swipeState.settledValue) {
                             if (swipeState.settledValue != SwipeToDismissBoxValue.Settled) {
                                 delay(AnimationConstants.DefaultDurationMillis.toLong())
-                                swipeState.snapTo(SwipeToDismissBoxValue.Settled)
                                 state.logout(account.accountKey)
                             }
                         }

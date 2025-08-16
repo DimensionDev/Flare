@@ -13,38 +13,43 @@ struct TimelineItemsView: View {
             TimelineStatusViewV2(
                 item: item,
                 timelineViewModel: viewModel
-            ).padding(.horizontal, 16)
+            ).id(item.id)
+            .padding(.horizontal, 16)
                 .padding(.vertical, 4)
                 .onAppear {
-                    //   viewModel.itemDidAppear(item: item)
+                  // viewModel.itemOnAppear(item: item)
+                    FlareLog.debug("🔍 [TimelineItemsView] onAppear  for id: '\(item.id)', content: '\(item.content.raw)'")
 
-                    Task {
-                        if hasMore, !viewModel.isLoadingMore,
-                           items.count >= 7,
-
-                           item.id == items[items.count - 5].id ||
-                           item.id == items[items.count - 6].id
-                        {
-                            FlareLog.debug("[TimelineItemsView] 🚀 预加载触发 ")
-
-                            do {
-                                try await viewModel.handleLoadMore()
-                                FlareLog.debug("[TimelineItemsView] ✅ 预加载成功 - 新总数: \(items.count)")
-                            } catch {
-                                FlareLog.error("[TimelineItemsView] ❌ 预加载失败: \(error)")
-                            }
-                        }
-                    }
+//                    Task {
+//                        if hasMore, !viewModel.isLoadingMore,
+//                           items.count >= 7,
+//                           item.id == items[items.count - 5].id ||
+//                           item.id == items[items.count - 6].id
+//                        {
+//                            FlareLog.debug("[TimelineItemsView] 🚀 预加载触发 ")
+//
+//                            do {
+//                                try await viewModel.handleLoadMore(isBottom: false)
+//                                FlareLog.debug("[TimelineItemsView] ✅ 预加载成功 - 新总数: \(items.count)")
+//                            } catch {
+//                                FlareLog.error("[TimelineItemsView] ❌ 预加载失败: \(error)")
+//                            }
+//                        }
+//                    }
                 }
-//                .onDisappear {
-//                     viewModel.itemDidDisappear(item: item)
-//                }
+                .onDisappear {
+                    FlareLog.debug("🔍 [TimelineItemsView] onDisappear  for id: '\(item.id)'")
+  //                  viewModel.itemDidDisappear(item: item)
+                }
         }
 
         if hasMore {
+
             TimelineLoadMoreView {
                 FlareLog.debug("[TimelineItemsView] LoadMoreView触发handleLoadMore")
-                try await viewModel.handleLoadMore()
+                FlareLog.debug("🔍 [TimelineItemsView] onDisappear  for  items.last?.id: '\(items.last?.id )'")
+
+                try await viewModel.handleLoadMore(scrollToId: items.last?.id ?? "")
             }
         }
     }

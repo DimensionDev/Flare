@@ -19,21 +19,16 @@ class TimelineViewModel {
     private var dataSourceTask: Task<Void, Never>?
 
     private(set) var isLoadingMore: Bool = false
+//    private var isLoadMoreInProgress: Bool = false
 
-    var scrollToId: String?
+      var scrollToId: String = ""
 
-    @ObservationIgnored
-    private var visibleItems: [TimelineItem] = []
+//    @ObservationIgnored
+//    private var visibleItems: [TimelineItem] = []
+// 
+//   private let visibilityQueue = DispatchQueue(label: "timeline.visibility", qos: .userInitiated)
 
-    // private let visibilityQueue = DispatchQueue(label: "timeline.visibility", qos: .userInitiated)
-
-    var items: [TimelineItem] {
-        if case let .loaded(items, _) = timelineState {
-            return items
-        }
-        return []
-    }
-
+    
     var hasMore: Bool {
         if case let .loaded(_, hasMore) = timelineState {
             return hasMore
@@ -148,6 +143,13 @@ class TimelineViewModel {
                     break
                 }
 
+                // 🎯 如果是loadMore操作，跳过状态更新
+//                if isLoadMoreInProgress {
+//                    FlareLog.debug("⏭️ [Timeline ViewModel] Skipping state update during loadMore")
+//                    isLoadMoreInProgress = false  // 🎯 接收到状态后重置标志
+//                    continue
+//                }
+
                 FlareLog.debug("📦 [Timeline ViewModel] Received KMP state update - type: \(type(of: state.listState))")
 
                 if let successState = state.listState as? PagingStateSuccess<UiTimeline> {
@@ -163,13 +165,13 @@ class TimelineViewModel {
                 FlareLog.debug("✨ [Timeline ViewModel] State conversion completed - beforeType: \(type(of: state.listState)), afterType: \(type(of: flareState))")
 
                 await MainActor.run {
-                    let oldItemsCount = self.items.count
+                    let oldItemsCount = self.timelineState.itemCount
                     let oldState = type(of: self.timelineState)
                     let oldHasMore = self.hasMore
 
                     self.timelineState = flareState
 
-                    let newItemsCount = self.items.count
+                    let newItemsCount = self.timelineState.itemCount
                     let newState = type(of: self.timelineState)
                     let newHasMore = self.hasMore
 
@@ -265,17 +267,7 @@ class TimelineViewModel {
             FlareLog.debug("🚨 [Timeline ViewModel] Error state set - showErrorAlert: true")
         }
     }
-
-    func getFirstItemID() -> String? {
-        guard let firstID = items.first?.id else {
-            FlareLog.debug("Timeline ScrollToTop skipped: no items")
-            return nil
-        }
-
-        FlareLog.debug("Timeline ScrollToTop available: firstID=\(firstID)")
-        return firstID
-    }
-
+ 
     func handleError(_ error: FlareError) {
         FlareLog.error("[TimelineViewModel] 处理错误: \(error)")
         currentError = error
@@ -292,7 +284,7 @@ class TimelineViewModel {
         }
     }
 
-    func handleLoadMore() async {
+    func handleLoadMore(scrollToId  : String) async {
         let timestamp = Date().timeIntervalSince1970
         FlareLog.debug("📄 [Timeline ViewModel] handleLoadMore started - isLoadingMore: \(isLoadingMore), hasPresenter: \(presenter != nil), timestamp: \(timestamp)")
 
@@ -307,10 +299,15 @@ class TimelineViewModel {
         }
 
         isLoadingMore = true
-        FlareLog.debug("🔄 [Timeline ViewModel] isLoadingMore set to true, timestamp: \(timestamp)")
+         
+//        isLoadMoreInProgress = true
+        FlareLog
+            .debug(
+                "🔄 [Timeline ViewModel] isLoadingMore set to true, timestamp: \(timestamp),scrollToId: \(scrollToId)"
+            )
 
-        let topVisibleItem = visibleItems.first
-        FlareLog.debug("🎯 [Timeline ViewModel] 保存顶部可见item: \(topVisibleItem?.id ?? "nil")")
+//        let topVisibleItem = visibleItems.first
+//        FlareLog.debug("🎯 [Timeline ViewModel] 保存顶部可见item: \(topVisibleItem?.id ?? "nil")")
 
         defer {
             isLoadingMore = false
@@ -329,9 +326,10 @@ class TimelineViewModel {
 //               visibleItems.contains(where: { $0.id == topItem.id })
 //            {
 //                FlareLog.debug("🎯 [Timeline ViewModel] 恢复滚动位置到: \(topItem.id)")
-//
-//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-//                    self.scrollTo(itemId: topItem.id)
+//                if (isBottom == true){
+                     DispatchQueue.main.asyncAfter(deadline: .now()  ) {
+                       self.scrollTo(itemId: scrollToId)
+                    }
 //                }
 //            }
         } catch {
@@ -339,22 +337,22 @@ class TimelineViewModel {
             FlareLog.error("💥 [Timeline ViewModel] handleLoadMore failed - error: \(error), timestamp: \(errorTimestamp)")
         }
     }
-
+//
     func clearScrollTarget() {
         FlareLog.debug("[TimelineViewModel] 清除滚动目标")
-        scrollToId = nil
+        scrollToId = ""
     }
 
     func scrollTo(itemId: String) {
         FlareLog.debug("[TimelineViewModel] 设置滚动目标: \(itemId)")
         scrollToId = itemId
     }
-
+//
 //    func getCurrentVisibleItemIds() -> [String] {
 //        visibleItems.map(\.id)
 //    }
 
-//    func itemDidAppear(item: TimelineItem) {
+//    func itemOnAppear(item: TimelineItem) {
 //
 //        visibilityQueue.async { [weak self] in
 //            guard let self = self else { return }
@@ -371,12 +369,12 @@ class TimelineViewModel {
 //            }
 //
 //
-//            DispatchQueue.main.async {
+//            DispatchQueue.main.asyncAfter(deadline: .now()   ) {
 //                self.visibleItems = newVisibleItems
 //            }
 //        }
 //    }
-
+//
 //    func itemDidDisappear(item: TimelineItem) {
 //
 //        visibilityQueue.async { [weak self] in
@@ -386,7 +384,7 @@ class TimelineViewModel {
 //            let newVisibleItems = self.visibleItems.filter { $0.id != item.id }
 //
 //
-//            DispatchQueue.main.async {
+//            DispatchQueue.main.asyncAfter(deadline: .now()   ) {
 //                self.visibleItems = newVisibleItems
 //            }
 //        }

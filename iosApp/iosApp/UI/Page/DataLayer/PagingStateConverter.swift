@@ -154,13 +154,20 @@ class PagingStateConverter {
                 // 正常增量转换：有新数据需要加载
                 FlareLog.debug("[PagingStateConverter] 正常增量转换 - startIndex: \(startIndex), maxIndex: \(maxConvertibleIndex)")
 
+                let updatedItems = findUpdatedItems(successState: successState)
+
                 incrementalItems = convertItemsInRange(
                     from: startIndex,
                     to: maxConvertibleIndex,
                     successState: successState
                 )
 
-                FlareLog.debug("[PagingStateConverter] 正常增量转换完成: 新增 \(incrementalItems.count) 个items")
+             
+ 
+                updateExistingItems(with: updatedItems)
+
+
+                FlareLog.debug("[PagingStateConverter] 正常增量转换完成: 更新 \(updatedItems.count) 个items, 新增 \(incrementalItems.count) 个items")
 
             } else {
                 // 异常情况：数据倒退，需要智能去重处理
@@ -408,6 +415,41 @@ class PagingStateConverter {
 
         FlareLog.debug("[PagingStateConverter] 智能去重完成 - 更新items: \(updatedItems.count), 新增items: \(newItems.count)")
         return (updatedItems, newItems)
+    }
+
+  
+    private func findUpdatedItems(
+        successState: PagingStateSuccess<UiTimeline>
+    ) -> [TimelineItem] {
+
+        var existingItemsMap: [String: TimelineItem] = [:]
+        for item in convertedItems {
+            if existingItemsMap[item.id] != nil {
+                FlareLog.warning("[PagingStateConverter] findUpdatedItems - 发现重复ID: \(item.id)")
+            }
+            existingItemsMap[item.id] = item
+        }
+
+        FlareLog.debug("[PagingStateConverter] findUpdatedItems - 开始遍历KMP数据，总数: \(successState.itemCount)")
+
+        
+        var updatedItems: [TimelineItem] = []
+        for index in 0..<successState.itemCount {
+            if let uiTimeline = safePeek(successState, index: Int32(index)) {
+                let kmpItem = TimelineItem.from(uiTimeline)
+ 
+                if let existingItem = existingItemsMap[kmpItem.id] {
+
+                    if hasOperationStateChanged(existing: existingItem, new: kmpItem) {
+                        updatedItems.append(kmpItem)
+                        FlareLog.debug("[PagingStateConverter] findUpdatedItems - 发现需要更新的item: \(kmpItem.id)")
+                    }
+                }
+            }
+        }
+
+        FlareLog.debug("[PagingStateConverter] findUpdatedItems - 完成，找到 \(updatedItems.count) 个需要更新的items")
+        return updatedItems
     }
 
     private func hasOperationStateChanged(existing: TimelineItem, new: TimelineItem) -> Bool {

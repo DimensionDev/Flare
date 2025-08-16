@@ -103,7 +103,7 @@ struct TimelineActionsViewV2: View, Equatable {
         FlareLog.debug("🔥 [TimelineActionsViewV2] handleLikeAction called for item: \(item.id)")
         FlareLog.debug("🔍 [TimelineActionsViewV2] handleLikeAction called for item: isLiked=\(item.isLiked), likeCount=\(item.likeCount)")
 
-        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .like)
+       // timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .like)
 
 //        for action in item.actions {
 //            let enumResult = onEnum(of: action)
@@ -130,7 +130,7 @@ struct TimelineActionsViewV2: View, Equatable {
 
         FlareLog.debug("🔥 [TimelineActionsViewV2] performRetweetAction (repost) called for item: \(item.id)")
 
-        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .retweet)
+        // timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .retweet)
 
         performKMPAction(actionType: .repost)
     }
@@ -142,7 +142,7 @@ struct TimelineActionsViewV2: View, Equatable {
     private func handleBookmarkAction() {
         FlareLog.debug("🔥 [TimelineActionsViewV2] handleBookmarkAction called for item: \(item.id)")
 
-        timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .bookmark)
+       // timelineViewModel?.updateItemOptimistically(itemId: item.id, actionType: .bookmark)
 
         performKMPAction(actionType: .bookmark)
     }

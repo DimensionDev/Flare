@@ -71,7 +71,7 @@ struct WaterfallItemsView: View {
                 .padding(.horizontal, 8)
                 if hasMore {
                     TimelineLoadMoreView {
-                        try await viewModel.handleLoadMore()
+                        try await viewModel.handleLoadMore(scrollToId: "")
                     }
                     .padding(.top, 16)
                 }
@@ -113,7 +113,7 @@ struct WaterfallItemsView: View {
             {
                 FlareLog.debug("Waterfall Near bottom, triggering load more (distance: \(distanceFromBottom))")
                 Task {
-                    await viewModel.handleLoadMore()
+                    await viewModel.handleLoadMore(scrollToId: "")
                 }
             }
         }
@@ -204,9 +204,10 @@ struct WaterfallItemsView: View {
             let accountType = UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest()
             let statusKey = timelineItem.createMicroBlogKey()
 
-            router.navigate(to: .statusDetail(
+            router.navigate(to: .statusDetailV2(
                 accountType: accountType,
-                statusKey: statusKey
+                statusKey: statusKey,
+                preloadItem: timelineItem
             ))
         }
     }

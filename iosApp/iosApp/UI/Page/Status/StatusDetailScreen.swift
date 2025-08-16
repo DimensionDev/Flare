@@ -19,9 +19,8 @@ struct StatusDetailScreen: View {
     var body: some View {
         ObservePresenter(presenter: presenter) { state in
             List {
-                StatusTimelineComponent(
-                    data: state.listState,
-                    detailKey: statusKey
+                TimelineV4Component(
+                    data: state.listState
                 )
                 .listRowBackground(theme.primaryBackgroundColor)
             }

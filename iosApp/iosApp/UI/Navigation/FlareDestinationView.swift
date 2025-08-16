@@ -39,8 +39,8 @@ struct FlareDestinationView: View {
             case let .statusDetail(accountType, statusKey):
                 StatusDetailScreen(accountType: accountType, statusKey: statusKey)
 
-            case let .statusDetailV2(accountType, statusKey):
-                StatusDetailScreenV2(accountType: accountType, statusKey: statusKey)
+            case let .statusDetailV2(accountType, statusKey, preloadItem):
+                StatusDetailScreenV2(accountType: accountType, statusKey: statusKey, preloadItem: preloadItem)
 
             case let .search(accountType, keyword):
                 SearchScreen(

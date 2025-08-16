@@ -5,7 +5,6 @@ import SwiftUI
 
 struct MediaComponentV2: View {
     @State var hideSensitive: Bool
-    @State private var aiDetectedSensitive: Bool = false
     @Environment(\.appSettings) private var appSettings
     @Environment(\.isInCaptureMode) private var isInCaptureMode
 
@@ -16,7 +15,7 @@ struct MediaComponentV2: View {
     var body: some View {
         let showSensitiveButton = medias.allSatisfy { media in
             media.type == .image || media.type == .video
-        } && (sensitive || aiDetectedSensitive)
+        } && sensitive
 
         // - 媒体遮罩逻辑
 
@@ -27,7 +26,7 @@ struct MediaComponentV2: View {
         // 3. AI检测敏感 + 用户开启AI分析 → 应用模糊
         // 注意：时间范围的敏感内容过滤在 StatusItemView.shouldHideInTimeline 中处理
         //      这里只负责媒体遮罩层的显示/隐藏
-        let shouldBlur = !isInCaptureMode && (hideSensitive || (aiDetectedSensitive && appSettings.otherSettings.sensitiveContentAnalysisEnabled))
+        let shouldBlur = !isInCaptureMode && hideSensitive
 
         // 添加详细日志
 //        let _ = FlareLog.debug("MediaComponentV2 开始渲染")
@@ -69,12 +68,7 @@ struct MediaComponentV2: View {
                 SensitiveContentButton(
                     hideSensitive: shouldBlur,
                     action: {
-                        // if sensitive {
                         hideSensitive.toggle()
-                        // } else if aiDetectedSensitive {
-                        //     // 对于AI检测的敏感内容，可以临时显示
-                        //     aiDetectedSensitive = false
-                        // }
                     }
                 )
             }

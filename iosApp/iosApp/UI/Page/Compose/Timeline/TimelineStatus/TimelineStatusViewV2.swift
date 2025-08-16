@@ -176,7 +176,8 @@ struct TimelineStatusViewV2: View, Equatable {
 
         router.navigate(to: .statusDetailV2(
             accountType: accountType,
-            statusKey: statusKey
+            statusKey: statusKey,
+            preloadItem: item
         ))
     }
 

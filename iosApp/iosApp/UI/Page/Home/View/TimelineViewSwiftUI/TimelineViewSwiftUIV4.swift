@@ -93,24 +93,37 @@ struct TimelineViewSwiftUIV4: View {
                     proxy.scrollTo("timeline-top-v4", anchor: .center)
                 }
             }
-//            .onChange(of: timeLineViewModel.scrollToId) { _, newValue in
-//                if let newValue {
-//                    // 检查当前屏幕可视区域的tweet id数组是否包含滚动的id
+            .onChange(
+                of: timeLineViewModel.timelineState.itemCount)
+            { _, newValue in
+                FlareLog.debug("🔍 [TimelineViewSwiftUIV4]  timeLineViewModel.scrollToId: '\(timeLineViewModel.scrollToId)'")
+                FlareLog.debug("🔍 [TimelineViewSwiftUIV4] timeLineViewModel.timelineState.itemCount   newValue: '\(newValue)'")
+
+                if timeLineViewModel.scrollToId == "" {
+                    return
+                }
+
 //                    let currentVisibleIds = timeLineViewModel.getCurrentVisibleItemIds()
 //
-//                    if currentVisibleIds.contains(newValue) {
+//                    if currentVisibleIds
+//                        .contains(timeLineViewModel.scrollToId ) {
+//                        FlareLog.debug("🔍 [TimelineViewSwiftUIV4] timeLineViewModel.clearScrollTarget  ")
+//
 //                         timeLineViewModel.clearScrollTarget()
 //                    } else {
-//                         withAnimation(.easeInOut(duration: 0.1)) {
-//                            proxy.scrollTo(newValue, anchor: .top)
-//                        }
-//
-//                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-//                            timeLineViewModel.clearScrollTarget()
-//                        }
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    FlareLog.debug("🔍 [TimelineViewSwiftUIV4] proxy.scrollTo   timeLineViewModel.scrollToId: '\(timeLineViewModel.scrollToId)'")
+
+                    proxy.scrollTo(timeLineViewModel.scrollToId, anchor: .top)
+                }
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    FlareLog.debug("🔍 [TimelineViewSwiftUIV4] proxy.scrollTo timeLineViewModel.clearScrollTarget  timeLineViewModel.scrollToId: '\(timeLineViewModel.scrollToId)'")
+
+                    timeLineViewModel.clearScrollTarget()
+                }
 //                    }
-//                }
-//            }
+            }
             .task(id: tab.key) {
                 let timestamp = Date().timeIntervalSince1970
                 FlareLog.debug("📱 [TimelineV4] .task(id: \(tab.key)) triggered - isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")

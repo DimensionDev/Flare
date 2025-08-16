@@ -21,14 +21,13 @@ class TimelineViewModel {
     private(set) var isLoadingMore: Bool = false
 //    private var isLoadMoreInProgress: Bool = false
 
-      var scrollToId: String = ""
+    var scrollToId: String = ""
 
 //    @ObservationIgnored
 //    private var visibleItems: [TimelineItem] = []
-// 
-//   private let visibilityQueue = DispatchQueue(label: "timeline.visibility", qos: .userInitiated)
+//
+    //   private let visibilityQueue = DispatchQueue(label: "timeline.visibility", qos: .userInitiated)
 
-    
     var hasMore: Bool {
         if case let .loaded(_, hasMore) = timelineState {
             return hasMore
@@ -267,7 +266,7 @@ class TimelineViewModel {
             FlareLog.debug("🚨 [Timeline ViewModel] Error state set - showErrorAlert: true")
         }
     }
- 
+
     func handleError(_ error: FlareError) {
         FlareLog.error("[TimelineViewModel] 处理错误: \(error)")
         currentError = error
@@ -284,7 +283,7 @@ class TimelineViewModel {
         }
     }
 
-    func handleLoadMore(scrollToId  : String) async {
+    func handleLoadMore(scrollToId: String) async {
         let timestamp = Date().timeIntervalSince1970
         FlareLog.debug("📄 [Timeline ViewModel] handleLoadMore started - isLoadingMore: \(isLoadingMore), hasPresenter: \(presenter != nil), timestamp: \(timestamp)")
 
@@ -299,7 +298,7 @@ class TimelineViewModel {
         }
 
         isLoadingMore = true
-         
+
 //        isLoadMoreInProgress = true
         FlareLog
             .debug(
@@ -327,9 +326,9 @@ class TimelineViewModel {
 //            {
 //                FlareLog.debug("🎯 [Timeline ViewModel] 恢复滚动位置到: \(topItem.id)")
 //                if (isBottom == true){
-                     DispatchQueue.main.asyncAfter(deadline: .now()  ) {
-                       self.scrollTo(itemId: scrollToId)
-                    }
+            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                self.scrollTo(itemId: scrollToId)
+            }
 //                }
 //            }
         } catch {
@@ -337,6 +336,7 @@ class TimelineViewModel {
             FlareLog.error("💥 [Timeline ViewModel] handleLoadMore failed - error: \(error), timestamp: \(errorTimestamp)")
         }
     }
+
 //
     func clearScrollTarget() {
         FlareLog.debug("[TimelineViewModel] 清除滚动目标")

@@ -14,10 +14,10 @@ struct TimelineItemsView: View {
                 item: item,
                 timelineViewModel: viewModel
             ).id(item.id)
-            .padding(.horizontal, 16)
+                .padding(.horizontal, 16)
                 .padding(.vertical, 4)
                 .onAppear {
-                  // viewModel.itemOnAppear(item: item)
+                    // viewModel.itemOnAppear(item: item)
                     FlareLog.debug("🔍 [TimelineItemsView] onAppear  for id: '\(item.id)', content: '\(item.content.raw)'")
 
 //                    Task {
@@ -39,15 +39,14 @@ struct TimelineItemsView: View {
                 }
                 .onDisappear {
                     FlareLog.debug("🔍 [TimelineItemsView] onDisappear  for id: '\(item.id)'")
-  //                  viewModel.itemDidDisappear(item: item)
+                    //                  viewModel.itemDidDisappear(item: item)
                 }
         }
 
         if hasMore {
-
             TimelineLoadMoreView {
                 FlareLog.debug("[TimelineItemsView] LoadMoreView触发handleLoadMore")
-                FlareLog.debug("🔍 [TimelineItemsView] onDisappear  for  items.last?.id: '\(items.last?.id )'")
+                FlareLog.debug("🔍 [TimelineItemsView] onDisappear  for  items.last?.id: '\(items.last?.id)'")
 
                 try await viewModel.handleLoadMore(scrollToId: items.last?.id ?? "")
             }

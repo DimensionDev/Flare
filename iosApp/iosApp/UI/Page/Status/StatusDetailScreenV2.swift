@@ -22,8 +22,7 @@ struct StatusDetailScreenV2: View {
 
                     switch timelineViewModel.timelineState {
                     case .loading:
-                        if let preloadItem = preloadItem {
-                           
+                        if let preloadItem {
                             TimelineStatusViewV2(
                                 item: preloadItem,
                                 timelineViewModel: timelineViewModel
@@ -31,7 +30,7 @@ struct StatusDetailScreenV2: View {
                             .listRowBackground(theme.primaryBackgroundColor)
                             .listRowInsets(EdgeInsets())
                             .listRowSeparator(.hidden)
-                        } else { 
+                        } else {
                             ForEach(0 ..< 5, id: \.self) { _ in
                                 TimelineStatusViewV2(
                                     item: createSampleTimelineItem(),

@@ -94,15 +94,15 @@ struct TimelineViewSwiftUIV4: View {
                 }
             }
             .onChange(
-                of: timeLineViewModel.timelineState.itemCount) { _, newValue in
-                 
-                    FlareLog.debug("🔍 [TimelineViewSwiftUIV4]  timeLineViewModel.scrollToId: '\(timeLineViewModel.scrollToId)'")
-                    FlareLog.debug("🔍 [TimelineViewSwiftUIV4] timeLineViewModel.timelineState.itemCount   newValue: '\(newValue)'")
+                of: timeLineViewModel.timelineState.itemCount)
+            { _, newValue in
+                FlareLog.debug("🔍 [TimelineViewSwiftUIV4]  timeLineViewModel.scrollToId: '\(timeLineViewModel.scrollToId)'")
+                FlareLog.debug("🔍 [TimelineViewSwiftUIV4] timeLineViewModel.timelineState.itemCount   newValue: '\(newValue)'")
 
-                    if (timeLineViewModel.scrollToId == ""){
-                        return
-                    }
-                    
+                if timeLineViewModel.scrollToId == "" {
+                    return
+                }
+
 //                    let currentVisibleIds = timeLineViewModel.getCurrentVisibleItemIds()
 //
 //                    if currentVisibleIds
@@ -111,19 +111,18 @@ struct TimelineViewSwiftUIV4: View {
 //
 //                         timeLineViewModel.clearScrollTarget()
 //                    } else {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                             FlareLog.debug("🔍 [TimelineViewSwiftUIV4] proxy.scrollTo   timeLineViewModel.scrollToId: '\(timeLineViewModel.scrollToId)'")
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    FlareLog.debug("🔍 [TimelineViewSwiftUIV4] proxy.scrollTo   timeLineViewModel.scrollToId: '\(timeLineViewModel.scrollToId)'")
 
-                            proxy.scrollTo(timeLineViewModel.scrollToId, anchor: .top)
-                        }
+                    proxy.scrollTo(timeLineViewModel.scrollToId, anchor: .top)
+                }
 
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                            FlareLog.debug("🔍 [TimelineViewSwiftUIV4] proxy.scrollTo timeLineViewModel.clearScrollTarget  timeLineViewModel.scrollToId: '\(timeLineViewModel.scrollToId)'")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    FlareLog.debug("🔍 [TimelineViewSwiftUIV4] proxy.scrollTo timeLineViewModel.clearScrollTarget  timeLineViewModel.scrollToId: '\(timeLineViewModel.scrollToId)'")
 
-                            timeLineViewModel.clearScrollTarget()
-                        }
+                    timeLineViewModel.clearScrollTarget()
+                }
 //                    }
-              
             }
             .task(id: tab.key) {
                 let timestamp = Date().timeIntervalSince1970

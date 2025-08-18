@@ -370,31 +370,33 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
 
             else -> emptyList()
         }
-    }.mapNotNull { entry ->
+    }.flatMap { entry ->
         when (entry.content) {
-            is TimelineTimelineCursor -> null
+            is TimelineTimelineCursor -> listOf()
             is TimelineTimelineItem -> {
-                if (entry.content.itemContent is TimelineTweet) {
-                    XQTTimeline(
-                        tweets = entry.content.itemContent,
-                        sortedIndex = entry.sortIndex.toLong(),
-                        id =
-                            when (entry.content.itemContent.tweetResults.result) {
-                                is Tweet -> entry.content.itemContent.tweetResults.result.restId
-                                is TweetTombstone -> null
-                                is TweetWithVisibilityResults -> entry.content.itemContent.tweetResults.result.tweet.restId
-                                null -> null
-                            },
-                        parents = emptyList(),
-                    )
-                } else {
-                    null
-                }
+                listOfNotNull(
+                    if (entry.content.itemContent is TimelineTweet) {
+                        XQTTimeline(
+                            tweets = entry.content.itemContent,
+                            sortedIndex = entry.sortIndex.toLong(),
+                            id =
+                                when (entry.content.itemContent.tweetResults.result) {
+                                    is Tweet -> entry.content.itemContent.tweetResults.result.restId
+                                    is TweetTombstone -> null
+                                    is TweetWithVisibilityResults -> entry.content.itemContent.tweetResults.result.tweet.restId
+                                    null -> null
+                                },
+                            parents = emptyList(),
+                        )
+                    } else {
+                        null
+                    },
+                )
             }
 
             is TimelineTimelineModule -> {
                 if (entry.content.items == null) {
-                    null
+                    listOf()
                 } else {
                     if (entry.content.items.size == 1) {
                         val item =
@@ -402,88 +404,77 @@ internal fun List<InstructionUnion>.tweets(includePin: Boolean = true): List<XQT
                                 .first()
                                 .item.itemContent
                         if (item is TimelineTweet) {
-                            XQTTimeline(
-                                tweets = item,
-                                sortedIndex = entry.sortIndex.toLong(),
-                                id =
-                                    when (item.tweetResults.result) {
-                                        is Tweet -> item.tweetResults.result.restId
-                                        is TweetTombstone -> null
-                                        is TweetWithVisibilityResults -> item.tweetResults.result.tweet.restId
-                                        null -> null
-                                    },
-                                parents = emptyList(),
+                            listOf(
+                                XQTTimeline(
+                                    tweets = item,
+                                    sortedIndex = entry.sortIndex.toLong(),
+                                    id =
+                                        when (item.tweetResults.result) {
+                                            is Tweet -> item.tweetResults.result.restId
+                                            is TweetTombstone -> null
+                                            is TweetWithVisibilityResults -> item.tweetResults.result.tweet.restId
+                                            null -> null
+                                        },
+                                    parents = emptyList(),
+                                ),
                             )
                         } else {
-                            null
+                            listOf()
                         }
                     } else {
-                        val parent =
-                            entry.content.items
-                                .take(entry.content.items.size - 1)
-                                .mapNotNull {
-                                    if (it.item.itemContent is TimelineTweet) {
-                                        XQTTimeline(
-                                            tweets = it.item.itemContent,
-                                            sortedIndex = entry.sortIndex.toLong(),
-                                            id =
-                                                when (it.item.itemContent.tweetResults.result) {
-                                                    is Tweet -> it.item.itemContent.tweetResults.result.restId
-                                                    is TweetTombstone -> null
-                                                    is TweetWithVisibilityResults -> it.item.itemContent.tweetResults.result.tweet.restId
-                                                    null -> null
-                                                },
-                                            parents = emptyList(),
-                                        )
-                                    } else {
-                                        null
-                                    }
+                        entry.content.items
+                            .mapNotNull {
+                                if (it.item.itemContent is TimelineTweet) {
+                                    XQTTimeline(
+                                        tweets = it.item.itemContent,
+                                        sortedIndex = entry.sortIndex.toLong(),
+                                        id =
+                                            when (it.item.itemContent.tweetResults.result) {
+                                                is Tweet -> it.item.itemContent.tweetResults.result.restId
+                                                is TweetTombstone -> null
+                                                is TweetWithVisibilityResults -> it.item.itemContent.tweetResults.result.tweet.restId
+                                                null -> null
+                                            },
+                                        parents = emptyList(),
+                                    )
+                                } else {
+                                    null
                                 }
-                        val lastItem =
-                            entry.content.items
-                                .last()
-                                .item.itemContent
-                        if (lastItem is TimelineTweet) {
-                            XQTTimeline(
-                                tweets = lastItem,
-                                sortedIndex = entry.sortIndex.toLong(),
-                                id =
-                                    when (lastItem.tweetResults.result) {
-                                        is Tweet -> lastItem.tweetResults.result.restId
-                                        is TweetTombstone -> null
-                                        is TweetWithVisibilityResults -> lastItem.tweetResults.result.tweet.restId
-                                        null -> null
-                                    },
-                                parents = parent,
-                            )
-                        } else {
-                            null
-                        }
+                            }.groupBy {
+                                when (it.tweets.tweetResults.result) {
+                                    is Tweet ->
+                                        it.tweets.tweetResults.result.legacy
+                                            ?.conversationIdStr
+
+                                    is TweetTombstone -> null
+                                    is TweetWithVisibilityResults ->
+                                        it.tweets.tweetResults.result.tweet.legacy
+                                            ?.conversationIdStr
+
+                                    null -> null
+                                }
+                            }.map { (_, items) ->
+                                val parents = items.take(items.size - 1)
+                                val item = items.last()
+                                XQTTimeline(
+                                    parents = parents,
+                                    tweets = item.tweets,
+                                    sortedIndex = item.sortedIndex,
+                                    id =
+                                        when (val item = item.tweets.tweetResults.result) {
+                                            is Tweet -> item.restId
+                                            is TweetTombstone -> null
+                                            is TweetWithVisibilityResults -> item.tweet.restId
+                                            null -> null
+                                        },
+                                )
+                            }
                     }
                 }
             }
 
-            null -> null
+            null -> listOf()
         }
-//        pair.first.let {
-//            when (it) {
-//                is TimelineTweet -> {
-//                    XQTTimeline(
-//                        tweets = it,
-//                        sortedIndex = pair.second,
-//                        id =
-//                            when (it.tweetResults.result) {
-//                                is Tweet -> it.tweetResults.result.restId
-//                                is TweetTombstone -> null
-//                                is TweetWithVisibilityResults -> it.tweetResults.result.tweet.restId
-//                                null -> null
-//                            },
-//                    )
-//                }
-//
-//                else -> null
-//            }
-//        }
     }.filter {
         it.tweets.promotedMetadata == null
     }

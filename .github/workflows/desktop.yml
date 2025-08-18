@@ -1,4 +1,4 @@
-name: Android CI
+name: Desktop CI
 
 on:
   push:

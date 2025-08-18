@@ -44,13 +44,14 @@ struct SearchScreen: View {
                     EmptyView()
                         .listRowSeparator(.hidden)
                 }
-                StatusTimelineComponent(
-                    data: state.status,
-                    detailKey: nil
-                ).listRowBackground(theme.primaryBackgroundColor)
+                TimelineV4Component(
+                    data: state.status
+                ).scrollContentBackground(.hidden)
+                    .listRowBackground(theme.primaryBackgroundColor)
                     .listRowInsets(EdgeInsets())
 
-            }.padding(.horizontal, 16).listStyle(.plain)
+            }.padding(.horizontal, 16)
+                .listStyle(.plain)
         }
     }
 }

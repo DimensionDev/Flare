@@ -5,6 +5,7 @@ import SwiftUI
 struct StatusDetailScreenV2: View {
     let accountType: AccountType
     let statusKey: MicroBlogKey
+    let preloadItem: TimelineItem?
 
     @State private var timelineViewModel = TimelineViewModel()
     @Environment(FlareTheme.self) private var theme
@@ -21,15 +22,25 @@ struct StatusDetailScreenV2: View {
 
                     switch timelineViewModel.timelineState {
                     case .loading:
-                        ForEach(0 ..< 5, id: \.self) { _ in
+                        if let preloadItem {
                             TimelineStatusViewV2(
-                                item: createSampleTimelineItem(),
+                                item: preloadItem,
                                 timelineViewModel: timelineViewModel
                             )
-                            .redacted(reason: .placeholder)
                             .listRowBackground(theme.primaryBackgroundColor)
                             .listRowInsets(EdgeInsets())
                             .listRowSeparator(.hidden)
+                        } else {
+                            ForEach(0 ..< 5, id: \.self) { _ in
+                                TimelineStatusViewV2(
+                                    item: createSampleTimelineItem(),
+                                    timelineViewModel: timelineViewModel
+                                )
+                                .redacted(reason: .placeholder)
+                                .listRowBackground(theme.primaryBackgroundColor)
+                                .listRowInsets(EdgeInsets())
+                                .listRowSeparator(.hidden)
+                            }
                         }
 
                     case let .loaded(items, hasMore):

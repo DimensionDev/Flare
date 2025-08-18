@@ -108,6 +108,8 @@ struct HomeTabViewContentV2: View {
                     FlareTabBarV2(
                         accountType: accountType
                     )
+                    .offset(y: timelineState.tabBarOffset)
+                    .animation(.easeInOut(duration: 0.3), value: timelineState.tabBarOffset)
 
                     Rectangle()
                         .fill(.clear)

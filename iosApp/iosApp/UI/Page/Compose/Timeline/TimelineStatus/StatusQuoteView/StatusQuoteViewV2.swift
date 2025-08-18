@@ -70,7 +70,8 @@ struct QuotedStatusV2: View {
 
             router.navigate(to: .statusDetailV2(
                 accountType: accountType,
-                statusKey: statusKey
+                statusKey: statusKey,
+                preloadItem: item
             ))
         }, label: {
             VStack(alignment: .leading) {

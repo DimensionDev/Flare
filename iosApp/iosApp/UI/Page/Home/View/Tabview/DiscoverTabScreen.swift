@@ -42,15 +42,15 @@ struct DiscoverTabScreen: View {
                                     }
                                 }
                             }.listRowBackground(theme.primaryBackgroundColor)
+                                .listRowSeparator(.hidden)
                         default:
                             EmptyView()
                                 .listRowSeparator(.hidden)
                         }
                         Section("discover_status") {
-                            StatusTimelineComponent(
-                                data: searchState.status,
-                                detailKey: nil
-                            ).listRowBackground(theme.primaryBackgroundColor)
+                            TimelineV4Component(
+                                data: searchState.status
+                            )
                         }
                     } else {
                         switch onEnum(of: state.users) {
@@ -63,12 +63,7 @@ struct DiscoverTabScreen: View {
                                                 UserComponent(
                                                     user: item,
                                                     topEndContent: nil
-
-//                                                    onUserClicked: {
-//                                                        onUserClicked(item)
-//                                                    }
                                                 )
-                                                .background(theme.secondaryBackgroundColor)
                                                 .frame(width: 200, alignment: .leading)
                                                 .onAppear {
                                                     data.get(index: index)
@@ -120,9 +115,8 @@ struct DiscoverTabScreen: View {
                         }
                         if case let .success(data) = onEnum(of: state.status) {
                             Section("discover_status") {
-                                StatusTimelineComponent(
-                                    data: state.status,
-                                    detailKey: nil
+                                TimelineV4Component(
+                                    data: state.status
                                 )
                                 .listRowBackground(theme.primaryBackgroundColor)
                             }

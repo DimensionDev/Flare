@@ -283,6 +283,21 @@ class TimelineViewModel {
         }
     }
 
+ 
+    func handleScrollOffsetChange(_ offsetY: CGFloat, showFloatingButton: Binding<Bool>, timelineState: TimelineExtState, isHomeTab: Bool) {
+        
+        let shouldShowFloatingButton = offsetY > 50
+        if showFloatingButton.wrappedValue != shouldShowFloatingButton {
+            showFloatingButton.wrappedValue = shouldShowFloatingButton
+            FlareLog.debug("[TimelineViewModel] 浮动按钮状态更新: \(showFloatingButton.wrappedValue)")
+        }
+
+       
+        timelineState.updateTabBarOffset(currentOffset: offsetY, isHomeTab: isHomeTab)
+
+        FlareLog.debug("[TimelineViewModel] 滚动状态更新 - offset: \(offsetY), isHomeTab: \(isHomeTab), tabBarOffset: \(timelineState.tabBarOffset)")
+    }
+
     func handleLoadMore(scrollToId: String) async {
         let timestamp = Date().timeIntervalSince1970
         FlareLog.debug("📄 [Timeline ViewModel] handleLoadMore started - isLoadingMore: \(isLoadingMore), hasPresenter: \(presenter != nil), timestamp: \(timestamp)")

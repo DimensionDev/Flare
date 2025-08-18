@@ -15,8 +15,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
-import com.konyaco.fluent.LocalTextStyle
-import com.konyaco.fluent.component.Text
+import io.github.composefluent.LocalTextStyle
+import io.github.composefluent.component.Text
 
 @Composable
 internal actual fun PlatformText(

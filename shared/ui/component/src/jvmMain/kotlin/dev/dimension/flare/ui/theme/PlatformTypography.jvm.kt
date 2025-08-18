@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
-import com.konyaco.fluent.FluentTheme
+import io.github.composefluent.FluentTheme
 
 internal actual object PlatformTypography {
     actual val caption: TextStyle

@@ -116,4 +116,7 @@
     <string name="feeds_subscribe">Subscribe</string>
 
     <string name="social_title">Social</string>
+
+    <string name="antenna_title">Antenna</string>
+    <string name="mixed_timeline_title">Mixed</string>
 </resources>

@@ -549,7 +549,15 @@ fun TabIcon(
         }
 
         is IconType.Url -> {
-            NetworkImage(icon.url, contentDescription = null, modifier = modifier.size(24.dp))
+            NetworkImage(
+                icon.url,
+                contentDescription =
+                    when (title) {
+                        is TitleType.Localized -> stringResource(id = title.resId)
+                        is TitleType.Text -> title.content
+                    },
+                modifier = modifier.size(24.dp),
+            )
         }
     }
 }

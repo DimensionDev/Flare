@@ -21,12 +21,12 @@ import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
-import com.konyaco.fluent.ExperimentalFluentApi
-import com.konyaco.fluent.FluentTheme
-import com.konyaco.fluent.darkColors
-import com.konyaco.fluent.lightColors
-import com.mayakapps.compose.windowstyler.WindowFrameStyle
-import com.mayakapps.compose.windowstyler.WindowStyleManager
+import dev.dimension.flare.ui.component.ComponentAppearance
+import dev.dimension.flare.ui.component.LocalComponentAppearance
+import io.github.composefluent.ExperimentalFluentApi
+import io.github.composefluent.FluentTheme
+import io.github.composefluent.darkColors
+import io.github.composefluent.lightColors
 import kotlinx.coroutines.launch
 import org.apache.commons.lang3.SystemUtils
 
@@ -45,17 +45,17 @@ internal fun FrameWindowScope.FlareTheme(
                 lightColors()
             },
     ) {
-        val micaBase = FluentTheme.colors.background.mica.base
-        LaunchedEffect(window, isDarkTheme) {
-            WindowStyleManager(
-                window = window,
-                isDarkTheme = isDarkTheme,
-                frameStyle =
-                    WindowFrameStyle(
-                        titleBarColor = micaBase,
-                    ),
-            )
-        }
+//        val micaBase = FluentTheme.colors.background.mica.base
+//        LaunchedEffect(window, isDarkTheme) {
+//            WindowStyleManager(
+//                window = window,
+//                isDarkTheme = isDarkTheme,
+//                frameStyle =
+//                    WindowFrameStyle(
+//                        titleBarColor = micaBase,
+//                    ),
+//            )
+//        }
         if (SystemUtils.IS_OS_MAC) {
             LaunchedEffect(window) {
                 window.rootPane.apply {
@@ -65,12 +65,14 @@ internal fun FrameWindowScope.FlareTheme(
                 }
             }
         }
+
         CompositionLocalProvider(
             LocalIndication provides
                 FluentIndication(
                     hover = Color.Transparent,
                     pressed = Color.Transparent,
                 ),
+            LocalComponentAppearance provides ComponentAppearance(),
         ) {
             Box(
                 modifier =

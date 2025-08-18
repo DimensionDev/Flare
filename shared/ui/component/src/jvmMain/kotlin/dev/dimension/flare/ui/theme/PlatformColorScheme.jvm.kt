@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.theme
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.konyaco.fluent.FluentTheme
+import io.github.composefluent.FluentTheme
 
 internal actual object PlatformColorScheme {
     actual val primary: Color

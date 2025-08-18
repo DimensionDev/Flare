@@ -13,8 +13,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.FluentTheme
-import com.konyaco.fluent.component.SubtleButton
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
@@ -28,6 +26,8 @@ import dev.dimension.flare.ui.component.uiListItemComponent
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.AllListPresenter
+import io.github.composefluent.FluentTheme
+import io.github.composefluent.component.SubtleButton
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 

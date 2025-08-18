@@ -2,7 +2,7 @@ package dev.dimension.flare.ui.component.platform
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.konyaco.fluent.component.Slider
+import io.github.composefluent.component.Slider
 
 @Composable
 internal actual fun PlatformSlider(

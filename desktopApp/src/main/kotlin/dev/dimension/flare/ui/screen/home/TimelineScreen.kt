@@ -25,9 +25,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.component.AccentButton
-import com.konyaco.fluent.component.ProgressBar
-import com.konyaco.fluent.component.Text
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
@@ -46,6 +43,9 @@ import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import io.github.composefluent.component.AccentButton
+import io.github.composefluent.component.ProgressBar
+import io.github.composefluent.component.Text
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.mapNotNull

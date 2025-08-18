@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,12 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.FluentTheme
-import com.konyaco.fluent.component.SegmentedButton
-import com.konyaco.fluent.component.SegmentedControl
-import com.konyaco.fluent.component.SegmentedItemPosition
-import com.konyaco.fluent.component.Text
-import com.konyaco.fluent.surface.Card
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
@@ -56,6 +49,12 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
+import io.github.composefluent.FluentTheme
+import io.github.composefluent.component.SegmentedButton
+import io.github.composefluent.component.SegmentedControl
+import io.github.composefluent.component.SegmentedItemPosition
+import io.github.composefluent.component.Text
+import io.github.composefluent.surface.Card
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
@@ -119,107 +118,104 @@ internal fun ProfileScreen(
                 }
             }
         }
-        Column(
-            modifier = Modifier.fillMaxSize(),
+        LazyStatusVerticalStaggeredGrid(
+            contentPadding =
+                PaddingValues(
+                    vertical =
+                        if (isBigScreen) {
+                            16.dp
+                        } else {
+                            0.dp
+                        },
+                ),
+            state = listState,
         ) {
-            LazyStatusVerticalStaggeredGrid(
-                contentPadding =
-                    PaddingValues(
-                        vertical =
-                            if (isBigScreen) {
-                                16.dp
-                            } else {
-                                0.dp
-                            },
-                    ),
-                state = listState,
-            ) {
-                if (!isBigScreen) {
+            if (!isBigScreen) {
+                item(
+                    span = StaggeredGridItemSpan.FullLine,
+                ) {
+                    ProfileHeader(
+                        state = state.state,
+                        menu = {
+                            ProfileMenu(
+                                profileState = state.state,
+                                setShowMoreMenus = state::setShowMoreMenus,
+                                showMoreMenus = state.showMoreMenus,
+                                toEditAccountList = toEditAccountList,
+                                accountsState = state.allAccountsState,
+                                toSearchUserUsingAccount = toSearchUserUsingAccount,
+                                toStartMessage = toStartMessage,
+                            )
+                        },
+                        onAvatarClick = {
+                        },
+                        onBannerClick = {
+                        },
+                        isBigScreen = false,
+                        onFollowListClick = onFollowListClick,
+                        onFansListClick = onFansListClick,
+                    )
+                }
+            }
+            state.state.tabs.onSuccess { tabs ->
+                if (tabs.size > 1) {
                     item(
                         span = StaggeredGridItemSpan.FullLine,
                     ) {
-                        ProfileHeader(
-                            state = state.state,
-                            menu = {
-                                ProfileMenu(
-                                    profileState = state.state,
-                                    setShowMoreMenus = state::setShowMoreMenus,
-                                    showMoreMenus = state.showMoreMenus,
-                                    toEditAccountList = toEditAccountList,
-                                    accountsState = state.allAccountsState,
-                                    toSearchUserUsingAccount = toSearchUserUsingAccount,
-                                    toStartMessage = toStartMessage,
-                                )
-                            },
-                            onAvatarClick = {
-                            },
-                            onBannerClick = {
-                            },
-                            isBigScreen = false,
-                            onFollowListClick = onFollowListClick,
-                            onFansListClick = onFansListClick,
-                        )
-                    }
-                }
-                state.state.tabs.onSuccess { tabs ->
-                    if (tabs.size > 1) {
-                        item(
-                            span = StaggeredGridItemSpan.FullLine,
-                        ) {
-                            SegmentedControl {
-                                repeat(tabs.size) { index ->
-                                    val tab = tabs.get(index)
-                                    SegmentedButton(
-                                        checked = state.selectedTab == index,
-                                        onCheckedChanged = {
-                                            state.setSelectedTab(index)
+                        SegmentedControl {
+                            repeat(tabs.size) { index ->
+                                val tab = tabs.get(index)
+                                SegmentedButton(
+                                    checked = state.selectedTab == index,
+                                    onCheckedChanged = {
+                                        state.setSelectedTab(index)
+                                    },
+                                    position =
+                                        when (index) {
+                                            0 -> SegmentedItemPosition.Start
+                                            tabs.size - 1 -> SegmentedItemPosition.End
+                                            else -> SegmentedItemPosition.Center
                                         },
-                                        position =
-                                            when (index) {
-                                                0 -> SegmentedItemPosition.Start
-                                                tabs.size - 1 -> SegmentedItemPosition.End
-                                                else -> SegmentedItemPosition.Center
-                                            },
-                                    ) {
-                                        Text(
-                                            stringResource(tab.title),
-                                        )
-                                    }
+                                ) {
+                                    Text(
+                                        stringResource(tab.title),
+                                    )
                                 }
                             }
                         }
                     }
-                    when (val tab = tabs.get(state.selectedTab)) {
-                        is ProfileState.Tab.Media -> {
-                            items(
-                                tab.data,
-                                loadingContent = {
-                                    Card(
-                                        modifier = Modifier,
-                                    ) {
-                                        Box(modifier = Modifier.size(120.dp).placeholder(true))
-                                    }
-                                },
-                            ) { item ->
-                                CompositionLocalProvider(
-                                    LocalComponentAppearance provides
-                                        LocalComponentAppearance.current.copy(
-                                            videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
-                                        ),
+                }
+                when (val tab = tabs.get(state.selectedTab)) {
+                    is ProfileState.Tab.Media -> {
+                        items(
+                            tab.data,
+                            loadingContent = {
+                                Card(
+                                    modifier = Modifier,
                                 ) {
-                                    val media = item.media
-                                    MediaItem(
-                                        media = media,
-                                        showCountdown = false,
-                                        modifier =
-                                            Modifier
-                                                .clip(FluentTheme.shapes.control)
-                                                .padding(
-                                                    vertical = 4.dp,
-                                                ).clipToBounds()
-                                                .clickable {
-                                                    val content = item.status.content
-                                                    if (content is UiTimeline.ItemContent.Status) {
+                                    Box(modifier = Modifier.size(120.dp).placeholder(true))
+                                }
+                            },
+                        ) { item ->
+                            CompositionLocalProvider(
+                                LocalComponentAppearance provides
+                                    LocalComponentAppearance.current.copy(
+                                        videoAutoplay = ComponentAppearance.VideoAutoplay.NEVER,
+                                    ),
+                            ) {
+                                val media = item.media
+                                MediaItem(
+                                    media = media,
+                                    showCountdown = false,
+                                    modifier =
+                                        Modifier
+                                            .clip(FluentTheme.shapes.control)
+                                            .padding(
+                                                vertical = 4.dp,
+                                            ).clipToBounds()
+                                            .clickable {
+                                                val content = item.status.content
+                                                if (content is UiTimeline.ItemContent.Status) {
 //                                                onItemClicked(
 //                                                    content.statusKey,
 //                                                    item.index,
@@ -230,15 +226,14 @@ internal fun ProfileScreen(
 //                                                        else -> null
 //                                                    },
 //                                                )
-                                                    }
-                                                },
-                                    )
-                                }
+                                                }
+                                            },
+                                )
                             }
                         }
-                        is ProfileState.Tab.Timeline -> {
-                            status(tab.data)
-                        }
+                    }
+                    is ProfileState.Tab.Timeline -> {
+                        status(tab.data)
                     }
                 }
             }

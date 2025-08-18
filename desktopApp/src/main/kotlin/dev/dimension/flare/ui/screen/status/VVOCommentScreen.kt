@@ -15,7 +15,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.component.ProgressBar
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
@@ -27,6 +26,7 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.VVOCommentPresenter
+import io.github.composefluent.component.ProgressBar
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 

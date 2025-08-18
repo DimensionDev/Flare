@@ -27,13 +27,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.FluentTheme
-import com.konyaco.fluent.component.AccentButton
-import com.konyaco.fluent.component.ProgressBar
-import com.konyaco.fluent.component.ProgressRing
-import com.konyaco.fluent.component.Text
-import com.konyaco.fluent.component.TextField
-import com.konyaco.fluent.surface.Card
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleQuestion
@@ -61,6 +54,13 @@ import dev.dimension.flare.ui.model.takeSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.login.ServiceSelectPresenter
 import dev.dimension.flare.ui.presenter.login.ServiceSelectState
+import io.github.composefluent.FluentTheme
+import io.github.composefluent.component.AccentButton
+import io.github.composefluent.component.ProgressBar
+import io.github.composefluent.component.ProgressRing
+import io.github.composefluent.component.Text
+import io.github.composefluent.component.TextField
+import io.github.composefluent.surface.Card
 import kotlinx.coroutines.flow.distinctUntilChanged
 import moe.tlaster.precompose.molecule.producePresenter
 import org.apache.commons.lang3.SystemUtils

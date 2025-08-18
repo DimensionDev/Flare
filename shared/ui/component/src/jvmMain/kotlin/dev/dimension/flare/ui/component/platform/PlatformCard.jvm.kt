@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import com.konyaco.fluent.FluentTheme
-import com.konyaco.fluent.surface.Card
-import com.konyaco.fluent.surface.CardDefaults
+import io.github.composefluent.FluentTheme
+import io.github.composefluent.surface.Card
+import io.github.composefluent.surface.CardDefaults
 
 @Composable
 internal actual fun PlatformCard(

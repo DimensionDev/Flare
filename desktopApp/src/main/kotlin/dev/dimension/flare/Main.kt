@@ -12,7 +12,6 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
-import androidx.navigation.compose.rememberNavController
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.request.crossfade
@@ -22,11 +21,9 @@ import dev.dimension.flare.ui.route.FloatingWindowState
 import dev.dimension.flare.ui.route.WindowRoute
 import dev.dimension.flare.ui.route.WindowRouter
 import dev.dimension.flare.ui.theme.FlareTheme
-import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.context.startKoin
-import java.awt.Desktop
 
 fun main(args: Array<String>) {
     startKoin {
@@ -54,14 +51,14 @@ fun main(args: Array<String>) {
                 )
             }
         }
-        val navController = rememberNavController()
-        LaunchedEffect(Unit) {
-            if (SystemUtils.IS_OS_MAC_OSX) {
-                Desktop.getDesktop().setOpenURIHandler {
-                    navController.navigate(it.uri.toString())
-                }
-            }
-        }
+//        val navController = rememberNavController()
+//        LaunchedEffect(Unit) {
+//            if (SystemUtils.IS_OS_MAC_OSX) {
+//                Desktop.getDesktop().setOpenURIHandler {
+//                    navController.navigate(it.uri.toString())
+//                }
+//            }
+//        }
         Window(
             onCloseRequest = ::exitApplication,
             title = stringResource(Res.string.app_name),
@@ -74,7 +71,7 @@ fun main(args: Array<String>) {
         ) {
             FlareTheme {
                 FlareApp(
-                    navController = navController,
+//                    navController = navController,
                     onRawImage = { url ->
                         openWindow(
                             url,

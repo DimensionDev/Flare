@@ -2,9 +2,9 @@ package dev.dimension.flare.ui.component.platform
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.konyaco.fluent.component.MenuFlyout
-import com.konyaco.fluent.component.MenuFlyoutItem
-import com.konyaco.fluent.component.MenuFlyoutScope
+import io.github.composefluent.component.MenuFlyout
+import io.github.composefluent.component.MenuFlyoutItem
+import io.github.composefluent.component.MenuFlyoutScope
 
 @Composable
 internal actual fun PlatformDropdownMenu(

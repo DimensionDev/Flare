@@ -11,8 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.FluentTheme
-import com.konyaco.fluent.component.Text
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TitleType
@@ -23,6 +21,8 @@ import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import io.github.composefluent.FluentTheme
+import io.github.composefluent.component.Text
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
@@ -133,6 +133,20 @@ fun TabIcon(
                     )
                 }
             }
+        }
+
+        is IconType.Url -> {
+            NetworkImage(
+                icon.url,
+                contentDescription =
+                    when (title) {
+                        is TitleType.Localized -> stringResource(title.res)
+                        is TitleType.Text -> title.content
+                    },
+                modifier =
+                    modifier
+                        .size(24.dp),
+            )
         }
     }
 }

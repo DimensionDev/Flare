@@ -33,10 +33,6 @@ import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.size.Size
-import com.konyaco.fluent.FluentTheme
-import com.konyaco.fluent.component.GridViewItem
-import com.konyaco.fluent.component.HorizontalFlipView
-import com.konyaco.fluent.component.SubtleButton
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Chalkboard
@@ -59,15 +55,21 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.presenter.status.StatusState
+import io.github.composefluent.FluentTheme
+import io.github.composefluent.component.GridViewItem
+import io.github.composefluent.component.HorizontalFlipView
+import io.github.composefluent.component.SubtleButton
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
+import me.saket.telephoto.ExperimentalTelephotoApi
+import me.saket.telephoto.zoomable.Viewport
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.rememberZoomableState
+import me.saket.telephoto.zoomable.spatial.CoordinateSpace
 import me.saket.telephoto.zoomable.zoomable
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 import javax.swing.JFileChooser
-import kotlin.collections.orEmpty
 
 @Composable
 internal fun StatusMediaScreen(
@@ -230,6 +232,7 @@ internal fun StatusMediaScreen(
     }
 }
 
+@OptIn(ExperimentalTelephotoApi::class)
 @Composable
 private fun ImageItem(
     url: String,
@@ -255,8 +258,10 @@ private fun ImageItem(
         } ?: setLockPager(false)
     }
     val aspectRatio =
-        remember(zoomableState.transformedContentBounds) {
-            zoomableState.transformedContentBounds.let {
+        remember(zoomableState.coordinateSystem.unscaledContentBounds) {
+            with(zoomableState.coordinateSystem) {
+                unscaledContentBounds.rectIn(CoordinateSpace.Viewport)
+            }.let {
                 it.height / it.width
             }
         }

@@ -21,10 +21,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.component.SegmentedButton
-import com.konyaco.fluent.component.SegmentedControl
-import com.konyaco.fluent.component.SegmentedItemPosition
-import com.konyaco.fluent.component.Text
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FileCircleExclamation
@@ -49,6 +45,10 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailPresenter
 import dev.dimension.flare.ui.presenter.status.VVOStatusDetailState
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import io.github.composefluent.component.SegmentedButton
+import io.github.composefluent.component.SegmentedControl
+import io.github.composefluent.component.SegmentedItemPosition
+import io.github.composefluent.component.Text
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource

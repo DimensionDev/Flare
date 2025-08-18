@@ -16,7 +16,7 @@ import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.isUnspecified
-import com.konyaco.fluent.FluentTheme
+import io.github.composefluent.FluentTheme
 import kotlinx.coroutines.launch
 
 @Composable

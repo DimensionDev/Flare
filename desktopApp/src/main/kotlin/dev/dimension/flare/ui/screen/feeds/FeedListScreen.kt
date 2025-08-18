@@ -12,10 +12,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.component.ListItem
-import com.konyaco.fluent.component.ListItemDefaults
-import com.konyaco.fluent.component.SubtleButton
-import com.konyaco.fluent.component.Text
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
@@ -33,6 +29,10 @@ import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedsPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import io.github.composefluent.component.ListItem
+import io.github.composefluent.component.ListItemDefaults
+import io.github.composefluent.component.SubtleButton
+import io.github.composefluent.component.Text
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 

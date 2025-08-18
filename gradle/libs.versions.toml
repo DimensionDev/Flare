@@ -3,7 +3,7 @@ clikt = "5.0.3"
 collection = "1.5.0"
 compileSdk = "36"
 haze = "1.6.10"
-lifecycleViewmodelCompose = "2.9.1"
+lifecycleViewmodelComposeVersion = "2.9.2"
 minSdk = "23"
 java = "21"
 agp = "8.12.0"
@@ -70,6 +70,7 @@ lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtim
 lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle-runtime-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleViewmodelComposeVersion" }
 openai-client = { module = "com.aallam.openai:openai-client", version.ref = "openaiClient" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "stately" }
@@ -190,15 +191,13 @@ compose-cupertino = { module = "io.github.alexzhirkevich:cupertino-core", versio
 
 xmlUtil = { module = "io.github.pdvrieze.xmlutil:serialization", version = "0.91.2" }
 
-fluent-ui = { module = "com.konyaco:fluent", version = "0.1.0-SNAPSHOT" }
-
-window-styler = { module = "com.mayakapps.compose:window-styler", version = "0.3.3-SNAPSHOT" }
+fluent-ui = { module = "io.github.compose-fluent:fluent", version = "v0.1.0" }
 
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version = "3.18.0" }
 
 jSystemThemeDetector = { module = "com.github.Dansoftowner:jSystemThemeDetector", version = "3.9.1" }
 
-jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.9.0-beta04" }
+jetbrains-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version = "2.9.0-beta05" }
 krypto = { module = "com.soywiz:korlibs-crypto", version = "6.0.1" }
 
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }

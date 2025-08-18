@@ -10,10 +10,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.component.ContentDialog
-import com.konyaco.fluent.component.ContentDialogButton
-import com.konyaco.fluent.component.Text
-import com.konyaco.fluent.component.TextField
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
 import dev.dimension.flare.model.AccountType
@@ -23,6 +19,10 @@ import dev.dimension.flare.report_description
 import dev.dimension.flare.report_title
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.MisskeyReportPresenter
+import io.github.composefluent.component.ContentDialog
+import io.github.composefluent.component.ContentDialogButton
+import io.github.composefluent.component.Text
+import io.github.composefluent.component.TextField
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 

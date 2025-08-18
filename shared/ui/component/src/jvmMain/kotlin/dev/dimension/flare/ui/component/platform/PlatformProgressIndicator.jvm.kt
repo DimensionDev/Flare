@@ -3,9 +3,9 @@ package dev.dimension.flare.ui.component.platform
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.konyaco.fluent.FluentTheme
-import com.konyaco.fluent.component.ProgressBar
-import com.konyaco.fluent.component.ProgressRing
+import io.github.composefluent.FluentTheme
+import io.github.composefluent.component.ProgressBar
+import io.github.composefluent.component.ProgressRing
 
 @Composable
 internal actual fun PlatformLinearProgressIndicator(

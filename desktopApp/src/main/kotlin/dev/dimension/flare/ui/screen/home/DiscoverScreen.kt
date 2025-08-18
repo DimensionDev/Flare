@@ -19,9 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.component.ListItem
-import com.konyaco.fluent.component.Text
-import com.konyaco.fluent.surface.Card
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
@@ -35,6 +32,9 @@ import dev.dimension.flare.ui.presenter.home.DiscoverPresenter
 import dev.dimension.flare.ui.presenter.home.DiscoverState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
+import io.github.composefluent.component.ListItem
+import io.github.composefluent.component.Text
+import io.github.composefluent.surface.Card
 import moe.tlaster.precompose.molecule.producePresenter
 
 @OptIn(ExperimentalLayoutApi::class)

@@ -3,9 +3,9 @@ package dev.dimension.flare.ui.component.platform
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.konyaco.fluent.component.AccentButton
-import com.konyaco.fluent.component.Button
-import com.konyaco.fluent.component.SubtleButton
+import io.github.composefluent.component.AccentButton
+import io.github.composefluent.component.Button
+import io.github.composefluent.component.SubtleButton
 
 @Composable
 internal actual fun PlatformButton(

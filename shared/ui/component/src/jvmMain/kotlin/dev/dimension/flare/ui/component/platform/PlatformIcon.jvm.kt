@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.konyaco.fluent.component.Icon
+import io.github.composefluent.component.Icon
 
 @Composable
 internal actual fun PlatformIcon(

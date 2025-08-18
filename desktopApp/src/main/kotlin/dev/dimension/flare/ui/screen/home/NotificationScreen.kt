@@ -13,11 +13,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.component.ProgressBar
-import com.konyaco.fluent.component.SegmentedButton
-import com.konyaco.fluent.component.SegmentedControl
-import com.konyaco.fluent.component.SegmentedItemPosition
-import com.konyaco.fluent.component.Text
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.model.AccountType
@@ -28,6 +23,11 @@ import dev.dimension.flare.ui.presenter.home.NotificationPresenter
 import dev.dimension.flare.ui.presenter.home.UserPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
+import io.github.composefluent.component.ProgressBar
+import io.github.composefluent.component.SegmentedButton
+import io.github.composefluent.component.SegmentedControl
+import io.github.composefluent.component.SegmentedItemPosition
+import io.github.composefluent.component.Text
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 

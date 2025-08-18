@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,25 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.UriHandler
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import androidx.navigation.NavDestination.Companion.hasRoute
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
-import com.konyaco.fluent.FluentTheme
-import com.konyaco.fluent.component.Badge
-import com.konyaco.fluent.component.BadgeStatus
-import com.konyaco.fluent.component.Button
-import com.konyaco.fluent.component.Icon
-import com.konyaco.fluent.component.MenuItemSeparator
-import com.konyaco.fluent.component.NavigationDefaults
-import com.konyaco.fluent.component.NavigationDisplayMode
-import com.konyaco.fluent.component.NavigationView
-import com.konyaco.fluent.component.SubtleButton
-import com.konyaco.fluent.component.Text
-import com.konyaco.fluent.component.menuItem
-import com.konyaco.fluent.component.rememberNavigationState
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Gear
@@ -53,6 +33,7 @@ import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.DirectMessageTabItem
 import dev.dimension.flare.data.model.DiscoverTabItem
+import dev.dimension.flare.data.model.Misskey
 import dev.dimension.flare.data.model.NotificationTabItem
 import dev.dimension.flare.data.model.ProfileTabItem
 import dev.dimension.flare.data.model.RssTabItem
@@ -75,10 +56,31 @@ import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
+import dev.dimension.flare.ui.route.Route.AllLists
+import dev.dimension.flare.ui.route.Route.BlueskyFeeds
+import dev.dimension.flare.ui.route.Route.DirectMessage
+import dev.dimension.flare.ui.route.Route.Discover
+import dev.dimension.flare.ui.route.Route.MeRoute
+import dev.dimension.flare.ui.route.Route.Notification
+import dev.dimension.flare.ui.route.Route.Timeline
 import dev.dimension.flare.ui.route.Router
+import dev.dimension.flare.ui.route.StackManager
+import dev.dimension.flare.ui.route.rememberStackManager
+import io.github.composefluent.FluentTheme
+import io.github.composefluent.component.Badge
+import io.github.composefluent.component.BadgeStatus
+import io.github.composefluent.component.Button
+import io.github.composefluent.component.Icon
+import io.github.composefluent.component.MenuItemSeparator
+import io.github.composefluent.component.NavigationDefaults
+import io.github.composefluent.component.NavigationDisplayMode
+import io.github.composefluent.component.NavigationView
+import io.github.composefluent.component.SubtleButton
+import io.github.composefluent.component.Text
+import io.github.composefluent.component.menuItem
+import io.github.composefluent.component.rememberNavigationState
 import io.ktor.http.Url
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
@@ -87,7 +89,6 @@ import org.jetbrains.compose.resources.stringResource
 internal fun FlareApp(
     onRawImage: (String) -> Unit,
     onStatusMedia: (AccountType, MicroBlogKey, Int) -> Unit,
-    navController: NavHostController = rememberNavController(),
 ) {
     val state by producePresenter { presenter() }
     val bigScreen = isBigScreen()
@@ -98,25 +99,24 @@ internal fun FlareApp(
             NavigationDisplayMode.LeftCompact
         }
     var selectedIndex by remember { mutableStateOf(0) }
-    val currentEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = currentEntry?.destination
     val uriHandler = LocalUriHandler.current
 
-    fun navigate(route: Route) {
-        navController.navigate(route) {
-//            popUpTo(navController.graph.findStartDestination().id) {
-//                saveState = true
-//            }
-            launchSingleTop = true
-//            restoreState = true
-        }
-    }
-    val canNavigateUp by remember(navController) {
-        navController.currentBackStack.map {
-            it.size > 1
-        }
-    }.collectAsState(false)
     state.tabs.onSuccess { tabs ->
+        val stackManager =
+            rememberStackManager(startRoute = getRoute(tabs.primary.first().tabItem), key = tabs)
+        val currentRoute =
+            remember(stackManager.stack) {
+                stackManager.current
+            }
+
+        fun navigate(route: Route) {
+            stackManager.push(route)
+        }
+
+        fun goBack() {
+            stackManager.pop()
+        }
+
         LaunchedEffect(selectedIndex) {
             val tab = tabs.all[selectedIndex]
             navigate(getRoute(tab.tabItem))
@@ -131,9 +131,9 @@ internal fun FlareApp(
             backButton = {
                 NavigationDefaults.BackButton(
                     onClick = {
-                        navController.navigateUp()
+                        goBack()
                     },
-                    disabled = !canNavigateUp,
+                    disabled = !stackManager.canGoBack,
                 )
             },
             menuItems = {
@@ -161,7 +161,11 @@ internal fun FlareApp(
                                     if (navigationState.expanded) {
                                         Column {
                                             RichText(user.name, maxLines = 1)
-                                            Text(user.handle, style = FluentTheme.typography.caption, maxLines = 1)
+                                            Text(
+                                                user.handle,
+                                                style = FluentTheme.typography.caption,
+                                                maxLines = 1,
+                                            )
                                         }
                                     }
                                 }
@@ -216,10 +220,10 @@ internal fun FlareApp(
                     index: Int,
                 ) {
                     menuItem(
-                        selected = currentDestination?.hierarchy?.any { it.hasRoute(getRoute(tab.tabItem)::class) } == true,
+                        selected = currentRoute == getRoute(tab.tabItem),
                         onClick = {
                             if (selectedIndex == index) {
-                                tab.tabState.onClick()
+                                state.scrollToTopRegistry.scrollToTop()
                             } else {
                                 selectedIndex = index
                             }
@@ -270,7 +274,7 @@ internal fun FlareApp(
             contentPadding = PaddingValues(top = 8.dp),
             footerItems = {
                 menuItem(
-                    selected = currentDestination?.hierarchy?.any { it.hasRoute(Route.Settings::class) } == true,
+                    selected = currentRoute == Route.Settings,
                     onClick = {
                         navigate(Route.Settings)
                     },
@@ -294,17 +298,16 @@ internal fun FlareApp(
                 LocalUriHandler provides
                     remember {
                         ProxyUriHandler(
-                            navController = navController,
+                            stackManager = stackManager,
                             actualUriHandler = uriHandler,
                             onRawImage = onRawImage,
                             onStatusMedia = onStatusMedia,
                         )
                     },
-                LocalTabState provides currentTab?.tabState,
+                LocalScrollToTopRegistry provides state.scrollToTopRegistry,
             ) {
                 Router(
-                    startDestination = getRoute(tabs.primary.first().tabItem),
-                    navController = navController,
+                    manager = stackManager,
                 )
             }
         }
@@ -313,15 +316,16 @@ internal fun FlareApp(
 
 private fun getRoute(tab: TabItem): Route =
     when (tab) {
-        is DiscoverTabItem -> Route.Discover(tab.account)
-        is ProfileTabItem -> Route.MeRoute(tab.account)
-        is TimelineTabItem -> Route.Timeline(tab)
-        is NotificationTabItem -> Route.Notification(tab.account)
+        is DiscoverTabItem -> Discover(tab.account)
+        is ProfileTabItem -> MeRoute(tab.account)
+        is TimelineTabItem -> Timeline(tab)
+        is NotificationTabItem -> Notification(tab.account)
         SettingsTabItem -> Route.Settings
-        is AllListTabItem -> Route.AllLists(tab.account)
-        is Bluesky.FeedsTabItem -> Route.BlueskyFeeds(tab.account)
-        is DirectMessageTabItem -> Route.DirectMessage(tab.account)
+        is AllListTabItem -> AllLists(tab.account)
+        is Bluesky.FeedsTabItem -> BlueskyFeeds(tab.account)
+        is DirectMessageTabItem -> DirectMessage(tab.account)
         is RssTabItem -> Route.Rss
+        is Misskey.AntennasListTabItem -> Route.Rss
     }
 
 @Composable
@@ -329,12 +333,17 @@ private fun presenter() =
     run {
         val accountState = remember { ActiveAccountPresenter() }.invoke()
         val tabState = remember { HomeTabsPresenter(flowOf(TabSettings())) }.invoke()
+        val scrollToTopRegistry =
+            remember {
+                ScrollToTopRegistry()
+            }
         object : UserState by accountState, HomeTabsPresenter.State by tabState {
+            val scrollToTopRegistry = scrollToTopRegistry
         }
     }
 
 private class ProxyUriHandler(
-    private val navController: NavController,
+    private val stackManager: StackManager,
     private val actualUriHandler: UriHandler,
     private val onRawImage: (String) -> Unit,
     private val onStatusMedia: (AccountType, MicroBlogKey, Int) -> Unit,
@@ -349,6 +358,7 @@ private class ProxyUriHandler(
                         onRawImage(rawImage)
                     }
                 }
+
                 "StatusMedia" -> {
                     val accountKey = data.parameters["accountKey"]?.let(MicroBlogKey::valueOf)
                     val statusKey = data.segments.getOrNull(0)?.let(MicroBlogKey::valueOf)
@@ -358,7 +368,16 @@ private class ProxyUriHandler(
                         onStatusMedia(accountType, statusKey, index)
                     }
                 }
-                else -> navController.navigate(uri)
+
+                else -> {
+                    Route.parse(uri)?.let {
+                        stackManager.push(it)
+                    } ?: run {
+                        // If the URI does not match any known route, we can handle it as a custom URI scheme
+                        // For example, you might want to log it or show an error
+                        println("Unhandled URI: $uri")
+                    }
+                }
             }
         } else {
             actualUriHandler.openUri(uri)
@@ -366,8 +385,24 @@ private class ProxyUriHandler(
     }
 }
 
-private val LocalTabState =
-    androidx.compose.runtime.staticCompositionLocalOf<HomeTabsPresenter.State.HomeTabState.HomeTabItem.TabState?> {
+private class ScrollToTopRegistry {
+    private val callbacks = mutableSetOf<() -> Unit>()
+
+    fun registerCallback(callback: () -> Unit) {
+        callbacks.add(callback)
+    }
+
+    fun unregisterCallback(callback: () -> Unit) {
+        callbacks.remove(callback)
+    }
+
+    fun scrollToTop() {
+        callbacks.forEach { it.invoke() }
+    }
+}
+
+private val LocalScrollToTopRegistry =
+    androidx.compose.runtime.staticCompositionLocalOf<ScrollToTopRegistry?> {
         null
     }
 
@@ -376,18 +411,20 @@ internal fun RegisterTabCallback(
     lazyListState: LazyStaggeredGridState,
     onRefresh: () -> Unit,
 ) {
-    val tabState = LocalTabState.current
     val onRefreshState by rememberUpdatedState(onRefresh)
+    val tabState = LocalScrollToTopRegistry.current
     if (tabState != null) {
         val scope = rememberCoroutineScope()
         val callback: () -> Unit =
             remember(lazyListState, scope) {
                 {
-                    if (lazyListState.firstVisibleItemIndex == 0) {
-                        onRefreshState()
+                    if (lazyListState.firstVisibleItemIndex == 0 &&
+                        lazyListState.firstVisibleItemScrollOffset == 0
+                    ) {
+                        onRefreshState.invoke()
                     } else {
                         scope.launch {
-                            if (lazyListState.firstVisibleItemIndex > 40) {
+                            if (lazyListState.firstVisibleItemIndex > 20) {
                                 lazyListState.scrollToItem(0)
                             } else {
                                 lazyListState.animateScrollToItem(0)

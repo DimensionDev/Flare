@@ -20,11 +20,14 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.reflect.KClass
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @Composable
 internal fun rememberStackManager(
     startRoute: Route,
     key: Any? = null,
+    topLevelRoutes: List<Route> = emptyList(),
 ): StackManager {
     val navControllerViewModel = viewModel<NavControllerViewModel>()
     val savableStateHolder = rememberSaveableStateHolder()
@@ -34,12 +37,14 @@ internal fun rememberStackManager(
             startRoute = startRoute,
             navControllerViewModel = navControllerViewModel,
             savableStateHolder = savableStateHolder,
+            topLevelRoutes = topLevelRoutes,
         )
     }
 }
 
 internal class StackManager(
     private val startRoute: Route,
+    private val topLevelRoutes: List<Route>,
     private val navControllerViewModel: NavControllerViewModel,
     private val savableStateHolder: SaveableStateHolder,
 ) {
@@ -48,7 +53,6 @@ internal class StackManager(
     private var _current =
         mutableStateOf(
             stack.lastOrNull() ?: Entry(
-                id = "0",
                 route = startRoute,
                 viewModelStoreProvider = navControllerViewModel,
                 savableStateHolder = savableStateHolder,
@@ -72,14 +76,36 @@ internal class StackManager(
         if (stack.isNotEmpty() && stack.last().route == route) {
             return
         }
-        val entry =
-            Entry(
-                id = (stack.size).toString(),
-                route = route,
-                viewModelStoreProvider = navControllerViewModel,
-                savableStateHolder = savableStateHolder,
-            )
-        stack.add(entry)
+        if (route in topLevelRoutes) {
+            val entry = stack.find { it.route == route }
+            if (entry != null) {
+                // remove rest of the stack and set the entry as current
+                for (item in stack) {
+                    if (item != entry && item.route !in topLevelRoutes) {
+                        item.setWillBeCleared()
+                    }
+                }
+                stack.removeAll { it.route !in topLevelRoutes || it == entry }
+                stack.add(entry)
+            } else {
+                val entry =
+                    Entry(
+                        route = route,
+                        viewModelStoreProvider = navControllerViewModel,
+                        savableStateHolder = savableStateHolder,
+                    )
+                stack.add(entry)
+            }
+        } else {
+            val entry =
+                Entry(
+                    route = route,
+                    viewModelStoreProvider = navControllerViewModel,
+                    savableStateHolder = savableStateHolder,
+                )
+            stack.add(entry)
+        }
+
         updateEntry()
     }
 
@@ -100,7 +126,6 @@ internal class StackManager(
         } else {
             _current.value =
                 Entry(
-                    id = "0",
                     route = startRoute,
                     viewModelStoreProvider = navControllerViewModel,
                     savableStateHolder = savableStateHolder,
@@ -116,65 +141,70 @@ internal class StackManager(
         stack.clear()
     }
 
-    data class Entry(
-        private val id: String,
-        val route: Route,
-        private val viewModelStoreProvider: ViewModelStoreProvider,
-        private val savableStateHolder: SaveableStateHolder,
-    ) : LifecycleOwner,
-        ViewModelStoreOwner {
-        private var willBeCleared = false
-        private val lifecycleRegistry =
-            androidx.lifecycle.LifecycleRegistry(this).apply {
-                handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+    data class Entry
+        @OptIn(ExperimentalUuidApi::class)
+        constructor(
+            private val id: String = Uuid.random().toString(),
+            val route: Route,
+            private val viewModelStoreProvider: ViewModelStoreProvider,
+            private val savableStateHolder: SaveableStateHolder,
+        ) : LifecycleOwner,
+            ViewModelStoreOwner {
+            private var willBeCleared = false
+            private val lifecycleRegistry =
+                androidx.lifecycle.LifecycleRegistry(this).apply {
+                    handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+                }
+
+            override val lifecycle: Lifecycle
+                get() = lifecycleRegistry
+
+            fun active() {
+                lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
             }
 
-        override val lifecycle: Lifecycle
-            get() = lifecycleRegistry
-
-        fun active() {
-            lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
-        }
-
-        fun inactive() {
-            if (willBeCleared) {
-                savableStateHolder.removeState(id)
-                viewModelStoreProvider.clear(id)
-                lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-                println("Lifecycle for $id is destroyed and cleared.")
-            } else {
-                lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
-            }
-        }
-
-        fun setWillBeCleared() {
-            willBeCleared = true
-        }
-
-        override val viewModelStore by lazy {
-            viewModelStoreProvider.getViewModelStore(id)
-        }
-
-        @Composable
-        fun Content(content: @Composable (route: Route) -> Unit) {
-            CompositionLocalProvider(
-                LocalLifecycleOwner provides this,
-                LocalViewModelStoreOwner provides this,
-            ) {
-                savableStateHolder.SaveableStateProvider(id) {
-                    content.invoke(route)
+            fun inactive() {
+                if (willBeCleared) {
+                    savableStateHolder.removeState(id)
+                    viewModelStoreProvider.clear(id)
+                    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+                    println("Entry $id is cleared and destroyed")
+                } else {
+                    lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
                 }
             }
-            DisposableEffect(Unit) {
-                // Activate the lifecycle when the composable is composed
-                active()
-                onDispose {
-                    // Inactive the lifecycle when the composable is disposed
+
+            fun setWillBeCleared() {
+                willBeCleared = true
+                if (lifecycle.currentState.isAtLeast(Lifecycle.State.CREATED)) {
                     inactive()
                 }
             }
+
+            override val viewModelStore by lazy {
+                viewModelStoreProvider.getViewModelStore(id)
+            }
+
+            @Composable
+            fun Content(content: @Composable (route: Route) -> Unit) {
+                CompositionLocalProvider(
+                    LocalLifecycleOwner provides this,
+                    LocalViewModelStoreOwner provides this,
+                ) {
+                    savableStateHolder.SaveableStateProvider(id) {
+                        content.invoke(route)
+                    }
+                }
+                DisposableEffect(Unit) {
+                    // Activate the lifecycle when the composable is composed
+                    active()
+                    onDispose {
+                        // Inactive the lifecycle when the composable is disposed
+                        inactive()
+                    }
+                }
+            }
         }
-    }
 }
 
 interface ViewModelStoreProvider {

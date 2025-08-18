@@ -6,6 +6,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import dev.dimension.flare.ui.screen.home.ProfileScreen
 import dev.dimension.flare.ui.screen.home.TimelineScreen
+import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import io.github.composefluent.component.Text
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -57,7 +58,13 @@ internal fun Router(
                     Text("rss")
                 }
                 Route.ServiceSelect -> {
-                    Text("route")
+                    ServiceSelectScreen(
+                        onBack = ::onBack,
+                        onVVO = {
+                        },
+                        onXQT = {
+                        },
+                    )
                 }
                 Route.Settings -> {
                     Text("route")

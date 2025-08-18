@@ -103,7 +103,11 @@ internal fun FlareApp(
 
     state.tabs.onSuccess { tabs ->
         val stackManager =
-            rememberStackManager(startRoute = getRoute(tabs.primary.first().tabItem), key = tabs)
+            rememberStackManager(
+                startRoute = getRoute(tabs.primary.first().tabItem),
+                key = tabs,
+                topLevelRoutes = tabs.primary.map { getRoute(it.tabItem) },
+            )
         val currentRoute =
             remember(stackManager.stack) {
                 stackManager.current

@@ -22,6 +22,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.layout.layout
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
@@ -49,6 +51,7 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
+import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.SegmentedButton
 import io.github.composefluent.component.SegmentedControl
@@ -135,6 +138,14 @@ internal fun ProfileScreen(
                     span = StaggeredGridItemSpan.FullLine,
                 ) {
                     ProfileHeader(
+                        modifier =
+                            Modifier.let {
+                                if (isBigScreen) {
+                                    it
+                                } else {
+                                    it.ignoreHorizontalParentPadding(screenHorizontalPadding)
+                                }
+                            },
                         state = state.state,
                         menu = {
                             ProfileMenu(
@@ -303,3 +314,12 @@ private fun presenter(
         }
     }
 }
+
+fun Modifier.ignoreHorizontalParentPadding(horizontal: Dp): Modifier =
+    this.layout { measurable, constraints ->
+        val overridenWidth = constraints.maxWidth + 2 * horizontal.roundToPx()
+        val placeable = measurable.measure(constraints.copy(maxWidth = overridenWidth))
+        layout(placeable.width, placeable.height) {
+            placeable.place(0, 0)
+        }
+    }

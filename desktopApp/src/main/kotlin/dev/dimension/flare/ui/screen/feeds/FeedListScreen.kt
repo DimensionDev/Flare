@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.screen.feeds
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -23,14 +24,13 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.UiListItem
+import dev.dimension.flare.ui.component.platform.PlatformListItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.uiListItemComponent
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedsPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import io.github.composefluent.component.ListItem
-import io.github.composefluent.component.ListItemDefaults
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import moe.tlaster.precompose.molecule.producePresenter
@@ -47,19 +47,23 @@ internal fun FeedListScreen(
     Column(
         modifier =
             Modifier
-                .fillMaxSize(),
+                .fillMaxSize()
+                .padding(horizontal = screenHorizontalPadding),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         LazyColumn(
+            contentPadding =
+                PaddingValues(
+                    vertical = 8.dp,
+                ),
             modifier =
                 Modifier
                     .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             item {
-                ListItem(
-                    onClick = {},
-                    colors = ListItemDefaults.selectedListItemColors(),
-                    text = {
+                PlatformListItem(
+                    headlineContent = {
                         Text(stringResource(Res.string.feeds_my_feeds_title))
                     },
                 )
@@ -70,10 +74,8 @@ internal fun FeedListScreen(
             )
 
             item {
-                ListItem(
-                    onClick = {},
-                    colors = ListItemDefaults.selectedListItemColors(),
-                    text = {
+                PlatformListItem(
+                    headlineContent = {
                         Text(stringResource(Res.string.feeds_discover_feeds_title))
                     },
                 )

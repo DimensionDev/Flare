@@ -9,7 +9,6 @@ import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -19,7 +18,6 @@ import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.invalidateDraw
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
 import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.LocalComponentAppearance
@@ -78,14 +76,14 @@ internal fun FrameWindowScope.FlareTheme(
                 modifier =
                     Modifier
                         .fillMaxSize()
-                        .background(FluentTheme.colors.background.mica.base)
-                        .let {
-                            if (SystemUtils.IS_OS_MAC) {
-                                it.padding(top = 24.dp)
-                            } else {
-                                it
-                            }
-                        },
+                        .background(FluentTheme.colors.background.mica.base),
+//                        .let {
+//                            if (SystemUtils.IS_OS_MAC) {
+//                                it.padding(top = 24.dp)
+//                            } else {
+//                                it
+//                            }
+//                        },
             ) {
                 content.invoke()
             }

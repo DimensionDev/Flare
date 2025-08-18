@@ -3,11 +3,14 @@ package dev.dimension.flare.ui.route
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.SaveableStateHolder
 import androidx.compose.runtime.saveable.rememberSaveableStateHolder
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
@@ -42,38 +45,40 @@ internal fun rememberStackManager(
     }
 }
 
+@Stable
 internal class StackManager(
     private val startRoute: Route,
     private val topLevelRoutes: List<Route>,
     private val navControllerViewModel: NavControllerViewModel,
     private val savableStateHolder: SaveableStateHolder,
 ) {
-    val stack: MutableList<Entry> = mutableStateListOf()
-
-    private var _current =
-        mutableStateOf(
-            stack.lastOrNull() ?: Entry(
+    private val stack: MutableList<Entry> =
+        mutableStateListOf(
+            Entry(
                 route = startRoute,
                 viewModelStoreProvider = navControllerViewModel,
                 savableStateHolder = savableStateHolder,
             ),
         )
 
-    val current: Entry
-        get() = _current.value
+    private var _current by
+        mutableStateOf(
+            stack.last(),
+        )
 
-    private var _canGoBack = mutableStateOf(false)
+    val current: Route
+        get() = _current.route
+
+    val currentEntry: Entry
+        get() = _current
+
+    private var _canGoBack by mutableStateOf(false)
 
     val canGoBack: Boolean
-        get() = _canGoBack.value
-
-    init {
-        // Initialize the stack with the start route
-        push(startRoute)
-    }
+        get() = _canGoBack
 
     fun push(route: Route) {
-        if (stack.isNotEmpty() && stack.last().route == route) {
+        if (current == route) {
             return
         }
         if (route in topLevelRoutes) {
@@ -122,16 +127,16 @@ internal class StackManager(
 
     private fun updateEntry() {
         if (stack.isNotEmpty()) {
-            _current.value = stack.last()
+            _current = stack.last()
         } else {
-            _current.value =
+            _current =
                 Entry(
                     route = startRoute,
                     viewModelStoreProvider = navControllerViewModel,
                     savableStateHolder = savableStateHolder,
                 )
         }
-        _canGoBack.value = stack.size > 1
+        _canGoBack = stack.size > 1
     }
 
     fun clear() {

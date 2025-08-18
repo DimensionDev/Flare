@@ -4,8 +4,17 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import dev.dimension.flare.data.model.Bluesky
+import dev.dimension.flare.data.model.IconType
+import dev.dimension.flare.data.model.ListTimelineTabItem
+import dev.dimension.flare.data.model.TabMetaData
+import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.ui.screen.feeds.FeedListScreen
+import dev.dimension.flare.ui.screen.home.DiscoverScreen
+import dev.dimension.flare.ui.screen.home.NotificationScreen
 import dev.dimension.flare.ui.screen.home.ProfileScreen
 import dev.dimension.flare.ui.screen.home.TimelineScreen
+import dev.dimension.flare.ui.screen.list.AllListScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import io.github.composefluent.component.Text
 
@@ -23,40 +32,89 @@ internal fun Router(
         manager.pop()
     }
     AnimatedContent(
-        manager.current,
+        manager.currentEntry,
+        modifier = modifier,
     ) { entry ->
         entry.Content { route ->
             when (route) {
                 is Route.AllLists -> {
-                    Text("route")
+                    AllListScreen(
+                        accountType = route.accountType,
+                        onAddList = {
+                        },
+                        toList = {
+                            navigate(
+                                Route.Timeline(
+                                    ListTimelineTabItem(
+                                        account = route.accountType,
+                                        listId = it.id,
+                                        metaData =
+                                            TabMetaData(
+                                                title = TitleType.Text(it.title),
+                                                icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                                            ),
+                                    ),
+                                ),
+                            )
+                        },
+                    )
                 }
+
                 is Route.BlueskyFeeds -> {
-                    Text("route")
+                    FeedListScreen(
+                        accountType = route.accountType,
+                        toFeed = {
+                            navigate(
+                                Route.Timeline(
+                                    Bluesky.FeedTabItem(
+                                        account = route.accountType,
+                                        uri = it.id,
+                                        metaData =
+                                            TabMetaData(
+                                                title = TitleType.Text(it.title),
+                                                icon = IconType.Material(IconType.Material.MaterialIcon.Feeds),
+                                            ),
+                                    ),
+                                ),
+                            )
+                        },
+                    )
                 }
+
                 is Route.DirectMessage -> {
                     Text("route")
                 }
+
                 is Route.Discover -> {
-                    Text("route")
+                    DiscoverScreen(
+                        accountType = route.accountType,
+                    )
                 }
+
                 is Route.MeRoute -> {
                     ProfileScreen(
                         accountType = route.accountType,
                         userKey = null,
                     )
                 }
+
                 is Route.Notification -> {
-                    Text("route")
+                    NotificationScreen(
+                        accountType = route.accountType,
+                    )
                 }
+
                 is Route.Profile -> {
                     ProfileScreen(
                         accountType = route.accountType,
                         userKey = route.userKey,
                     )
                 }
+
                 Route.Rss -> {
-                    Text("rss")
+                    Text("route")
                 }
+
                 Route.ServiceSelect -> {
                     ServiceSelectScreen(
                         onBack = ::onBack,
@@ -66,9 +124,11 @@ internal fun Router(
                         },
                     )
                 }
+
                 Route.Settings -> {
                     Text("route")
                 }
+
                 is Route.Timeline -> {
                     TimelineScreen(
                         route.tabItem,

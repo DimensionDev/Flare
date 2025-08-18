@@ -119,4 +119,9 @@
 
     <string name="antenna_title">Antenna</string>
     <string name="mixed_timeline_title">Mixed</string>
+
+    <string name="bluesky_login_username">Username</string>
+    <string name="bluesky_login_password">Password</string>
+    <string name="bluesky_login_2fa">Two-factor authentication code</string>
+
 </resources>

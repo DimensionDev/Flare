@@ -27,6 +27,15 @@ import compose.icons.fontawesomeicons.solid.Users
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.icons.Misskey
 
+internal val Context.appearanceSettings: DataStore<AppearanceSettings> by dataStore(
+    fileName = "appearance_settings.pb",
+    serializer = AccountPreferencesSerializer,
+)
+internal val Context.appSettings: DataStore<AppSettings> by dataStore(
+    fileName = "app_settings.pb",
+    serializer = AppSettingsSerializer,
+)
+
 internal val TitleType.Localized.resId: Int
     get() =
         when (key) {

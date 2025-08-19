@@ -1,13 +1,16 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
@@ -19,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
@@ -40,18 +44,23 @@ import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.ProfileHeader
+import dev.dimension.flare.ui.component.ProfileHeaderLoading
 import dev.dimension.flare.ui.component.ProfileMenu
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.MediaItem
+import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.status.status
 import dev.dimension.flare.ui.model.UiTimeline
 import dev.dimension.flare.ui.model.map
+import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.profile.ProfilePresenter
 import dev.dimension.flare.ui.presenter.profile.ProfileState
+import dev.dimension.flare.ui.presenter.profile.ProfileWithUserNameAndHostPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
@@ -65,6 +74,96 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+
+@Composable
+internal fun ProfileWithUserNameAndHostDeeplinkRoute(
+    userName: String,
+    host: String,
+    accountType: AccountType,
+    toEditAccountList: (userKey: MicroBlogKey) -> Unit,
+    toSearchUserUsingAccount: (String, MicroBlogKey) -> Unit,
+    toStartMessage: (MicroBlogKey) -> Unit,
+    onFollowListClick: (userKey: MicroBlogKey) -> Unit,
+    onFansListClick: (userKey: MicroBlogKey) -> Unit,
+    onBack: () -> Unit = {},
+) {
+    val state by producePresenter(key = "acct_${accountType}_$userName@$host") {
+        profileWithUserNameAndHostPresenter(
+            userName = userName,
+            host = host,
+            accountType = accountType,
+        )
+    }
+    state
+        .onSuccess {
+            ProfileScreen(
+                accountType = accountType,
+                toEditAccountList = {
+                    toEditAccountList(it.key)
+                },
+                toSearchUserUsingAccount = toSearchUserUsingAccount,
+                toStartMessage = toStartMessage,
+                onFollowListClick = onFollowListClick,
+                onFansListClick = onFansListClick,
+                userKey = it.key,
+            )
+        }.onLoading {
+            ProfileLoadingScreen(
+                onBack = onBack,
+            )
+        }.onError {
+            ProfileErrorScreen(
+                onBack = onBack,
+            )
+        }
+}
+
+@Composable
+private fun ProfileErrorScreen(onBack: () -> Unit) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text = "Error")
+    }
+}
+
+@Composable
+private fun ProfileLoadingScreen(onBack: () -> Unit) {
+    LazyColumn(
+        contentPadding = LocalContentPadding.current,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        item {
+            ProfileHeaderLoading(withStatusBarHeight = false)
+        }
+        items(5) {
+            StatusPlaceholder(
+                modifier = Modifier.padding(horizontal = screenHorizontalPadding),
+            )
+        }
+    }
+}
+
+@Composable
+private fun profileWithUserNameAndHostPresenter(
+    userName: String,
+    host: String,
+    accountType: AccountType,
+) = run {
+    remember(
+        userName,
+        host,
+    ) {
+        ProfileWithUserNameAndHostPresenter(
+            userName = userName,
+            host = host,
+            accountType = accountType,
+        )
+    }.invoke().user
+}
 
 @Composable
 internal fun ProfileScreen(
@@ -251,6 +350,7 @@ internal fun ProfileScreen(
                             }
                         }
                     }
+
                     is ProfileState.Tab.Timeline -> {
                         status(tab.data)
                     }

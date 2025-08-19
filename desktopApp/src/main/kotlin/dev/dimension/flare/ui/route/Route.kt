@@ -40,6 +40,13 @@ internal sealed interface Route {
     ) : ScreenRoute
 
     @Serializable
+    data class ProfileWithNameAndHost(
+        val accountType: AccountType,
+        val userName: String,
+        val host: String,
+    ) : ScreenRoute
+
+    @Serializable
     data class MeRoute(
         val accountType: AccountType,
     ) : ScreenRoute
@@ -119,6 +126,12 @@ internal sealed interface Route {
         val text: String,
     ) : FloatingRoute
 
+    @Serializable
+    data class Search(
+        val accountType: AccountType,
+        val keyword: String,
+    ) : ScreenRoute
+
     companion object {
         public fun parse(url: String): Route? {
             val data = Url(url)
@@ -140,8 +153,7 @@ internal sealed interface Route {
                     val keyword = data.segments.getOrNull(0) ?: return null
                     val accountType =
                         accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-//                    Route.Search(accountType, keyword)
-                    null
+                    Route.Search(accountType = accountType, keyword = keyword)
                 }
 
                 "Profile" -> {
@@ -158,8 +170,11 @@ internal sealed interface Route {
                     val host = data.segments.getOrNull(1) ?: return null
                     val accountType =
                         accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-//                    Route.Profile.UserNameWithHost(accountType, userName, host)
-                    null
+                    Route.ProfileWithNameAndHost(
+                        accountType = accountType,
+                        userName = userName,
+                        host = host,
+                    )
                 }
 
                 "StatusDetail" -> {
@@ -246,13 +261,19 @@ internal sealed interface Route {
                 "DeleteStatus" -> {
                     val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
                     val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                    Route.DeleteStatus(statusKey = statusKey, accountType = AccountType.Specific(accountKey))
+                    Route.DeleteStatus(
+                        statusKey = statusKey,
+                        accountType = AccountType.Specific(accountKey),
+                    )
                 }
 
                 "AddReaction" -> {
                     val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
                     val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                    Route.AddReaction(statusKey = statusKey, accountType = AccountType.Specific(accountKey))
+                    Route.AddReaction(
+                        statusKey = statusKey,
+                        accountType = AccountType.Specific(accountKey),
+                    )
                 }
 
                 "Bluesky" ->
@@ -262,7 +283,10 @@ internal sealed interface Route {
                                 MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
                             val statusKey =
                                 MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            Route.BlueskyReport(statusKey = statusKey, accountType = AccountType.Specific(accountKey))
+                            Route.BlueskyReport(
+                                statusKey = statusKey,
+                                accountType = AccountType.Specific(accountKey),
+                            )
                         }
 
                         else -> null

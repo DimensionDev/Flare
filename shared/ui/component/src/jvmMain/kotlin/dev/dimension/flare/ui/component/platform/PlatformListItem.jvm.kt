@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.ui.component.status.ListComponent
 
 @Composable
-public actual fun PlatformListItem(
+internal actual fun PlatformListItem(
     headlineContent: @Composable () -> Unit,
     modifier: Modifier,
     leadingContent: @Composable () -> Unit,

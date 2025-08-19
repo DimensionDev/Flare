@@ -11,21 +11,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import compose.icons.FontAwesomeIcons
-import compose.icons.fontawesomeicons.Solid
-import compose.icons.fontawesomeicons.solid.EllipsisVertical
-import dev.dimension.flare.Res
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.more
-import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.uiListItemComponent
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.list.AllListPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import io.github.composefluent.component.SubtleButton
 import moe.tlaster.precompose.molecule.producePresenter
-import org.jetbrains.compose.resources.stringResource
 
 @Composable
 internal fun AllListScreen(
@@ -85,19 +77,19 @@ internal fun AllListScreen(
             uiListItemComponent(
                 state.items,
                 onClicked = toList,
-                trailingContent = { item ->
-                    if (!item.readonly) {
-                        SubtleButton(
-                            onClick = {
-                            },
-                        ) {
-                            FAIcon(
-                                FontAwesomeIcons.Solid.EllipsisVertical,
-                                contentDescription = stringResource(Res.string.more),
-                            )
-                        }
-                    }
-                },
+//                trailingContent = { item ->
+//                    if (!item.readonly) {
+//                        SubtleButton(
+//                            onClick = {
+//                            },
+//                        ) {
+//                            FAIcon(
+//                                FontAwesomeIcons.Solid.EllipsisVertical,
+//                                contentDescription = stringResource(Res.string.more),
+//                            )
+//                        }
+//                    }
+//                },
             )
         }
     }

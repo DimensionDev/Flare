@@ -136,6 +136,7 @@ internal fun FlareApp(
                     .onSuccess { user ->
                         SubtleButton(
                             onClick = {
+                                navigate(MeRoute(AccountType.Specific(user.key)))
                             },
                         ) {
                             Column(

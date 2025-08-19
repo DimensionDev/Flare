@@ -63,8 +63,7 @@ internal fun TimelineScreen(tabItem: TimelineTabItem) {
     ) {
         presenter(tabItem)
     }
-    val listState = rememberLazyStaggeredGridState()
-    RegisterTabCallback(listState, onRefresh = state::refreshSync)
+    RegisterTabCallback(state.lazyListState, onRefresh = state::refreshSync)
     Box(
         modifier =
             Modifier
@@ -75,7 +74,7 @@ internal fun TimelineScreen(tabItem: TimelineTabItem) {
                 PaddingValues(
                     vertical = 8.dp,
                 ) + LocalContentPadding.current,
-            state = listState,
+            state = state.lazyListState,
         ) {
             status(state.listState)
         }

@@ -84,6 +84,7 @@ import dev.dimension.flare.settings_status_appearance_title
 import dev.dimension.flare.ui.component.AccountItem
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.Header
 import dev.dimension.flare.ui.component.RichText
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
@@ -526,7 +527,7 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                     Text(stringResource(Res.string.app_name))
                 },
                 caption = {
-                    Text(System.getProperty("jpackage.app-version"))
+                    Text(System.getProperty("jpackage.app-version", "1.0.0"))
                 },
                 expanded = state.aboutExpanded,
                 onExpandedChanged = { state.setAboutExpanded(it) },
@@ -634,15 +635,6 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
             }
         }
     }
-}
-
-@Composable
-private fun Header(text: String) {
-    Text(
-        text = text,
-        style = FluentTheme.typography.bodyStrong,
-        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
-    )
 }
 
 @Composable

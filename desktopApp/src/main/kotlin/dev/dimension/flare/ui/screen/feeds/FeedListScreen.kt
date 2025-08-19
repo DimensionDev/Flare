@@ -25,8 +25,8 @@ import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.common.items
 import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
+import dev.dimension.flare.ui.component.Header
 import dev.dimension.flare.ui.component.UiListItem
-import dev.dimension.flare.ui.component.platform.PlatformListItem
 import dev.dimension.flare.ui.component.status.StatusPlaceholder
 import dev.dimension.flare.ui.component.uiListItemComponent
 import dev.dimension.flare.ui.model.UiList
@@ -34,7 +34,6 @@ import dev.dimension.flare.ui.presenter.home.bluesky.BlueskyFeedsPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.component.SubtleButton
-import io.github.composefluent.component.Text
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
@@ -64,11 +63,7 @@ internal fun FeedListScreen(
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             item {
-                PlatformListItem(
-                    headlineContent = {
-                        Text(stringResource(Res.string.feeds_my_feeds_title))
-                    },
-                )
+                Header(stringResource(Res.string.feeds_my_feeds_title))
             }
             uiListItemComponent(
                 state.myFeeds,
@@ -76,11 +71,7 @@ internal fun FeedListScreen(
             )
 
             item {
-                PlatformListItem(
-                    headlineContent = {
-                        Text(stringResource(Res.string.feeds_discover_feeds_title))
-                    },
-                )
+                Header(stringResource(Res.string.feeds_discover_feeds_title))
             }
             items(
                 state.popularFeeds,

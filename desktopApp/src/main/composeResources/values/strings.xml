@@ -212,4 +212,9 @@
     <string name="settings_about_localization">Crowdin</string>
     <string name="settings_about_localization_description">Help us translate Flare</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
+
+    <string name="users">Users</string>
+    <string name="hashtags">Hashtags</string>
+    <string name="statues">Statuses</string>
+
 </resources>

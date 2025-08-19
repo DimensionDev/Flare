@@ -55,15 +55,15 @@ struct HapticFeedbackSettings: Codable, Changeable {
     var intensity: HapticIntensity = .medium
 
     enum HapticIntensity: String, CaseIterable, Codable {
-        case light = "light"
-        case medium = "medium"
-        case heavy = "heavy"
+        case light
+        case medium
+        case heavy
 
         var displayName: String {
             switch self {
-            case .light: return "Light"
-            case .medium: return "Medium"
-            case .heavy: return "Heavy"
+            case .light: "Light"
+            case .medium: "Medium"
+            case .heavy: "Heavy"
             }
         }
     }

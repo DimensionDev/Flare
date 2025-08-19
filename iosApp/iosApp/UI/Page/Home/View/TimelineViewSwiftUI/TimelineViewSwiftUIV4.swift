@@ -77,7 +77,6 @@ struct TimelineViewSwiftUIV4: View {
                 .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
                     geometry
                 } action: { _, newValue in
-                     
                     timeLineViewModel.handleScrollOffsetChange(
                         newValue.contentOffset.y,
                         showFloatingButton: $timelineState.showFloatingButton,

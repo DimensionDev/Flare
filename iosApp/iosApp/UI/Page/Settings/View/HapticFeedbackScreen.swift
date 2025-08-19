@@ -4,11 +4,10 @@ import SwiftUI
 struct HapticFeedbackScreen: View {
     @Environment(\.appSettings) private var appSettings
     @Environment(FlareTheme.self) private var theme
-    
+
     var body: some View {
         List {
             Section {
-
                 Toggle(isOn: Binding(get: {
                     appSettings.appearanceSettings.hapticFeedback.isEnabled
                 }, set: { value in
@@ -25,7 +24,6 @@ struct HapticFeedbackScreen: View {
                             .foregroundColor(.secondary)
                     }
                 }
-                
 
                 if appSettings.appearanceSettings.hapticFeedback.isEnabled {
                     HStack {
@@ -40,9 +38,8 @@ struct HapticFeedbackScreen: View {
                         Picker("", selection: Binding(get: {
                             appSettings.appearanceSettings.hapticFeedback.intensity
                         }, set: { value in
-
                             FlareHapticManager.shared.generate(.impact(mapIntensityToImpactStyle(value)))
-                            
+
                             appSettings.update(newValue: appSettings.appearanceSettings.changing(
                                 path: \.hapticFeedback.intensity, to: value
                             ))
@@ -63,13 +60,12 @@ struct HapticFeedbackScreen: View {
         .navigationTitle("Haptic Feedback")
         .navigationBarTitleDisplayMode(.inline)
     }
-    
 
     private func mapIntensityToImpactStyle(_ intensity: HapticFeedbackSettings.HapticIntensity) -> FlareHapticManager.ImpactStyle {
         switch intensity {
-        case .light: return .light
-        case .medium: return .medium
-        case .heavy: return .heavy
+        case .light: .light
+        case .medium: .medium
+        case .heavy: .heavy
         }
     }
 }

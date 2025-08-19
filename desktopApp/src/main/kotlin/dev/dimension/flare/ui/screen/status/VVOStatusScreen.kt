@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FileCircleExclamation
-import dev.dimension.flare.LocalContentPadding
+import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.model.AccountType
@@ -77,13 +77,13 @@ internal fun VVOStatusScreen(
                         .verticalScroll(rememberScrollState())
                         .width(432.dp)
                         .padding(PaddingValues(horizontal = screenHorizontalPadding))
-                        .padding(LocalContentPadding.current),
+                        .padding(LocalWindowPadding.current),
             )
             LazyStatusVerticalStaggeredGrid(
                 contentPadding =
                     PaddingValues(
                         vertical = 8.dp,
-                    ) + LocalContentPadding.current,
+                    ) + LocalWindowPadding.current,
             ) {
                 reactionContent(
                     comment = state.comment,
@@ -98,7 +98,7 @@ internal fun VVOStatusScreen(
             contentPadding =
                 PaddingValues(
                     vertical = 8.dp,
-                ) + LocalContentPadding.current,
+                ) + LocalWindowPadding.current,
         ) {
             item {
                 StatusContent(statusState = state.status, detailStatusKey = statusKey)

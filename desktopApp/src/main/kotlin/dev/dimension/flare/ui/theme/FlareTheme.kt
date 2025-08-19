@@ -9,6 +9,7 @@ import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -22,7 +23,9 @@ import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.invalidateDraw
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
+import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.data.model.AppSettings
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
@@ -71,6 +74,17 @@ internal fun FrameWindowScope.FlareTheme(
                     hover = Color.Transparent,
                     pressed = Color.Transparent,
                 ),
+            LocalWindowPadding provides
+                if (SystemUtils.IS_OS_MAC) {
+                    PaddingValues(
+                        start = 0.dp,
+                        top = 24.dp,
+                        end = 0.dp,
+                        bottom = 0.dp,
+                    )
+                } else {
+                    PaddingValues(0.dp)
+                },
         ) {
             Box(
                 modifier =

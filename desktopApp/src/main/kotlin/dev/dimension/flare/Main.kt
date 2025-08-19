@@ -19,7 +19,7 @@ import dev.dimension.flare.common.DeeplinkHandler
 import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.di.desktopModule
 import dev.dimension.flare.ui.route.FloatingWindowState
-import dev.dimension.flare.ui.route.WindowRoute
+import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.WindowRouter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.ProvideThemeSettings
@@ -49,7 +49,7 @@ fun main(args: Array<String>) {
 
         fun openWindow(
             key: String,
-            route: WindowRoute,
+            route: Route.WindowRoute,
         ) {
             if (extraWindowRoutes.containsKey(key)) {
                 extraWindowRoutes[key]?.bringToFront?.invoke()
@@ -73,20 +73,10 @@ fun main(args: Array<String>) {
             ) {
                 FlareTheme {
                     FlareApp(
-                        onRawImage = { url ->
+                        onWindowRoute = {
                             openWindow(
-                                url,
-                                WindowRoute.RawImage(url),
-                            )
-                        },
-                        onStatusMedia = { accountType, statusKey, index ->
-                            openWindow(
-                                "$accountType/$statusKey",
-                                WindowRoute.StatusMedia(
-                                    accountType = accountType,
-                                    statusKey = statusKey,
-                                    index = index,
-                                ),
+                                it.toString(),
+                                it,
                             )
                         },
                     )

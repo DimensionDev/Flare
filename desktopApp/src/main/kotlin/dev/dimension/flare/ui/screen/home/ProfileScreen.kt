@@ -29,7 +29,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import dev.dimension.flare.LocalContentPadding
+import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
@@ -133,7 +133,7 @@ private fun ProfileErrorScreen(onBack: () -> Unit) {
 @Composable
 private fun ProfileLoadingScreen(onBack: () -> Unit) {
     LazyColumn(
-        contentPadding = LocalContentPadding.current,
+        contentPadding = LocalWindowPadding.current,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item {
@@ -188,7 +188,7 @@ internal fun ProfileScreen(
             Column(
                 modifier =
                     Modifier
-                        .padding(LocalContentPadding.current)
+                        .padding(LocalWindowPadding.current)
                         .padding(
                             vertical = 16.dp,
                         ).padding(
@@ -234,7 +234,7 @@ internal fun ProfileScreen(
                         },
                 ) +
                     if (isBigScreen) {
-                        LocalContentPadding.current
+                        LocalWindowPadding.current
                     } else {
                         PaddingValues()
                     },

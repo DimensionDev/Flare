@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
-import dev.dimension.flare.LocalContentPadding
+import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.PagingState
@@ -73,7 +73,7 @@ internal fun TimelineScreen(tabItem: TimelineTabItem) {
             contentPadding =
                 PaddingValues(
                     vertical = 8.dp,
-                ) + LocalContentPadding.current,
+                ) + LocalWindowPadding.current,
             state = state.lazyListState,
         ) {
             status(state.listState)

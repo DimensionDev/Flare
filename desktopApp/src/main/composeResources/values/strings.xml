@@ -217,4 +217,32 @@
     <string name="hashtags">Hashtags</string>
     <string name="statues">Statuses</string>
 
+
+    <string name="compose_title">Compose</string>
+    <string name="compose_hint">What\'s happening?</string>
+    <string name="compose_poll_option_hint">Option %1$s</string>
+    <string name="compose_poll_single_choice">Single choice</string>
+    <string name="compose_poll_multiple_choice">Multiple choice</string>
+    <string name="compose_poll_expiration_at">Expiration at: %1$s</string>
+    <string name="compose_poll_expiration_5_minutes">5 minutes</string>
+    <string name="compose_poll_expiration_30_minutes">30 minutes</string>
+    <string name="compose_poll_expiration_1_hour">1 hour</string>
+    <string name="compose_poll_expiration_6_hours">6 hours</string>
+    <string name="compose_poll_expiration_12_hours">12 hours</string>
+    <string name="compose_poll_expiration_1_day">1 day</string>
+    <string name="compose_poll_expiration_3_days">3 days</string>
+    <string name="compose_poll_expiration_7_days">7 days</string>
+    <string name="compose_content_warning_hint">Content warning</string>
+    <string name="compose_media_sensitive">Mark media as sensitive</string>
+    <string name="compose_notification_title">Sending toot</string>
+
+    <string name="misskey_visibility_public">Public</string>
+    <string name="misskey_visibility_home">Home</string>
+    <string name="misskey_visibility_followers">Followers</string>
+    <string name="misskey_visibility_specified">Specified</string>
+    <string name="misskey_visibility_public_description">Anyone can see and boost this toot</string>
+    <string name="misskey_visibility_home_description">Only users on this instance can see this toot</string>
+    <string name="misskey_visibility_followers_description">Only followers can see this toot</string>
+    <string name="misskey_visibility_specified_description">Only mentioned users can see this toot</string>
+
 </resources>

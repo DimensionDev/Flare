@@ -12,6 +12,8 @@ internal sealed interface Route {
 
     sealed interface ScreenRoute : Route
 
+    sealed interface WindowRoute : Route
+
     @Serializable
     data class Timeline(
         val tabItem: TimelineTabItem,
@@ -132,6 +134,45 @@ internal sealed interface Route {
         val keyword: String,
     ) : ScreenRoute
 
+    @Serializable
+    data class StatusMedia(
+        val accountType: AccountType,
+        val statusKey: MicroBlogKey,
+        val index: Int,
+        val preview: String? = null,
+    ) : WindowRoute
+
+    @Serializable
+    data class RawImage(
+        val rawImage: String,
+    ) : WindowRoute
+
+    data object Compose {
+        @Serializable
+        data class Reply(
+            val accountKey: MicroBlogKey,
+            val statusKey: MicroBlogKey,
+        ) : WindowRoute
+
+        @Serializable
+        data class Quote(
+            val accountKey: MicroBlogKey,
+            val statusKey: MicroBlogKey,
+        ) : WindowRoute
+
+        @Serializable
+        data class New(
+            val accountType: AccountType,
+        ) : WindowRoute
+
+        @Serializable
+        data class VVOReplyComment(
+            val accountKey: MicroBlogKey,
+            val replyTo: MicroBlogKey,
+            val rootId: String,
+        ) : WindowRoute
+    }
+
     companion object {
         public fun parse(url: String): Route? {
             val data = Url(url)
@@ -192,8 +233,7 @@ internal sealed interface Route {
                                 MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
                             val statusKey =
                                 MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-//                            Route.Compose.Reply(accountKey, statusKey)
-                            null
+                            Route.Compose.Reply(accountKey, statusKey)
                         }
 
                         "Quote" -> {
@@ -201,15 +241,13 @@ internal sealed interface Route {
                                 MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
                             val statusKey =
                                 MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-//                            Route.Compose.Quote(accountKey, statusKey)
-                            null
+                            Route.Compose.Quote(accountKey, statusKey)
                         }
 
                         "New" -> {
                             val accountKey =
                                 MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-//                            Route.Compose.New(AccountType.Specific(accountKey))
-                            null
+                            Route.Compose.New(AccountType.Specific(accountKey))
                         }
 
                         else -> null
@@ -217,8 +255,7 @@ internal sealed interface Route {
 
                 "RawImage" -> {
                     val rawImage = data.segments.getOrNull(0) ?: return null
-//                    Route.Media.Image(rawImage, previewUrl = null)
-                    null
+                    Route.RawImage(rawImage)
                 }
 
                 "VVO" ->
@@ -251,8 +288,7 @@ internal sealed interface Route {
                             val replyTo =
                                 MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
                             val rootId = data.segments.getOrNull(3) ?: return null
-//                            Route.Compose.VVOReplyComment(accountKey, replyTo, rootId)
-                            null
+                            Route.Compose.VVOReplyComment(accountKey, replyTo, rootId)
                         }
 
                         else -> null
@@ -337,8 +373,7 @@ internal sealed interface Route {
                     val accountType =
                         accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
                     val preview = data.parameters["preview"]
-//                    Route.Media.StatusMedia(accountType = accountType, statusKey = statusKey, index = index, preview = preview)
-                    null
+                    Route.StatusMedia(accountType = accountType, statusKey = statusKey, index = index, preview = preview)
                 }
 
                 "Podcast" -> {

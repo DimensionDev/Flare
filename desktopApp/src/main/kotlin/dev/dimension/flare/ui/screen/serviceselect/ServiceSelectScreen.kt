@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleQuestion
-import dev.dimension.flare.LocalContentPadding
+import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.bluesky_login_2fa
 import dev.dimension.flare.bluesky_login_oauth_button
@@ -111,7 +111,7 @@ internal fun ServiceSelectScreen(
                 Alignment.CenterHorizontally,
             ),
         verticalItemSpacing = 0.dp,
-        contentPadding = LocalContentPadding.current,
+        contentPadding = LocalWindowPadding.current,
     ) {
         item(
             span = StaggeredGridItemSpan.FullLine,

@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Trash
-import dev.dimension.flare.LocalContentPadding
+import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.isRefreshing
@@ -90,7 +90,7 @@ fun SearchScreen(
         LazyStatusVerticalStaggeredGrid(
             modifier = Modifier.fillMaxSize(),
             state = lazyListState,
-            contentPadding = PaddingValues(vertical = 8.dp) + LocalContentPadding.current,
+            contentPadding = PaddingValues(vertical = 8.dp) + LocalWindowPadding.current,
         ) {
             item(
                 span = StaggeredGridItemSpan.FullLine,

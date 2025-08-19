@@ -31,7 +31,7 @@ import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Lock
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
-import dev.dimension.flare.LocalContentPadding
+import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.add_account
 import dev.dimension.flare.app_name
@@ -127,7 +127,7 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                 Modifier
                     .fillMaxSize()
                     .verticalScroll(scrollState)
-                    .padding(LocalContentPadding.current)
+                    .padding(LocalWindowPadding.current)
                     .padding(horizontal = screenHorizontalPadding),
         ) {
             state.accountState.user

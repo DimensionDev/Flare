@@ -51,7 +51,6 @@ import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabTitle
@@ -90,10 +89,7 @@ import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun FlareApp(
-    onRawImage: (String) -> Unit,
-    onStatusMedia: (AccountType, MicroBlogKey, Int) -> Unit,
-) {
+internal fun FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
     val state by producePresenter { presenter() }
     val uriHandler = LocalUriHandler.current
 
@@ -155,7 +151,13 @@ internal fun FlareApp(
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
-                            onClick = {},
+                            onClick = {
+                                onWindowRoute.invoke(
+                                    Route.Compose.New(
+                                        accountType = AccountType.Specific(user.key),
+                                    ),
+                                )
+                            },
                             modifier =
                                 Modifier
                                     .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -293,26 +295,14 @@ internal fun FlareApp(
             }
             CompositionLocalProvider(
                 LocalUriHandler provides
-                    remember(uriHandler, stackManager, onRawImage, onStatusMedia) {
+                    remember(uriHandler, stackManager, onWindowRoute) {
                         ProxyUriHandler(
                             stackManager = stackManager,
                             actualUriHandler = uriHandler,
-                            onRawImage = onRawImage,
-                            onStatusMedia = onStatusMedia,
+                            onWindowRoute = onWindowRoute,
                         )
                     },
                 LocalScrollToTopRegistry provides state.scrollToTopRegistry,
-                LocalContentPadding provides
-                    if (SystemUtils.IS_OS_MAC) {
-                        PaddingValues(
-                            start = 0.dp,
-                            top = 24.dp,
-                            end = 0.dp,
-                            bottom = 0.dp,
-                        )
-                    } else {
-                        PaddingValues(0.dp)
-                    },
             ) {
                 Layer(
                     modifier = Modifier.fillMaxSize(),
@@ -418,39 +408,22 @@ private fun presenter() =
 private class ProxyUriHandler(
     private val stackManager: StackManager,
     private val actualUriHandler: UriHandler,
-    private val onRawImage: (String) -> Unit,
-    private val onStatusMedia: (AccountType, MicroBlogKey, Int) -> Unit,
+    private val onWindowRoute: (Route.WindowRoute) -> Unit,
 ) : UriHandler {
     override fun openUri(uri: String) {
         if (uri.startsWith("flare://")) {
             val data = Url(uri)
-            when (data.host) {
-                "RawImage" -> {
-                    val rawImage = data.segments.getOrNull(0)
-                    if (rawImage != null) {
-                        onRawImage(rawImage)
-                    }
-                }
 
-                "StatusMedia" -> {
-                    val accountKey = data.parameters["accountKey"]?.let(MicroBlogKey::valueOf)
-                    val statusKey = data.segments.getOrNull(0)?.let(MicroBlogKey::valueOf)
-                    val index = data.segments.getOrNull(1)?.toIntOrNull()
-                    val accountType = accountKey?.let(AccountType::Specific) ?: AccountType.Guest
-                    if (statusKey != null && index != null) {
-                        onStatusMedia(accountType, statusKey, index)
-                    }
+            Route.parse(uri)?.let {
+                if (it is Route.WindowRoute) {
+                    onWindowRoute.invoke(it)
+                } else {
+                    stackManager.push(it)
                 }
-
-                else -> {
-                    Route.parse(uri)?.let {
-                        stackManager.push(it)
-                    } ?: run {
-                        // If the URI does not match any known route, we can handle it as a custom URI scheme
-                        // For example, you might want to log it or show an error
-                        println("Unhandled URI: $uri")
-                    }
-                }
+            } ?: run {
+                // If the URI does not match any known route, we can handle it as a custom URI scheme
+                // For example, you might want to log it or show an error
+                println("Unhandled URI: $uri")
             }
         } else {
             actualUriHandler.openUri(uri)
@@ -474,7 +447,7 @@ private class ScrollToTopRegistry {
     }
 }
 
-val LocalContentPadding =
+val LocalWindowPadding =
     androidx.compose.runtime.staticCompositionLocalOf {
         PaddingValues(0.dp)
     }

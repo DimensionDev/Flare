@@ -13,7 +13,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.dimension.flare.LocalContentPadding
+import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.model.AccountType
@@ -51,7 +51,7 @@ internal fun NotificationScreen(accountType: AccountType) {
             contentPadding =
                 PaddingValues(
                     vertical = 8.dp,
-                ) + LocalContentPadding.current,
+                ) + LocalWindowPadding.current,
             state = listState,
         ) {
             state.state.allTypes.onSuccess { types ->

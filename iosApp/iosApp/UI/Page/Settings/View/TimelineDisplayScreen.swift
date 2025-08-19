@@ -209,6 +209,7 @@ struct TimelineDisplayScreen: View {
         Picker(selection: .init(get: {
             theme.selectedSet.rawValue
         }, set: { value in
+            FlareHapticManager.shared.selection()
             let themeSet = ColorSetName(rawValue: value) ?? ColorSetName.themeLight
             theme.selectedSet = themeSet
 
@@ -287,7 +288,11 @@ struct TimelineDisplayScreen: View {
             .sheet(isPresented: $isFontSelectorPresented, content: { FontPicker() })
 
             VStack {
-                Slider(value: $localValues.fontSizeScale, in: 0.5 ... 1.5, step: 0.1)
+                Slider(value: $localValues.fontSizeScale, in: 0.5 ... 1.5, step: 0.1, onEditingChanged: { editing in
+                    if !editing {
+                        FlareHapticManager.shared.selection()
+                    }
+                })
                 Text("Font Size Scale: \(String(format: "%.1f", localValues.fontSizeScale))")
                     .font(.scaledBody)
             }.alignmentGuide(.listRowSeparatorLeading) { d in
@@ -295,7 +300,11 @@ struct TimelineDisplayScreen: View {
             }
 
             VStack {
-                Slider(value: $localValues.lineSpacing, in: 0.4 ... 10.0, step: 0.2)
+                Slider(value: $localValues.lineSpacing, in: 0.4 ... 10.0, step: 0.2, onEditingChanged: { editing in
+                    if !editing {
+                        FlareHapticManager.shared.selection()
+                    }
+                })
                 Text(
                     "Line Spacing: \(String(format: "%.1f", localValues.lineSpacing))"
                 )

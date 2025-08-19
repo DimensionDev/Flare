@@ -114,6 +114,7 @@ struct AllFeedsView: View {
                             .font(.headline)
 
                         Button("Refresh") {
+                            FlareHapticManager.shared.dataRefresh()
                             emptyState.refresh()
                         }
                         .buttonStyle(.bordered)

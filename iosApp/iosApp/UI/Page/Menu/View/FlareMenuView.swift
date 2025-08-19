@@ -24,6 +24,7 @@ struct FlareMenuView: View {
     var body: some View {
         VStack(spacing: 0) {
             Button(action: {
+                FlareHapticManager.shared.buttonPress()
                 if currentUser != nil {
                     showAccounts = true
                 } else {
@@ -40,6 +41,7 @@ struct FlareMenuView: View {
                 // only show list button when user login
                 if !(accountType is AccountTypeGuest) {
                     Button(action: {
+                        FlareHapticManager.shared.buttonPress()
                         menuState.isCustomTabBarHidden = true
                         router.navigate(to: .lists(accountType: accountType))
                     }) {
@@ -60,6 +62,7 @@ struct FlareMenuView: View {
                     // only show feeds button when user login and platform is Bluesky
                     if currentUser?.isBluesky == true {
                         Button(action: {
+                            FlareHapticManager.shared.buttonPress()
                             menuState.isCustomTabBarHidden = true
                             router.navigate(to: .feeds(accountType: accountType))
                         }) {
@@ -81,6 +84,7 @@ struct FlareMenuView: View {
                     // Message
                     if currentUser?.isXQt == true || currentUser?.isBluesky == true {
                         Button(action: {
+                            FlareHapticManager.shared.buttonPress()
                             menuState.isCustomTabBarHidden = true
                             router.navigate(to: .messages(accountType: accountType))
                         }) {
@@ -101,6 +105,7 @@ struct FlareMenuView: View {
                     // X Spaces
                     if currentUser?.isXQt == true {
                         Button(action: {
+                            FlareHapticManager.shared.buttonPress()
                             menuState.isCustomTabBarHidden = true
                             router.navigate(to: .spaces(accountType: accountType))
                         }) {
@@ -121,6 +126,7 @@ struct FlareMenuView: View {
 
                     // download manager
                     Button(action: {
+                        FlareHapticManager.shared.buttonPress()
                         menuState.isCustomTabBarHidden = true
                         router.navigate(to: .download(accountType: accountType))
                     }) {
@@ -141,6 +147,7 @@ struct FlareMenuView: View {
                     if currentUser?.isMastodon == true || currentUser?.isMisskey == true {
                         Spacer()
                         Button(action: {
+                            FlareHapticManager.shared.buttonPress()
                             menuState.isCustomTabBarHidden = true
                             let host = UserManager.shared.instanceMetadata?.instance.domain ?? currentUser?.key.host ?? ""
                             let platformType = currentUser?.platformType ?? PlatformType.mastodon
@@ -288,6 +295,7 @@ struct FlareMenuView: View {
 
     private var settingsButton: some View {
         Button(action: {
+            FlareHapticManager.shared.buttonPress()
             FlareLog.debug("Tab switched to: menu setting")
 
             showSettings = true

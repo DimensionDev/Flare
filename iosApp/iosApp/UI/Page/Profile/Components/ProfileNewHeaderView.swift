@@ -501,7 +501,8 @@ class ProfileNewHeaderView: UIView {
     @objc private func handleFollowButtonTap() {
         os_log("[ProfileNewHeaderView] Follow button tapped", log: .default, type: .debug)
 
-        // 直接调用回调，传递 relation
+        FlareHapticManager.shared.buttonPress()
+
         if let relation = userInfo?.relation {
             onFollowClick?(relation)
         }

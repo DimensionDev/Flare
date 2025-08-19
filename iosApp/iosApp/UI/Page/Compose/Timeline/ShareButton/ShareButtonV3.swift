@@ -86,7 +86,10 @@ struct ShareButtonV3: View, Equatable {
         if !isInCaptureMode {
             Menu {
                 if isMenuContentReady {
-                    LazyMoreMenuContent(item: item, onMoreAction: onMoreAction)
+                    LazyMoreMenuContent(item: item, onMoreAction: { action in
+                        FlareHapticManager.shared.buttonPress()
+                        onMoreAction(action)
+                    })
                 } else {
                     Button("") {}
                         .onAppear {

@@ -69,10 +69,10 @@ struct AppBarSettingRow: View {
                         },
                         set: { _ in
                             if !isProcessing {
+                                FlareHapticManager.shared.selection()
                                 isProcessing = true
                                 FlareLog.debug("Toggle SET: tab=\(tab.key), 开始切换状态")
                                 store.toggleTab(tab.key)
-                                // 设置短暂延迟避免频繁操作
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                     isProcessing = false
                                     FlareLog.debug("Toggle SET: tab=\(tab.key), 切换完成")
@@ -168,6 +168,7 @@ struct ListTabItemRowRow: View {
                     },
                     set: { _ in
                         if !isProcessing {
+                            FlareHapticManager.shared.selection()
                             isProcessing = true
                             let tabKey = isBlueskyFeed ?
                                 "feed_\(store.accountType)_\(listId)" :

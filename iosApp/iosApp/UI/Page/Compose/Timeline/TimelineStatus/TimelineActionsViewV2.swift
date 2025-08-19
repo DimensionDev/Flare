@@ -37,6 +37,7 @@ struct TimelineActionsViewV2: View, Equatable {
                 isActive: false,
                 activeColor: .blue
             ) {
+                FlareHapticManager.shared.buttonPress()
                 handleReplyAction()
             }
             .frame(maxWidth: .infinity)
@@ -47,6 +48,7 @@ struct TimelineActionsViewV2: View, Equatable {
                 isActive: item.isRetweeted,
                 activeColor: .green
             ) {
+                FlareHapticManager.shared.buttonPress()
                 handleRetweetAction()
             }
             .frame(maxWidth: .infinity)
@@ -64,6 +66,7 @@ struct TimelineActionsViewV2: View, Equatable {
                 isActive: item.isLiked,
                 activeColor: .red
             ) {
+                FlareHapticManager.shared.buttonPress()
                 handleLikeAction()
             }
             .frame(maxWidth: .infinity)
@@ -76,6 +79,7 @@ struct TimelineActionsViewV2: View, Equatable {
                 isActive: item.isBookmarked,
                 activeColor: .orange
             ) {
+                FlareHapticManager.shared.buttonPress()
                 handleBookmarkAction()
             }
             .frame(maxWidth: .infinity)

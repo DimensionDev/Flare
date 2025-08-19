@@ -12,7 +12,7 @@ import java.util.function.Consumer
 private val detector = OsThemeDetector.getDetector()
 
 @Composable
-internal fun isDarkTheme(): Boolean {
+internal fun isSystemInDarkTheme(): Boolean {
     var isDarkTheme by remember {
         mutableStateOf(detector.isDark)
     }

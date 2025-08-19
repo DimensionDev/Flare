@@ -7,11 +7,15 @@ import androidx.compose.foundation.interaction.FocusInteraction
 import androidx.compose.foundation.interaction.HoverInteraction
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
@@ -19,6 +23,13 @@ import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.node.invalidateDraw
 import androidx.compose.ui.window.FrameWindowScope
+import dev.dimension.flare.data.model.AppSettings
+import dev.dimension.flare.data.model.AppearanceSettings
+import dev.dimension.flare.data.model.AvatarShape
+import dev.dimension.flare.data.model.LocalAppearanceSettings
+import dev.dimension.flare.data.model.Theme
+import dev.dimension.flare.data.model.VideoAutoplay
+import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import io.github.composefluent.ExperimentalFluentApi
@@ -27,6 +38,7 @@ import io.github.composefluent.darkColors
 import io.github.composefluent.lightColors
 import kotlinx.coroutines.launch
 import org.apache.commons.lang3.SystemUtils
+import org.koin.compose.koinInject
 
 @OptIn(ExperimentalFluentApi::class)
 @Composable
@@ -43,17 +55,6 @@ internal fun FrameWindowScope.FlareTheme(
                 lightColors()
             },
     ) {
-//        val micaBase = FluentTheme.colors.background.mica.base
-//        LaunchedEffect(window, isDarkTheme) {
-//            WindowStyleManager(
-//                window = window,
-//                isDarkTheme = isDarkTheme,
-//                frameStyle =
-//                    WindowFrameStyle(
-//                        titleBarColor = micaBase,
-//                    ),
-//            )
-//        }
         if (SystemUtils.IS_OS_MAC) {
             LaunchedEffect(window) {
                 window.rootPane.apply {
@@ -69,10 +70,6 @@ internal fun FrameWindowScope.FlareTheme(
                 FluentIndication(
                     hover = Color.Transparent,
                     pressed = Color.Transparent,
-                ),
-            LocalComponentAppearance provides
-                ComponentAppearance(
-                    videoAutoplay = ComponentAppearance.VideoAutoplay.ALWAYS,
                 ),
         ) {
             Box(
@@ -157,4 +154,51 @@ private class FluentIndication(
             }
         }
     }
+}
+
+@Composable
+private fun isDarkTheme(): Boolean =
+    LocalAppearanceSettings.current.theme == Theme.DARK ||
+        (LocalAppearanceSettings.current.theme == Theme.SYSTEM && isSystemInDarkTheme())
+
+@Composable
+internal fun ProvideThemeSettings(content: @Composable () -> Unit) {
+    val settingsRepository = koinInject<SettingsRepository>()
+    val appearanceSettings by settingsRepository.appearanceSettings.collectAsState(
+        AppearanceSettings(),
+    )
+    val appSettings by settingsRepository.appSettings.collectAsState(AppSettings(""))
+    CompositionLocalProvider(
+        LocalAppearanceSettings provides appearanceSettings,
+        LocalComponentAppearance provides
+            remember(appearanceSettings, appSettings.aiConfig) {
+                ComponentAppearance(
+                    dynamicTheme = appearanceSettings.dynamicTheme,
+                    avatarShape =
+                        when (appearanceSettings.avatarShape) {
+                            AvatarShape.CIRCLE -> ComponentAppearance.AvatarShape.CIRCLE
+                            AvatarShape.SQUARE -> ComponentAppearance.AvatarShape.SQUARE
+                        },
+                    showActions = appearanceSettings.showActions,
+                    showNumbers = appearanceSettings.showNumbers,
+                    showLinkPreview = appearanceSettings.showLinkPreview,
+                    showMedia = appearanceSettings.showMedia,
+                    showSensitiveContent = appearanceSettings.showSensitiveContent,
+                    videoAutoplay =
+                        when (appearanceSettings.videoAutoplay) {
+                            VideoAutoplay.ALWAYS -> ComponentAppearance.VideoAutoplay.ALWAYS
+                            VideoAutoplay.WIFI -> ComponentAppearance.VideoAutoplay.WIFI
+                            VideoAutoplay.NEVER -> ComponentAppearance.VideoAutoplay.NEVER
+                        },
+                    expandMediaSize = appearanceSettings.expandMediaSize,
+                    compatLinkPreview = appearanceSettings.compatLinkPreview,
+                    aiConfig =
+                        ComponentAppearance.AiConfig(
+                            translation = appSettings.aiConfig.translation,
+                            tldr = appSettings.aiConfig.tldr,
+                        ),
+                )
+            },
+        content = content,
+    )
 }

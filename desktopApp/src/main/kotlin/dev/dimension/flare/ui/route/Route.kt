@@ -114,6 +114,11 @@ internal sealed interface Route {
         val userKey: MicroBlogKey,
     ) : FloatingRoute
 
+    @Serializable
+    data class AltText(
+        val text: String,
+    ) : FloatingRoute
+
     companion object {
         public fun parse(url: String): Route? {
             val data = Url(url)
@@ -322,7 +327,7 @@ internal sealed interface Route {
 
                 "AltText" -> {
                     val text = data.segments.getOrNull(0) ?: return null
-//                    Route.Status.AltText(text)
+//                    Route.AltText(text)
                     null
                 }
 

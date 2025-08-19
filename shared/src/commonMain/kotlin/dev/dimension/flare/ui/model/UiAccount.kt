@@ -56,6 +56,7 @@ public sealed class UiAccount {
                         accountKey = accountKey,
                         instance = instance,
                     )
+
                 Credential.ForkType.Pleroma ->
                     PleromaDataSource(
                         accountKey = accountKey,

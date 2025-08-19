@@ -38,4 +38,7 @@ internal actual fun Modifier.placeholder(
         )
     }
 
-public fun Modifier.placeholder(visible: Boolean): Modifier = placeholder(visible, Color.Unspecified)
+public fun Modifier.placeholder(
+    visible: Boolean,
+    shape: Shape? = null,
+): Modifier = placeholder(visible, Color.Unspecified, shape = shape)

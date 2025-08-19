@@ -118,25 +118,20 @@ internal fun FlareApp(
             Column(
                 modifier =
                     Modifier
+                        .background(
+                            FluentTheme.colors.background.layerOnMicaBaseAlt.secondary,
+                        ).fillMaxHeight()
+                        .width(72.dp)
+                        .verticalScroll(rememberScrollState())
+                        .padding(top = 16.dp)
                         .let {
                             if (SystemUtils.IS_OS_MAC) {
                                 it.padding(top = 24.dp)
                             } else {
                                 it
                             }
-                        }.background(
-                            FluentTheme.colors.background.layerOnMicaBaseAlt.secondary,
-                        ).fillMaxHeight()
-                        .width(72.dp)
-                        .verticalScroll(rememberScrollState()),
+                        },
             ) {
-                NavigationDefaults.BackButton(
-                    onClick = {
-                        goBack()
-                    },
-                    disabled = !stackManager.canGoBack,
-                    modifier = Modifier.fillMaxWidth(),
-                )
                 state.user
                     .onSuccess { user ->
                         SubtleButton(
@@ -179,10 +174,13 @@ internal fun FlareApp(
                             },
                             modifier =
                                 Modifier
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    .padding(vertical = 4.dp)
                                     .fillMaxWidth(),
                         ) {
                             Column(
+                                modifier =
+                                    Modifier
+                                        .padding(vertical = 4.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
                                 verticalArrangement = Arrangement.spacedBy(4.dp),
                             ) {
@@ -321,9 +319,20 @@ internal fun FlareApp(
                     shape = RoundedCornerShape(0),
                     border = null,
                 ) {
-                    Router(
-                        manager = stackManager,
-                    )
+                    Box {
+                        Router(
+                            manager = stackManager,
+                        )
+                        if (stackManager.canGoBack) {
+                            NavigationDefaults.BackButton(
+                                onClick = {
+                                    goBack()
+                                },
+                                disabled = !stackManager.canGoBack,
+                                modifier = Modifier.align(Alignment.TopStart),
+                            )
+                        }
+                    }
                 }
             }
         }

@@ -1,9 +1,11 @@
 package dev.dimension.flare.ui.route
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import dev.dimension.flare.data.model.Bluesky.FeedTabItem
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.IconType.Material
@@ -18,6 +20,7 @@ import dev.dimension.flare.ui.screen.home.ProfileScreen
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 import dev.dimension.flare.ui.screen.list.AllListScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
+import dev.dimension.flare.ui.screen.settings.SettingsScreen
 import dev.dimension.flare.ui.screen.status.StatusScreen
 import dev.dimension.flare.ui.screen.status.VVOCommentScreen
 import dev.dimension.flare.ui.screen.status.VVOStatusScreen
@@ -26,6 +29,7 @@ import dev.dimension.flare.ui.screen.status.action.BlueskyReportStatusDialog
 import dev.dimension.flare.ui.screen.status.action.DeleteStatusConfirmDialog
 import dev.dimension.flare.ui.screen.status.action.MastodonReportDialog
 import dev.dimension.flare.ui.screen.status.action.MisskeyReportDialog
+import io.github.composefluent.component.Flyout
 import io.github.composefluent.component.Text
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -137,7 +141,11 @@ internal fun Router(
                     }
 
                     Route.Settings -> {
-                        Text("route")
+                        SettingsScreen(
+                            toLogin = {
+                                navigate(Route.ServiceSelect)
+                            },
+                        )
                     }
 
                     is Route.Timeline -> {
@@ -207,6 +215,20 @@ internal fun Router(
                         onBack = ::onBack,
                         userKey = entry.route.userKey,
                     )
+                }
+
+                is Route.AltText -> {
+                    Flyout(
+                        visible = true,
+                        onDismissRequest = {
+                            onBack()
+                        },
+                    ) {
+                        Text(
+                            text = entry.route.text,
+                            modifier = Modifier.padding(16.dp),
+                        )
+                    }
                 }
             }
         }

@@ -133,7 +133,12 @@ internal fun ProfileScreen(
                         } else {
                             0.dp
                         },
-                ) + LocalContentPadding.current,
+                ) +
+                    if (isBigScreen) {
+                        LocalContentPadding.current
+                    } else {
+                        PaddingValues()
+                    },
             state = listState,
         ) {
             if (!isBigScreen) {

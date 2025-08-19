@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -39,6 +40,7 @@ import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.Res
 import dev.dimension.flare.ui.component.platform.PlatformCircularProgressIndicator
+import dev.dimension.flare.ui.component.platform.PlatformFlyoutContainer
 import dev.dimension.flare.ui.component.platform.PlatformIconButton
 import dev.dimension.flare.ui.component.platform.PlatformText
 import dev.dimension.flare.ui.component.platform.PlatformVideoPlayer
@@ -112,24 +114,42 @@ internal fun StatusMediaComponent(
                             )
                         }
                         if (!media.description.isNullOrEmpty()) {
-                            PlatformText(
-                                text = "ALT",
+                            PlatformFlyoutContainer(
                                 modifier =
                                     Modifier
-                                        .padding(16.dp)
-                                        .align(Alignment.BottomEnd)
-                                        .background(
-                                            color = Color.Black.copy(alpha = 0.75f),
-                                            shape = PlatformTheme.shapes.medium,
-                                        ).padding(
-                                            horizontal = 8.dp,
-                                            vertical = 2.dp,
-                                        ).clickable {
-                                            media.description?.let {
-                                                uriHandler.openUri(AppDeepLink.AltText(it))
-                                            }
-                                        },
-                                color = Color.White,
+                                        .align(Alignment.BottomEnd),
+                                content = { requestShowFlyout ->
+                                    PlatformText(
+                                        text = "ALT",
+                                        modifier =
+                                            Modifier
+                                                .pointerHoverIcon(PointerIcon.Hand)
+                                                .padding(16.dp)
+                                                .background(
+                                                    color = Color.Black.copy(alpha = 0.75f),
+                                                    shape = PlatformTheme.shapes.medium,
+                                                ).padding(
+                                                    horizontal = 8.dp,
+                                                    vertical = 2.dp,
+                                                ).clickable {
+                                                    if (!requestShowFlyout.invoke()) {
+                                                        media.description?.let {
+                                                            uriHandler.openUri(AppDeepLink.AltText(it))
+                                                        }
+                                                    }
+                                                },
+                                        color = Color.White,
+                                    )
+                                },
+                                flyout = {
+                                    PlatformText(
+                                        text = media.description ?: "",
+                                        modifier =
+                                            Modifier
+                                                .padding(8.dp)
+                                                .widthIn(max = 240.dp),
+                                    )
+                                },
                             )
                         }
                     }

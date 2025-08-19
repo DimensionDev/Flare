@@ -32,8 +32,10 @@ dependencies {
     implementation(libs.ksoup)
     implementation(platform(libs.koin.bom))
     implementation(libs.koin.core)
+    implementation(libs.koin.compose)
     implementation(libs.commons.lang3)
     implementation(libs.zoomable)
+    implementation(libs.datastore)
 }
 
 compose.desktop {

@@ -123,5 +123,93 @@
     <string name="bluesky_login_username">Username</string>
     <string name="bluesky_login_password">Password</string>
     <string name="bluesky_login_2fa">Two-factor authentication code</string>
+    <string name="bluesky_login_oauth_button">Login with OAuth</string>
+    <string name="bluesky_login_use_password_button">Use Password</string>
+    <string name="bluesky_login_oauth_hint">Bluesky OAuth might not stable enough, please use password login if you encounter any issues.</string>
 
+    <string name="login_expired">Login session expired</string>
+    <string name="login_expired_message">Click to login again</string>
+    <string name="login_expired_relogin">Login again</string>
+    <string name="account_item_error_title">Error</string>
+    <string name="account_item_error_message">Failed to load account</string>
+    <string name="add_account">Add account</string>
+    <string name="remove_account">Remove account</string>
+
+    <string name="settings_accounts_title">Account Management</string>
+    <string name="settings_appearance_title">Appearance</string>
+    <string name="settings_status_appearance_title">Status Appearance</string>
+    <string name="settings_status_appearance_subtitle">Customize the appearance of status</string>
+    <string name="settings_appearance_subtitle">Customize the look and feel of Flare</string>
+    <string name="settings_storage_title">Storage</string>
+    <string name="settings_storage_subtitle">Manage Flare\'s storage</string>
+    <string name="settings_about_title">About</string>
+    <string name="settings_about_subtitle">Learn more about Flare</string>
+    <string name="settings_side_panel">Side Panel customization</string>
+    <string name="settings_side_panel_description">Customize the side panel</string>
+    <string name="settings_local_filter_title">Local filter</string>
+    <string name="settings_local_filter_description">Local filter settings for timeline</string>
+    <string name="settings_guest_setting_title">Guest Mode Host</string>
+    <string name="settings_guest_setting_description">Set the host for guest mode</string>
+    <string name="settings_local_history_title">Local history</string>
+    <string name="settings_local_history_description">View or search your browsing history</string>
+    <string name="settings_app_logging_title">App logging</string>
+    <string name="settings_app_logging_save">Save log</string>
+    <string name="settings_app_logging_clear">Clear log</string>
+    <string name="settings_app_logging_enable_network_logging">Enable network logging</string>
+    <string name="settings_ai_config_title">AI Configuration</string>
+    <string name="settings_ai_config_description">Configure AI settings</string>
+    <string name="settings_ai_config_server">Server URL</string>
+    <string name="settings_ai_config_server_hint">Enter the server URL</string>
+    <string name="settings_ai_config_server_self_host_description">You can use the official server or self-host your own server</string>
+    <string name="settings_ai_config_entable_translation">Enable AI translation</string>
+    <string name="settings_ai_config_translation_description">Replace Google Translate with AI translation, might take longer time</string>
+    <string name="settings_ai_config_enable_tldr">Enable AI Summarization</string>
+    <string name="settings_ai_config_tldr_description">Enable AI summarization for long posts, only available in post that longer than 500 characters</string>
+
+
+    <string name="settings_appearance_generic">Generic</string>
+
+    <string name="settings_appearance_show_actions">Show actions</string>
+    <string name="settings_appearance_show_actions_description">Show actions on the bottom of the status</string>
+    <string name="settings_appearance_show_media">Show media</string>
+    <string name="settings_appearance_show_media_description">Show media in the status</string>
+    <string name="settings_appearance_show_numbers">Show numbers</string>
+    <string name="settings_appearance_show_numbers_description">Show numbers on the bottom of the status</string>
+    <string name="settings_appearance_show_cw_img">Show sensitive content</string>
+    <string name="settings_appearance_show_cw_img_description">Always show sensitive content in the status</string>
+    <string name="settings_appearance_expand_media">Expand media to full size</string>
+    <string name="settings_appearance_expand_media_description">Keep the aspectradio of the media in timeline</string>
+    <string name="settings_appearance_video_autoplay">Video autoplay</string>
+    <string name="settings_appearance_video_autoplay_description">Automatically play videos in the status</string>
+    <string name="settings_appearance_video_autoplay_wifi">Wi-Fi only</string>
+    <string name="settings_appearance_video_autoplay_always">Always</string>
+    <string name="settings_appearance_video_autoplay_never">Never</string>
+    <string name="settings_appearance_avatar_shape">Avatar shape</string>
+    <string name="settings_appearance_avatar_shape_description">Change the shape of the avatar</string>
+    <string name="settings_appearance_avatar_shape_round">Round</string>
+    <string name="settings_appearance_avatar_shape_square">Square</string>
+    <string name="settings_appearance_theme">Theme</string>
+    <string name="settings_appearance_theme_description">Change the theme of the app</string>
+    <string name="settings_appearance_theme_light">Light</string>
+    <string name="settings_appearance_theme_dark">Dark</string>
+    <string name="settings_appearance_theme_auto">Auto</string>
+    <string name="settings_appearance_dynamic_theme">Dynamic theme</string>
+    <string name="settings_appearance_dynamic_theme_description">Change the theme of the app based on the device\'s wallpaper</string>
+    <string name="settings_appearance_show_link_previews">Show link previews</string>
+    <string name="settings_appearance_show_link_previews_description">Show link previews in the status</string>
+    <string name="settings_appearance_compat_link_previews">Simplify link previews</string>
+    <string name="settings_appearance_compat_link_previews_description">Show link previews in simplify mode in the status</string>
+    <string name="settings_appearance_theme_color">Theme color</string>
+    <string name="settings_appearance_theme_color_description">Change the theme color of the app</string>
+    <string name="settings_appearance_theme_pure_color">High contrast Mode</string>
+    <string name="settings_appearance_theme_pure_color_description">Increase contrast between background and text</string>
+
+    <string name="settings_about_source_code">Source code</string>
+    <string name="settings_about_telegram">Telegram</string>
+    <string name="settings_about_telegram_description">Join our Telegram group</string>
+    <string name="settings_about_line" translatable="false">Line</string>
+    <string name="settings_about_line_description">Join our Line group</string>
+    <string name="settings_about_localization">Crowdin</string>
+    <string name="settings_about_localization_description">Help us translate Flare</string>
+    <string name="settings_privacy_policy">Privacy Policy</string>
 </resources>

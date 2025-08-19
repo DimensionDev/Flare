@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.LocalContentPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
 import dev.dimension.flare.data.datasource.microblog.ProfileTab
@@ -35,6 +36,7 @@ import dev.dimension.flare.profile_tab_media
 import dev.dimension.flare.profile_tab_timeline
 import dev.dimension.flare.profile_tab_timeline_with_reply
 import dev.dimension.flare.ui.common.items
+import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.ComponentAppearance
 import dev.dimension.flare.ui.component.LocalComponentAppearance
 import dev.dimension.flare.ui.component.ProfileHeader
@@ -87,6 +89,7 @@ internal fun ProfileScreen(
             Column(
                 modifier =
                     Modifier
+                        .padding(LocalContentPadding.current)
                         .padding(
                             vertical = 16.dp,
                         ).padding(
@@ -130,7 +133,7 @@ internal fun ProfileScreen(
                         } else {
                             0.dp
                         },
-                ),
+                ) + LocalContentPadding.current,
             state = listState,
         ) {
             if (!isBigScreen) {

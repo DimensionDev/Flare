@@ -17,11 +17,13 @@ import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.Trash
+import dev.dimension.flare.LocalContentPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.feeds_discover_feeds_title
 import dev.dimension.flare.feeds_my_feeds_title
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.common.items
+import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.UiListItem
 import dev.dimension.flare.ui.component.platform.PlatformListItem
@@ -55,7 +57,7 @@ internal fun FeedListScreen(
             contentPadding =
                 PaddingValues(
                     vertical = 8.dp,
-                ),
+                ) + LocalContentPadding.current,
             modifier =
                 Modifier
                     .fillMaxSize(),

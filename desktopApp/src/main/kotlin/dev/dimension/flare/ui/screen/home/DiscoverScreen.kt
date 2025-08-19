@@ -19,10 +19,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.LocalContentPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.onLoading
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.platform.placeholder
 import dev.dimension.flare.ui.component.status.CommonStatusHeaderComponent
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -51,7 +53,7 @@ internal fun DiscoverScreen(accountType: AccountType) {
     LazyStatusVerticalStaggeredGrid(
         modifier = Modifier.fillMaxSize(),
         state = lazyListState,
-        contentPadding = PaddingValues(vertical = 8.dp),
+        contentPadding = PaddingValues(vertical = 8.dp) + LocalContentPadding.current,
     ) {
         if (true) {
             state.users

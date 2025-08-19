@@ -61,24 +61,25 @@ internal class StackManager(
             ),
         )
 
-    private var _current by
+    private var currentEntry by
         mutableStateOf(
             stack.last(),
         )
 
-    val current: Route
-        get() = _current.route
+    val currentRoute: Route
+        get() = currentEntry.route
 
-    val currentEntry: Entry
-        get() = _current
+    var currentScreenEntry: Entry by mutableStateOf(currentEntry)
+        private set
 
-    private var _canGoBack by mutableStateOf(false)
+    var currentFloatingEntry: Entry? by mutableStateOf(null)
+        private set
 
-    val canGoBack: Boolean
-        get() = _canGoBack
+    var canGoBack: Boolean by mutableStateOf(false)
+        private set
 
     fun push(route: Route) {
-        if (current == route) {
+        if (currentRoute == route) {
             return
         }
         if (route in topLevelRoutes) {
@@ -126,17 +127,19 @@ internal class StackManager(
     }
 
     private fun updateEntry() {
-        if (stack.isNotEmpty()) {
-            _current = stack.last()
-        } else {
-            _current =
+        currentEntry =
+            if (stack.isNotEmpty()) {
+                stack.last()
+            } else {
                 Entry(
                     route = startRoute,
                     viewModelStoreProvider = navControllerViewModel,
                     savableStateHolder = savableStateHolder,
                 )
-        }
-        _canGoBack = stack.size > 1
+            }
+        canGoBack = stack.any { it.route !in topLevelRoutes }
+        currentScreenEntry = stack.last { it.route is Route.ScreenRoute }
+        currentFloatingEntry = stack.lastOrNull { it.route is Route.FloatingRoute }
     }
 
     fun clear() {

@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.AnglesUp
+import dev.dimension.flare.LocalContentPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.PagingState
@@ -35,6 +36,7 @@ import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.home_timeline_new_toots
+import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
@@ -72,7 +74,7 @@ internal fun TimelineScreen(tabItem: TimelineTabItem) {
             contentPadding =
                 PaddingValues(
                     vertical = 8.dp,
-                ),
+                ) + LocalContentPadding.current,
             state = listState,
         ) {
             status(state.listState)

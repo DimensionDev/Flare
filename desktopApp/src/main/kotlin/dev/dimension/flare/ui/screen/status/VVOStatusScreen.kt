@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.FileCircleExclamation
+import dev.dimension.flare.LocalContentPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.model.AccountType
@@ -31,6 +32,7 @@ import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.status_detail_comment
 import dev.dimension.flare.status_detail_repost
 import dev.dimension.flare.status_loadmore_error_retry
+import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
@@ -56,7 +58,6 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 internal fun VVOStatusScreen(
     statusKey: MicroBlogKey,
-    onBack: () -> Unit,
     accountType: AccountType,
 ) {
     val state by producePresenter(key = "status_detail_${statusKey}_$accountType") {
@@ -75,9 +76,15 @@ internal fun VVOStatusScreen(
                     Modifier
                         .verticalScroll(rememberScrollState())
                         .width(432.dp)
-                        .padding(PaddingValues(horizontal = screenHorizontalPadding)),
+                        .padding(PaddingValues(horizontal = screenHorizontalPadding))
+                        .padding(LocalContentPadding.current),
             )
-            LazyStatusVerticalStaggeredGrid {
+            LazyStatusVerticalStaggeredGrid(
+                contentPadding =
+                    PaddingValues(
+                        vertical = 8.dp,
+                    ) + LocalContentPadding.current,
+            ) {
                 reactionContent(
                     comment = state.comment,
                     repost = state.repost,
@@ -87,7 +94,12 @@ internal fun VVOStatusScreen(
             }
         }
     } else {
-        LazyStatusVerticalStaggeredGrid {
+        LazyStatusVerticalStaggeredGrid(
+            contentPadding =
+                PaddingValues(
+                    vertical = 8.dp,
+                ) + LocalContentPadding.current,
+        ) {
             item {
                 StatusContent(statusState = state.status, detailStatusKey = statusKey)
             }

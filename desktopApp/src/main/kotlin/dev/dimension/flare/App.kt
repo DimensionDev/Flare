@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -84,6 +86,7 @@ import io.ktor.http.Url
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
+import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -101,7 +104,7 @@ internal fun FlareApp(
                 key = tabs,
                 topLevelRoutes = tabs.all.map { getRoute(it.tabItem) },
             )
-        val currentRoute = stackManager.current
+        val currentRoute = stackManager.currentRoute
 
         fun navigate(route: Route) {
             stackManager.push(route)
@@ -115,7 +118,13 @@ internal fun FlareApp(
             Column(
                 modifier =
                     Modifier
-                        .background(
+                        .let {
+                            if (SystemUtils.IS_OS_MAC) {
+                                it.padding(top = 24.dp)
+                            } else {
+                                it
+                            }
+                        }.background(
                             FluentTheme.colors.background.layerOnMicaBaseAlt.secondary,
                         ).fillMaxHeight()
                         .width(72.dp)
@@ -294,9 +303,23 @@ internal fun FlareApp(
                         )
                     },
                 LocalScrollToTopRegistry provides state.scrollToTopRegistry,
+                LocalContentPadding provides
+                    if (SystemUtils.IS_OS_MAC) {
+                        PaddingValues(
+                            start = 0.dp,
+                            top = 24.dp,
+                            end = 0.dp,
+                            bottom = 0.dp,
+                        )
+                    } else {
+                        PaddingValues(0.dp)
+                    },
             ) {
                 Layer(
                     modifier = Modifier.fillMaxSize(),
+                    color = FluentTheme.colors.background.mica.base,
+                    shape = RoundedCornerShape(0),
+                    border = null,
                 ) {
                     Router(
                         manager = stackManager,
@@ -440,6 +463,11 @@ private class ScrollToTopRegistry {
         callbacks.forEach { it.invoke() }
     }
 }
+
+val LocalContentPadding =
+    androidx.compose.runtime.staticCompositionLocalOf {
+        PaddingValues(0.dp)
+    }
 
 private val LocalScrollToTopRegistry =
     androidx.compose.runtime.staticCompositionLocalOf<ScrollToTopRegistry?> {

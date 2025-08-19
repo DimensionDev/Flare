@@ -8,55 +8,111 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal sealed interface Route {
+    sealed interface FloatingRoute : Route
+
+    sealed interface ScreenRoute : Route
+
     @Serializable
     data class Timeline(
         val tabItem: TimelineTabItem,
-    ) : Route
+    ) : ScreenRoute
 
     @Serializable
     data class Discover(
         val accountType: AccountType,
-    ) : Route
+    ) : ScreenRoute
 
     @Serializable
     data class Notification(
         val accountType: AccountType,
-    ) : Route
+    ) : ScreenRoute
 
     @Serializable
-    data object Settings : Route
+    data object Settings : ScreenRoute
 
     @Serializable
-    data object Rss : Route
+    data object Rss : ScreenRoute
 
     @Serializable
     data class Profile(
         val accountType: AccountType,
         val userKey: MicroBlogKey,
-    ) : Route
+    ) : ScreenRoute
 
     @Serializable
     data class MeRoute(
         val accountType: AccountType,
-    ) : Route
+    ) : ScreenRoute
 
     @Serializable
-    data object ServiceSelect : Route
+    data object ServiceSelect : ScreenRoute
 
     @Serializable
     data class AllLists(
         val accountType: AccountType,
-    ) : Route
+    ) : ScreenRoute
 
     @Serializable
     data class BlueskyFeeds(
         val accountType: AccountType,
-    ) : Route
+    ) : ScreenRoute
 
     @Serializable
     data class DirectMessage(
         val accountType: AccountType,
-    ) : Route
+    ) : ScreenRoute
+
+    @Serializable
+    data class StatusDetail(
+        val accountType: AccountType,
+        val statusKey: MicroBlogKey,
+    ) : ScreenRoute
+
+    data object VVO {
+        @Serializable
+        data class StatusDetail(
+            val accountType: AccountType,
+            val statusKey: MicroBlogKey,
+        ) : ScreenRoute
+
+        @Serializable
+        data class CommentDetail(
+            val accountType: AccountType,
+            val statusKey: MicroBlogKey,
+        ) : ScreenRoute
+    }
+
+    @Serializable
+    data class AddReaction(
+        val accountType: AccountType,
+        val statusKey: MicroBlogKey,
+    ) : FloatingRoute
+
+    @Serializable
+    data class DeleteStatus(
+        val accountType: AccountType,
+        val statusKey: MicroBlogKey,
+    ) : FloatingRoute
+
+    @Serializable
+    data class BlueskyReport(
+        val accountType: AccountType,
+        val statusKey: MicroBlogKey,
+    ) : FloatingRoute
+
+    @Serializable
+    data class MastodonReport(
+        val accountType: AccountType,
+        val statusKey: MicroBlogKey,
+        val userKey: MicroBlogKey,
+    ) : FloatingRoute
+
+    @Serializable
+    data class MisskeyReport(
+        val accountType: AccountType,
+        val statusKey: MicroBlogKey,
+        val userKey: MicroBlogKey,
+    ) : FloatingRoute
 
     companion object {
         public fun parse(url: String): Route? {
@@ -77,7 +133,8 @@ internal sealed interface Route {
                 "Search" -> {
                     val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
                     val keyword = data.segments.getOrNull(0) ?: return null
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
+                    val accountType =
+                        accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
 //                    Route.Search(accountType, keyword)
                     null
                 }
@@ -85,7 +142,8 @@ internal sealed interface Route {
                 "Profile" -> {
                     val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
                     val userKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
+                    val accountType =
+                        accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
                     Route.Profile(accountType, userKey)
                 }
 
@@ -93,7 +151,8 @@ internal sealed interface Route {
                     val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
                     val userName = data.segments.getOrNull(0) ?: return null
                     val host = data.segments.getOrNull(1) ?: return null
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
+                    val accountType =
+                        accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
 //                    Route.Profile.UserNameWithHost(accountType, userName, host)
                     null
                 }
@@ -101,29 +160,34 @@ internal sealed interface Route {
                 "StatusDetail" -> {
                     val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
                     val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
-//                    Route.Status.Detail(statusKey, accountType)
-                    null
+                    val accountType =
+                        accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
+                    Route.StatusDetail(statusKey = statusKey, accountType = accountType)
                 }
 
                 "Compose" ->
                     when (data.segments.getOrNull(0)) {
                         "Reply" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
+                            val accountKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
+                            val statusKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
 //                            Route.Compose.Reply(accountKey, statusKey)
                             null
                         }
 
                         "Quote" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
+                            val accountKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
+                            val statusKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
 //                            Route.Compose.Quote(accountKey, statusKey)
                             null
                         }
 
                         "New" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
+                            val accountKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
 //                            Route.Compose.New(AccountType.Specific(accountKey))
                             null
                         }
@@ -140,22 +204,32 @@ internal sealed interface Route {
                 "VVO" ->
                     when (data.segments.getOrNull(0)) {
                         "StatusDetail" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-//                            Route.Status.VVOStatus(statusKey, AccountType.Specific(accountKey))
-                            null
+                            val accountKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
+                            val statusKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
+                            Route.VVO.StatusDetail(
+                                statusKey = statusKey,
+                                accountType = AccountType.Specific(accountKey),
+                            )
                         }
 
                         "CommentDetail" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-//                            Route.Status.VVOComment(statusKey, AccountType.Specific(accountKey))
-                            null
+                            val accountKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
+                            val statusKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
+                            Route.VVO.CommentDetail(
+                                statusKey = statusKey,
+                                accountType = AccountType.Specific(accountKey),
+                            )
                         }
 
                         "ReplyToComment" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val replyTo = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
+                            val accountKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
+                            val replyTo =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
                             val rootId = data.segments.getOrNull(3) ?: return null
 //                            Route.Compose.VVOReplyComment(accountKey, replyTo, rootId)
                             null
@@ -167,24 +241,23 @@ internal sealed interface Route {
                 "DeleteStatus" -> {
                     val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
                     val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-//                    Route.Status.DeleteConfirm(statusKey, AccountType.Specific(accountKey))
-                    null
+                    Route.DeleteStatus(statusKey = statusKey, accountType = AccountType.Specific(accountKey))
                 }
 
                 "AddReaction" -> {
                     val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
                     val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-//                    Route.Status.AddReaction(statusKey, AccountType.Specific(accountKey))
-                    null
+                    Route.AddReaction(statusKey = statusKey, accountType = AccountType.Specific(accountKey))
                 }
 
                 "Bluesky" ->
                     when (data.segments.getOrNull(0)) {
                         "ReportStatus" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-//                            Route.Status.BlueskyReport(statusKey, AccountType.Specific(accountKey))
-                            null
+                            val accountKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
+                            val statusKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
+                            Route.BlueskyReport(statusKey = statusKey, accountType = AccountType.Specific(accountKey))
                         }
 
                         else -> null
@@ -193,15 +266,17 @@ internal sealed interface Route {
                 "Mastodon" ->
                     when (data.segments.getOrNull(0)) {
                         "ReportStatus" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            val userKey = MicroBlogKey.valueOf(data.segments.getOrNull(3) ?: return null)
-//                            Route.Status.MastodonReport(
-//                                statusKey = statusKey,
-//                                userKey = userKey,
-//                                accountType = AccountType.Specific(accountKey),
-//                            )
-                            null
+                            val accountKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
+                            val statusKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
+                            val userKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(3) ?: return null)
+                            Route.MastodonReport(
+                                statusKey = statusKey,
+                                userKey = userKey,
+                                accountType = AccountType.Specific(accountKey),
+                            )
                         }
 
                         else -> null
@@ -210,15 +285,17 @@ internal sealed interface Route {
                 "Misskey" ->
                     when (data.segments.getOrNull(0)) {
                         "ReportStatus" -> {
-                            val accountKey = MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
-                            val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
-                            val userKey = MicroBlogKey.valueOf(data.segments.getOrNull(3) ?: return null)
-//                            Route.Status.MisskeyReport(
-//                                accountType = AccountType.Specific(accountKey),
-//                                statusKey = statusKey,
-//                                userKey = userKey,
-//                            )
-                            null
+                            val accountKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(1) ?: return null)
+                            val statusKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(2) ?: return null)
+                            val userKey =
+                                MicroBlogKey.valueOf(data.segments.getOrNull(3) ?: return null)
+                            Route.MisskeyReport(
+                                accountType = AccountType.Specific(accountKey),
+                                statusKey = statusKey,
+                                userKey = userKey,
+                            )
                         }
 
                         else -> null
@@ -228,7 +305,8 @@ internal sealed interface Route {
                     val accountKey = data.parameters["accountKey"]?.let { MicroBlogKey.valueOf(it) }
                     val statusKey = MicroBlogKey.valueOf(data.segments.getOrNull(0) ?: return null)
                     val index = data.segments.getOrNull(1)?.toIntOrNull() ?: return null
-                    val accountType = accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
+                    val accountType =
+                        accountKey?.let { AccountType.Specific(it) } ?: AccountType.Guest
                     val preview = data.parameters["preview"]
 //                    Route.Media.StatusMedia(accountType = accountType, statusKey = statusKey, index = index, preview = preview)
                     null

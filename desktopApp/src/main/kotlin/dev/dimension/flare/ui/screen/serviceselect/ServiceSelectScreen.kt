@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.solid.CircleQuestion
+import dev.dimension.flare.LocalContentPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.bluesky_login_2fa
 import dev.dimension.flare.bluesky_login_password
@@ -91,10 +91,10 @@ internal fun ServiceSelectScreen(
             }
     }
     Column(
+        modifier = Modifier.padding(LocalContentPadding.current),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        Spacer(Modifier)
         Text(
             stringResource(Res.string.service_select_welcome_title),
             style = FluentTheme.typography.title,

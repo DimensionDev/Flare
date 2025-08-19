@@ -15,10 +15,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.LocalContentPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.StatusItem
 import dev.dimension.flare.ui.component.status.status
@@ -33,7 +35,6 @@ import moe.tlaster.precompose.molecule.producePresenter
 @Composable
 internal fun VVOCommentScreen(
     commentKey: MicroBlogKey,
-    onBack: () -> Unit,
     accountType: AccountType,
 ) {
     val state by producePresenter("comment_$commentKey") {
@@ -55,7 +56,7 @@ internal fun VVOCommentScreen(
             contentPadding =
                 PaddingValues(
                     vertical = 8.dp,
-                ),
+                ) + LocalContentPadding.current,
             state = listState,
         ) {
             item {

@@ -70,20 +70,16 @@ internal fun FrameWindowScope.FlareTheme(
                     hover = Color.Transparent,
                     pressed = Color.Transparent,
                 ),
-            LocalComponentAppearance provides ComponentAppearance(),
+            LocalComponentAppearance provides
+                ComponentAppearance(
+                    videoAutoplay = ComponentAppearance.VideoAutoplay.ALWAYS,
+                ),
         ) {
             Box(
                 modifier =
                     Modifier
                         .fillMaxSize()
                         .background(FluentTheme.colors.background.mica.base),
-//                        .let {
-//                            if (SystemUtils.IS_OS_MAC) {
-//                                it.padding(top = 24.dp)
-//                            } else {
-//                                it
-//                            }
-//                        },
             ) {
                 content.invoke()
             }

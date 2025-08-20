@@ -22,7 +22,6 @@
     <string name="home_tab_list_title">List</string>
     <string name="home_tab_feeds_title">Feeds</string>
     <string name="dm_list_title">Direct Messages</string>
-    <string name="rss_title">Rss</string>
     <string name="home_timeline_new_toots">New toots</string>
 
     <string name="navigate_back">Back</string>
@@ -245,4 +244,26 @@
     <string name="misskey_visibility_followers_description">Only followers can see this toot</string>
     <string name="misskey_visibility_specified_description">Only mentioned users can see this toot</string>
 
+
+    <string name="rss_sources_title">Rss Sources</string>
+    <string name="add_rss_source">Add Rss Source</string>
+    <string name="edit_rss_source">Edit Rss Source</string>
+    <string name="delete_rss_source">Delete Rss Source</string>
+
+    <string name="rss_sources_title_label">Title</string>
+    <string name="rss_sources_url_label">Url</string>
+    <string name="rss_title">Rss</string>
+    <string name="empty_rss_sources">No rss sources</string>
+    <string name="rss_sources_rss_hub_host_label">RssHub Host</string>
+    <string name="rss_sources_rss_hub_host_hint">You need to set the RssHub host if you want to use RssHub, or select the public RssHub server</string>
+    <string name="rss_sources_discovered_rss_sources">Discovered Rss Sources</string>
+    <string name="rss_sources_pinned_in_tabs">Pin to home tabs</string>
+
+    <string name="tab_settings_add">Add</string>
+    <string name="tab_settings_drag">Drag</string>
+    <string name="tab_settings_edit">Edit</string>
+    <string name="tab_settings_remove">Remove</string>
+    <string name="tab_settings_default">Default</string>
+    <string name="tab_settings_list">List</string>
+    <string name="tab_settings_feed">Feeds</string>
 </resources>

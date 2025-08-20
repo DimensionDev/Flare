@@ -56,7 +56,6 @@ import dev.dimension.flare.ui.presenter.home.SearchHistoryState
 import dev.dimension.flare.ui.presenter.home.SearchPresenter
 import dev.dimension.flare.ui.presenter.home.SearchState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.users
 import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.component.AutoSuggestBoxDefaults
@@ -178,7 +177,6 @@ fun SearchScreen(
                             rows = GridCells.Fixed(2),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                         ) {
                             items(
                                 itemCount,
@@ -221,7 +219,6 @@ fun SearchScreen(
                             rows = GridCells.Fixed(2),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                         ) {
                             items(10) {
                                 Card(

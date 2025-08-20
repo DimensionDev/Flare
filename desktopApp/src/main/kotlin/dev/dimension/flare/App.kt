@@ -313,6 +313,7 @@ internal fun FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
                     Box {
                         Router(
                             manager = stackManager,
+                            onWindowRoute = onWindowRoute,
                         )
                         if (stackManager.canGoBack) {
                             NavigationDefaults.BackButton(
@@ -387,8 +388,8 @@ private fun getRoute(tab: TabItem): Route =
         is AllListTabItem -> AllLists(tab.account)
         is Bluesky.FeedsTabItem -> BlueskyFeeds(tab.account)
         is DirectMessageTabItem -> DirectMessage(tab.account)
-        is RssTabItem -> Route.Rss
-        is Misskey.AntennasListTabItem -> Route.Rss
+        is RssTabItem -> Route.RssList
+        is Misskey.AntennasListTabItem -> Route.RssList
     }
 
 @Composable
@@ -417,6 +418,8 @@ private class ProxyUriHandler(
             Route.parse(uri)?.let {
                 if (it is Route.WindowRoute) {
                     onWindowRoute.invoke(it)
+                } else if (it is Route.UrlRoute) {
+                    actualUriHandler.openUri(it.url)
                 } else {
                     stackManager.push(it)
                 }

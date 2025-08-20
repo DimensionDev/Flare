@@ -1,6 +1,8 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
@@ -89,11 +92,13 @@ internal fun TimelineScreen(tabItem: TimelineTabItem) {
         state.listState.onSuccess {
             AnimatedVisibility(
                 state.showNewToots,
-                enter = slideInVertically { -it },
-                exit = slideOutVertically { -it },
+                enter = slideInVertically { -it } + fadeIn(),
+                exit = slideOutVertically { -it } + fadeOut(),
                 modifier =
                     Modifier
-                        .align(Alignment.TopCenter),
+                        .align(Alignment.TopCenter)
+                        .padding(LocalWindowPadding.current)
+                        .padding(top = 8.dp),
             ) {
                 AccentButton(
                     onClick = {
@@ -162,7 +167,8 @@ internal fun timelineItemPresenter(timelineTabItem: TimelineTabItem): TimelineIt
     val lazyListState = rememberLazyStaggeredGridState()
     val isAtTheTop by remember {
         derivedStateOf {
-            lazyListState.firstVisibleItemIndex == 0
+            lazyListState.firstVisibleItemIndex == 0 &&
+                lazyListState.firstVisibleItemScrollOffset == 0
         }
     }
     LaunchedEffect(isAtTheTop, showNewToots) {

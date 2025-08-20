@@ -9,8 +9,12 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.data.model.Bluesky.FeedTabItem
 import dev.dimension.flare.data.model.IconType.Material
 import dev.dimension.flare.data.model.ListTimelineTabItem
+import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
+import dev.dimension.flare.model.AccountType.Specific
+import dev.dimension.flare.ui.route.Route.Profile
+import dev.dimension.flare.ui.route.Route.Search
 import dev.dimension.flare.ui.route.Route.Timeline
 import dev.dimension.flare.ui.screen.feeds.FeedListScreen
 import dev.dimension.flare.ui.screen.home.DiscoverScreen
@@ -20,6 +24,8 @@ import dev.dimension.flare.ui.screen.home.ProfileWithUserNameAndHostDeeplinkRout
 import dev.dimension.flare.ui.screen.home.SearchScreen
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 import dev.dimension.flare.ui.screen.list.AllListScreen
+import dev.dimension.flare.ui.screen.rss.EditRssSourceScreen
+import dev.dimension.flare.ui.screen.rss.RssListScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
 import dev.dimension.flare.ui.screen.settings.SettingsScreen
 import dev.dimension.flare.ui.screen.status.StatusScreen
@@ -37,10 +43,15 @@ import io.github.composefluent.component.Text
 @Composable
 internal fun Router(
     manager: StackManager,
+    onWindowRoute: (Route.WindowRoute) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     fun navigate(route: Route) {
-        manager.push(route)
+        if (route is Route.WindowRoute) {
+            onWindowRoute(route)
+        } else {
+            manager.push(route)
+        }
     }
 
     fun onBack() {
@@ -106,7 +117,7 @@ internal fun Router(
                             accountType = route.accountType,
                             toUser = {
                                 navigate(
-                                    Route.Profile(
+                                    Profile(
                                         accountType = route.accountType,
                                         userKey = it,
                                     ),
@@ -114,7 +125,7 @@ internal fun Router(
                             },
                             toSearch = {
                                 navigate(
-                                    Route.Search(
+                                    Search(
                                         accountType = route.accountType,
                                         keyword = it,
                                     ),
@@ -129,7 +140,7 @@ internal fun Router(
                             accountType = route.accountType,
                             toUser = {
                                 navigate(
-                                    Route.Profile(
+                                    Profile(
                                         accountType = route.accountType,
                                         userKey = it,
                                     ),
@@ -155,11 +166,19 @@ internal fun Router(
                         ProfileScreen(
                             accountType = route.accountType,
                             userKey = route.userKey,
+                            toEditAccountList = {},
+                            toSearchUserUsingAccount = { keyword, accountKey ->
+                                navigate(
+                                    Search(
+                                        accountType = Specific(accountKey),
+                                        keyword = keyword,
+                                    ),
+                                )
+                            },
+                            toStartMessage = {},
+                            onFollowListClick = {},
+                            onFansListClick = {},
                         )
-                    }
-
-                    Route.Rss -> {
-                        Text("route")
                     }
 
                     Route.ServiceSelect -> {
@@ -214,10 +233,49 @@ internal fun Router(
                             accountType = route.accountType,
                             onBack = ::onBack,
                             toEditAccountList = {},
-                            toSearchUserUsingAccount = { _, _ -> },
+                            toSearchUserUsingAccount = { keyword, accountKey ->
+                                navigate(
+                                    Search(
+                                        accountType = Specific(accountKey),
+                                        keyword = keyword,
+                                    ),
+                                )
+                            },
                             toStartMessage = {},
                             onFollowListClick = {},
                             onFansListClick = {},
+                        )
+                    }
+
+                    Route.RssList ->
+                        RssListScreen(
+                            toItem = {
+                                navigate(
+                                    Route.RssTimeline(
+                                        url = it.url,
+                                        title = it.title,
+                                        id = it.id,
+                                    ),
+                                )
+                            },
+                            onEdit = {
+                                navigate(
+                                    Route.EditRssSource(
+                                        id = it.id,
+                                    ),
+                                )
+                            },
+                            onAdd = {
+                                navigate(Route.CreateRssSource)
+                            },
+                        )
+
+                    is Route.RssTimeline -> {
+                        TimelineScreen(
+                            RssTimelineTabItem(
+                                feedUrl = route.url,
+                                title = route.title.orEmpty(),
+                            ),
                         )
                     }
                 }
@@ -225,60 +283,76 @@ internal fun Router(
         }
     }
     manager.currentFloatingEntry?.let { entry ->
-        if (entry.route is Route.FloatingRoute) {
-            when (entry.route) {
-                is Route.AddReaction -> {
-                    AddReactionSheet(
-                        accountType = entry.route.accountType,
-                        statusKey = entry.route.statusKey,
-                        onBack = ::onBack,
-                    )
-                }
+        entry.Content { route ->
+            if (route is Route.FloatingRoute) {
+                when (route) {
+                    is Route.AddReaction -> {
+                        AddReactionSheet(
+                            accountType = route.accountType,
+                            statusKey = route.statusKey,
+                            onBack = ::onBack,
+                        )
+                    }
 
-                is Route.BlueskyReport -> {
-                    BlueskyReportStatusDialog(
-                        accountType = entry.route.accountType,
-                        statusKey = entry.route.statusKey,
-                        onBack = ::onBack,
-                    )
-                }
+                    is Route.BlueskyReport -> {
+                        BlueskyReportStatusDialog(
+                            accountType = route.accountType,
+                            statusKey = route.statusKey,
+                            onBack = ::onBack,
+                        )
+                    }
 
-                is Route.DeleteStatus -> {
-                    DeleteStatusConfirmDialog(
-                        accountType = entry.route.accountType,
-                        statusKey = entry.route.statusKey,
-                        onBack = ::onBack,
-                    )
-                }
+                    is Route.DeleteStatus -> {
+                        DeleteStatusConfirmDialog(
+                            accountType = route.accountType,
+                            statusKey = route.statusKey,
+                            onBack = ::onBack,
+                        )
+                    }
 
-                is Route.MastodonReport -> {
-                    MastodonReportDialog(
-                        accountType = entry.route.accountType,
-                        statusKey = entry.route.statusKey,
-                        onBack = ::onBack,
-                        userKey = entry.route.userKey,
-                    )
-                }
+                    is Route.MastodonReport -> {
+                        MastodonReportDialog(
+                            accountType = route.accountType,
+                            statusKey = route.statusKey,
+                            onBack = ::onBack,
+                            userKey = route.userKey,
+                        )
+                    }
 
-                is Route.MisskeyReport -> {
-                    MisskeyReportDialog(
-                        accountType = entry.route.accountType,
-                        statusKey = entry.route.statusKey,
-                        onBack = ::onBack,
-                        userKey = entry.route.userKey,
-                    )
-                }
+                    is Route.MisskeyReport -> {
+                        MisskeyReportDialog(
+                            accountType = route.accountType,
+                            statusKey = route.statusKey,
+                            onBack = ::onBack,
+                            userKey = route.userKey,
+                        )
+                    }
 
-                is Route.AltText -> {
-                    Flyout(
-                        visible = true,
-                        onDismissRequest = {
-                            onBack()
-                        },
-                    ) {
-                        Text(
-                            text = entry.route.text,
-                            modifier = Modifier.padding(16.dp),
+                    is Route.AltText -> {
+                        Flyout(
+                            visible = true,
+                            onDismissRequest = {
+                                onBack()
+                            },
+                        ) {
+                            Text(
+                                text = route.text,
+                                modifier = Modifier.padding(16.dp),
+                            )
+                        }
+                    }
+
+                    Route.CreateRssSource -> {
+                        EditRssSourceScreen(
+                            onDismissRequest = ::onBack,
+                            id = null,
+                        )
+                    }
+
+                    is Route.EditRssSource -> {
+                        EditRssSourceScreen(
+                            onDismissRequest = ::onBack,
+                            id = route.id,
                         )
                     }
                 }

@@ -14,6 +14,10 @@ internal sealed interface Route {
 
     sealed interface WindowRoute : Route
 
+    sealed interface UrlRoute : Route {
+        val url: String
+    }
+
     @Serializable
     data class Timeline(
         val tabItem: TimelineTabItem,
@@ -31,9 +35,6 @@ internal sealed interface Route {
 
     @Serializable
     data object Settings : ScreenRoute
-
-    @Serializable
-    data object Rss : ScreenRoute
 
     @Serializable
     data class Profile(
@@ -172,6 +173,29 @@ internal sealed interface Route {
             val rootId: String,
         ) : WindowRoute
     }
+
+    @Serializable
+    data object RssList : ScreenRoute
+
+    @Serializable
+    data class RssTimeline(
+        val id: Int,
+        val url: String,
+        val title: String?,
+    ) : ScreenRoute
+
+    @Serializable
+    data class EditRssSource(
+        val id: Int,
+    ) : FloatingRoute
+
+    @Serializable
+    data object CreateRssSource : FloatingRoute
+
+    @Serializable
+    data class RssDetail(
+        override val url: String,
+    ) : UrlRoute
 
     companion object {
         public fun parse(url: String): Route? {
@@ -392,8 +416,7 @@ internal sealed interface Route {
 
                 "RSS" -> {
                     val feedUrl = data.segments.getOrNull(0) ?: return null
-//                    Route.Rss.Detail(feedUrl)
-                    null
+                    Route.RssDetail(feedUrl)
                 }
 
                 else -> null

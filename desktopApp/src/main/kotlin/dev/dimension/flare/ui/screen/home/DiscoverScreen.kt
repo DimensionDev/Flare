@@ -60,7 +60,6 @@ import dev.dimension.flare.ui.presenter.home.DiscoverState
 import dev.dimension.flare.ui.presenter.home.SearchHistoryPresenter
 import dev.dimension.flare.ui.presenter.home.SearchHistoryState
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import dev.dimension.flare.users
 import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.component.AutoSuggestBoxDefaults
@@ -181,7 +180,6 @@ internal fun DiscoverScreen(
                             rows = GridCells.Fixed(2),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                         ) {
                             items(
                                 itemCount,
@@ -224,7 +222,6 @@ internal fun DiscoverScreen(
                             rows = GridCells.Fixed(2),
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            contentPadding = PaddingValues(horizontal = screenHorizontalPadding),
                         ) {
                             items(10) {
                                 Card(
@@ -252,7 +249,6 @@ internal fun DiscoverScreen(
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier.padding(horizontal = screenHorizontalPadding),
                     ) {
                         repeat(
                             itemCount,

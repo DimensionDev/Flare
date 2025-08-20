@@ -101,9 +101,6 @@ internal fun ServiceSelectScreen(
             }
     }
     LazyStatusVerticalStaggeredGrid(
-        modifier =
-            Modifier
-                .padding(horizontal = 16.dp),
         columns = StaggeredGridCells.Adaptive(300.dp),
         horizontalArrangement =
             Arrangement.spacedBy(

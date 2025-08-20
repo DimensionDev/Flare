@@ -46,7 +46,6 @@ import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.SquarePollHorizontal
 import compose.icons.fontawesomeicons.solid.TriangleExclamation
 import compose.icons.fontawesomeicons.solid.Xmark
-import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.compose_content_warning_hint
@@ -74,6 +73,7 @@ import dev.dimension.flare.misskey_visibility_public_description
 import dev.dimension.flare.misskey_visibility_specified
 import dev.dimension.flare.misskey_visibility_specified_description
 import dev.dimension.flare.model.AccountType
+import dev.dimension.flare.navigate_back
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.EmojiPicker
 import dev.dimension.flare.ui.component.FAIcon
@@ -98,10 +98,12 @@ import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.CheckBox
 import io.github.composefluent.component.FlyoutContainer
+import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
 import io.github.composefluent.component.PillButton
 import io.github.composefluent.component.RadioButton
+import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import io.github.composefluent.surface.Card
@@ -147,13 +149,20 @@ fun ComposeDialog(
                 focusRequester.requestFocus()
             }
         }
-    Column(
-        modifier =
-            modifier
-                .padding(
-                    LocalWindowPadding.current,
-                ).padding(top = 8.dp),
-    ) {
+    Column {
+        SubtleButton(
+            onClick = onBack,
+            modifier =
+                Modifier
+                    .align(Alignment.Start)
+                    .padding(8.dp),
+            iconOnly = true,
+        ) {
+            FAIcon(
+                imageVector = FontAwesomeIcons.Solid.Xmark,
+                contentDescription = stringResource(Res.string.navigate_back),
+            )
+        }
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
@@ -554,6 +563,7 @@ fun ComposeDialog(
                 state.state.emojiState.onSuccess { emojis ->
                     AnimatedVisibility(emojis.size > 0) {
                         FlyoutContainer(
+                            placement = FlyoutPlacement.Bottom,
                             flyout = {
                                 val actualAccountType =
                                     remember(
@@ -570,7 +580,10 @@ fun ComposeDialog(
                                     accountType = actualAccountType ?: accountType,
                                     modifier =
                                         Modifier
-                                            .padding(8.dp),
+                                            .sizeIn(
+                                                maxWidth = 300.dp,
+                                                maxHeight = 200.dp,
+                                            ),
                                 )
                             },
                         ) {

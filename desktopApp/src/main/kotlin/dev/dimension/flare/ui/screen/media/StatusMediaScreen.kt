@@ -55,6 +55,7 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.StatusPresenter
 import dev.dimension.flare.ui.presenter.status.StatusState
+import dev.dimension.flare.ui.theme.LocalComposeWindow
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.GridViewItem
 import io.github.composefluent.component.HorizontalFlipView
@@ -76,9 +77,9 @@ internal fun StatusMediaScreen(
     accountType: AccountType,
     statusKey: MicroBlogKey,
     index: Int,
-    window: ComposeWindow,
 ) {
     val scope = rememberCoroutineScope()
+    val window = LocalComposeWindow.current
     val state by producePresenter(
         "StatusMediaScreen_${accountType}_$statusKey",
     ) {

@@ -17,7 +17,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.node.DelegatableNode
@@ -42,6 +44,11 @@ import io.github.composefluent.lightColors
 import kotlinx.coroutines.launch
 import org.apache.commons.lang3.SystemUtils
 import org.koin.compose.koinInject
+
+internal val LocalComposeWindow =
+    staticCompositionLocalOf<ComposeWindow> {
+        error("No ComposeWindow provided")
+    }
 
 @OptIn(ExperimentalFluentApi::class)
 @Composable
@@ -85,6 +92,7 @@ internal fun FrameWindowScope.FlareTheme(
                 } else {
                     PaddingValues(0.dp)
                 },
+            LocalComposeWindow provides window,
         ) {
             Box(
                 modifier =

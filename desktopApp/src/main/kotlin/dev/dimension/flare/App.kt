@@ -100,10 +100,15 @@ internal fun FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
                 key = tabs,
                 topLevelRoutes = tabs.all.map { getRoute(it.tabItem) },
             )
+
         val currentRoute = stackManager.currentRoute
 
         fun navigate(route: Route) {
-            stackManager.push(route)
+            if (route is Route.WindowRoute) {
+                onWindowRoute.invoke(route)
+            } else {
+                stackManager.push(route)
+            }
         }
 
         fun goBack() {
@@ -152,7 +157,7 @@ internal fun FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Button(
                             onClick = {
-                                onWindowRoute.invoke(
+                                navigate(
                                     Route.Compose.New(
                                         accountType = AccountType.Specific(user.key),
                                     ),

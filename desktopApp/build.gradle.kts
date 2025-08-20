@@ -18,7 +18,6 @@ dependencies {
     implementation(compose.ui)
     implementation(compose.desktop.common)
     implementation(compose.components.resources)
-    implementation(compose.components.uiToolingPreview)
     implementation(libs.precompose.molecule)
     implementation(libs.lifecycle.runtime.compose)
     implementation(compose.desktop.currentOs)
@@ -58,7 +57,7 @@ compose.desktop {
         buildTypes {
             release {
                 proguard {
-                    version.set("7.6.1")
+                    version.set("7.7.0")
                     this.configurationFiles.from(
                         file("proguard-rules.pro")
                     )

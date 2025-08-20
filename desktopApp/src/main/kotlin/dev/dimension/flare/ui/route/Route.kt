@@ -153,25 +153,25 @@ internal sealed interface Route {
         data class Reply(
             val accountKey: MicroBlogKey,
             val statusKey: MicroBlogKey,
-        ) : WindowRoute
+        ) : FloatingRoute
 
         @Serializable
         data class Quote(
             val accountKey: MicroBlogKey,
             val statusKey: MicroBlogKey,
-        ) : WindowRoute
+        ) : FloatingRoute
 
         @Serializable
         data class New(
             val accountType: AccountType,
-        ) : WindowRoute
+        ) : FloatingRoute
 
         @Serializable
         data class VVOReplyComment(
             val accountKey: MicroBlogKey,
             val replyTo: MicroBlogKey,
             val rootId: String,
-        ) : WindowRoute
+        ) : FloatingRoute
     }
 
     @Serializable

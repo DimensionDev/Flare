@@ -7,7 +7,10 @@ struct TranslateButton: View {
     let isTranslated: Bool
 
     var body: some View {
-        Button(action: onTranslate) {
+        Button(action: {
+            FlareHapticManager.shared.buttonPress()
+            onTranslate()
+        }) {
             HStack(spacing: 4) {
                 if isTranslating {
                     ProgressView()
@@ -24,6 +27,7 @@ struct TranslateButton: View {
         .allowsHitTesting(true)
         .contentShape(Rectangle())
         .onTapGesture {
+            FlareHapticManager.shared.buttonPress()
             onTranslate()
         }
     }

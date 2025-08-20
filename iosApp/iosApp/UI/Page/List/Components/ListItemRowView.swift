@@ -33,6 +33,7 @@ public struct ListItemRowView: View {
 
     public var body: some View {
         Button(action: {
+            FlareHapticManager.shared.buttonPress()
             onTap?()
         }) {
             HStack(spacing: 12) {

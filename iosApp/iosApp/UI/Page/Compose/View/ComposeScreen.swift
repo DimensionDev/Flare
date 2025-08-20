@@ -115,13 +115,23 @@ struct ComposeScreen: View {
                                     }
                                 }
                             }
-                            Toggle(isOn: $viewModel.mediaViewModel.sensitive, label: {
+                            Toggle(isOn: Binding(get: {
+                                viewModel.mediaViewModel.sensitive
+                            }, set: { value in
+                                FlareHapticManager.shared.selection()
+                                viewModel.mediaViewModel.sensitive = value
+                            }), label: {
                                 Text("compose_media_sensitive")
                             })
                         }
                         if viewModel.pollViewModel.enabled {
                             HStack {
-                                Picker("compose_poll_type", selection: $viewModel.pollViewModel.pollType) {
+                                Picker("compose_poll_type", selection: Binding(get: {
+                                    viewModel.pollViewModel.pollType
+                                }, set: { value in
+                                    FlareHapticManager.shared.selection()
+                                    viewModel.pollViewModel.pollType = value
+                                })) {
                                     Text("compose_poll_single_choice")
                                         .tag(ComposePollType.single)
                                     Text("compose_poll_multiple_choice")
@@ -129,6 +139,7 @@ struct ComposeScreen: View {
                                 }
                                 .pickerStyle(.segmented)
                                 Button {
+                                    FlareHapticManager.shared.buttonPress()
                                     withAnimation {
                                         viewModel.pollViewModel.add()
                                     }
@@ -319,6 +330,7 @@ struct ComposeScreen: View {
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button(action: {
+                    FlareHapticManager.shared.buttonPress()
                     viewModel.send()
                     onBack()
                 }, label: {
@@ -330,6 +342,7 @@ struct ComposeScreen: View {
             }
             ToolbarItem(placement: .cancellationAction) {
                 Button(role: .cancel, action: {
+                    FlareHapticManager.shared.buttonPress()
                     onBack()
                 }, label: {
                     Awesome.Classic.Solid.xmark.image

@@ -15,12 +15,12 @@ import shared
 import SwiftUI
 import UIKit
 
-// 头部视图
+
 class ProfileNewHeaderView: UIView {
-    private var state: ProfileNewState?
+    private var state: ProfileState?
     var theme: FlareTheme?
 
-    // 添加关注按钮回调
+
     var onFollowClick: ((UiRelation) -> Void)?
 
     // 防重复设置事件的标志
@@ -49,14 +49,8 @@ class ProfileNewHeaderView: UIView {
         return imageView
     }()
 
-    private let followButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("follow", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        // button.backgroundColor = .systemBlue
-        button.layer.cornerRadius = 15
-        return button
-    }()
+    // SwiftUI Follow Button
+    private var presenter: ProfilePresenter?
 
     private let nameLabel: UILabel = {
         let label = UILabel()
@@ -150,9 +144,7 @@ class ProfileNewHeaderView: UIView {
         avatarView.addGestureRecognizer(avatarTap)
         avatarView.isUserInteractionEnabled = true
 
-        // Follow Button
-        addSubview(followButton)
-        followButton.frame = CGRect(x: frame.width - 100, y: 160, width: 80, height: 30)
+
 
         // Name Label
         addSubview(nameLabel)
@@ -215,9 +207,7 @@ class ProfileNewHeaderView: UIView {
         nameLabel.textColor = UIColor(theme.labelColor)
         descriptionLabel.textColor = UIColor(theme.labelColor)
         descriptionLabel.backgroundColor = UIColor(theme.primaryBackgroundColor) // 貌似没用
-        // 应用按钮颜色
-        followButton.backgroundColor = UIColor(theme.tintColor)
-    }
+}
 
     private func layoutContent() {
         // 计算description的高度
@@ -258,17 +248,18 @@ class ProfileNewHeaderView: UIView {
         frame.height
     }
 
-    func configure(with userInfo: ProfileUserInfo, state: ProfileNewState? = nil, theme: FlareTheme? = nil) {
-        self.userInfo = userInfo // 需要保存 userInfo 以便在点击时使用
+    func configure(with userInfo: ProfileUserInfo, state: ProfileState? = nil, theme: FlareTheme? = nil, presenter: ProfilePresenter? = nil) {
+        self.userInfo = userInfo
         self.state = state
         self.theme = theme
+        self.presenter = presenter
 
-        // 应用主题
+
         if theme != nil {
             applyTheme()
         }
 
-        // 设置用户名
+
         nameLabel.text = userInfo.profile.name.markdown
 
         // 设置用户handle
@@ -313,8 +304,11 @@ class ProfileNewHeaderView: UIView {
         followsCountLabel.text = "\(formatCount(Int64(userInfo.followCount) ?? 0)) \(NSLocalizedString("following_title", comment: ""))"
         fansCountLabel.text = "\(formatCount(Int64(userInfo.fansCount) ?? 0)) \(NSLocalizedString("fans_title", comment: ""))"
 
-        // 更新关注按钮状态
-        updateFollowButton(with: userInfo)
+
+        setupSwiftUIFollowButton(with: userInfo)
+
+
+        setupSwiftUIMoreButton(with: userInfo)
 
         // 设置用户标记
         markStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
@@ -440,46 +434,83 @@ class ProfileNewHeaderView: UIView {
         }
     }
 
-    private func updateFollowButton(with userInfo: ProfileUserInfo) {
-        // 根据用户关系更新关注按钮状态
-        if userInfo.isMe {
-            followButton.isHidden = true
-        } else {
-            followButton.isHidden = false
-            if let relation = userInfo.relation {
-                let title = if relation.blocking {
-                    NSLocalizedString("profile_header_button_blocked", comment: "")
-                } else if relation.following {
-                    NSLocalizedString("profile_header_button_following", comment: "")
-                } else if relation.hasPendingFollowRequestFromYou {
-                    NSLocalizedString("profile_header_button_requested", comment: "")
-                } else {
-                    NSLocalizedString("profile_header_button_follow", comment: "")
-                }
-                followButton.setTitle(title, for: .normal)
+    private func setupSwiftUIFollowButton(with userInfo: ProfileUserInfo) {
+        // 只有在不是自己的profile时才创建follow按钮
+        guard !userInfo.isMe else { return }
 
-                // 保持蓝色背景
-                // followButton.backgroundColor = .systemBlue
-            }
+        // 创建SwiftUI Follow Button
+        let followButtonView = FollowButtonView(
+            presenter: self.presenter,
+            userKey: userInfo.profile.key
+        )
+
+        let hostingController = UIHostingController(rootView: followButtonView)
+
+        // 添加到视图层次结构
+        addSubview(hostingController.view)
+         hostingController.view.backgroundColor = UIColor.clear
+
+        // 设置约束
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            hostingController.view.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            hostingController.view.topAnchor.constraint(equalTo: topAnchor, constant: 160),
+            hostingController.view.widthAnchor.constraint(equalToConstant: 80),
+            hostingController.view.heightAnchor.constraint(equalToConstant: 30)
+        ])
+    }
+
+    private func setupSwiftUIMoreButton(with userInfo: ProfileUserInfo) {
+        // 只有在不是自己的profile时才创建more按钮
+        guard !userInfo.isMe else {
+            // 如果是自己的profile，清除more按钮
+            clearMoreButton()
+            return
+        }
+
+        // 创建SwiftUI More Button
+        let moreButtonView = ProfileMoreButtonView(
+            presenter: self.presenter,
+            userKey: userInfo.profile.key
+        )
+
+        let hostingController = UIHostingController(rootView: moreButtonView)
+        hostingController.view.backgroundColor = UIColor.clear
+
+        // 设置为导航栏右侧按钮
+        let barButtonItem = UIBarButtonItem(customView: hostingController.view)
+
+        // 添加到导航栏
+        if let navigationController = self.findViewController()?.navigationController {
+            navigationController.navigationBar.topItem?.rightBarButtonItem = barButtonItem
+        }
+    }
+
+    private func clearMoreButton() {
+        // 清除导航栏右侧按钮
+        if let navigationController = self.findViewController()?.navigationController {
+            navigationController.navigationBar.topItem?.rightBarButtonItem = nil
         }
     }
 
     private func setupEventHandlers() {
-        // 防止重复设置事件 - 检查是否已经有target
-        let existingTargets = followButton.allTargets
-        if !existingTargets.isEmpty {
-            os_log("[ProfileNewHeaderView] Button events already setup, skipping", log: .default, type: .debug)
-            return
+        // SwiftUI Follow Button handles its own events
+        os_log("[ProfileNewHeaderView] Event handlers setup completed (SwiftUI Follow Button)", log: .default, type: .debug)
+    }
+
+    private func findPresenterFromParent() -> ProfilePresenter? {
+        // 尝试从父视图控制器中找到presenter
+        var responder: UIResponder? = self
+        while let nextResponder = responder?.next {
+            if let viewController = nextResponder as? UIViewController {
+                // 这里需要根据实际的视图控制器结构来获取presenter
+                // 暂时返回nil，需要在实际集成时修复
+                os_log("[ProfileNewHeaderView] Found view controller, but presenter access needs implementation", log: .default, type: .debug)
+                return nil
+            }
+            responder = nextResponder
         }
-
-        // 确保按钮可以响应事件
-        followButton.isEnabled = true
-        followButton.isUserInteractionEnabled = true
-
-        // 添加按钮事件
-        followButton.addTarget(self, action: #selector(handleFollowButtonTap), for: .touchUpInside)
-
-        os_log("[ProfileNewHeaderView] Button events setup completed", log: .default, type: .debug)
+        return nil
     }
 
     @objc private func avatarTapped() {
@@ -498,14 +529,7 @@ class ProfileNewHeaderView: UIView {
         onFansCountTap?()
     }
 
-    @objc private func handleFollowButtonTap() {
-        os_log("[ProfileNewHeaderView] Follow button tapped", log: .default, type: .debug)
-
-        // 直接调用回调，传递 relation
-        if let relation = userInfo?.relation {
-            onFollowClick?(relation)
-        }
-    }
+    // Follow button tap is now handled by SwiftUI FollowButtonView
 
     // 辅助方法：查找当前视图所在的 ViewController
     private func findViewController() -> UIViewController? {

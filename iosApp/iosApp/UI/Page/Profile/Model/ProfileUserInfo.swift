@@ -10,7 +10,7 @@ struct ProfileUserInfo: Equatable {
     let fields: [String: UiRichText]
     let canSendMessage: Bool
 
-    static func from(state: ProfileNewState) -> ProfileUserInfo? {
+    static func from(state: ProfileState) -> ProfileUserInfo? {
         guard case let .success(user) = onEnum(of: state.userState),
               let profile = user.data as? UiProfile
         else {

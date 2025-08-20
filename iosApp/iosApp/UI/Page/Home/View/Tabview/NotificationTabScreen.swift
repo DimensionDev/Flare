@@ -37,9 +37,11 @@ struct NotificationTabScreen: View {
                 .listRowBackground(theme.primaryBackgroundColor)
             }
             .onChange(of: notificationType) {
+                FlareHapticManager.shared.selection()
                 state.onNotificationTypeChanged(value: notificationType)
             }
             .refreshable {
+                FlareHapticManager.shared.dataRefresh()
                 try? await state.refresh()
             }
             .toolbar {

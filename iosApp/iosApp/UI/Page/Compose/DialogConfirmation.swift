@@ -13,8 +13,13 @@ extension View {
             isPresented: isPresented,
             titleVisibility: .visible,
             actions: {
-                Button("OK", role: .destructive, action: action)
-                Button("Cancel", role: .cancel) {}
+                Button("OK", role: .destructive, action: {
+                    FlareHapticManager.shared.buttonPress()
+                    action()
+                })
+                Button("Cancel", role: .cancel) {
+                    FlareHapticManager.shared.buttonPress()
+                }
             },
             message: {
                 Text(message)

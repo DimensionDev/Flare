@@ -14,6 +14,7 @@ struct MediaContentScreen: View {
                 Toggle(isOn: Binding(get: {
                     appSettings.appearanceSettings.showLinkPreview
                 }, set: { value in
+                    FlareHapticManager.shared.selection()
                     appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showLinkPreview, to: value))
                 })) {
                     Text("settings_appearance_show_link_previews")
@@ -24,6 +25,7 @@ struct MediaContentScreen: View {
                 Toggle(isOn: Binding(get: {
                     appSettings.appearanceSettings.showMedia
                 }, set: { value in
+                    FlareHapticManager.shared.selection()
                     appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showMedia, to: value))
                 })) {
                     Text("settings_appearance_show_media")

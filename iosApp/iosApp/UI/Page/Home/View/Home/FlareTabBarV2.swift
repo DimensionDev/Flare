@@ -69,6 +69,7 @@ struct FlareTabBarV2: View {
     @ViewBuilder
     private func tabBarItem(for tab: FlareHomeTabs) -> some View {
         Button {
+            FlareHapticManager.shared.tabSelection()
             if router.selectedTab == tab {
                 router.popToRoot(for: tab)
                 if tab == .timeline {
@@ -133,6 +134,7 @@ struct FlareTabBarV2: View {
     @ViewBuilder
     private func composeButton() -> some View {
         Button {
+            FlareHapticManager.shared.buttonPress()
             ComposeManager.shared.showNewCompose(accountType: accountType)
         } label: {
             Asset.Tab.compose.swiftUIImage

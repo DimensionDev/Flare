@@ -19,6 +19,7 @@ struct AppBarTabItemsViewSwiftUI: View {
                             tabItemView(for: item)
                                 .id(item.key)
                                 .onTapGesture {
+                                    FlareHapticManager.shared.tabSelection()
                                     withAnimation(.spring()) {
                                         // 如果点击的是当前已选中的标签，触发返回顶部
                                         if selection == item.key {

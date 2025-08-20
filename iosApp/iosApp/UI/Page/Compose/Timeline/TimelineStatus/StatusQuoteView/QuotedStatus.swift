@@ -15,6 +15,7 @@ struct QuotedStatus: View {
 
     var body: some View {
         Button(action: {
+            FlareHapticManager.shared.buttonPress()
             router.navigate(to: .statusDetailV2(
                 accountType: UserManager.shared.getCurrentAccountType() ?? AccountTypeGuest(),
                 statusKey: data.statusKey
@@ -70,6 +71,7 @@ struct QuotedStatus: View {
                         )
                     } else {
                         Button {
+                            FlareHapticManager.shared.buttonPress()
                             withAnimation {
                                 showMedia = true
                             }

@@ -77,7 +77,6 @@ struct TimelineViewSwiftUIV4: View {
                 .onScrollGeometryChange(for: ScrollGeometry.self) { geometry in
                     geometry
                 } action: { _, newValue in
-                     
                     timeLineViewModel.handleScrollOffsetChange(
                         newValue.contentOffset.y,
                         showFloatingButton: $timelineState.showFloatingButton,
@@ -150,6 +149,8 @@ struct TimelineViewSwiftUIV4: View {
                 timeLineViewModel.resume()
             }
             .onDisappear {
+                timelineState.tabBarOffset = 0
+
                 let timestamp = Date().timeIntervalSince1970
                 FlareLog.debug("👋 [TimelineV4] onDisappear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
 

@@ -8,6 +8,7 @@ struct SensitiveContentButton: View {
     var body: some View {
         ZStack {
             Button(action: {
+                FlareHapticManager.shared.buttonPress()
                 withAnimation {
                     action()
                 }

@@ -75,6 +75,7 @@ struct StoragePrivacyScreen: View {
                 Section("Storage Management") {
                     // Database Cache
                     Button(role: .destructive) {
+                        FlareHapticManager.shared.buttonPress()
                         state.clearCache()
                     } label: {
                         HStack(alignment: .center) {
@@ -95,6 +96,7 @@ struct StoragePrivacyScreen: View {
 
                     // Image Cache
                     Button(role: .destructive) {
+                        FlareHapticManager.shared.buttonPress()
                         clearImageCache()
                     } label: {
                         HStack {
@@ -120,6 +122,7 @@ struct StoragePrivacyScreen: View {
 
                     // Download Cache
                     Button(role: .destructive) {
+                        FlareHapticManager.shared.buttonPress()
                         showClearFilesConfirm = true
                     } label: {
                         HStack {

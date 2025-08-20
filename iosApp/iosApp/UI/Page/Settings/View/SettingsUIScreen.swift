@@ -36,6 +36,16 @@ struct SettingsUIScreen: View {
                             }
                             .tag(SettingsDestination.mediaContent)
 
+                            // Haptic Feedback
+                            Label {
+                                Text(SettingsDestination.hapticFeedback.title)
+                                    .foregroundColor(theme.labelColor)
+                            } icon: {
+                                Image(systemName: SettingsDestination.hapticFeedback.icon)
+                                    .foregroundColor(theme.tintColor)
+                            }
+                            .tag(SettingsDestination.hapticFeedback)
+
                             // Translation & Language
                             Label {
                                 Text(SettingsDestination.translationLanguage.title)
@@ -107,6 +117,8 @@ struct SettingsUIScreen: View {
                             TimelineDisplayScreen(presenter: appearancePresenter)
                         case .mediaContent:
                             MediaContentScreen()
+                        case .hapticFeedback:
+                            HapticFeedbackScreen()
                         case .translationLanguage:
                             TranslationLanguageScreen()
                         case .browserSettings:
@@ -137,6 +149,7 @@ struct SettingsUIScreen: View {
 public enum SettingsDestination: String, CaseIterable, Identifiable {
     case timelineDisplay = "timeline_display"
     case mediaContent = "media_content"
+    case hapticFeedback = "haptic_feedback"
     case translationLanguage = "translation_language"
     case browserSettings = "browser_settings"
 //    case aiSettings = "ai_settings"
@@ -150,6 +163,7 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
         switch self {
         case .timelineDisplay: "Timeline & Display"
         case .mediaContent: "Media & Content"
+        case .hapticFeedback: "Haptic Feedback"
         case .translationLanguage: "Translation & Language"
         case .browserSettings: "Browser Settings"
 //        case .aiSettings: "AI Settings"
@@ -163,6 +177,7 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
         switch self {
         case .timelineDisplay: "list.bullet.rectangle"
         case .mediaContent: "photo.on.rectangle"
+        case .hapticFeedback: "waveform.path"
         case .translationLanguage: "character.bubble"
         case .browserSettings: "network"
 //        case .aiSettings: "brain"
@@ -175,7 +190,7 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
     var priority: Int {
         switch self {
         case .timelineDisplay, .mediaContent: 3
-        case .translationLanguage, .browserSettings: 2 // ,.aiSettings:
+        case .hapticFeedback, .translationLanguage, .browserSettings: 2 // ,.aiSettings:
         case .storagePrivacy, .about, .support: 1
         }
     }

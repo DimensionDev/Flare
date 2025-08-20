@@ -96,6 +96,7 @@ struct TimelineStatusViewV2: View, Equatable {
                 }
             ).contentShape(Rectangle())
                 .onTapGesture {
+                    FlareHapticManager.shared.buttonPress()
                     handleStatusTap()
                 }
 

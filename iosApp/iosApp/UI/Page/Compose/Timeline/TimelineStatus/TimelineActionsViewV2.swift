@@ -37,6 +37,7 @@ struct TimelineActionsViewV2: View, Equatable {
                 isActive: false,
                 activeColor: .blue
             ) {
+                FlareHapticManager.shared.buttonPress()
                 handleReplyAction()
             }
             .frame(maxWidth: .infinity)
@@ -47,12 +48,19 @@ struct TimelineActionsViewV2: View, Equatable {
                 isActive: item.isRetweeted,
                 activeColor: .green
             ) {
+                FlareHapticManager.shared.buttonPress()
                 handleRetweetAction()
             }
             .frame(maxWidth: .infinity)
             .confirmationDialog("Retweet Options", isPresented: $showRetweetMenu) {
-                Button("Retweet") { performRetweetAction(isQuote: false) }
-                Button("Quote Tweet") { performRetweetAction(isQuote: true) }
+                Button(item.isRetweeted ? "retweet_remove": "Retweet") {
+                    FlareHapticManager.shared.buttonPress()
+                    performRetweetAction(isQuote: false)
+                }
+                Button("Quote Tweet") {
+                    FlareHapticManager.shared.buttonPress()
+                    performRetweetAction(isQuote: true)
+                }
                 Button("Cancel", role: .cancel) {}
             }
 
@@ -64,6 +72,7 @@ struct TimelineActionsViewV2: View, Equatable {
                 isActive: item.isLiked,
                 activeColor: .red
             ) {
+                FlareHapticManager.shared.buttonPress()
                 handleLikeAction()
             }
             .frame(maxWidth: .infinity)
@@ -76,6 +85,7 @@ struct TimelineActionsViewV2: View, Equatable {
                 isActive: item.isBookmarked,
                 activeColor: .orange
             ) {
+                FlareHapticManager.shared.buttonPress()
                 handleBookmarkAction()
             }
             .frame(maxWidth: .infinity)

@@ -29,6 +29,7 @@ public struct TweetMediaPlayButton: View {
         .clipShape(RoundedRectangle(cornerRadius: 4))
         .foregroundColor(.white)
         .onTapGesture {
+            FlareHapticManager.shared.buttonPress()
             tapAction?()
         }
     }

@@ -149,10 +149,13 @@ struct TimelineViewSwiftUIV4: View {
                 timeLineViewModel.resume()
             }
             .onDisappear {
+                timelineState.tabBarOffset = 0
+
                 let timestamp = Date().timeIntervalSince1970
                 FlareLog.debug("👋 [TimelineV4] onDisappear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
 
                 timeLineViewModel.pause()
+
             }
             .onReceive(NotificationCenter.default.publisher(for: .timelineItemUpdated)) { _ in
                 let timestamp = Date().timeIntervalSince1970

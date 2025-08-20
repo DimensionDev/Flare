@@ -81,6 +81,7 @@ struct StatusShareAsImageViewV2: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button {
+                        FlareHapticManager.shared.buttonPress()
                         dismiss()
                     } label: {
                         Text("Done")

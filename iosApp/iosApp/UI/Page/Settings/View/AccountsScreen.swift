@@ -19,12 +19,14 @@ struct AccountsScreen: View {
                                 accountRowContent(user: user.data, activeAccount: state.activeAccount)
                                     .highPriorityGesture(
                                         TapGesture().onEnded {
+                                            FlareHapticManager.shared.selection()
                                             NotificationCenter.default.post(name: .accountChanged, object: nil)
                                             state.setActiveAccount(accountKey: user.data.key)
                                         }
                                     )
                                     .swipeActions(edge: .trailing) {
                                         Button(role: .destructive) {
+                                            FlareHapticManager.shared.buttonPress()
                                             state.removeAccount(accountKey: user.data.key)
                                         } label: {
                                             Label("delete", systemImage: "trash")
@@ -33,6 +35,7 @@ struct AccountsScreen: View {
                                 #if os(macOS)
                                     .contextMenu {
                                         Button(role: .destructive) {
+                                            FlareHapticManager.shared.buttonPress()
                                             state.removeAccount(accountKey: user.data.key)
                                         } label: {
                                             Label("delete", systemImage: "trash")
@@ -66,6 +69,7 @@ struct AccountsScreen: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: {
+                        FlareHapticManager.shared.buttonPress()
                         showServiceSelectSheet = true
                     }, label: {
                         Image(systemName: "plus").foregroundColor(theme.tintColor)

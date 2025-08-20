@@ -75,6 +75,7 @@ struct TimelineDisplayScreen: View {
                     Picker(selection: Binding(get: {
                         appSettings.appearanceSettings.renderEngine
                     }, set: { value in
+                        FlareHapticManager.shared.selection()
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.renderEngine, to: value))
                     }), content: {
                         ForEach(RenderEngine.allCases, id: \.self) { engine in
@@ -89,6 +90,7 @@ struct TimelineDisplayScreen: View {
                     Picker(selection: Binding(get: {
                         appSettings.appearanceSettings.timelineDisplayType
                     }, set: { value in
+                        FlareHapticManager.shared.selection()
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.timelineDisplayType, to: value))
                     }), content: {
                         ForEach(TimelineDisplayType.allCases, id: \.self) { type in
@@ -112,6 +114,7 @@ struct TimelineDisplayScreen: View {
                     Picker(selection: Binding(get: {
                         appSettings.appearanceSettings.avatarShape
                     }, set: { value in
+                        FlareHapticManager.shared.selection()
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.avatarShape, to: value))
                     }), content: {
                         Text("settings_appearance_avatar_shape_round")
@@ -127,6 +130,7 @@ struct TimelineDisplayScreen: View {
                     Toggle(isOn: Binding(get: {
                         appSettings.appearanceSettings.showActions
                     }, set: { value in
+                        FlareHapticManager.shared.selection()
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showActions, to: value))
                     })) {
                         Text("settings_appearance_show_actions")
@@ -138,6 +142,7 @@ struct TimelineDisplayScreen: View {
                         Toggle(isOn: Binding(get: {
                             appSettings.appearanceSettings.showNumbers
                         }, set: { value in
+                            FlareHapticManager.shared.selection()
                             appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showNumbers, to: value))
                         })) {
                             Text("settings_appearance_show_numbers")
@@ -149,6 +154,7 @@ struct TimelineDisplayScreen: View {
                     Toggle(isOn: Binding(get: {
                         appSettings.appearanceSettings.hideScrollToTopButton
                     }, set: { value in
+                        FlareHapticManager.shared.selection()
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.hideScrollToTopButton, to: value))
                     })) {
                         Text("Hide Scroll to Top Button")
@@ -162,6 +168,7 @@ struct TimelineDisplayScreen: View {
                     Toggle(isOn: Binding(get: {
                         appSettings.appearanceSettings.enableFullSwipePop
                     }, set: { value in
+                        FlareHapticManager.shared.selection()
                         appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.enableFullSwipePop, to: value))
                     })) {
                         Text("Full Swipe Back")
@@ -254,6 +261,7 @@ struct TimelineDisplayScreen: View {
                         return theme.chosenFontData != nil ? FlareTheme.FontState.custom : FlareTheme.FontState.system
                     },
                     set: { newValue in
+                        FlareHapticManager.shared.selection()
                         switch newValue {
                         case .system:
                             theme.chosenFont = nil

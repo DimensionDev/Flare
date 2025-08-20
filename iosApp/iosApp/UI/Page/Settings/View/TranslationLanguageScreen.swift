@@ -18,6 +18,7 @@ struct TranslationLanguageScreen: View {
                     Picker("", selection: Binding(get: {
                         appSettings.otherSettings.translationProvider
                     }, set: { value in
+                        FlareHapticManager.shared.selection()
                         appSettings.updateOther(newValue: appSettings.otherSettings.also { settings in
                             settings.translationProvider = value
                         })
@@ -47,6 +48,7 @@ struct TranslationLanguageScreen: View {
 
             if appSettings.otherSettings.translationProvider == .systemOffline {
                 Button(action: {
+                    FlareHapticManager.shared.buttonPress()
                     showSystemTranslationTest = true
                 }) {
                     HStack {

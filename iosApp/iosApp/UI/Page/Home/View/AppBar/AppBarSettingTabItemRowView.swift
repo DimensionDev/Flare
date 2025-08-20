@@ -148,6 +148,7 @@ struct ListTabItemRowRow: View {
 
             HStack(spacing: 8) {
                 Button(action: {
+                    FlareHapticManager.shared.buttonPress()
                     let titleToEdit = store.listTitles[listId] ?? currentTitle
                     onRequestEdit(listId, titleToEdit)
                 }) {

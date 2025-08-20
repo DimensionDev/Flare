@@ -43,6 +43,7 @@ public struct SingleMediaView: View {
                 }
             }
             .onTapGesture {
+                FlareHapticManager.shared.buttonPress()
                 action()
             }
         }

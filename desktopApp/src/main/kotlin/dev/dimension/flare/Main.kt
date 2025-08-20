@@ -16,6 +16,7 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.request.crossfade
 import dev.dimension.flare.common.DeeplinkHandler
+import dev.dimension.flare.common.SandboxHelper
 import dev.dimension.flare.di.KoinHelper
 import dev.dimension.flare.di.desktopModule
 import dev.dimension.flare.ui.route.FloatingWindowState
@@ -30,6 +31,7 @@ import org.koin.core.context.startKoin
 import java.awt.Desktop
 
 fun main(args: Array<String>) {
+    SandboxHelper.configureSQLiteDriver()
     startKoin {
         modules(desktopModule + KoinHelper.modules())
     }

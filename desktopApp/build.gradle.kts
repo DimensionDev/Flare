@@ -98,3 +98,8 @@ val macExtraPlistKeys: String
       </array>
     """
 
+extra["sqliteVersion"] = libs.versions.sqlite.get()
+extra["sqliteOsArch"] = "osx_arm64"
+
+apply(from = File(projectDir, "download-sql-bundle.gradle.kts"))
+

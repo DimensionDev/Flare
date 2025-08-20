@@ -27,6 +27,7 @@ struct StatusDetailScreenV2: View {
                                 item: preloadItem,
                                 timelineViewModel: timelineViewModel
                             )
+                            .padding(.horizontal, 14)
                             .listRowBackground(theme.primaryBackgroundColor)
                             .listRowInsets(EdgeInsets())
                             .listRowSeparator(.hidden)
@@ -40,6 +41,7 @@ struct StatusDetailScreenV2: View {
                                 .listRowBackground(theme.primaryBackgroundColor)
                                 .listRowInsets(EdgeInsets())
                                 .listRowSeparator(.hidden)
+                                .padding(.horizontal, 14)
                             }
                         }
 
@@ -48,7 +50,7 @@ struct StatusDetailScreenV2: View {
                             items: items,
                             hasMore: hasMore,
                             viewModel: timelineViewModel
-                        )
+                        ).padding(.horizontal, 14)
                         .listRowBackground(theme.primaryBackgroundColor)
                         .listRowInsets(EdgeInsets())
 

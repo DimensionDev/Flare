@@ -53,7 +53,7 @@ struct TimelineActionsViewV2: View, Equatable {
             }
             .frame(maxWidth: .infinity)
             .confirmationDialog("Retweet Options", isPresented: $showRetweetMenu) {
-                Button("Retweet") {
+                Button(item.isRetweeted ? "retweet_remove": "Retweet") {
                     FlareHapticManager.shared.buttonPress()
                     performRetweetAction(isQuote: false)
                 }

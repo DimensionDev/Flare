@@ -50,7 +50,7 @@ struct StatusDetailScreenV2: View {
                             items: items,
                             hasMore: hasMore,
                             viewModel: timelineViewModel
-                        ).padding(.horizontal, 14)
+                        ).padding(.horizontal, 8)
                         .listRowBackground(theme.primaryBackgroundColor)
                         .listRowInsets(EdgeInsets())
 

@@ -24,7 +24,7 @@ struct CompactLabelStyle: LabelStyle {
  */
 struct CommonProfileHeader: View {
     let userInfo: ProfileUserInfo
-    let state: ProfileNewState?
+    let state: ProfileState?
     let onFollowClick: (UiRelation) -> Void
     @State private var isBannerValid: Bool = true
 

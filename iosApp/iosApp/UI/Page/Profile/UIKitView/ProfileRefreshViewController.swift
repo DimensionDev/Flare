@@ -14,7 +14,7 @@ extension JXPagingListContainerView: JXSegmentedViewListContainer {}
 class ProfileNewRefreshViewController: UIViewController {
     private var theme: FlareTheme?
     private var userInfo: ProfileUserInfo?
-    private var state: ProfileNewState?
+    private var state: ProfileState?
     private var selectedTab: Binding<Int>?
     private var isShowAppBar: Binding<Bool?>?
     private var horizontalSizeClass: UserInterfaceSizeClass?
@@ -51,7 +51,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
     func configure(
         userInfo: ProfileUserInfo?,
-        state: ProfileNewState,
+        state: ProfileState,
         selectedTab: Binding<Int>,
         isShowAppBar: Binding<Bool?>,
         horizontalSizeClass: UserInterfaceSizeClass?,
@@ -97,14 +97,14 @@ class ProfileNewRefreshViewController: UIViewController {
         }
 
         // 🔑 设置导航按钮
-        setupNavigationButtons(isOwnProfile: isOwnProfile)
+        // setupNavigationButtons(isOwnProfile: isOwnProfile)
 
         // 更新UI
         updateUI()
 
         // 配置头部视图
         if let userInfo {
-            userHeaderView?.configure(with: userInfo, state: state, theme: theme)
+            userHeaderView?.configure(with: userInfo, state: state, theme: theme, presenter: presenterWrapper.presenter)
 
             // 设置关注按钮回调
             userHeaderView?.onFollowClick = { [weak self] relation in
@@ -189,7 +189,7 @@ class ProfileNewRefreshViewController: UIViewController {
 
         // 新的配置代码
         if let userInfo {
-            userHeaderView?.configure(with: userInfo, state: state, theme: theme)
+            userHeaderView?.configure(with: userInfo, state: state, theme: theme, presenter: presenterWrapper?.presenter)
         }
 
         // 配置分段控制器
@@ -446,13 +446,13 @@ class ProfileNewRefreshViewController: UIViewController {
     private func setupNavigationButtons(isOwnProfile: Bool) {
         if isOwnProfile {
             // 自己的Profile：清除所有导航按钮
-            navigationController?.navigationBar.topItem?.leftBarButtonItem = nil
-            navigationController?.navigationBar.topItem?.rightBarButtonItem = nil
+            // navigationController?.navigationBar.topItem?.leftBarButtonItem = nil
+            // navigationController?.navigationBar.topItem?.rightBarButtonItem = nil
         } else {
             // 其他用户Profile：只设置更多按钮，使用系统默认返回按钮
-            navigationController?.navigationBar.topItem?.leftBarButtonItem = nil // 使用系统默认返回按钮
-            let moreButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), style: .plain, target: self, action: #selector(handleMoreMenuTap))
-            navigationController?.navigationBar.topItem?.rightBarButtonItem = moreButton
+            // navigationController?.navigationBar.topItem?.leftBarButtonItem = nil // 使用系统默认返回按钮
+            // let moreButton = UIBarButtonItem(image: UIImage(systemName: "ellipsis.circle"), style: .plain, target: self, action: #selector(handleMoreMenuTap))
+            // navigationController?.navigationBar.topItem?.rightBarButtonItem = moreButton
         }
     }
 

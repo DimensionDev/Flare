@@ -7,6 +7,7 @@ struct TimelineViewSwiftUIV4: View {
     @ObservedObject var store: AppBarTabSettingStore
     let isCurrentTab: Bool
     @Environment(FlareTheme.self) private var theme
+    @Environment(\.shouldShowVersionBanner) private var shouldShowVersionBanner
     @EnvironmentObject private var timelineState: TimelineExtState
 
     @State private var timeLineViewModel = TimelineViewModel()
@@ -21,6 +22,17 @@ struct TimelineViewSwiftUIV4: View {
 
     @State private var refreshDebounceTimer: Timer?
 
+    private var shouldShowBanner: Bool {
+        shouldShowVersionBanner && isHomeFirstTab
+    }
+
+    private var isHomeFirstTab: Bool {
+        let containsHome = tab.key.lowercased().contains("home")
+        let firstTabKey = store.availableAppBarTabsItems.first?.key
+        let isFirstTab = tab.key == firstTabKey
+        return containsHome || isFirstTab
+    }
+
     var body: some View {
         ScrollViewReader { proxy in
             VStack {
@@ -30,6 +42,15 @@ struct TimelineViewSwiftUIV4: View {
                         .frame(height: 0)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
+
+                    if shouldShowBanner {
+                        ReleaseLogBannerView {
+                            NotificationCenter.default.post(name: .versionBannerDismissed, object: nil)
+                        }
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                    }
 
                     switch timeLineViewModel.timelineState {
                     case .loading:

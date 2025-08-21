@@ -51,8 +51,8 @@ struct StatusDetailScreenV2: View {
                             hasMore: hasMore,
                             viewModel: timelineViewModel
                         ).padding(.horizontal, 8)
-                        .listRowBackground(theme.primaryBackgroundColor)
-                        .listRowInsets(EdgeInsets())
+                            .listRowBackground(theme.primaryBackgroundColor)
+                            .listRowInsets(EdgeInsets())
 
                     case let .error(error):
                         TimelineErrorView(error: error) {

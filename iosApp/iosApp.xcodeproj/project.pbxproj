@@ -23,6 +23,7 @@
 		06B851552B6B926D00DFA075 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 06B851542B6B926D00DFA075 /* Localizable.xcstrings */; };
 		640236062DF6B62200C0D558 /* SwiftUIIntrospect in Frameworks */ = {isa = PBXBuildFile; productRef = 640236052DF6B62200C0D558 /* SwiftUIIntrospect */; };
 		6404FB1E2DE45EB700D0A053 /* EmojiText in Frameworks */ = {isa = PBXBuildFile; productRef = 6404FB1D2DE45EB700D0A053 /* EmojiText */; };
+		641E7F9B2E56DEFA000828C7 /* ReleaseLog.md in Resources */ = {isa = PBXBuildFile; fileRef = 641E7F9A2E56DEFA000828C7 /* ReleaseLog.md */; };
 		642DED2D2DBF6965006B944C /* FontAwesomeSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 642DED2C2DBF6965006B944C /* FontAwesomeSwiftUI */; };
 		6447DE922E192773005E08AE /* WaterfallGrid in Frameworks */ = {isa = PBXBuildFile; productRef = 6447DE912E192773005E08AE /* WaterfallGrid */; };
 		644C84F82D535D0B00E92D0D /* JXPagingView in Frameworks */ = {isa = PBXBuildFile; productRef = 644C84F72D535D0B00E92D0D /* JXPagingView */; };
@@ -35,7 +36,6 @@
 		6489B3312D68D50800D8AEBB /* SVGView in Frameworks */ = {isa = PBXBuildFile; productRef = 6489B3302D68D50800D8AEBB /* SVGView */; };
 		648EE5BD2D8D71EA00A457AA /* SwiftfulRouting in Frameworks */ = {isa = PBXBuildFile; productRef = 648EE5BC2D8D71EA00A457AA /* SwiftfulRouting */; };
 		64A2DC662DAD21BF008EF8C2 /* ExyteChat in Frameworks */ = {isa = PBXBuildFile; productRef = 64A2DC652DAD21BF008EF8C2 /* ExyteChat */; };
-		64B780542D9D3B7F00955C56 /* TagCloud in Frameworks */ = {isa = PBXBuildFile; productRef = 64B780532D9D3B7F00955C56 /* TagCloud */; };
 		64BA00252D1AD84D0053F205 /* JXPhotoBrowser in Frameworks */ = {isa = PBXBuildFile; productRef = 64BA00242D1AD84D0053F205 /* JXPhotoBrowser */; };
 		64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */ = {isa = PBXBuildFile; productRef = 64BBDA712CFDD8420052E599 /* SwiftDate */; };
 		64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 64C855FF2CFD7F260071DCD8 /* Release.xcconfig */; };
@@ -44,13 +44,9 @@
 		64E208742CF845C2001C64EF /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208732CF845C2001C64EF /* Kingfisher */; };
 		64E208772CF84612001C64EF /* JXPhotoBrowser in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208762CF84612001C64EF /* JXPhotoBrowser */; };
 		64E2087A2CF84670001C64EF /* Generated in Frameworks */ = {isa = PBXBuildFile; productRef = 64E208792CF84670001C64EF /* Generated */; };
-		64E8778C2D06CA4A003559B9 /* TwitterText in Frameworks */ = {isa = PBXBuildFile; productRef = 64E8778B2D06CA4A003559B9 /* TwitterText */; };
-		64E877C92D0842AA003559B9 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877C82D0842AA003559B9 /* SwiftSoup */; };
-		64E877CC2D0842C5003559B9 /* Fuzi in Frameworks */ = {isa = PBXBuildFile; productRef = 64E877CB2D0842C5003559B9 /* Fuzi */; };
 		64E890742D2D28400001B93D /* MJRefresh in Frameworks */ = {isa = PBXBuildFile; productRef = 64E890732D2D28400001B93D /* MJRefresh */; };
 		64EA48E32D6344A900D0F609 /* Hero in Frameworks */ = {isa = PBXBuildFile; productRef = 64EA48E22D6344A900D0F609 /* Hero */; };
 		64FF2E132D2BC4E80046A32B /* Generated in Frameworks */ = {isa = PBXBuildFile; productRef = 64FF2E122D2BC4E80046A32B /* Generated */; };
-		B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,19 +58,18 @@
 		06B851502B6B22DD00DFA075 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		06B851542B6B926D00DFA075 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		06BE4D632B3181B0000C6D7D /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
+		641E7F9A2E56DEFA000828C7 /* ReleaseLog.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ReleaseLog.md; sourceTree = "<group>"; };
 		64655C2C2CFD6CA000255488 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		64C855FF2CFD7F260071DCD8 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		64D13E3C2DEEE1390013547A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* Flare.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flare.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
-		B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MoleculeViewModelBase.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		647078602D76F0A100551073 /* UI */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = UI; sourceTree = "<group>"; };
 		647078DE2D76F0A400551073 /* Extension */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Extension; sourceTree = "<group>"; };
-		647078E32D76F0A600551073 /* Common */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Common; sourceTree = "<group>"; };
 		647078EC2D76F0B900551073 /* Data */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Data; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
@@ -85,7 +80,6 @@
 			files = (
 				6467B2AE2DB109500045DA9A /* SFSymbolKit in Frameworks */,
 				64541A902DA3CE5A001208C7 /* Tiercel in Frameworks */,
-				64E877CC2D0842C5003559B9 /* Fuzi in Frameworks */,
 				646CABC52DAE876C00B9EA6F /* ExyteChat in Frameworks */,
 				64E208712CF8458A001C64EF /* FLAnimatedImage in Frameworks */,
 				642DED2D2DBF6965006B944C /* FontAwesomeSwiftUI in Frameworks */,
@@ -98,9 +92,7 @@
 				066AD0492B3ACDC1006F28F4 /* OrderedCollections in Frameworks */,
 				06B8514D2B6B228600DFA075 /* FirebaseCrashlytics in Frameworks */,
 				6488800B2D1AD43E00EFE72C /* JXSegmentedView in Frameworks */,
-				64E8778C2D06CA4A003559B9 /* TwitterText in Frameworks */,
 				644C84F82D535D0B00E92D0D /* JXPagingView in Frameworks */,
-				64B780542D9D3B7F00955C56 /* TagCloud in Frameworks */,
 				06244DED2B75F21E00884683 /* AVKit.framework in Frameworks */,
 				64E2087A2CF84670001C64EF /* Generated in Frameworks */,
 				6447DE922E192773005E08AE /* WaterfallGrid in Frameworks */,
@@ -113,7 +105,6 @@
 				64BBDA722CFDD8420052E599 /* SwiftDate in Frameworks */,
 				640236062DF6B62200C0D558 /* SwiftUIIntrospect in Frameworks */,
 				64EA48E32D6344A900D0F609 /* Hero in Frameworks */,
-				64E877C92D0842AA003559B9 /* SwiftSoup in Frameworks */,
 				64E208772CF84612001C64EF /* JXPhotoBrowser in Frameworks */,
 				066AD0472B3ACDC1006F28F4 /* DequeModule in Frameworks */,
 				648EE5BD2D8D71EA00A457AA /* SwiftfulRouting in Frameworks */,
@@ -162,18 +153,17 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				641E7F9A2E56DEFA000828C7 /* ReleaseLog.md */,
 				64D13E3C2DEEE1390013547A /* PrivacyInfo.xcprivacy */,
 				647078EC2D76F0B900551073 /* Data */,
 				647078602D76F0A100551073 /* UI */,
 				647078DE2D76F0A400551073 /* Extension */,
-				647078E32D76F0A600551073 /* Common */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
 				7555FF8C242A565B00829871 /* Info.plist */,
 				06BE4D632B3181B0000C6D7D /* iosApp.entitlements */,
 				06B8514E2B6B22A500DFA075 /* GoogleService-Info.plist */,
 				058557D7273AAEEB004C7B11 /* Preview Content */,
 				060D00C12AC407DF0087427A /* FlareApp.swift */,
-				B62B237F0BC42E0102952FED /* MoleculeViewModelBase.swift */,
 				06B851542B6B926D00DFA075 /* Localizable.xcstrings */,
 				06B851502B6B22DD00DFA075 /* AppDelegate.swift */,
 				B62B2291B79CA2EBCE71D4A8 /* AppIcon.appiconset */,
@@ -236,7 +226,6 @@
 			fileSystemSynchronizedGroups = (
 				647078602D76F0A100551073 /* UI */,
 				647078DE2D76F0A400551073 /* Extension */,
-				647078E32D76F0A600551073 /* Common */,
 				647078EC2D76F0B900551073 /* Data */,
 			);
 			name = iosApp;
@@ -253,9 +242,6 @@
 				64E208762CF84612001C64EF /* JXPhotoBrowser */,
 				64E208792CF84670001C64EF /* Generated */,
 				64BBDA712CFDD8420052E599 /* SwiftDate */,
-				64E8778B2D06CA4A003559B9 /* TwitterText */,
-				64E877C82D0842AA003559B9 /* SwiftSoup */,
-				64E877CB2D0842C5003559B9 /* Fuzi */,
 				6488800A2D1AD43E00EFE72C /* JXSegmentedView */,
 				64BA00242D1AD84D0053F205 /* JXPhotoBrowser */,
 				64FF2E122D2BC4E80046A32B /* Generated */,
@@ -264,7 +250,6 @@
 				64EA48E22D6344A900D0F609 /* Hero */,
 				6489B3302D68D50800D8AEBB /* SVGView */,
 				648EE5BC2D8D71EA00A457AA /* SwiftfulRouting */,
-				64B780532D9D3B7F00955C56 /* TagCloud */,
 				64541A8F2DA3CE5A001208C7 /* Tiercel */,
 				64A2DC652DAD21BF008EF8C2 /* ExyteChat */,
 				646CABC42DAE876C00B9EA6F /* ExyteChat */,
@@ -314,9 +299,6 @@
 				64E2086F2CF8458A001C64EF /* XCRemoteSwiftPackageReference "FLAnimatedImage" */,
 				64E208722CF845C2001C64EF /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				64BBDA702CFDD8420052E599 /* XCRemoteSwiftPackageReference "SwiftDate" */,
-				64E8778A2D06CA4A003559B9 /* XCRemoteSwiftPackageReference "twitter-text" */,
-				64E877C72D0842AA003559B9 /* XCRemoteSwiftPackageReference "SwiftSoup" */,
-				64E877CA2D0842C5003559B9 /* XCRemoteSwiftPackageReference "Fuzi" */,
 				648880092D1AD43E00EFE72C /* XCRemoteSwiftPackageReference "JXSegmentedView" */,
 				64BA00232D1AD84D0053F205 /* XCRemoteSwiftPackageReference "PhotoBrowser" */,
 				64FF2E112D2BC4E80046A32B /* XCLocalSwiftPackageReference "Generated" */,
@@ -325,7 +307,6 @@
 				64EA48E12D6344A900D0F609 /* XCRemoteSwiftPackageReference "Hero" */,
 				6489B32F2D68D50800D8AEBB /* XCRemoteSwiftPackageReference "SVGView" */,
 				648EE5BB2D8D71EA00A457AA /* XCRemoteSwiftPackageReference "SwiftfulRouting" */,
-				64B780522D9D3B7F00955C56 /* XCRemoteSwiftPackageReference "TagCloud" */,
 				64541A8E2DA3CE5A001208C7 /* XCRemoteSwiftPackageReference "Tiercel" */,
 				646CABC32DAE876C00B9EA6F /* XCRemoteSwiftPackageReference "Chat" */,
 				6467B2AC2DB109500045DA9A /* XCRemoteSwiftPackageReference "SFSymbolKit" */,
@@ -350,6 +331,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */,
+				641E7F9B2E56DEFA000828C7 /* ReleaseLog.md in Resources */,
 				058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */,
 				64C856002CFD7F260071DCD8 /* Release.xcconfig in Resources */,
 				64D13E3D2DEEE1390013547A /* PrivacyInfo.xcprivacy in Resources */,
@@ -430,7 +412,6 @@
 			files = (
 				060D00C22AC407DF0087427A /* FlareApp.swift in Sources */,
 				06B851512B6B22DD00DFA075 /* AppDelegate.swift in Sources */,
-				B62B2FD55B1833C5CED7FE0A /* MoleculeViewModelBase.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -828,14 +809,6 @@
 				minimumVersion = 5.3.6;
 			};
 		};
-		64B780522D9D3B7F00955C56 /* XCRemoteSwiftPackageReference "TagCloud" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/yarspirin/TagCloud.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.4;
-			};
-		};
 		64BA00232D1AD84D0053F205 /* XCRemoteSwiftPackageReference "PhotoBrowser" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/JiongXing/PhotoBrowser";
@@ -866,30 +839,6 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 8.1.1;
-			};
-		};
-		64E8778A2D06CA4A003559B9 /* XCRemoteSwiftPackageReference "twitter-text" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/TwidereProject/twitter-text";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.0.4;
-			};
-		};
-		64E877C72D0842AA003559B9 /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.7.6;
-			};
-		};
-		64E877CA2D0842C5003559B9 /* XCRemoteSwiftPackageReference "Fuzi" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/cezheng/Fuzi.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.1.3;
 			};
 		};
 		64E890722D2D28400001B93D /* XCRemoteSwiftPackageReference "MJRefresh" */ = {
@@ -1010,11 +959,6 @@
 			isa = XCSwiftPackageProductDependency;
 			productName = ExyteChat;
 		};
-		64B780532D9D3B7F00955C56 /* TagCloud */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 64B780522D9D3B7F00955C56 /* XCRemoteSwiftPackageReference "TagCloud" */;
-			productName = TagCloud;
-		};
 		64BA00242D1AD84D0053F205 /* JXPhotoBrowser */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 64BA00232D1AD84D0053F205 /* XCRemoteSwiftPackageReference "PhotoBrowser" */;
@@ -1042,21 +986,6 @@
 		64E208792CF84670001C64EF /* Generated */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = Generated;
-		};
-		64E8778B2D06CA4A003559B9 /* TwitterText */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 64E8778A2D06CA4A003559B9 /* XCRemoteSwiftPackageReference "twitter-text" */;
-			productName = TwitterText;
-		};
-		64E877C82D0842AA003559B9 /* SwiftSoup */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 64E877C72D0842AA003559B9 /* XCRemoteSwiftPackageReference "SwiftSoup" */;
-			productName = SwiftSoup;
-		};
-		64E877CB2D0842C5003559B9 /* Fuzi */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 64E877CA2D0842C5003559B9 /* XCRemoteSwiftPackageReference "Fuzi" */;
-			productName = Fuzi;
 		};
 		64E890732D2D28400001B93D /* MJRefresh */ = {
 			isa = XCSwiftPackageProductDependency;

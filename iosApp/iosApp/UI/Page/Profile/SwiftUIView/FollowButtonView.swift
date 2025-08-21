@@ -1,40 +1,37 @@
-import SwiftUI
-import shared
 import os.log
+import shared
+import SwiftUI
 
 struct FollowButtonView: View {
     let presenter: ProfilePresenter?
     let userKey: MicroBlogKey
     @Environment(FlareTheme.self) private var theme
 
-     
     var body: some View {
-        if let presenter = presenter {
+        if let presenter {
             ObservePresenter(presenter: presenter) { state in
                 let profileState = state
                 followButtonContent(state: profileState)
             }
         } else {
-            
             loadingButton()
         }
     }
-    
+
     @ViewBuilder
     private func followButtonContent(state: ProfileState) -> some View {
         switch onEnum(of: state.relationState) {
         case .loading:
             loadingButton()
-        case .error(let error):
+        case let .error(error):
             errorButton(error: error)
-        case .success(let rel):
+        case let .success(rel):
             successButton(relation: rel.data as UiRelation, state: state)
         }
     }
-    
+
     @ViewBuilder
     private func loadingButton() -> some View {
- 
         Button(action: {}) {
             HStack(spacing: 4) {
                 Text("Follow")
@@ -47,13 +44,12 @@ struct FollowButtonView: View {
         }
         .disabled(true)
     }
-    
+
     @ViewBuilder
-    private func errorButton(error: UiStateError<UiRelation>) -> some View {
- 
+    private func errorButton(error _: UiStateError<UiRelation>) -> some View {
         Button(action: {
             //
-         }) {
+        }) {
             Text("Retry")
                 .font(.caption)
                 .padding(.horizontal, 12)
@@ -62,11 +58,11 @@ struct FollowButtonView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 15))
         }
     }
-    
+
     @ViewBuilder
     private func successButton(relation: UiRelation, state: ProfileState) -> some View {
         let buttonTitle = getButtonTitle(relation: relation)
- 
+
         Button(action: {
             handleFollowTap(relation: relation, state: state)
         }) {
@@ -80,24 +76,22 @@ struct FollowButtonView: View {
         }
         .buttonStyle(.borderless)
     }
-    
+
     private func getButtonTitle(relation: UiRelation) -> String {
         if relation.blocking {
-            return NSLocalizedString("profile_header_button_blocked", comment: "")
+            NSLocalizedString("profile_header_button_blocked", comment: "")
         } else if relation.following {
-            return NSLocalizedString("profile_header_button_following", comment: "")
+            NSLocalizedString("profile_header_button_following", comment: "")
         } else if relation.hasPendingFollowRequestFromYou {
-            return NSLocalizedString("profile_header_button_requested", comment: "")
+            NSLocalizedString("profile_header_button_requested", comment: "")
         } else {
-            return NSLocalizedString("profile_header_button_follow", comment: "")
+            NSLocalizedString("profile_header_button_follow", comment: "")
         }
     }
-    
-    private func handleFollowTap(relation: UiRelation, state: ProfileState) {
- 
-         FlareHapticManager.shared.buttonPress()
 
-         state.follow(userKey: userKey, data: relation)
- 
+    private func handleFollowTap(relation: UiRelation, state: ProfileState) {
+        FlareHapticManager.shared.buttonPress()
+
+        state.follow(userKey: userKey, data: relation)
     }
 }

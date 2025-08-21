@@ -22,7 +22,6 @@ struct TimelineViewSwiftUIV4: View {
 
     @State private var refreshDebounceTimer: Timer?
 
-    
     private var shouldShowBanner: Bool {
         shouldShowVersionBanner && isHomeFirstTab
     }
@@ -44,9 +43,8 @@ struct TimelineViewSwiftUIV4: View {
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets())
 
-                   
                     if shouldShowBanner {
-                        ReleaseLogBannerView { 
+                        ReleaseLogBannerView {
                             NotificationCenter.default.post(name: .versionBannerDismissed, object: nil)
                         }
                         .listRowSeparator(.hidden)

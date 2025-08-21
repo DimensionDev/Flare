@@ -4,20 +4,18 @@ struct ReleaseLogBannerView: View {
     @ObservedObject private var releaseLogManager = ReleaseLogManager.shared
     @Environment(FlareTheme.self) private var theme
     @State private var showReleaseLogSheet = false
-    
+
     let onDismiss: () -> Void
-    
+
     var body: some View {
         Button(action: {
             showReleaseLogSheet = true
         }) {
             HStack(spacing: 12) {
-                
                 Image(systemName: "sparkles")
                     .foregroundColor(theme.tintColor)
                     .font(.title2)
-                
-               
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(releaseLogManager.getBannerText())
                         .font(.body)
@@ -25,10 +23,9 @@ struct ReleaseLogBannerView: View {
                         .multilineTextAlignment(.leading)
                         .lineLimit(2)
                 }
-                
+
                 Spacer()
-                
-                
+
                 Image(systemName: "chevron.right")
                     .foregroundColor(theme.labelColor.opacity(0.6))
                     .font(.caption)
@@ -43,10 +40,9 @@ struct ReleaseLogBannerView: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 8)
         .sheet(isPresented: $showReleaseLogSheet, onDismiss: {
-            
             if let currentVersion = releaseLogManager.getCurrentAppVersion() {
                 releaseLogManager.markVersionLogAsShown(version: currentVersion)
-                onDismiss()  
+                onDismiss()
             }
         }) {
             NavigationView {
@@ -69,5 +65,3 @@ struct ReleaseLogBannerView: View {
         .animation(.easeInOut(duration: 0.3), value: showReleaseLogSheet)
     }
 }
-
- 

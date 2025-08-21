@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
- private struct VersionBannerKey: EnvironmentKey {
+private struct VersionBannerKey: EnvironmentKey {
     static let defaultValue: Bool = false
 }
 
@@ -12,8 +12,6 @@ extension EnvironmentValues {
     }
 }
 
- 
 extension Notification.Name {
- 
     static let versionBannerDismissed = Notification.Name("versionBannerDismissed")
 }

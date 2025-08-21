@@ -15,23 +15,18 @@ struct FlareApp: SwiftUI.App {
     @State private var shouldShowVersionBanner: Bool = false
 
     init() {
- 
         FontAwesome.register()
 
         KoinHelper.shared.start(inAppNotification: SwitUIInAppNotification())
 
         FlareImageConfiguration.shared.configure()
 
-        
         UserManager.shared.initialize()
 
-         
         AppBarTabSettingStore.shared.initialize(with: AccountTypeGuest(), user: nil)
 
-        
         _ = DownloadManager.shared
 
-         
         _shouldShowVersionBanner = State(initialValue: ReleaseLogManager.shared.shouldShowBanner())
     }
 
@@ -88,6 +83,4 @@ struct FlareApp: SwiftUI.App {
             .windowStyle(.hiddenTitleBar)
         #endif
     }
-
-
 }

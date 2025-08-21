@@ -15,11 +15,9 @@ import shared
 import SwiftUI
 import UIKit
 
-
 class ProfileNewHeaderView: UIView {
     private var state: ProfileState?
     var theme: FlareTheme?
-
 
     var onFollowClick: ((UiRelation) -> Void)?
 
@@ -144,8 +142,6 @@ class ProfileNewHeaderView: UIView {
         avatarView.addGestureRecognizer(avatarTap)
         avatarView.isUserInteractionEnabled = true
 
-
-
         // Name Label
         addSubview(nameLabel)
         nameLabel.frame = CGRect(x: 16, y: avatarView.frame.maxY + 10, width: frame.width - 32, height: 24)
@@ -207,7 +203,7 @@ class ProfileNewHeaderView: UIView {
         nameLabel.textColor = UIColor(theme.labelColor)
         descriptionLabel.textColor = UIColor(theme.labelColor)
         descriptionLabel.backgroundColor = UIColor(theme.primaryBackgroundColor) // 貌似没用
-}
+    }
 
     private func layoutContent() {
         // 计算description的高度
@@ -254,11 +250,9 @@ class ProfileNewHeaderView: UIView {
         self.theme = theme
         self.presenter = presenter
 
-
         if theme != nil {
             applyTheme()
         }
-
 
         nameLabel.text = userInfo.profile.name.markdown
 
@@ -304,9 +298,7 @@ class ProfileNewHeaderView: UIView {
         followsCountLabel.text = "\(formatCount(Int64(userInfo.followCount) ?? 0)) \(NSLocalizedString("following_title", comment: ""))"
         fansCountLabel.text = "\(formatCount(Int64(userInfo.fansCount) ?? 0)) \(NSLocalizedString("fans_title", comment: ""))"
 
-
         setupSwiftUIFollowButton(with: userInfo)
-
 
         setupSwiftUIMoreButton(with: userInfo)
 
@@ -440,7 +432,7 @@ class ProfileNewHeaderView: UIView {
 
         // 创建SwiftUI Follow Button
         let followButtonView = FollowButtonView(
-            presenter: self.presenter,
+            presenter: presenter,
             userKey: userInfo.profile.key
         )
 
@@ -448,7 +440,7 @@ class ProfileNewHeaderView: UIView {
 
         // 添加到视图层次结构
         addSubview(hostingController.view)
-         hostingController.view.backgroundColor = UIColor.clear
+        hostingController.view.backgroundColor = UIColor.clear
 
         // 设置约束
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
@@ -470,7 +462,7 @@ class ProfileNewHeaderView: UIView {
 
         // 创建SwiftUI More Button
         let moreButtonView = ProfileMoreButtonView(
-            presenter: self.presenter,
+            presenter: presenter,
             userKey: userInfo.profile.key
         )
 
@@ -481,14 +473,14 @@ class ProfileNewHeaderView: UIView {
         let barButtonItem = UIBarButtonItem(customView: hostingController.view)
 
         // 添加到导航栏
-        if let navigationController = self.findViewController()?.navigationController {
+        if let navigationController = findViewController()?.navigationController {
             navigationController.navigationBar.topItem?.rightBarButtonItem = barButtonItem
         }
     }
 
     private func clearMoreButton() {
         // 清除导航栏右侧按钮
-        if let navigationController = self.findViewController()?.navigationController {
+        if let navigationController = findViewController()?.navigationController {
             navigationController.navigationBar.topItem?.rightBarButtonItem = nil
         }
     }

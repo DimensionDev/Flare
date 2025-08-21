@@ -1,5 +1,5 @@
-import SwiftUI
 import MarkdownUI
+import SwiftUI
 
 struct ReleaseLogScreen: View {
     @StateObject private var releaseLogManager = ReleaseLogManager.shared
@@ -7,7 +7,7 @@ struct ReleaseLogScreen: View {
     @State private var isTranslating = false
     @State private var translatedContent: String?
     @Environment(FlareTheme.self) private var theme
-    
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -15,7 +15,6 @@ struct ReleaseLogScreen: View {
                     ProgressView("Loading...")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    
                     ForEach(releaseLogManager.releaseLogEntries, id: \.version) { entry in
                         VStack(alignment: .leading, spacing: 12) {
                             if let translated = translatedContent {
@@ -55,15 +54,15 @@ struct ReleaseLogScreen: View {
             }
         }
     }
-    
+
     private func translateContent() {
         guard !releaseLogManager.releaseLogEntries.isEmpty else { return }
-        
+
         isTranslating = true
         let fullContent = releaseLogManager.releaseLogEntries
-            .map { $0.content }
+            .map(\.content)
             .joined(separator: "\n\n----------\n\n")
-        
+
         Task {
             do {
                 let locale = Locale.current
@@ -71,12 +70,12 @@ struct ReleaseLogScreen: View {
                 let translationService = GoogleTranslationService(targetLanguage: targetLanguage)
                 let result = try await translationService.translate(text: fullContent)
                 await MainActor.run {
-                    self.translatedContent = result.translatedText
-                    self.isTranslating = false
+                    translatedContent = result.translatedText
+                    isTranslating = false
                 }
             } catch {
                 await MainActor.run {
-                    self.isTranslating = false
+                    isTranslating = false
                     print("翻译失败: \(error)")
                 }
             }

@@ -1,47 +1,44 @@
-import SwiftUI
-import shared
 import os.log
+import shared
+import SwiftUI
 
 struct ProfileMoreButtonView: View {
     let presenter: ProfilePresenter?
     let userKey: MicroBlogKey
     @Environment(FlareTheme.self) private var theme
-    
+
     var body: some View {
-        if let presenter = presenter {
+        if let presenter {
             ObservePresenter<ProfileState, ProfilePresenter, AnyView>(presenter: presenter) { state in
                 let profileState = state
 
                 AnyView(Menu {
-
                     switch onEnum(of: profileState.actions) {
-                    case .success(let actionsData):
+                    case let .success(actionsData):
                         switch onEnum(of: profileState.relationState) {
-                        case .success(let relationData):
+                        case let .success(relationData):
                             let actions = actionsData.data
                             let relation = relationData.data as UiRelation
                             ForEach(0 ..< actions.size, id: \.self) { index in
                                 let action = actions.get(index: Int32(index))
-                            Button(action: {
-
-                                handleProfileAction(action, relation: relation, state: profileState)
-                            }) {
-                                if action is ProfileActionBlock {
-                                    if action.relationState(relation: relation) {
-                                        Label("Unblock", systemImage: "person.slash.fill")
-                                    } else {
-                                        Label("Block", systemImage: "person.slash")
-                                    }
-                                } else if action is ProfileActionMute {
-                                    if action.relationState(relation: relation) {
-                                        Label("Unmute", systemImage: "speaker.wave.3")
-                                    } else {
-                                        Label("Mute", systemImage: "speaker.slash")
+                                Button(action: {
+                                    handleProfileAction(action, relation: relation, state: profileState)
+                                }) {
+                                    if action is ProfileActionBlock {
+                                        if action.relationState(relation: relation) {
+                                            Label("Unblock", systemImage: "person.slash.fill")
+                                        } else {
+                                            Label("Block", systemImage: "person.slash")
+                                        }
+                                    } else if action is ProfileActionMute {
+                                        if action.relationState(relation: relation) {
+                                            Label("Unmute", systemImage: "speaker.wave.3")
+                                        } else {
+                                            Label("Mute", systemImage: "speaker.slash")
+                                        }
                                     }
                                 }
                             }
-                        }
-                        
 
                             if actions.size > 0 {
                                 Divider()
@@ -52,7 +49,6 @@ struct ProfileMoreButtonView: View {
                     default:
                         EmptyView()
                     }
-
 
                     Button(role: .destructive, action: {
                         handleReport(state: profileState)
@@ -69,7 +65,7 @@ struct ProfileMoreButtonView: View {
                     //         Label("Edit List", systemImage: "list.bullet")
                     //     }
                     // }
-                    
+
                     // TODO: Send Message
                     // if let canSendMessage = profileState.canSendMessage.data,
                     //    canSendMessage {
@@ -77,10 +73,10 @@ struct ProfileMoreButtonView: View {
                     //         Label("Send Message", systemImage: "message")
                     //     }
                     // }
-                    
+
                     // TODO: Search User Using Account -
                     // 需要实现多账户跨平台搜索功能
-                    
+
                 } label: {
                     // 保持现有的ellipsis.circle图标
                     Image(systemName: "ellipsis.circle")
@@ -89,7 +85,6 @@ struct ProfileMoreButtonView: View {
                 .menuStyle(BorderlessButtonMenuStyle()))
             }
         } else {
-
             Menu {
                 Button(role: .destructive, action: {
                     handleBasicReport()
@@ -102,9 +97,7 @@ struct ProfileMoreButtonView: View {
             }
         }
     }
-    
 
-    
     private func handleProfileAction(_ action: ProfileAction, relation: UiRelation, state: ProfileState) {
         Task {
             state.onProfileActionClick(
@@ -125,7 +118,7 @@ struct ProfileMoreButtonView: View {
             }
         }
     }
-    
+
     private func handleReport(state: ProfileState) {
         Task {
             state.report(userKey: userKey)
@@ -137,26 +130,21 @@ struct ProfileMoreButtonView: View {
             }
         }
     }
-    
-    private func handleBasicReport() {
 
+    private func handleBasicReport() {
         ToastView(
             icon: UIImage(systemName: "info.circle"),
             message: "Report functionality not available"
         ).show()
     }
-    
-
 
     // private func handleEditList() {
     //     print("Edit List functionality - to be implemented")
     // }
-    
 
     // private func handleSendMessage() {
     //     print("Send Message functionality - to be implemented")
     // }
-    
 
     // private func handleSearchUserUsingAccount() {
     //     print("Search User Using Account functionality - to be implemented")

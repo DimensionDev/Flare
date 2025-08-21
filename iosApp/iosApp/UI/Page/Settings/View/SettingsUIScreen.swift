@@ -76,7 +76,6 @@ struct SettingsUIScreen: View {
 //                            }
 //                            .tag(SettingsDestination.aiSettings)
 
-                            
                             Label {
                                 Text(SettingsDestination.releaseLog.title)
                                     .foregroundColor(theme.labelColor)

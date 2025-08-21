@@ -90,7 +90,6 @@ struct AppearanceSettings: Codable, Changeable {
     var misskey: Misskey = .init()
     var bluesky: Bluesky = .init()
 
-    
     var shownReleaseLogVersions: [String: Int] = [:]
 
     struct Mastodon: Codable, Changeable {

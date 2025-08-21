@@ -45,7 +45,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Pkg)
             packageName = "dev.dimension.flare"
-            packageVersion = System.getenv("BUILD_VERSION") ?: "1.0.0"
+            packageVersion = "1.0.0"
             macOS {
                 val file = project.file("signing.properties")
                 val hasSigningProps = file.exists()

@@ -1,5 +1,5 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import java.util.Properties
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -23,7 +23,6 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(libs.kotlinx.coroutines.swing)
     implementation(libs.fluent.ui)
-    implementation("io.github.kdroidfilter:platformtools.darkmodedetector:0.5.0")
     implementation(libs.composeIcons.fontAwesome)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.bundles.coil3)
@@ -35,6 +34,8 @@ dependencies {
     implementation(libs.commons.lang3)
     implementation(libs.zoomable)
     implementation(libs.datastore)
+    implementation(libs.filekit.dialogs.compose)
+    implementation(libs.filekit.coil)
 }
 
 compose.desktop {
@@ -46,18 +47,17 @@ compose.desktop {
             packageName = "dev.dimension.flare"
             packageVersion = System.getenv("BUILD_VERSION") ?: "1.0.0"
             macOS {
-
                 val file = project.file("signing.properties")
                 val hasSigningProps = file.exists()
-
                 packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "12"
                 bundleID = "dev.dimension.flare"
                 minimumSystemVersion = "12.0"
                 appStore = hasSigningProps
 
                 jvmArgs(
-                    "-Djna.nosys=false",
-                    "-Djna.nounpack=true",
+                    "-Dapple.awt.application.appearance=system",
+//                    "-Djna.nosys=false",
+//                    "-Djna.nounpack=true",
 //                    "-Djna.boot.library=\$APP_ROOT/Contents/app/resources:\$APP_ROOT/Contents/app:\$APP_ROOT/Contents/runtime/Contents/MacOS:\$APP_ROOT/Contents/runtime/Contents/Home/lib:\$APP_ROOT/Contents/runtime/Contents/Home/lib/server:/System/Library/Frameworks/Foundation.framework/Foundation",
 //                    "-Djna.library.path=\$APP_ROOT/Contents/app/resources:\$APP_ROOT/Contents/app:\$APP_ROOT/Contents/runtime/Contents/MacOS:\$APP_ROOT/Contents/runtime/Contents/Home/lib:\$APP_ROOT/Contents/runtime/Contents/Home/lib/server:/System/Library/Frameworks/Foundation.framework/Foundation",
                 )
@@ -81,6 +81,9 @@ compose.desktop {
                 }
 
 //                iconFile.set(project.file("src/jvmMain/resources/icon/ic_launcher.icns"))
+            }
+            linux {
+                modules("jdk.security.auth")
             }
             appResourcesRootDir.set(file("resources"))
         }

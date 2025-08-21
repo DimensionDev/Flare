@@ -5,18 +5,25 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.foundation.text.input.delete
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
@@ -26,6 +33,8 @@ import compose.icons.fontawesomeicons.Solid
 import compose.icons.fontawesomeicons.brands.Github
 import compose.icons.fontawesomeicons.brands.Line
 import compose.icons.fontawesomeicons.brands.Telegram
+import compose.icons.fontawesomeicons.solid.CircleCheck
+import compose.icons.fontawesomeicons.solid.CircleXmark
 import compose.icons.fontawesomeicons.solid.EllipsisVertical
 import compose.icons.fontawesomeicons.solid.Language
 import compose.icons.fontawesomeicons.solid.Lock
@@ -35,6 +44,8 @@ import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.add_account
 import dev.dimension.flare.app_name
+import dev.dimension.flare.cancel
+import dev.dimension.flare.data.model.AppSettings
 import dev.dimension.flare.data.model.AppearanceSettings
 import dev.dimension.flare.data.model.AvatarShape
 import dev.dimension.flare.data.model.LocalAppearanceSettings
@@ -45,6 +56,7 @@ import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.home_login
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.MicroBlogKey
+import dev.dimension.flare.ok
 import dev.dimension.flare.remove_account
 import dev.dimension.flare.settings_about_line
 import dev.dimension.flare.settings_about_line_description
@@ -55,6 +67,15 @@ import dev.dimension.flare.settings_about_telegram
 import dev.dimension.flare.settings_about_telegram_description
 import dev.dimension.flare.settings_about_title
 import dev.dimension.flare.settings_accounts_title
+import dev.dimension.flare.settings_ai_config_description
+import dev.dimension.flare.settings_ai_config_enable_tldr
+import dev.dimension.flare.settings_ai_config_entable_translation
+import dev.dimension.flare.settings_ai_config_server
+import dev.dimension.flare.settings_ai_config_server_hint
+import dev.dimension.flare.settings_ai_config_server_self_host_description
+import dev.dimension.flare.settings_ai_config_title
+import dev.dimension.flare.settings_ai_config_tldr_description
+import dev.dimension.flare.settings_ai_config_translation_description
 import dev.dimension.flare.settings_appearance_avatar_shape
 import dev.dimension.flare.settings_appearance_avatar_shape_description
 import dev.dimension.flare.settings_appearance_avatar_shape_round
@@ -89,27 +110,39 @@ import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.Header
 import dev.dimension.flare.ui.component.RichText
+import dev.dimension.flare.ui.model.isSuccess
 import dev.dimension.flare.ui.model.onError
+import dev.dimension.flare.ui.model.onLoading
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.home.ActiveAccountPresenter
 import dev.dimension.flare.ui.presenter.home.UserState
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.settings.AccountsPresenter
 import dev.dimension.flare.ui.presenter.settings.AccountsState
+import dev.dimension.flare.ui.presenter.settings.FlareServerProviderPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.component.CardExpanderItem
+import io.github.composefluent.component.ContentDialog
+import io.github.composefluent.component.ContentDialogButton
 import io.github.composefluent.component.DropDownButton
 import io.github.composefluent.component.Expander
 import io.github.composefluent.component.ExpanderItem
 import io.github.composefluent.component.FlyoutPlacement
 import io.github.composefluent.component.MenuFlyoutContainer
 import io.github.composefluent.component.MenuFlyoutItem
+import io.github.composefluent.component.ProgressRing
 import io.github.composefluent.component.RadioButton
 import io.github.composefluent.component.ScrollbarContainer
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Switcher
 import io.github.composefluent.component.Text
+import io.github.composefluent.component.TextField
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
@@ -365,6 +398,7 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                                                     stringResource(
                                                         Res.string.settings_appearance_avatar_shape_round,
                                                     )
+
                                                 AvatarShape.SQUARE ->
                                                     stringResource(
                                                         Res.string.settings_appearance_avatar_shape_square,
@@ -530,7 +564,12 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                     },
                     trailing = {
                         Switcher(
-                            checked = LocalAppearanceSettings.current.videoAutoplay in listOf(VideoAutoplay.ALWAYS, VideoAutoplay.WIFI),
+                            checked =
+                                LocalAppearanceSettings.current.videoAutoplay in
+                                    listOf(
+                                        VideoAutoplay.ALWAYS,
+                                        VideoAutoplay.WIFI,
+                                    ),
                             {
                                 state.appearanceState.updateSettings {
                                     copy(
@@ -538,6 +577,121 @@ internal fun SettingsScreen(toLogin: () -> Unit) {
                                             if (it) VideoAutoplay.ALWAYS else VideoAutoplay.NEVER,
                                     )
                                 }
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+            }
+
+            Header(stringResource(Res.string.settings_ai_config_title))
+            ContentDialog(
+                title = stringResource(Res.string.settings_ai_config_server),
+                visible = state.aiConfigState.showServerDialog,
+                content = {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.settings_ai_config_server_self_host_description),
+                        )
+                        Spacer(modifier = Modifier.size(8.dp))
+                        TextField(
+                            state.aiConfigState.serverText,
+                            placeholder = { Text(stringResource(Res.string.settings_ai_config_server_hint)) },
+                            modifier = Modifier.fillMaxWidth(),
+                            trailing = {
+                                state.aiConfigState.serverValidation
+                                    .onSuccess {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.CircleCheck,
+                                            contentDescription = null,
+                                            tint = FluentTheme.colors.system.neutral,
+                                        )
+                                    }.onError {
+                                        FAIcon(
+                                            imageVector = FontAwesomeIcons.Solid.CircleXmark,
+                                            contentDescription = null,
+                                            tint = FluentTheme.colors.system.critical,
+                                        )
+                                    }.onLoading {
+                                        ProgressRing(
+                                            modifier = Modifier.size(24.dp),
+                                        )
+                                    }
+                            },
+                        )
+                    }
+                },
+                primaryButtonText = stringResource(Res.string.ok),
+                closeButtonText = stringResource(Res.string.cancel),
+                onButtonClick = {
+                    when (it) {
+                        ContentDialogButton.Primary -> {
+                            if (state.aiConfigState.serverValidation.isSuccess) {
+                                state.aiConfigState.setShowServerDialog(false)
+                                state.aiConfigState.confirm()
+                            }
+                        }
+                        else -> {
+                            state.aiConfigState.setShowServerDialog(false)
+                        }
+                    }
+                },
+            )
+            Expander(
+                state.aiConfigState.expanded,
+                onExpandedChanged = state.aiConfigState::setExpanded,
+                heading = {
+                    Text(stringResource(Res.string.settings_ai_config_title))
+                },
+                caption = {
+                    Text(stringResource(Res.string.settings_ai_config_description))
+                },
+                icon = null,
+            ) {
+                CardExpanderItem(
+                    onClick = {
+                        state.aiConfigState.setShowServerDialog(true)
+                    },
+                    heading = {
+                        Text(stringResource(Res.string.settings_ai_config_server))
+                    },
+                    caption = {
+                        state.aiConfigState.currentServer.onSuccess {
+                            Text(it)
+                        }
+                    },
+                )
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_ai_config_entable_translation))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_ai_config_translation_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = state.aiConfigState.aiConfig.translation,
+                            {
+                                state.aiConfigState.update { copy(translation = it) }
+                            },
+                            textBefore = true,
+                        )
+                    },
+                )
+                ExpanderItem(
+                    heading = {
+                        Text(stringResource(Res.string.settings_ai_config_enable_tldr))
+                    },
+                    caption = {
+                        Text(stringResource(Res.string.settings_ai_config_tldr_description))
+                    },
+                    trailing = {
+                        Switcher(
+                            checked = state.aiConfigState.aiConfig.tldr,
+                            {
+                                state.aiConfigState.update { copy(tldr = it) }
                             },
                             textBefore = true,
                         )
@@ -667,11 +821,13 @@ private fun presenter() =
     run {
         val accountState = accountsPresenter()
         val appearanceState = appearancePresenter()
+        val aiConfigState = aiConfigPresenter()
         var aboutExpanded by remember { mutableStateOf(false) }
 
         object {
             val accountState = accountState
             val appearanceState = appearanceState
+            val aiConfigState = aiConfigState
 
             val aboutExpanded = aboutExpanded
 
@@ -747,6 +903,57 @@ private fun accountsPresenter(settingsRepository: SettingsRepository = koinInjec
                     }
                 }
                 removeAccount(accountKey)
+            }
+        }
+    }
+
+@OptIn(FlowPreview::class)
+@Composable
+private fun aiConfigPresenter(settingsRepository: SettingsRepository = koinInject<SettingsRepository>()) =
+    run {
+        var expanded by remember { mutableStateOf(false) }
+        var showServerDialog by remember { mutableStateOf(false) }
+        val serverText = rememberTextFieldState()
+        val scope = rememberCoroutineScope()
+        val state = remember { FlareServerProviderPresenter() }.invoke()
+        val aiConfig by remember { settingsRepository.appSettings.map { it.aiConfig } }
+            .collectAsState(AppSettings.AiConfig())
+        state.currentServer.onSuccess { currentServer ->
+            LaunchedEffect(currentServer) {
+                serverText.edit {
+                    delete(0, length)
+                    append(currentServer)
+                }
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            snapshotFlow { serverText.text }
+                .distinctUntilChanged()
+                .debounce(666L)
+                .collectLatest {
+                    state.checkServer(it.toString())
+                }
+        }
+
+        object : FlareServerProviderPresenter.State by state {
+            val showServerDialog = showServerDialog
+            val serverText = serverText
+            val aiConfig = aiConfig
+            val expanded = expanded
+
+            fun setExpanded(value: Boolean) {
+                expanded = value
+            }
+
+            fun update(block: AppSettings.AiConfig.() -> AppSettings.AiConfig) {
+                scope.launch {
+                    settingsRepository.updateAppSettings { copy(aiConfig = block.invoke(this.aiConfig)) }
+                }
+            }
+
+            fun setShowServerDialog(value: Boolean) {
+                showServerDialog = value
             }
         }
     }

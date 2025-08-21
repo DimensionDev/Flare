@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -26,18 +27,21 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.material.IconButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -51,6 +55,8 @@ import compose.icons.fontawesomeicons.solid.TriangleExclamation
 import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.FileItem
+import dev.dimension.flare.common.ImageClipboardManager
+import dev.dimension.flare.common.ImageDragAndDropTarget
 import dev.dimension.flare.compose_content_warning_hint
 import dev.dimension.flare.compose_hint
 import dev.dimension.flare.compose_media_sensitive
@@ -113,6 +119,8 @@ import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import io.github.composefluent.component.TextFieldDefaults
 import io.github.composefluent.surface.Card
+import io.github.vinceglb.filekit.dialogs.FileKitType
+import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
@@ -122,12 +130,13 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.uuid.ExperimentalUuidApi
 
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalUuidApi::class)
 @Composable
 fun ComposeDialog(
     onBack: () -> Unit,
     accountType: AccountType,
-    modifier: Modifier = Modifier,
     status: ComposeStatus? = null,
     initialText: String = "",
 ) {
@@ -138,6 +147,16 @@ fun ComposeDialog(
             initialText = initialText,
         )
     }
+    val launcher =
+        rememberFilePickerLauncher(
+            FileKitType.ImageAndVideo,
+        ) { file ->
+            if (file != null) {
+                state.mediaState.onSuccess {
+                    it.addMedia(listOf(file.file))
+                }
+            }
+        }
 
     val focusRequester = remember { FocusRequester() }
     val contentWarningFocusRequester = remember { FocusRequester() }
@@ -155,7 +174,24 @@ fun ComposeDialog(
                 focusRequester.requestFocus()
             }
         }
-    Column {
+    Column(
+        modifier =
+            Modifier
+                .dragAndDropTarget(
+                    shouldStartDragAndDrop = {
+                        true
+                    },
+                    remember {
+                        ImageDragAndDropTarget(
+                            onImageDropped = { images ->
+                                state.mediaState.onSuccess {
+                                    it.addMedia(images)
+                                }
+                            },
+                        )
+                    },
+                ),
+    ) {
         SubtleButton(
             onClick = onBack,
             modifier =
@@ -307,21 +343,35 @@ fun ComposeDialog(
                         color = TextFieldDefaults.defaultTextFieldColors().default.placeholderColor,
                     )
                 }
-                BasicTextField(
-                    state = state.textFieldState,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 120.dp)
-                            .focusRequester(
-                                focusRequester = focusRequester,
-                            ),
-                    textStyle = LocalTextStyle.current.copy(color = FluentTheme.colors.text.text.primary),
-                    cursorBrush = SolidColor(FluentTheme.colors.text.text.primary),
-//                    placeholder = {
-//                        Text(text = stringResource(Res.string.compose_hint))
-//                    },
-                )
+                CompositionLocalProvider(
+                    LocalClipboard provides
+                        remember {
+                            ImageClipboardManager(
+                                onImagePasted = { file ->
+                                    state.mediaState.onSuccess {
+                                        it.addMedia(
+                                            listOf(
+                                                file,
+                                            ),
+                                        )
+                                    }
+                                },
+                            )
+                        },
+                ) {
+                    BasicTextField(
+                        state = state.textFieldState,
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 120.dp)
+                                .focusRequester(
+                                    focusRequester = focusRequester,
+                                ),
+                        textStyle = LocalTextStyle.current.copy(color = FluentTheme.colors.text.text.primary),
+                        cursorBrush = SolidColor(FluentTheme.colors.text.text.primary),
+                    )
+                }
             }
             state.mediaState.onSuccess { mediaState ->
                 AnimatedVisibility(mediaState.medias.isNotEmpty()) {
@@ -525,15 +575,13 @@ fun ComposeDialog(
             ) {
                 state.mediaState.onSuccess {
                     if (it.enabled) {
-                        IconButton(
+                        SubtleButton(
                             onClick = {
-//                                photoPickerLauncher.launch(
-//                                    PickVisualMediaRequest(
-//                                        ActivityResultContracts.PickVisualMedia.ImageAndVideo,
-//                                    ),
-//                                )
+                                launcher.launch()
                             },
-                            enabled = state.canMedia,
+                            disabled = !state.canMedia,
+                            iconOnly = true,
+                            modifier = Modifier.padding(4.dp),
                         ) {
                             FAIcon(
                                 imageVector = FontAwesomeIcons.Solid.Image,
@@ -543,11 +591,13 @@ fun ComposeDialog(
                     }
                 }
                 state.pollState.onSuccess {
-                    IconButton(
+                    SubtleButton(
                         onClick = {
                             it.togglePoll()
                         },
-                        enabled = state.canPoll,
+                        disabled = !state.canPoll,
+                        iconOnly = true,
+                        modifier = Modifier.padding(4.dp),
                     ) {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.SquarePollHorizontal,
@@ -586,20 +636,24 @@ fun ComposeDialog(
                             }
                         },
                     ) {
-                        IconButton(
+                        SubtleButton(
                             onClick = {
                                 isFlyoutVisible = true
                             },
+                            iconOnly = true,
+                            modifier = Modifier.padding(4.dp),
                         ) {
                             StatusVisibilityComponent(visibility = visibilityState.visibility)
                         }
                     }
                 }
                 state.contentWarningState.onSuccess {
-                    IconButton(
+                    SubtleButton(
                         onClick = {
                             it.toggle()
                         },
+                        iconOnly = true,
+                        modifier = Modifier.padding(4.dp),
                     ) {
                         FAIcon(
                             imageVector = FontAwesomeIcons.Solid.TriangleExclamation,
@@ -634,10 +688,12 @@ fun ComposeDialog(
                                 )
                             },
                         ) {
-                            IconButton(
+                            SubtleButton(
                                 onClick = {
                                     isFlyoutVisible = !isFlyoutVisible
                                 },
+                                iconOnly = true,
+                                modifier = Modifier.padding(4.dp),
                             ) {
                                 FAIcon(
                                     imageVector = FontAwesomeIcons.Solid.FaceSmile,
@@ -692,9 +748,11 @@ private fun PollOption(
             Text(text = stringResource(Res.string.compose_poll_option_hint, index + 1))
         },
         trailing = {
-            IconButton(
+            SubtleButton(
                 onClick = onRemove,
-                enabled = index > 1,
+                disabled = index <= 1,
+                iconOnly = true,
+                modifier = Modifier.padding(4.dp),
             ) {
                 FAIcon(imageVector = FontAwesomeIcons.Solid.Xmark, contentDescription = null)
             }

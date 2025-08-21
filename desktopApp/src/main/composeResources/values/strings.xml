@@ -233,7 +233,7 @@
     <string name="compose_poll_expiration_7_days">7 days</string>
     <string name="compose_content_warning_hint">Content warning</string>
     <string name="compose_media_sensitive">Mark media as sensitive</string>
-    <string name="compose_notification_title">Sending toot</string>
+    <string name="compose_notification_title">Sent successfully</string>
 
     <string name="misskey_visibility_public">Public</string>
     <string name="misskey_visibility_home">Home</string>
@@ -266,4 +266,6 @@
     <string name="tab_settings_default">Default</string>
     <string name="tab_settings_list">List</string>
     <string name="tab_settings_feed">Feeds</string>
+
+    <string name="notification_login_expired">Login expired, please login again</string>
 </resources>

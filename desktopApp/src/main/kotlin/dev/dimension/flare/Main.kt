@@ -24,6 +24,7 @@ import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.WindowRouter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.ProvideThemeSettings
+import io.github.vinceglb.filekit.FileKit
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -41,6 +42,7 @@ fun main(args: Array<String>) {
         }
     }
     application {
+        FileKit.init(appId = "dev.dimension.flare")
         setSingletonImageLoaderFactory { context ->
             ImageLoader
                 .Builder(context)

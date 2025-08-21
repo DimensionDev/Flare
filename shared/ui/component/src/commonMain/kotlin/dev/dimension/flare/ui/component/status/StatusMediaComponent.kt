@@ -321,7 +321,7 @@ public fun MediaItem(
                                     .padding(16.dp)
                                     .background(
                                         Color.Black.copy(alpha = 0.5f),
-                                        shape = PlatformTheme.shapes.small,
+                                        shape = PlatformTheme.shapes.medium,
                                     ).padding(horizontal = 8.dp, vertical = 4.dp)
                                     .align(Alignment.BottomStart),
                             contentAlignment = Alignment.Center,
@@ -357,7 +357,7 @@ public fun MediaItem(
                                     .padding(16.dp)
                                     .background(
                                         Color.Black.copy(alpha = 0.5f),
-                                        shape = PlatformTheme.shapes.small,
+                                        shape = PlatformTheme.shapes.medium,
                                     ).padding(horizontal = 8.dp, vertical = 4.dp)
                                     .align(Alignment.BottomStart),
                             contentAlignment = Alignment.Center,
@@ -381,7 +381,7 @@ public fun MediaItem(
                                             .padding(16.dp)
                                             .background(
                                                 Color.Black.copy(alpha = 0.5f),
-                                                shape = PlatformTheme.shapes.small,
+                                                shape = PlatformTheme.shapes.medium,
                                             ).padding(horizontal = 8.dp, vertical = 4.dp)
                                             .align(Alignment.BottomStart),
                                     contentAlignment = Alignment.Center,
@@ -429,7 +429,7 @@ public fun MediaItem(
                                 .padding(16.dp)
                                 .background(
                                     Color.Black.copy(alpha = 0.5f),
-                                    shape = PlatformTheme.shapes.small,
+                                    shape = PlatformTheme.shapes.medium,
                                 ).padding(horizontal = 8.dp, vertical = 4.dp)
                                 .align(Alignment.BottomStart),
                         contentAlignment = Alignment.Center,

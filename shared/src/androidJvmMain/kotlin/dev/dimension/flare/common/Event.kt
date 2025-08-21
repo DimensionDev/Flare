@@ -1,17 +1,17 @@
 package dev.dimension.flare.common
 
-class Event<out T>(
+public class Event<out T>(
     private val content: T?,
     initialHandled: Boolean = false,
 ) {
     @Suppress("MemberVisibilityCanBePrivate")
-    var hasBeenHandled = initialHandled
+    public var hasBeenHandled: Boolean = initialHandled
         private set // Allow external read but not write
 
     /**
      * Returns the content and prevents its use again.
      */
-    fun getContentIfNotHandled(): T? =
+    public fun getContentIfNotHandled(): T? =
         if (hasBeenHandled) {
             null
         } else {

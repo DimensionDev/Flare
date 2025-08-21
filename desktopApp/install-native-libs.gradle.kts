@@ -5,15 +5,17 @@ import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
-import java.time.Duration
-import java.util.zip.ZipFile
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+import java.time.Duration
+import java.util.zip.ZipFile
 
-val httpClient: HttpClient = HttpClient.newBuilder()
-    .followRedirects(HttpClient.Redirect.NORMAL)
-    .connectTimeout(Duration.ofSeconds(20))
-    .build()
+val httpClient: HttpClient =
+    HttpClient
+        .newBuilder()
+        .followRedirects(HttpClient.Redirect.NORMAL)
+        .connectTimeout(Duration.ofSeconds(20))
+        .build()
 
 fun Project.registerExtractFromJarTask(
     taskName: String,
@@ -21,9 +23,13 @@ fun Project.registerExtractFromJarTask(
     cacheSubDir: String,
     jarFileName: String,
     entryPathInJar: String,
-    destFile: File
+    destFile: File,
 ): TaskProvider<Task> {
-    val workDir = layout.buildDirectory.dir("native-extract/$cacheSubDir").get().asFile
+    val workDir =
+        layout.buildDirectory
+            .dir("native-extract/$cacheSubDir")
+            .get()
+            .asFile
     val jarFile = workDir.resolve(jarFileName)
 
     return tasks.register(taskName) {
@@ -40,10 +46,12 @@ fun Project.registerExtractFromJarTask(
 
             if (!jarFile.exists()) {
                 logger.lifecycle("Downloading $jarUrl …")
-                val request = HttpRequest.newBuilder(URI.create(jarUrl))
-                    .GET()
-                    .timeout(Duration.ofMinutes(2))
-                    .build()
+                val request =
+                    HttpRequest
+                        .newBuilder(URI.create(jarUrl))
+                        .GET()
+                        .timeout(Duration.ofMinutes(2))
+                        .build()
 
                 val tmp = Files.createTempFile(workDir.toPath(), "download-", ".jar")
                 val resp = httpClient.send(request, HttpResponse.BodyHandlers.ofFile(tmp))
@@ -61,8 +69,9 @@ fun Project.registerExtractFromJarTask(
 
             val entryPath = entryPathInJar
             ZipFile(jarFile).use { zip ->
-                val entry = zip.getEntry(entryPath)
-                    ?: throw GradleException("Entry not found in jar: $entryPath")
+                val entry =
+                    zip.getEntry(entryPath)
+                        ?: throw GradleException("Entry not found in jar: $entryPath")
                 zip.getInputStream(entry).use { zin ->
                     Files.copy(zin, destFile.toPath(), REPLACE_EXISTING)
                 }
@@ -83,14 +92,15 @@ val sqliteJarUrl =
     "https://dl.google.com/android/maven2/androidx/sqlite/sqlite-bundled-jvm/$sqliteVersion/$sqliteJarName"
 val sqliteEntry = "natives/$sqliteOsArch/libsqliteJni.dylib"
 
-val sqliteTask = registerExtractFromJarTask(
-    taskName = "installSqliteJni_$sqliteVersion",
-    jarUrl = sqliteJarUrl,
-    cacheSubDir = "sqliteJni/$sqliteVersion",
-    jarFileName = sqliteJarName,
-    entryPathInJar = sqliteEntry,
-    destFile = nativeDestDir.resolve("libsqliteJni.dylib")
-)
+val sqliteTask =
+    registerExtractFromJarTask(
+        taskName = "installSqliteJni_$sqliteVersion",
+        jarUrl = sqliteJarUrl,
+        cacheSubDir = "sqliteJni/$sqliteVersion",
+        jarFileName = sqliteJarName,
+        entryPathInJar = sqliteEntry,
+        destFile = nativeDestDir.resolve("libsqliteJni.dylib"),
+    )
 
 val cmpVersion = (findProperty("composeMediaPlayerVersion") as String?) ?: "0.8.1"
 val cmpJarName = "composemediaplayer-jvm-$cmpVersion.jar"
@@ -98,17 +108,19 @@ val cmpJarUrl =
     "https://repo1.maven.org/maven2/io/github/kdroidfilter/composemediaplayer-jvm/$cmpVersion/$cmpJarName"
 val cmpEntry = "darwin-aarch64/libNativeVideoPlayer.dylib"
 
-val cmpTask = registerExtractFromJarTask(
-    taskName = "installNativeVideoPlayer_$cmpVersion",
-    jarUrl = cmpJarUrl,
-    cacheSubDir = "composeMediaPlayer/$cmpVersion",
-    jarFileName = cmpJarName,
-    entryPathInJar = cmpEntry,
-    destFile = nativeDestDir.resolve("libNativeVideoPlayer.dylib")
-)
+val cmpTask =
+    registerExtractFromJarTask(
+        taskName = "installNativeVideoPlayer_$cmpVersion",
+        jarUrl = cmpJarUrl,
+        cacheSubDir = "composeMediaPlayer/$cmpVersion",
+        jarFileName = cmpJarName,
+        entryPathInJar = cmpEntry,
+        destFile = nativeDestDir.resolve("libNativeVideoPlayer.dylib"),
+    )
 
-val installNativeLibs = tasks.register("installNativeLibs") {
-    group = "setup"
-    description = "Install sqliteJni + NativeVideoPlayer dylibs to $nativeDestDirPath"
-    dependsOn(sqliteTask, cmpTask)
-}
+val installNativeLibs =
+    tasks.register("installNativeLibs") {
+        group = "setup"
+        description = "Install sqliteJni + NativeVideoPlayer dylibs to $nativeDestDirPath"
+        dependsOn(sqliteTask, cmpTask)
+    }

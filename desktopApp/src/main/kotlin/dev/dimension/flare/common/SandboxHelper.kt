@@ -6,6 +6,8 @@ object SandboxHelper {
         if (isSandboxed) {
             val resourcesPath = System.getProperty("compose.application.resources.dir")
             System.setProperty("androidx.sqlite.driver.bundled.path", resourcesPath)
+            System.setProperty("jna.nounpack", "true")
+            System.setProperty("jna.boot.library.path", resourcesPath)
         }
     }
 }

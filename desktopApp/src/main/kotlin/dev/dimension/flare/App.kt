@@ -52,6 +52,7 @@ import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
+import dev.dimension.flare.ui.component.InAppNotificationComponent
 import dev.dimension.flare.ui.component.TabIcon
 import dev.dimension.flare.ui.component.TabTitle
 import dev.dimension.flare.ui.model.isSuccess
@@ -329,6 +330,11 @@ internal fun FlareApp(onWindowRoute: (Route.WindowRoute) -> Unit) {
                                 modifier = Modifier.align(Alignment.TopStart),
                             )
                         }
+                        InAppNotificationComponent(
+                            modifier =
+                                Modifier
+                                    .align(Alignment.TopCenter),
+                        )
                     }
                 }
             }

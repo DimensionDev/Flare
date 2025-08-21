@@ -36,11 +36,4 @@ allprojects {
             )
         }
     }
-    configurations.all {
-        resolutionStrategy.eachDependency {
-            if (requested.group == "net.java.dev.jna" && requested.name == "jna") {
-                useTarget("net.java.dev.jna:jna:5.12.1")
-            }
-        }
-    }
 }

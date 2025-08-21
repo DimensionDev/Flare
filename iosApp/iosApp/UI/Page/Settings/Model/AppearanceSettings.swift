@@ -89,6 +89,10 @@ struct AppearanceSettings: Codable, Changeable {
     var mastodon: Mastodon = .init()
     var misskey: Misskey = .init()
     var bluesky: Bluesky = .init()
+
+    
+    var shownReleaseLogVersions: [String: Int] = [:]
+
     struct Mastodon: Codable, Changeable {
         var showVisibility: Bool = true
         var swipeLeft: SwipeActions = .reply

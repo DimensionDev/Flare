@@ -1,7 +1,7 @@
 import EmojiText
 import MarkdownUI
 import SwiftUI
-import TwitterText
+//import TwitterText
 
 public enum FlareTextType {
     case flareTextTypeBody

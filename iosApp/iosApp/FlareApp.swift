@@ -12,24 +12,27 @@ struct FlareApp: SwiftUI.App {
     @StateObject private var router = FlareRouter.shared
     @StateObject private var podcastManager = IOSPodcastManager.shared
     @State var theme = FlareTheme.shared
+    @State private var shouldShowVersionBanner: Bool = false
 
     init() {
-        // Register FontAwesome fonts
+ 
         FontAwesome.register()
 
         KoinHelper.shared.start(inAppNotification: SwitUIInAppNotification())
 
         FlareImageConfiguration.shared.configure()
 
-        // 初始化UserManager
+        
         UserManager.shared.initialize()
 
-        // 初始化AppBarTabSettingStore（使用游客模式）
-        // UserManager初始化完成后会自动更新为正确的账号
+         
         AppBarTabSettingStore.shared.initialize(with: AccountTypeGuest(), user: nil)
 
-        // DownloadManager初始化
+        
         _ = DownloadManager.shared
+
+         
+        _shouldShowVersionBanner = State(initialValue: ReleaseLogManager.shared.shouldShowBanner())
     }
 
     var body: some Scene {
@@ -67,6 +70,10 @@ struct FlareApp: SwiftUI.App {
                         .environment(router)
                 }
             }.environment(theme).withFlareTheme().applyTheme(theme).environment(theme)
+                .environment(\.shouldShowVersionBanner, shouldShowVersionBanner)
+                .onReceive(NotificationCenter.default.publisher(for: .versionBannerDismissed)) { _ in
+                    shouldShowVersionBanner = false
+                }
         }
         .environment(theme)
 
@@ -81,4 +88,6 @@ struct FlareApp: SwiftUI.App {
             .windowStyle(.hiddenTitleBar)
         #endif
     }
+
+
 }

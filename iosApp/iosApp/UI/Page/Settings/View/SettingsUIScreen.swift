@@ -76,6 +76,16 @@ struct SettingsUIScreen: View {
 //                            }
 //                            .tag(SettingsDestination.aiSettings)
 
+                            
+                            Label {
+                                Text(SettingsDestination.releaseLog.title)
+                                    .foregroundColor(theme.labelColor)
+                            } icon: {
+                                Image(systemName: SettingsDestination.releaseLog.icon)
+                                    .foregroundColor(theme.tintColor)
+                            }
+                            .tag(SettingsDestination.releaseLog)
+
                             // Storage & Privacy
                             Label {
                                 Text(SettingsDestination.storagePrivacy.title)
@@ -125,6 +135,8 @@ struct SettingsUIScreen: View {
                             BrowserSettingsScreen()
 //                        case .aiSettings:
 //                            AISettingsScreen()
+                        case .releaseLog:
+                            ReleaseLogScreen()
                         case .storagePrivacy:
                             StoragePrivacyScreen(presenter: storagePresenter).id(selectedDetail)
                         case .about:
@@ -153,6 +165,7 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
     case translationLanguage = "translation_language"
     case browserSettings = "browser_settings"
 //    case aiSettings = "ai_settings"
+    case releaseLog = "release_log"
     case storagePrivacy = "storage"
     case about
     case support
@@ -167,6 +180,7 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
         case .translationLanguage: "Translation & Language"
         case .browserSettings: "Browser Settings"
 //        case .aiSettings: "AI Settings"
+        case .releaseLog: "Release Log"
         case .storagePrivacy: "Storage"
         case .about: "About"
         case .support: "Feature Requests"
@@ -181,6 +195,7 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
         case .translationLanguage: "character.bubble"
         case .browserSettings: "network"
 //        case .aiSettings: "brain"
+        case .releaseLog: "doc.text"
         case .storagePrivacy: "lock.shield"
         case .about: "info.circle"
         case .support: "list.bullet.rectangle.portrait"
@@ -191,7 +206,7 @@ public enum SettingsDestination: String, CaseIterable, Identifiable {
         switch self {
         case .timelineDisplay, .mediaContent: 3
         case .hapticFeedback, .translationLanguage, .browserSettings: 2 // ,.aiSettings:
-        case .storagePrivacy, .about, .support: 1
+        case .releaseLog, .storagePrivacy, .about, .support: 1
         }
     }
 }

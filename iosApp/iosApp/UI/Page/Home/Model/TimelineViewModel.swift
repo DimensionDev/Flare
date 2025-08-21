@@ -292,7 +292,7 @@ class TimelineViewModel {
 
         timelineState.updateTabBarOffset(currentOffset: offsetY, isHomeTab: isHomeTab)
 
-        FlareLog.debug("[TimelineViewModel] 滚动状态更新 - offset: \(offsetY), isHomeTab: \(isHomeTab), tabBarOffset: \(timelineState.tabBarOffset)")
+        //FlareLog.debug("[TimelineViewModel] 滚动状态更新 - offset: \(offsetY), isHomeTab: \(isHomeTab), tabBarOffset: \(timelineState.tabBarOffset)")
     }
 
     func handleLoadMore(scrollToId: String) async {

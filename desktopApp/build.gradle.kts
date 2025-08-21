@@ -1,5 +1,5 @@
-
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -23,7 +23,7 @@ dependencies {
     implementation(compose.desktop.currentOs)
     implementation(libs.kotlinx.coroutines.swing)
     implementation(libs.fluent.ui)
-    implementation(libs.jSystemThemeDetector)
+    implementation("io.github.kdroidfilter:platformtools.darkmodedetector:0.5.0")
     implementation(libs.composeIcons.fontAwesome)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.bundles.coil3)
@@ -42,14 +42,44 @@ compose.desktop {
         mainClass = "dev.dimension.flare.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Pkg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(TargetFormat.Pkg)
             packageName = "dev.dimension.flare"
-            packageVersion = "1.0.0"
+            packageVersion = System.getenv("BUILD_VERSION") ?: "1.0.0"
             macOS {
+
+                val file = project.file("signing.properties")
+                val hasSigningProps = file.exists()
+
+                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "12"
                 bundleID = "dev.dimension.flare"
+                minimumSystemVersion = "12.0"
+                appStore = hasSigningProps
+
+                jvmArgs(
+                    "-Djna.nosys=false",
+                    "-Djna.nounpack=true",
+//                    "-Djna.boot.library=\$APP_ROOT/Contents/app/resources:\$APP_ROOT/Contents/app:\$APP_ROOT/Contents/runtime/Contents/MacOS:\$APP_ROOT/Contents/runtime/Contents/Home/lib:\$APP_ROOT/Contents/runtime/Contents/Home/lib/server:/System/Library/Frameworks/Foundation.framework/Foundation",
+//                    "-Djna.library.path=\$APP_ROOT/Contents/app/resources:\$APP_ROOT/Contents/app:\$APP_ROOT/Contents/runtime/Contents/MacOS:\$APP_ROOT/Contents/runtime/Contents/Home/lib:\$APP_ROOT/Contents/runtime/Contents/Home/lib/server:/System/Library/Frameworks/Foundation.framework/Foundation",
+                )
+
                 infoPlist {
                     extraKeysRawXml = macExtraPlistKeys
                 }
+
+                if (hasSigningProps) {
+                    val signingProp = Properties()
+                    signingProp.load(file.inputStream())
+                    signing {
+                        sign.set(true)
+                        identity.set(signingProp.getProperty("identity"))
+                    }
+
+                    entitlementsFile.set(project.file(signingProp.getProperty("entitlementsFile")))
+                    runtimeEntitlementsFile.set(project.file(signingProp.getProperty("runtimeEntitlementsFile")))
+                    provisioningProfile.set(project.file(signingProp.getProperty("provisioningProfile")))
+                    runtimeProvisioningProfile.set(project.file(signingProp.getProperty("runtimeProvisioningProfile")))
+                }
+
 //                iconFile.set(project.file("src/jvmMain/resources/icon/ic_launcher.icns"))
             }
             appResourcesRootDir.set(file("resources"))
@@ -57,10 +87,11 @@ compose.desktop {
         buildTypes {
             release {
                 proguard {
-                    version.set("7.7.0")
-                    this.configurationFiles.from(
-                        file("proguard-rules.pro")
-                    )
+                    this.isEnabled.set(false)
+//                    version.set("7.7.0")
+//                    this.configurationFiles.from(
+//                        file("proguard-rules.pro")
+//                    )
                 }
             }
         }
@@ -71,9 +102,6 @@ compose.resources {
     packageOfResClass = "dev.dimension.flare"
 }
 
-tasks.withType<JavaExec> {
-    systemProperty("compose.application.resources.dir", file("resources").absolutePath)
-}
 
 ktlint {
     version.set(libs.versions.ktlint)
@@ -96,10 +124,14 @@ val macExtraPlistKeys: String
           </array>
         </dict>
       </array>
+      <key>ITSAppUsesNonExemptEncryption</key>
+      <false/>
     """
+
 
 extra["sqliteVersion"] = libs.versions.sqlite.get()
 extra["sqliteOsArch"] = "osx_arm64"
+extra["composeMediaPlayerVersion"] = libs.versions.composemediaplayer.get()
+extra["nativeDestDir"] = "resources/macos-arm64"
 
-apply(from = File(projectDir, "download-sql-bundle.gradle.kts"))
-
+apply(from = File(projectDir, "install-native-libs.gradle.kts"))

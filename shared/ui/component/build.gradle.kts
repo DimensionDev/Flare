@@ -65,7 +65,7 @@ kotlin {
                 implementation(libs.fluent.ui)
                 implementation(libs.koin.compose)
                 implementation(compose("org.jetbrains.compose.material3:material3-window-size-class"))
-                implementation("io.github.kdroidfilter:composemediaplayer:0.8.1")
+                implementation(libs.composemediaplayer)
                 implementation(libs.androidx.collection)
             }
         }

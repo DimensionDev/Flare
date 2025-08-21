@@ -1,6 +1,8 @@
 package dev.dimension.flare.ui.screen.compose
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -35,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import compose.icons.FontAwesomeIcons
@@ -49,6 +52,7 @@ import compose.icons.fontawesomeicons.solid.Xmark
 import dev.dimension.flare.Res
 import dev.dimension.flare.common.FileItem
 import dev.dimension.flare.compose_content_warning_hint
+import dev.dimension.flare.compose_hint
 import dev.dimension.flare.compose_media_sensitive
 import dev.dimension.flare.compose_poll_expiration_12_hours
 import dev.dimension.flare.compose_poll_expiration_1_day
@@ -94,6 +98,7 @@ import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
+import io.github.composefluent.LocalTextStyle
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.Button
 import io.github.composefluent.component.CheckBox
@@ -106,6 +111,7 @@ import io.github.composefluent.component.RadioButton
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
+import io.github.composefluent.component.TextFieldDefaults
 import io.github.composefluent.surface.Card
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
@@ -239,17 +245,45 @@ fun ComposeDialog(
                     Column(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        TextField(
-                            state = it.textFieldState,
+                        Box(
+                            contentAlignment = Alignment.CenterStart,
                             modifier =
                                 Modifier
-                                    .fillMaxWidth()
-                                    .focusRequester(
-                                        focusRequester = contentWarningFocusRequester,
+                                    .padding(
+                                        horizontal = screenHorizontalPadding,
                                     ),
-                            placeholder = {
-                                Text(text = stringResource(Res.string.compose_content_warning_hint))
-                            },
+                        ) {
+                            androidx.compose.animation.AnimatedVisibility(
+                                it.textFieldState.text.isEmpty(),
+                                enter = fadeIn(),
+                                exit = fadeOut(),
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.compose_content_warning_hint),
+                                    color = TextFieldDefaults.defaultTextFieldColors().default.placeholderColor,
+                                )
+                            }
+                            BasicTextField(
+                                state = it.textFieldState,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .focusRequester(
+                                            focusRequester = contentWarningFocusRequester,
+                                        ),
+//                            placeholder = {
+//                                Text(text = stringResource(Res.string.compose_content_warning_hint))
+//                            },
+                                textStyle = LocalTextStyle.current.copy(color = FluentTheme.colors.text.text.primary),
+                                cursorBrush = SolidColor(FluentTheme.colors.text.text.primary),
+                            )
+                        }
+                        Box(
+                            modifier =
+                                Modifier
+                                    .height(1.dp)
+                                    .fillMaxWidth()
+                                    .background(FluentTheme.colors.stroke.divider.default),
                         )
 //                        HorizontalDivider()
                     }
@@ -258,19 +292,32 @@ fun ComposeDialog(
             Box(
                 modifier =
                     Modifier
-                        .fillMaxWidth(),
+                        .padding(
+                            horizontal = screenHorizontalPadding,
+                        ).fillMaxWidth(),
+                contentAlignment = Alignment.TopStart,
             ) {
+                androidx.compose.animation.AnimatedVisibility(
+                    state.textFieldState.text.isEmpty(),
+                    enter = fadeIn(),
+                    exit = fadeOut(),
+                ) {
+                    Text(
+                        text = stringResource(Res.string.compose_hint),
+                        color = TextFieldDefaults.defaultTextFieldColors().default.placeholderColor,
+                    )
+                }
                 BasicTextField(
                     state = state.textFieldState,
                     modifier =
                         Modifier
                             .fillMaxWidth()
                             .heightIn(min = 120.dp)
-                            .padding(
-                                horizontal = screenHorizontalPadding,
-                            ).focusRequester(
+                            .focusRequester(
                                 focusRequester = focusRequester,
                             ),
+                    textStyle = LocalTextStyle.current.copy(color = FluentTheme.colors.text.text.primary),
+                    cursorBrush = SolidColor(FluentTheme.colors.text.text.primary),
 //                    placeholder = {
 //                        Text(text = stringResource(Res.string.compose_hint))
 //                    },

@@ -2,6 +2,7 @@
 clikt = "5.0.3"
 collection = "1.5.0"
 compileSdk = "36"
+composemediaplayer = "0.8.1"
 haze = "1.6.10"
 lifecycleViewmodelComposeVersion = "2.9.2"
 minSdk = "23"
@@ -59,6 +60,7 @@ androidx-collection = { module = "androidx.collection:collection", version.ref =
 bluesky = { module = "moe.tlaster.ozone:bluesky", version.ref = "bluesky" }
 bluesky-oauth = { module = "moe.tlaster.ozone:oauth", version.ref = "bluesky" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
+composemediaplayer = { module = "io.github.kdroidfilter:composemediaplayer", version.ref = "composemediaplayer" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }

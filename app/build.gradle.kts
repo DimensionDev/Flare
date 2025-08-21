@@ -1,5 +1,6 @@
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
 import com.google.gms.googleservices.GoogleServicesPlugin
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 plugins {
@@ -19,6 +20,8 @@ if (project.file("google-services.json").exists()) {
     apply<GoogleServicesPlugin>()
     apply<CrashlyticsPlugin>()
 }
+
+kotlin.compilerOptions.jvmTarget.set(JvmTarget.fromTarget(libs.versions.java.get()))
 
 android {
     namespace = "dev.dimension.flare"
@@ -83,9 +86,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.toVersion(libs.versions.java.get())
         targetCompatibility = JavaVersion.toVersion(libs.versions.java.get())
-    }
-    kotlinOptions {
-        jvmTarget = libs.versions.java.get()
     }
     buildFeatures {
         compose = true

@@ -209,6 +209,11 @@ internal sealed interface Route {
         val userKey: MicroBlogKey,
     ) : ScreenRoute
 
+    @Serializable
+    data class MisskeyAntennas(
+        val accountType: AccountType,
+    ) : ScreenRoute
+
     companion object {
         public fun parse(url: String): Route? {
             val data = Url(url)

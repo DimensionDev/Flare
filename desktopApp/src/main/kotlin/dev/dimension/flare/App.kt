@@ -400,7 +400,7 @@ private fun getRoute(tab: TabItem): Route =
         is Bluesky.FeedsTabItem -> BlueskyFeeds(tab.account)
         is DirectMessageTabItem -> Route.DmList(tab.account)
         is RssTabItem -> Route.RssList
-        is Misskey.AntennasListTabItem -> Route.RssList
+        is Misskey.AntennasListTabItem -> Route.MisskeyAntennas(tab.account)
     }
 
 @Composable

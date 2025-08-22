@@ -7,8 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.common.OnDeepLink
 import dev.dimension.flare.data.model.Bluesky.FeedTabItem
+import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.IconType.Material
 import dev.dimension.flare.data.model.ListTimelineTabItem
+import dev.dimension.flare.data.model.Misskey
 import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
@@ -35,6 +37,7 @@ import dev.dimension.flare.ui.screen.home.TimelineScreen
 import dev.dimension.flare.ui.screen.list.AllListScreen
 import dev.dimension.flare.ui.screen.media.RawMediaScreen
 import dev.dimension.flare.ui.screen.media.StatusMediaScreen
+import dev.dimension.flare.ui.screen.misskey.AntennasListScreen
 import dev.dimension.flare.ui.screen.rss.EditRssSourceScreen
 import dev.dimension.flare.ui.screen.rss.RssListScreen
 import dev.dimension.flare.ui.screen.serviceselect.ServiceSelectScreen
@@ -489,5 +492,25 @@ internal fun RouteContent(
                 },
             )
         }
+
+        is Route.MisskeyAntennas ->
+            AntennasListScreen(
+                accountType = route.accountType,
+                toTimeline = {
+                    navigate(
+                        Timeline(
+                            Misskey.AntennasTimelineTabItem(
+                                account = route.accountType,
+                                id = it.id,
+                                metaData =
+                                    TabMetaData(
+                                        title = TitleType.Text(it.title),
+                                        icon = IconType.Material(IconType.Material.MaterialIcon.Rss),
+                                    ),
+                            ),
+                        ),
+                    )
+                },
+            )
     }
 }

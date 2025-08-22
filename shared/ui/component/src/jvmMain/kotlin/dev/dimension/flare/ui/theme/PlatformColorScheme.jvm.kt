@@ -29,4 +29,7 @@ internal actual object PlatformColorScheme {
     public actual val cardAlt: Color
         @Composable
         get() = FluentTheme.colors.background.card.secondary
+    actual val onCard: Color
+        @Composable
+        get() = FluentTheme.colors.text.text.primary
 }

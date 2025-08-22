@@ -12,13 +12,19 @@ import dev.dimension.flare.data.model.ListTimelineTabItem
 import dev.dimension.flare.data.model.RssTimelineTabItem
 import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
-import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.model.AccountType.Specific
-import dev.dimension.flare.ui.presenter.compose.ComposeStatus
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Quote
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus.Reply
+import dev.dimension.flare.ui.presenter.compose.ComposeStatus.VVOComment
+import dev.dimension.flare.ui.route.Route.EditRssSource
 import dev.dimension.flare.ui.route.Route.Profile
+import dev.dimension.flare.ui.route.Route.RssTimeline
 import dev.dimension.flare.ui.route.Route.Search
 import dev.dimension.flare.ui.route.Route.Timeline
 import dev.dimension.flare.ui.screen.compose.ComposeDialog
+import dev.dimension.flare.ui.screen.dm.DmConversationScreen
+import dev.dimension.flare.ui.screen.dm.DmListScreen
+import dev.dimension.flare.ui.screen.dm.UserDMConversationScreen
 import dev.dimension.flare.ui.screen.feeds.FeedListScreen
 import dev.dimension.flare.ui.screen.home.DiscoverScreen
 import dev.dimension.flare.ui.screen.home.NotificationScreen
@@ -183,8 +189,8 @@ internal fun RouteContent(
             FluentDialog(visible = true) {
                 ComposeDialog(
                     onBack = onBack,
-                    status = ComposeStatus.Quote(route.statusKey),
-                    accountType = AccountType.Specific(accountKey = route.accountKey),
+                    status = Quote(route.statusKey),
+                    accountType = Specific(accountKey = route.accountKey),
                 )
             }
 
@@ -192,8 +198,8 @@ internal fun RouteContent(
             FluentDialog(visible = true) {
                 ComposeDialog(
                     onBack = onBack,
-                    status = ComposeStatus.Reply(route.statusKey),
-                    accountType = AccountType.Specific(accountKey = route.accountKey),
+                    status = Reply(route.statusKey),
+                    accountType = Specific(accountKey = route.accountKey),
                 )
             }
 
@@ -201,8 +207,8 @@ internal fun RouteContent(
             FluentDialog(visible = true) {
                 ComposeDialog(
                     onBack = onBack,
-                    accountType = AccountType.Specific(accountKey = route.accountKey),
-                    status = ComposeStatus.VVOComment(route.replyTo, route.rootId),
+                    accountType = Specific(accountKey = route.accountKey),
+                    status = VVOComment(route.replyTo, route.rootId),
                 )
             }
 
@@ -250,10 +256,6 @@ internal fun RouteContent(
             )
         }
 
-        is Route.DirectMessage -> {
-            Text("route")
-        }
-
         is Route.Discover -> {
             DiscoverScreen(
                 accountType = route.accountType,
@@ -276,7 +278,7 @@ internal fun RouteContent(
             )
         }
 
-        is Route.Search -> {
+        is Search -> {
             SearchScreen(
                 initialQuery = route.keyword,
                 accountType = route.accountType,
@@ -304,7 +306,7 @@ internal fun RouteContent(
             )
         }
 
-        is Route.Profile -> {
+        is Profile -> {
             ProfileScreen(
                 accountType = route.accountType,
                 userKey = route.userKey,
@@ -317,7 +319,14 @@ internal fun RouteContent(
                         ),
                     )
                 },
-                toStartMessage = {},
+                toStartMessage = {
+                    navigate(
+                        Route.DmUserConversation(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
                 onFollowListClick = {},
                 onFansListClick = {},
             )
@@ -383,7 +392,14 @@ internal fun RouteContent(
                         ),
                     )
                 },
-                toStartMessage = {},
+                toStartMessage = {
+                    navigate(
+                        Route.DmUserConversation(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
                 onFollowListClick = {},
                 onFansListClick = {},
             )
@@ -393,7 +409,7 @@ internal fun RouteContent(
             RssListScreen(
                 toItem = {
                     navigate(
-                        Route.RssTimeline(
+                        RssTimeline(
                             url = it.url,
                             title = it.title,
                             id = it.id,
@@ -402,7 +418,7 @@ internal fun RouteContent(
                 },
                 onEdit = {
                     navigate(
-                        Route.EditRssSource(
+                        EditRssSource(
                             id = it.id,
                         ),
                     )
@@ -429,5 +445,49 @@ internal fun RouteContent(
                 statusKey = route.statusKey,
                 index = route.index,
             )
+
+        is Route.DmList ->
+            DmListScreen(
+                accountType = route.accountType,
+                onItemClicked = {
+                    navigate(
+                        Route.DmConversation(
+                            accountType = route.accountType,
+                            roomKey = it,
+                        ),
+                    )
+                },
+            )
+
+        is Route.DmConversation ->
+            DmConversationScreen(
+                accountType = route.accountType,
+                roomKey = route.roomKey,
+                onBack = onBack,
+                toProfile = {
+                    navigate(
+                        Profile(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
+            )
+
+        is Route.DmUserConversation -> {
+            UserDMConversationScreen(
+                accountType = route.accountType,
+                userKey = route.userKey,
+                onBack = onBack,
+                toProfile = {
+                    navigate(
+                        Profile(
+                            accountType = route.accountType,
+                            userKey = it,
+                        ),
+                    )
+                },
+            )
+        }
     }
 }

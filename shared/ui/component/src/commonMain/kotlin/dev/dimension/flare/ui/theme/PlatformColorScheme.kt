@@ -27,4 +27,7 @@ internal expect object PlatformColorScheme {
 
     @get:Composable
     val cardAlt: Color
+
+    @get:Composable
+    val onCard: Color
 }

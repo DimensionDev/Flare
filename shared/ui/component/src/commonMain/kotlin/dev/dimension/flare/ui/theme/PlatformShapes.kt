@@ -27,4 +27,10 @@ internal expect object PlatformShapes {
 
     @get:Composable
     val listCardItemShape: CornerBasedShape
+
+    @get:Composable
+    val dmShapeFromMe: CornerBasedShape
+
+    @get:Composable
+    val dmShapeFromOther: CornerBasedShape
 }

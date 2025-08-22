@@ -2,6 +2,7 @@ package dev.dimension.flare.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.shape.CornerBasedShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -14,7 +15,9 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 internal actual object PlatformShapes {
     actual val extraSmall: Shape
         @Composable
@@ -29,7 +32,6 @@ internal actual object PlatformShapes {
         @Composable
         get() = MaterialTheme.shapes.large
 
-    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     actual val topCardShape: Shape
         @Composable
         get() =
@@ -38,7 +40,6 @@ internal actual object PlatformShapes {
                 topEnd = listCardContainerShape.topEnd,
             )
 
-    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
     actual val bottomCardShape: Shape
         @Composable
         get() =
@@ -55,6 +56,18 @@ internal actual object PlatformShapes {
     actual val listCardItemShape: CornerBasedShape
         @Composable
         get() = MaterialTheme.shapes.extraSmall
+    actual val dmShapeFromMe: CornerBasedShape
+        @Composable
+        get() =
+            MaterialTheme.shapes.largeIncreased.copy(
+                bottomEnd = CornerSize(0.dp),
+            )
+    actual val dmShapeFromOther: CornerBasedShape
+        @Composable
+        get() =
+            MaterialTheme.shapes.largeIncreased.copy(
+                bottomStart = CornerSize(0.dp),
+            )
 }
 
 public object ListCardShapes {

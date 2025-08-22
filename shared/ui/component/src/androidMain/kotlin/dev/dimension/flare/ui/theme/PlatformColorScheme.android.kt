@@ -29,4 +29,7 @@ internal actual object PlatformColorScheme {
     public actual val cardAlt: Color
         @Composable
         get() = MaterialTheme.colorScheme.surfaceVariant
+    actual val onCard: Color
+        @Composable
+        get() = MaterialTheme.colorScheme.onSurface
 }

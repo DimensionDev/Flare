@@ -12,4 +12,7 @@ internal actual object PlatformTypography {
     actual val title: TextStyle
         @Composable
         get() = MaterialTheme.typography.titleMedium
+    actual val headline: TextStyle
+        @Composable
+        get() = MaterialTheme.typography.headlineMedium
 }

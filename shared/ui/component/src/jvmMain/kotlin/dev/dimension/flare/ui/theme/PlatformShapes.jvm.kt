@@ -4,6 +4,7 @@ import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.dp
 import io.github.composefluent.FluentTheme
 
 internal actual object PlatformShapes {
@@ -43,4 +44,22 @@ internal actual object PlatformShapes {
     actual val listCardItemShape: CornerBasedShape
         @Composable
         get() = RoundedCornerShape(FluentTheme.cornerRadius.control)
+    actual val dmShapeFromMe: CornerBasedShape
+        @Composable
+        get() =
+            RoundedCornerShape(
+                topStart = FluentTheme.cornerRadius.overlay,
+                topEnd = FluentTheme.cornerRadius.overlay,
+                bottomStart = FluentTheme.cornerRadius.overlay,
+                bottomEnd = 0.dp,
+            )
+    actual val dmShapeFromOther: CornerBasedShape
+        @Composable
+        get() =
+            RoundedCornerShape(
+                topStart = FluentTheme.cornerRadius.overlay,
+                topEnd = FluentTheme.cornerRadius.overlay,
+                bottomStart = 0.dp,
+                bottomEnd = FluentTheme.cornerRadius.overlay,
+            )
 }

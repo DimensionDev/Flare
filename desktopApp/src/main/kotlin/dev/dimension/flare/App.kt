@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,7 +66,6 @@ import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.Route.AllLists
 import dev.dimension.flare.ui.route.Route.BlueskyFeeds
-import dev.dimension.flare.ui.route.Route.DirectMessage
 import dev.dimension.flare.ui.route.Route.Discover
 import dev.dimension.flare.ui.route.Route.MeRoute
 import dev.dimension.flare.ui.route.Route.Notification
@@ -398,7 +398,7 @@ private fun getRoute(tab: TabItem): Route =
         SettingsTabItem -> Route.Settings
         is AllListTabItem -> AllLists(tab.account)
         is Bluesky.FeedsTabItem -> BlueskyFeeds(tab.account)
-        is DirectMessageTabItem -> DirectMessage(tab.account)
+        is DirectMessageTabItem -> Route.DmList(tab.account)
         is RssTabItem -> Route.RssList
         is Misskey.AntennasListTabItem -> Route.RssList
     }
@@ -474,6 +474,42 @@ private val LocalScrollToTopRegistry =
 @Composable
 internal fun RegisterTabCallback(
     lazyListState: LazyStaggeredGridState,
+    onRefresh: () -> Unit,
+) {
+    val onRefreshState by rememberUpdatedState(onRefresh)
+    val tabState = LocalScrollToTopRegistry.current
+    if (tabState != null) {
+        val scope = rememberCoroutineScope()
+        val callback: () -> Unit =
+            remember(lazyListState, scope) {
+                {
+                    if (lazyListState.firstVisibleItemIndex == 0 &&
+                        lazyListState.firstVisibleItemScrollOffset == 0
+                    ) {
+                        onRefreshState.invoke()
+                    } else {
+                        scope.launch {
+                            if (lazyListState.firstVisibleItemIndex > 20) {
+                                lazyListState.scrollToItem(0)
+                            } else {
+                                lazyListState.animateScrollToItem(0)
+                            }
+                        }
+                    }
+                }
+            }
+        DisposableEffect(tabState, callback, lazyListState) {
+            tabState.registerCallback(callback)
+            onDispose {
+                tabState.unregisterCallback(callback)
+            }
+        }
+    }
+}
+
+@Composable
+internal fun RegisterTabCallback(
+    lazyListState: LazyListState,
     onRefresh: () -> Unit,
 ) {
     val onRefreshState by rememberUpdatedState(onRefresh)

@@ -9,4 +9,7 @@ internal expect object PlatformTypography {
 
     @get:Composable
     val title: TextStyle
+
+    @get:Composable
+    val headline: TextStyle
 }

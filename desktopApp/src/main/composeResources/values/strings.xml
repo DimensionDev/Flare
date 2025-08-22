@@ -268,4 +268,14 @@
     <string name="tab_settings_feed">Feeds</string>
 
     <string name="notification_login_expired">Login expired, please login again</string>
+
+    <string name="dm_list_empty">No direct messages</string>
+    <string name="dm_list_error">Failed to load direct messages</string>
+    <string name="send">Send</string>
+    <string name="dm_send_placeholder">Send a message</string>
+    <string name="dm_deleted">Deleted</string>
+    <string name="dm_conversation">Direct Message Room</string>
+    <string name="dm_sending">Sending</string>
+    <string name="dm_leave">Leave conversation</string>
+    <string name="dm_to_profile">Show profile</string>
 </resources>

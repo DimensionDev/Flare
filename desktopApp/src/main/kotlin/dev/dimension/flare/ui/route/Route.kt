@@ -68,11 +68,6 @@ internal sealed interface Route {
     ) : ScreenRoute
 
     @Serializable
-    data class DirectMessage(
-        val accountType: AccountType,
-    ) : ScreenRoute
-
-    @Serializable
     data class StatusDetail(
         val accountType: AccountType,
         val statusKey: MicroBlogKey,
@@ -196,6 +191,23 @@ internal sealed interface Route {
     data class RssDetail(
         override val url: String,
     ) : UrlRoute
+
+    @Serializable
+    data class DmList(
+        val accountType: AccountType,
+    ) : ScreenRoute
+
+    @Serializable
+    data class DmConversation(
+        val accountType: AccountType,
+        val roomKey: MicroBlogKey,
+    ) : ScreenRoute
+
+    @Serializable
+    data class DmUserConversation(
+        val accountType: AccountType,
+        val userKey: MicroBlogKey,
+    ) : ScreenRoute
 
     companion object {
         public fun parse(url: String): Route? {

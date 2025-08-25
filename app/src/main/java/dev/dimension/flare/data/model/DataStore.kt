@@ -1,10 +1,6 @@
 package dev.dimension.flare.data.model
 
-import android.content.Context
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.datastore.core.DataStore
-import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
-import androidx.datastore.dataStore
 import compose.icons.FontAwesomeIcons
 import compose.icons.fontawesomeicons.Brands
 import compose.icons.fontawesomeicons.Solid
@@ -26,15 +22,6 @@ import compose.icons.fontawesomeicons.solid.Star
 import compose.icons.fontawesomeicons.solid.Users
 import dev.dimension.flare.R
 import dev.dimension.flare.ui.icons.Misskey
-
-internal val Context.appearanceSettings: DataStore<AppearanceSettings> by dataStore(
-    fileName = "appearance_settings.pb",
-    serializer = AccountPreferencesSerializer,
-)
-internal val Context.appSettings: DataStore<AppSettings> by dataStore(
-    fileName = "app_settings.pb",
-    serializer = AppSettingsSerializer,
-)
 
 internal val TitleType.Localized.resId: Int
     get() =
@@ -79,12 +66,3 @@ internal fun IconType.Material.MaterialIcon.toIcon(): ImageVector =
         IconType.Material.MaterialIcon.Messages -> FontAwesomeIcons.Solid.Message
         IconType.Material.MaterialIcon.Rss -> FontAwesomeIcons.Solid.SquareRss
     }
-
-internal val Context.tabSettings: DataStore<TabSettings> by dataStore(
-    fileName = "tab_settings.pb",
-    serializer = TabSettingsSerializer,
-    corruptionHandler =
-        ReplaceFileCorruptionHandler {
-            TabSettingsSerializer.defaultValue
-        },
-)

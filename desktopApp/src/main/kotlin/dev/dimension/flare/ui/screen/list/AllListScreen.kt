@@ -18,10 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.component.uiListItemComponent
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.list.AllListPresenter
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.ScrollbarContainer
@@ -32,6 +30,8 @@ internal fun AllListScreen(
     accountType: AccountType,
     onAddList: () -> Unit,
     toList: (UiList) -> Unit,
+    editList: (UiList) -> Unit,
+    deleteList: (UiList) -> Unit,
 ) {
     val state by producePresenter("AllListScreen_$accountType") {
         presenter(accountType)
@@ -90,22 +90,11 @@ internal fun AllListScreen(
                             .padding(horizontal = screenHorizontalPadding),
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    uiListItemComponent(
-                        state.items,
-                        onClicked = toList,
-//                trailingContent = { item ->
-//                    if (!item.readonly) {
-//                        SubtleButton(
-//                            onClick = {
-//                            },
-//                        ) {
-//                            FAIcon(
-//                                FontAwesomeIcons.Solid.EllipsisVertical,
-//                                contentDescription = stringResource(Res.string.more),
-//                            )
-//                        }
-//                    }
-//                },
+                    uiListWithTabs(
+                        state = state,
+                        toList = toList,
+                        editList = editList,
+                        deleteList = deleteList,
                     )
                 }
             }
@@ -125,6 +114,6 @@ internal fun AllListScreen(
 private fun presenter(accountType: AccountType) =
     run {
         remember(accountType) {
-            AllListPresenter(accountType)
+            AllListWithTabsPresenter(accountType)
         }.invoke()
     }

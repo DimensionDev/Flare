@@ -18,6 +18,7 @@ import coil3.request.crossfade
 import dev.dimension.flare.common.DeeplinkHandler
 import dev.dimension.flare.common.SandboxHelper
 import dev.dimension.flare.di.KoinHelper
+import dev.dimension.flare.di.composeUiModule
 import dev.dimension.flare.di.desktopModule
 import dev.dimension.flare.ui.route.FloatingWindowState
 import dev.dimension.flare.ui.route.Route
@@ -34,7 +35,7 @@ import java.awt.Desktop
 fun main(args: Array<String>) {
     SandboxHelper.configureSQLiteDriver()
     startKoin {
-        modules(desktopModule + KoinHelper.modules())
+        modules(desktopModule + KoinHelper.modules() + composeUiModule)
     }
     if (SystemUtils.IS_OS_MAC_OSX) {
         Desktop.getDesktop().setOpenURIHandler {

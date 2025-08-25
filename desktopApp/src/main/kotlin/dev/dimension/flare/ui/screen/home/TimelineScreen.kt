@@ -13,18 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -34,7 +27,6 @@ import compose.icons.fontawesomeicons.solid.AnglesUp
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.Res
-import dev.dimension.flare.common.PagingState
 import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineTabItem
@@ -43,23 +35,20 @@ import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
-import dev.dimension.flare.ui.presenter.home.UserPresenter
-import dev.dimension.flare.ui.presenter.home.UserState
+import dev.dimension.flare.ui.presenter.TimelineItemPresenter
 import dev.dimension.flare.ui.presenter.invoke
 import io.github.composefluent.component.AccentButton
 import io.github.composefluent.component.ProgressBar
 import io.github.composefluent.component.Text
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-internal fun TimelineScreen(tabItem: TimelineTabItem) {
+internal fun TimelineScreen(
+    tabItem: TimelineTabItem,
+    header: @Composable (() -> Unit)? = null,
+) {
     val scope = rememberCoroutineScope()
     val state by producePresenter(
         "timeline_$tabItem",
@@ -79,6 +68,13 @@ internal fun TimelineScreen(tabItem: TimelineTabItem) {
                 ) + LocalWindowPadding.current,
             state = state.lazyListState,
         ) {
+            if (header != null) {
+                item(
+                    span = StaggeredGridItemSpan.FullLine,
+                ) {
+                    header.invoke()
+                }
+            }
             status(state.listState)
         }
         if (state.listState.isRefreshing) {
@@ -124,87 +120,7 @@ internal fun TimelineScreen(tabItem: TimelineTabItem) {
 @Composable
 private fun presenter(tabItem: TimelineTabItem) =
     run {
-        val state = timelineItemPresenter(tabItem)
-        val accountState =
-            remember(tabItem.account) {
-                UserPresenter(
-                    accountType = tabItem.account,
-                    userKey = null,
-                )
-            }.invoke()
-        object : UserState by accountState, TimelineItemState by state {
-        }
-    }
-
-@Composable
-internal fun timelineItemPresenter(timelineTabItem: TimelineTabItem): TimelineItemState {
-    val state =
-        remember(timelineTabItem.key) {
-            timelineTabItem.createPresenter()
+        remember(tabItem.key) {
+            TimelineItemPresenter(tabItem)
         }.invoke()
-    val badge =
-        remember(timelineTabItem) {
-            NotificationBadgePresenter(timelineTabItem.account)
-        }.invoke()
-    val scope = rememberCoroutineScope()
-    var showNewToots by remember { mutableStateOf(false) }
-    state.listState.onSuccess {
-        LaunchedEffect(Unit) {
-            snapshotFlow {
-                if (itemCount > 0) {
-                    peek(0)?.itemKey
-                } else {
-                    null
-                }
-            }.mapNotNull { it }
-                .distinctUntilChanged()
-                .drop(1)
-                .collect {
-                    showNewToots = true
-                }
-        }
     }
-    val lazyListState = rememberLazyStaggeredGridState()
-    val isAtTheTop by remember {
-        derivedStateOf {
-            lazyListState.firstVisibleItemIndex == 0 &&
-                lazyListState.firstVisibleItemScrollOffset == 0
-        }
-    }
-    LaunchedEffect(isAtTheTop, showNewToots) {
-        if (isAtTheTop) {
-            showNewToots = false
-        }
-    }
-    return object : TimelineItemState {
-        override val listState = state.listState
-        override val showNewToots = showNewToots
-        override val isRefreshing = state.listState.isRefreshing
-        override val lazyListState = lazyListState
-        override val timelineTabItem = timelineTabItem
-
-        override fun onNewTootsShown() {
-            showNewToots = false
-        }
-
-        override fun refreshSync() {
-            scope.launch {
-                state.refresh()
-            }
-            badge.refresh()
-        }
-    }
-}
-
-@Immutable
-internal interface TimelineItemState {
-    val listState: PagingState<UiTimeline>
-    val showNewToots: Boolean
-    val isRefreshing: Boolean
-    val lazyListState: LazyStaggeredGridState
-    val timelineTabItem: TimelineTabItem
-
-    fun onNewTootsShown()
-
-    fun refreshSync()
-}

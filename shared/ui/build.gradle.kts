@@ -7,17 +7,22 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
 }
 
+android {
+    namespace = "dev.dimension.flare.shared.ui"
+}
+
 kotlin {
     jvmToolchain(libs.versions.java.get().toInt())
     explicitApi()
     applyDefaultHierarchyTemplate()
-    androidLibrary {
-        compileSdk = libs.versions.compileSdk.get().toInt()
-        namespace = "dev.dimension.flare.shared.ui"
-        minSdk = libs.versions.minSdk.get().toInt()
-        experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
-    }
+//    androidLibrary {
+//        compileSdk = libs.versions.compileSdk.get().toInt()
+//        namespace = "dev.dimension.flare.shared.ui"
+//        minSdk = libs.versions.minSdk.get().toInt()
+//        experimentalProperties["android.experimental.kmp.enableAndroidResources"] = true
+//    }
 
+    androidTarget()
 
     listOf(
         iosX64(),

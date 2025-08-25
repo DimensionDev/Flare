@@ -43,13 +43,13 @@ import dev.dimension.flare.data.model.AllListTabItem
 import dev.dimension.flare.data.model.Bluesky
 import dev.dimension.flare.data.model.DirectMessageTabItem
 import dev.dimension.flare.data.model.DiscoverTabItem
+import dev.dimension.flare.data.model.HomeTimelineTabItem
 import dev.dimension.flare.data.model.Misskey
 import dev.dimension.flare.data.model.NotificationTabItem
 import dev.dimension.flare.data.model.ProfileTabItem
 import dev.dimension.flare.data.model.RssTabItem
 import dev.dimension.flare.data.model.SettingsTabItem
 import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TabSettings
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
@@ -83,7 +83,6 @@ import io.github.composefluent.component.NavigationDefaults
 import io.github.composefluent.component.SubtleButton
 import io.github.composefluent.component.Text
 import io.ktor.http.Url
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
 import org.apache.commons.lang3.SystemUtils
@@ -393,6 +392,7 @@ private fun getRoute(tab: TabItem): Route =
     when (tab) {
         is DiscoverTabItem -> Discover(tab.account)
         is ProfileTabItem -> MeRoute(tab.account)
+        is HomeTimelineTabItem -> Route.Home(tab.account)
         is TimelineTabItem -> Timeline(tab)
         is NotificationTabItem -> Notification(tab.account)
         SettingsTabItem -> Route.Settings
@@ -407,7 +407,7 @@ private fun getRoute(tab: TabItem): Route =
 private fun presenter() =
     run {
         val accountState = remember { ActiveAccountPresenter() }.invoke()
-        val tabState = remember { HomeTabsPresenter(flowOf(TabSettings())) }.invoke()
+        val tabState = remember { HomeTabsPresenter() }.invoke()
         val scrollToTopRegistry =
             remember {
                 ScrollToTopRegistry()

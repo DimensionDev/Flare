@@ -72,7 +72,6 @@ import dev.dimension.flare.data.model.RssTabItem
 import dev.dimension.flare.data.model.SettingsTabItem
 import dev.dimension.flare.data.model.TabItem
 import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
@@ -102,7 +101,6 @@ import dev.dimension.flare.ui.screen.splash.SplashScreen
 import dev.dimension.flare.ui.theme.MediumAlpha
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
-import org.koin.compose.koinInject
 
 @OptIn(
     ExperimentalMaterial3AdaptiveNavigationSuiteApi::class,
@@ -554,7 +552,7 @@ private fun getDirection(
     }
 
 @Composable
-private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
+private fun presenter() =
     run {
         val navigationState =
             remember {
@@ -562,7 +560,7 @@ private fun presenter(settingsRepository: SettingsRepository = koinInject()) =
             }
         val tabs =
             remember {
-                HomeTabsPresenter(settingsRepository.tabSettings)
+                HomeTabsPresenter()
             }.invoke()
         val scrollToTopRegistry =
             remember {

@@ -28,7 +28,9 @@ import dev.dimension.flare.ui.screen.dm.DmConversationScreen
 import dev.dimension.flare.ui.screen.dm.DmListScreen
 import dev.dimension.flare.ui.screen.dm.UserDMConversationScreen
 import dev.dimension.flare.ui.screen.feeds.FeedListScreen
+import dev.dimension.flare.ui.screen.feeds.TabSettingScreen
 import dev.dimension.flare.ui.screen.home.DiscoverScreen
+import dev.dimension.flare.ui.screen.home.HomeTimelineScreen
 import dev.dimension.flare.ui.screen.home.NotificationScreen
 import dev.dimension.flare.ui.screen.home.ProfileScreen
 import dev.dimension.flare.ui.screen.home.ProfileWithUserNameAndHostDeeplinkRoute
@@ -235,6 +237,10 @@ internal fun RouteContent(
                         ),
                     )
                 },
+                editList = {
+                },
+                deleteList = {
+                },
             )
         }
 
@@ -359,6 +365,21 @@ internal fun RouteContent(
             )
         }
 
+        is Route.Home -> {
+            HomeTimelineScreen(
+                route.accountType,
+                onAddTab = {
+                    navigate(
+                        Route.TabSetting,
+                    )
+                },
+            )
+        }
+
+        Route.TabSetting -> {
+            TabSettingScreen()
+        }
+
         is Route.StatusDetail -> {
             StatusScreen(
                 statusKey = route.statusKey,
@@ -422,7 +443,7 @@ internal fun RouteContent(
                 onEdit = {
                     navigate(
                         EditRssSource(
-                            id = it.id,
+                            id = it,
                         ),
                     )
                 },

@@ -14,8 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -31,16 +29,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,13 +47,7 @@ import compose.icons.fontawesomeicons.solid.Plus
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import dev.dimension.flare.R
-import dev.dimension.flare.common.PagingState
-import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
-import dev.dimension.flare.data.model.HomeTimelineTabItem
-import dev.dimension.flare.data.model.MixedTimelineTabItem
-import dev.dimension.flare.data.model.TimelineTabItem
-import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.FAIcon
@@ -75,28 +61,17 @@ import dev.dimension.flare.ui.component.platform.isBigScreen
 import dev.dimension.flare.ui.component.status.AdaptiveCard
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
-import dev.dimension.flare.ui.model.UiRssSource
-import dev.dimension.flare.ui.model.UiTimeline
-import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.onError
 import dev.dimension.flare.ui.model.onSuccess
-import dev.dimension.flare.ui.presenter.home.NotificationBadgePresenter
-import dev.dimension.flare.ui.presenter.home.UserPresenter
-import dev.dimension.flare.ui.presenter.home.UserState
+import dev.dimension.flare.ui.presenter.HomeTimelineWithTabsPresenter
+import dev.dimension.flare.ui.presenter.TimelineItemPresenter
 import dev.dimension.flare.ui.presenter.invoke
-import dev.dimension.flare.ui.presenter.settings.AccountEventPresenter
 import dev.dimension.flare.ui.screen.settings.TabIcon
 import dev.dimension.flare.ui.screen.settings.TabTitle
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.molecule.producePresenter
-import org.koin.compose.koinInject
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
@@ -127,6 +102,7 @@ internal fun HomeTimelineScreen(
                     lazyListState = lazyListState,
                     onRefresh = {
                         currentTab.refreshSync()
+                        state.changeLogState.dismissChangeLog()
                     },
                 )
             }
@@ -254,6 +230,7 @@ internal fun HomeTimelineScreen(
                         state = tabs[index],
                         contentPadding = contentPadding,
                         modifier = Modifier.fillMaxWidth(),
+                        changeLogState = state.changeLogState,
                     )
                 }
             }
@@ -263,15 +240,19 @@ internal fun HomeTimelineScreen(
 
 @Composable
 internal fun TimelineItemContent(
-    state: TimelineItemState,
+    state: TimelineItemPresenter.State,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(0.dp),
+    changeLogState: ChangeLogState? = null,
 ) {
     val hazeState = rememberHazeState()
     val scope = rememberCoroutineScope()
     RefreshContainer(
         modifier = modifier,
-        onRefresh = state::refreshSync,
+        onRefresh = {
+            state.refreshSync()
+            changeLogState?.dismissChangeLog()
+        },
         isRefreshing = state.isRefreshing,
         indicatorPadding = contentPadding,
         content = {
@@ -283,8 +264,8 @@ internal fun TimelineItemContent(
                         .fillMaxSize()
                         .hazeSource(hazeState),
             ) {
-                state.shouldShowChangeLog.onSuccess {
-                    state.changeLog?.let { changelog ->
+                changeLogState?.shouldShowChangeLog?.onSuccess {
+                    changeLogState.changeLog?.let { changelog ->
                         if (it) {
                             item {
                                 Column {
@@ -309,7 +290,7 @@ internal fun TimelineItemContent(
                                             Text(changelog)
                                             Button(
                                                 onClick = {
-                                                    state.dismissChangeLog()
+                                                    changeLogState.dismissChangeLog()
                                                 },
                                             ) {
                                                 Text(
@@ -372,176 +353,19 @@ internal fun TimelineItemContent(
 }
 
 @Composable
-private fun timelinePresenter(
-    accountType: AccountType,
-    settingsRepository: SettingsRepository = koinInject(),
-) = run {
-    val accountState =
-        remember(accountType) {
-            UserPresenter(
-                accountType = accountType,
-                userKey = null,
-            )
-        }.invoke()
+private fun timelinePresenter(accountType: AccountType) =
+    run {
+        val state = remember(accountType) { HomeTimelineWithTabsPresenter(accountType) }.invoke()
 
-    val accountEvent =
-        remember {
-            AccountEventPresenter()
-        }.invoke()
-
-    LaunchedEffect(accountEvent.onAdded) {
-        accountEvent.onAdded.collect { account ->
-            val tab =
-                HomeTimelineTabItem(
-                    accountKey = account.accountKey,
-                    icon = UiRssSource.favIconUrl(account.accountKey.host),
-                    title =
-                        account.accountKey.host
-                            .substringBeforeLast('.')
-                            .substringAfter('.'),
-                )
-            settingsRepository.updateTabSettings {
-                copy(
-                    mainTabs =
-                        (mainTabs + tab).distinctBy {
-                            it.key
-                        },
-                )
+        val pagerState =
+            state.tabState.map {
+                rememberPagerState { it.size }
             }
+
+        val changeLogState = changeLogPresenter()
+
+        object : HomeTimelineWithTabsPresenter.State by state {
+            val pagerState = pagerState
+            val changeLogState = changeLogState
         }
     }
-
-    LaunchedEffect(accountEvent.onRemoved) {
-        accountEvent.onRemoved.collect { accountKey ->
-            settingsRepository.updateTabSettings {
-                copy(
-                    mainTabs = mainTabs.filterNot { it.account == AccountType.Specific(accountKey) },
-                )
-            }
-        }
-    }
-
-    val tabs by remember {
-        settingsRepository.tabSettings
-            .map { settings ->
-                if (accountType == AccountType.Guest) {
-                    listOf(
-                        HomeTimelineTabItem(AccountType.Guest),
-                    )
-                } else {
-                    (
-                        listOfNotNull(
-                            if (settings.enableMixedTimeline && settings.mainTabs.size > 1) {
-                                MixedTimelineTabItem(
-                                    subTimelineTabItem = settings.mainTabs,
-                                )
-                            } else {
-                                null
-                            },
-                        ) + settings.mainTabs
-                    ).ifEmpty {
-                        listOf(
-                            HomeTimelineTabItem(
-                                accountType = AccountType.Active,
-                            ),
-                        )
-                    }
-                }
-            }.map {
-                it.toImmutableList()
-            }
-    }.collectAsUiState()
-    val tabState =
-        tabs.map {
-            it
-                .map {
-                    // use key inorder to force update when the list is changed
-                    key(it.key) {
-                        timelineItemPresenter(it)
-                    }
-                }.toImmutableList()
-        }
-    val pagerState =
-        tabState.map {
-            rememberPagerState { it.size }
-        }
-
-    object : UserState by accountState {
-        val pagerState = pagerState
-        val tabState = tabState
-    }
-}
-
-@Composable
-internal fun timelineItemPresenter(timelineTabItem: TimelineTabItem): TimelineItemState {
-    val changeLogState = changeLogPresenter()
-    val state =
-        remember(timelineTabItem.key) {
-            timelineTabItem.createPresenter()
-        }.invoke()
-    val badge =
-        remember(timelineTabItem.account) {
-            NotificationBadgePresenter(timelineTabItem.account)
-        }.invoke()
-    val scope = rememberCoroutineScope()
-    var showNewToots by remember { mutableStateOf(false) }
-    state.listState.onSuccess {
-        LaunchedEffect(Unit) {
-            snapshotFlow {
-                if (itemCount > 0) {
-                    peek(0)?.itemKey
-                } else {
-                    null
-                }
-            }.mapNotNull { it }
-                .distinctUntilChanged()
-                .drop(1)
-                .collect {
-                    showNewToots = true
-                }
-        }
-    }
-    val lazyListState = rememberLazyStaggeredGridState()
-    val isAtTheTop by remember {
-        derivedStateOf {
-            lazyListState.firstVisibleItemIndex == 0
-        }
-    }
-    LaunchedEffect(isAtTheTop, showNewToots) {
-        if (isAtTheTop) {
-            showNewToots = false
-        }
-    }
-    return object : TimelineItemState, ChangeLogState by changeLogState {
-        override val listState = state.listState
-        override val showNewToots = showNewToots
-        override val isRefreshing = state.listState.isRefreshing
-        override val lazyListState = lazyListState
-        override val timelineTabItem = timelineTabItem
-
-        override fun onNewTootsShown() {
-            showNewToots = false
-        }
-
-        override fun refreshSync() {
-            scope.launch {
-                state.refresh()
-            }
-            badge.refresh()
-            changeLogState.dismissChangeLog()
-        }
-    }
-}
-
-@Immutable
-internal interface TimelineItemState : ChangeLogState {
-    val listState: PagingState<UiTimeline>
-    val showNewToots: Boolean
-    val isRefreshing: Boolean
-    val lazyListState: LazyStaggeredGridState
-    val timelineTabItem: TimelineTabItem
-
-    fun onNewTootsShown()
-
-    fun refreshSync()
-}

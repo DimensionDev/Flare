@@ -1,7 +1,8 @@
+
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
 import com.google.gms.googleservices.GoogleServicesPlugin
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
@@ -20,8 +21,6 @@ if (project.file("google-services.json").exists()) {
     apply<GoogleServicesPlugin>()
     apply<CrashlyticsPlugin>()
 }
-
-kotlin.compilerOptions.jvmTarget.set(JvmTarget.fromTarget(libs.versions.java.get()))
 
 android {
     namespace = "dev.dimension.flare"
@@ -136,7 +135,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(projects.shared)
     implementation(projects.shared.ui)
-    implementation(projects.shared.ui.component)
+    implementation(projects.composeUi)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)
     implementation(libs.colorpicker.compose)

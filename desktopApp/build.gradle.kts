@@ -11,7 +11,7 @@ plugins {
 
 dependencies {
     implementation(projects.shared)
-    implementation(projects.shared.ui.component)
+    implementation(projects.composeUi)
 
     implementation(compose.runtime)
     implementation(compose.foundation)
@@ -36,6 +36,8 @@ dependencies {
     implementation(libs.datastore)
     implementation(libs.filekit.dialogs.compose)
     implementation(libs.filekit.coil)
+    implementation(libs.bouncycastle.bcprov)
+    implementation(libs.bouncycastle.bcpkix)
 }
 
 compose.desktop {

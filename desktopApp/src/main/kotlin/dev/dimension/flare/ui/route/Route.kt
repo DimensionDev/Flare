@@ -24,6 +24,11 @@ internal sealed interface Route {
     ) : ScreenRoute
 
     @Serializable
+    data class Home(
+        val accountType: AccountType,
+    ) : ScreenRoute
+
+    @Serializable
     data class Discover(
         val accountType: AccountType,
     ) : ScreenRoute
@@ -213,6 +218,9 @@ internal sealed interface Route {
     data class MisskeyAntennas(
         val accountType: AccountType,
     ) : ScreenRoute
+
+    @Serializable
+    data object TabSetting : ScreenRoute
 
     companion object {
         public fun parse(url: String): Route? {

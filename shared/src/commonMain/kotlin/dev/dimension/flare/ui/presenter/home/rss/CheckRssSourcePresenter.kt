@@ -2,12 +2,10 @@ package dev.dimension.flare.ui.presenter.home.rss
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 import dev.dimension.flare.data.network.rss.RssService
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.model.UiState
 import dev.dimension.flare.ui.model.flattenUiState
-import dev.dimension.flare.ui.model.map
 import dev.dimension.flare.ui.model.mapper.title
 import dev.dimension.flare.ui.presenter.PresenterBase
 import dev.dimension.flare.ui.presenter.home.rss.CheckRssSourcePresenter.State.RssState

@@ -20,7 +20,7 @@ rootProject.name = "Flare"
 include(":app")
 include(":shared")
 include(":shared:ui")
-include(":shared:ui:component")
+include(":compose-ui")
 include(":desktopApp")
 include(":server")
 include(":shared:api")

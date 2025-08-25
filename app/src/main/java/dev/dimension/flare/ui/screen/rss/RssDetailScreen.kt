@@ -158,7 +158,7 @@ internal fun RssDetailScreen(
                     ) {
                         it.publishDateTime?.let {
                             Text(
-                                text = it.value.localizedFullTime,
+                                text = it.localizedFullTime,
                                 style = MaterialTheme.typography.bodySmall,
                             )
                         }

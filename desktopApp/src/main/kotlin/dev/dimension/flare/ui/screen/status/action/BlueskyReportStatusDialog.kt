@@ -5,11 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import com.konyaco.fluent.component.ContentDialog
-import com.konyaco.fluent.component.ContentDialogButton
-import com.konyaco.fluent.component.ListItem
-import com.konyaco.fluent.component.RadioButton
-import com.konyaco.fluent.component.Text
 import dev.dimension.flare.Res
 import dev.dimension.flare.cancel
 import dev.dimension.flare.model.AccountType
@@ -33,6 +28,11 @@ import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusPresenter
 import dev.dimension.flare.ui.presenter.status.action.BlueskyReportStatusState
+import io.github.composefluent.component.ContentDialog
+import io.github.composefluent.component.ContentDialogButton
+import io.github.composefluent.component.ListItem
+import io.github.composefluent.component.RadioButton
+import io.github.composefluent.component.Text
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource

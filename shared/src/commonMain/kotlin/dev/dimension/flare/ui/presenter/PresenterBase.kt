@@ -7,5 +7,5 @@ public expect abstract class PresenterBase<Model : Any>() {
     public val models: StateFlow<Model>
 
     @Composable
-    internal abstract fun body(): Model
+    public abstract fun body(): Model
 }

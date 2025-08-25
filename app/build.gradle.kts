@@ -1,6 +1,8 @@
+
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsPlugin
 import com.google.gms.googleservices.GoogleServicesPlugin
 import java.util.Properties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.application)
@@ -84,9 +86,6 @@ android {
         sourceCompatibility = JavaVersion.toVersion(libs.versions.java.get())
         targetCompatibility = JavaVersion.toVersion(libs.versions.java.get())
     }
-    kotlinOptions {
-        jvmTarget = libs.versions.java.get()
-    }
     buildFeatures {
         compose = true
         buildConfig = true
@@ -136,7 +135,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.play.services)
     implementation(projects.shared)
     implementation(projects.shared.ui)
-    implementation(projects.shared.ui.component)
+    implementation(projects.composeUi)
     implementation(libs.androidx.splash)
     implementation(libs.materialKolor)
     implementation(libs.colorpicker.compose)

@@ -16,9 +16,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.konyaco.fluent.component.ListHeader
-import com.konyaco.fluent.component.Text
-import com.konyaco.fluent.component.TextField
 import dev.dimension.flare.Res
 import dev.dimension.flare.emoji_picker_recent
 import dev.dimension.flare.emoji_picker_search
@@ -27,6 +24,9 @@ import dev.dimension.flare.ui.model.UiEmoji
 import dev.dimension.flare.ui.model.onSuccess
 import dev.dimension.flare.ui.presenter.compose.EmojiHistoryPresenter
 import dev.dimension.flare.ui.presenter.invoke
+import io.github.composefluent.component.ListHeader
+import io.github.composefluent.component.Text
+import io.github.composefluent.component.TextField
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList

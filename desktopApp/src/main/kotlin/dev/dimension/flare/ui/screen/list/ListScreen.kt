@@ -29,14 +29,14 @@ internal fun ListScreen(accountType: AccountType) {
                 MasterDetailViewState.Detail
             },
         master = {
-            AllListScreen(
-                accountType = accountType,
-                onAddList = {
-                },
-                toList = {
-                    state.setSelectedList(it)
-                },
-            )
+//            AllListScreen(
+//                accountType = accountType,
+//                onAddList = {
+//                },
+//                toList = {
+//                    state.setSelectedList(it)
+//                },
+//            )
         },
         detail = {
             state.selectedList?.let {

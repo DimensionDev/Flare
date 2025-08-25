@@ -1,4 +1,7 @@
+import com.android.build.api.dsl.LibraryExtension
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 plugins {
     alias(libs.plugins.android.application) apply false
@@ -17,29 +20,44 @@ plugins {
     alias(libs.plugins.composeMultiplatform) apply false
 }
 
-allprojects {
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
+subprojects {
+    val commonOptIn = listOf(
+        "kotlin.time.ExperimentalTime",
+    )
+
+    val freeArgs = listOf(
+        "-Xexpect-actual-classes",
+        "-Xconsistent-data-class-copy-visibility",
+        "-Xmulti-dollar-interpolation",
+    )
+
+    plugins.withId("org.jetbrains.kotlin.multiplatform") {
+        extensions.configure<KotlinMultiplatformExtension> {
+            compilerOptions {
+                allWarningsAsErrors.set(true)
+                freeCompilerArgs.addAll(freeArgs)
+                optIn.addAll(commonOptIn)
+            }
+            jvmToolchain(libs.versions.java.get().toInt())
         }
     }
-    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask<*>>().configureEach {
-        compilerOptions {
-            allWarningsAsErrors.set(true)
-            freeCompilerArgs.set(
-                listOf(
-                    "-Xexpect-actual-classes",
-                    "-Xconsistent-data-class-copy-visibility",
-                    "-Xmulti-dollar-interpolation",
-                    "-opt-in=kotlin.time.ExperimentalTime",
-                )
-            )
+    plugins.withId("org.jetbrains.kotlin.android") {
+        extensions.configure<KotlinAndroidProjectExtension> {
+            compilerOptions {
+                allWarningsAsErrors.set(true)
+                freeCompilerArgs.addAll(freeArgs)
+                optIn.addAll(commonOptIn)
+                jvmTarget.set(JvmTarget.fromTarget(libs.versions.java.get()))
+            }
+            jvmToolchain(libs.versions.java.get().toInt())
         }
     }
-    configurations.all {
-        resolutionStrategy.eachDependency {
-            if (requested.group == "net.java.dev.jna" && requested.name == "jna") {
-                useTarget("net.java.dev.jna:jna:5.12.1")
+
+    plugins.withId("com.android.library") {
+        extensions.configure<LibraryExtension> {
+            compileSdk = libs.versions.compileSdk.get().toInt()
+            defaultConfig {
+                minSdk = libs.versions.minSdk.get().toInt()
             }
         }
     }

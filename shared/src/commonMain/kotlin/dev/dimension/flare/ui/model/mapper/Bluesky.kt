@@ -132,7 +132,8 @@ private fun parseBluesky(
         if (start - codePointIndex < 0) {
             continue
         }
-        val beforeFacetText = codePoints.drop(codePointIndex).take(start - codePointIndex).stringify()
+        val beforeFacetText =
+            codePoints.drop(codePointIndex).take(start - codePointIndex).stringify()
         element.appendTextWithBr(beforeFacetText)
         if (end - start < 0) {
             continue
@@ -222,9 +223,14 @@ internal fun FeedViewPostReasonUnion.render(
                     icon = UiTimeline.TopMessage.Icon.Pin,
                     type = UiTimeline.TopMessage.MessageType.Bluesky.Pinned,
                     onClicked = { },
-                    statusKey = MicroBlogKey(id = data?.uri?.atUri.orEmpty(), host = accountKey.host),
+                    statusKey =
+                        MicroBlogKey(
+                            id = data?.uri?.atUri.orEmpty(),
+                            host = accountKey.host,
+                        ),
                 )
             }
+
             is FeedViewPostReasonUnion.ReasonRepost -> {
                 val user = value.by.render(accountKey)
                 UiTimeline.TopMessage(
@@ -239,9 +245,14 @@ internal fun FeedViewPostReasonUnion.render(
                             ),
                         )
                     },
-                    statusKey = MicroBlogKey(id = data?.uri?.atUri.orEmpty(), host = accountKey.host),
+                    statusKey =
+                        MicroBlogKey(
+                            id = data?.uri?.atUri.orEmpty(),
+                            host = accountKey.host,
+                        ),
                 )
             }
+
             is FeedViewPostReasonUnion.Unknown -> null
         }
     return UiTimeline(
@@ -264,7 +275,12 @@ internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
                     icon = data.reason.icon,
                     type = data.reason.type,
                     onClicked = {
-                        launcher.launch(AppDeepLink.Profile(accountKey = accountKey, userKey = user.key))
+                        launcher.launch(
+                            AppDeepLink.Profile(
+                                accountKey = accountKey,
+                                userKey = user.key,
+                            ),
+                        )
                     },
                     statusKey = MicroBlogKey(id = data.uri.atUri, host = accountKey.host),
                 )
@@ -277,8 +293,13 @@ internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
                 content = content,
             )
         }
+
         is StatusContent.BlueskyNotification.Post ->
-            references[ReferenceType.Notification]?.firstOrNull()?.render(event) ?: post.render(accountKey, event = event)
+            references[ReferenceType.Notification]?.firstOrNull()?.render(event) ?: post.render(
+                accountKey,
+                event = event,
+            )
+
         is StatusContent.BlueskyNotification.UserList -> {
             val reason = this.data.firstOrNull()?.reason
             val uri =
@@ -302,12 +323,19 @@ internal fun StatusContent.BlueskyNotification.renderBlueskyNotification(
                 }
             val content =
                 UiTimeline.ItemContent.UserList(
-                    users = this.data.map { it.author.render(accountKey = accountKey) }.toImmutableList(),
+                    users =
+                        this.data
+                            .map { it.author.render(accountKey = accountKey) }
+                            .toImmutableList(),
                     status =
-                        references[ReferenceType.Notification]?.firstOrNull()?.let { it as? StatusContent.Bluesky }?.data?.renderStatus(
-                            accountKey,
-                            event,
-                        ),
+                        references[ReferenceType.Notification]
+                            ?.firstOrNull()
+                            ?.let { it as? StatusContent.Bluesky }
+                            ?.data
+                            ?.renderStatus(
+                                accountKey,
+                                event,
+                            ),
                 )
             return UiTimeline(
                 topMessage = topMessage,
@@ -630,8 +658,20 @@ private fun findCard(postView: PostView): UiCard? =
         val embed = postView.embed as PostViewEmbedUnion.ExternalView
         UiCard(
             url = embed.value.external.uri.uri,
-            title = embed.value.external.title,
-            description = embed.value.external.description,
+            title =
+                embed.value.external.title.takeIf {
+                    it.isNotEmpty()
+                } ?: embed.value.external.uri.uri,
+            description =
+                embed.value.external.description.takeIf {
+                    it.isNotEmpty()
+                } ?: if (embed.value.external.title
+                        .isEmpty()
+                ) {
+                    null
+                } else {
+                    embed.value.external.uri.uri
+                },
             media =
                 embed.value.external.thumb?.let {
                     UiMedia.Image(
@@ -687,6 +727,7 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
                 is RecordWithMediaViewMediaUnion.ExternalView -> {
                     findMediaFromExternal(media.value)
                 }
+
                 is RecordWithMediaViewMediaUnion.ImagesView ->
                     media.value.images
                         .map {
@@ -699,6 +740,7 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
                                 sensitive = false,
                             )
                         }.toPersistentList()
+
                 is RecordWithMediaViewMediaUnion.VideoView ->
                     persistentListOf(
                         UiMedia.Video(
@@ -722,18 +764,6 @@ private fun findMedias(postView: PostView): ImmutableList<UiMedia> =
 
         is PostViewEmbedUnion.ExternalView -> {
             findMediaFromExternal(embed.value)
-            persistentListOf(
-                UiMedia.Image(
-                    url = embed.value.external.uri.uri,
-                    previewUrl =
-                        embed.value.external.thumb
-                            ?.uri ?: "",
-                    description = embed.value.external.description,
-                    width = 0f,
-                    height = 0f,
-                    sensitive = false,
-                ),
-            )
         }
 
         else -> persistentListOf()
@@ -754,7 +784,12 @@ private fun findMediaFromExternal(value: ExternalView): PersistentList<UiMedia> 
                     height = height,
                 ),
             )
-        } else {
+        } else if (
+            it.endsWith(".png", ignoreCase = true) ||
+            it.endsWith(".jpg", ignoreCase = true) ||
+            it.endsWith(".jpeg", ignoreCase = true) ||
+            it.endsWith(".webp", ignoreCase = true)
+        ) {
             persistentListOf(
                 UiMedia.Image(
                     url = value.external.uri.uri,
@@ -765,6 +800,8 @@ private fun findMediaFromExternal(value: ExternalView): PersistentList<UiMedia> 
                     sensitive = false,
                 ),
             )
+        } else {
+            persistentListOf()
         }
     } ?: persistentListOf()
 }

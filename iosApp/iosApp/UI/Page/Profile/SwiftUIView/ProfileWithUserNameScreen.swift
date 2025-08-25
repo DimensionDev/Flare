@@ -57,7 +57,7 @@ struct ProfileWithUserNameScreen: View {
 //
 //                    let loadedUserInfo = ProfileUserInfo.from(state: state as! ProfileNewState)
 
-                    ProfileTabScreenUikit(
+                    ProfileSwiftUIViewV2(
                         accountType: accountType,
                         userKey: data.data.key
                     )

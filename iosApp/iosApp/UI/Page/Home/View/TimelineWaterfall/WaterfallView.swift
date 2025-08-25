@@ -52,8 +52,7 @@ struct WaterfallView: View {
             }
         }
         .task(id: tab.key) {
-            let timestamp = Date().timeIntervalSince1970
-            FlareLog.debug("📱 [WaterfallView] .task(id: \(tab.key)) triggered - isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
+            FlareLog.debug("📱 [WaterfallView] .task(id: \(tab.key)) triggered - isCurrentTab: \(isCurrentTab) ")
 
             if !isInitialized {
                 isInitialized = true
@@ -65,8 +64,7 @@ struct WaterfallView: View {
             }
         }
         .onAppear {
-//            let timestamp = Date().timeIntervalSince1970
-            // FlareLog.debug("👁️ [WaterfallView] onAppear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
+            // FlareLog.debug("👁️ [WaterfallView] onAppear - tab: \(tab.key), isCurrentTab: \(isCurrentTab) ")
 
 //            if isCurrentTab {
             //  FlareLog.debug("✅ [WaterfallView] Current tab, calling resume - tab: \(tab.key)")
@@ -76,23 +74,20 @@ struct WaterfallView: View {
 //            }
         }
         .onDisappear {
-            let timestamp = Date().timeIntervalSince1970
-            FlareLog.debug("👋 [WaterfallView] onDisappear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
+            FlareLog.debug("👋 [WaterfallView] onDisappear - tab: \(tab.key), isCurrentTab: \(isCurrentTab)")
 
             // 无论isCurrentTab值如何，都尝试暂停，让ViewModel内部判断
             FlareLog.debug("⏸️ [WaterfallView] Calling pause for tab: \(tab.key)")
             viewModel.pause()
         }
         .onReceive(NotificationCenter.default.publisher(for: .timelineItemUpdated)) { _ in
-            let timestamp = Date().timeIntervalSince1970
-            FlareLog.debug("📬 [WaterfallView] Received timelineItemUpdated notification - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
+            FlareLog.debug("📬 [WaterfallView] Received timelineItemUpdated notification - tab: \(tab.key), isCurrentTab: \(isCurrentTab) ")
 
             refreshDebounceTimer?.invalidate()
             FlareLog.debug("⏰ [WaterfallView] Setting refresh debounce timer - tab: \(tab.key), isCurrentTab: \(isCurrentTab)")
 
             refreshDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-                let timerTimestamp = Date().timeIntervalSince1970
-                FlareLog.debug("⏱️ [WaterfallView] Debounce timer fired - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timerTimestamp)")
+                FlareLog.debug("⏱️ [WaterfallView] Debounce timer fired - tab: \(tab.key), isCurrentTab: \(isCurrentTab),  ")
 
                 guard isCurrentTab else {
                     FlareLog.debug("⏸️ [WaterfallView] Skipping refresh - not current tab: \(tab.key), isCurrentTab: \(isCurrentTab)")

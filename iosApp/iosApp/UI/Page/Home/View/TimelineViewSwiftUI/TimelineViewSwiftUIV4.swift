@@ -151,8 +151,7 @@ struct TimelineViewSwiftUIV4: View {
 //                    }
             }
             .task(id: tab.key) {
-                let timestamp = Date().timeIntervalSince1970
-                FlareLog.debug("📱 [TimelineV4] .task(id: \(tab.key)) triggered - isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
+                FlareLog.debug("📱 [TimelineV4] .task(id: \(tab.key)) triggered - isCurrentTab: \(isCurrentTab) ")
 
                 if !isInitialized {
                     isInitialized = true
@@ -164,29 +163,25 @@ struct TimelineViewSwiftUIV4: View {
                 }
             }
             .onAppear {
-                let timestamp = Date().timeIntervalSince1970
-                FlareLog.debug("👁️ [TimelineV4] onAppear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
+                FlareLog.debug("👁️ [TimelineV4] onAppear - tab: \(tab.key), isCurrentTab: \(isCurrentTab) ")
 
                 timeLineViewModel.resume()
             }
             .onDisappear {
                 timelineState.tabBarOffset = 0
 
-                let timestamp = Date().timeIntervalSince1970
-                FlareLog.debug("👋 [TimelineV4] onDisappear - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
+                FlareLog.debug("👋 [TimelineV4] onDisappear - tab: \(tab.key), isCurrentTab: \(isCurrentTab) ")
 
                 timeLineViewModel.pause()
             }
             .onReceive(NotificationCenter.default.publisher(for: .timelineItemUpdated)) { _ in
-                let timestamp = Date().timeIntervalSince1970
-                FlareLog.debug("📬 [TimelineV4] Received timelineItemUpdated notification - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timestamp)")
+                FlareLog.debug("📬 [TimelineV4] Received timelineItemUpdated notification - tab: \(tab.key), isCurrentTab: \(isCurrentTab) ")
 
                 refreshDebounceTimer?.invalidate()
                 FlareLog.debug("⏰ [TimelineV4] Setting refresh debounce timer - tab: \(tab.key), isCurrentTab: \(isCurrentTab)")
 
                 refreshDebounceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { _ in
-                    let timerTimestamp = Date().timeIntervalSince1970
-                    FlareLog.debug("⏱️ [TimelineV4] Debounce timer fired - tab: \(tab.key), isCurrentTab: \(isCurrentTab), timestamp: \(timerTimestamp)")
+                    FlareLog.debug("⏱️ [TimelineV4] Debounce timer fired - tab: \(tab.key), isCurrentTab: \(isCurrentTab) ")
 
                     guard isCurrentTab else {
                         FlareLog.debug("⏸️ [TimelineV4] Skipping refresh - not current tab: \(tab.key)")

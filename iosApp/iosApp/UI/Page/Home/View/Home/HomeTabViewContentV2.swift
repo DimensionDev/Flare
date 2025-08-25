@@ -89,7 +89,7 @@ struct HomeTabViewContentV2: View {
                 if !(accountType is AccountTypeGuest) {
                     Tab(value: FlareHomeTabs.profile) {
                         FlareTabItem(tabType: .profile) {
-                            ProfileTabScreenUikit(
+                            ProfileSwiftUIViewV2(
                                 accountType: accountType,
                                 userKey: nil
                             )

@@ -85,12 +85,12 @@ internal fun FrameWindowScope.FlareTheme(
                 if (SystemUtils.IS_OS_MAC) {
                     PaddingValues(
                         start = 0.dp,
-                        top = 24.dp,
+                        top = 24.dp + 8.dp,
                         end = 0.dp,
-                        bottom = 0.dp,
+                        bottom = 8.dp,
                     )
                 } else {
-                    PaddingValues(0.dp)
+                    PaddingValues(vertical = 8.dp)
                 },
             LocalComposeWindow provides window,
         ) {

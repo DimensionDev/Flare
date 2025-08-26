@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -94,7 +93,7 @@ internal fun DiscoverScreen(
     LazyStatusVerticalStaggeredGrid(
         modifier = Modifier.fillMaxSize(),
         state = lazyListState,
-        contentPadding = PaddingValues(vertical = 8.dp) + LocalWindowPadding.current,
+        contentPadding = LocalWindowPadding.current,
     ) {
         if (true) {
             item(

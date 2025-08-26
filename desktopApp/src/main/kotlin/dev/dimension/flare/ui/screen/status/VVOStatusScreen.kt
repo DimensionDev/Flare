@@ -80,10 +80,7 @@ internal fun VVOStatusScreen(
                         .padding(LocalWindowPadding.current),
             )
             LazyStatusVerticalStaggeredGrid(
-                contentPadding =
-                    PaddingValues(
-                        vertical = 8.dp,
-                    ) + LocalWindowPadding.current,
+                contentPadding = LocalWindowPadding.current,
             ) {
                 reactionContent(
                     comment = state.comment,
@@ -95,10 +92,7 @@ internal fun VVOStatusScreen(
         }
     } else {
         LazyStatusVerticalStaggeredGrid(
-            contentPadding =
-                PaddingValues(
-                    vertical = 8.dp,
-                ) + LocalWindowPadding.current,
+            contentPadding = LocalWindowPadding.current,
         ) {
             item {
                 StatusContent(statusState = state.status, detailStatusKey = statusKey)

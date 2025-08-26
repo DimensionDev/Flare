@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
@@ -12,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.common.isRefreshing
@@ -48,10 +46,7 @@ internal fun NotificationScreen(accountType: AccountType) {
                 .fillMaxSize(),
     ) {
         LazyStatusVerticalStaggeredGrid(
-            contentPadding =
-                PaddingValues(
-                    vertical = 8.dp,
-                ) + LocalWindowPadding.current,
+            contentPadding = LocalWindowPadding.current,
             state = listState,
         ) {
             state.state.allTypes.onSuccess { types ->

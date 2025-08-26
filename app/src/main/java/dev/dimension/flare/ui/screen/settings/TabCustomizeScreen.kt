@@ -58,20 +58,14 @@ import compose.icons.fontawesomeicons.solid.Plus
 import compose.icons.fontawesomeicons.solid.TableList
 import compose.icons.fontawesomeicons.solid.Trash
 import dev.dimension.flare.R
-import dev.dimension.flare.data.model.Bluesky.FeedTabItem
 import dev.dimension.flare.data.model.IconType
 import dev.dimension.flare.data.model.IconType.Mixed
-import dev.dimension.flare.data.model.ListTimelineTabItem
-import dev.dimension.flare.data.model.Misskey
 import dev.dimension.flare.data.model.TabItem
-import dev.dimension.flare.data.model.TabMetaData
 import dev.dimension.flare.data.model.TitleType
 import dev.dimension.flare.data.model.resId
 import dev.dimension.flare.data.model.toIcon
 import dev.dimension.flare.data.repository.SettingsRepository
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.model.AccountType.Specific
-import dev.dimension.flare.model.MicroBlogKey
 import dev.dimension.flare.ui.component.AvatarComponent
 import dev.dimension.flare.ui.component.BackButton
 import dev.dimension.flare.ui.component.FAIcon
@@ -79,7 +73,6 @@ import dev.dimension.flare.ui.component.FlareLargeFlexibleTopAppBar
 import dev.dimension.flare.ui.component.FlareScaffold
 import dev.dimension.flare.ui.component.NetworkImage
 import dev.dimension.flare.ui.component.listCard
-import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.model.UiProfile
 import dev.dimension.flare.ui.model.collectAsUiState
 import dev.dimension.flare.ui.model.onLoading
@@ -240,55 +233,6 @@ internal fun TabCustomizeScreen(
         )
     }
 }
-
-internal fun UiList.toTabItem(accountKey: MicroBlogKey) =
-    when (type) {
-        UiList.Type.Feed -> {
-            FeedTabItem(
-                account = Specific(accountKey),
-                uri = id,
-                metaData =
-                    TabMetaData(
-                        title = TitleType.Text(title),
-                        icon =
-                            Mixed(
-                                icon = IconType.Material.MaterialIcon.List,
-                                userKey = accountKey,
-                            ),
-                    ),
-            )
-        }
-
-        UiList.Type.List ->
-            ListTimelineTabItem(
-                account = AccountType.Specific(accountKey),
-                listId = id,
-                metaData =
-                    TabMetaData(
-                        title = TitleType.Text(title),
-                        icon =
-                            IconType.Mixed(
-                                icon = IconType.Material.MaterialIcon.List,
-                                userKey = accountKey,
-                            ),
-                    ),
-            )
-
-        UiList.Type.Antenna ->
-            Misskey.AntennasTimelineTabItem(
-                account = AccountType.Specific(accountKey),
-                id = id,
-                metaData =
-                    TabMetaData(
-                        title = TitleType.Text(title),
-                        icon =
-                            IconType.Mixed(
-                                icon = IconType.Material.MaterialIcon.Rss,
-                                userKey = accountKey,
-                            ),
-                    ),
-            )
-    }
 
 @Composable
 internal fun ListTabItem(

@@ -28,13 +28,13 @@ import dev.dimension.flare.ui.screen.dm.DmConversationScreen
 import dev.dimension.flare.ui.screen.dm.DmListScreen
 import dev.dimension.flare.ui.screen.dm.UserDMConversationScreen
 import dev.dimension.flare.ui.screen.feeds.FeedListScreen
-import dev.dimension.flare.ui.screen.feeds.TabSettingScreen
 import dev.dimension.flare.ui.screen.home.DiscoverScreen
 import dev.dimension.flare.ui.screen.home.HomeTimelineScreen
 import dev.dimension.flare.ui.screen.home.NotificationScreen
 import dev.dimension.flare.ui.screen.home.ProfileScreen
 import dev.dimension.flare.ui.screen.home.ProfileWithUserNameAndHostDeeplinkRoute
 import dev.dimension.flare.ui.screen.home.SearchScreen
+import dev.dimension.flare.ui.screen.home.TabSettingScreen
 import dev.dimension.flare.ui.screen.home.TimelineScreen
 import dev.dimension.flare.ui.screen.list.AllListScreen
 import dev.dimension.flare.ui.screen.media.RawMediaScreen
@@ -377,7 +377,13 @@ internal fun RouteContent(
         }
 
         Route.TabSetting -> {
-            TabSettingScreen()
+            TabSettingScreen(
+                toAddRssSource = {
+                    navigate(
+                        Route.CreateRssSource,
+                    )
+                },
+            )
         }
 
         is Route.StatusDetail -> {

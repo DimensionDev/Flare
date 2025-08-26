@@ -3,7 +3,6 @@ package dev.dimension.flare.ui.screen.list
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -16,6 +15,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.model.AccountType
 import dev.dimension.flare.ui.model.UiList
@@ -80,10 +80,7 @@ internal fun AllListScreen(
                 adapter = scrollbarAdapter,
             ) {
                 LazyColumn(
-                    contentPadding =
-                        PaddingValues(
-                            vertical = 8.dp,
-                        ),
+                    contentPadding = LocalWindowPadding.current,
                     modifier =
                         Modifier
                             .fillMaxSize()

@@ -1,6 +1,7 @@
 package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -85,8 +86,14 @@ private fun presenter(
     settingsRepository: SettingsRepository = koinInject(),
 ) = run {
     val state = remember(accountType) { HomeTimelineWithTabsPresenter(accountType) }.invoke()
-    var selectedIndex by remember(state.tabState) {
+    var selectedIndex by remember {
         mutableStateOf(0)
+    }
+
+    state.tabState.onSuccess {
+        LaunchedEffect(it.size) {
+            selectedIndex = 0
+        }
     }
 
     val selectedTab =

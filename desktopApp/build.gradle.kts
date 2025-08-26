@@ -36,6 +36,7 @@ dependencies {
     implementation(libs.datastore)
     implementation(libs.filekit.dialogs.compose)
     implementation(libs.filekit.coil)
+    implementation(libs.reorderable)
     implementation(libs.bouncycastle.bcprov)
     implementation(libs.bouncycastle.bcpkix)
 }

@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.screen.dm
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -42,7 +41,7 @@ internal fun DmListScreen(
 
     Box {
         LazyColumn(
-            contentPadding = LocalWindowPadding.current + PaddingValues(top = 8.dp),
+            contentPadding = LocalWindowPadding.current,
             modifier =
                 Modifier
                     .padding(horizontal = screenHorizontalPadding),

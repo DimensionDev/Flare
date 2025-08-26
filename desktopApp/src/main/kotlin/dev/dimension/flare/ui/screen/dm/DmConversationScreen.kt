@@ -101,7 +101,7 @@ fun DmConversationScreen(
                     .background(FluentTheme.colors.background.card.default)
                     .fillMaxWidth()
                     .padding(start = 40.dp)
-                    .padding(LocalWindowPadding.current + PaddingValues(8.dp)),
+                    .padding(LocalWindowPadding.current),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             state.users

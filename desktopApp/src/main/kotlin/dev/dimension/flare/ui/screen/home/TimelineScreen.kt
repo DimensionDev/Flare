@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,7 +30,6 @@ import dev.dimension.flare.common.isRefreshing
 import dev.dimension.flare.common.onSuccess
 import dev.dimension.flare.data.model.TimelineTabItem
 import dev.dimension.flare.home_timeline_new_toots
-import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.component.status.LazyStatusVerticalStaggeredGrid
 import dev.dimension.flare.ui.component.status.status
@@ -62,10 +60,7 @@ internal fun TimelineScreen(
                 .fillMaxSize(),
     ) {
         LazyStatusVerticalStaggeredGrid(
-            contentPadding =
-                PaddingValues(
-                    vertical = 8.dp,
-                ) + LocalWindowPadding.current,
+            contentPadding = LocalWindowPadding.current,
             state = state.lazyListState,
         ) {
             if (header != null) {
@@ -93,8 +88,7 @@ internal fun TimelineScreen(
                 modifier =
                     Modifier
                         .align(Alignment.TopCenter)
-                        .padding(LocalWindowPadding.current)
-                        .padding(top = 8.dp),
+                        .padding(LocalWindowPadding.current),
             ) {
                 AccentButton(
                     onClick = {

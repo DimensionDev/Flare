@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.screen.rss
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,7 +18,6 @@ import compose.icons.fontawesomeicons.solid.Plus
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.Res
 import dev.dimension.flare.add_rss_source
-import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.component.FAIcon
 import dev.dimension.flare.ui.model.UiRssSource
 import dev.dimension.flare.ui.presenter.invoke
@@ -43,7 +41,7 @@ internal fun RssListScreen(
             modifier
                 .padding(horizontal = screenHorizontalPadding),
         verticalArrangement = Arrangement.spacedBy(2.dp),
-        contentPadding = LocalWindowPadding.current + PaddingValues(top = 8.dp),
+        contentPadding = LocalWindowPadding.current,
     ) {
         item {
             Box(

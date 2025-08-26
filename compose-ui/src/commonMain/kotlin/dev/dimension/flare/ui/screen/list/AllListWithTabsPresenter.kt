@@ -31,7 +31,10 @@ public class AllListWithTabsPresenter(
                     metaData =
                         TabMetaData(
                             title = TitleType.Text(item.title),
-                            icon = IconType.Material(IconType.Material.MaterialIcon.List),
+                            icon =
+                                item.avatar?.let {
+                                    IconType.Url(it)
+                                } ?: IconType.Material(IconType.Material.MaterialIcon.List),
                         ),
                 )
 

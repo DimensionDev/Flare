@@ -2,7 +2,6 @@ package dev.dimension.flare.ui.screen.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -91,7 +90,7 @@ fun SearchScreen(
         LazyStatusVerticalStaggeredGrid(
             modifier = Modifier.fillMaxSize(),
             state = lazyListState,
-            contentPadding = PaddingValues(vertical = 8.dp) + LocalWindowPadding.current,
+            contentPadding = LocalWindowPadding.current,
         ) {
             item(
                 span = StaggeredGridItemSpan.FullLine,

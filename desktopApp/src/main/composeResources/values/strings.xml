@@ -278,4 +278,12 @@
     <string name="dm_sending">Sending</string>
     <string name="dm_leave">Leave conversation</string>
     <string name="dm_to_profile">Show profile</string>
+    <string name="tab_settings_mixed_timeline">Add mixed timeline tab</string>
+    <string name="tab_settings_mixed_timeline_desc">Mixed timeline will mix all tabs timeline result in one tab</string>
+
+    <string name="edit_tab_title">Edit tab</string>
+    <string name="edit_tab_name">Name</string>
+    <string name="edit_tab_name_placeholder">Tab name</string>
+    <string name="edit_tab_icon">Icon</string>
+    <string name="edit_tab_with_avatar">With avatar</string>
 </resources>

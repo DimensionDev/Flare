@@ -1,7 +1,6 @@
 package dev.dimension.flare.ui.screen.misskey
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -14,7 +13,6 @@ import androidx.compose.ui.unit.dp
 import dev.dimension.flare.LocalWindowPadding
 import dev.dimension.flare.RegisterTabCallback
 import dev.dimension.flare.model.AccountType
-import dev.dimension.flare.ui.common.plus
 import dev.dimension.flare.ui.model.UiList
 import dev.dimension.flare.ui.presenter.invoke
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
@@ -37,7 +35,7 @@ internal fun AntennasListScreen(
         adapter = scrollbarAdapter,
     ) {
         LazyColumn(
-            contentPadding = LocalWindowPadding.current + PaddingValues(vertical = 8.dp),
+            contentPadding = LocalWindowPadding.current,
             modifier =
                 Modifier
                     .padding(horizontal = screenHorizontalPadding),

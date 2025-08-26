@@ -50,6 +50,27 @@ struct SensitiveContentSettings: Codable, Changeable {
     init() {}
 }
 
+struct HapticFeedbackSettings: Codable, Changeable {
+    var isEnabled: Bool = true
+    var intensity: HapticIntensity = .medium
+
+    enum HapticIntensity: String, CaseIterable, Codable {
+        case light
+        case medium
+        case heavy
+
+        var displayName: String {
+            switch self {
+            case .light: "Light"
+            case .medium: "Medium"
+            case .heavy: "Heavy"
+            }
+        }
+    }
+
+    init() {}
+}
+
 struct AppearanceSettings: Codable, Changeable {
     var theme: Theme = .auto
     var avatarShape: AvatarShape = .circle
@@ -64,9 +85,13 @@ struct AppearanceSettings: Codable, Changeable {
     var swipeGestures: Bool = false
     var enableFullSwipePop: Bool = true
     var hideScrollToTopButton: Bool = false
+    var hapticFeedback: HapticFeedbackSettings = .init()
     var mastodon: Mastodon = .init()
     var misskey: Misskey = .init()
     var bluesky: Bluesky = .init()
+
+    var shownReleaseLogVersions: [String: Int] = [:]
+
     struct Mastodon: Codable, Changeable {
         var showVisibility: Bool = true
         var swipeLeft: SwipeActions = .reply

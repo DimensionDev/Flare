@@ -4,7 +4,7 @@ import shared
 import SwiftUI
 
 class ProfilePresenterWrapper: ObservableObject {
-    let presenter: ProfileNewPresenter
+    let presenter: ProfilePresenter
     @Published var isShowAppBar: Bool? = nil // nil: 初始状态, true: 显示, false: 隐藏
 
     // 新增：TimelineViewModel集成

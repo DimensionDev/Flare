@@ -15,6 +15,7 @@ struct BrowserSettingsScreen: View {
                     Picker("", selection: Binding(get: {
                         appSettings.otherSettings.preferredBrowser
                     }, set: { value in
+                        FlareHapticManager.shared.selection()
                         appSettings.updateOther(newValue: appSettings.otherSettings.also { settings in
                             settings.preferredBrowser = value
                         })

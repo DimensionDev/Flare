@@ -24,7 +24,7 @@ struct CompactLabelStyle: LabelStyle {
  */
 struct CommonProfileHeader: View {
     let userInfo: ProfileUserInfo
-    let state: ProfileNewState?
+    let state: ProfileState?
     let onFollowClick: (UiRelation) -> Void
     @State private var isBannerValid: Bool = true
 
@@ -102,6 +102,7 @@ struct CommonProfileHeader: View {
                             if !userInfo.isMe {
                                 if let relation = userInfo.relation {
                                     Button(action: {
+                                        FlareHapticManager.shared.buttonPress()
                                         onFollowClick(relation)
                                     }, label: {
                                         let text = if relation.blocking {
@@ -219,6 +220,7 @@ struct CommonProfileHeader: View {
                                 ForEach(0 ..< actions.data.size, id: \.self) { index in
                                     let item = actions.data.get(index: index)
                                     Button(action: {
+                                        FlareHapticManager.shared.buttonPress()
                                         Task {
                                             try? await item.invoke(userKey: user.data.key, relation: relation.data)
                                         }
@@ -251,7 +253,10 @@ struct CommonProfileHeader: View {
                                     })
                                 }
                             }
-                            Button(action: { state.report(userKey: user.data.key) }, label: {
+                            Button(action: {
+                                FlareHapticManager.shared.buttonPress()
+                                state.report(userKey: user.data.key)
+                            }, label: {
                                 Label("report", systemImage: "exclamationmark.bubble")
                             })
                         }

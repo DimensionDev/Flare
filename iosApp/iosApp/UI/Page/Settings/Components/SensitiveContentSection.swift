@@ -39,6 +39,7 @@ struct SensitiveContentSection: View {
                         Toggle("", isOn: Binding(
                             get: { !appSettings.appearanceSettings.showSensitiveContent },
                             set: { value in
+                                FlareHapticManager.shared.selection()
                                 appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.showSensitiveContent, to: !value))
                             }
                         ))
@@ -75,6 +76,7 @@ struct SensitiveContentSection: View {
                         Toggle("", isOn: Binding(
                             get: { appSettings.appearanceSettings.sensitiveContentSettings.hideInTimeline },
                             set: { value in
+                                FlareHapticManager.shared.selection()
                                 let newSettings = appSettings.appearanceSettings.sensitiveContentSettings.changing(path: \.hideInTimeline, to: value)
                                 appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.sensitiveContentSettings, to: newSettings))
 
@@ -115,6 +117,7 @@ struct SensitiveContentSection: View {
 
                             if appSettings.appearanceSettings.sensitiveContentSettings.timeRange != nil {
                                 Button(action: {
+                                    FlareHapticManager.shared.buttonPress()
                                     removeTimeRange()
                                 }) {
                                     Image(systemName: "xmark")
@@ -128,6 +131,7 @@ struct SensitiveContentSection: View {
                         .padding(.leading, 20) // 缩进以显示层级关系
                         .contentShape(Rectangle())
                         .onTapGesture {
+                            FlareHapticManager.shared.buttonPress()
                             let newSettings = appSettings.appearanceSettings.sensitiveContentSettings.changing(path: \.isShowingTimePicker, to: true)
                             appSettings.update(newValue: appSettings.appearanceSettings.changing(path: \.sensitiveContentSettings, to: newSettings))
                         }

@@ -62,6 +62,7 @@ struct ReplayFloatingPlayerView: View {
                     Image(systemName: "exclamationmark.triangle.fill")
                 case .playing, .paused, .stopped:
                     Button {
+                        FlareHapticManager.shared.buttonPress()
                         if manager.playbackState == .playing {
                             manager.pause()
                         } else {
@@ -76,6 +77,7 @@ struct ReplayFloatingPlayerView: View {
             }
 
             Button {
+                FlareHapticManager.shared.buttonPress()
                 manager.stopPodcast()
             } label: {
                 Image(systemName: "xmark")

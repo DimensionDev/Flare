@@ -338,6 +338,7 @@ struct HomeAppBarSettingsView: View {
                         .contentShape(Rectangle())
                         .onTapGesture {
                             if totalAvailableCount > availableListsLimit {
+                                FlareHapticManager.shared.selection()
                                 withAnimation {
                                     isAvailableListsExpanded.toggle()
                                 }
@@ -365,6 +366,7 @@ struct HomeAppBarSettingsView: View {
                         // 添加"显示更多"按钮
                         if !isAvailableListsExpanded, totalAvailableCount > availableListsLimit {
                             Button(action: {
+                                FlareHapticManager.shared.buttonPress()
                                 withAnimation {
                                     isAvailableListsExpanded = true
                                 }
@@ -467,6 +469,7 @@ struct HomeAppBarSettingsView: View {
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     if totalAvailableCount > availableListsLimit {
+                                        FlareHapticManager.shared.selection()
                                         withAnimation {
                                             isAvailableFeedsExpanded.toggle()
                                         }
@@ -494,6 +497,7 @@ struct HomeAppBarSettingsView: View {
                                 // 添加"显示更多"按钮
                                 if !isAvailableFeedsExpanded, totalAvailableCount > availableListsLimit {
                                     Button(action: {
+                                        FlareHapticManager.shared.buttonPress()
                                         withAnimation {
                                             isAvailableFeedsExpanded = true
                                         }

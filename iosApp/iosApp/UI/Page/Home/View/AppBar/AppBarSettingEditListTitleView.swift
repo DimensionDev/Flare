@@ -72,9 +72,11 @@ struct AppBarSettingEditListTitleView: View {
             .navigationTitle(isBlueskyFeed ? "Edit Feed Title" : "Edit List Title")
             .navigationBarItems(
                 leading: Button("Cancel") {
+                    FlareHapticManager.shared.buttonPress()
                     onCancel()
                 },
                 trailing: Button("Save") {
+                    FlareHapticManager.shared.buttonPress()
                     onSave(title)
                 }
                 .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)

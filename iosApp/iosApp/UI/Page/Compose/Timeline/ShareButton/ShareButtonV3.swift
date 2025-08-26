@@ -4,7 +4,7 @@ import JXPhotoBrowser
 import Kingfisher
 import MarkdownUI
 import os.log
-import SwiftDate
+
 import SwiftUI
 import UIKit
 
@@ -86,7 +86,10 @@ struct ShareButtonV3: View, Equatable {
         if !isInCaptureMode {
             Menu {
                 if isMenuContentReady {
-                    LazyMoreMenuContent(item: item, onMoreAction: onMoreAction)
+                    LazyMoreMenuContent(item: item, onMoreAction: { action in
+                        FlareHapticManager.shared.buttonPress()
+                        onMoreAction(action)
+                    })
                 } else {
                     Button("") {}
                         .onAppear {

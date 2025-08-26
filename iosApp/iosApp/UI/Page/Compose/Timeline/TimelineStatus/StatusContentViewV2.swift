@@ -4,7 +4,7 @@ import JXPhotoBrowser
 import Kingfisher
 import MarkdownUI
 import os.log
-import SwiftDate
+
 import SwiftUI
 import UIKit
 
@@ -55,6 +55,7 @@ struct StatusContentViewV2: View, Equatable {
                 if item.isPodcastCard {
                     PodcastPreviewV2(card: card)
                         .onTapGesture {
+                            FlareHapticManager.shared.buttonPress()
                             onPodcastCardTap(card)
                         }
                 } else if appSettings.appearanceSettings.showLinkPreview, item.shouldShowLinkPreview {

@@ -51,7 +51,7 @@ struct ProfileTabScreenUikit: View {
 
     var body: some View {
         ObservePresenter(presenter: presenterWrapper.presenter) { state in
-            let userInfo = ProfileUserInfo.from(state: state as! ProfileNewState)
+            let userInfo = ProfileUserInfo.from(state: state)
 
             // 打印 isShowAppBar 的值
             let _ = os_log(
@@ -70,7 +70,7 @@ struct ProfileTabScreenUikit: View {
             if userKey == nil {
                 ProfileNewRefreshViewControllerWrapper(
                     userInfo: userInfo,
-                    state: state as! ProfileNewState,
+                    state: state,
                     selectedTab: $selectedTab,
                     isShowAppBar: Binding(
                         get: { presenterWrapper.isShowAppBar },
@@ -91,7 +91,7 @@ struct ProfileTabScreenUikit: View {
             } else {
                 ProfileNewRefreshViewControllerWrapper(
                     userInfo: userInfo,
-                    state: state as! ProfileNewState,
+                    state: state,
                     selectedTab: $selectedTab,
                     isShowAppBar: Binding(
                         get: { presenterWrapper.isShowAppBar },
@@ -115,7 +115,7 @@ struct ProfileTabScreenUikit: View {
 
 struct ProfileNewRefreshViewControllerWrapper: UIViewControllerRepresentable {
     let userInfo: ProfileUserInfo?
-    let state: ProfileNewState
+    let state: ProfileState
     @Binding var selectedTab: Int
     @Binding var isShowAppBar: Bool?
     let horizontalSizeClass: UserInterfaceSizeClass?

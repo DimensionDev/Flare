@@ -5,7 +5,7 @@ import Kingfisher
 import MarkdownUI
 import os.log
 import shared
-import SwiftDate
+
 import SwiftUI
 import UIKit
 
@@ -96,6 +96,7 @@ struct TimelineStatusViewV2: View, Equatable {
                 }
             ).contentShape(Rectangle())
                 .onTapGesture {
+                    FlareHapticManager.shared.buttonPress()
                     handleStatusTap()
                 }
 

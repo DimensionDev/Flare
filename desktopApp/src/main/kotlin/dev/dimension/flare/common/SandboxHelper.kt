@@ -1,7 +1,7 @@
 package dev.dimension.flare.common
 
 object SandboxHelper {
-    fun configureSQLiteDriver() {
+    fun configureSandboxArgs() {
         val isSandboxed = System.getenv("APP_SANDBOX_CONTAINER_ID") != null
         if (isSandboxed) {
             val resourcesPath = System.getProperty("compose.application.resources.dir")

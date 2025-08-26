@@ -25,7 +25,6 @@ import dev.dimension.flare.ui.route.Route
 import dev.dimension.flare.ui.route.WindowRouter
 import dev.dimension.flare.ui.theme.FlareTheme
 import dev.dimension.flare.ui.theme.ProvideThemeSettings
-import io.github.vinceglb.filekit.FileKit
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -33,7 +32,7 @@ import org.koin.core.context.startKoin
 import java.awt.Desktop
 
 fun main(args: Array<String>) {
-    SandboxHelper.configureSQLiteDriver()
+    SandboxHelper.configureSandboxArgs()
     startKoin {
         modules(desktopModule + KoinHelper.modules() + composeUiModule)
     }
@@ -43,7 +42,6 @@ fun main(args: Array<String>) {
         }
     }
     application {
-        FileKit.init(appId = "dev.dimension.flare")
         setSingletonImageLoaderFactory { context ->
             ImageLoader
                 .Builder(context)

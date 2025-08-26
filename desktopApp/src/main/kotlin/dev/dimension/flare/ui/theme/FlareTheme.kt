@@ -7,7 +7,6 @@ import androidx.compose.foundation.interaction.FocusInteraction
 import androidx.compose.foundation.interaction.HoverInteraction
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -41,6 +40,7 @@ import io.github.composefluent.ExperimentalFluentApi
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.darkColors
 import io.github.composefluent.lightColors
+import io.github.kdroidfilter.platformtools.darkmodedetector.isSystemInDarkMode
 import kotlinx.coroutines.launch
 import org.apache.commons.lang3.SystemUtils
 import org.koin.compose.koinInject
@@ -181,7 +181,7 @@ private class FluentIndication(
 @Composable
 private fun isDarkTheme(): Boolean =
     LocalAppearanceSettings.current.theme == Theme.DARK ||
-        (LocalAppearanceSettings.current.theme == Theme.SYSTEM && isSystemInDarkTheme())
+        (LocalAppearanceSettings.current.theme == Theme.SYSTEM && isSystemInDarkMode())
 
 @Composable
 internal fun ProvideThemeSettings(content: @Composable () -> Unit) {

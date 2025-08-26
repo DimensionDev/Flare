@@ -249,7 +249,7 @@ internal fun ServiceSelectScreen(
                                         SegmentedButton(
                                             checked = !useOAuth,
                                             onCheckedChanged = {
-                                                useOAuth = true
+                                                useOAuth = false
                                             },
                                             position = SegmentedItemPosition.Start,
                                         ) {
@@ -258,7 +258,7 @@ internal fun ServiceSelectScreen(
                                         SegmentedButton(
                                             checked = useOAuth,
                                             onCheckedChanged = {
-                                                useOAuth = false
+                                                useOAuth = true
                                             },
                                             position = SegmentedItemPosition.End,
                                         ) {

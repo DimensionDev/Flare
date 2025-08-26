@@ -1,5 +1,5 @@
-import java.util.Properties
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlin.jvm)
@@ -34,11 +34,10 @@ dependencies {
     implementation(libs.commons.lang3)
     implementation(libs.zoomable)
     implementation(libs.datastore)
-    implementation(libs.filekit.dialogs.compose)
-    implementation(libs.filekit.coil)
     implementation(libs.reorderable)
-    implementation(libs.bouncycastle.bcprov)
-    implementation(libs.bouncycastle.bcpkix)
+    implementation("io.github.kdroidfilter:platformtools.darkmodedetector:0.5.0")
+//    implementation(libs.bouncycastle.bcprov)
+//    implementation(libs.bouncycastle.bcpkix)
 }
 
 compose.desktop {
@@ -52,7 +51,7 @@ compose.desktop {
             macOS {
                 val file = project.file("signing.properties")
                 val hasSigningProps = file.exists()
-                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "12"
+                packageBuildVersion = System.getenv("BUILD_NUMBER") ?: "15"
                 bundleID = "dev.dimension.flare"
                 minimumSystemVersion = "12.0"
                 appStore = hasSigningProps
@@ -132,12 +131,15 @@ val macExtraPlistKeys: String
       </array>
       <key>ITSAppUsesNonExemptEncryption</key>
       <false/>
+      <key>LSMultipleInstancesProhibited</key>
+      <true/>
     """
 
 
 extra["sqliteVersion"] = libs.versions.sqlite.get()
 extra["sqliteOsArch"] = "osx_arm64"
 extra["composeMediaPlayerVersion"] = libs.versions.composemediaplayer.get()
+extra["jnaVersion"] = "5.17.0"
 extra["nativeDestDir"] = "resources/macos-arm64"
 
 apply(from = File(projectDir, "install-native-libs.gradle.kts"))

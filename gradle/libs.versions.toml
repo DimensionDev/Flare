@@ -3,7 +3,6 @@ clikt = "5.0.3"
 collection = "1.5.0"
 compileSdk = "36"
 composemediaplayer = "0.8.1"
-filekitDialogsCompose = "0.10.0"
 haze = "1.6.10"
 lifecycleViewmodelComposeVersion = "2.9.2"
 minSdk = "23"
@@ -64,8 +63,6 @@ bluesky-oauth = { module = "moe.tlaster.ozone:oauth", version.ref = "bluesky" }
 clikt = { module = "com.github.ajalt.clikt:clikt", version.ref = "clikt" }
 composemediaplayer = { module = "io.github.kdroidfilter:composemediaplayer", version.ref = "composemediaplayer" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
-filekit-dialogs-compose = { module = "io.github.vinceglb:filekit-dialogs-compose", version.ref = "filekitDialogsCompose" }
-filekit-coil = { module = "io.github.vinceglb:filekit-coil", version.ref = "filekitDialogsCompose" }
 haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

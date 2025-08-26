@@ -118,9 +118,24 @@ val cmpTask =
         destFile = nativeDestDir.resolve("libNativeVideoPlayer.dylib"),
     )
 
+val jnaVersion = (findProperty("jnaVersion") as String?) ?: "5.17.0"
+val jnaJarName = "jna-$jnaVersion.jar"
+val jnaJarUrl = "https://repo1.maven.org/maven2/net/java/dev/jna/jna/$jnaVersion/$jnaJarName"
+val jnaEntry = "com/sun/jna/darwin-aarch64/libjnidispatch.jnilib"
+
+val jnaTask =
+    registerExtractFromJarTask(
+        taskName = "installJnaNative_$jnaVersion",
+        jarUrl = jnaJarUrl,
+        cacheSubDir = "jna/$jnaVersion",
+        jarFileName = jnaJarName,
+        entryPathInJar = jnaEntry,
+        destFile = nativeDestDir.resolve("libjnidispatch.dylib"),
+    )
+
 val installNativeLibs =
     tasks.register("installNativeLibs") {
         group = "setup"
         description = "Install sqliteJni + NativeVideoPlayer dylibs to $nativeDestDirPath"
-        dependsOn(sqliteTask, cmpTask)
+        dependsOn(sqliteTask, cmpTask, jnaTask)
     }

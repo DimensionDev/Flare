@@ -102,6 +102,7 @@ import dev.dimension.flare.ui.model.takeSuccessOr
 import dev.dimension.flare.ui.presenter.compose.ComposePresenter
 import dev.dimension.flare.ui.presenter.compose.ComposeStatus
 import dev.dimension.flare.ui.presenter.invoke
+import dev.dimension.flare.ui.theme.LocalComposeWindow
 import dev.dimension.flare.ui.theme.screenHorizontalPadding
 import io.github.composefluent.FluentTheme
 import io.github.composefluent.LocalTextStyle
@@ -119,8 +120,6 @@ import io.github.composefluent.component.Text
 import io.github.composefluent.component.TextField
 import io.github.composefluent.component.TextFieldDefaults
 import io.github.composefluent.surface.Card
-import io.github.vinceglb.filekit.dialogs.FileKitType
-import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
 import kotlinx.collections.immutable.toImmutableList
 import moe.tlaster.precompose.molecule.producePresenter
 import org.jetbrains.compose.resources.StringResource
@@ -131,6 +130,10 @@ import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.uuid.ExperimentalUuidApi
+
+private val imageExtensions = setOf("png", "jpg", "jpeg", "gif", "bmp")
+private val videoExtensions = setOf("mp4", "mov", "avi", "mkv", "webm")
+private val pickerFileExtensions = imageExtensions + videoExtensions
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalUuidApi::class)
 @Composable
@@ -147,17 +150,7 @@ fun ComposeDialog(
             initialText = initialText,
         )
     }
-    val launcher =
-        rememberFilePickerLauncher(
-            FileKitType.ImageAndVideo,
-        ) { file ->
-            if (file != null) {
-                state.mediaState.onSuccess {
-                    it.addMedia(listOf(file.file))
-                }
-            }
-        }
-
+    val composeWindow = LocalComposeWindow.current
     val focusRequester = remember { FocusRequester() }
     val contentWarningFocusRequester = remember { FocusRequester() }
     state.contentWarningState
@@ -573,11 +566,24 @@ fun ComposeDialog(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                state.mediaState.onSuccess {
-                    if (it.enabled) {
+                state.mediaState.onSuccess { mediaState ->
+                    if (mediaState.enabled) {
                         SubtleButton(
                             onClick = {
-                                launcher.launch()
+                                java.awt
+                                    .FileDialog(composeWindow)
+                                    .apply {
+                                        filenameFilter =
+                                            java.io.FilenameFilter { _, name ->
+                                                pickerFileExtensions.any {
+                                                    name.endsWith(".$it", ignoreCase = true)
+                                                }
+                                            }
+                                        isVisible = true
+                                    }.files
+                                    .takeIf { files -> files.isNotEmpty() }
+                                    ?.map { file -> File(file.toURI()) }
+                                    ?.let { uris -> mediaState.addMedia(uris) }
                             },
                             disabled = !state.canMedia,
                             iconOnly = true,
